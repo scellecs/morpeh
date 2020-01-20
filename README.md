@@ -36,8 +36,7 @@ Add to your project manifiest by path `UnityProject/Packages/manifiest.json` nex
 ```json
 {
   "dependencies": {
-     "com.xcrew.morpeh": "https://github.com/X-Crew/Morpeh.git",
-     ...
+     "com.xcrew.morpeh": "https://github.com/X-Crew/Morpeh.git"
   }
 }
 ```
