@@ -9,6 +9,7 @@ Features:
 * No code generation and any C# Reflection.
 * Structure-based and Cache-friendly.
 * Reactive and Fast Filters based on bitsets.
+* Built-in Events and Reactive Variables.
 * Single-threaded.
 
 ## Table of Contents
@@ -72,5 +73,4 @@ Add to your project manifiest by path `UnityProject/Packages/manifiest.json` nex
 ## Contacts
 
 Telegram: [benjminmoore](https://t.me/benjminmoore)  
-Skype: [benjminmoore](skype:benjminmoore?chat)  
 E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)
