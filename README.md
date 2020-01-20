@@ -1,7 +1,15 @@
 # Morpeh
 <img align="right" width="160px" height="160px" src="Unity/Utils/Editor/Resources/logo.png">
 
-Fast and Simple ECS Framework for Unity Game Engine.
+ECS Framework for Unity Game Engine.  
+
+Features:
+* Simple Syntax.
+* Simple Integration with Unity Engine.
+* No code generation and any C# Reflection.
+* Structure-based and Cache-friendly.
+* Reactive and Fast Filters based on bitsets.
+* Single-threaded.
 
 ## Table of Contents
 
@@ -63,6 +71,6 @@ Add to your project manifiest by path `UnityProject/Packages/manifiest.json` nex
 
 ## Contacts
 
-Telegram: [benjminmoore](https://t.me/benjminmoore)
-Skype: [benjminmoore](skype:benjminmoore?chat)
+Telegram: [benjminmoore](https://t.me/benjminmoore)  
+Skype: [benjminmoore](skype:benjminmoore?chat)  
 E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)
