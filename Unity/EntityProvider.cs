@@ -15,7 +15,7 @@ namespace Morpeh {
         public IEntity Entity => this.IsPrefab() ? null : this.entity;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool isNotEntityProvider => this.GetType() != typeof(EntityProvider);
-        
+
         [HideIf("$isNotEntityProvider")]
         [DisableContextMenu]
         [PropertySpace]
@@ -47,12 +47,12 @@ namespace Morpeh {
         private FastBitMask         lastMask       = FastBitMask.None;
         private List<ComponentView> componentViews = new List<ComponentView>();
 
-        
+
         [PropertyTooltip("$FullName")]
         [Serializable]
         private struct ComponentView {
             internal CommonCacheTypeIdentifier.DebugInfo info;
-            
+
             internal bool   IsMarker => this.info.Info.isMarker;
             internal string FullName => this.info.Type.FullName;
 
@@ -61,6 +61,7 @@ namespace Morpeh {
             [DisplayAsString(false)]
             [ShowInInspector]
             internal string TypeName => this.info.Type.Name;
+
             internal int id;
 
             [DisableContextMenu]
@@ -84,7 +85,6 @@ namespace Morpeh {
                     this.info.SetBoxed(this.id, value);
                 }
             }
-            
         }
 
 #endif
