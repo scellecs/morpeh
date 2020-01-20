@@ -5,7 +5,7 @@ Fast and Simple ECS Framework for Unity Game Engine.
 
 ## How to install
 
-### Unity Package
+### Unity Package Installation
 - Add to your project manifiest by path `UnityProject/Packages/manifiest.json` these lines:
 ```json
 {
@@ -31,7 +31,7 @@ Fast and Simple ECS Framework for Unity Game Engine.
 ```
 - Open window Package Manager in Unity and install Morpeh
 
-### Git way
+### Git Installation
 Add to your project manifiest by path `UnityProject/Packages/manifiest.json` next line:
 ```json
 {
