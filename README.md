@@ -3,7 +3,19 @@
 
 Fast and Simple ECS Framework for Unity Game Engine.
 
-## How to install
+## Table of Contents
+
+* [Introduction](#introduction)
+  * [Code Example](#code-example)
+  * [Performance](#performance)
+* [How To Install](#how-to-install)
+* [License](#license)
+* [Contacts](#contacts)
+
+## Introduction
+TODO
+
+## How To Install
 
 ### Unity Package Installation
 - Add to your project manifiest by path `UnityProject/Packages/manifiest.json` these lines:
@@ -45,9 +57,12 @@ Add to your project manifiest by path `UnityProject/Packages/manifiest.json` nex
 - Go to [Releases](https://github.com/X-Crew/Morpeh/releases) and download latest package.
 - Import Morpeh.
 
-## Introduction
-TODO
-
 ## License
 
 [MIT License](LICENSE)
+
+## Contacts
+
+Telegram: [benjminmoore](https://t.me/benjminmoore)
+Skype: [benjminmoore](skype:benjminmoore?chat)
+E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)
