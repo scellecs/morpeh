@@ -16,7 +16,9 @@ namespace Morpeh {
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
+#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#endif
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
@@ -89,7 +91,7 @@ namespace Morpeh {
         private int[] components;
         private int   componentsDoubleCount;
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
         public int ID => this.InternalID;
