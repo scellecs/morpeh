@@ -3,7 +3,6 @@
 
 ECS Framework for Unity Game Engine.  
 
-Features:
 * Simple Syntax.
 * Simple Integration with Unity Engine.
 * No code generation and any C# Reflection.
