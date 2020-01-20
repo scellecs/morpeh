@@ -33,13 +33,6 @@ TODO
   },
   "scopedRegistries": [
     {
-      "name": "Unity",
-      "url": "https://packages.unity.com",
-      "scopes": [
-        "com.unity"
-      ]
-    },
-    {
       "name": "XCrew",
       "url": "http://xcrew.dev",
       "scopes": [
