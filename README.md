@@ -3,6 +3,20 @@
 
 Fast and Simple ECS Framework for Unity Game Engine.
 
+## How to install
+Add to your project manifiest by path `UnityProject/Packages/manifiest.json` next line:
+```json
+{
+  "dependencies": {
+     "com.xcrew.morpeh": "https://github.com/X-Crew/Morpeh.git",
+     ...
+  }
+}
+```
+
+## Introduction
+TODO
+
 ## License
 
 [MIT License](LICENSE)
