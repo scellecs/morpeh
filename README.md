@@ -1,5 +1,5 @@
 # Morpeh
-<img align="right" width="160px" height="160px" src="Unity/Utils/Editor/Resources/logo.png">
+<img align="right" width="320px" height="320px" src="Unity/Utils/Editor/Resources/logo.png">
 
 ECS Framework for Unity Game Engine.  
 
