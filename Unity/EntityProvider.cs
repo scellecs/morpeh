@@ -12,8 +12,7 @@ namespace Morpeh {
         private Entity entity;
 
         [CanBeNull]
-        public IEntity Entity => this.entity;
-
+        public IEntity Entity => this.IsPrefab() ? null : this.entity;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool isNotEntityProvider => this.GetType() != typeof(EntityProvider);
         
@@ -107,8 +106,12 @@ namespace Morpeh {
                 foreach (var monoProvider in this.GetComponents<EntityProvider>()) {
                     monoProvider.entity = null;
                 }
+
+                this.entity = null;
             }
         }
+
+        private bool IsPrefab() => this.gameObject.scene.name == null;
 
         protected virtual void PreInitialize() {
         }
