@@ -16,9 +16,7 @@
         }
 
         public abstract void OnAwake();
-        public void OnStart() {
-            
-        }
+        public virtual void OnStart() { }
 
         public abstract void OnUpdate(float deltaTime);
 

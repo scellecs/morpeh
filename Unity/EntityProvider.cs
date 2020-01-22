@@ -9,10 +9,10 @@ namespace Morpeh {
 #endif
 
     public class EntityProvider : MonoBehaviour {
-        private Entity entity;
+        private Entity entity = null;
 
         [CanBeNull]
-        public IEntity Entity => this.IsPrefab() ? null : this.entity;
+        public IEntity Entity => this.IsPrefab() ? null : Application.isPlaying ? this.entity : null;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool isNotEntityProvider => this.GetType() != typeof(EntityProvider);
 
@@ -89,6 +89,10 @@ namespace Morpeh {
 
 #endif
         private protected virtual void Awake() {
+            if (!Application.isPlaying) {
+                return;
+            }
+            
             if (this.entity == null) {
                 var ent = World.Default.CreateEntityInternal(out _);
                 foreach (var monoProvider in this.GetComponents<EntityProvider>()) {

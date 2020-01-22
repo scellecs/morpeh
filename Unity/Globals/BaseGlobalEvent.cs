@@ -31,7 +31,7 @@ namespace Morpeh.Globals {
             }
         }
 
-        public List<TData> BatchedChanges {
+        public Stack<TData> BatchedChanges {
             get {
 #if UNITY_EDITOR
                 if (!Application.isPlaying) {
@@ -59,7 +59,7 @@ namespace Morpeh.Globals {
                 this.internalEntity.AddComponent<GlobalEventMarker>();
                 this.internalEntity.SetComponent(new GlobalEventComponent<TData> {
                     Action = null,
-                    Data   = new List<TData>()
+                    Data   = new Stack<TData>()
                 });
 
                 if (!GlobalEventComponent<TData>.Initialized) {
@@ -72,14 +72,14 @@ namespace Morpeh.Globals {
         public void Publish(TData data) {
             this.CheckIsInitialized();
             ref var component = ref this.internalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
-            component.Data.Add(data);
+            component.Data.Push(data);
             this.internalEntity.SetComponent(new GlobalEventPublished());
         }
         
         public void NextFrame(TData data) {
             this.CheckIsInitialized();
             ref var component = ref this.internalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
-            component.Data.Add(data);
+            component.Data.Push(data);
             this.internalEntity.SetComponent(new GlobalEventNextFrame());
         }
 

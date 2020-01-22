@@ -1,5 +1,6 @@
 ﻿namespace Morpeh.Globals {
     using System;
+    using JetBrains.Annotations;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
@@ -80,7 +81,7 @@
 #endif
         }
 
-        protected abstract TData  Load(string serializedData);
+        protected abstract TData  Load([NotNull]string serializedData);
         protected abstract string Save();
 
         protected override void OnEnable() {
@@ -98,8 +99,10 @@
             this.LoadData();
         }
 #if UNITY_EDITOR
-        //[Button]
-        //[PropertyOrder(3)]
+        [Button]
+        [PropertyOrder(3)]
+        [ShowIf("@AutoSave")]
+        [HideInInlineEditors]
         private void GenerateCustomKey() => this.customKey = Guid.NewGuid().ToString().Replace("-", string.Empty);
 #endif
         protected override void OnDisable() {

@@ -47,7 +47,7 @@ namespace Morpeh.Globals {
             internal static bool Initialized;
 
             public Action<IEnumerable<TData>> Action;
-            public List<TData>                Data;
+            public Stack<TData>                Data;
         }
 
         internal struct GlobalEventPublished : IComponent {
