@@ -45,11 +45,11 @@ namespace Morpeh.Globals {
         }
 
 
-        protected virtual void OnEnable() {
+        internal virtual void OnEnable() {
             this.internalEntity = null;
         }
 
-        protected virtual void OnDisable() {
+        internal virtual void OnDisable() {
             this.internalEntity = null;
         }
 
@@ -58,7 +58,7 @@ namespace Morpeh.Globals {
                 this.internalEntity = World.Default.CreateEntityInternal();
                 this.internalEntity.AddComponent<GlobalEventMarker>();
                 this.internalEntity.SetComponent(new GlobalEventComponent<TData> {
-                    Action = null,
+                    Action = null,    
                     Data   = new Stack<TData>()
                 });
 
