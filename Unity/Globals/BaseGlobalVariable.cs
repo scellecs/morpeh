@@ -81,7 +81,7 @@
         protected abstract TData Load([NotNull] string serializedData);
         protected abstract string Save();
 
-        internal virtual void Reset() {
+        public virtual void Reset() {
             this.value = this.Load(this.defaultSerializedValue);
         }
 
