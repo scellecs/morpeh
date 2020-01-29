@@ -58,13 +58,16 @@
                     var monoImporter = MonoImporter.GetAtPath(path) as MonoImporter;
                     if (monoImporter != null) {
                         var script           = monoImporter.GetScript();
+                        var type = script.GetClass();
+                        if (type == null) {
+                            continue;
+                        }
+                        
                         var serializedObject = new SerializedObject(script);
                         var iconProperty     = serializedObject.FindProperty("m_Icon");
                         if (iconProperty.objectReferenceValue != null) {
                             continue;
                         }
-
-                        var type = script.GetClass();
                         
                         if (InheritsFrom(type, typeof(Initializer))) {
                             SelectIcon(script, iconI);
