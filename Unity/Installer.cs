@@ -1,6 +1,9 @@
 ﻿namespace Morpeh {
-    using Utils;
+#if UNITY_EDITOR
+    using UnityEditor;
+#endif
     using UnityEngine;
+    using Utils;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
@@ -8,6 +11,10 @@
     //TODO refactor for Reorder in Runtime
     public class Installer : WorldViewer {
         [Space]
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [PropertyOrder(-4)]
+#endif
+        public Initializer[] initializers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-3)]
 #endif
@@ -22,6 +29,11 @@
         public LateSystemPair[] lateUpdateSystems;
 
         private void OnEnable() {
+            for (int i = 0, length = this.initializers.Length; i < length; i++) {
+                var initializer = this.initializers[i];
+                World.Default.AddInitializer(initializer);
+            }
+
             this.AddSystems(this.updateSystems);
             this.AddSystems(this.fixedUpdateSystems);
             this.AddSystems(this.lateUpdateSystems);
@@ -55,20 +67,20 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [OnInspectorGUI]
         private void OnEditoGUI() {
-            gameObject.transform.hideFlags = HideFlags.HideInInspector;
+            this.gameObject.transform.hideFlags = HideFlags.HideInInspector;
         }
 #endif
 #if UNITY_EDITOR
-        [UnityEditor.MenuItem("GameObject/ECS/", true, 10)]
+        [MenuItem("GameObject/ECS/", true, 10)]
         private static bool OrderECS() => true;
 
-        [UnityEditor.MenuItem("GameObject/ECS/Installer", false, 1)]
-        private static void CreateInstaller(UnityEditor.MenuCommand menuCommand) {
+        [MenuItem("GameObject/ECS/Installer", false, 1)]
+        private static void CreateInstaller(MenuCommand menuCommand) {
             var go = new GameObject("[Installer]");
             go.AddComponent<Installer>();
-            UnityEditor.GameObjectUtility.SetParentAndAlign(go, menuCommand.context as GameObject);
-            UnityEditor.Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
-            UnityEditor.Selection.activeObject = go;
+            GameObjectUtility.SetParentAndAlign(go, menuCommand.context as GameObject);
+            Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
+            Selection.activeObject = go;
         }
 #endif
 //        private void Reorder() {
@@ -90,10 +102,9 @@
     namespace Utils {
         using System;
         using JetBrains.Annotations;
-        using UnityEngine;
-
 #if UNITY_EDITOR && ODIN_INSPECTOR
         using Sirenix.OdinInspector;
+
 #endif
         [Serializable]
         public abstract class BasePair<T> where T : class, ISystem {
@@ -151,7 +162,5 @@
         [Serializable]
         public class LateSystemPair : BasePair<LateUpdateSystem> {
         }
-        
-        
     }
 }

@@ -11,6 +11,7 @@
         private static Action<Object, Texture2D> SelectIcon;
         private static Action<MonoScript>        SaveIcon;
 
+        //TODO refactor to dictionary
         private static Texture2D iconC;
         private static Texture2D iconE;
         private static Texture2D iconF;
@@ -65,8 +66,10 @@
 
                         var type = script.GetClass();
                         
-                        
-                        if (InheritsFrom(type, typeof(MonoProvider<>))) {
+                        if (InheritsFrom(type, typeof(Initializer))) {
+                            SelectIcon(script, iconI);
+                        }
+                        else if (InheritsFrom(type, typeof(MonoProvider<>))) {
                             SelectIcon(script, iconP);
                         }
                         else if (InheritsFrom(type, typeof(IComponent))) {
