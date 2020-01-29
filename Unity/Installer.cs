@@ -58,6 +58,19 @@
             gameObject.transform.hideFlags = HideFlags.HideInInspector;
         }
 #endif
+#if UNITY_EDITOR
+        [UnityEditor.MenuItem("GameObject/ECS/", true, 10)]
+        private static bool OrderECS() => true;
+
+        [UnityEditor.MenuItem("GameObject/ECS/Installer", false, 1)]
+        private static void CreateInstaller(UnityEditor.MenuCommand menuCommand) {
+            var go = new GameObject("[Installer]");
+            go.AddComponent<Installer>();
+            UnityEditor.GameObjectUtility.SetParentAndAlign(go, menuCommand.context as GameObject);
+            UnityEditor.Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
+            UnityEditor.Selection.activeObject = go;
+        }
+#endif
 //        private void Reorder() {
 //            this.InternalReorder(this.updateSystems);
 //        }
@@ -138,5 +151,7 @@
         [Serializable]
         public class LateSystemPair : BasePair<LateUpdateSystem> {
         }
+        
+        
     }
 }
