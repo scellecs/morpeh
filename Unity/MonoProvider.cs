@@ -8,7 +8,7 @@
         [SerializeField, HideInInspector] private T serializedData;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private string typeName = typeof(T).Name;
-        [PropertySpace, ShowInInspector, PropertyOrder(1), LabelText("$typeName")]
+        [PropertySpace, ShowInInspector, PropertyOrder(1), HideLabel, InlineProperty]
 #endif
         private T Data {
             get {
