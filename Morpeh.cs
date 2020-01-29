@@ -1040,6 +1040,9 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEntity GetEntity(in int id) => this.world.Entities[this.entitiesCacheForBags[id]];
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEntity First() => this.world.Entities[this.entitiesCacheForBags[0]];
 
         public Filter With<T>(bool fillWithPreviousEntities = true) where T : struct, IComponent
             => this.CreateFilter<T>(FilterMode.Include, fillWithPreviousEntities);
