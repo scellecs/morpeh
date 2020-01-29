@@ -1,7 +1,7 @@
 ﻿namespace Morpeh {
     using UnityEngine;
-    
-    public abstract class UpdateSystem : ScriptableObject, ISystem {
+
+    public abstract class Initializer : ScriptableObject, IInitializer {
         private World world;
         private FilterProvider filter;
 
@@ -16,10 +16,8 @@
         }
 
         public abstract void OnAwake();
-        public virtual void OnStart() { }
+        public abstract void OnStart();
 
-        public abstract void OnUpdate(float deltaTime);
-
-        public virtual void Dispose() { }
+        public abstract void Dispose();
     }
 }

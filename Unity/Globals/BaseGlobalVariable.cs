@@ -1,9 +1,11 @@
 ﻿namespace Morpeh.Globals {
     using System;
+    using JetBrains.Annotations;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
     using UnityEngine;
+    using Object = UnityEngine.Object;
 
     public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData> {
         [Space]
@@ -18,6 +20,7 @@
         protected TData value;
 
         private TData lastValue;
+        private string defaultSerializedValue;
 
         private const string COMMON_KEY = "MORPEH__GLOBALS_VARIABLES_";
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -73,36 +76,39 @@
                 this.Publish(newValue);
                 this.SaveData();
             }
-#if UNITY_EDITOR
-            else {
-                this.editorBackfield = this.Save();
-            }
-#endif
         }
 
-        protected abstract TData  Load(string serializedData);
+        protected abstract TData Load([NotNull] string serializedData);
         protected abstract string Save();
 
-        protected override void OnEnable() {
+        public virtual void Reset() {
+            this.value = this.Load(this.defaultSerializedValue);
+        }
+
+        internal override void OnEnable() {
             base.OnEnable();
+            this.defaultSerializedValue = this.Save();
             MApplicationFocusHook.OnApplicationFocusLost += this.SaveData;
 #if UNITY_EDITOR
             if (string.IsNullOrEmpty(this.customKey)) {
                 this.GenerateCustomKey();
             }
 
-            this.editorBackfield = this.Save();
 
             UnityEditor.EditorApplication.playModeStateChanged += this.EditorApplicationOnPlayModeStateChanged;
 #endif
             this.LoadData();
         }
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [Button]
+        [PropertyOrder(3)]
+        [ShowIf("@AutoSave")]
+        [HideInInlineEditors]
+#endif
 #if UNITY_EDITOR
-        //[Button]
-        //[PropertyOrder(3)]
         private void GenerateCustomKey() => this.customKey = Guid.NewGuid().ToString().Replace("-", string.Empty);
 #endif
-        protected override void OnDisable() {
+        internal override void OnDisable() {
             base.OnDisable();
             MApplicationFocusHook.OnApplicationFocusLost -= this.SaveData;
 #if UNITY_EDITOR
@@ -130,7 +136,7 @@
             this.OnChange(this.value);
         }
 
-        private void SaveData() {
+        internal void SaveData() {
             if (this.AutoSave) {
                 PlayerPrefs.SetString(this.Key, this.Save());
             }
@@ -139,34 +145,16 @@
         #region EDITOR
 
 #if UNITY_EDITOR
-        //hack for save start values of GlobalVariables
-        private string editorBackfield;
-
-        private bool HasPlayerPrefsValue            => PlayerPrefs.HasKey(this.Key);
+        private bool HasPlayerPrefsValue => PlayerPrefs.HasKey(this.Key);
         private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        [HideInInlineEditors]
-        [PropertyOrder(2)]
-        [ShowInInspector]
-        [ShowIf("@HasPlayerPrefsValueAndAutoSave")]
-#endif
-        private TData PlayerPrefsValue {
-            get {
-                if (this.HasPlayerPrefsValue) {
-                    return this.Load(PlayerPrefs.GetString(this.Key));
-                }
-
-                return default;
-            }
-        }
 
 
         private void EditorApplicationOnPlayModeStateChanged(UnityEditor.PlayModeStateChange state) {
             if (state == UnityEditor.PlayModeStateChange.EnteredEditMode) {
                 this.SaveData();
-                this.value           = this.Load(this.editorBackfield);
-                this.editorBackfield = default;
-                this.isLoaded        = false;
+                this.Reset();
+                this.defaultSerializedValue = default;
+                this.isLoaded = false;
 
                 UnityEditor.EditorApplication.playModeStateChanged -= this.EditorApplicationOnPlayModeStateChanged;
             }
@@ -180,7 +168,7 @@
         [PropertyOrder(4)]
         [Button]
 #endif
-        private void ResetPlayerPrefsValue() {
+        internal void ResetPlayerPrefsValue() {
             if (this.HasPlayerPrefsValue) {
                 PlayerPrefs.DeleteKey(this.Key);
             }
@@ -191,19 +179,21 @@
     }
 
     internal static class InitializerGlobalVariables {
+        internal static MApplicationFocusHook hook;
+
         [RuntimeInitializeOnLoadMethod]
-        private static void Initialize() {
+        internal static void InitializeNoReturn() {
             var go = new GameObject("MORPEH__HOOK_APPLICATION_FOCUS");
-            go.AddComponent<MApplicationFocusHook>();
             go.hideFlags = HideFlags.HideAndDontSave;
             UnityEngine.Object.DontDestroyOnLoad(go);
+            hook = go.AddComponent<MApplicationFocusHook>();
         }
     }
 
     internal class MApplicationFocusHook : MonoBehaviour {
         internal static Action OnApplicationFocusLost = () => { };
 
-        private void OnApplicationFocus(bool hasFocus) {
+        internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {
                 OnApplicationFocusLost.Invoke();
             }
