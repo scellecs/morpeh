@@ -1,11 +1,12 @@
 ﻿namespace Morpeh.Globals {
     using System;
     using JetBrains.Annotations;
+    using UnityEditor;
+    using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+
 #endif
-    using UnityEngine;
-    using Object = UnityEngine.Object;
 
     public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData> {
         [Space]
@@ -19,7 +20,7 @@
 #endif
         protected TData value;
 
-        private TData lastValue;
+        private TData  lastValue;
         private string defaultSerializedValue;
 
         private const string COMMON_KEY = "MORPEH__GLOBALS_VARIABLES_";
@@ -78,7 +79,7 @@
             }
         }
 
-        protected abstract TData Load([NotNull] string serializedData);
+        protected abstract TData  Load([NotNull] string serializedData);
         protected abstract string Save();
 
         public virtual void Reset() {
@@ -87,15 +88,15 @@
 
         internal override void OnEnable() {
             base.OnEnable();
-            this.defaultSerializedValue = this.Save();
-            MApplicationFocusHook.OnApplicationFocusLost += this.SaveData;
+            this.defaultSerializedValue               =  this.Save();
+            UnityRuntimeHelper.OnApplicationFocusLost += this.SaveData;
 #if UNITY_EDITOR
             if (string.IsNullOrEmpty(this.customKey)) {
                 this.GenerateCustomKey();
             }
 
 
-            UnityEditor.EditorApplication.playModeStateChanged += this.EditorApplicationOnPlayModeStateChanged;
+            EditorApplication.playModeStateChanged += this.EditorApplicationOnPlayModeStateChanged;
 #endif
             this.LoadData();
         }
@@ -108,9 +109,9 @@
 #if UNITY_EDITOR
         private void GenerateCustomKey() => this.customKey = Guid.NewGuid().ToString().Replace("-", string.Empty);
 #endif
-        internal override void OnDisable() {
-            base.OnDisable();
-            MApplicationFocusHook.OnApplicationFocusLost -= this.SaveData;
+        public override void Dispose() {
+            base.Dispose();
+            UnityRuntimeHelper.OnApplicationFocusLost -= this.SaveData;
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
                 return;
@@ -145,20 +146,20 @@
         #region EDITOR
 
 #if UNITY_EDITOR
-        private bool HasPlayerPrefsValue => PlayerPrefs.HasKey(this.Key);
+        private bool HasPlayerPrefsValue            => PlayerPrefs.HasKey(this.Key);
         private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
 
 
-        private void EditorApplicationOnPlayModeStateChanged(UnityEditor.PlayModeStateChange state) {
-            if (state == UnityEditor.PlayModeStateChange.EnteredEditMode) {
+        private void EditorApplicationOnPlayModeStateChanged(PlayModeStateChange state) {
+            if (state == PlayModeStateChange.EnteredEditMode) {
                 this.SaveData();
                 this.Reset();
                 this.defaultSerializedValue = default;
-                this.isLoaded = false;
+                this.isLoaded               = false;
 
-                UnityEditor.EditorApplication.playModeStateChanged -= this.EditorApplicationOnPlayModeStateChanged;
+                EditorApplication.playModeStateChanged -= this.EditorApplicationOnPlayModeStateChanged;
             }
-            else if (state == UnityEditor.PlayModeStateChange.EnteredPlayMode) {
+            else if (state == PlayModeStateChange.EnteredPlayMode) {
                 this.LoadData();
             }
         }
@@ -176,27 +177,5 @@
 #endif
 
         #endregion
-    }
-
-    internal static class InitializerGlobalVariables {
-        internal static MApplicationFocusHook hook;
-
-        [RuntimeInitializeOnLoadMethod]
-        internal static void InitializeNoReturn() {
-            var go = new GameObject("MORPEH__HOOK_APPLICATION_FOCUS");
-            go.hideFlags = HideFlags.HideAndDontSave;
-            UnityEngine.Object.DontDestroyOnLoad(go);
-            hook = go.AddComponent<MApplicationFocusHook>();
-        }
-    }
-
-    internal class MApplicationFocusHook : MonoBehaviour {
-        internal static Action OnApplicationFocusLost = () => { };
-
-        internal void OnApplicationFocus(bool hasFocus) {
-            if (!hasFocus) {
-                OnApplicationFocusLost.Invoke();
-            }
-        }
     }
 }

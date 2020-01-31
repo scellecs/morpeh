@@ -1,17 +1,16 @@
 namespace Morpeh {
     using System;
     using System.Collections.Generic;
+    using UnityEngine;
+    using Utils;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
-    using UnityEngine;
-    using Utils;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
     [HideMonoScript]
 #endif
     public class WorldViewer : MonoBehaviour {
-        
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [DisableContextMenu]
         [PropertySpace]
@@ -36,10 +35,10 @@ namespace Morpeh {
 
                 return this.entityViews;
             }
-            set {}
+            set { }
         }
-        
-        private List<EntityView> entityViews = new List<EntityView>();
+
+        private readonly List<EntityView> entityViews = new List<EntityView>();
 
         [DisableContextMenu]
         [Serializable]
@@ -48,7 +47,7 @@ namespace Morpeh {
 
             [ShowInInspector]
             private int ID => this.entity.InternalID;
-            
+
             [DisableContextMenu]
             [PropertySpace]
             [ShowInInspector]
@@ -61,8 +60,9 @@ namespace Morpeh {
                         for (int i = 0, length = 256; i < length; i++) {
                             if (this.entity.ComponentsMask.GetBit(i)) {
                                 var view = new ComponentView {
-                                    info = CommonCacheTypeIdentifier.editorTypeAssociation[i], 
-                                    id = this.entity.GetComponentId(i)
+                                    DebugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[i],
+                                    ID        = this.entity.GetComponentId(i),
+                                    World     = this.entity.World
                                 };
                                 this.componentViews.Add(view);
                             }
@@ -76,23 +76,26 @@ namespace Morpeh {
                 set { }
             }
 
-            private FastBitMask  lastMask       = FastBitMask.None;
+            private FastBitMask         lastMask       = FastBitMask.None;
             private List<ComponentView> componentViews = new List<ComponentView>();
 
 
             [Serializable]
             private struct ComponentView {
-                internal CommonCacheTypeIdentifier.DebugInfo info;
-            
-                internal bool IsMarker => this.info.Info.isMarker;
-                internal string FullName => this.info.Type.FullName;
+                internal CommonCacheTypeIdentifier.DebugInfo DebugInfo;
+                internal World                               World;
+
+
+                internal bool   IsMarker => this.DebugInfo.TypeInfo.isMarker;
+                internal string FullName => this.DebugInfo.Type.FullName;
 
                 [ShowIf("$IsMarker")]
                 [HideLabel]
                 [DisplayAsString(false)]
                 [ShowInInspector]
-                internal string TypeName => this.info.Type.Name;
-                internal int id;
+                internal string TypeName => this.DebugInfo.Type.Name;
+
+                internal int ID;
 
                 [DisableContextMenu]
                 [HideIf("$IsMarker")]
@@ -101,21 +104,20 @@ namespace Morpeh {
                 [HideReferenceObjectPickerAttribute]
                 public object Data {
                     get {
-                        if (this.info.Info.isMarker) {
+                        if (this.DebugInfo.TypeInfo.isMarker) {
                             return null;
                         }
 
-                        return this.info.GetBoxed(this.id);
+                        return this.DebugInfo.GetBoxed(this.World, this.ID);
                     }
                     set {
-                        if (this.info.Info.isMarker) {
+                        if (this.DebugInfo.TypeInfo.isMarker) {
                             return;
                         }
 
-                        this.info.SetBoxed(this.id, value);
+                        this.DebugInfo.SetBoxed(this.World, this.ID, value);
                     }
                 }
-            
             }
         }
 #endif

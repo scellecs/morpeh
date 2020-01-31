@@ -1,11 +1,10 @@
 namespace Morpeh.Globals {
-    using System;
-    using UnityEngine;
-
     namespace ECS {
         using System;
         using System.Collections.Generic;
+        using UnityEngine;
 
+        [Serializable]
         internal struct GlobalEventMarker : IComponent {
         }
 
@@ -43,21 +42,24 @@ namespace Morpeh.Globals {
         }
 
 
+        [Serializable]
         internal struct GlobalEventComponent<TData> : IComponent {
             internal static bool Initialized;
 
             public Action<IEnumerable<TData>> Action;
-            public Stack<TData>                Data;
+            public Stack<TData>               Data;
         }
 
+        [Serializable]
         internal struct GlobalEventPublished : IComponent {
         }
 
+        [Serializable]
         internal struct GlobalEventNextFrame : IComponent {
         }
 
         internal sealed class ProcessEventsSystem : ILateSystem {
-            private World world;
+            private World          world;
             private FilterProvider filter;
 
             public World World {
@@ -73,10 +75,6 @@ namespace Morpeh.Globals {
             public void OnAwake() {
             }
 
-            public void OnStart() {
-                
-            }
-
             public void OnUpdate(float deltaTime) {
                 foreach (var updater in GlobalEventComponentUpdater.Updaters) {
                     updater.Update();
@@ -89,7 +87,7 @@ namespace Morpeh.Globals {
 
         internal static class InitializerECS {
             [RuntimeInitializeOnLoadMethod]
-            private static void Initialize() {
+            internal static void Initialize() {
                 World.Default.AddSystem(9999, new ProcessEventsSystem());
             }
         }

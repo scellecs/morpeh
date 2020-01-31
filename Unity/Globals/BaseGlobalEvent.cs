@@ -2,10 +2,20 @@ namespace Morpeh.Globals {
     using System;
     using System.Collections.Generic;
     using ECS;
+    using UnityEditor;
     using UnityEngine;
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
 
     public abstract class BaseGlobalEvent<TData> : ScriptableObject, IDisposable {
-        private Entity internalEntity;
+        [SerializeField]
+#if ODIN_INSPECTOR
+        [ReadOnly]
+#endif
+        private int internalEntityID = -1;
+
+        private Entity InternalEntity => World.Default.Entities[this.internalEntityID];
 
         public IEntity Entity {
             get {
@@ -15,19 +25,19 @@ namespace Morpeh.Globals {
                 }
 #endif
                 this.CheckIsInitialized();
-                return this.internalEntity;
+                return this.InternalEntity;
             }
         }
 
         public bool IsPublished {
             get {
-#if UNITY_EDITOR 
+#if UNITY_EDITOR
                 if (!Application.isPlaying) {
                     return default;
                 }
 #endif
                 this.CheckIsInitialized();
-                return this.internalEntity.Has<GlobalEventPublished>();
+                return this.InternalEntity.Has<GlobalEventPublished>();
             }
         }
 
@@ -39,56 +49,60 @@ namespace Morpeh.Globals {
                 }
 #endif
                 this.CheckIsInitialized();
-                ref var component = ref this.internalEntity.GetComponent<GlobalEventComponent<TData>>();
+                ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>();
                 return component.Data;
             }
         }
 
-
         internal virtual void OnEnable() {
-            this.internalEntity = null;
-        }
-
-        internal virtual void OnDisable() {
-            this.internalEntity = null;
+#if UNITY_EDITOR
+            EditorApplication.playModeStateChanged += state => {
+                if (state == PlayModeStateChange.ExitingEditMode
+                    || state == PlayModeStateChange.ExitingPlayMode) {
+                    this.internalEntityID = -1;
+                }
+            };
+#endif
         }
 
         protected void CheckIsInitialized() {
-            if (this.internalEntity == null) {
-                this.internalEntity = World.Default.CreateEntityInternal();
-                this.internalEntity.AddComponent<GlobalEventMarker>();
-                this.internalEntity.SetComponent(new GlobalEventComponent<TData> {
-                    Action = null,    
+            if (this.internalEntityID < 0) {
+                var ent = World.Default.CreateEntityInternal(out this.internalEntityID);
+
+                ent.AddComponent<GlobalEventMarker>();
+                ent.SetComponent(new GlobalEventComponent<TData> {
+                    Action = null,
                     Data   = new Stack<TData>()
                 });
+            }
 
-                if (!GlobalEventComponent<TData>.Initialized) {
-                    GlobalEventComponentUpdater.Updaters.Add(new GlobalEventComponentUpdater<TData>(this.internalEntity.World.Filter));
-                    GlobalEventComponent<TData>.Initialized = true;
-                }
+            if (!GlobalEventComponent<TData>.Initialized) {
+                GlobalEventComponentUpdater.Updaters.Add(new GlobalEventComponentUpdater<TData>(World.Default.Filter));
+                GlobalEventComponent<TData>.Initialized = true;
             }
         }
 
+
         public void Publish(TData data) {
             this.CheckIsInitialized();
-            ref var component = ref this.internalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
+            ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Data.Push(data);
-            this.internalEntity.SetComponent(new GlobalEventPublished());
+            this.InternalEntity.SetComponent(new GlobalEventPublished());
         }
-        
+
         public void NextFrame(TData data) {
             this.CheckIsInitialized();
-            ref var component = ref this.internalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
+            ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Data.Push(data);
-            this.internalEntity.SetComponent(new GlobalEventNextFrame());
+            this.InternalEntity.SetComponent(new GlobalEventNextFrame());
         }
 
         public IDisposable Subscribe(Action<IEnumerable<TData>> callback) {
             this.CheckIsInitialized();
-            ref var component = ref this.internalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
+            ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Action = (Action<IEnumerable<TData>>) Delegate.Combine(component.Action, callback);
 
-            var ent = this.internalEntity;
+            var ent = this.InternalEntity;
             return new Unsubscriber(() => {
                 if (ent == null) {
                     return;
@@ -99,6 +113,7 @@ namespace Morpeh.Globals {
             });
         }
 
+
         public static implicit operator bool(BaseGlobalEvent<TData> exists) => exists.IsPublished;
 
         private class Unsubscriber : IDisposable {
@@ -107,10 +122,11 @@ namespace Morpeh.Globals {
             public void Dispose() => this.unsubscribe();
         }
 
-        public void Dispose() {
-            if (this.internalEntity != null) {
-                this.internalEntity.Dispose();
-                World.Default.RemoveEntity(this.internalEntity);
+        public virtual void Dispose() {
+            if (this.internalEntityID != -1) {
+                this.InternalEntity.Dispose();
+                World.Default.RemoveEntity(this.InternalEntity);
+                this.internalEntityID = -1;
             }
         }
 
