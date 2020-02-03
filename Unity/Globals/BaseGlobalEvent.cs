@@ -7,7 +7,12 @@ namespace Morpeh.Globals {
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
+    using Unity.IL2CPP.CompilerServices;
 
+
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class BaseGlobalEvent<TData> : ScriptableObject, IDisposable {
         [SerializeField]
 #if ODIN_INSPECTOR

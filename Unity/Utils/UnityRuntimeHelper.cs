@@ -1,27 +1,37 @@
 namespace Morpeh {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
-    using Globals.ECS;
-    using Sirenix.Serialization;
+    using UnityEngine;
+#if UNITY_EDITOR
     using UnityEditor;
+#endif
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+    using Sirenix.Serialization;
+    using System.Reflection;
+    using Globals.ECS;
+#else
+    using UnityEngine;
 #endif
+    using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
 #if ODIN_INSPECTOR
     internal class UnityRuntimeHelper : SerializedMonoBehaviour {
 #else
-    internal class UnityRuntimeHelper : MonoBehaviour, ISerializationCallbackReceiver {
+    internal class UnityRuntimeHelper : MonoBehaviour {
 #endif
         internal static Action OnApplicationFocusLost = () => { };
-
+#if UNITY_EDITOR && ODIN_INSPECTOR
         [OdinSerialize]
         private List<World> worldsSerialized = null;
         [OdinSerialize]
         private List<string> types = null;
-
         private bool hotReloaded = false;
+#endif
+
 
 #if UNITY_EDITOR
         private void OnEnable() {
@@ -37,7 +47,7 @@ namespace Morpeh {
 
 
         private void Update() {
-            World.PlayerLoopUpdate();
+            World.GlobalUpdate(Time.deltaTime);
 #if UNITY_EDITOR && ODIN_INSPECTOR
             if (this.hotReloaded) {
                 foreach (var world in World.Worlds) {
@@ -52,8 +62,8 @@ namespace Morpeh {
 #endif
         }
 
-        private void FixedUpdate() => World.PlayerLoopFixedUpdate();
-        private void LateUpdate()  => World.PlayerLoopLateUpdate();
+        private void FixedUpdate() => World.GlobalFixedUpdate(Time.fixedDeltaTime);
+        private void LateUpdate()  => World.GlobalLateUpdate(Time.deltaTime);
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {

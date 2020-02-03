@@ -2,14 +2,31 @@
 #if UNITY_EDITOR
     using UnityEditor;
 #endif
+    using System.Linq;
     using UnityEngine;
     using Utils;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
+    using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     //TODO refactor for Reorder in Runtime
-    public class Installer : WorldViewer {
+    public sealed class Installer : WorldViewer {
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [Required]
+        [InfoBox("Order collision with other installer!", InfoMessageType.Error, "isCollisionWithOtherInstaller")]
+        [PropertyOrder(-5)]
+#endif
+        public int order;
+        
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        private bool isCollisionWithOtherInstaller 
+            => FindObjectsOfType<Installer>().Where(i => i != this).Any(i => i.order == this.order);
+#endif
+        
         [Space]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-4)]
@@ -17,40 +34,67 @@
         public Initializer[] initializers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-3)]
+        [OnValueChanged(nameof(OnValueChangedUpdate))]
 #endif
         public UpdateSystemPair[] updateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-2)]
+        [OnValueChanged(nameof(OnValueChangedFixedUpdate))]
 #endif
         public FixedSystemPair[] fixedUpdateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-1)]
+        [OnValueChanged(nameof(OnValueChangedLateUpdate))]
 #endif
         public LateSystemPair[] lateUpdateSystems;
+        
+        private SystemsGroup group;
+
+        private void OnValueChangedUpdate() {
+            this.RemoveSystems(this.updateSystems);
+            this.AddSystems(this.updateSystems);
+        }
+        
+        private void OnValueChangedFixedUpdate() {
+            this.RemoveSystems(this.fixedUpdateSystems);
+            this.AddSystems(this.fixedUpdateSystems);
+        }
+        
+        private void OnValueChangedLateUpdate() {
+            this.RemoveSystems(this.lateUpdateSystems);
+            this.AddSystems(this.lateUpdateSystems);
+        }
+        
 
         private void OnEnable() {
+            this.group = World.Default.CreateSystemsGroup();
             for (int i = 0, length = this.initializers.Length; i < length; i++) {
                 var initializer = this.initializers[i];
-                World.Default.AddInitializer(initializer);
+                this.group.AddInitializer(initializer);
             }
 
             this.AddSystems(this.updateSystems);
             this.AddSystems(this.fixedUpdateSystems);
             this.AddSystems(this.lateUpdateSystems);
+            
+            World.Default.AddSystemsGroup(this.order, this.group);
         }
 
         private void OnDisable() {
             this.RemoveSystems(this.updateSystems);
             this.RemoveSystems(this.fixedUpdateSystems);
             this.RemoveSystems(this.lateUpdateSystems);
+            
+            World.Default.RemoveSystemsGroup(this.group);
         }
 
         private void AddSystems<T>(BasePair<T>[] pairs) where T : class, ISystem {
             for (int i = 0, length = pairs.Length; i < length; i++) {
                 var pair   = pairs[i];
                 var system = pair.System;
-                if (pair.Enabled && system != null) {
-                    World.Default.AddSystem(i, system);
+                pair.group = this.group;
+                if (system != null) {
+                    this.group.AddSystem(system, pair.Enabled);
                 }
             }
         }
@@ -59,7 +103,7 @@
             for (int i = 0, length = pairs.Length; i < length; i++) {
                 var system = pairs[i].System;
                 if (system != null) {
-                    World.Default.RemoveSystem(system);
+                    this.group.RemoveSystem(system);
                 }
             }
         }
@@ -83,20 +127,6 @@
             Selection.activeObject = go;
         }
 #endif
-//        private void Reorder() {
-//            this.InternalReorder(this.updateSystems);
-//        }
-//        private void ReorderFixed() {
-//            this.InternalReorder(this.fixedUpdateSystems);
-//        }
-//        private void ReorderLate() {
-//            this.InternalReorder(this.lateUpdateSystems);
-//        }
-//
-//        private void InternalReorder<T>(BasePair<T>[] collection) where T : class, ISystem {
-//            var temp = collection.Where(p => p.Added).Select(p => p.System).ToList();
-//            World.ReorderSystems(temp);
-//        }
     }
 
     namespace Utils {
@@ -104,10 +134,11 @@
         using JetBrains.Annotations;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         using Sirenix.OdinInspector;
-
 #endif
         [Serializable]
         public abstract class BasePair<T> where T : class, ISystem {
+            internal SystemsGroup group;
+            
             [SerializeField]
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HorizontalGroup("Pair", 10)]
@@ -141,10 +172,10 @@
 
                 if (Application.isPlaying) {
                     if (this.enabled) {
-                        World.Default.EnableSystem(this.system);
+                        this.group.EnableSystem(this.system);
                     }
                     else {
-                        World.Default.DisableSystem(this.system);
+                        this.group.DisableSystem(this.system);
                     }
                 }
 #endif

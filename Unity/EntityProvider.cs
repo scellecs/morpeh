@@ -6,12 +6,13 @@ namespace Morpeh {
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
     using Utils;
-
 #endif
 
     public class EntityProvider : MonoBehaviour {
+#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
         [ReadOnly]
+#endif
         private int entityID = -1;
 
         [CanBeNull]

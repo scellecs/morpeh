@@ -5,7 +5,6 @@
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
-
 #endif
 
     public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData> {

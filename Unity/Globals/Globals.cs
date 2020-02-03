@@ -88,7 +88,9 @@ namespace Morpeh.Globals {
         internal static class InitializerECS {
             [RuntimeInitializeOnLoadMethod]
             internal static void Initialize() {
-                World.Default.AddSystem(9999, new ProcessEventsSystem());
+                var sg = World.Default.CreateSystemsGroup();
+                sg.AddSystem(new ProcessEventsSystem());
+                World.Default.AddSystemsGroup(9999, sg);
             }
         }
     }
