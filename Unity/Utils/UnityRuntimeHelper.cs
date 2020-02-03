@@ -1,24 +1,20 @@
 namespace Morpeh {
     using System;
-    using System.Collections.Generic;
     using UnityEngine;
-#if UNITY_EDITOR
+#if UNITY_EDITOR && ODIN_INSPECTOR
     using UnityEditor;
-#endif
-#if ODIN_INSPECTOR
+    using System.Collections.Generic;
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
     using System.Reflection;
     using Globals.ECS;
-#else
-    using UnityEngine;
 #endif
     using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-#if ODIN_INSPECTOR
+#if UNITY_EDITOR && ODIN_INSPECTOR
     internal class UnityRuntimeHelper : SerializedMonoBehaviour {
 #else
     internal class UnityRuntimeHelper : MonoBehaviour {
