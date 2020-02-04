@@ -31,13 +31,24 @@ namespace Morpeh {
 
 #if UNITY_EDITOR
         private void OnEnable() {
-            EditorApplication.playModeStateChanged += state => {
-                if (state == PlayModeStateChange.ExitingPlayMode) {
-                    if (this != null && this.gameObject != null) {
-                        DestroyImmediate(this.gameObject);
-                    }
+            EditorApplication.playModeStateChanged += OnEditorApplicationOnplayModeStateChanged;
+        }
+
+        private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
+            if (state == PlayModeStateChange.EnteredEditMode) {
+                foreach (var world in World.Worlds) {
+                    world?.Dispose();
                 }
-            };
+
+                World.Worlds.Clear();
+                World.Worlds.Add(null);
+
+                if (this != null && this.gameObject != null) {
+                    DestroyImmediate(this.gameObject);
+                }
+
+                EditorApplication.playModeStateChanged -= OnEditorApplicationOnplayModeStateChanged;
+            }
         }
 #endif
 
