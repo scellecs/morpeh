@@ -3,28 +3,23 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Editor")]
 
 namespace Morpeh {
-#if UNITY_2019_3
-    using UnityEngine.LowLevel;
-    using UnityEngine.PlayerLoop;
-#else
-    using UnityEngine.Experimental.PlayerLoop;
-    using UnityEngine.Experimental.LowLevel;
-#endif
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.CompilerServices;
-    using JetBrains.Annotations;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
+    using System;
+    using System.Collections;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+#if UNITY_2019_1_OR_NEWER
+    using JetBrains.Annotations;
     using Unity.Collections.LowLevel.Unsafe;
-    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    using Utils;
-    using Il2Cpp = Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute;
     using Object = UnityEngine.Object;
+#endif
+    using Utils;
+    using Unity.IL2CPP.CompilerServices;
+    using Il2Cpp = Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute;
+    using System.Runtime.CompilerServices;
 
     internal static class Constants {
         internal const int DEFAULT_WORLD_ENTITIES_CAPACITY             = 65536;
@@ -61,11 +56,6 @@ namespace Morpeh {
         ///     Calling 1 time on registration in World
         /// </summary>
         void OnAwake();
-
-        /// <summary>
-        ///     Calling before update first system in frame, but after filters update
-        /// </summary>
-        void OnStart();
     }
 
     public interface ISystem : IInitializer {
@@ -83,21 +73,38 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     [Serializable]
     internal sealed class Entity : IEntity {
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
         internal int InternalID;
 
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
         internal FastBitMask ComponentsMask;
-        internal World       World;
+        internal World World => World.Worlds[this.worldID];
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        private int worldID;
 
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
         private int[] components;
-        private int   componentsDoubleCount;
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        private int componentsDoubleCount;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
         public int ID => this.InternalID;
 
-        internal Entity(int id) {
+        internal Entity(int id, int worldID) {
             this.InternalID = id;
+            this.worldID    = worldID;
 
             this.componentsDoubleCount = 0;
 
@@ -113,18 +120,18 @@ namespace Morpeh {
 #if UNITY_EDITOR
                 Debug.LogError("You add component which already exist! Use Get or SetComponent instead!");
 #endif
-                return ref CacheComponents<T>.Empty();
+                return ref this.World.GetCache<T>().Empty();
             }
 
             this.ComponentsMask.SetBit(typeInfo.id);
             this.World.Filter.EntityChanged(this.InternalID);
 
             if (!typeInfo.isMarker) {
-                var componentId = CacheComponents<T>.Add();
+                var componentId = this.World.GetCache<T>().Add();
                 for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
                     if (this.components[i] == typeInfo.id) {
                         this.components[i + 1] = componentId;
-                        return ref CacheComponents<T>.Get(this.components[i + 1]);
+                        return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
 
@@ -136,10 +143,10 @@ namespace Morpeh {
                 this.components[this.componentsDoubleCount - 2] = typeInfo.id;
                 this.components[this.componentsDoubleCount - 1] = componentId;
 
-                return ref CacheComponents<T>.Get(this.components[this.componentsDoubleCount - 1]);
+                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCount - 1]);
             }
 
-            return ref CacheComponents<T>.Empty();
+            return ref this.World.GetCache<T>().Empty();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -151,7 +158,7 @@ namespace Morpeh {
                 Debug.LogError("You add component which already exist! Use Get or SetComponent instead!");
 #endif
                 exist = true;
-                return ref CacheComponents<T>.Empty();
+                return ref this.World.GetCache<T>().Empty();
             }
 
             exist = false;
@@ -159,11 +166,11 @@ namespace Morpeh {
             this.World.Filter.EntityChanged(this.InternalID);
 
             if (!typeInfo.isMarker) {
-                var componentId = CacheComponents<T>.Add();
+                var componentId = this.World.GetCache<T>().Add();
                 for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
                     if (this.components[i] == typeInfo.id) {
                         this.components[i + 1] = componentId;
-                        return ref CacheComponents<T>.Get(this.components[i + 1]);
+                        return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
 
@@ -175,16 +182,16 @@ namespace Morpeh {
                 this.components[this.componentsDoubleCount - 2] = typeInfo.id;
                 this.components[this.componentsDoubleCount - 1] = componentId;
 
-                return ref CacheComponents<T>.Get(this.components[this.componentsDoubleCount - 1]);
+                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCount - 1]);
             }
 
-            return ref CacheComponents<T>.Empty();
+            return ref this.World.GetCache<T>().Empty();
         }
 
 #if UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int GetComponentId(int typeId) {
-            var typeInfo = CommonCacheTypeIdentifier.editorTypeAssociation[typeId].Info;
+            var typeInfo = CommonCacheTypeIdentifier.editorTypeAssociation[typeId].TypeInfo;
             if (typeInfo.isMarker) {
                 return -1;
             }
@@ -221,17 +228,17 @@ namespace Morpeh {
 
             if (typeInfo.isMarker) {
                 if (this.Has<T>()) {
-                    return ref CacheComponents<T>.Empty();
+                    return ref this.World.GetCache<T>().Empty();
                 }
             }
 
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 if (this.components[i] == typeInfo.id) {
-                    return ref CacheComponents<T>.Get(this.components[i + 1]);
+                    return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                 }
             }
 
-            return ref CacheComponents<T>.Empty();
+            return ref this.World.GetCache<T>().Empty();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -241,19 +248,19 @@ namespace Morpeh {
             if (typeInfo.isMarker) {
                 if (this.Has<T>()) {
                     exist = true;
-                    return ref CacheComponents<T>.Empty();
+                    return ref this.World.GetCache<T>().Empty();
                 }
             }
 
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 if (this.components[i] == typeInfo.id) {
                     exist = true;
-                    return ref CacheComponents<T>.Get(this.components[i + 1]);
+                    return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                 }
             }
 
             exist = false;
-            return ref CacheComponents<T>.Empty();
+            return ref this.World.GetCache<T>().Empty();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -262,7 +269,7 @@ namespace Morpeh {
 
             if (!typeInfo.isMarker) {
                 if (!this.Has(typeInfo.mask)) {
-                    var componentId = CacheComponents<T>.Add();
+                    var componentId = this.World.GetCache<T>().Add();
                     for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
                         if (this.components[i] == typeInfo.id) {
                             this.components[i + 1] = componentId;
@@ -277,14 +284,14 @@ namespace Morpeh {
                     this.components[this.componentsDoubleCount - 2] = typeInfo.id;
                     this.components[this.componentsDoubleCount - 1] = componentId;
                     this.World.Filter.EntityChanged(this.InternalID);
-                    CacheComponents<T>.Set(componentId, value);
+                    this.World.GetCache<T>().Set(componentId, value);
                     this.ComponentsMask.SetBit(typeInfo.id);
                     return;
                 }
 
                 for (int i = 0, length = this.components.Length; i < length; i += 2) {
                     if (this.components[i] == typeInfo.id) {
-                        CacheComponents<T>.Set(this.components[i + 1], value);
+                        this.World.GetCache<T>().Set(this.components[i + 1], value);
                     }
                 }
             }
@@ -303,7 +310,7 @@ namespace Morpeh {
             if (!typeInfo.isMarker) {
                 for (int i = 0, length = this.components.Length; i < length; i += 2) {
                     if (this.components[i] == typeInfo.id) {
-                        CacheComponents<T>.Remove(this.components[i + 1]);
+                        this.World.GetCache<T>().Remove(this.components[i + 1]);
 
                         this.ComponentsMask.ClearBit(typeInfo.id);
                         if (this.ComponentsMask == FastBitMask.None) {
@@ -343,13 +350,18 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsDisposed() => this.ComponentsMask == FastBitMask.None;
 
+        
         public void Dispose() {
+            if (this.ComponentsMask == FastBitMask.None) {
+                return;
+            }
+            
             var mask = new FastBitMask();
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 var typeId = this.components[i];
                 mask.SetBit(typeId);
                 if (this.ComponentsMask.Has(mask)) {
-                    ComponentsCleaner.Clean(typeId, this.components[i + 1]);
+                    this.World.GetCache(typeId).Remove(this.components[i + 1]);
                 }
 
                 mask.ClearBit(typeId);
@@ -359,58 +371,78 @@ namespace Morpeh {
         }
     }
 
+    [Serializable]
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public sealed class World : IDisposable {
-        public static World Default { get; private set; }
+    public sealed class SystemsGroup : IDisposable {
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        private List<ISystem> systems;
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        private List<ISystem> fixedSystems;
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        private List<ISystem> lateSystems;
 
-        private static readonly List<World> Worlds = new List<World>();
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        private List<ISystem> disabledSystems;
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        private List<ISystem> disabledFixedSystems;
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        private List<ISystem> disabledLateSystems;
 
-        internal Filter Filter;
-
-        private SortedList<int, ISystem> systems;
-        private SortedList<int, ISystem> fixedSystems;
-        private SortedList<int, ISystem> lateSystems;
-
-        private SortedList<int, ISystem> disabledSystems;
-        private SortedList<int, ISystem> disabledFixedSystems;
-        private SortedList<int, ISystem> disabledLateSystems;
-
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
         private List<IInitializer> newInitializers;
-        private List<IDisposable>  disposables;
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        private List<IDisposable> disposables;
 
-        internal Entity[] Entities;
+        private World world;
 
-        internal int EntitiesCount;
-        internal int EntitiesLength;
-        internal int EntitiesCapacity;
+        private SystemsGroup() {
+            
+        }
+        
+        internal SystemsGroup(World world) {
+            this.world = world;
+            
+            this.systems      = new List<ISystem>();
+            this.fixedSystems = new List<ISystem>();
+            this.lateSystems  = new List<ISystem>();
 
-        private Queue<int> freeEntityIDs;
-
-        public World() {
-            this.systems      = new SortedList<int, ISystem>();
-            this.fixedSystems = new SortedList<int, ISystem>();
-            this.lateSystems  = new SortedList<int, ISystem>();
-
-            this.disabledSystems      = new SortedList<int, ISystem>();
-            this.disabledFixedSystems = new SortedList<int, ISystem>();
-            this.disabledLateSystems  = new SortedList<int, ISystem>();
+            this.disabledSystems      = new List<ISystem>();
+            this.disabledFixedSystems = new List<ISystem>();
+            this.disabledLateSystems  = new List<ISystem>();
 
             this.newInitializers = new List<IInitializer>();
             this.disposables     = new List<IDisposable>();
-
-            this.EntitiesLength   = 0;
-            this.EntitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
-            this.Entities         = new Entity[this.EntitiesCapacity];
-            this.freeEntityIDs    = new Queue<int>();
-
-            this.Filter = new Filter(this);
         }
 
         public void Dispose() {
-            void DisposeSystems(SortedList<int, ISystem> systemsToDispose) {
-                foreach (var system in systemsToDispose.Values) {
+            void DisposeSystems(List<ISystem> systemsToDispose) {
+                foreach (var system in systemsToDispose) {
                     system.Dispose();
                 }
 
@@ -448,136 +480,59 @@ namespace Morpeh {
 
             this.disposables.Clear();
             this.disposables = null;
-
-            foreach (var entity in this.Entities) {
-                entity?.Dispose();
-            }
-
-            this.Entities         = null;
-            this.EntitiesLength   = -1;
-            this.EntitiesCapacity = -1;
-
-            this.freeEntityIDs.Clear();
-            this.freeEntityIDs = null;
-
-            this.Filter.Dispose();
-            this.Filter = null;
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        public static void InitializationWithPlayerLoop() {
-            Default = new World();
-            Default.RegisterInDefaultPlayerLoop();
-
-            var defaultPlayerLoop = PlayerLoop.GetDefaultPlayerLoop();
-            for (int i = 0, length = defaultPlayerLoop.subSystemList.Length; i < length; i++) {
-                var subSystem = defaultPlayerLoop.subSystemList[i];
-
-                if (subSystem.type == typeof(PreLateUpdate)) {
-                    defaultPlayerLoop.subSystemList[i].updateDelegate += PlayerLoopUpdate;
-                }
-                else if (subSystem.type == typeof(FixedUpdate)) {
-                    var go = new GameObject {
-                        name      = "MORPEH_FIXED_UPDATE_WORKAROUND",
-                        hideFlags = HideFlags.HideAndDontSave
-                    };
-                    go.AddComponent<FixedUpdateWorkaround>();
-                    Object.DontDestroyOnLoad(go);
-                }
-                else if (subSystem.type == typeof(PostLateUpdate)) {
-                    defaultPlayerLoop.subSystemList[i].updateDelegate += PlayerLoopLateUpdate;
-                }
-            }
-
-            PlayerLoop.SetPlayerLoop(defaultPlayerLoop);
-        }
-
-        private class FixedUpdateWorkaround : MonoBehaviour {
-            private void FixedUpdate() => PlayerLoopFixedUpdate();
-        }
-
-        private static void PlayerLoopUpdate() {
-            foreach (var world in Worlds) {
-                world.Update();
-            }
-        }
-
-        private static void PlayerLoopFixedUpdate() {
-            foreach (var world in Worlds) {
-                world.FixedUpdate();
-            }
-        }
-
-        private static void PlayerLoopLateUpdate() {
-            foreach (var world in Worlds) {
-                world.LateUpdate();
-            }
-        }
-
-        public void RegisterInDefaultPlayerLoop() {
-            Worlds.Add(this);
-        }
-
-        public void UnregisterInDefaultPlayerLoop() {
-            Worlds.Remove(this);
-        }
-
-        public void Update() {
+        public void Update(float deltaTime) {
             foreach (var disposable in this.disposables) {
                 disposable.Dispose();
             }
 
             this.disposables.Clear();
 
-            this.Filter.Update();
+            this.world.Filter.Update();
 
             foreach (var initializer in this.newInitializers) {
-                initializer.OnStart();
-                this.Filter.Update();
+                initializer.OnAwake();
+                this.world.Filter.Update();
             }
 
             this.newInitializers.Clear();
 
-            var dt = Time.deltaTime;
             for (int i = 0, length = this.systems.Count; i < length; i++) {
-                this.systems.Values[i].OnUpdate(dt);
-                this.Filter.Update();
+                this.systems[i].OnUpdate(deltaTime);
+                this.world.Filter.Update();
             }
         }
 
-        public void FixedUpdate() {
-            this.Filter.Update();
+        public void FixedUpdate(float deltaTime) {
+            this.world.Filter.Update();
 
-            var dt = Time.fixedDeltaTime;
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
-                this.fixedSystems.Values[i].OnUpdate(dt);
-                this.Filter.Update();
+                this.fixedSystems[i].OnUpdate(deltaTime);
+                this.world.Filter.Update();
             }
         }
 
-        public void LateUpdate() {
-            this.Filter.Update();
+        public void LateUpdate(float deltaTime) {
+            this.world.Filter.Update();
 
-            var dt = Time.deltaTime;
             for (int i = 0, length = this.lateSystems.Count; i < length; i++) {
-                this.lateSystems.Values[i].OnUpdate(dt);
-                this.Filter.Update();
+                this.lateSystems[i].OnUpdate(deltaTime);
+                this.world.Filter.Update();
             }
         }
 
         public void AddInitializer<T>(T initializer) where T : class, IInitializer {
-            initializer.World  = this;
-            initializer.Filter = new FilterProvider {World = this};
+            initializer.World  = this.world;
+            initializer.Filter = new FilterProvider {World = this.world};
 
-            initializer.OnAwake();
             this.newInitializers.Add(initializer);
         }
 
         public void RemoveInitializer<T>(T initializer) where T : class, IInitializer
             => this.newInitializers.Remove(initializer);
 
-        //TODO refactor for Order of Systems
-        public bool AddSystem<T>(int order, T system) where T : class, ISystem {
+        public bool AddSystem<T>(T system, bool enabled = true) where T : class, ISystem {
             var collection         = this.systems;
             var disabledCollection = this.disabledSystems;
             if (system is IFixedSystem) {
@@ -589,8 +544,13 @@ namespace Morpeh {
                 disabledCollection = this.disabledLateSystems;
             }
 
-            if (!collection.ContainsValue(system) && !disabledCollection.ContainsValue(system)) {
-                collection.Add(order, system);
+            if (enabled && !collection.Contains(system)) {
+                collection.Add(system);
+                this.AddInitializer(system);
+                return true;
+            }
+            if (!enabled && !disabledCollection.Contains(system)) {
+                disabledCollection.Add(system);
                 this.AddInitializer(system);
                 return true;
             }
@@ -610,10 +570,9 @@ namespace Morpeh {
                 disabledCollection = this.disabledLateSystems;
             }
 
-            if (disabledCollection.ContainsValue(system)) {
-                var order = disabledCollection.Keys[disabledCollection.IndexOfValue(system)];
-                collection.Add(order, system);
-                disabledCollection.Remove(order);
+            if (disabledCollection.Contains(system)) {
+                collection.Add(system);
+                disabledCollection.Remove(system);
                 return true;
             }
 
@@ -632,10 +591,9 @@ namespace Morpeh {
                 disabledCollection = this.disabledLateSystems;
             }
 
-            if (collection.ContainsValue(system)) {
-                var order = collection.Keys[collection.IndexOfValue(system)];
-                disabledCollection.Add(order, system);
-                collection.Remove(order);
+            if (collection.Contains(system)) {
+                disabledCollection.Add(system);
+                collection.Remove(system);
                 return true;
             }
 
@@ -654,18 +612,16 @@ namespace Morpeh {
                 disabledCollection = this.disabledLateSystems;
             }
 
-            if (collection.ContainsValue(system)) {
-                var order   = collection.Keys[collection.IndexOfValue(system)];
-                var deleted = collection.Remove(order);
+            if (collection.Contains(system)) {
+                var deleted = collection.Remove(system);
                 if (deleted) {
                     this.disposables.Add(system);
                     this.RemoveInitializer(system);
                     return true;
                 }
             }
-            else if (disabledCollection.ContainsValue(system)) {
-                var order   = disabledCollection.Keys[disabledCollection.IndexOfValue(system)];
-                var deleted = disabledCollection.Remove(order);
+            else if (disabledCollection.Contains(system)) {
+                var deleted = disabledCollection.Remove(system);
                 if (deleted) {
                     this.disposables.Add(system);
                     this.RemoveInitializer(system);
@@ -675,13 +631,181 @@ namespace Morpeh {
 
             return false;
         }
+    }
+
+    [Serializable]
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    public sealed class World : IDisposable {
+#if UNITY_2019_1_OR_NEWER
+        [CanBeNull]
+#endif
+        public static World Default => Worlds[0];
+#if UNITY_2019_1_OR_NEWER
+        [NotNull]
+#endif
+        internal static List<World> Worlds = new List<World> {null};
+
+        [NonSerialized]
+        internal Filter Filter;
+
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        internal SortedList<int, SystemsGroup> systemsGroups;
+
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal Entity[] Entities;
+
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal int EntitiesCount;
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal int EntitiesLength;
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal int EntitiesCapacity;
+
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        private List<int> freeEntityIDs;
+
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal CacheComponents[] Caches;
+
+        public static World Create() => new World().Initialize();
+
+        private World() {
+            this.Ctor();
+        }
+
+        internal void Ctor() {
+            this.systemsGroups = new SortedList<int, SystemsGroup>();
+
+            this.Filter = new Filter(this);
+        }
+
+        private World Initialize() {
+#if UNITY_2019_1_OR_NEWER
+            Worlds.Add(this);
+#endif
+
+            this.freeEntityIDs = new List<int>();
+            this.Caches        = new CacheComponents[256];
+
+            this.EntitiesLength   = 0;
+            this.EntitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
+            this.Entities         = new Entity[this.EntitiesCapacity];
+
+            return this;
+        }
+
+        public void Dispose() {
+            foreach (var systemsGroup in this.systemsGroups.Values) {
+                systemsGroup.Dispose();
+            }
+
+            this.systemsGroups = null;
+
+            foreach (var entity in this.Entities) {
+                entity?.Dispose();
+            }
+
+            this.Entities         = null;
+            this.EntitiesLength   = -1;
+            this.EntitiesCapacity = -1;
+
+            this.freeEntityIDs.Clear();
+            this.freeEntityIDs = null;
+
+            this.Filter.Dispose();
+            this.Filter = null;
+        }
+#if UNITY_2019_1_OR_NEWER
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+#endif
+        public static void InitializationDefaultWorld() {
+            Worlds.Clear();
+            Create();
+#if UNITY_2019_1_OR_NEWER
+            var go = new GameObject {
+                name      = "MORPEH_UNITY_RUNTIME_HELPER",
+                hideFlags = HideFlags.DontSaveInEditor
+            };
+            go.AddComponent<UnityRuntimeHelper>();
+            go.hideFlags = HideFlags.HideAndDontSave;
+            Object.DontDestroyOnLoad(go);
+#endif
+        }
+
+        internal CacheComponents GetCache(int typeId) => this.Caches[typeId];
+
+        internal CacheComponents<T> GetCache<T>() where T : struct, IComponent {
+            var info  = CacheTypeIdentifier<T>.info;
+            var cache = (CacheComponents<T>) this.Caches[info.id];
+            if (cache == null) {
+                this.Caches[info.id] = cache = new CacheComponents<T>();
+            }
+
+            return cache;
+        }
+
+        public static void GlobalUpdate(float deltaTime) {
+            foreach (var world in Worlds) {
+                foreach (var systemsGroup in world.systemsGroups.Values) {
+                    systemsGroup.Update(deltaTime);
+                }
+            }
+        }
+
+        public static void GlobalFixedUpdate(float deltaTime) {
+            foreach (var world in Worlds) {
+                foreach (var systemsGroup in world.systemsGroups.Values) {
+                    systemsGroup.FixedUpdate(deltaTime);
+                }
+            }
+        }
+
+        public static void GlobalLateUpdate(float deltaTime) {
+            foreach (var world in Worlds) {
+                foreach (var systemsGroup in world.systemsGroups.Values) {
+                    systemsGroup.LateUpdate(deltaTime);
+                }
+            }
+        }
+
+        public SystemsGroup CreateSystemsGroup() => new SystemsGroup(this);
+        
+        public void AddSystemsGroup(int order, SystemsGroup systemsGroup) {
+            this.systemsGroups.Add(order, systemsGroup);
+        }
+        
+        public void RemoveSystemsGroup(SystemsGroup systemsGroup) {
+            this.systemsGroups.RemoveAt(this.systemsGroups.IndexOfValue(systemsGroup));
+        }
+        
+        public void RemoveAtSystemsGroup(int order) {
+            this.systemsGroups.Remove(order);
+        }
 
         public IEntity CreateEntity() => this.CreateEntityInternal();
 
         internal Entity CreateEntityInternal() {
             var id = -1;
             if (this.freeEntityIDs.Count > 0) {
-                id = this.freeEntityIDs.Dequeue();
+                id = this.freeEntityIDs[0];
+                this.freeEntityIDs.RemoveAtFast(0);
             }
             else {
                 id = this.EntitiesLength++;
@@ -693,7 +817,7 @@ namespace Morpeh {
                 this.EntitiesCapacity = newCapacity;
             }
 
-            this.Entities[id] = new Entity(id) {World = this};
+            this.Entities[id] = new Entity(id, Worlds.IndexOf(this));
             this.Filter.Entities.Add(id);
             ++this.EntitiesCount;
 
@@ -704,7 +828,8 @@ namespace Morpeh {
 
         internal Entity CreateEntityInternal(out int id) {
             if (this.freeEntityIDs.Count > 0) {
-                id = this.freeEntityIDs.Dequeue();
+                id = this.freeEntityIDs[0];
+                this.freeEntityIDs.RemoveAtFast(0);
             }
             else {
                 id = this.EntitiesLength++;
@@ -716,7 +841,7 @@ namespace Morpeh {
                 this.EntitiesCapacity = newCapacity;
             }
 
-            this.Entities[id] = new Entity(id) {World = this};
+            this.Entities[id] = new Entity(id, Worlds.IndexOf(this));
             this.Filter.Entities.Add(id);
             ++this.EntitiesCount;
 
@@ -729,7 +854,7 @@ namespace Morpeh {
             if (entity is Entity ent) {
                 var id = ent.ID;
                 if (this.Entities[id] == ent) {
-                    this.freeEntityIDs.Enqueue(id);
+                    this.freeEntityIDs.Add(id);
                     this.Filter.Entities.Remove(id);
                     this.Entities[id] = null;
                     --this.EntitiesCount;
@@ -764,7 +889,7 @@ namespace Morpeh {
 
         internal ObservableHashSet<int> Entities;
 
-        private World world;
+        private readonly World world;
 
         private int[] entitiesCacheForBags;
         private int   entitiesCacheForBagsCapacity;
@@ -779,12 +904,15 @@ namespace Morpeh {
         private FastBitMask  mask;
         private FilterMode   filterMode;
 
+#if UNITY_2019_1_OR_NEWER
         [CanBeNull]
+#endif
         private List<int> addedList;
+#if UNITY_2019_1_OR_NEWER
         [CanBeNull]
+#endif
         private List<int> removedList;
         private List<int> dirtyList;
-
 
         //root filter ctor
         //don't allocate any trash
@@ -864,8 +992,6 @@ namespace Morpeh {
             this.Entities.Clear();
             this.Entities = null;
 
-            this.world = null;
-
             this.entitiesCacheForBags         = null;
             this.entitiesCacheForBagsCapacity = -1;
 
@@ -910,7 +1036,7 @@ namespace Morpeh {
                         if (entity.Has(this.mask)) {
                             if (this.Entities.Add(dirtyId)) {
                                 this.dirtyList.RemoveAtFast(i);
-                            }
+                            }  
                         }
                         else {
                             this.Entities.Remove(dirtyId);
@@ -1041,6 +1167,9 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEntity GetEntity(in int id) => this.world.Entities[this.entitiesCacheForBags[id]];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEntity First() => this.world.Entities[this.entitiesCacheForBags[0]];
+
         public Filter With<T>(bool fillWithPreviousEntities = true) where T : struct, IComponent
             => this.CreateFilter<T>(FilterMode.Include, fillWithPreviousEntities);
 
@@ -1111,7 +1240,7 @@ namespace Morpeh {
                 var bag = new ComponentsBag<T> {
                     world            = world,
                     ids              = new int[1],
-                    sharedComponents = CacheComponents<T>.Components
+                    sharedComponents = world.GetCache<T>().Components
                 };
 
                 if (cacheCapacity <= cacheLength) {
@@ -1193,25 +1322,35 @@ namespace Morpeh {
             var id = counter++;
             var info = new DebugInfo {
                 Type     = typeof(T),
-                GetBoxed = componentId => CacheComponents<T>.Components[componentId],
-                SetBoxed = (componentId, value) => CacheComponents<T>.Components[componentId] = (T) value,
-                Info     = CacheTypeIdentifier<T>.info
+                GetBoxed = (world, componentId) => world.GetCache<T>().Components[componentId],
+                SetBoxed = (world, componentId, value) => world.GetCache<T>().Components[componentId] = (T) value,
+                TypeInfo = CacheTypeIdentifier<T>.info
             };
             editorTypeAssociation.Add(id, info);
             return id;
         }
 
         internal struct DebugInfo {
-            public Type                Type;
-            public Func<int, object>   GetBoxed;
-            public Action<int, object> SetBoxed;
-            public TypeInfo            Info;
+            public Type                       Type;
+            public Func<World, int, object>   GetBoxed;
+            public Action<World, int, object> SetBoxed;
+            public TypeInfo                   TypeInfo;
         }
 #endif
 
+        [Serializable]
         internal class TypeInfo {
-            internal int         id;
-            internal bool        isMarker;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
+            internal int id;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
+            internal bool isMarker;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
             internal FastBitMask mask;
 
             public TypeInfo(bool isMarker) {
@@ -1243,99 +1382,112 @@ namespace Morpeh {
         }
     }
 
-    [Il2Cpp(Option.NullChecks, false)]
-    [Il2Cpp(Option.ArrayBoundsChecks, false)]
-    [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal static class ComponentsCleaner {
-        private static readonly Dictionary<int, RemoveDelegate> Cleaners;
-
-        internal delegate bool RemoveDelegate(in int id);
-
-        static ComponentsCleaner() => Cleaners = new Dictionary<int, RemoveDelegate>();
-
-        internal static bool Register(in int typeId, RemoveDelegate func) {
-            if (!Cleaners.ContainsKey(typeId)) {
-                Cleaners.Add(typeId, func);
-                return true;
-            }
-
-            return false;
-        }
-
-
-        internal static bool Clean(int typeId, int id) {
-            if (Cleaners.TryGetValue(typeId, out var func)) {
-                func(id);
-                return true;
-            }
-
-            return false;
+    internal static class UnsafeUtility {
+        public static int SizeOf<T>() where T : struct {
+#if UNITY_2019_1_OR_NEWER
+            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
+#else
+            return System.Runtime.InteropServices.Marshal.SizeOf(default(T));
+#endif
         }
     }
 
+    [Serializable]
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
-    internal static class CacheComponents<T> where T : struct, IComponent {
-        internal static T[] Components;
+    internal abstract class CacheComponents : IDisposable {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract bool Remove(in int id);
 
-        private static int capacity;
-        private static int length;
-        private static T   empty;
+        public abstract void Dispose();
+    }
 
-        private static readonly Queue<int> FreeIndexes;
+    [Serializable]
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    internal sealed class CacheComponents<T> : CacheComponents where T : struct, IComponent {
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal T[] Components;
 
-        static CacheComponents() {
-            capacity = Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY;
-            length   = 0;
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        private int capacity;
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        private int length;
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        private T empty;
 
-            Components  = new T[capacity];
-            FreeIndexes = new Queue<int>();
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        private List<int> freeIndexes;
 
-            ComponentsCleaner.Register(CacheTypeIdentifier<T>.info.id, Remove);
+        public CacheComponents() {
+            this.capacity = Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY;
+            this.length   = 0;
+
+            this.Components  = new T[this.capacity];
+            this.freeIndexes = new List<int>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Add() {
+        public int Add() {
             var id = 0;
 
-            if (FreeIndexes.Count > 0) {
-                id = FreeIndexes.Dequeue();
+            if (this.freeIndexes.Count > 0) {
+                id = this.freeIndexes[0];
+                this.freeIndexes.RemoveAtFast(0);
                 return id;
             }
 
-            if (capacity <= length) {
-                var newCapacity = capacity * 2;
-                Array.Resize(ref Components, newCapacity);
-                capacity = newCapacity;
+            if (this.capacity <= this.length) {
+                var newCapacity = this.capacity * 2;
+                Array.Resize(ref this.Components, newCapacity);
+                this.capacity = newCapacity;
             }
 
-            id = length;
-            length++;
+            id = this.length;
+            this.length++;
 
             return id;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T Get(in int id) => ref Components[id];
+        public ref T Get(in int id) => ref this.Components[id];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Set(in int id, in T value) => Components[id] = value;
+        public void Set(in int id, in T value) => this.Components[id] = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T Empty() => ref empty;
+        public ref T Empty() => ref this.empty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Remove(in int id) {
-            Components[id] = default;
+        public override bool Remove(in int id) {
+            this.Components[id] = default;
 
-            if (length >= id && !FreeIndexes.Contains(id)) {
-                FreeIndexes.Enqueue(id);
+            if (this.length >= id && !this.freeIndexes.Contains(id)) {
+                this.freeIndexes.Add(id);
                 return true;
             }
 
             return false;
+        }
+
+        public override void Dispose() {
+            this.Components = null;
+            this.capacity = -1;
+            this.length = -1;
+            this.freeIndexes.Clear();
+            this.freeIndexes = null;
         }
     }
 
@@ -1348,6 +1500,7 @@ namespace Morpeh {
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
+        [Serializable]
         public struct FastBitMask : IEquatable<FastBitMask> {
             public static readonly FastBitMask None = new FastBitMask(new int[0]);
 
@@ -1356,9 +1509,21 @@ namespace Morpeh {
             private const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(ulong);
             private const int BITS_PER_FIELD_SHIFT = 6;
 
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
             private ulong field0;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
             private ulong field1;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
             private ulong field2;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
             private ulong field3;
 
             public FastBitMask(int[] bits) {
@@ -1609,6 +1774,7 @@ namespace Morpeh {
 #pragma warning restore CS0659
 #pragma warning restore CS0661
 
+
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -1710,8 +1876,7 @@ namespace Unity.IL2CPP.CompilerServices {
     ///     return tmp.ToString();
     ///     }
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, Inherited = false,
-        AllowMultiple                                                                                                                 = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
     public class Il2CppSetOptionAttribute : Attribute {
         public Option Option { get; }
         public object Value  { get; }

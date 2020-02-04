@@ -58,34 +58,41 @@
                     var monoImporter = MonoImporter.GetAtPath(path) as MonoImporter;
                     if (monoImporter != null) {
                         var script           = monoImporter.GetScript();
+                        var type = script.GetClass();
+                        if (type == null) {
+                            continue;
+                        }
+                        
                         var serializedObject = new SerializedObject(script);
                         var iconProperty     = serializedObject.FindProperty("m_Icon");
                         if (iconProperty.objectReferenceValue != null) {
                             continue;
                         }
-
-                        var type = script.GetClass();
                         
                         if (InheritsFrom(type, typeof(Initializer))) {
                             SelectIcon(script, iconI);
+                            SaveIcon(script);
                         }
                         else if (InheritsFrom(type, typeof(MonoProvider<>))) {
                             SelectIcon(script, iconP);
+                            SaveIcon(script);
                         }
                         else if (InheritsFrom(type, typeof(IComponent))) {
                             SelectIcon(script, iconC);
+                            SaveIcon(script);
                         }
                         else if (InheritsFrom(type, typeof(IFixedSystem))) {
                             SelectIcon(script, iconF);
+                            SaveIcon(script);
                         }
                         else if (InheritsFrom(type, typeof(ILateSystem))) {
                             SelectIcon(script, iconL);
+                            SaveIcon(script);
                         }
                         else if (InheritsFrom(type, typeof(ISystem))) {
                             SelectIcon(script, iconU);
+                            SaveIcon(script);
                         }
-
-                        SaveIcon(script);
                     }
                 }
 

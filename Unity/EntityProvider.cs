@@ -9,7 +9,22 @@ namespace Morpeh {
 #endif
 
     public class EntityProvider : MonoBehaviour {
-        private Entity entity = null;
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+        [ReadOnly]
+#endif
+        private int entityID = -1;
+
+        [CanBeNull]
+        private Entity entity {
+            get {
+                if (World.Default != null && this.entityID >= 0 && World.Default.EntitiesLength > this.entityID) {
+                    return World.Default.Entities[this.entityID];
+                }
+
+                return null;
+            }
+        }
 
         [CanBeNull]
         public IEntity Entity => this.IsPrefab() ? null : Application.isPlaying ? this.entity : null;
@@ -29,8 +44,9 @@ namespace Morpeh {
                     for (int i = 0, length = 256; i < length; i++) {
                         if (this.entity.ComponentsMask.GetBit(i)) {
                             var view = new ComponentView {
-                                info = CommonCacheTypeIdentifier.editorTypeAssociation[i],
-                                id   = this.entity.GetComponentId(i)
+                                debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[i],
+                                ID        = this.entity.GetComponentId(i),
+                                World     = this.entity.World
                             };
                             this.componentViews.Add(view);
                         }
@@ -44,25 +60,26 @@ namespace Morpeh {
             set { }
         }
 
-        private FastBitMask         lastMask       = FastBitMask.None;
-        private List<ComponentView> componentViews = new List<ComponentView>();
+        private          FastBitMask         lastMask       = FastBitMask.None;
+        private readonly List<ComponentView> componentViews = new List<ComponentView>();
 
 
         [PropertyTooltip("$FullName")]
         [Serializable]
         private struct ComponentView {
-            internal CommonCacheTypeIdentifier.DebugInfo info;
+            internal CommonCacheTypeIdentifier.DebugInfo debugInfo;
+            internal World                               World;
 
-            internal bool   IsMarker => this.info.Info.isMarker;
-            internal string FullName => this.info.Type.FullName;
+            internal bool   IsMarker => this.debugInfo.TypeInfo.isMarker;
+            internal string FullName => this.debugInfo.Type.FullName;
 
             [ShowIf("$IsMarker")]
             [HideLabel]
             [DisplayAsString(false)]
             [ShowInInspector]
-            internal string TypeName => this.info.Type.Name;
+            internal string TypeName => this.debugInfo.Type.Name;
 
-            internal int id;
+            internal int ID;
 
             [DisableContextMenu]
             [HideIf("$IsMarker")]
@@ -71,18 +88,18 @@ namespace Morpeh {
             [HideReferenceObjectPickerAttribute]
             public object Data {
                 get {
-                    if (this.info.Info.isMarker) {
+                    if (this.debugInfo.TypeInfo.isMarker) {
                         return null;
                     }
 
-                    return this.info.GetBoxed(this.id);
+                    return this.debugInfo.GetBoxed(this.World, this.ID);
                 }
                 set {
-                    if (this.info.Info.isMarker) {
+                    if (this.debugInfo.TypeInfo.isMarker) {
                         return;
                     }
 
-                    this.info.SetBoxed(this.id, value);
+                    this.debugInfo.SetBoxed(this.World, this.ID, value);
                 }
             }
         }
@@ -92,11 +109,11 @@ namespace Morpeh {
             if (!Application.isPlaying) {
                 return;
             }
-            
-            if (this.entity == null) {
-                var ent = World.Default.CreateEntityInternal(out _);
+
+            if (this.entityID < 0) {
+                World.Default.CreateEntityInternal(out this.entityID);
                 foreach (var monoProvider in this.GetComponents<EntityProvider>()) {
-                    monoProvider.entity = ent;
+                    monoProvider.entityID = this.entityID;
                 }
             }
 
@@ -106,12 +123,7 @@ namespace Morpeh {
 
         protected virtual void OnDestroy() {
             if (this.entity != null) {
-                World.Default.RemoveEntity(this.entity);
-                foreach (var monoProvider in this.GetComponents<EntityProvider>()) {
-                    monoProvider.entity = null;
-                }
-
-                this.entity = null;
+                World.Default?.RemoveEntity(this.entity);
             }
         }
 
