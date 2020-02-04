@@ -61,15 +61,16 @@ namespace Morpeh.Globals {
 
         internal virtual void OnEnable() {
 #if UNITY_EDITOR
-            EditorApplication.playModeStateChanged += state => {
-                if (state == PlayModeStateChange.ExitingEditMode
-                    || state == PlayModeStateChange.ExitingPlayMode) {
-                    this.internalEntityID = -1;
-                }
-            };
+            EditorApplication.playModeStateChanged += OnEditorApplicationOnplayModeStateChanged;
 #endif
         }
-
+#if UNITY_EDITOR
+        internal virtual void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
+            if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.ExitingPlayMode) {
+                this.internalEntityID = -1;
+            }
+        }
+#endif
         protected void CheckIsInitialized() {
             if (this.internalEntityID < 0) {
                 var ent = World.Default.CreateEntityInternal(out this.internalEntityID);

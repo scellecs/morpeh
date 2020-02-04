@@ -50,6 +50,9 @@
         [PropertyOrder(0)]
 #endif
         public bool AutoSave;
+        
+        private bool HasPlayerPrefsValue            => PlayerPrefs.HasKey(this.Key);
+        private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
 
         private bool isLoaded;
 
@@ -82,7 +85,9 @@
         protected abstract string Save();
 
         public virtual void Reset() {
-            this.value = this.Load(this.defaultSerializedValue);
+            if (!string.IsNullOrEmpty(this.defaultSerializedValue)) {
+                this.value = this.Load(this.defaultSerializedValue);
+            }
         }
 
         internal override void OnEnable() {
@@ -93,12 +98,26 @@
             if (string.IsNullOrEmpty(this.customKey)) {
                 this.GenerateCustomKey();
             }
-
-
-            EditorApplication.playModeStateChanged += this.EditorApplicationOnPlayModeStateChanged;
 #endif
             this.LoadData();
         }
+        
+#if UNITY_EDITOR
+        internal override void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
+            base.OnEditorApplicationOnplayModeStateChanged(state);
+            if (state == PlayModeStateChange.EnteredEditMode) {
+                this.SaveData();
+                this.Reset();
+                this.defaultSerializedValue = default;
+                this.isLoaded               = false;
+            }
+            else if (state == PlayModeStateChange.EnteredPlayMode) {
+                this.defaultSerializedValue = this.Save();
+                this.LoadData();
+            }
+        }
+#endif
+
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Button]
         [PropertyOrder(3)]
@@ -145,23 +164,8 @@
         #region EDITOR
 
 #if UNITY_EDITOR
-        private bool HasPlayerPrefsValue            => PlayerPrefs.HasKey(this.Key);
-        private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
 
 
-        private void EditorApplicationOnPlayModeStateChanged(PlayModeStateChange state) {
-            if (state == PlayModeStateChange.EnteredEditMode) {
-                this.SaveData();
-                this.Reset();
-                this.defaultSerializedValue = default;
-                this.isLoaded               = false;
-
-                EditorApplication.playModeStateChanged -= this.EditorApplicationOnPlayModeStateChanged;
-            }
-            else if (state == PlayModeStateChange.EnteredPlayMode) {
-                this.LoadData();
-            }
-        }
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [ShowIf("@HasPlayerPrefsValueAndAutoSave")]
