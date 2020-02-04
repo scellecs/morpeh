@@ -26,12 +26,10 @@ namespace Morpeh {
         [OdinSerialize]
         private List<string> types = null;
         private bool hotReloaded = false;
-        private bool isPlaying = false;
 #endif
-
+        
 #if UNITY_EDITOR
         private void OnEnable() {
-            this.isPlaying = true;
             EditorApplication.playModeStateChanged += OnEditorApplicationOnplayModeStateChanged;
         }
 
@@ -50,12 +48,8 @@ namespace Morpeh {
 
                 EditorApplication.playModeStateChanged -= OnEditorApplicationOnplayModeStateChanged;
             }
-            else if (state == PlayModeStateChange.EnteredPlayMode) {
-                this.isPlaying = false;
-            }
         }
 #endif
-
 
         private void Update() {
             World.GlobalUpdate(Time.deltaTime);
@@ -85,9 +79,6 @@ namespace Morpeh {
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         protected override void OnBeforeSerialize() {
-            if (!this.isPlaying) {
-                return;
-            }
             this.worldsSerialized = World.Worlds;
             if (this.types == null) {
                 this.types = new List<string>();
@@ -99,11 +90,8 @@ namespace Morpeh {
             }
         }
 
+        
         protected override void OnAfterDeserialize() {
-            if (!this.isPlaying) {
-                return;
-            }
-            
             if (this.worldsSerialized != null) {
                 foreach (var t in this.types) {
                     var genType = Type.GetType(t);

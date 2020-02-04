@@ -350,7 +350,12 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsDisposed() => this.ComponentsMask == FastBitMask.None;
 
+        
         public void Dispose() {
+            if (this.ComponentsMask == FastBitMask.None) {
+                return;
+            }
+            
             var mask = new FastBitMask();
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 var typeId = this.components[i];
@@ -1031,7 +1036,7 @@ namespace Morpeh {
                         if (entity.Has(this.mask)) {
                             if (this.Entities.Add(dirtyId)) {
                                 this.dirtyList.RemoveAtFast(i);
-                            }
+                            }  
                         }
                         else {
                             this.Entities.Remove(dirtyId);
