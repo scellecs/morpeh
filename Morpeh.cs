@@ -653,7 +653,6 @@ namespace Morpeh {
 
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
-        [HideInInspector]
 #endif
         internal Entity[] Entities;
 
@@ -1392,9 +1391,11 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal abstract class CacheComponents {
+    internal abstract class CacheComponents : IDisposable {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract bool Remove(in int id);
+
+        public abstract void Dispose();
     }
 
     [Serializable]
@@ -1474,6 +1475,14 @@ namespace Morpeh {
             }
 
             return false;
+        }
+
+        public override void Dispose() {
+            this.Components = null;
+            this.capacity = -1;
+            this.length = -1;
+            this.freeIndexes.Clear();
+            this.freeIndexes = null;
         }
     }
 
