@@ -95,6 +95,8 @@ var filter = newWorld.Filter.With<HealthComponent>();
 ```
 
 ### Simple Start
+After installation import ScriptTemplates.
+![import_script_templates.gif](Gifs~/import_script_templates.gif)
 
 ## How To Install
 
