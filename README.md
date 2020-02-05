@@ -95,11 +95,14 @@ var filter = newWorld.Filter.With<HealthComponent>();
 ```
 
 ### Simple Start
+> **IMPORTANT**  
+> For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.
+  
 After installation import ScriptTemplates and Restart Unity.  
 ![import_script_templates.gif](Gifs~/import_script_templates.gif)
 
 Let's create our first component and open it.  
-Right click in project window and select Create/ECS/Component.  
+Right click in project window and select `Create/ECS/Component`.  
 ![create_component.gif](Gifs~/create_component.gif)
 
 After it, you will see something like this.
@@ -115,8 +118,10 @@ using Unity.IL2CPP.CompilerServices;
 public struct HealthComponent : IComponent {
 }
 ```
+> Don't care about attributes.  
+> Il2CppSetOption attribute can give you better performance.  
 
-Add health points field to component.
+Add health points field to component.  
 
 ```c#  
 public struct HealthComponent : IComponent {
@@ -125,13 +130,16 @@ public struct HealthComponent : IComponent {
 ```
 
 It is okay.  
+ 
 Now let's create first system.  
-Right click in project window and select Create/ECS/System.  
-Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem.  
-They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate.
+Right click in project window and select `Create/ECS/System`.  
+ 
+> Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem.  
+> They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate.
+ 
 ![create_system.gif](Gifs~/create_system.gif)
 
-System looks like
+System looks like this.
 ```c#  
 using Morpeh;
 using UnityEngine;
