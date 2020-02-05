@@ -108,7 +108,7 @@ var filter = newWorld.Filter.With<HealthComponent>();
 
 Let's create our first component and open it.  
 <details>
-    <summary>Right click in project window and select `Create/ECS/Component`.  </summary>
+    <summary>Right click in project window and select <code>Create/ECS/Component</code>.  </summary>
 
 ![create_component.gif](Gifs~/create_component.gif)
 </details>
@@ -142,7 +142,7 @@ It is okay.
  
 Now let's create first system.  
 <details>
-    <summary>Right click in project window and select `Create/ECS/System`.  </summary>
+    <summary>Right click in project window and select <code>Create/ECS/System</code>.  </summary>
 
 ![create_system.gif](Gifs~/create_system.gif)
 </details>
@@ -231,7 +231,7 @@ public sealed class HealthSystem : UpdateSystem {
 Let's create ScriptableObject for HealthSystem.  
 This will allow the system to have its inspector and we can refer to it in the scene.  
 <details>
-    <summary>Right click in project window and select `Create/ECS/Systems/HealthSystem`.  </summary>
+    <summary>Right click in project window and select <code>Create/ECS/Systems/HealthSystem</code>.  </summary>
 
 ![create_system_scriptableobject.gif](Gifs~/create_system_scriptableobject.gif)
 </details>
@@ -240,7 +240,7 @@ Next step: create `Installer` on the scene.
 This will help us choose which systems should work and in which order.  
 
 <details>
-    <summary>Right click in hierarchy window and select `ECS/Installer`.  </summary>
+    <summary>Right click in hierarchy window and select <code>ECS/Installer</code>.  </summary>
 
 ![create_installer.gif](Gifs~/create_installer.gif)
 </details>
@@ -258,7 +258,7 @@ To do this, we need a provider that associates GameObject with an entity.
 Create a new provider.  
 
 <details>
-    <summary>Right click in project window and select `Create/ECS/Provider`.  </summary>
+    <summary>Right click in project window and select <code>Create/ECS/Provider</code>.  </summary>
 
 ![create_provider.gif](Gifs~/create_provider.gif)
 </details>
@@ -281,7 +281,7 @@ public sealed class HealthProvider : MonoProvider<HealthComponent> {
 ```
 
 <details>
-    <summary>Create new GameObject and add `HealthProvider`.  </summary>
+    <summary>Create new GameObject and add <code>HealthProvider</code>.  </summary>
     
 ![add_provider.gif](Gifs~/add_provider.gif)
 </details>
