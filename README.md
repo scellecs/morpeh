@@ -224,6 +224,7 @@ This will allow the system to have its inspector and we can refer to it in the s
 
 Next step: create `Installer` on the scene.  
 This will help us choose which systems should work and in which order.  
+Right click in hierarchy window and select `ECS/Installer`.  
 ![create_installer.gif](Gifs~/create_installer.gif)
 
 Add system to the installer and run project.  
@@ -259,6 +260,9 @@ Create new GameObject and add `HealthProvider`.
 
 Now press the play button, and you will see Debug.Log with healthPoints.  
 Nice!  
+
+### Advanced
+TODO
 
 ## How To Install
 
