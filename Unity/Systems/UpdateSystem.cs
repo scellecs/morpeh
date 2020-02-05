@@ -6,18 +6,7 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class UpdateSystem : ScriptableObject, ISystem {
-        private World          world;
-        private FilterProvider filter;
-
-        public World World {
-            get => this.world;
-            set => this.world = value;
-        }
-
-        public FilterProvider Filter {
-            get => this.filter;
-            set => this.filter = value;
-        }
+        public World World { get; set; }
 
         public abstract void OnAwake();
 

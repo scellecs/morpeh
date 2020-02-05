@@ -5,10 +5,8 @@
 
     [CreateAssetMenu(menuName = "ECS/Globals/Custom/Tests/" + nameof(TestStructCustomVariable))]
     public class TestStructCustomVariable : BaseGlobalVariable<DummyStruct> {
-        protected override DummyStruct Load(string serializedData) {
-            this.value = JsonUtility.FromJson<DummyStruct>(serializedData);
-            return this.value;
-        }
+        protected override DummyStruct Load(string serializedData) => JsonUtility.FromJson<DummyStruct>(serializedData);
+        
         protected override string Save() => JsonUtility.ToJson(this.value);
     }
 

@@ -59,18 +59,7 @@ namespace Morpeh.Globals {
         }
 
         internal sealed class ProcessEventsSystem : ILateSystem {
-            private World          world;
-            private FilterProvider filter;
-
-            public World World {
-                get => this.world;
-                set => this.world = value;
-            }
-
-            public FilterProvider Filter {
-                get => this.filter;
-                set => this.filter = value;
-            }
+            public World World { get; set; }
 
             public void OnAwake() {
             }
