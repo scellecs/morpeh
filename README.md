@@ -99,12 +99,17 @@ var filter = newWorld.Filter.With<HealthComponent>();
 > **IMPORTANT**  
 > For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.
   
-After installation import ScriptTemplates and Restart Unity.  
+<details>
+    <summary>After installation import ScriptTemplates and Restart Unity.  </summary>
 ![import_script_templates.gif](Gifs~/import_script_templates.gif)
+</details>
 
 Let's create our first component and open it.  
-Right click in project window and select `Create/ECS/Component`.  
+<details>
+    <summary>Right click in project window and select `Create/ECS/Component`.  </summary>
 ![create_component.gif](Gifs~/create_component.gif)
+</details>
+
 
 After it, you will see something like this.
 ```c#  
@@ -133,12 +138,13 @@ public struct HealthComponent : IComponent {
 It is okay.  
  
 Now let's create first system.  
-Right click in project window and select `Create/ECS/System`.  
+<details>
+    <summary>Right click in project window and select `Create/ECS/System`.  </summary>
+![create_system.gif](Gifs~/create_system.gif)
+</details>
  
 > Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem.  
 > They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate.
- 
-![create_system.gif](Gifs~/create_system.gif)
 
 System looks like this.
 ```c#  
@@ -220,23 +226,34 @@ public sealed class HealthSystem : UpdateSystem {
 
 Let's create ScriptableObject for HealthSystem.  
 This will allow the system to have its inspector and we can refer to it in the scene.  
+<details>
+    <summary>Right click in project window and select `Create/ECS/Systems/HealthSystem`.  </summary>
 ![create_system_scriptableobject.gif](Gifs~/create_system_scriptableobject.gif)
+</details>
 
 Next step: create `Installer` on the scene.  
 This will help us choose which systems should work and in which order.  
-Right click in hierarchy window and select `ECS/Installer`.  
-![create_installer.gif](Gifs~/create_installer.gif)
 
-Add system to the installer and run project.  
+<details>
+    <summary>Right click in hierarchy window and select `ECS/Installer`.  </summary>
+![create_installer.gif](Gifs~/create_installer.gif)
+</details>
+
+<details>
+    <summary>Add system to the installer and run project.  </summary>
 ![add_system_to_installer.gif](Gifs~/add_system_to_installer.gif)
+</details>
 
 Nothing happened because we did not create our entities.  
 I will show the creation of entities directly related to GameObject, because to create them from the code it is enough to write `world.CreateEntity()`.  
 To do this, we need a provider that associates GameObject with an entity.  
   
 Create a new provider.  
-Right click in project window and select `Create/ECS/Provider`.  
+
+<details>
+    <summary>Right click in project window and select `Create/ECS/Provider`.  </summary>
 ![create_provider.gif](Gifs~/create_provider.gif)
+</details>
 
 ```c#  
 using Morpeh;
@@ -255,8 +272,10 @@ public sealed class HealthProvider : MonoProvider<HealthComponent> {
 }
 ```
 
-Create new GameObject and add `HealthProvider`.  
+<details>
+    <summary>Create new GameObject and add `HealthProvider`.  </summary>
 ![add_provider.gif](Gifs~/add_provider.gif)
+</details>
 
 Now press the play button, and you will see Debug.Log with healthPoints.  
 Nice!  
