@@ -122,7 +122,7 @@ public struct HealthComponent : IComponent {
 > Don't care about attributes.  
 > Il2CppSetOption attribute can give you better performance.  
 
-Add health points field to component.  
+Add health points field to the component.  
 
 ```c#  
 public struct HealthComponent : IComponent {
