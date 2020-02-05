@@ -101,12 +101,14 @@ var filter = newWorld.Filter.With<HealthComponent>();
   
 <details>
     <summary>After installation import ScriptTemplates and Restart Unity.  </summary>
+    
 ![import_script_templates.gif](Gifs~/import_script_templates.gif)
 </details>
 
 Let's create our first component and open it.  
 <details>
     <summary>Right click in project window and select `Create/ECS/Component`.  </summary>
+
 ![create_component.gif](Gifs~/create_component.gif)
 </details>
 
@@ -140,6 +142,7 @@ It is okay.
 Now let's create first system.  
 <details>
     <summary>Right click in project window and select `Create/ECS/System`.  </summary>
+
 ![create_system.gif](Gifs~/create_system.gif)
 </details>
  
@@ -228,6 +231,7 @@ Let's create ScriptableObject for HealthSystem.
 This will allow the system to have its inspector and we can refer to it in the scene.  
 <details>
     <summary>Right click in project window and select `Create/ECS/Systems/HealthSystem`.  </summary>
+
 ![create_system_scriptableobject.gif](Gifs~/create_system_scriptableobject.gif)
 </details>
 
@@ -236,11 +240,13 @@ This will help us choose which systems should work and in which order.
 
 <details>
     <summary>Right click in hierarchy window and select `ECS/Installer`.  </summary>
+
 ![create_installer.gif](Gifs~/create_installer.gif)
 </details>
 
 <details>
     <summary>Add system to the installer and run project.  </summary>
+    
 ![add_system_to_installer.gif](Gifs~/add_system_to_installer.gif)
 </details>
 
@@ -252,6 +258,7 @@ Create a new provider.
 
 <details>
     <summary>Right click in project window and select `Create/ECS/Provider`.  </summary>
+
 ![create_provider.gif](Gifs~/create_provider.gif)
 </details>
 
@@ -274,6 +281,7 @@ public sealed class HealthProvider : MonoProvider<HealthComponent> {
 
 <details>
     <summary>Create new GameObject and add `HealthProvider`.  </summary>
+    
 ![add_provider.gif](Gifs~/add_provider.gif)
 </details>
 
