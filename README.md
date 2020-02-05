@@ -98,9 +98,57 @@ var filter = newWorld.Filter.With<HealthComponent>();
 After installation import ScriptTemplates and Restart Unity.  
 ![import_script_templates.gif](Gifs~/import_script_templates.gif)
 
-Let's create out first component and open it.  
+Let's create our first component and open it.  
 Right click in project window and select Create/ECS/Component.  
 ![create_component.gif](Gifs~/create_component.gif)
+
+After it, you will see something like this.
+```c#  
+using Morpeh;
+using UnityEngine;
+using Unity.IL2CPP.CompilerServices;
+
+[Il2CppSetOption(Option.NullChecks, false)]
+[Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+[Il2CppSetOption(Option.DivideByZeroChecks, false)]
+[System.Serializable]
+public struct HealthComponent : IComponent {
+}
+```
+
+Add health points field to component.
+
+```c#  
+public struct HealthComponent : IComponent {
+    public int healthPoints;
+}
+```
+
+It is okay.  
+Now let's create first system.  
+Right click in project window and select Create/ECS/System.  
+Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem.  
+They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate.
+![create_system.gif](Gifs~/create_system.gif)
+
+System looks like
+```c#  
+using Morpeh;
+using UnityEngine;
+using Unity.IL2CPP.CompilerServices;
+
+[Il2CppSetOption(Option.NullChecks, false)]
+[Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+[Il2CppSetOption(Option.DivideByZeroChecks, false)]
+[CreateAssetMenu(menuName = "ECS/Systems/" + nameof(HealthSystem))]
+public sealed class HealthSystem : UpdateSystem {
+    public override void OnAwake() {
+    }
+
+    public override void OnUpdate(float deltaTime) {
+    }
+}
+```
 
 ## How To Install
 
