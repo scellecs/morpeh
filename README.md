@@ -15,7 +15,8 @@ ECS Framework for Unity Game Engine.
 
 * [Introduction](#introduction)
   * [Base concept of ECS pattern](#base-concept-of-ecs-pattern)
-  * [Performance](#performance)
+  * [Simple Start](#simple-start)
+  * [Advanced](#advanced)
 * [How To Install](#how-to-install)
 * [License](#license)
 * [Contacts](#contacts)
@@ -157,6 +158,107 @@ public sealed class HealthSystem : UpdateSystem {
     }
 }
 ```
+
+We have to add a filter to find all the entities with `HealthComponent`.
+```c#  
+public sealed class HealthSystem : UpdateSystem {
+    private Filter filter;
+    
+    public override void OnAwake() {
+        this.filter = this.World.Filter.With<HealthComponent>();
+    }
+
+    public override void OnUpdate(float deltaTime) {
+    }
+}
+```
+> You can chain filters by two operators `With<>` and `Without<>`.  
+> For example `this.World.Filter.With<FooComponent>().With<BarComponent>().Without<BeeComponent>();`
+  
+Now we can iterate all needed entities.
+```c#  
+public sealed class HealthSystem : UpdateSystem {
+    private Filter filter;
+    
+    public override void OnAwake() {
+        this.filter = this.World.Filter.With<HealthComponent>();
+    }
+
+    public override void OnUpdate(float deltaTime) {
+        foreach (var entity in this.filter) {
+            ref var healthComponent = ref entity.GetComponent<HealthComponent>();
+            Debug.Log(healthComponent.healthPoints);
+        }
+    }
+}
+```
+> Don't forget about `ref` operator.  
+> Components are struct and if you wanna direct change them, then you must use reference operator.
+
+For high performance, you can do cached sampling.  
+No need to do GetComponent from entity every time.  
+But we will focus on a simplified version, because even in this version GetComponent is very fast.
+
+```c#  
+public sealed class HealthSystem : UpdateSystem {
+    private Filter filter;
+    
+    public override void OnAwake() {
+        this.filter = this.World.Filter.With<HealthComponent>();
+    }
+
+    public override void OnUpdate(float deltaTime) {
+        var healthBag = this.filter.Select<HealthComponent>();
+
+        for (int i = 0, length = this.filter.Length; i < length; i++) {
+            ref var healthComponent = ref healthBag.GetComponent(i);
+            Debug.Log(healthComponent.healthPoints);
+        }
+    }
+}
+```
+
+Let's create ScriptableObject for HealthSystem.  
+This will allow the system to have its inspector and we can refer to it in the scene.  
+![create_system_scriptableobject.gif](Gifs~/create_system_scriptableobject.gif)
+
+Next step: create `Installer` on the scene.  
+This will help us choose which systems should work and in which order.  
+![create_installer.gif](Gifs~/create_installer.gif)
+
+Add system to the installer and run project.  
+![add_system_to_installer.gif](Gifs~/add_system_to_installer.gif)
+
+Nothing happened because we did not create our entities.  
+I will show the creation of entities directly related to GameObject, because to create them from the code it is enough to write `world.CreateEntity()`.  
+To do this, we need a provider that associates GameObject with an entity.  
+  
+Create a new provider.  
+Right click in project window and select `Create/ECS/Provider`.  
+![create_provider.gif](Gifs~/create_provider.gif)
+
+```c#  
+using Morpeh;
+using Unity.IL2CPP.CompilerServices;
+
+[Il2CppSetOption(Option.NullChecks, false)]
+[Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+[Il2CppSetOption(Option.DivideByZeroChecks, false)]
+public sealed class HealthProvider : MonoProvider<{YOUR_COMPONENT}> {
+}
+```
+
+We need to specify a component for the provider.
+```c#  
+public sealed class HealthProvider : MonoProvider<HealthComponent> {
+}
+```
+
+Create new GameObject and add `HealthProvider`.  
+![add_provider.gif](Gifs~/add_provider.gif)
+
+Now press the play button, and you will see Debug.Log with healthPoints.  
+Nice!  
 
 ## How To Install
 
