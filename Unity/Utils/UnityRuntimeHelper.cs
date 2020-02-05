@@ -1,8 +1,10 @@
 namespace Morpeh {
     using System;
     using UnityEngine;
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
     using UnityEditor;
+#endif
+#if UNITY_EDITOR && ODIN_INSPECTOR
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
