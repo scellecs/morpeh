@@ -193,7 +193,7 @@ public sealed class HealthSystem : UpdateSystem {
 }
 ```
 > Don't forget about `ref` operator.  
-> Components are struct and if you wanna direct change them, then you must use reference operator.
+> Components are struct and if you wanna change them directly, then you must use reference operator.
 
 For high performance, you can do cached sampling.  
 No need to do GetComponent from entity every time.  
