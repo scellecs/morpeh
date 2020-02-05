@@ -95,8 +95,12 @@ var filter = newWorld.Filter.With<HealthComponent>();
 ```
 
 ### Simple Start
-After installation import ScriptTemplates.
+After installation import ScriptTemplates and Restart Unity.  
 ![import_script_templates.gif](Gifs~/import_script_templates.gif)
+
+Let's create out first component and open it.  
+Right click in project window and select Create/ECS/Component.  
+![create_component.gif](Gifs~/create_component.gif)
 
 ## How To Install
 
