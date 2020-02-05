@@ -97,7 +97,8 @@ var filter = newWorld.Filter.With<HealthComponent>();
 
 ### Simple Start
 > **IMPORTANT**  
-> For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.
+> For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.  
+> All GIFs are hidden under spoilers.
   
 <details>
     <summary>After installation import ScriptTemplates and Restart Unity.  </summary>
