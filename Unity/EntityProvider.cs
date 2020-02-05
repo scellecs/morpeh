@@ -111,9 +111,19 @@ namespace Morpeh {
             }
 
             if (this.entityID < 0) {
-                World.Default.CreateEntityInternal(out this.entityID);
-                foreach (var monoProvider in this.GetComponents<EntityProvider>()) {
-                    monoProvider.entityID = this.entityID;
+                var others = this.GetComponents<EntityProvider>();
+                foreach (var monoProvider in others) {
+                    if (monoProvider.entityID >= 0) {
+                        this.entityID = monoProvider.entityID;
+                        break;
+                    }
+                }
+
+                if (this.entityID < 0) {
+                    World.Default.CreateEntityInternal(out this.entityID);
+                    foreach (var monoProvider in others) {
+                        monoProvider.entityID = this.entityID;
+                    }
                 }
             }
 

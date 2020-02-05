@@ -50,7 +50,6 @@ namespace Morpeh {
 
     public interface IInitializer : IDisposable {
         World          World  { get; set; }
-        FilterProvider Filter { get; set; }
 
         /// <summary>
         ///     Calling 1 time on registration in World
@@ -524,7 +523,6 @@ namespace Morpeh {
 
         public void AddInitializer<T>(T initializer) where T : class, IInitializer {
             initializer.World  = this.world;
-            initializer.Filter = new FilterProvider {World = this.world};
 
             this.newInitializers.Add(initializer);
         }
@@ -648,7 +646,7 @@ namespace Morpeh {
         internal static List<World> Worlds = new List<World> {null};
 
         [NonSerialized]
-        internal Filter Filter;
+        public Filter Filter;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
@@ -861,17 +859,6 @@ namespace Morpeh {
                 }
             }
         }
-    }
-
-    [Il2Cpp(Option.NullChecks, false)]
-    [Il2Cpp(Option.ArrayBoundsChecks, false)]
-    [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public sealed class FilterProvider : IDisposable {
-        public Filter All => this.World.Filter;
-
-        internal World World;
-
-        public void Dispose() => this.World = null;
     }
 
     //TODO Separate RootFilter and ChildFilter
