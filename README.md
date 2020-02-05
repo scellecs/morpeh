@@ -45,7 +45,6 @@ bool hasHealthComponent = entity.Has<HealthComponent>();
 Components are types which include only data.  
 In Morpeh components are value types for performance purposes.
 ```c#
-[System.Serializable]
 public struct HealthComponent : IComponent {
     public int healthPoints;
 }
