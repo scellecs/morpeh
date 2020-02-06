@@ -15,26 +15,20 @@ namespace Morpeh.Globals {
             protected Filter filterNextFrame;
 
 
-            internal abstract void Update();
+            internal abstract void Update(World world);
         }
 
         internal sealed class GlobalEventComponentUpdater<T> : GlobalEventComponentUpdater {
-            internal GlobalEventComponentUpdater(Filter rootFilter) {
-                var common = rootFilter.With<GlobalEventMarker>().With<GlobalEventComponent<T>>();
-
-                this.filter          = common.With<GlobalEventPublished>();
-                this.filterNextFrame = common.With<GlobalEventNextFrame>();
-            }
-
-            internal override void Update() {
-                foreach (var entity in this.filter) {
+            internal override void Update(World world) {
+                var common = world.Filter.With<GlobalEventMarker>().With<GlobalEventComponent<T>>();
+                foreach (var entity in common.With<GlobalEventPublished>()) {
                     ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
                     entity.RemoveComponent<GlobalEventPublished>();
                 }
 
-                foreach (var entity in this.filterNextFrame) {
+                foreach (var entity in common.With<GlobalEventNextFrame>()) {
                     entity.AddComponent<GlobalEventPublished>();
                     entity.RemoveComponent<GlobalEventNextFrame>();
                 }
@@ -66,7 +60,7 @@ namespace Morpeh.Globals {
 
             public void OnUpdate(float deltaTime) {
                 foreach (var updater in GlobalEventComponentUpdater.Updaters) {
-                    updater.Update();
+                    updater.Update(this.World);
                 }
             }
 
