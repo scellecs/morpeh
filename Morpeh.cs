@@ -1648,15 +1648,15 @@ namespace Morpeh {
                     return false;
                 }
 
-                if (this.field1 != other.field0) {
+                if (this.field1 != other.field1) {
                     return false;
                 }
 
-                if (this.field2 != other.field0) {
+                if (this.field2 != other.field2) {
                     return false;
                 }
 
-                if (this.field3 != other.field0) {
+                if (this.field3 != other.field3) {
                     return false;
                 }
 
