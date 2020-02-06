@@ -15,7 +15,7 @@ ECS Framework for Unity Game Engine.
 
 * [Introduction](#introduction)
   * [Base concept of ECS pattern](#base-concept-of-ecs-pattern)
-  * [Simple Start](#simple-start)
+  * [Getting Start](#getting-start)
   * [Advanced](#advanced)
 * [How To Install](#how-to-install)
 * [License](#license)
