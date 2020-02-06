@@ -94,7 +94,9 @@ newWorld.RemoveSystemsGroup(systemsGroup);
 var filter = newWorld.Filter.With<HealthComponent>();
 ```
 
-### Simple Start
+---
+
+### Getting Start
 > **IMPORTANT**  
 > For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.  
 > All GIFs are hidden under spoilers.
@@ -290,6 +292,8 @@ Nice!
 
 ### Advanced
 TODO
+
+---
 
 ## How To Install
 
