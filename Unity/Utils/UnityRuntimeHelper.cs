@@ -37,7 +37,7 @@ namespace Morpeh {
 
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredEditMode) {
-                for (var i = 0; i < World.Worlds.Count; i++) {
+                for (var i = World.Worlds.Count; i >= 0; i--) {
                     var world = World.Worlds[i];
                     world?.Dispose();
                 }
