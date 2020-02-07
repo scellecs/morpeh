@@ -29,7 +29,7 @@ namespace Morpeh {
         private List<string> types = null;
         private bool hotReloaded = false;
 #endif
-        
+
 #if UNITY_EDITOR
         private void OnEnable() {
             EditorApplication.playModeStateChanged += OnEditorApplicationOnplayModeStateChanged;
@@ -37,7 +37,8 @@ namespace Morpeh {
 
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredEditMode) {
-                foreach (var world in World.Worlds) {
+                for (var i = 0; i < World.Worlds.Count; i++) {
+                    var world = World.Worlds[i];
                     world?.Dispose();
                 }
 
@@ -92,7 +93,7 @@ namespace Morpeh {
             }
         }
 
-        
+
         protected override void OnAfterDeserialize() {
             if (this.worldsSerialized != null) {
                 foreach (var t in this.types) {
