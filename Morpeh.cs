@@ -729,6 +729,8 @@ namespace Morpeh {
 
             this.Filter.Dispose();
             this.Filter = null;
+
+            Worlds.Remove(this);
         }
 #if UNITY_2019_1_OR_NEWER
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
