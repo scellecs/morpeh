@@ -15,7 +15,7 @@ ECS Framework for Unity Game Engine.
 
 * [Introduction](#introduction)
   * [Base concept of ECS pattern](#base-concept-of-ecs-pattern)
-  * [Simple Start](#simple-start)
+  * [Getting Start](#getting-start)
   * [Advanced](#advanced)
 * [How To Install](#how-to-install)
 * [License](#license)
@@ -94,7 +94,9 @@ newWorld.RemoveSystemsGroup(systemsGroup);
 var filter = newWorld.Filter.With<HealthComponent>();
 ```
 
-### Simple Start
+---
+
+### Getting Start
 > **IMPORTANT**  
 > For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.  
 > All GIFs are hidden under spoilers.
@@ -290,6 +292,8 @@ Nice!
 
 ### Advanced
 TODO
+
+---
 
 ## How To Install
 

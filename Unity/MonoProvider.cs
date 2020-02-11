@@ -34,6 +34,14 @@
                 }
             }
         }
+        
+        public ref T GetData() {
+            if (this.Entity != null) {
+                return ref this.Entity.GetComponent<T>();
+            }
+
+            return ref this.serializedData;
+        }
 
         public ref T GetData(out bool existOnEntity) {
             if (this.Entity != null) {
@@ -44,7 +52,7 @@
             return ref this.serializedData;
         }
 
-        protected override void PreInitialize() {
+        protected sealed override void PreInitialize() {
             this.Entity.SetComponent(this.serializedData);
         }
     }

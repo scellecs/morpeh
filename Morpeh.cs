@@ -49,7 +49,7 @@ namespace Morpeh {
     }
 
     public interface IInitializer : IDisposable {
-        World          World  { get; set; }
+        World World { get; set; }
 
         /// <summary>
         ///     Calling 1 time on registration in World
@@ -349,12 +349,12 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsDisposed() => this.ComponentsMask == FastBitMask.None;
 
-        
+
         public void Dispose() {
             if (this.ComponentsMask == FastBitMask.None) {
                 return;
             }
-            
+
             var mask = new FastBitMask();
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 var typeId = this.components[i];
@@ -421,12 +421,11 @@ namespace Morpeh {
         private World world;
 
         private SystemsGroup() {
-            
         }
-        
+
         internal SystemsGroup(World world) {
             this.world = world;
-            
+
             this.systems      = new List<ISystem>();
             this.fixedSystems = new List<ISystem>();
             this.lateSystems  = new List<ISystem>();
@@ -522,7 +521,7 @@ namespace Morpeh {
         }
 
         public void AddInitializer<T>(T initializer) where T : class, IInitializer {
-            initializer.World  = this.world;
+            initializer.World = this.world;
 
             this.newInitializers.Add(initializer);
         }
@@ -547,6 +546,7 @@ namespace Morpeh {
                 this.AddInitializer(system);
                 return true;
             }
+
             if (!enabled && !disabledCollection.Contains(system)) {
                 disabledCollection.Add(system);
                 this.AddInitializer(system);
@@ -729,6 +729,8 @@ namespace Morpeh {
 
             this.Filter.Dispose();
             this.Filter = null;
+
+            Worlds.Remove(this);
         }
 #if UNITY_2019_1_OR_NEWER
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -784,15 +786,15 @@ namespace Morpeh {
         }
 
         public SystemsGroup CreateSystemsGroup() => new SystemsGroup(this);
-        
+
         public void AddSystemsGroup(int order, SystemsGroup systemsGroup) {
             this.systemsGroups.Add(order, systemsGroup);
         }
-        
+
         public void RemoveSystemsGroup(SystemsGroup systemsGroup) {
             this.systemsGroups.RemoveAt(this.systemsGroups.IndexOfValue(systemsGroup));
         }
-        
+
         public void RemoveAtSystemsGroup(int order) {
             this.systemsGroups.Remove(order);
         }
@@ -1023,7 +1025,7 @@ namespace Morpeh {
                         if (entity.Has(this.mask)) {
                             if (this.Entities.Add(dirtyId)) {
                                 this.dirtyList.RemoveAtFast(i);
-                            }  
+                            }
                         }
                         else {
                             this.Entities.Remove(dirtyId);
@@ -1471,8 +1473,8 @@ namespace Morpeh {
 
         public override void Dispose() {
             this.Components = null;
-            this.capacity = -1;
-            this.length = -1;
+            this.capacity   = -1;
+            this.length     = -1;
             this.freeIndexes.Clear();
             this.freeIndexes = null;
         }
@@ -1648,15 +1650,15 @@ namespace Morpeh {
                     return false;
                 }
 
-                if (this.field1 != other.field0) {
+                if (this.field1 != other.field1) {
                     return false;
                 }
 
-                if (this.field2 != other.field0) {
+                if (this.field2 != other.field2) {
                     return false;
                 }
 
-                if (this.field3 != other.field0) {
+                if (this.field3 != other.field3) {
                     return false;
                 }
 

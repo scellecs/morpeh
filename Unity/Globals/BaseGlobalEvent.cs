@@ -84,7 +84,7 @@ namespace Morpeh.Globals {
             }
 
             if (!GlobalEventComponent<TData>.Initialized) {
-                GlobalEventComponentUpdater.Updaters.Add(new GlobalEventComponentUpdater<TData>(World.Default.Filter));
+                GlobalEventComponentUpdater.Updaters.Add(new GlobalEventComponentUpdater<TData>());
                 GlobalEventComponent<TData>.Initialized = true;
             }
         }
