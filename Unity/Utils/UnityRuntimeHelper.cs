@@ -37,7 +37,7 @@ namespace Morpeh {
 
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredEditMode) {
-                for (var i = World.Worlds.Count; i >= 0; i--) {
+                for (var i = World.Worlds.Count - 1; i >= 0; i--) {
                     var world = World.Worlds[i];
                     world?.Dispose();
                 }
@@ -49,7 +49,7 @@ namespace Morpeh {
                     DestroyImmediate(this.gameObject);
                 }
 
-                EditorApplication.playModeStateChanged -= OnEditorApplicationOnplayModeStateChanged;
+                EditorApplication.playModeStateChanged -= this.OnEditorApplicationOnplayModeStateChanged;
             }
         }
 #endif
