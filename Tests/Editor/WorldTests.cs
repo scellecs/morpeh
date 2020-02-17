@@ -16,17 +16,17 @@
 
         [Test]
         public void World_Entities_Capacity_Is_Same_As_Const_Capacity_By_Default() {
-            Assert.AreEqual(this.World.EntitiesCapacity, Constants.DEFAULT_WORLD_ENTITIES_CAPACITY);
+            Assert.AreEqual(this.World.entitiesCapacity, Constants.DEFAULT_WORLD_ENTITIES_CAPACITY);
         }
 
         [Test]
         public void World_Entities_Length_Is_Same_As_Capacity_By_Default() {
-            Assert.AreEqual(this.World.EntitiesCapacity, this.World.Entities.Length);
+            Assert.AreEqual(this.World.entitiesCapacity, this.World.entities.Length);
         }
 
         [Test]
         public void World_Entities_Public_Length_Is_Zero_By_Default() {
-            Assert.AreEqual(this.World.EntitiesLength, 0);
+            Assert.AreEqual(this.World.entitiesLength, 0);
         }
 
         [Test]
@@ -39,7 +39,7 @@
                 this.World.CreateEntity();
             }
 
-            Assert.AreEqual(this.World.EntitiesLength, countEntities);
+            Assert.AreEqual(this.World.entitiesLength, countEntities);
         }
 
         [Test]
@@ -50,8 +50,8 @@
                 this.World.CreateEntity();
             }
 
-            Assert.AreEqual(this.World.Entities.Length, expected);
-            Assert.AreEqual(this.World.EntitiesCapacity, expected);
+            Assert.AreEqual(this.World.entities.Length, expected);
+            Assert.AreEqual(this.World.entitiesCapacity, expected);
         }
     }
 }

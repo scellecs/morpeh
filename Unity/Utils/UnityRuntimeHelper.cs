@@ -37,13 +37,13 @@ namespace Morpeh {
 
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredEditMode) {
-                for (var i = World.Worlds.Count - 1; i >= 0; i--) {
-                    var world = World.Worlds[i];
+                for (var i = World.worlds.Count - 1; i >= 0; i--) {
+                    var world = World.worlds[i];
                     world?.Dispose();
                 }
 
-                World.Worlds.Clear();
-                World.Worlds.Add(null);
+                World.worlds.Clear();
+                World.worlds.Add(null);
 
                 if (this != null && this.gameObject != null) {
                     DestroyImmediate(this.gameObject);
@@ -58,10 +58,10 @@ namespace Morpeh {
             World.GlobalUpdate(Time.deltaTime);
 #if UNITY_EDITOR && ODIN_INSPECTOR
             if (this.hotReloaded) {
-                foreach (var world in World.Worlds) {
-                    for (var index = 0; index < world.EntitiesCount; index++) {
-                        var entity = world.Entities[index];
-                        world.Filter.Entities.Add(entity.InternalID);
+                foreach (var world in World.worlds) {
+                    for (var index = 0; index < world.entitiesCount; index++) {
+                        var entity = world.entities[index];
+                        world.Filter.entities.Add(entity.internalID);
                     }
                 }
 
@@ -82,14 +82,14 @@ namespace Morpeh {
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         protected override void OnBeforeSerialize() {
-            this.worldsSerialized = World.Worlds;
+            this.worldsSerialized = World.worlds;
             if (this.types == null) {
                 this.types = new List<string>();
             }
 
             this.types.Clear();
             foreach (var info in CommonCacheTypeIdentifier.editorTypeAssociation.Values) {
-                this.types.Add(info.Type.AssemblyQualifiedName);
+                this.types.Add(info.type.AssemblyQualifiedName);
             }
         }
 
@@ -113,7 +113,7 @@ namespace Morpeh {
                     world?.Ctor();
                 }
 
-                World.Worlds = this.worldsSerialized;
+                World.worlds = this.worldsSerialized;
                 InitializerECS.Initialize();
                 this.hotReloaded = true;
             }

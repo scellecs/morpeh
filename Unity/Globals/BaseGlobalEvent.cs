@@ -20,7 +20,7 @@ namespace Morpeh.Globals {
 #endif
         private int internalEntityID = -1;
 
-        private Entity InternalEntity => World.Default.Entities[this.internalEntityID];
+        private Entity InternalEntity => World.Default.entities[this.internalEntityID];
 
         public IEntity Entity {
             get {
