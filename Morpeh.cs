@@ -42,7 +42,6 @@ namespace Morpeh {
         void SetComponent<T>(in T value) where T : struct, IComponent;
         bool RemoveComponent<T>() where T : struct, IComponent;
         bool Has<T>() where T : struct, IComponent;
-        bool Has(in FastBitMask mask);
     }
 
     public interface IComponent {
@@ -77,10 +76,6 @@ namespace Morpeh {
 #endif
         internal int InternalID;
 
-#if UNITY_2019_1_OR_NEWER
-        [SerializeField]
-#endif
-        internal FastBitMask ComponentsMask;
         internal World World => World.Worlds[this.worldID];
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
@@ -95,6 +90,11 @@ namespace Morpeh {
         [SerializeField]
 #endif
         private int componentsDoubleCount;
+        
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        private bool isDisposed;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
@@ -107,8 +107,7 @@ namespace Morpeh {
 
             this.componentsDoubleCount = 0;
 
-            this.components     = new int[Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY];
-            this.ComponentsMask = FastBitMask.None;
+            this.components = new int[Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -119,17 +118,38 @@ namespace Morpeh {
 #if UNITY_EDITOR
                 Debug.LogError("You add component which already exist! Use Get or SetComponent instead!");
 #endif
-                return ref this.World.GetCache<T>().Empty();
+                return ref CacheComponents<T>.Empty();
             }
 
-            this.ComponentsMask.SetBit(typeInfo.id);
             this.World.Filter.EntityChanged(this.InternalID);
 
-            if (!typeInfo.isMarker) {
+
+            if (typeInfo.isMarker) {
+                const int componentId = -1;
+                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                    if (this.components[i] == -1) {
+                        this.components[i]     = typeInfo.id;
+                        this.components[i + 1] = componentId;
+
+                        return ref CacheComponents<T>.Empty();
+                    }
+                }
+
+                this.componentsDoubleCount += 2;
+                if (this.componentsDoubleCount >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
+                }
+
+                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCount - 1] = componentId;
+            }
+            else {
                 var componentId = this.World.GetCache<T>().Add();
                 for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
-                    if (this.components[i] == typeInfo.id) {
+                    if (this.components[i] == -1) {
+                        this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+
                         return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
@@ -145,7 +165,7 @@ namespace Morpeh {
                 return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCount - 1]);
             }
 
-            return ref this.World.GetCache<T>().Empty();
+            return ref CacheComponents<T>.Empty();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -157,18 +177,38 @@ namespace Morpeh {
                 Debug.LogError("You add component which already exist! Use Get or SetComponent instead!");
 #endif
                 exist = true;
-                return ref this.World.GetCache<T>().Empty();
+                return ref CacheComponents<T>.Empty();
             }
 
             exist = false;
-            this.ComponentsMask.SetBit(typeInfo.id);
             this.World.Filter.EntityChanged(this.InternalID);
 
-            if (!typeInfo.isMarker) {
+            if (typeInfo.isMarker) {
+                const int componentId = -1;
+                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                    if (this.components[i] == -1) {
+                        this.components[i]     = typeInfo.id;
+                        this.components[i + 1] = componentId;
+                        
+                        return ref CacheComponents<T>.Empty();
+                    }
+                }
+
+                this.componentsDoubleCount += 2;
+                if (this.componentsDoubleCount >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
+                }
+
+                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCount - 1] = componentId;
+            }
+            else {
                 var componentId = this.World.GetCache<T>().Add();
                 for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
-                    if (this.components[i] == typeInfo.id) {
+                    if (this.components[i] == -1) {
+                        this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        
                         return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
@@ -184,7 +224,7 @@ namespace Morpeh {
                 return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCount - 1]);
             }
 
-            return ref this.World.GetCache<T>().Empty();
+            return ref CacheComponents<T>.Empty();
         }
 
 #if UNITY_EDITOR
@@ -227,7 +267,7 @@ namespace Morpeh {
 
             if (typeInfo.isMarker) {
                 if (this.Has<T>()) {
-                    return ref this.World.GetCache<T>().Empty();
+                    return ref CacheComponents<T>.Empty();
                 }
             }
 
@@ -237,7 +277,7 @@ namespace Morpeh {
                 }
             }
 
-            return ref this.World.GetCache<T>().Empty();
+            return ref CacheComponents<T>.Empty();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -247,7 +287,7 @@ namespace Morpeh {
             if (typeInfo.isMarker) {
                 if (this.Has<T>()) {
                     exist = true;
-                    return ref this.World.GetCache<T>().Empty();
+                    return ref CacheComponents<T>.Empty();
                 }
             }
 
@@ -259,7 +299,7 @@ namespace Morpeh {
             }
 
             exist = false;
-            return ref this.World.GetCache<T>().Empty();
+            return ref CacheComponents<T>.Empty();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -267,11 +307,17 @@ namespace Morpeh {
             var typeInfo = CacheTypeIdentifier<T>.info;
 
             if (!typeInfo.isMarker) {
-                if (!this.Has(typeInfo.mask)) {
+                if (!this.Has(typeInfo.id)) {
                     var componentId = this.World.GetCache<T>().Add();
+                    
                     for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
-                        if (this.components[i] == typeInfo.id) {
+                        if (this.components[i] == -1) {
+                            this.components[i]     = typeInfo.id;
                             this.components[i + 1] = componentId;
+                        
+                            this.World.Filter.EntityChanged(this.InternalID);
+                            this.World.GetCache<T>().Set(componentId, value);
+                            return;
                         }
                     }
 
@@ -284,7 +330,6 @@ namespace Morpeh {
                     this.components[this.componentsDoubleCount - 1] = componentId;
                     this.World.Filter.EntityChanged(this.InternalID);
                     this.World.GetCache<T>().Set(componentId, value);
-                    this.ComponentsMask.SetBit(typeInfo.id);
                     return;
                 }
 
@@ -295,44 +340,43 @@ namespace Morpeh {
                 }
             }
             else {
-                if (!this.Has(typeInfo.mask)) {
+                if (!this.Has(typeInfo.id)) {
+                    const int componentId = -1;
+                    for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                        if (this.components[i] == -1) {
+                            this.components[i]     = typeInfo.id;
+                            this.components[i + 1] = componentId;
+                            
+                            this.World.Filter.EntityChanged(this.InternalID);
+                            return;
+                        }
+                    }
+
+                    this.componentsDoubleCount += 2;
+                    if (this.componentsDoubleCount >= this.components.Length) {
+                        Array.Resize(ref this.components, this.componentsDoubleCount << 1);
+                    }
+
+                    this.components[this.componentsDoubleCount - 2] = typeInfo.id;
+                    this.components[this.componentsDoubleCount - 1] = componentId;
                     this.World.Filter.EntityChanged(this.InternalID);
                 }
             }
-
-            this.ComponentsMask.SetBit(typeInfo.id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RemoveComponent<T>() where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
-            if (!typeInfo.isMarker) {
-                for (int i = 0, length = this.components.Length; i < length; i += 2) {
-                    if (this.components[i] == typeInfo.id) {
+            
+            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                if (this.components[i] == typeInfo.id) {
+                    this.components[i]     = -1;
+                    if (!typeInfo.isMarker) {
                         this.World.GetCache<T>().Remove(this.components[i + 1]);
-
-                        this.ComponentsMask.ClearBit(typeInfo.id);
-                        if (this.ComponentsMask == FastBitMask.None) {
-                            this.World.RemoveEntity(this);
-                        }
-                        else {
-                            this.World.Filter.EntityChanged(this.InternalID);
-                        }
-
-                        return true;
-                    }
-                }
-            }
-            else {
-                if (this.ComponentsMask.Has(typeInfo.mask)) {
-                    this.ComponentsMask.ClearBit(typeInfo.id);
-                    if (this.ComponentsMask == FastBitMask.None) {
-                        this.World.RemoveEntity(this);
-                    }
-                    else {
-                        this.World.Filter.EntityChanged(this.InternalID);
+                        this.components[i + 1] = -1;
                     }
 
+                    this.World.Filter.EntityChanged(this.InternalID);
                     return true;
                 }
             }
@@ -341,32 +385,49 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Has(in FastBitMask mask) => this.ComponentsMask.Has(mask);
+        internal bool Has(int typeID) {
+            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                if (this.components[i] == typeID) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Has<T>() where T : struct, IComponent => this.ComponentsMask.Has(CacheTypeIdentifier<T>.info.mask);
+        public bool Has<T>() where T : struct, IComponent {
+            var typeID = CacheTypeIdentifier<T>.info.id;
+            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                if (this.components[i] == typeID) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsDisposed() => this.ComponentsMask == FastBitMask.None;
-
+        public bool IsDisposed() => this.isDisposed;
 
         public void Dispose() {
-            if (this.ComponentsMask == FastBitMask.None) {
+            if (this.isDisposed) {
                 return;
             }
 
-            var mask = new FastBitMask();
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 var typeId = this.components[i];
-                mask.SetBit(typeId);
-                if (this.ComponentsMask.Has(mask)) {
+                if (typeId >= 0) {
                     this.World.GetCache(typeId).Remove(this.components[i + 1]);
                 }
-
-                mask.ClearBit(typeId);
             }
 
-            this.ComponentsMask = FastBitMask.None;
+            this.components = null;
+            this.InternalID = -1;
+            this.worldID = -1;
+            this.componentsDoubleCount = -1;
+            
+            this.isDisposed = true;
         }
     }
 
@@ -849,6 +910,8 @@ namespace Morpeh {
         }
 
         public IEntity GetEntity(in int id) => this.Entities[id];
+        
+        internal Entity GetEntityInternal(in int id) => this.Entities[id];
 
         public void RemoveEntity(IEntity entity) {
             if (entity is Entity ent) {
@@ -890,7 +953,7 @@ namespace Morpeh {
         private int   componentsBagsTripleCount;
 
         private List<Filter> childs;
-        private FastBitMask  mask;
+        private int          typeID;
         private FilterMode   filterMode;
 
 #if UNITY_2019_1_OR_NEWER
@@ -912,7 +975,7 @@ namespace Morpeh {
             this.dirtyList = new List<int>(Constants.DEFAULT_ROOT_FILTER_DIRTY_ENTITIES_CAPACITY);
             this.childs    = new List<Filter>();
 
-            this.mask       = FastBitMask.None;
+            this.typeID     = -1;
             this.filterMode = FilterMode.Include;
 
             this.entitiesCacheForBags         = new int[0];
@@ -921,7 +984,7 @@ namespace Morpeh {
 
 
         //full child filter
-        private Filter(World world, ObservableHashSet<int> rootEntities, FastBitMask mask, FilterMode mode, bool fillWithPreviousEntities) {
+        private Filter(World world, ObservableHashSet<int> rootEntities, int typeID, FilterMode mode, bool fillWithPreviousEntities) {
             this.world = world;
 
             this.addedList   = new List<int>(Constants.DEFAULT_FILTER_ADDED_ENTITIES_CAPACITY);
@@ -930,7 +993,7 @@ namespace Morpeh {
             this.dirtyList   = new List<int>(Constants.DEFAULT_FILTER_DIRTY_ENTITIES_CAPACITY);
             this.childs      = new List<Filter>();
 
-            this.mask       = mask;
+            this.typeID     = typeID;
             this.filterMode = mode;
 
             this.componentsBags       = new int[0];
@@ -947,16 +1010,16 @@ namespace Morpeh {
             }
 
             foreach (var id in rootEntities) {
-                var entity = this.world.GetEntity(id);
+                var entity = this.world.GetEntityInternal(id);
                 switch (this.filterMode) {
                     case FilterMode.Include:
-                        if (entity.Has(this.mask)) {
+                        if (entity.Has(this.typeID)) {
                             this.Entities.Add(id);
                         }
 
                         break;
                     case FilterMode.Exclude:
-                        if (!entity.Has(this.mask)) {
+                        if (!entity.Has(this.typeID)) {
                             this.Entities.Add(id);
                         }
 
@@ -987,7 +1050,7 @@ namespace Morpeh {
             this.componentsBags            = null;
             this.componentsBagsTripleCount = -1;
 
-            this.mask       = FastBitMask.None;
+            this.typeID     = -1;
             this.filterMode = FilterMode.None;
 
             this.addedList?.Clear();
@@ -1002,7 +1065,7 @@ namespace Morpeh {
         internal void EntityChanged(int id) => this.dirtyList.Add(id);
 
         public void Update() {
-            if (this.mask == FastBitMask.None) {
+            if (this.typeID == -1) {
                 for (int i = 0, length = this.childs.Count; i < length; i++) {
                     this.childs[i].ChildrensUpdate(this.dirtyList);
                 }
@@ -1018,11 +1081,11 @@ namespace Morpeh {
 
             for (var i = this.dirtyList.Count - 1; i >= 0; i--) {
                 var dirtyId = this.dirtyList[i];
-                var entity  = this.world.GetEntity(dirtyId);
+                var entity  = this.world.GetEntityInternal(dirtyId);
                 //TODO maybe remove?
                 if (entity != null) {
                     if (this.filterMode == FilterMode.Include) {
-                        if (entity.Has(this.mask)) {
+                        if (entity.Has(this.typeID)) {
                             if (this.Entities.Add(dirtyId)) {
                                 this.dirtyList.RemoveAtFast(i);
                             }
@@ -1034,7 +1097,7 @@ namespace Morpeh {
                     }
 
                     if (this.filterMode == FilterMode.Exclude) {
-                        if (!entity.Has(this.mask)) {
+                        if (!entity.Has(this.typeID)) {
                             if (this.Entities.Add(dirtyId)) {
                                 this.dirtyList.RemoveAtFast(i);
                             }
@@ -1057,16 +1120,16 @@ namespace Morpeh {
 
             for (int i = 0, length = this.addedList.Count; i < length; i++) {
                 var id     = this.addedList[i];
-                var entity = this.world.GetEntity(id);
+                var entity = this.world.GetEntityInternal(id);
                 switch (this.filterMode) {
                     case FilterMode.Include:
-                        if (entity.Has(this.mask)) {
+                        if (entity.Has(this.typeID)) {
                             this.Entities.Add(id);
                         }
 
                         break;
                     case FilterMode.Exclude:
-                        if (!entity.Has(this.mask)) {
+                        if (!entity.Has(this.typeID)) {
                             this.Entities.Add(id);
                         }
 
@@ -1168,12 +1231,12 @@ namespace Morpeh {
         private Filter CreateFilter<T>(FilterMode mode, bool fillWithPreviousEntities) where T : struct, IComponent {
             for (int i = 0, length = this.childs.Count; i < length; i++) {
                 var child = this.childs[i];
-                if (child.filterMode == mode && child.mask == CacheTypeIdentifier<T>.info.mask) {
+                if (child.filterMode == mode && child.typeID == CacheTypeIdentifier<T>.info.id) {
                     return child;
                 }
             }
 
-            var newFilter = new Filter(this.world, this.Entities, CacheTypeIdentifier<T>.info.mask, mode, fillWithPreviousEntities);
+            var newFilter = new Filter(this.world, this.Entities, CacheTypeIdentifier<T>.info.id, mode, fillWithPreviousEntities);
             this.childs.Add(newFilter);
 
             return newFilter;
@@ -1337,19 +1400,13 @@ namespace Morpeh {
             [SerializeField]
 #endif
             internal bool isMarker;
-#if UNITY_2019_1_OR_NEWER
-            [SerializeField]
-#endif
-            internal FastBitMask mask;
 
             public TypeInfo(bool isMarker) {
                 this.isMarker = isMarker;
-                this.mask     = new FastBitMask();
             }
 
             public void SetID(int id) {
                 this.id = id;
-                this.mask.SetBit(id);
             }
         }
     }
@@ -1397,6 +1454,8 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class CacheComponents<T> : CacheComponents where T : struct, IComponent {
+        private static T empty;
+
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
@@ -1410,10 +1469,6 @@ namespace Morpeh {
         [SerializeField]
 #endif
         private int length;
-#if UNITY_2019_1_OR_NEWER
-        [SerializeField]
-#endif
-        private T empty;
 
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
@@ -1457,7 +1512,7 @@ namespace Morpeh {
         public void Set(in int id, in T value) => this.Components[id] = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T Empty() => ref this.empty;
+        public static ref T Empty() => ref empty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Remove(in int id) {
@@ -1481,289 +1536,6 @@ namespace Morpeh {
     }
 
     namespace Utils {
-        using System.Text;
-        using FieldType = UInt64;
-
-#pragma warning disable CS0659
-#pragma warning disable CS0661
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        [Serializable]
-        public struct FastBitMask : IEquatable<FastBitMask> {
-            public static readonly FastBitMask None = new FastBitMask(new int[0]);
-
-            private const int FIELD_COUNT          = 4;
-            private const int BITS_PER_BYTE        = 8;
-            private const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(ulong);
-            private const int BITS_PER_FIELD_SHIFT = 6;
-
-#if UNITY_2019_1_OR_NEWER
-            [SerializeField]
-#endif
-            private ulong field0;
-#if UNITY_2019_1_OR_NEWER
-            [SerializeField]
-#endif
-            private ulong field1;
-#if UNITY_2019_1_OR_NEWER
-            [SerializeField]
-#endif
-            private ulong field2;
-#if UNITY_2019_1_OR_NEWER
-            [SerializeField]
-#endif
-            private ulong field3;
-
-            public FastBitMask(int[] bits) {
-                this.field0 = 0;
-                this.field1 = 0;
-                this.field2 = 0;
-                this.field3 = 0;
-
-                for (int i = 0, length = bits.Length; i < length; ++i) {
-                    ref var bit = ref bits[i];
-
-                    var dataIndex = bit >> BITS_PER_FIELD_SHIFT;
-                    var bitIndex  = bit - (dataIndex << BITS_PER_FIELD_SHIFT);
-
-                    var mask = (ulong) 1 << bitIndex;
-
-                    switch (dataIndex) {
-                        case 0:
-                            this.field0 |= mask;
-                            break;
-                        case 1:
-                            this.field1 |= mask;
-                            break;
-                        case 2:
-                            this.field2 |= mask;
-                            break;
-                        case 3:
-                            this.field3 |= mask;
-                            break;
-                    }
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool GetBit(in int index) {
-                var dataIndex = index >> BITS_PER_FIELD_SHIFT;
-                var bitIndex  = index - (dataIndex << BITS_PER_FIELD_SHIFT);
-
-                switch (dataIndex) {
-                    case 0:
-                        return (this.field0 & ((ulong) 1 << bitIndex)) != 0;
-                    case 1:
-                        return (this.field1 & ((ulong) 1 << bitIndex)) != 0;
-                    case 2:
-                        return (this.field2 & ((ulong) 1 << bitIndex)) != 0;
-                    case 3:
-                        return (this.field3 & ((ulong) 1 << bitIndex)) != 0;
-                }
-
-                return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SetBit(in int index) {
-                var dataIndex = index >> BITS_PER_FIELD_SHIFT;
-                var bitIndex  = index - (dataIndex << BITS_PER_FIELD_SHIFT);
-
-                switch (dataIndex) {
-                    case 0:
-                        this.field0 |= (ulong) 1 << bitIndex;
-                        break;
-                    case 1:
-                        this.field1 |= (ulong) 1 << bitIndex;
-                        break;
-                    case 2:
-                        this.field2 |= (ulong) 1 << bitIndex;
-                        break;
-                    case 3:
-                        this.field3 |= (ulong) 1 << bitIndex;
-                        break;
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void FlipBit(in int index) {
-                var dataIndex = index >> BITS_PER_FIELD_SHIFT;
-                var bitIndex  = index - (dataIndex << BITS_PER_FIELD_SHIFT);
-
-                switch (dataIndex) {
-                    case 0:
-                        this.field0 ^= (ulong) 1 << bitIndex;
-                        break;
-                    case 1:
-                        this.field1 ^= (ulong) 1 << bitIndex;
-                        break;
-                    case 2:
-                        this.field2 ^= (ulong) 1 << bitIndex;
-                        break;
-                    case 3:
-                        this.field3 ^= (ulong) 1 << bitIndex;
-                        break;
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void ClearBit(in int index) {
-                var dataIndex = index >> BITS_PER_FIELD_SHIFT;
-                var bitIndex  = index - (dataIndex << BITS_PER_FIELD_SHIFT);
-
-                switch (dataIndex) {
-                    case 0:
-                        this.field0 &= ~((ulong) 1 << bitIndex);
-                        break;
-                    case 1:
-                        this.field1 &= ~((ulong) 1 << bitIndex);
-                        break;
-                    case 2:
-                        this.field2 &= ~((ulong) 1 << bitIndex);
-                        break;
-                    case 3:
-                        this.field3 &= ~((ulong) 1 << bitIndex);
-                        break;
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SetAll() {
-                this.field0 = 0xffffffff;
-                this.field1 = 0xffffffff;
-                this.field2 = 0xffffffff;
-                this.field3 = 0xffffffff;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void ClearAll() {
-                this.field0 = 0x00000000;
-                this.field1 = 0x00000000;
-                this.field2 = 0x00000000;
-                this.field3 = 0x00000000;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Equals(FastBitMask other) {
-                if (this.field0 != other.field0) {
-                    return false;
-                }
-
-                if (this.field1 != other.field1) {
-                    return false;
-                }
-
-                if (this.field2 != other.field2) {
-                    return false;
-                }
-
-                if (this.field3 != other.field3) {
-                    return false;
-                }
-
-                return true;
-            }
-
-            public override bool Equals(object obj) {
-                if (obj is FastBitMask mask) {
-                    return this.Equals(mask);
-                }
-
-                return base.Equals(obj);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(FastBitMask mask1, FastBitMask mask2) => mask1.Equals(mask2);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(FastBitMask mask1, FastBitMask mask2) => !mask1.Equals(mask2);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static FastBitMask operator &(FastBitMask mask1, FastBitMask mask2) {
-                var newBitMask = new FastBitMask();
-
-                newBitMask.field0 = mask1.field0 & mask2.field0;
-                newBitMask.field1 = mask1.field1 & mask2.field1;
-                newBitMask.field2 = mask1.field2 & mask2.field2;
-                newBitMask.field3 = mask1.field3 & mask2.field3;
-
-                return newBitMask;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static FastBitMask operator |(FastBitMask mask1, FastBitMask mask2) {
-                var newBitMask = new FastBitMask();
-
-                newBitMask.field0 = mask1.field0 | mask2.field0;
-                newBitMask.field1 = mask1.field1 | mask2.field1;
-                newBitMask.field2 = mask1.field2 | mask2.field2;
-                newBitMask.field3 = mask1.field3 | mask2.field3;
-
-                return newBitMask;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static FastBitMask operator ~(FastBitMask mask) {
-                var newBitMask = new FastBitMask();
-
-                newBitMask.field0 = ~mask.field0;
-                newBitMask.field1 = ~mask.field1;
-                newBitMask.field2 = ~mask.field2;
-                newBitMask.field3 = ~mask.field3;
-
-                return newBitMask;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Has(in FastBitMask mask) {
-                var temp = mask.field0;
-                if ((this.field0 & temp) != temp) {
-                    return false;
-                }
-
-                temp = mask.field1;
-                if ((this.field1 & temp) != temp) {
-                    return false;
-                }
-
-                temp = mask.field2;
-                if ((this.field2 & temp) != temp) {
-                    return false;
-                }
-
-                temp = mask.field3;
-                if ((this.field3 & temp) != temp) {
-                    return false;
-                }
-
-                return true;
-            }
-
-            public override string ToString() {
-                var builder = new StringBuilder();
-
-                var fields = new ulong[FIELD_COUNT];
-
-                fields[0] = this.field0;
-                fields[1] = this.field1;
-                fields[2] = this.field2;
-                fields[3] = this.field3;
-
-                for (var i = 0; i < FIELD_COUNT; ++i) {
-                    var binaryString = Convert.ToString((long) fields[i], 2);
-
-                    builder.Append(binaryString.PadLeft(BITS_PER_FIELD, '0'));
-                    builder.Append("_");
-                }
-
-                return builder.ToString();
-            }
-        }
-#pragma warning restore CS0659
-#pragma warning restore CS0661
-
-
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
