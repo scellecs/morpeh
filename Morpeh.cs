@@ -978,7 +978,7 @@ namespace Morpeh {
             Exclude = 2
         }
 
-        public int length;
+        public int Length;
 
         internal ObservableHashSet<int> entities;
 
@@ -1068,7 +1068,7 @@ namespace Morpeh {
                 }
             }
 
-            this.length = this.entities.Count;
+            this.Length = this.entities.Count;
             this.CacheEntities();
         }
 
@@ -1080,7 +1080,7 @@ namespace Morpeh {
             this.childs.Clear();
             this.childs = null;
 
-            this.length = -1;
+            this.Length = -1;
 
             this.entities.Clear();
             this.entities = null;
@@ -1193,7 +1193,7 @@ namespace Morpeh {
 
             this.dirtyList.Clear();
 
-            this.length = this.entities.Count;
+            this.Length = this.entities.Count;
 
             if (changed) {
                 this.CacheEntities();
@@ -1201,9 +1201,9 @@ namespace Morpeh {
         }
 
         private void CacheEntities() {
-            if (this.entitiesCacheForBagsCapacity < this.length) {
-                Array.Resize(ref this.entitiesCacheForBags, this.length);
-                this.entitiesCacheForBagsCapacity = this.length;
+            if (this.entitiesCacheForBagsCapacity < this.Length) {
+                Array.Resize(ref this.entitiesCacheForBags, this.Length);
+                this.entitiesCacheForBagsCapacity = this.Length;
             }
 
             var i = 0;
@@ -1233,7 +1233,7 @@ namespace Morpeh {
                     ref var componentBag = ref ComponentsBag<T>.Get(index);
 
                     if (this.componentsBags[i + 2] > 0) {
-                        componentBag.Update(this.entitiesCacheForBags, this.length);
+                        componentBag.Update(this.entitiesCacheForBags, this.Length);
                         this.componentsBags[i + 2] = 0;
                     }
 
@@ -1253,7 +1253,7 @@ namespace Morpeh {
 
             ref var indexBag         = ref this.componentsBags[this.componentsBagsTripleCount - 2];
             ref var newComponentsBag = ref ComponentsBag<T>.Get(indexBag);
-            newComponentsBag.Update(this.entitiesCacheForBags, this.length);
+            newComponentsBag.Update(this.entitiesCacheForBags, this.Length);
             return ref newComponentsBag;
         }
 
@@ -1349,11 +1349,11 @@ namespace Morpeh {
             }
         }
 
-        public EntityEnumerator GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.length);
+        public EntityEnumerator GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.Length);
 
-        IEnumerator<IEntity> IEnumerable<IEntity>.GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.length);
+        IEnumerator<IEntity> IEnumerable<IEntity>.GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.Length);
 
-        IEnumerator IEnumerable.GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.length);
+        IEnumerator IEnumerable.GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.Length);
 
         public struct EntityEnumerator : IEnumerator<IEntity> {
             private World  world;
