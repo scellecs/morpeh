@@ -846,7 +846,7 @@ namespace Morpeh {
             var currentLength = this.caches.Length;
             if (info.id >= currentLength) {
                 while (currentLength <= info.id) {
-                    currentLength <<= 2;
+                    currentLength <<= 1;
                 }
 
                 Array.Resize(ref this.caches, currentLength);
