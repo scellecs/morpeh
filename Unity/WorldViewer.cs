@@ -21,10 +21,10 @@ namespace Morpeh {
         private List<EntityView> Entities {
             get {
                 if (Application.isPlaying) {
-                    if (World.Default.EntitiesCount != this.entityViews.Count) {
+                    if (World.Default.entitiesCount != this.entityViews.Count) {
                         this.entityViews.Clear();
-                        for (int i = 0, length = World.Default.EntitiesLength; i < length; i++) {
-                            var entity = World.Default.Entities[i];
+                        for (int i = 0, length = World.Default.entitiesLength; i < length; i++) {
+                            var entity = World.Default.entities[i];
                             if (entity != null) {
                                 var view = new EntityView {entity = entity};
                                 this.entityViews.Add(view);
@@ -46,7 +46,7 @@ namespace Morpeh {
             internal Entity entity;
 
             [ShowInInspector]
-            private int ID => this.entity.InternalID;
+            private int ID => this.entity.internalID;
 
             [DisableContextMenu]
             [PropertySpace]
@@ -55,20 +55,19 @@ namespace Morpeh {
             [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
             private List<ComponentView> Components {
                 get {
-                    if (this.entity != null && this.lastMask != this.entity.ComponentsMask) {
+                    if (this.entity != null) {
                         this.componentViews.Clear();
-                        for (int i = 0, length = 256; i < length; i++) {
-                            if (this.entity.ComponentsMask.GetBit(i)) {
-                                var view = new ComponentView {
-                                    DebugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[i],
-                                    ID        = this.entity.GetComponentId(i),
-                                    World     = this.entity.World
-                                };
-                                this.componentViews.Add(view);
+                        for (int i = 0, length = this.entity.componentsDoubleCount; i < length; i+=2) {
+                            if (this.entity.components[i] == -1) {
+                                continue;
                             }
+                            var view = new ComponentView {
+                                debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[this.entity.components[i]],
+                                id        = this.entity.components[i + 1],
+                                world     = this.entity.World
+                            };
+                            this.componentViews.Add(view);
                         }
-
-                        this.lastMask = this.entity.ComponentsMask;
                     }
 
                     return this.componentViews;
@@ -76,26 +75,25 @@ namespace Morpeh {
                 set { }
             }
 
-            private FastBitMask         lastMask       = FastBitMask.None;
             private List<ComponentView> componentViews = new List<ComponentView>();
 
 
             [Serializable]
             private struct ComponentView {
-                internal CommonCacheTypeIdentifier.DebugInfo DebugInfo;
-                internal World                               World;
+                internal CommonCacheTypeIdentifier.DebugInfo debugInfo;
+                internal World                               world;
 
 
-                internal bool   IsMarker => this.DebugInfo.TypeInfo.isMarker;
-                internal string FullName => this.DebugInfo.Type.FullName;
+                internal bool   IsMarker => this.debugInfo.typeInfo.isMarker;
+                internal string FullName => this.debugInfo.type.FullName;
 
                 [ShowIf("$IsMarker")]
                 [HideLabel]
                 [DisplayAsString(false)]
                 [ShowInInspector]
-                internal string TypeName => this.DebugInfo.Type.Name;
+                internal string TypeName => this.debugInfo.type.Name;
 
-                internal int ID;
+                internal int id;
 
                 [DisableContextMenu]
                 [HideIf("$IsMarker")]
@@ -104,18 +102,18 @@ namespace Morpeh {
                 [HideReferenceObjectPickerAttribute]
                 public object Data {
                     get {
-                        if (this.DebugInfo.TypeInfo.isMarker) {
+                        if (this.debugInfo.typeInfo.isMarker) {
                             return null;
                         }
 
-                        return this.DebugInfo.GetBoxed(this.World, this.ID);
+                        return this.debugInfo.getBoxed(this.world, this.id);
                     }
                     set {
-                        if (this.DebugInfo.TypeInfo.isMarker) {
+                        if (this.debugInfo.typeInfo.isMarker) {
                             return;
                         }
 
-                        this.DebugInfo.SetBoxed(this.World, this.ID, value);
+                        this.debugInfo.setBoxed(this.world, this.id, value);
                     }
                 }
             }

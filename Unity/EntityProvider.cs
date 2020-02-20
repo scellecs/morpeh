@@ -18,8 +18,8 @@ namespace Morpeh {
         [CanBeNull]
         private Entity entity {
             get {
-                if (World.Default != null && this.entityID >= 0 && World.Default.EntitiesLength > this.entityID) {
-                    return World.Default.Entities[this.entityID];
+                if (World.Default != null && this.entityID >= 0 && World.Default.entitiesLength > this.entityID) {
+                    return World.Default.entities[this.entityID];
                 }
 
                 return null;
@@ -39,28 +39,23 @@ namespace Morpeh {
         [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
         private List<ComponentView> ComponentsOnEntity {
             get {
-                if (this.entity != null && this.lastMask != this.entity.ComponentsMask) {
+                if (this.entity != null) {
                     this.componentViews.Clear();
-                    for (int i = 0, length = 256; i < length; i++) {
-                        if (this.entity.ComponentsMask.GetBit(i)) {
-                            var view = new ComponentView {
-                                debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[i],
-                                ID        = this.entity.GetComponentId(i),
-                                World     = this.entity.World
-                            };
-                            this.componentViews.Add(view);
-                        }
+                    for (int i = 0, length = this.entity.componentsDoubleCount; i < length; i+=2) {
+                        var view = new ComponentView {
+                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[this.entity.components[i]],
+                            ID        = this.entity.components[i + 1],
+                            world     = this.entity.World
+                        };
+                        this.componentViews.Add(view);
                     }
-
-                    this.lastMask = this.entity.ComponentsMask;
                 }
 
                 return this.componentViews;
             }
             set { }
         }
-
-        private          FastBitMask         lastMask       = FastBitMask.None;
+        
         private readonly List<ComponentView> componentViews = new List<ComponentView>();
 
 
@@ -68,16 +63,16 @@ namespace Morpeh {
         [Serializable]
         private struct ComponentView {
             internal CommonCacheTypeIdentifier.DebugInfo debugInfo;
-            internal World                               World;
+            internal World                               world;
 
-            internal bool   IsMarker => this.debugInfo.TypeInfo.isMarker;
-            internal string FullName => this.debugInfo.Type.FullName;
+            internal bool   IsMarker => this.debugInfo.typeInfo.isMarker;
+            internal string FullName => this.debugInfo.type.FullName;
 
             [ShowIf("$IsMarker")]
             [HideLabel]
             [DisplayAsString(false)]
             [ShowInInspector]
-            internal string TypeName => this.debugInfo.Type.Name;
+            internal string TypeName => this.debugInfo.type.Name;
 
             internal int ID;
 
@@ -88,18 +83,18 @@ namespace Morpeh {
             [HideReferenceObjectPickerAttribute]
             public object Data {
                 get {
-                    if (this.debugInfo.TypeInfo.isMarker) {
+                    if (this.debugInfo.typeInfo.isMarker) {
                         return null;
                     }
 
-                    return this.debugInfo.GetBoxed(this.World, this.ID);
+                    return this.debugInfo.getBoxed(this.world, this.ID);
                 }
                 set {
-                    if (this.debugInfo.TypeInfo.isMarker) {
+                    if (this.debugInfo.typeInfo.isMarker) {
                         return;
                     }
 
-                    this.debugInfo.SetBoxed(this.World, this.ID, value);
+                    this.debugInfo.setBoxed(this.world, this.ID, value);
                 }
             }
         }
