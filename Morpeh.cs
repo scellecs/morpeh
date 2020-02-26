@@ -1158,6 +1158,12 @@ namespace Morpeh {
 
                 changed = true;
             }
+            
+            for (int i = 0, length = this.removedList.Count; i < length; i++) {
+                var id = this.removedList[i];
+                this.entities.Remove(id);
+            }
+            this.removedList.Clear();
 
             for (int i = 0, length = this.addedList.Count; i < length; i++) {
                 var id     = this.addedList[i];
@@ -1178,17 +1184,10 @@ namespace Morpeh {
                 }
             }
 
-            this.removedList.Clear();
+            this.addedList.Clear();
 
             for (int i = 0, length = this.childs.Count; i < length; i++) {
                 this.childs[i].ChildrensUpdate(this.dirtyList);
-            }
-
-            this.addedList.Clear();
-
-            for (int i = 0, length = this.removedList.Count; i < length; i++) {
-                var id = this.removedList[i];
-                this.entities.Remove(id);
             }
 
             this.dirtyList.Clear();
