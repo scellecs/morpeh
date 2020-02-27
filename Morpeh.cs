@@ -894,10 +894,12 @@ namespace Morpeh {
         }
 
         public void RemoveSystemsGroup(SystemsGroup systemsGroup) {
+            systemsGroup.Dispose();
             this.systemsGroups.RemoveAt(this.systemsGroups.IndexOfValue(systemsGroup));
         }
 
         public void RemoveAtSystemsGroup(int order) {
+            this.systemsGroups[order].Dispose();
             this.systemsGroups.Remove(order);
         }
 
