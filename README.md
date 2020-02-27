@@ -7,7 +7,7 @@ ECS Framework for Unity Game Engine.
 * Simple Integration with Unity Engine.
 * No code generation and any C# Reflection in Runtime.
 * Structure-based and Cache-friendly.
-* Reactive and Fast Filters based on bitsets.
+* Reactive and Fast Filters.
 * Built-in Events and Reactive Variables.
 * Single-threaded.
 
