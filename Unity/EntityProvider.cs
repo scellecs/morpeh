@@ -42,6 +42,9 @@ namespace Morpeh {
                 if (this.entity != null) {
                     this.componentViews.Clear();
                     for (int i = 0, length = this.entity.componentsDoubleCount; i < length; i+=2) {
+                        if (this.entity.components[i] == -1) {
+                            continue;
+                        }
                         var view = new ComponentView {
                             debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[this.entity.components[i]],
                             ID        = this.entity.components[i + 1],
