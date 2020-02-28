@@ -719,7 +719,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public sealed class World : IDisposable {
+    public sealed partial class World : IDisposable {
 #if UNITY_2019_1_OR_NEWER
         [CanBeNull]
 #endif
@@ -776,7 +776,11 @@ namespace Morpeh {
             this.systemsGroups = new SortedList<int, SystemsGroup>();
 
             this.Filter = new Filter(this);
+
+            this.InitializeGlobals();
         }
+
+        partial void InitializeGlobals();
 
         private World Initialize() {
 #if UNITY_2019_1_OR_NEWER

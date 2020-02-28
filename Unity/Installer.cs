@@ -51,18 +51,24 @@
         private SystemsGroup group;
 
         private void OnValueChangedUpdate() {
-            this.RemoveSystems(this.updateSystems);
-            this.AddSystems(this.updateSystems);
+            if (Application.isPlaying) {
+                this.RemoveSystems(this.updateSystems);
+                this.AddSystems(this.updateSystems);
+            }
         }
         
         private void OnValueChangedFixedUpdate() {
-            this.RemoveSystems(this.fixedUpdateSystems);
-            this.AddSystems(this.fixedUpdateSystems);
+            if (Application.isPlaying) {
+                this.RemoveSystems(this.fixedUpdateSystems);
+                this.AddSystems(this.fixedUpdateSystems);
+            }
         }
         
         private void OnValueChangedLateUpdate() {
-            this.RemoveSystems(this.lateUpdateSystems);
-            this.AddSystems(this.lateUpdateSystems);
+            if (Application.isPlaying) {
+                this.RemoveSystems(this.lateUpdateSystems);
+                this.AddSystems(this.lateUpdateSystems);
+            }
         }
         
 

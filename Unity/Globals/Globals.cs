@@ -67,14 +67,15 @@ namespace Morpeh.Globals {
             public void Dispose() {
             }
         }
+    }
+}
 
-        internal static class InitializerECS {
-            [RuntimeInitializeOnLoadMethod]
-            internal static void Initialize() {
-                var sg = World.Default.CreateSystemsGroup();
-                sg.AddSystem(new ProcessEventsSystem());
-                World.Default.AddSystemsGroup(9999, sg);
-            }
+namespace Morpeh {
+    partial class World {
+        partial void InitializeGlobals() {
+            var sg = this.CreateSystemsGroup();
+            sg.AddSystem(new Morpeh.Globals.ECS.ProcessEventsSystem());
+            this.AddSystemsGroup(9999, sg);
         }
     }
 }
