@@ -62,7 +62,7 @@ namespace Morpeh.Globals {
         internal virtual void OnEnable() {
             this.internalEntityID = -1;
 #if UNITY_EDITOR
-            EditorApplication.playModeStateChanged += OnEditorApplicationOnplayModeStateChanged;
+            EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
 #else
             CheckIsInitialized();
 #endif
@@ -73,7 +73,7 @@ namespace Morpeh.Globals {
                 this.internalEntityID = -1;
             }
         }
-#endif
+#endif 
         protected void CheckIsInitialized() {
             if (this.internalEntityID < 0) {
                 var ent = World.Default.CreateEntityInternal(out this.internalEntityID);
