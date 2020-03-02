@@ -63,6 +63,8 @@ namespace Morpeh.Globals {
             this.internalEntityID = -1;
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += OnEditorApplicationOnplayModeStateChanged;
+#else
+            CheckIsInitialized();
 #endif
         }
 #if UNITY_EDITOR
