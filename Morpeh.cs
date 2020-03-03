@@ -778,9 +778,11 @@ namespace Morpeh {
             this.Filter = new Filter(this);
 
             this.InitializeGlobals();
+            this.InitializeTasks();
         }
 
         partial void InitializeGlobals();
+        partial void InitializeTasks();
 
         private World Initialize() {
 #if UNITY_2019_1_OR_NEWER

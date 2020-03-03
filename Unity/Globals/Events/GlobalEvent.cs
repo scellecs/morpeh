@@ -8,6 +8,7 @@ namespace Morpeh.Globals {
             base.Publish(-1);
         }
         
+        [ContextMenu("NextFrame")]
         public void NextFrame() {
             base.NextFrame(-1);
         }

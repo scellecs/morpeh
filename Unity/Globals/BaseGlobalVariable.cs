@@ -26,7 +26,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [PropertyOrder(1)]
-        [ShowIf("@AutoSave")]
+        [ShowIf("@AutoSave && CanBeSerialized")]
 #endif
         [SerializeField]
         private string customKey;
@@ -44,10 +44,13 @@
             }
         }
 
+        public virtual bool CanBeSerialized => true;
+
         [Header("Saving Settings")]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [PropertyOrder(0)]
+        [ShowIf(nameof(CanBeSerialized))]
 #endif
         public bool AutoSave;
         

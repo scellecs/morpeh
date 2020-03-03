@@ -2,50 +2,20 @@ namespace Morpeh.Globals {
     using System;
     using System.Collections.Generic;
     using ECS;
-    using UnityEditor;
     using UnityEngine;
 #if ODIN_INSPECTOR
-    using Sirenix.OdinInspector;
 #endif
     using Unity.IL2CPP.CompilerServices;
-
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public abstract class BaseGlobalEvent<TData> : ScriptableObject, IDisposable {
-        [SerializeField]
-#if ODIN_INSPECTOR
-        [ReadOnly]
-#endif
-        private int internalEntityID = -1;
-
-        private Entity InternalEntity => World.Default.entities[this.internalEntityID];
-
-        public IEntity Entity {
-            get {
+    public abstract class BaseGlobalEvent<TData> : BaseGlobal {
+        
 #if UNITY_EDITOR
-                if (!Application.isPlaying) {
-                    return default;
-                }
+        public override Type GetValueType() => typeof(TData);
 #endif
-                this.CheckIsInitialized();
-                return this.InternalEntity;
-            }
-        }
-
-        public bool IsPublished {
-            get {
-#if UNITY_EDITOR
-                if (!Application.isPlaying) {
-                    return default;
-                }
-#endif
-                this.CheckIsInitialized();
-                return this.InternalEntity.Has<GlobalEventPublished>();
-            }
-        }
-
+        
         public Stack<TData> BatchedChanges {
             get {
 #if UNITY_EDITOR
@@ -58,23 +28,8 @@ namespace Morpeh.Globals {
                 return component.Data;
             }
         }
-        
-        internal virtual void OnEnable() {
-            this.internalEntityID = -1;
-#if UNITY_EDITOR
-            EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
-#else
-            CheckIsInitialized();
-#endif
-        }
-#if UNITY_EDITOR
-        internal virtual void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
-            if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.EnteredEditMode) {
-                this.internalEntityID = -1;
-            }
-        }
-#endif 
-        protected void CheckIsInitialized() {
+
+        private protected override void CheckIsInitialized() {
             if (this.internalEntityID < 0) {
                 var ent = World.Default.CreateEntityInternal(out this.internalEntityID);
 
@@ -120,27 +75,6 @@ namespace Morpeh.Globals {
                 ref var comp = ref ent.GetComponent<GlobalEventComponent<TData>>(out _);
                 comp.Action = (Action<IEnumerable<TData>>) Delegate.Remove(comp.Action, callback);
             });
-        }
-
-
-        public static implicit operator bool(BaseGlobalEvent<TData> exists) => exists.IsPublished;
-
-        private class Unsubscriber : IDisposable {
-            private readonly Action unsubscribe;
-            public Unsubscriber(Action unsubscribe) => this.unsubscribe = unsubscribe;
-            public void Dispose() => this.unsubscribe();
-        }
-
-        public virtual void Dispose() {
-            if (this.internalEntityID != -1) {
-                this.InternalEntity.Dispose();
-                World.Default.RemoveEntity(this.InternalEntity);
-                this.internalEntityID = -1;
-            }
-        }
-
-        private void OnDestroy() {
-            this.Dispose();
         }
     }
 }

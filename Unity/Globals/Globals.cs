@@ -75,7 +75,7 @@ namespace Morpeh {
         partial void InitializeGlobals() {
             var sg = this.CreateSystemsGroup();
             sg.AddSystem(new Morpeh.Globals.ECS.ProcessEventsSystem());
-            this.AddSystemsGroup(9999, sg);
+            this.AddSystemsGroup(9000, sg);
         }
     }
 }
