@@ -2,8 +2,7 @@ namespace Morpeh.Tasks {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Morpeh.Globals;
-    using Morpeh.Tasks;
+    using Globals;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
@@ -80,7 +79,7 @@ namespace Morpeh.Tasks {
             [SerializeField]
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [InlineProperty]
-            [ShowIf(nameof(IsVariable))]
+            [HideIf(nameof(IsVariable))]
             [HideLabel]
 #endif
             private EventComparisonMode eventComparisonMode = default;
@@ -128,7 +127,7 @@ namespace Morpeh.Tasks {
             private bool IsString => this.global.GetValueType() == typeof(string);
             private bool IsBool   => this.global.GetValueType() == typeof(bool);
 
-            private bool IsVariable => InheritsFrom(this.global.GetType(), typeof(BaseGlobalVariable<>));
+            private bool IsVariable => this.global != null && InheritsFrom(this.global.GetType(), typeof(BaseGlobalVariable<>));
 
             private bool DontCompare =>
                 this.IsVariable ? this.variableComparisonMode == VariableComparisonMode.DontCompareOnChange : this.eventComparisonMode == EventComparisonMode.DontCompareOnChange;
@@ -333,7 +332,7 @@ namespace Morpeh.Tasks {
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HideLabel]
-            [InlineEditor]
+            [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
 #endif
             [ShowInInspector]
             public BaseAction Action {

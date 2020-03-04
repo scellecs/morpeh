@@ -103,7 +103,7 @@ namespace Morpeh {
         }
 
 #endif
-        private protected virtual void Awake() {
+        private protected virtual void Start() {
             if (!Application.isPlaying) {
                 return;
             }

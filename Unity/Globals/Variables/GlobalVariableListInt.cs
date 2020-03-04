@@ -2,11 +2,7 @@ namespace Morpeh.Globals {
     using System.Collections.Generic;
     using UnityEngine;
     using System;
-#if ODIN_INSPECTOR
-    using Sirenix.OdinInspector;
-    
-    [InlineEditor]
-#endif
+
     [CreateAssetMenu(menuName = "ECS/Globals/Variable List Int")]
     public class GlobalVariableListInt : BaseGlobalVariable<List<int>> {
         protected override List<int> Load(string serializedData)
