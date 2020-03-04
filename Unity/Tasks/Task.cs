@@ -57,11 +57,9 @@ namespace Morpeh.Tasks {
 #endif
 
         public void Execute() {
-            if (this.conditions.Count > 0) {
-                for (int i = 0, length = this.conditions.Count; i < length; i++) {
-                    if (!this.conditions[i].Compare()) {
-                        return;
-                    }
+            for (int i = 0, length = this.conditions.Count; i < length; i++) {
+                if (!this.conditions[i].Compare()) {
+                    return;
                 }
             }
 

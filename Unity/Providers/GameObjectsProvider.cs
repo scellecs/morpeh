@@ -9,7 +9,7 @@
 
     public class GameObjectsProvider : MonoBehaviour {
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [TableList]
+        [TableList(AlwaysExpanded = true)]
         [HideLabel]
 #endif
         public List<GameObjectPair> table;
