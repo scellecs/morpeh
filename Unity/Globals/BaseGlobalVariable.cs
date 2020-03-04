@@ -155,7 +155,6 @@
             }
 
             this.value = this.Load(PlayerPrefs.GetString(this.Key));
-            this.OnChange(this.value);
         }
 
         internal void SaveData() {

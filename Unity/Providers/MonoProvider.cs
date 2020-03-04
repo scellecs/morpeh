@@ -55,5 +55,9 @@
         protected sealed override void PreInitialize() {
             this.Entity.SetComponent(this.serializedData);
         }
+
+        protected override void OnDisable() {
+            this.Entity?.RemoveComponent<T>();
+        }
     }
 }

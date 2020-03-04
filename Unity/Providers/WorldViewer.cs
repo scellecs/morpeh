@@ -57,7 +57,7 @@ namespace Morpeh {
                 get {
                     if (this.entity != null) {
                         this.componentViews.Clear();
-                        for (int i = 0, length = this.entity.componentsDoubleCount; i < length; i+=2) {
+                        for (int i = 0, length = this.entity.componentsDoubleCapacity; i < length; i+=2) {
                             if (this.entity.components[i] == -1) {
                                 continue;
                             }

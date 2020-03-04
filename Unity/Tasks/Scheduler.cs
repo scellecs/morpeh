@@ -57,20 +57,33 @@
             public void OnAwake() {
                 this.sortedList = new SortedList<int, List<Task>>();
                 this.filter = this.World.Filter.With<TasksComponent>();
+
+                this.PrepareSortedList();
+
+                for (var index = 0; index < this.sortedList.Values.Count; index++) {
+                    var tasks = this.sortedList.Values[index];
+                    foreach (var task in tasks) {
+                        task.Start();
+                    }
+                }
             }
 
             public void OnUpdate(float deltaTime) {
-                this.sortedList.Clear();
-                foreach (var tasksEntity in this.filter) {
-                    ref var tasksComponent = ref tasksEntity.GetComponent<TasksComponent>();
-                    this.sortedList.Add(tasksComponent.order, tasksComponent.tasks);
-                }
-
+                this.PrepareSortedList();
+               
                 for (var index = 0; index < this.sortedList.Values.Count; index++) {
                     var tasks = this.sortedList.Values[index];
                     foreach (var task in tasks) {
                         task.Execute();
                     }
+                }
+            }
+
+            private void PrepareSortedList() {
+                this.sortedList.Clear();
+                foreach (var tasksEntity in this.filter) {
+                    ref var tasksComponent = ref tasksEntity.GetComponent<TasksComponent>();
+                    this.sortedList.Add(tasksComponent.order, tasksComponent.tasks);
                 }
             }
 

@@ -41,7 +41,7 @@ namespace Morpeh {
             get {
                 if (this.entity != null) {
                     this.componentViews.Clear();
-                    for (int i = 0, length = this.entity.componentsDoubleCount; i < length; i+=2) {
+                    for (int i = 0, length = this.entity.componentsDoubleCapacity; i < length; i+=2) {
                         if (this.entity.components[i] == -1) {
                             continue;
                         }
@@ -103,7 +103,7 @@ namespace Morpeh {
         }
 
 #endif
-        private protected virtual void Start() {
+        private protected virtual void OnEnable() {
             if (!Application.isPlaying) {
                 return;
             }
@@ -129,10 +129,8 @@ namespace Morpeh {
             this.Initialize();
         }
 
-        protected virtual void OnDestroy() {
-            if (this.entity != null) {
-                World.Default?.RemoveEntity(this.entity);
-            }
+        protected virtual void OnDisable() {
+            
         }
 
         private bool IsPrefab() => this.gameObject.scene.name == null;

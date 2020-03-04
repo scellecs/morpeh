@@ -55,6 +55,11 @@ namespace Morpeh.Tasks {
             AssetDatabase.SaveAssets();
         }
 #endif
+        public void Start() {
+            foreach (var action in this.actions) {
+                action.Action.Start();
+            }
+        }
 
         public void Execute() {
             for (int i = 0, length = this.conditions.Count; i < length; i++) {

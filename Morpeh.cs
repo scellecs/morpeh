@@ -43,6 +43,7 @@ namespace Morpeh {
         void SetComponent<T>(in T value) where T : struct, IComponent;
         bool RemoveComponent<T>() where T : struct, IComponent;
         bool Has<T>() where T : struct, IComponent;
+        bool IsDisposed();
     }
 
     public interface IComponent {
@@ -91,7 +92,12 @@ namespace Morpeh {
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
-        internal int componentsDoubleCount;
+        internal int componentsDoubleCapacity;
+
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal int componentsCount;
 
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
@@ -107,7 +113,8 @@ namespace Morpeh {
             this.internalID = id;
             this.worldID    = worldID;
 
-            this.componentsDoubleCount = 0;
+            this.componentsDoubleCapacity = 0;
+            this.componentsCount = 0;
 
             this.components = new int[Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY];
             for (int i = 0, length = this.components.Length; i < length; i++) {
@@ -131,49 +138,53 @@ namespace Morpeh {
 
             if (typeInfo.isMarker) {
                 const int componentId = -1;
-                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                     if (this.components[i] == -1) {
                         this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        this.componentsCount++;
 
                         return ref CacheComponents<T>.Empty();
                     }
                 }
 
-                this.componentsDoubleCount += 2;
-                if (this.componentsDoubleCount >= this.components.Length) {
-                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                    for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                this.componentsDoubleCapacity += 2;
+                if (this.componentsDoubleCapacity >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                    for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                         this.components[i] = -1;
                     }
                 }
 
-                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                this.components[this.componentsDoubleCount - 1] = componentId;
+                this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCapacity - 1] = componentId;
+                this.componentsCount++;
             }
             else {
                 var componentId = this.World.GetCache<T>().Add();
-                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                     if (this.components[i] == -1) {
                         this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        this.componentsCount++;
 
                         return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
 
-                this.componentsDoubleCount += 2;
-                if (this.componentsDoubleCount >= this.components.Length) {
-                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                    for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                this.componentsDoubleCapacity += 2;
+                if (this.componentsDoubleCapacity >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                    for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                         this.components[i] = -1;
                     }
                 }
 
-                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                this.components[this.componentsDoubleCount - 1] = componentId;
+                this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCapacity - 1] = componentId;
+                this.componentsCount++;
 
-                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCount - 1]);
+                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCapacity - 1]);
             }
 
             return ref CacheComponents<T>.Empty();
@@ -196,49 +207,53 @@ namespace Morpeh {
 
             if (typeInfo.isMarker) {
                 const int componentId = -1;
-                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                     if (this.components[i] == -1) {
                         this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        this.componentsCount++;
 
                         return ref CacheComponents<T>.Empty();
                     }
                 }
 
-                this.componentsDoubleCount += 2;
-                if (this.componentsDoubleCount >= this.components.Length) {
-                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                    for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                this.componentsDoubleCapacity += 2;
+                if (this.componentsDoubleCapacity >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                    for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                         this.components[i] = -1;
                     }
                 }
 
-                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                this.components[this.componentsDoubleCount - 1] = componentId;
+                this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCapacity - 1] = componentId;
+                this.componentsCount++;
             }
             else {
                 var componentId = this.World.GetCache<T>().Add();
-                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                     if (this.components[i] == -1) {
                         this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        this.componentsCount++;
 
                         return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
 
-                this.componentsDoubleCount += 2;
-                if (this.componentsDoubleCount >= this.components.Length) {
-                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                    for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                this.componentsDoubleCapacity += 2;
+                if (this.componentsDoubleCapacity >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                    for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                         this.components[i] = -1;
                     }
                 }
 
-                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                this.components[this.componentsDoubleCount - 1] = componentId;
+                this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCapacity - 1] = componentId;
+                this.componentsCount++;
 
-                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCount - 1]);
+                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCapacity - 1]);
             }
 
             return ref CacheComponents<T>.Empty();
@@ -327,29 +342,32 @@ namespace Morpeh {
                 if (!this.Has(typeInfo.id)) {
                     var componentId = this.World.GetCache<T>().Add();
 
-                    for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                    for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                         if (this.components[i] == -1) {
                             this.components[i]     = typeInfo.id;
                             this.components[i + 1] = componentId;
+                            this.componentsCount++;
 
-                            this.World.Filter.EntityChanged(this.internalID);
                             this.World.GetCache<T>().Set(componentId, value);
+                            this.World.Filter.EntityChanged(this.internalID);
                             return;
                         }
                     }
 
-                    this.componentsDoubleCount += 2;
-                    if (this.componentsDoubleCount >= this.components.Length) {
-                        Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                        for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                    this.componentsDoubleCapacity += 2;
+                    if (this.componentsDoubleCapacity >= this.components.Length) {
+                        Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                        for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                             this.components[i] = -1;
                         }
                     }
 
-                    this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                    this.components[this.componentsDoubleCount - 1] = componentId;
-                    this.World.Filter.EntityChanged(this.internalID);
+                    this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                    this.components[this.componentsDoubleCapacity - 1] = componentId;
+                    this.componentsCount++;
+                    
                     this.World.GetCache<T>().Set(componentId, value);
+                    this.World.Filter.EntityChanged(this.internalID);
                     return;
                 }
 
@@ -362,26 +380,28 @@ namespace Morpeh {
             else {
                 if (!this.Has(typeInfo.id)) {
                     const int componentId = -1;
-                    for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                    for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                         if (this.components[i] == -1) {
                             this.components[i]     = typeInfo.id;
                             this.components[i + 1] = componentId;
+                            this.componentsCount++;
 
                             this.World.Filter.EntityChanged(this.internalID);
                             return;
                         }
                     }
 
-                    this.componentsDoubleCount += 2;
-                    if (this.componentsDoubleCount >= this.components.Length) {
-                        Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                        for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                    this.componentsDoubleCapacity += 2;
+                    if (this.componentsDoubleCapacity >= this.components.Length) {
+                        Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                        for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                             this.components[i] = -1;
                         }
                     }
 
-                    this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                    this.components[this.componentsDoubleCount - 1] = componentId;
+                    this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                    this.components[this.componentsDoubleCapacity - 1] = componentId;
+                    this.componentsCount++;
                     this.World.Filter.EntityChanged(this.internalID);
                 }
             }
@@ -391,15 +411,22 @@ namespace Morpeh {
         public bool RemoveComponent<T>() where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
 
-            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+            for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                 if (this.components[i] == typeInfo.id) {
                     this.components[i] = -1;
                     if (!typeInfo.isMarker) {
                         this.World.GetCache<T>().Remove(this.components[i + 1]);
                         this.components[i + 1] = -1;
                     }
+                    --this.componentsCount;
 
-                    this.World.Filter.EntityChanged(this.internalID);
+                    if (this.componentsCount <= 0) {
+                        this.World.RemoveEntity(this);
+                    }
+                    else {
+                        this.World.Filter.EntityChanged(this.internalID);
+                    }
+                    
                     return true;
                 }
             }
@@ -409,7 +436,7 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool Has(int typeID) {
-            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+            for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                 if (this.components[i] == typeID) {
                     return true;
                 }
@@ -421,7 +448,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has<T>() where T : struct, IComponent {
             var typeID = CacheTypeIdentifier<T>.info.id;
-            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+            for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                 if (this.components[i] == typeID) {
                     return true;
                 }
@@ -448,7 +475,8 @@ namespace Morpeh {
             this.components            = null;
             this.internalID            = -1;
             this.worldID               = -1;
-            this.componentsDoubleCount = -1;
+            this.componentsDoubleCapacity = -1;
+            this.componentsCount = -1;
 
             this.isDisposed = true;
         }

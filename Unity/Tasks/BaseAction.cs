@@ -22,6 +22,9 @@ namespace Morpeh.Tasks {
             }
         }
 #endif
+        public virtual void Start() {
+            
+        }
 
         public abstract void Execute();
     }
