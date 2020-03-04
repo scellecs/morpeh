@@ -58,6 +58,7 @@
 
         protected override void OnDisable() {
             this.Entity?.RemoveComponent<T>();
+            base.OnDisable();
         }
     }
 }

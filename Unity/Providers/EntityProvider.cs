@@ -6,6 +6,7 @@ namespace Morpeh {
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
     using Utils;
+
 #endif
 
     public class EntityProvider : MonoBehaviour {
@@ -39,12 +40,13 @@ namespace Morpeh {
         [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
         private List<ComponentView> ComponentsOnEntity {
             get {
+                this.componentViews.Clear();
                 if (this.entity != null) {
-                    this.componentViews.Clear();
-                    for (int i = 0, length = this.entity.componentsDoubleCapacity; i < length; i+=2) {
+                    for (int i = 0, length = this.entity.componentsDoubleCapacity; i < length; i += 2) {
                         if (this.entity.components[i] == -1) {
                             continue;
                         }
+
                         var view = new ComponentView {
                             debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[this.entity.components[i]],
                             ID        = this.entity.components[i + 1],
@@ -58,7 +60,7 @@ namespace Morpeh {
             }
             set { }
         }
-        
+
         private readonly List<ComponentView> componentViews = new List<ComponentView>();
 
 
@@ -110,14 +112,14 @@ namespace Morpeh {
 
             if (this.entityID < 0) {
                 var others = this.GetComponents<EntityProvider>();
-                foreach (var monoProvider in others) {
-                    if (monoProvider.entityID >= 0) {
-                        this.entityID = monoProvider.entityID;
+                foreach (var entityProvider in others) {
+                    if (entityProvider.entityID >= 0) {
+                        this.entityID = entityProvider.entityID;
                         break;
                     }
                 }
 
-                if (this.entityID < 0) {
+                if (this.entityID < 0 || this.entity == null) {
                     World.Default.CreateEntityInternal(out this.entityID);
                     foreach (var monoProvider in others) {
                         monoProvider.entityID = this.entityID;
@@ -130,7 +132,21 @@ namespace Morpeh {
         }
 
         protected virtual void OnDisable() {
+            var others = this.GetComponents<EntityProvider>();
+            foreach (var entityProvider in others) {
+                entityProvider.CheckEntityIsAlive();
+            }
+        }
+
+        [Obsolete]
+        protected virtual void OnDestroy() {
             
+        }
+
+        private void CheckEntityIsAlive() {
+            if (this.entity == null || this.entity.IsDisposed()) {
+                this.entityID = -1;
+            }
         }
 
         private bool IsPrefab() => this.gameObject.scene.name == null;

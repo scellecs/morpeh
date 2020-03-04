@@ -998,6 +998,7 @@ namespace Morpeh {
                     this.Filter.entities.Remove(id);
                     this.entities[id] = null;
                     --this.entitiesCount;
+                    ent.Dispose();
                 }
             }
         }

@@ -131,10 +131,10 @@ namespace Morpeh.Tasks {
 
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
-            private bool IsInt    => this.global.GetValueType() == typeof(int);
-            private bool IsFloat  => this.global.GetValueType() == typeof(float);
-            private bool IsString => this.global.GetValueType() == typeof(string);
-            private bool IsBool   => this.global.GetValueType() == typeof(bool);
+            private bool IsInt    => this.global != null && this.global.GetValueType() == typeof(int);
+            private bool IsFloat  => this.global != null && this.global.GetValueType() == typeof(float);
+            private bool IsString => this.global != null && this.global.GetValueType() == typeof(string);
+            private bool IsBool   => this.global != null && this.global.GetValueType() == typeof(bool);
 
             private bool IsVariable => this.global != null && InheritsFrom(this.global.GetType(), typeof(BaseGlobalVariable<>));
 

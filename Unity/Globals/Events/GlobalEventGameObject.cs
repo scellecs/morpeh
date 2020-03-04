@@ -5,7 +5,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Event Bool")]
-    public class GlobalEventBool : BaseGlobalEvent<bool> {
+    [CreateAssetMenu(menuName = "ECS/Globals/Event GameObject")]
+    public sealed class GlobalEventGameObject : BaseGlobalEvent<GameObject> {
     }
 }
