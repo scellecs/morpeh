@@ -1,7 +1,9 @@
 ﻿namespace Morpeh.Tasks {
     using System.Collections.Generic;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 #if UNITY_EDITOR
+    using Providers;
     using UnityEditor;
 #endif
     
@@ -12,6 +14,9 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
     [HideMonoScript]
 #endif
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class Scheduler : MonoProvider<ECS.TasksComponent> {
         
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -26,6 +31,7 @@
         private static void CreateInstaller(MenuCommand menuCommand) {
             var go = new GameObject("[Scheduler]");
             go.AddComponent<Scheduler>();
+            go.AddComponent<GameObjectsProvider>();
             GameObjectUtility.SetParentAndAlign(go, menuCommand.context as GameObject);
             Undo.RegisterCreatedObjectUndo(go, "Create " + go.name);
             Selection.activeObject = go;

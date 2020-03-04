@@ -10,6 +10,7 @@ namespace Morpeh.Tasks {
     using UnityEditor;
 #endif
     using UnityEngine;
+    using Unity.IL2CPP.CompilerServices;
 
 #if UNITY_EDITOR
     [CreateAssetMenu(menuName = "ECS/Task")]
@@ -17,6 +18,9 @@ namespace Morpeh.Tasks {
 #if UNITY_EDITOR && ODIN_INSPECTOR
     [HideMonoScript]
 #endif
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class Task : ScriptableObject {
         [Space]
         [SerializeField]
@@ -54,8 +58,10 @@ namespace Morpeh.Tasks {
 
         public void Execute() {
             if (this.conditions.Count > 0) {
-                if (!this.conditions.All(c => c.Compare())) {
-                    return;
+                for (int i = 0, length = this.conditions.Count; i < length; i++) {
+                    if (!this.conditions[i].Compare()) {
+                        return;
+                    }
                 }
             }
 
@@ -333,8 +339,8 @@ namespace Morpeh.Tasks {
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HideLabel]
             [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
-#endif
             [ShowInInspector]
+#endif
             public BaseAction Action {
                 get => this.action;
                 set {

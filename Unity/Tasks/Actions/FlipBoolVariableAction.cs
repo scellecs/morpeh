@@ -1,10 +1,14 @@
 namespace Morpeh.Tasks.Actions {
     using Globals;
     using Sirenix.OdinInspector;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
-    [CreateAssetMenu]
-    public class FlipBoolVariableAction : BaseAction {
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [CreateAssetMenu(menuName = "ECS/Actions/" + nameof(FlipBoolVariableAction))]
+    public sealed class FlipBoolVariableAction : BaseAction {
         [Required]
         public GlobalVariableBool variable;
 
