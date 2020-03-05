@@ -1,6 +1,6 @@
-namespace Morpeh.Tasks.Actions {
-    using Globals;
+namespace Morpeh.Globals {
     using Sirenix.OdinInspector;
+    using Tasks;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 

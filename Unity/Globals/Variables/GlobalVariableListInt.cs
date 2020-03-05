@@ -12,20 +12,14 @@ namespace Morpeh.Globals {
         protected override List<int> Load(string serializedData)
             => JsonUtility.FromJson<ListIntWrapper>(serializedData).list;
 
-        protected override string Save() => JsonUtility.ToJson(new ListIntWrapper(this.value));
-    }
+        protected override string Save() => JsonUtility.ToJson(new ListIntWrapper {list = this.value});
 
-    [Il2CppSetOption(Option.NullChecks, false)]
-    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [Serializable]
-    struct ListIntWrapper
-    {
-        public List<int> list;
-
-        public ListIntWrapper(List<int> list)
-        {
-            this.list = list;
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        [Serializable]
+        private struct ListIntWrapper {
+            public List<int> list;
         }
     }
 }

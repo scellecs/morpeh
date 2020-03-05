@@ -4,7 +4,7 @@
 #endif
     using System.Collections.Generic;
     using System.Linq;
-    using Tasks;
+    using Globals;
     using UnityEngine;
     using Utils;
 #if UNITY_EDITOR && ODIN_INSPECTOR

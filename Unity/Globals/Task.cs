@@ -1,16 +1,16 @@
-namespace Morpeh.Tasks {
+namespace Morpeh.Globals {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Globals;
-#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+    using Tasks;
+    using Unity.IL2CPP.CompilerServices;
+    using UnityEditor;
+    using UnityEngine;
+#if UNITY_EDITOR && ODIN_INSPECTOR
 #endif
 #if UNITY_EDITOR
-    using UnityEditor;
 #endif
-    using UnityEngine;
-    using Unity.IL2CPP.CompilerServices;
 
 #if UNITY_EDITOR
     [CreateAssetMenu(menuName = "ECS/Task")]

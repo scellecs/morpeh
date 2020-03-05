@@ -1,6 +1,6 @@
-namespace Morpeh.Tasks.Actions {
-    using Globals;
+namespace Morpeh.Globals {
     using Sirenix.OdinInspector;
+    using Tasks;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -18,8 +18,15 @@ namespace Morpeh.Tasks.Actions {
         }
 
         public override void OnUpdate(float deltaTime) {
-            foreach (GameObject go in this.gameObjectVariable.Value) {
-                go.SetActive(this.isActive.Value);
+            foreach (var obj in this.gameObjectVariable.Value) {
+                switch (obj) {
+                    case GameObject go:
+                        go.SetActive(this.isActive.Value);
+                        break;
+                    case Component component:
+                        component.gameObject.SetActive(this.isActive.Value);
+                        break;
+                }
             }
         }
     }

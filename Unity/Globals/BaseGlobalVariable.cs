@@ -5,6 +5,7 @@
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+
 #endif
 
     public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData> {
@@ -19,14 +20,13 @@
 #endif
         protected TData value;
 
-        private TData  lastValue;
         private string defaultSerializedValue;
 
         private const string COMMON_KEY = "MORPEH__GLOBALS_VARIABLES_";
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [PropertyOrder(1)]
-        [ShowIf("@AutoSave && CanBeSerialized")]
+        [ShowIf("@" + nameof(AutoSave) + " && " + nameof(CanBeAutoSaved))]
 #endif
         [SerializeField]
         private string customKey;
@@ -44,16 +44,16 @@
             }
         }
 
-        public virtual bool CanBeSerialized => true;
+        public virtual bool CanBeAutoSaved => true;
 
         [Header("Saving Settings")]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [PropertyOrder(0)]
-        [ShowIf(nameof(CanBeSerialized))]
+        [ShowIf(nameof(CanBeAutoSaved))]
 #endif
         public bool AutoSave;
-        
+
         private bool HasPlayerPrefsValue            => PlayerPrefs.HasKey(this.Key);
         private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
 
@@ -95,7 +95,8 @@
 
         internal override void OnEnable() {
             base.OnEnable();
-            this.defaultSerializedValue               =  this.Save();
+            this.defaultSerializedValue = this.Save();
+
             UnityRuntimeHelper.OnApplicationFocusLost += this.SaveData;
 #if UNITY_EDITOR
             if (string.IsNullOrEmpty(this.customKey)) {
@@ -104,7 +105,7 @@
 #endif
             this.LoadData();
         }
-        
+
 #if UNITY_EDITOR
         internal override void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             base.OnEditorApplicationOnplayModeStateChanged(state);
