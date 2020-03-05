@@ -53,11 +53,17 @@
         }
 
         protected sealed override void PreInitialize() {
-            this.Entity.SetComponent(this.serializedData);
+            var ent = this.Entity;
+            if (ent != null && !ent.IsDisposed()) {
+                ent.SetComponent(this.serializedData);
+            }
         }
 
         protected override void OnDisable() {
-            this.Entity?.RemoveComponent<T>();
+            var ent = this.Entity;
+            if (ent != null && !ent.IsDisposed()) {
+                ent.RemoveComponent<T>();
+            }
             base.OnDisable();
         }
     }

@@ -17,22 +17,86 @@ namespace Morpeh {
         private int entityID = -1;
 
         [CanBeNull]
-        private Entity entity {
+        private Entity InternalEntity {
             get {
-                if (World.Default != null && this.entityID >= 0 && World.Default.entitiesLength > this.entityID) {
-                    return World.Default.entities[this.entityID];
+                if (this.IsPrefab()) {
+                    return null;
                 }
 
-                return null;
+                if (!Application.isPlaying) {
+                    return null;
+                }
+                
+                if (this.cachedEntity == null && World.Default != null && this.entityID >= 0 && World.Default.entitiesLength > this.entityID) {
+                    this.cachedEntity = World.Default.entities[this.entityID];
+                }
+
+                return this.cachedEntity;
             }
         }
 
-        [CanBeNull]
-        public IEntity Entity => this.IsPrefab() ? null : Application.isPlaying ? this.entity : null;
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        private bool isNotEntityProvider => this.GetType() != typeof(EntityProvider);
+        private Entity cachedEntity;
 
-        [HideIf("$isNotEntityProvider")]
+        [CanBeNull]
+        public IEntity Entity => this.InternalEntity;
+
+        private protected virtual void OnEnable() {
+            if (!Application.isPlaying) {
+                return;
+            }
+
+            if (this.entityID < 0) {
+                var others = this.GetComponents<EntityProvider>();
+                foreach (var entityProvider in others) {
+                    if (entityProvider.entityID >= 0) {
+                        this.entityID = entityProvider.entityID;
+                        this.cachedEntity = entityProvider.cachedEntity;
+                        break;
+                    }
+                }
+
+                if (this.entityID < 0 || this.InternalEntity == null) {
+                    this.cachedEntity = World.Default.CreateEntityInternal(out this.entityID);
+                    foreach (var entityProvider in others) {
+                        entityProvider.entityID = this.entityID;
+                        entityProvider.cachedEntity = this.cachedEntity;
+                    }
+                }
+            }
+
+            this.PreInitialize();
+            this.Initialize();
+        }
+
+        protected virtual void OnDisable() {
+            var others = this.GetComponents<EntityProvider>();
+            foreach (var entityProvider in others) {
+                entityProvider.CheckEntityIsAlive();
+            }
+        }
+
+        protected virtual void OnDestroy() {
+            
+        }
+
+        private void CheckEntityIsAlive() {
+            if (this.InternalEntity == null || this.InternalEntity.IsDisposed()) {
+                this.entityID = -1;
+            }
+        }
+
+        private bool IsPrefab() => this.gameObject.scene.name == null;
+
+        protected virtual void PreInitialize() {
+        }
+
+        protected virtual void Initialize() {
+        }
+        
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        private bool IsNotEntityProvider => this.GetType() != typeof(EntityProvider);
+
+        [HideIf("$" + nameof(IsNotEntityProvider))]
         [DisableContextMenu]
         [PropertySpace]
         [ShowInInspector]
@@ -41,16 +105,16 @@ namespace Morpeh {
         private List<ComponentView> ComponentsOnEntity {
             get {
                 this.componentViews.Clear();
-                if (this.entity != null) {
-                    for (int i = 0, length = this.entity.componentsDoubleCapacity; i < length; i += 2) {
-                        if (this.entity.components[i] == -1) {
+                if (this.InternalEntity != null) {
+                    for (int i = 0, length = this.InternalEntity.componentsDoubleCapacity; i < length; i += 2) {
+                        if (this.InternalEntity.components[i] == -1) {
                             continue;
                         }
 
                         var view = new ComponentView {
-                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[this.entity.components[i]],
-                            ID        = this.entity.components[i + 1],
-                            world     = this.entity.World
+                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[this.InternalEntity.components[i]],
+                            ID        = this.InternalEntity.components[i + 1],
+                            world     = this.InternalEntity.World
                         };
                         this.componentViews.Add(view);
                     }
@@ -105,56 +169,5 @@ namespace Morpeh {
         }
 
 #endif
-        private protected virtual void OnEnable() {
-            if (!Application.isPlaying) {
-                return;
-            }
-
-            if (this.entityID < 0) {
-                var others = this.GetComponents<EntityProvider>();
-                foreach (var entityProvider in others) {
-                    if (entityProvider.entityID >= 0) {
-                        this.entityID = entityProvider.entityID;
-                        break;
-                    }
-                }
-
-                if (this.entityID < 0 || this.entity == null) {
-                    World.Default.CreateEntityInternal(out this.entityID);
-                    foreach (var monoProvider in others) {
-                        monoProvider.entityID = this.entityID;
-                    }
-                }
-            }
-
-            this.PreInitialize();
-            this.Initialize();
-        }
-
-        protected virtual void OnDisable() {
-            var others = this.GetComponents<EntityProvider>();
-            foreach (var entityProvider in others) {
-                entityProvider.CheckEntityIsAlive();
-            }
-        }
-
-        [Obsolete]
-        protected virtual void OnDestroy() {
-            
-        }
-
-        private void CheckEntityIsAlive() {
-            if (this.entity == null || this.entity.IsDisposed()) {
-                this.entityID = -1;
-            }
-        }
-
-        private bool IsPrefab() => this.gameObject.scene.name == null;
-
-        protected virtual void PreInitialize() {
-        }
-
-        protected virtual void Initialize() {
-        }
     }
 }
