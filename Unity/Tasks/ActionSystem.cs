@@ -1,6 +1,5 @@
 namespace Morpeh.Tasks {
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
@@ -8,7 +7,7 @@ namespace Morpeh.Tasks {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public abstract class BaseAction : ScriptableObject {
+    public abstract class ActionSystem : UpdateSystem {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-1)]
         [DelayedProperty]
@@ -22,10 +21,5 @@ namespace Morpeh.Tasks {
             }
         }
 #endif
-        public virtual void Start() {
-            
-        }
-
-        public abstract void Execute();
     }
 }

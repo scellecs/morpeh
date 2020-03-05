@@ -34,42 +34,46 @@ namespace Morpeh.Tasks {
             CustomRemoveElementFunction = nameof(RemoveAction),
             CustomRemoveIndexFunction   = nameof(RemoveActionByIndex))]
 #endif
-        private List<TaskAction> actions = default;
+        internal List<TaskAction> actions = default;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private TaskAction AddAction() => new TaskAction {parent = this};
 
         private void RemoveAction(TaskAction action) {
-            AssetDatabase.RemoveObjectFromAsset(action.Action);
+            AssetDatabase.RemoveObjectFromAsset(action.ActionSystem);
             this.actions.Remove(action);
             AssetDatabase.SaveAssets();
         }
 
         private void RemoveActionByIndex(int index) {
             var value = this.actions[index];
-            if (value != null && value.Action != null) {
-                AssetDatabase.RemoveObjectFromAsset(value.Action);
+            if (value != null && value.ActionSystem != null) {
+                AssetDatabase.RemoveObjectFromAsset(value.ActionSystem);
             }
 
             this.actions.RemoveAt(index);
             AssetDatabase.SaveAssets();
         }
 #endif
-        public void Start() {
-            foreach (var action in this.actions) {
-                action.Action.Start();
-            }
-        }
+        internal ICondition GetTaskCondition() => this.taskCommonCondition ?? (this.taskCommonCondition = new TaskCommonCondition(this.conditions));
+        
+        private TaskCommonCondition taskCommonCondition = default;
 
-        public void Execute() {
-            for (int i = 0, length = this.conditions.Count; i < length; i++) {
-                if (!this.conditions[i].Compare()) {
-                    return;
+        private class TaskCommonCondition : ICondition {
+            private readonly List<TaskCondition> conditions;
+
+            public TaskCommonCondition(List<TaskCondition> taskConditions) => this.conditions = taskConditions;
+
+            public bool Check() {
+                for (int i = 0, length = this.conditions.Count; i < length; i++) {
+                    if (!this.conditions[i].Compare()) {
+                        return false;
+                    }
                 }
+                return true;
             }
 
-            foreach (var action in this.actions) {
-                action.Action.Execute();
+            public void Dispose() {
             }
         }
 
@@ -337,26 +341,26 @@ namespace Morpeh.Tasks {
 
             [SerializeField]
             [HideInInspector]
-            private BaseAction action;
+            private ActionSystem actionSystem;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HideLabel]
             [InlineEditor(InlineEditorObjectFieldModes.Foldout)]
             [ShowInInspector]
 #endif
-            public BaseAction Action {
-                get => this.action;
+            public ActionSystem ActionSystem {
+                get => this.actionSystem;
                 set {
 #if UNITY_EDITOR
-                    if (this.action != null) {
-                        AssetDatabase.RemoveObjectFromAsset(this.action);
+                    if (this.actionSystem != null) {
+                        AssetDatabase.RemoveObjectFromAsset(this.actionSystem);
                     }
 #endif
-                    this.action           = Instantiate(value);
-                    this.action.hideFlags = HideFlags.HideInHierarchy;
-                    this.action.name      = value.name;
+                    this.actionSystem           = Instantiate(value);
+                    this.actionSystem.hideFlags = HideFlags.HideInHierarchy;
+                    this.actionSystem.name      = value.name;
 #if UNITY_EDITOR
-                    AssetDatabase.AddObjectToAsset(this.action, this.parent);
+                    AssetDatabase.AddObjectToAsset(this.actionSystem, this.parent);
 
                     AssetDatabase.SaveAssets();
 #endif

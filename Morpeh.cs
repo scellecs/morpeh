@@ -10,6 +10,7 @@ namespace Morpeh {
     using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
 #if UNITY_2019_1_OR_NEWER
     using JetBrains.Annotations;
     using Unity.Collections.LowLevel.Unsafe;
@@ -481,6 +482,10 @@ namespace Morpeh {
             this.isDisposed = true;
         }
     }
+    
+    public interface ICondition : IDisposable {
+        bool Check();
+    }
 
     [Serializable]
     [Il2Cpp(Option.NullChecks, false)]
@@ -529,13 +534,17 @@ namespace Morpeh {
 #endif
         [NonSerialized]
         private List<IDisposable> disposables;
-
+        [NonSerialized]
         private World world;
+        [NonSerialized]
+        private List<SystemsGroup> childs;
+        [NonSerialized]
+        private ICondition condition;
 
         private SystemsGroup() {
         }
 
-        internal SystemsGroup(World world) {
+        internal SystemsGroup(World world, ICondition condition) {
             this.world = world;
 
             this.systems      = new List<ISystem>();
@@ -548,6 +557,9 @@ namespace Morpeh {
 
             this.newInitializers = new List<IInitializer>();
             this.disposables     = new List<IDisposable>();
+
+            this.condition = condition;
+            this.childs = new List<SystemsGroup>();
         }
 
         public void Dispose() {
@@ -590,9 +602,22 @@ namespace Morpeh {
 
             this.disposables.Clear();
             this.disposables = null;
+            
+            this.condition?.Dispose();
+            this.condition = null;
+
+            foreach (var child in this.childs) {
+                child.Dispose();
+            }
+
+            this.childs = null;
         }
 
         public void Update(float deltaTime) {
+            if (this.condition != null && !this.condition.Check()) {
+                return;
+            }
+            
             foreach (var disposable in this.disposables) {
                 disposable.Dispose();
             }
@@ -612,23 +637,43 @@ namespace Morpeh {
                 this.systems[i].OnUpdate(deltaTime);
                 this.world.Filter.Update();
             }
+            
+            for (int i = 0, length = this.childs.Count; i < length; i++) {
+                this.childs[i].Update(deltaTime);
+            }
         }
 
         public void FixedUpdate(float deltaTime) {
+            if (this.condition != null && !this.condition.Check()) {
+                return;
+            }
+
             this.world.Filter.Update();
 
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
                 this.fixedSystems[i].OnUpdate(deltaTime);
                 this.world.Filter.Update();
             }
+            
+            for (int i = 0, length = this.childs.Count; i < length; i++) {
+                this.childs[i].FixedUpdate(deltaTime);
+            }
         }
 
         public void LateUpdate(float deltaTime) {
+            if (this.condition != null && !this.condition.Check()) {
+                return;
+            }
+
             this.world.Filter.Update();
 
             for (int i = 0, length = this.lateSystems.Count; i < length; i++) {
                 this.lateSystems[i].OnUpdate(deltaTime);
                 this.world.Filter.Update();
+            }
+
+            for (int i = 0, length = this.childs.Count; i < length; i++) {
+                this.childs[i].LateUpdate(deltaTime);
             }
         }
 
@@ -740,6 +785,13 @@ namespace Morpeh {
             }
 
             return false;
+        }
+
+        public void AddChildGroup(SystemsGroup child) {
+            this.childs.Add(child);
+        }
+        public void RemoveChildGroup(SystemsGroup child) {
+            this.childs.Remove(child);
         }
     }
 
@@ -921,10 +973,15 @@ namespace Morpeh {
             }
         }
 
-        public SystemsGroup CreateSystemsGroup() => new SystemsGroup(this);
+        public SystemsGroup CreateSystemsGroup() => new SystemsGroup(this, null);
+        public SystemsGroup CreateSystemsGroup(ICondition condition) => new SystemsGroup(this, condition);
 
         public void AddSystemsGroup(int order, SystemsGroup systemsGroup) {
             this.systemsGroups.Add(order, systemsGroup);
+        }
+        
+        public void AddLastSystemsGroup(SystemsGroup systemsGroup) {
+            this.systemsGroups.Add(this.systemsGroups.Last().Key + 1, systemsGroup);
         }
 
         public void RemoveSystemsGroup(SystemsGroup systemsGroup) {
