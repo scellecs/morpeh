@@ -1148,13 +1148,13 @@ namespace Morpeh {
                 var entity = this.world.GetEntityInternal(id);
                 switch (this.filterMode) {
                     case FilterMode.Include:
-                        if (entity.Has(this.typeID)) {
+                        if (entity != null && !entity.IsDisposed() && entity.Has(this.typeID)) {
                             this.entities.Add(id);
                         }
 
                         break;
                     case FilterMode.Exclude:
-                        if (!entity.Has(this.typeID)) {
+                        if (entity != null && !entity.IsDisposed() && !entity.Has(this.typeID)) {
                             this.entities.Add(id);
                         }
 
@@ -1217,30 +1217,26 @@ namespace Morpeh {
             for (var i = this.dirtyList.Count - 1; i >= 0; i--) {
                 var dirtyId = this.dirtyList[i];
                 var entity  = this.world.GetEntityInternal(dirtyId);
-                //TODO maybe remove?
-                if (entity != null) {
-                    if (this.filterMode == FilterMode.Include) {
-                        if (entity.Has(this.typeID)) {
-                            if (this.entities.Add(dirtyId)) {
-                                this.dirtyList.RemoveAtFast(i);
-                            }
-                        }
-                        else {
-                            this.entities.Remove(dirtyId);
+                if (this.filterMode == FilterMode.Include) {
+                    if (entity != null && !entity.IsDisposed() && entity.Has(this.typeID)) {
+                        if (this.entities.Add(dirtyId)) {
                             this.dirtyList.RemoveAtFast(i);
                         }
                     }
-
-                    if (this.filterMode == FilterMode.Exclude) {
-                        if (!entity.Has(this.typeID)) {
-                            if (this.entities.Add(dirtyId)) {
-                                this.dirtyList.RemoveAtFast(i);
-                            }
-                        }
-                        else {
-                            this.entities.Remove(dirtyId);
+                    else {
+                        this.entities.Remove(dirtyId);
+                        this.dirtyList.RemoveAtFast(i);
+                    }
+                }
+                if (this.filterMode == FilterMode.Exclude) {
+                    if (entity != null && !entity.IsDisposed() && !entity.Has(this.typeID)) {
+                        if (this.entities.Add(dirtyId)) {
                             this.dirtyList.RemoveAtFast(i);
                         }
+                    }
+                    else {
+                        this.entities.Remove(dirtyId);
+                        this.dirtyList.RemoveAtFast(i);
                     }
                 }
             }

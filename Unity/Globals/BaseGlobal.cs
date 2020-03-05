@@ -1,6 +1,7 @@
 namespace Morpeh.Globals {
     using System;
     using ECS;
+    using JetBrains.Annotations;
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
     using UnityEditor;
@@ -16,6 +17,7 @@ namespace Morpeh.Globals {
 #endif
         private protected int internalEntityID = -1;
 
+        [CanBeNull]
         private protected Entity InternalEntity => World.Default.entities[this.internalEntityID];
 
         public IEntity Entity {
@@ -73,8 +75,11 @@ namespace Morpeh.Globals {
 
         public virtual void Dispose() {
             if (this.internalEntityID != -1) {
-                this.InternalEntity.Dispose();
-                World.Default.RemoveEntity(this.InternalEntity);
+                var entity = this.InternalEntity;
+                if (entity != null && !entity.IsDisposed()) {
+                    entity.Dispose();
+                    World.Default.RemoveEntity(entity);
+                }
                 this.internalEntityID = -1;
             }
         }
