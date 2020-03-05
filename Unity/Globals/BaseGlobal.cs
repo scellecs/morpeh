@@ -65,7 +65,7 @@ namespace Morpeh.Globals {
 
         private protected abstract void CheckIsInitialized();
 
-        public static implicit operator bool(BaseGlobal exists) => exists.IsPublished;
+        public static implicit operator bool(BaseGlobal exists) => exists != null && exists.IsPublished;
 
         private protected class Unsubscriber : IDisposable {
             private readonly Action unsubscribe;
