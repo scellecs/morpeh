@@ -77,7 +77,6 @@ namespace Morpeh.Globals {
             if (this.internalEntityID != -1) {
                 var entity = this.InternalEntity;
                 if (entity != null && !entity.IsDisposed()) {
-                    entity.Dispose();
                     World.Default.RemoveEntity(entity);
                 }
                 this.internalEntityID = -1;
