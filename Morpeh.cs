@@ -47,12 +47,17 @@ namespace Morpeh {
 
     public interface IComponent {
     }
+    
+    public interface IMonoComponent<T> : IComponent
+        where T : UnityEngine.Component {
+        T monoComponent { get; set; }
+    }
 
     public interface IInitializer : IDisposable {
         World World { get; set; }
 
         /// <summary>
-        ///     Calling 1 time on registration in World
+        ///     Called 1 time on registration in the World
         /// </summary>
         void OnAwake();
     }
@@ -121,7 +126,7 @@ namespace Morpeh {
 
             if (this.Has<T>()) {
 #if UNITY_EDITOR
-                Debug.LogError("You add component which already exist! Use Get or SetComponent instead!");
+                Debug.LogError("You're trying to add a component that already exists! Use Get or SetComponent instead!");
 #endif
                 return ref CacheComponents<T>.Empty();
             }
@@ -185,7 +190,7 @@ namespace Morpeh {
 
             if (this.Has<T>()) {
 #if UNITY_EDITOR
-                Debug.LogError("You add component which already exist! Use Get or SetComponent instead!");
+                Debug.LogError("You're trying to add a component that already exists! Use Get or SetComponent instead!");
 #endif
                 exist = true;
                 return ref CacheComponents<T>.Empty();
