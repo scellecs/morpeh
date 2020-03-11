@@ -33,7 +33,7 @@ namespace Morpeh {
         internal const int DEFAULT_CACHE_COMPONENTS_CAPACITY           = 2048;
     }
 
-    public interface IEntity : IDisposable {
+    public interface IEntity {
         int   ID { get; }
         ref T AddComponent<T>() where T : struct, IComponent;
         ref T AddComponent<T>(out bool exist) where T : struct, IComponent;
@@ -1100,6 +1100,8 @@ namespace Morpeh {
 #endif
         private List<int> removedList;
         private List<int> dirtyList;
+        
+        private int lastEntitiesCount = -1;
 
         //root filter ctor
         //don't allocate any trash
@@ -1195,18 +1197,24 @@ namespace Morpeh {
 
             this.dirtyList.Clear();
             this.dirtyList = null;
+
+            this.lastEntitiesCount = -1;
         }
 
         internal void EntityChanged(int id) => this.dirtyList.Add(id);
 
         public void Update() {
             if (this.typeID == -1) {
-                for (int i = 0, length = this.childs.Count; i < length; i++) {
-                    this.childs[i].ChildrensUpdate(this.dirtyList);
+                var entitiesCount = this.entities.Count;
+                if (this.lastEntitiesCount != entitiesCount || this.dirtyList.Count > 0) {
+                    for (int i = 0, length = this.childs.Count; i < length; i++) {
+                        this.childs[i].UpdateChilds(this.dirtyList);
+                    }
+
+                    this.lastEntitiesCount = entitiesCount;
+                    this.dirtyList.Clear();
                 }
-
-                this.dirtyList.Clear();
-
+                
                 return;
             }
 
@@ -1277,7 +1285,7 @@ namespace Morpeh {
             this.addedList.Clear();
 
             for (int i = 0, length = this.childs.Count; i < length; i++) {
-                this.childs[i].ChildrensUpdate(this.dirtyList);
+                this.childs[i].UpdateChilds(this.dirtyList);
             }
 
             this.dirtyList.Clear();
@@ -1301,7 +1309,7 @@ namespace Morpeh {
             }
         }
 
-        private void ChildrensUpdate(List<int> parentDirtyList) {
+        private void UpdateChilds(List<int> parentDirtyList) {
             this.dirtyList.AddRange(parentDirtyList);
             this.Update();
         }

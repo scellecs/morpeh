@@ -27,10 +27,15 @@ namespace Morpeh {
                     return null;
                 }
                 
-                if (this.cachedEntity == null && World.Default != null && this.entityID >= 0 && World.Default.entitiesLength > this.entityID) {
-                    this.cachedEntity = World.Default.entities[this.entityID];
+                if (this.cachedEntity == null) {
+                    if (World.Default != null && this.entityID >= 0 && World.Default.entitiesLength > this.entityID) {
+                        this.cachedEntity = World.Default.entities[this.entityID];
+                    }
                 }
-
+                else if (this.cachedEntity != null && this.cachedEntity.IsDisposed()) {
+                    this.cachedEntity = null;
+                }
+                
                 return this.cachedEntity;
             }
         }
