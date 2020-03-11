@@ -20,6 +20,8 @@
 #endif
         protected TData value;
 
+        [HideInInspector]
+        [SerializeField]
         private string defaultSerializedValue;
 
         private const string COMMON_KEY = "MORPEH__GLOBALS_VARIABLES_";
