@@ -80,6 +80,7 @@ namespace Morpeh.Globals {
         [Serializable]
         public class TaskCondition {
             public BaseGlobal global = default;
+            private bool firstCompare;
 
             [SerializeField]
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -258,7 +259,10 @@ namespace Morpeh.Globals {
 
                     var value = g.Value;
                     if (this.variableComparisonMode == VariableComparisonMode.CompareValueOnChange) {
-                        if (g.BatchedChanges.Count > 0) {
+                        if (!this.firstCompare) {
+                            this.firstCompare = true;
+                        }
+                        else if (g.BatchedChanges.Count > 0) {
                             value = g.BatchedChanges.Peek();
                         }
                         else {

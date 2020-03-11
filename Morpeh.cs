@@ -540,6 +540,8 @@ namespace Morpeh {
         private List<SystemsGroup> childs;
         [NonSerialized]
         private ICondition condition;
+        [NonSerialized]
+        private bool conditionalState;
 
         private SystemsGroup() {
         }
@@ -559,6 +561,8 @@ namespace Morpeh {
             this.disposables     = new List<IDisposable>();
 
             this.condition = condition;
+            this.conditionalState = false;
+            
             this.childs = new List<SystemsGroup>();
         }
 
@@ -605,6 +609,7 @@ namespace Morpeh {
             
             this.condition?.Dispose();
             this.condition = null;
+            this.conditionalState = false;
 
             foreach (var child in this.childs) {
                 child.Dispose();
@@ -614,8 +619,11 @@ namespace Morpeh {
         }
 
         public void Update(float deltaTime) {
-            if (this.condition != null && !this.condition.Check()) {
-                return;
+            if (this.condition != null) {
+                this.conditionalState = this.condition.Check();
+                if (!this.conditionalState) {
+                    return;
+                }
             }
             
             foreach (var disposable in this.disposables) {
@@ -644,7 +652,7 @@ namespace Morpeh {
         }
 
         public void FixedUpdate(float deltaTime) {
-            if (this.condition != null && !this.condition.Check()) {
+            if (this.condition != null && !this.conditionalState) {
                 return;
             }
 
@@ -661,7 +669,7 @@ namespace Morpeh {
         }
 
         public void LateUpdate(float deltaTime) {
-            if (this.condition != null && !this.condition.Check()) {
+            if (this.condition != null && !this.conditionalState) {
                 return;
             }
 
