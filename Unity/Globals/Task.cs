@@ -168,49 +168,53 @@ namespace Morpeh.Globals {
             [Serializable]
             public abstract class Comparison {
             }
-
+            
             [Serializable]
             public abstract class Comparison<T> : Comparison where T : IEquatable<T> {
-                public          T    value;
                 public abstract bool Compare(T other);
             }
 
             [Serializable]
-            public abstract class EqualityComparison<T> : Comparison<T> where T : IEquatable<T> {
-                public override bool Compare(T other) => other.Equals(this.value);
+            public abstract class Comparison<TGV, T> : Comparison<T> where T : IEquatable<T> where TGV : BaseGlobalVariable<T> {
+                public TGV value;
             }
 
             [Serializable]
-            public sealed class StringComparison : EqualityComparison<string> {
+            public abstract class EqualityComparison<TGV, T> : Comparison<TGV, T> where T : IEquatable<T> where TGV : BaseGlobalVariable<T> {
+                public override bool Compare(T other) => other.Equals(this.value.Value);
             }
 
             [Serializable]
-            public sealed class BoolComparison : EqualityComparison<bool> {
+            public sealed class StringComparison : EqualityComparison<GlobalVariableString, string> {
             }
 
             [Serializable]
-            public class FloatComparison : Comparison<float> {
+            public sealed class BoolComparison : EqualityComparison<GlobalVariableBool, bool> {
+            }
+
+            [Serializable]
+            public class FloatComparison : Comparison<GlobalVariableFloat, float> {
                 public ComparisonType type;
 
                 public override bool Compare(float other) {
                     if (this.type == ComparisonType.Equals) {
-                        return other == this.value;
+                        return other == this.value.Value;
                     }
 
                     if (this.type == ComparisonType.Greater) {
-                        return other > this.value;
+                        return other > this.value.Value;
                     }
 
                     if (this.type == ComparisonType.Less) {
-                        return other < this.value;
+                        return other < this.value.Value;
                     }
 
                     if (this.type == ComparisonType.GreaterOrEquals) {
-                        return other >= this.value;
+                        return other >= this.value.Value;
                     }
 
                     if (this.type == ComparisonType.LessOrEquals) {
-                        return other <= this.value;
+                        return other <= this.value.Value;
                     }
 
                     return false;
@@ -218,28 +222,28 @@ namespace Morpeh.Globals {
             }
 
             [Serializable]
-            public class IntComparison : Comparison<int> {
+            public class IntComparison : Comparison<GlobalVariableInt, int> {
                 public ComparisonType type;
 
                 public override bool Compare(int other) {
                     if (this.type == ComparisonType.Equals) {
-                        return other == this.value;
+                        return other == this.value.Value;
                     }
 
                     if (this.type == ComparisonType.Greater) {
-                        return other > this.value;
+                        return other > this.value.Value;
                     }
 
                     if (this.type == ComparisonType.Less) {
-                        return other < this.value;
+                        return other < this.value.Value;
                     }
 
                     if (this.type == ComparisonType.GreaterOrEquals) {
-                        return other >= this.value;
+                        return other >= this.value.Value;
                     }
 
                     if (this.type == ComparisonType.LessOrEquals) {
-                        return other <= this.value;
+                        return other <= this.value.Value;
                     }
 
                     return false;
