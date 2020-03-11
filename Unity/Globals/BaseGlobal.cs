@@ -10,7 +10,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public abstract class BaseGlobal : ScriptableObject, IDisposable {
+    public abstract class BaseGlobal :  ScriptableObject, IDisposable {
         [SerializeField]
 #if ODIN_INSPECTOR
         [ReadOnly]
