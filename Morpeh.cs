@@ -487,7 +487,6 @@ namespace Morpeh {
         bool Check();
     }
 
-    [Serializable]
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -495,52 +494,41 @@ namespace Morpeh {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> systems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> fixedSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> lateSystems;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> disabledSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> disabledFixedSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> disabledLateSystems;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<IInitializer> newInitializers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<IDisposable> disposables;
-        [NonSerialized]
         private World world;
-        [NonSerialized]
         private List<SystemsGroup> childs;
-        [NonSerialized]
+        
         private ICondition condition;
-        [NonSerialized]
         private bool conditionalState;
 
         private SystemsGroup() {
