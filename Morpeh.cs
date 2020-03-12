@@ -655,8 +655,21 @@ namespace Morpeh {
             if (this.condition != null && !this.conditionalState) {
                 return;
             }
+            
+            foreach (var disposable in this.disposables) {
+                disposable.Dispose();
+            }
+
+            this.disposables.Clear();
 
             this.world.Filter.Update();
+
+            foreach (var initializer in this.newInitializers) {
+                initializer.OnAwake();
+                this.world.Filter.Update();
+            }
+
+            this.newInitializers.Clear();
 
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
                 this.fixedSystems[i].OnUpdate(deltaTime);

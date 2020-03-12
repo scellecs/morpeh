@@ -32,7 +32,7 @@ namespace Morpeh.Globals {
                     evnt.Action?.Invoke(evnt.Data);
                 }
                 foreach (var entity in common.With<GlobalEventNextFrame>()) {
-                    entity.SetComponent(new GlobalEventPublished());
+                    entity.SetComponent(new GlobalEventPublished ());
                     entity.RemoveComponent<GlobalEventNextFrame>();
                 }
             }
