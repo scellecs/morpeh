@@ -80,6 +80,7 @@ namespace Morpeh {
             }
         }
 
+        [System.Obsolete]
         protected virtual void OnDestroy() {
             
         }

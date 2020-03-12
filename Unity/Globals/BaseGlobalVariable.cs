@@ -7,7 +7,6 @@
     using Sirenix.OdinInspector;
 
 #endif
-
     public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData> {
         [Space]
         [Header("Runtime Data")]
@@ -19,11 +18,9 @@
         [HideLabel]
 #endif
         protected TData value;
-
         [HideInInspector]
         [SerializeField]
         private string defaultSerializedValue;
-
         private const string COMMON_KEY = "MORPEH__GLOBALS_VARIABLES_";
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
@@ -32,7 +29,6 @@
 #endif
         [SerializeField]
         private string customKey;
-
         // ReSharper disable once InconsistentNaming
         private string __internalKey;
 
@@ -47,7 +43,6 @@
         }
 
         public virtual bool CanBeAutoSaved => true;
-
         [Header("Saving Settings")]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
@@ -55,15 +50,14 @@
         [ShowIf(nameof(CanBeAutoSaved))]
 #endif
         public bool AutoSave;
-
         private bool HasPlayerPrefsValue            => PlayerPrefs.HasKey(this.Key);
         private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
-
         private bool isLoaded;
 
         public TData Value {
             get {
                 if (!this.isLoaded) {
+                    this.defaultSerializedValue = this.Save();
                     this.LoadData();
                     this.isLoaded = true;
                 }
@@ -97,17 +91,16 @@
 
         internal override void OnEnable() {
             base.OnEnable();
-            this.defaultSerializedValue = this.Save();
-
+            this.defaultSerializedValue               =  this.Save();
             UnityRuntimeHelper.OnApplicationFocusLost += this.SaveData;
 #if UNITY_EDITOR
             if (string.IsNullOrEmpty(this.customKey)) {
                 this.GenerateCustomKey();
             }
-#endif
+#else
             this.LoadData();
+#endif
         }
-
 #if UNITY_EDITOR
         internal override void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             base.OnEditorApplicationOnplayModeStateChanged(state);
@@ -118,12 +111,10 @@
                 this.isLoaded               = false;
             }
             else if (state == PlayModeStateChange.EnteredPlayMode) {
-                this.defaultSerializedValue = this.Save();
                 this.LoadData();
             }
         }
 #endif
-
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Button]
         [PropertyOrder(3)]
@@ -169,8 +160,6 @@
         #region EDITOR
 
 #if UNITY_EDITOR
-
-
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [ShowIf("@HasPlayerPrefsValueAndAutoSave")]
