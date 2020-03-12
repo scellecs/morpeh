@@ -1052,8 +1052,10 @@ namespace Morpeh {
             return this.entities[id];
         }
 
+        [CanBeNull]
         public IEntity GetEntity(in int id) => this.entities[id];
 
+        [CanBeNull]
         internal Entity GetEntityInternal(in int id) => this.entities[id];
 
         public void RemoveEntity(IEntity entity) {
@@ -1277,13 +1279,13 @@ namespace Morpeh {
                 var entity = this.world.GetEntityInternal(id);
                 switch (this.filterMode) {
                     case FilterMode.Include:
-                        if (entity.Has(this.typeID)) {
+                        if (entity != null && !entity.IsDisposed() && entity.Has(this.typeID)) {
                             this.entities.Add(id);
                         }
 
                         break;
                     case FilterMode.Exclude:
-                        if (!entity.Has(this.typeID)) {
+                        if (entity != null && !entity.IsDisposed() && !entity.Has(this.typeID)) {
                             this.entities.Add(id);
                         }
 
