@@ -34,6 +34,7 @@ namespace Morpeh {
                 }
                 else if (this.cachedEntity != null && this.cachedEntity.IsDisposed()) {
                     this.cachedEntity = null;
+                    this.entityID = -1;
                 }
                 
                 return this.cachedEntity;
