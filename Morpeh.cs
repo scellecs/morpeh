@@ -103,7 +103,13 @@ namespace Morpeh {
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
+        internal bool isDirty;
+        
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
         private bool isDisposed;
+        
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
@@ -134,7 +140,7 @@ namespace Morpeh {
                 return ref CacheComponents<T>.Empty();
             }
 
-            this.World.Filter.EntityChanged(this.internalID);
+            this.MakeDirty();
 
 
             if (typeInfo.isMarker) {
@@ -204,7 +210,7 @@ namespace Morpeh {
             }
 
             exist = false;
-            this.World.Filter.EntityChanged(this.internalID);
+            this.MakeDirty();
 
             if (typeInfo.isMarker) {
                 const int componentId = -1;
@@ -350,7 +356,7 @@ namespace Morpeh {
                             this.componentsCount++;
 
                             this.World.GetCache<T>().Set(componentId, value);
-                            this.World.Filter.EntityChanged(this.internalID);
+                            this.MakeDirty();
                             return;
                         }
                     }
@@ -368,7 +374,7 @@ namespace Morpeh {
                     this.componentsCount++;
                     
                     this.World.GetCache<T>().Set(componentId, value);
-                    this.World.Filter.EntityChanged(this.internalID);
+                    this.MakeDirty();
                     return;
                 }
 
@@ -387,7 +393,7 @@ namespace Morpeh {
                             this.components[i + 1] = componentId;
                             this.componentsCount++;
 
-                            this.World.Filter.EntityChanged(this.internalID);
+                            this.MakeDirty();
                             return;
                         }
                     }
@@ -403,7 +409,7 @@ namespace Morpeh {
                     this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
                     this.components[this.componentsDoubleCapacity - 1] = componentId;
                     this.componentsCount++;
-                    this.World.Filter.EntityChanged(this.internalID);
+                    this.MakeDirty();
                 }
             }
         }
@@ -425,7 +431,7 @@ namespace Morpeh {
                         this.World.RemoveEntity(this);
                     }
                     else {
-                        this.World.Filter.EntityChanged(this.internalID);
+                        this.MakeDirty();
                     }
                     
                     return true;
@@ -461,6 +467,16 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsDisposed() => this.isDisposed;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void MakeDirty() {
+            if (this.isDirty) {
+                return;
+            }
+
+            this.isDirty = true;
+            this.World.Filter.EntityChanged(this.internalID);
+        }
+
         public void Dispose() {
             if (this.isDisposed) {
                 return;
@@ -482,9 +498,9 @@ namespace Morpeh {
             this.isDisposed = true;
         }
     }
-    
-    public interface ICondition : IDisposable {
-        bool Check();
+
+    public static class EntityExtensions {
+        public static bool IsNullOrDisposed([CanBeNull]this IEntity entity) => entity == null || entity.IsDisposed();
     }
 
     [Il2Cpp(Option.NullChecks, false)]
@@ -526,15 +542,11 @@ namespace Morpeh {
 #endif
         private List<IDisposable> disposables;
         private World world;
-        private List<SystemsGroup> childs;
-        
-        private ICondition condition;
-        private bool conditionalState;
 
         private SystemsGroup() {
         }
 
-        internal SystemsGroup(World world, ICondition condition) {
+        internal SystemsGroup(World world) {
             this.world = world;
 
             this.systems      = new List<ISystem>();
@@ -547,11 +559,6 @@ namespace Morpeh {
 
             this.newInitializers = new List<IInitializer>();
             this.disposables     = new List<IDisposable>();
-
-            this.condition = condition;
-            this.conditionalState = false;
-            
-            this.childs = new List<SystemsGroup>();
         }
 
         public void Dispose() {
@@ -594,26 +601,9 @@ namespace Morpeh {
 
             this.disposables.Clear();
             this.disposables = null;
-            
-            this.condition?.Dispose();
-            this.condition = null;
-            this.conditionalState = false;
-
-            foreach (var child in this.childs) {
-                child.Dispose();
-            }
-
-            this.childs = null;
         }
 
         public void Update(float deltaTime) {
-            if (this.condition != null) {
-                this.conditionalState = this.condition.Check();
-                if (!this.conditionalState) {
-                    return;
-                }
-            }
-            
             foreach (var disposable in this.disposables) {
                 disposable.Dispose();
             }
@@ -633,17 +623,9 @@ namespace Morpeh {
                 this.systems[i].OnUpdate(deltaTime);
                 this.world.Filter.Update();
             }
-            
-            for (int i = 0, length = this.childs.Count; i < length; i++) {
-                this.childs[i].Update(deltaTime);
-            }
         }
 
         public void FixedUpdate(float deltaTime) {
-            if (this.condition != null && !this.conditionalState) {
-                return;
-            }
-            
             foreach (var disposable in this.disposables) {
                 disposable.Dispose();
             }
@@ -663,26 +645,14 @@ namespace Morpeh {
                 this.fixedSystems[i].OnUpdate(deltaTime);
                 this.world.Filter.Update();
             }
-            
-            for (int i = 0, length = this.childs.Count; i < length; i++) {
-                this.childs[i].FixedUpdate(deltaTime);
-            }
         }
 
         public void LateUpdate(float deltaTime) {
-            if (this.condition != null && !this.conditionalState) {
-                return;
-            }
-
             this.world.Filter.Update();
 
             for (int i = 0, length = this.lateSystems.Count; i < length; i++) {
                 this.lateSystems[i].OnUpdate(deltaTime);
                 this.world.Filter.Update();
-            }
-
-            for (int i = 0, length = this.childs.Count; i < length; i++) {
-                this.childs[i].LateUpdate(deltaTime);
             }
         }
 
@@ -795,13 +765,6 @@ namespace Morpeh {
 
             return false;
         }
-
-        public void AddChildGroup(SystemsGroup child) {
-            this.childs.Add(child);
-        }
-        public void RemoveChildGroup(SystemsGroup child) {
-            this.childs.Remove(child);
-        }
     }
 
     [Serializable]
@@ -867,17 +830,14 @@ namespace Morpeh {
             this.Filter = new Filter(this);
 
             this.InitializeGlobals();
-            this.InitializeTasks();
         }
 
         partial void InitializeGlobals();
-        partial void InitializeTasks();
 
         private World Initialize() {
 #if UNITY_2019_1_OR_NEWER
             worlds.Add(this);
 #endif
-
             this.freeEntityIDs = new List<int>();
             this.caches        = new CacheComponents[Constants.DEFAULT_WORLD_CACHES_CAPACITY];
 
@@ -982,8 +942,7 @@ namespace Morpeh {
             }
         }
 
-        public SystemsGroup CreateSystemsGroup() => new SystemsGroup(this, null);
-        public SystemsGroup CreateSystemsGroup(ICondition condition) => new SystemsGroup(this, condition);
+        public SystemsGroup CreateSystemsGroup() => new SystemsGroup(this);
 
         public void AddSystemsGroup(int order, SystemsGroup systemsGroup) {
             this.systemsGroups.Add(order, systemsGroup);
@@ -1237,8 +1196,16 @@ namespace Morpeh {
                 var dirtyId = this.dirtyList[i];
                 var entity  = this.world.GetEntityInternal(dirtyId);
                 if (this.filterMode == FilterMode.Include) {
-                    if (entity != null && !entity.IsDisposed() && entity.Has(this.typeID)) {
-                        if (this.entities.Add(dirtyId)) {
+                    if (entity != null) {
+                        if (!entity.IsDisposed() && entity.Has(this.typeID)) {
+                            if (this.entities.Add(dirtyId)) {
+                                entity.isDirty = false;
+                                this.dirtyList.RemoveAtFast(i);
+                            }
+                        }
+                        else {
+                            this.entities.Remove(dirtyId);
+                            entity.isDirty = false;
                             this.dirtyList.RemoveAtFast(i);
                         }
                     }
@@ -1247,9 +1214,17 @@ namespace Morpeh {
                         this.dirtyList.RemoveAtFast(i);
                     }
                 }
+
                 if (this.filterMode == FilterMode.Exclude) {
-                    if (entity != null && !entity.IsDisposed() && !entity.Has(this.typeID)) {
-                        if (this.entities.Add(dirtyId)) {
+                    if (entity != null) {
+                        if (!entity.IsDisposed() && !entity.Has(this.typeID)) {
+                            if (this.entities.Add(dirtyId)) {
+                                this.dirtyList.RemoveAtFast(i);
+                            }
+                        }
+                        else {
+                            this.entities.Remove(dirtyId);
+                            entity.isDirty = false;
                             this.dirtyList.RemoveAtFast(i);
                         }
                     }

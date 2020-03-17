@@ -2,9 +2,7 @@
 #if UNITY_EDITOR
     using UnityEditor;
 #endif
-    using System.Collections.Generic;
     using System.Linq;
-    using Globals;
     using UnityEngine;
     using Utils;
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -48,12 +46,7 @@
         [OnValueChanged(nameof(OnValueChangedLateUpdate))]
 #endif
         public LateSystemPair[] lateUpdateSystems;
-        
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-1)]
-#endif
-        public List<Task> tasks = new List<Task>();
-        
+
         private SystemsGroup group;
 
         private void OnValueChangedUpdate() {
@@ -89,14 +82,6 @@
             this.AddSystems(this.updateSystems);
             this.AddSystems(this.fixedUpdateSystems);
             this.AddSystems(this.lateUpdateSystems);
-            
-            foreach (var task in this.tasks) {
-                var childGroup = World.Default.CreateSystemsGroup(task.GetTaskCondition());
-                foreach (var action in task.actions) {
-                    childGroup.AddSystem(action.ActionSystem);
-                }
-                this.group.AddChildGroup(childGroup);
-            }
             
             World.Default.AddSystemsGroup(this.order, this.group);
         }
