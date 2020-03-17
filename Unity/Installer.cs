@@ -13,61 +13,67 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    //TODO refactor for Reorder in Runtime
-    public sealed class Installer : WorldViewer {
+    public sealed class Installer : BaseInstaller {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Required]
-        [InfoBox("Order collision with other installer!", InfoMessageType.Error, "isCollisionWithOtherInstaller")]
+        [InfoBox("Order collision with other installer!", InfoMessageType.Error, nameof(IsCollisionWithOtherInstaller))]
         [PropertyOrder(-5)]
 #endif
         public int order;
         
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        private bool isCollisionWithOtherInstaller 
+        private bool IsCollisionWithOtherInstaller 
             => FindObjectsOfType<Installer>().Where(i => i != this).Any(i => i.order == this.order);
 #endif
         
         [Space]
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-4)]
+        [PropertyOrder(-5)]
 #endif
         public Initializer[] initializers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-3)]
+        [PropertyOrder(-4)]
         [OnValueChanged(nameof(OnValueChangedUpdate))]
 #endif
         public UpdateSystemPair[] updateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-2)]
+        [PropertyOrder(-3)]
         [OnValueChanged(nameof(OnValueChangedFixedUpdate))]
 #endif
         public FixedSystemPair[] fixedUpdateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-1)]
+        [PropertyOrder(-2)]
         [OnValueChanged(nameof(OnValueChangedLateUpdate))]
 #endif
         public LateSystemPair[] lateUpdateSystems;
-        
+
         private SystemsGroup group;
 
         private void OnValueChangedUpdate() {
-            this.RemoveSystems(this.updateSystems);
-            this.AddSystems(this.updateSystems);
+            if (Application.isPlaying) {
+                this.RemoveSystems(this.updateSystems);
+                this.AddSystems(this.updateSystems);
+            }
         }
         
         private void OnValueChangedFixedUpdate() {
-            this.RemoveSystems(this.fixedUpdateSystems);
-            this.AddSystems(this.fixedUpdateSystems);
+            if (Application.isPlaying) {
+                this.RemoveSystems(this.fixedUpdateSystems);
+                this.AddSystems(this.fixedUpdateSystems);
+            }
         }
         
         private void OnValueChangedLateUpdate() {
-            this.RemoveSystems(this.lateUpdateSystems);
-            this.AddSystems(this.lateUpdateSystems);
+            if (Application.isPlaying) {
+                this.RemoveSystems(this.lateUpdateSystems);
+                this.AddSystems(this.lateUpdateSystems);
+            }
         }
         
 
-        private void OnEnable() {
+        protected override void OnEnable() {
             this.group = World.Default.CreateSystemsGroup();
+            
             for (int i = 0, length = this.initializers.Length; i < length; i++) {
                 var initializer = this.initializers[i];
                 this.group.AddInitializer(initializer);
@@ -80,7 +86,7 @@
             World.Default.AddSystemsGroup(this.order, this.group);
         }
 
-        private void OnDisable() {
+        protected override void OnDisable() {
             this.RemoveSystems(this.updateSystems);
             this.RemoveSystems(this.fixedUpdateSystems);
             this.RemoveSystems(this.lateUpdateSystems);
@@ -107,13 +113,7 @@
                 }
             }
         }
-
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        [OnInspectorGUI]
-        private void OnEditoGUI() {
-            this.gameObject.transform.hideFlags = HideFlags.HideInInspector;
-        }
-#endif
+        
 #if UNITY_EDITOR
         [MenuItem("GameObject/ECS/", true, 10)]
         private static bool OrderECS() => true;

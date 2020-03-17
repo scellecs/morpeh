@@ -114,7 +114,6 @@ namespace Morpeh {
                 }
 
                 World.worlds = this.worldsSerialized;
-                InitializerECS.Initialize();
                 this.hotReloaded = true;
             }
         }
