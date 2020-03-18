@@ -1212,12 +1212,24 @@ namespace Morpeh {
                     this.dirtyList.RemoveAtFast(i);
                 }
                 else if(this.filterMode == FilterMode.Include) {
-                    if (entity.Has(this.typeID) && this.entities.Add(dirtyId)) {
+                    if (entity.Has(this.typeID)) {
+                        if (this.entities.Add(dirtyId)) {
+                            this.dirtyList.RemoveAtFast(i);
+                        }
+                    }
+                    else {
+                        this.entities.Remove(dirtyId);
                         this.dirtyList.RemoveAtFast(i);
                     }
                 }
                 else if(this.filterMode == FilterMode.Exclude) {
-                    if (!entity.Has(this.typeID) && this.entities.Add(dirtyId)) {
+                    if (!entity.Has(this.typeID)) {
+                        if (this.entities.Add(dirtyId)) {
+                            this.dirtyList.RemoveAtFast(i);
+                        }
+                    }
+                    else {
+                        this.entities.Remove(dirtyId);
                         this.dirtyList.RemoveAtFast(i);
                     }
                 }
