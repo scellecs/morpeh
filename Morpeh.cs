@@ -142,7 +142,6 @@ namespace Morpeh {
 
             this.MakeDirty();
 
-
             if (typeInfo.isMarker) {
                 const int componentId = -1;
                 for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
@@ -1188,6 +1187,13 @@ namespace Morpeh {
                     }
 
                     this.lastEntitiesCount = entitiesCount;
+                    
+                    for (int i = 0, length = this.dirtyList.Count; i < length; i++) {
+                        var entity  = this.world.GetEntityInternal(this.dirtyList[i]);
+                        if (!entity.IsNullOrDisposed()) {
+                            entity.isDirty = false;
+                        }
+                    }
                     this.dirtyList.Clear();
                 }
                 
@@ -1201,41 +1207,17 @@ namespace Morpeh {
             for (var i = this.dirtyList.Count - 1; i >= 0; i--) {
                 var dirtyId = this.dirtyList[i];
                 var entity  = this.world.GetEntityInternal(dirtyId);
-                if (this.filterMode == FilterMode.Include) {
-                    if (entity != null) {
-                        if (!entity.IsDisposed() && entity.Has(this.typeID)) {
-                            if (this.entities.Add(dirtyId)) {
-                                entity.isDirty = false;
-                                this.dirtyList.RemoveAtFast(i);
-                            }
-                        }
-                        else {
-                            this.entities.Remove(dirtyId);
-                            entity.isDirty = false;
-                            this.dirtyList.RemoveAtFast(i);
-                        }
-                    }
-                    else {
-                        this.entities.Remove(dirtyId);
+                if (entity.IsNullOrDisposed()) {
+                    this.entities.Remove(dirtyId);
+                    this.dirtyList.RemoveAtFast(i);
+                }
+                else if(this.filterMode == FilterMode.Include) {
+                    if (entity.Has(this.typeID) && this.entities.Add(dirtyId)) {
                         this.dirtyList.RemoveAtFast(i);
                     }
                 }
-
-                if (this.filterMode == FilterMode.Exclude) {
-                    if (entity != null) {
-                        if (!entity.IsDisposed() && !entity.Has(this.typeID)) {
-                            if (this.entities.Add(dirtyId)) {
-                                this.dirtyList.RemoveAtFast(i);
-                            }
-                        }
-                        else {
-                            this.entities.Remove(dirtyId);
-                            entity.isDirty = false;
-                            this.dirtyList.RemoveAtFast(i);
-                        }
-                    }
-                    else {
-                        this.entities.Remove(dirtyId);
+                else if(this.filterMode == FilterMode.Exclude) {
+                    if (!entity.Has(this.typeID) && this.entities.Add(dirtyId)) {
                         this.dirtyList.RemoveAtFast(i);
                     }
                 }
