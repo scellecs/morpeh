@@ -909,7 +909,13 @@ namespace Morpeh {
 
             var cache = (CacheComponents<T>) this.caches[info.id];
             if (cache == null) {
-                this.caches[info.id] = cache = new CacheComponents<T>();
+                if (info.isDisposable) {
+                    var constructedType = typeof(CacheDisposableComponents<>).MakeGenericType(typeof(T));
+                    this.caches[info.id] = cache = (CacheComponents<T>)Activator.CreateInstance(constructedType);
+                }
+                else {
+                    this.caches[info.id] = cache = new CacheComponents<T>();
+                }
             }
 
             return cache;
@@ -1524,9 +1530,14 @@ namespace Morpeh {
             [SerializeField]
 #endif
             internal bool isMarker;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
+            internal bool isDisposable;
 
-            public TypeInfo(bool isMarker) {
+            public TypeInfo(bool isMarker, bool isDisposable) {
                 this.isMarker = isMarker;
+                this.isDisposable = isDisposable;
             }
 
             public void SetID(int id) {
@@ -1542,7 +1553,7 @@ namespace Morpeh {
         internal static CommonCacheTypeIdentifier.TypeInfo info;
 
         static CacheTypeIdentifier() {
-            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1);
+            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
 #if UNITY_EDITOR
             var id = CommonCacheTypeIdentifier.GetID<T>();
 #else
@@ -1577,7 +1588,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal sealed class CacheComponents<T> : CacheComponents where T : struct, IComponent {
+    internal class CacheComponents<T> : CacheComponents where T : struct, IComponent {
         private static T empty;
 
 #if UNITY_2019_1_OR_NEWER
@@ -1659,6 +1670,17 @@ namespace Morpeh {
         }
     }
 
+    [Serializable]
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    internal sealed class CacheDisposableComponents<T> : CacheComponents<T> where T : struct, IComponent, IDisposable {
+        public override bool Remove(in int id) {
+            this.Components[id].Dispose();
+            return base.Remove(in id);
+        }
+    }
+    
     namespace Utils {
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
