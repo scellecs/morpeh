@@ -13,6 +13,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [AddComponentMenu("ECS/" + nameof(Installer))]
     public sealed class Installer : BaseInstaller {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Required]

@@ -1,13 +1,17 @@
 namespace Morpeh {
     using JetBrains.Annotations;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using System;
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
-
 #endif
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [AddComponentMenu("ECS/" + nameof(EntityProvider))]
     public class EntityProvider : MonoBehaviour {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
