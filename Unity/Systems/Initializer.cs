@@ -10,6 +10,7 @@
 
         public abstract void OnAwake();
 
-        public abstract void Dispose();
+        public virtual void Dispose() {
+        }
     }
 }

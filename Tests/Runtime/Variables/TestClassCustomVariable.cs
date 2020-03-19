@@ -5,6 +5,8 @@
 
     [CreateAssetMenu(menuName = "ECS/Globals/Custom/Tests/" + nameof(TestClassCustomVariable))]
     public class TestClassCustomVariable : BaseGlobalVariable<DummyClass> {
+        public override IDataWrapper Wrapper { get; set; }
+
         protected override DummyClass Load(string serializedData) {
             if (!string.IsNullOrEmpty(serializedData)) {
                 if (this.value != null) {

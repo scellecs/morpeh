@@ -9,6 +9,11 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Variable List Float")]
     public class GlobalVariableListFloat : BaseGlobalVariable<List<float>> {
+        public override IDataWrapper Wrapper {
+            get => new ListFloatWrapper {list = this.value};
+            set => this.Value = ((ListFloatWrapper) value).list;
+        }
+
         protected override List<float> Load(string serializedData)
             => JsonUtility.FromJson<ListFloatWrapper>(serializedData).list;
 
@@ -18,7 +23,7 @@ namespace Morpeh.Globals {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         [Serializable]
-        private struct ListFloatWrapper {
+        private class ListFloatWrapper : IDataWrapper {
             public List<float> list;
         }
     }
