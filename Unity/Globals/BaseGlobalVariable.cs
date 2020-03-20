@@ -5,9 +5,17 @@
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
-
 #endif
-    public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData> {
+
+    public interface IDataWrapper {
+        
+    }
+    
+    public interface IDataVariable {
+        IDataWrapper Wrapper { get; set; }
+    }
+    
+    public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData>, IDataVariable {
         [Space]
         [Header("Runtime Data")]
         [SerializeField]
@@ -54,6 +62,8 @@
         private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
         private bool isLoaded;
 
+        public abstract IDataWrapper Wrapper { get; set; }
+        
         public TData Value {
             get {
                 if (!this.isLoaded) {
@@ -162,7 +172,7 @@
 #if UNITY_EDITOR
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
-        [ShowIf("@HasPlayerPrefsValueAndAutoSave")]
+        [ShowIf("@" + nameof(HasPlayerPrefsValueAndAutoSave))]
         [PropertyOrder(4)]
         [Button]
 #endif
@@ -174,5 +184,7 @@
 #endif
 
         #endregion
+
+
     }
 }

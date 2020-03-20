@@ -142,7 +142,6 @@ namespace Morpeh {
 
             this.MakeDirty();
 
-
             if (typeInfo.isMarker) {
                 const int componentId = -1;
                 for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
@@ -909,7 +908,13 @@ namespace Morpeh {
 
             var cache = (CacheComponents<T>) this.caches[info.id];
             if (cache == null) {
-                this.caches[info.id] = cache = new CacheComponents<T>();
+                if (info.isDisposable) {
+                    var constructedType = typeof(CacheDisposableComponents<>).MakeGenericType(typeof(T));
+                    this.caches[info.id] = cache = (CacheComponents<T>)Activator.CreateInstance(constructedType);
+                }
+                else {
+                    this.caches[info.id] = cache = new CacheComponents<T>();
+                }
             }
 
             return cache;
@@ -1182,6 +1187,13 @@ namespace Morpeh {
                     }
 
                     this.lastEntitiesCount = entitiesCount;
+                    
+                    for (int i = 0, length = this.dirtyList.Count; i < length; i++) {
+                        var entity  = this.world.GetEntityInternal(this.dirtyList[i]);
+                        if (!entity.IsNullOrDisposed()) {
+                            entity.isDirty = false;
+                        }
+                    }
                     this.dirtyList.Clear();
                 }
                 
@@ -1195,17 +1207,13 @@ namespace Morpeh {
             for (var i = this.dirtyList.Count - 1; i >= 0; i--) {
                 var dirtyId = this.dirtyList[i];
                 var entity  = this.world.GetEntityInternal(dirtyId);
-                if (this.filterMode == FilterMode.Include) {
-                    if (entity != null) {
-                        if (!entity.IsDisposed() && entity.Has(this.typeID)) {
-                            if (this.entities.Add(dirtyId)) {
-                                entity.isDirty = false;
-                                this.dirtyList.RemoveAtFast(i);
-                            }
-                        }
-                        else {
-                            this.entities.Remove(dirtyId);
-                            entity.isDirty = false;
+                if (entity.IsNullOrDisposed()) {
+                    this.entities.Remove(dirtyId);
+                    this.dirtyList.RemoveAtFast(i);
+                }
+                else if(this.filterMode == FilterMode.Include) {
+                    if (entity.Has(this.typeID)) {
+                        if (this.entities.Add(dirtyId)) {
                             this.dirtyList.RemoveAtFast(i);
                         }
                     }
@@ -1214,17 +1222,9 @@ namespace Morpeh {
                         this.dirtyList.RemoveAtFast(i);
                     }
                 }
-
-                if (this.filterMode == FilterMode.Exclude) {
-                    if (entity != null) {
-                        if (!entity.IsDisposed() && !entity.Has(this.typeID)) {
-                            if (this.entities.Add(dirtyId)) {
-                                this.dirtyList.RemoveAtFast(i);
-                            }
-                        }
-                        else {
-                            this.entities.Remove(dirtyId);
-                            entity.isDirty = false;
+                else if(this.filterMode == FilterMode.Exclude) {
+                    if (!entity.Has(this.typeID)) {
+                        if (this.entities.Add(dirtyId)) {
                             this.dirtyList.RemoveAtFast(i);
                         }
                     }
@@ -1524,9 +1524,14 @@ namespace Morpeh {
             [SerializeField]
 #endif
             internal bool isMarker;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
+            internal bool isDisposable;
 
-            public TypeInfo(bool isMarker) {
+            public TypeInfo(bool isMarker, bool isDisposable) {
                 this.isMarker = isMarker;
+                this.isDisposable = isDisposable;
             }
 
             public void SetID(int id) {
@@ -1542,7 +1547,7 @@ namespace Morpeh {
         internal static CommonCacheTypeIdentifier.TypeInfo info;
 
         static CacheTypeIdentifier() {
-            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1);
+            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
 #if UNITY_EDITOR
             var id = CommonCacheTypeIdentifier.GetID<T>();
 #else
@@ -1577,7 +1582,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal sealed class CacheComponents<T> : CacheComponents where T : struct, IComponent {
+    internal class CacheComponents<T> : CacheComponents where T : struct, IComponent {
         private static T empty;
 
 #if UNITY_2019_1_OR_NEWER
@@ -1659,6 +1664,17 @@ namespace Morpeh {
         }
     }
 
+    [Serializable]
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    internal sealed class CacheDisposableComponents<T> : CacheComponents<T> where T : struct, IComponent, IDisposable {
+        public override bool Remove(in int id) {
+            this.Components[id].Dispose();
+            return base.Remove(in id);
+        }
+    }
+    
     namespace Utils {
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]

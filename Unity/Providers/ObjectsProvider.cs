@@ -1,13 +1,18 @@
 ﻿namespace Morpeh.Providers {
     using System.Collections.Generic;
     using Globals;
+    using Unity.IL2CPP.CompilerServices;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
     using UnityEngine;
     using Object = UnityEngine.Object;
 
-    public class ObjectsProvider : MonoBehaviour {
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [AddComponentMenu("ECS/" + nameof(ObjectsProvider))]
+    public sealed class ObjectsProvider : MonoBehaviour {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Header("Global Variables")]
         [TableList(AlwaysExpanded = true)]

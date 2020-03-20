@@ -1,14 +1,17 @@
 namespace Morpeh {
     using JetBrains.Annotations;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using System;
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
-    using Utils;
-
 #endif
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [AddComponentMenu("ECS/" + nameof(EntityProvider))]
     public class EntityProvider : MonoBehaviour {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
@@ -26,7 +29,7 @@ namespace Morpeh {
                 if (!Application.isPlaying) {
                     return null;
                 }
-                
+
                 if (this.cachedEntity == null) {
                     if (World.Default != null && this.entityID >= 0 && World.Default.entitiesLength > this.entityID) {
                         this.cachedEntity = World.Default.entities[this.entityID];
@@ -34,9 +37,9 @@ namespace Morpeh {
                 }
                 else if (this.cachedEntity != null && this.cachedEntity.IsDisposed()) {
                     this.cachedEntity = null;
-                    this.entityID = -1;
+                    this.entityID     = -1;
                 }
-                
+
                 return this.cachedEntity;
             }
         }
@@ -55,7 +58,7 @@ namespace Morpeh {
                 var others = this.GetComponents<EntityProvider>();
                 foreach (var entityProvider in others) {
                     if (entityProvider.entityID >= 0) {
-                        this.entityID = entityProvider.entityID;
+                        this.entityID     = entityProvider.entityID;
                         this.cachedEntity = entityProvider.cachedEntity;
                         break;
                     }
@@ -64,7 +67,7 @@ namespace Morpeh {
                 if (this.entityID < 0 || this.InternalEntity == null) {
                     this.cachedEntity = World.Default.CreateEntityInternal(out this.entityID);
                     foreach (var entityProvider in others) {
-                        entityProvider.entityID = this.entityID;
+                        entityProvider.entityID     = this.entityID;
                         entityProvider.cachedEntity = this.cachedEntity;
                     }
                 }
@@ -81,11 +84,6 @@ namespace Morpeh {
             }
         }
 
-        [System.Obsolete]
-        protected virtual void OnDestroy() {
-            
-        }
-
         private void CheckEntityIsAlive() {
             if (this.InternalEntity == null || this.InternalEntity.IsDisposed()) {
                 this.entityID = -1;
@@ -99,7 +97,7 @@ namespace Morpeh {
 
         protected virtual void Initialize() {
         }
-        
+
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool IsNotEntityProvider => this.GetType() != typeof(EntityProvider);
 
@@ -135,16 +133,17 @@ namespace Morpeh {
         private readonly List<ComponentView> componentViews = new List<ComponentView>();
 
 
-        [PropertyTooltip("$FullName")]
+        [PropertyTooltip("$" + nameof(FullName))]
         [Serializable]
         private struct ComponentView {
             internal CommonCacheTypeIdentifier.DebugInfo debugInfo;
-            internal World                               world;
+
+            internal World world;
 
             internal bool   IsMarker => this.debugInfo.typeInfo.isMarker;
             internal string FullName => this.debugInfo.type.FullName;
 
-            [ShowIf("$IsMarker")]
+            [ShowIf("$" + nameof(IsMarker))]
             [HideLabel]
             [DisplayAsString(false)]
             [ShowInInspector]
@@ -153,8 +152,8 @@ namespace Morpeh {
             internal int ID;
 
             [DisableContextMenu]
-            [HideIf("$IsMarker")]
-            [LabelText("$TypeName")]
+            [HideIf("$" + nameof(IsMarker))]
+            [LabelText("$" + nameof(TypeName))]
             [ShowInInspector]
             [HideReferenceObjectPickerAttribute]
             public object Data {
