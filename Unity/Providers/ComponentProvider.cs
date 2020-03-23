@@ -1,7 +1,7 @@
 ﻿namespace Morpeh {
     using UnityEngine.Assertions;
  
-    public abstract class BaseComponentProvider<T0, T1> : MonoProvider<T1>
+    public abstract class ComponentProvider<T0, T1> : MonoProvider<T1>
         where T0 : UnityEngine.Component
         where T1 : struct, IMonoComponent<T0> {
             private void OnValidate() {

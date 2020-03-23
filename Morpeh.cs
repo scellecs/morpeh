@@ -49,12 +49,12 @@ namespace Morpeh {
 
     public interface IComponent {
     }
-    
+#if UNITY_2019_1_OR_NEWER
     public interface IMonoComponent<T> : IComponent
         where T : UnityEngine.Component {
         T monoComponent { get; set; }
     }
-
+#endif
     public interface IInitializer : IDisposable {
         World World { get; set; }
 
