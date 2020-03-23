@@ -21,15 +21,18 @@ namespace Morpeh.Globals {
         internal sealed class GlobalEventComponentUpdater<T> : GlobalEventComponentUpdater {
             internal override void Update(World world) {
                 var common = world.Filter.With<GlobalEventMarker>().With<GlobalEventComponent<T>>();
-                foreach (var entity in common.With<GlobalEventPublished>()) {
+                foreach (var entity in common.With<GlobalEventPublished>().Without<GlobalEventNextFrame>()) {
                     ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
                     entity.RemoveComponent<GlobalEventPublished>();
                 }
-
+                foreach (var entity in common.With<GlobalEventPublished>().With<GlobalEventNextFrame>()) {
+                    ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
+                    evnt.Action?.Invoke(evnt.Data);
+                }
                 foreach (var entity in common.With<GlobalEventNextFrame>()) {
-                    entity.AddComponent<GlobalEventPublished>();
+                    entity.SetComponent(new GlobalEventPublished ());
                     entity.RemoveComponent<GlobalEventNextFrame>();
                 }
             }
@@ -67,14 +70,15 @@ namespace Morpeh.Globals {
             public void Dispose() {
             }
         }
+    }
+}
 
-        internal static class InitializerECS {
-            [RuntimeInitializeOnLoadMethod]
-            internal static void Initialize() {
-                var sg = World.Default.CreateSystemsGroup();
-                sg.AddSystem(new ProcessEventsSystem());
-                World.Default.AddSystemsGroup(9999, sg);
-            }
+namespace Morpeh {
+    partial class World {
+        partial void InitializeGlobals() {
+            var sg = this.CreateSystemsGroup();
+            sg.AddSystem(new Morpeh.Globals.ECS.ProcessEventsSystem());
+            this.AddSystemsGroup(9000, sg);
         }
     }
 }

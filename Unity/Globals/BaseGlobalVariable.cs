@@ -7,7 +7,15 @@
     using Sirenix.OdinInspector;
 #endif
 
-    public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData> {
+    public interface IDataWrapper {
+        
+    }
+    
+    public interface IDataVariable {
+        IDataWrapper Wrapper { get; set; }
+    }
+    
+    public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData>, IDataVariable {
         [Space]
         [Header("Runtime Data")]
         [SerializeField]
@@ -18,19 +26,17 @@
         [HideLabel]
 #endif
         protected TData value;
-
-        private TData  lastValue;
+        [HideInInspector]
+        [SerializeField]
         private string defaultSerializedValue;
-
         private const string COMMON_KEY = "MORPEH__GLOBALS_VARIABLES_";
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [PropertyOrder(1)]
-        [ShowIf("@AutoSave")]
+        [ShowIf("@" + nameof(AutoSave) + " && " + nameof(CanBeAutoSaved))]
 #endif
         [SerializeField]
         private string customKey;
-
         // ReSharper disable once InconsistentNaming
         private string __internalKey;
 
@@ -44,21 +50,24 @@
             }
         }
 
+        public virtual bool CanBeAutoSaved => true;
         [Header("Saving Settings")]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [PropertyOrder(0)]
+        [ShowIf(nameof(CanBeAutoSaved))]
 #endif
         public bool AutoSave;
-        
         private bool HasPlayerPrefsValue            => PlayerPrefs.HasKey(this.Key);
         private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
-
         private bool isLoaded;
 
+        public abstract IDataWrapper Wrapper { get; set; }
+        
         public TData Value {
             get {
                 if (!this.isLoaded) {
+                    this.defaultSerializedValue = this.Save();
                     this.LoadData();
                     this.isLoaded = true;
                 }
@@ -98,10 +107,10 @@
             if (string.IsNullOrEmpty(this.customKey)) {
                 this.GenerateCustomKey();
             }
-#endif
+#else
             this.LoadData();
+#endif
         }
-        
 #if UNITY_EDITOR
         internal override void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             base.OnEditorApplicationOnplayModeStateChanged(state);
@@ -112,12 +121,10 @@
                 this.isLoaded               = false;
             }
             else if (state == PlayModeStateChange.EnteredPlayMode) {
-                this.defaultSerializedValue = this.Save();
                 this.LoadData();
             }
         }
 #endif
-
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Button]
         [PropertyOrder(3)]
@@ -152,7 +159,6 @@
             }
 
             this.value = this.Load(PlayerPrefs.GetString(this.Key));
-            this.OnChange(this.value);
         }
 
         internal void SaveData() {
@@ -164,11 +170,9 @@
         #region EDITOR
 
 #if UNITY_EDITOR
-
-
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
-        [ShowIf("@HasPlayerPrefsValueAndAutoSave")]
+        [ShowIf("@" + nameof(HasPlayerPrefsValueAndAutoSave))]
         [PropertyOrder(4)]
         [Button]
 #endif
@@ -180,5 +184,7 @@
 #endif
 
         #endregion
+
+
     }
 }
