@@ -10,6 +10,7 @@ namespace Morpeh {
     using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
 #if UNITY_2019_1_OR_NEWER
     using JetBrains.Annotations;
     using Unity.Collections.LowLevel.Unsafe;
@@ -32,7 +33,7 @@ namespace Morpeh {
         internal const int DEFAULT_CACHE_COMPONENTS_CAPACITY           = 2048;
     }
 
-    public interface IEntity : IDisposable {
+    public interface IEntity {
         int   ID { get; }
         ref T AddComponent<T>() where T : struct, IComponent;
         ref T AddComponent<T>(out bool exist) where T : struct, IComponent;
@@ -43,6 +44,7 @@ namespace Morpeh {
         void SetComponent<T>(in T value) where T : struct, IComponent;
         bool RemoveComponent<T>() where T : struct, IComponent;
         bool Has<T>() where T : struct, IComponent;
+        bool IsDisposed();
     }
 
     public interface IComponent {
@@ -96,12 +98,23 @@ namespace Morpeh {
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
-        internal int componentsDoubleCount;
+        internal int componentsDoubleCapacity;
 
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
+        internal int componentsCount;
+
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal bool isDirty;
+        
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
         private bool isDisposed;
+        
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
@@ -112,7 +125,8 @@ namespace Morpeh {
             this.internalID = id;
             this.worldID    = worldID;
 
-            this.componentsDoubleCount = 0;
+            this.componentsDoubleCapacity = 0;
+            this.componentsCount = 0;
 
             this.components = new int[Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY];
             for (int i = 0, length = this.components.Length; i < length; i++) {
@@ -131,54 +145,57 @@ namespace Morpeh {
                 return ref CacheComponents<T>.Empty();
             }
 
-            this.World.Filter.EntityChanged(this.internalID);
-
+            this.MakeDirty();
 
             if (typeInfo.isMarker) {
                 const int componentId = -1;
-                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                     if (this.components[i] == -1) {
                         this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        this.componentsCount++;
 
                         return ref CacheComponents<T>.Empty();
                     }
                 }
 
-                this.componentsDoubleCount += 2;
-                if (this.componentsDoubleCount >= this.components.Length) {
-                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                    for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                this.componentsDoubleCapacity += 2;
+                if (this.componentsDoubleCapacity >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                    for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                         this.components[i] = -1;
                     }
                 }
 
-                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                this.components[this.componentsDoubleCount - 1] = componentId;
+                this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCapacity - 1] = componentId;
+                this.componentsCount++;
             }
             else {
                 var componentId = this.World.GetCache<T>().Add();
-                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                     if (this.components[i] == -1) {
                         this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        this.componentsCount++;
 
                         return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
 
-                this.componentsDoubleCount += 2;
-                if (this.componentsDoubleCount >= this.components.Length) {
-                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                    for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                this.componentsDoubleCapacity += 2;
+                if (this.componentsDoubleCapacity >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                    for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                         this.components[i] = -1;
                     }
                 }
 
-                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                this.components[this.componentsDoubleCount - 1] = componentId;
+                this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCapacity - 1] = componentId;
+                this.componentsCount++;
 
-                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCount - 1]);
+                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCapacity - 1]);
             }
 
             return ref CacheComponents<T>.Empty();
@@ -197,53 +214,57 @@ namespace Morpeh {
             }
 
             exist = false;
-            this.World.Filter.EntityChanged(this.internalID);
+            this.MakeDirty();
 
             if (typeInfo.isMarker) {
                 const int componentId = -1;
-                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                     if (this.components[i] == -1) {
                         this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        this.componentsCount++;
 
                         return ref CacheComponents<T>.Empty();
                     }
                 }
 
-                this.componentsDoubleCount += 2;
-                if (this.componentsDoubleCount >= this.components.Length) {
-                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                    for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                this.componentsDoubleCapacity += 2;
+                if (this.componentsDoubleCapacity >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                    for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                         this.components[i] = -1;
                     }
                 }
 
-                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                this.components[this.componentsDoubleCount - 1] = componentId;
+                this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCapacity - 1] = componentId;
+                this.componentsCount++;
             }
             else {
                 var componentId = this.World.GetCache<T>().Add();
-                for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                     if (this.components[i] == -1) {
                         this.components[i]     = typeInfo.id;
                         this.components[i + 1] = componentId;
+                        this.componentsCount++;
 
                         return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
 
-                this.componentsDoubleCount += 2;
-                if (this.componentsDoubleCount >= this.components.Length) {
-                    Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                    for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                this.componentsDoubleCapacity += 2;
+                if (this.componentsDoubleCapacity >= this.components.Length) {
+                    Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                    for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                         this.components[i] = -1;
                     }
                 }
 
-                this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                this.components[this.componentsDoubleCount - 1] = componentId;
+                this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                this.components[this.componentsDoubleCapacity - 1] = componentId;
+                this.componentsCount++;
 
-                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCount - 1]);
+                return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCapacity - 1]);
             }
 
             return ref CacheComponents<T>.Empty();
@@ -332,29 +353,32 @@ namespace Morpeh {
                 if (!this.Has(typeInfo.id)) {
                     var componentId = this.World.GetCache<T>().Add();
 
-                    for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                    for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                         if (this.components[i] == -1) {
                             this.components[i]     = typeInfo.id;
                             this.components[i + 1] = componentId;
+                            this.componentsCount++;
 
-                            this.World.Filter.EntityChanged(this.internalID);
                             this.World.GetCache<T>().Set(componentId, value);
+                            this.MakeDirty();
                             return;
                         }
                     }
 
-                    this.componentsDoubleCount += 2;
-                    if (this.componentsDoubleCount >= this.components.Length) {
-                        Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                        for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                    this.componentsDoubleCapacity += 2;
+                    if (this.componentsDoubleCapacity >= this.components.Length) {
+                        Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                        for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                             this.components[i] = -1;
                         }
                     }
 
-                    this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                    this.components[this.componentsDoubleCount - 1] = componentId;
-                    this.World.Filter.EntityChanged(this.internalID);
+                    this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                    this.components[this.componentsDoubleCapacity - 1] = componentId;
+                    this.componentsCount++;
+                    
                     this.World.GetCache<T>().Set(componentId, value);
+                    this.MakeDirty();
                     return;
                 }
 
@@ -367,27 +391,29 @@ namespace Morpeh {
             else {
                 if (!this.Has(typeInfo.id)) {
                     const int componentId = -1;
-                    for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+                    for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                         if (this.components[i] == -1) {
                             this.components[i]     = typeInfo.id;
                             this.components[i + 1] = componentId;
+                            this.componentsCount++;
 
-                            this.World.Filter.EntityChanged(this.internalID);
+                            this.MakeDirty();
                             return;
                         }
                     }
 
-                    this.componentsDoubleCount += 2;
-                    if (this.componentsDoubleCount >= this.components.Length) {
-                        Array.Resize(ref this.components, this.componentsDoubleCount << 1);
-                        for (int i = this.componentsDoubleCount, length = this.componentsDoubleCount << 1; i < length; i++) {
+                    this.componentsDoubleCapacity += 2;
+                    if (this.componentsDoubleCapacity >= this.components.Length) {
+                        Array.Resize(ref this.components, this.componentsDoubleCapacity << 1);
+                        for (int i = this.componentsDoubleCapacity, length = this.componentsDoubleCapacity << 1; i < length; i++) {
                             this.components[i] = -1;
                         }
                     }
 
-                    this.components[this.componentsDoubleCount - 2] = typeInfo.id;
-                    this.components[this.componentsDoubleCount - 1] = componentId;
-                    this.World.Filter.EntityChanged(this.internalID);
+                    this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
+                    this.components[this.componentsDoubleCapacity - 1] = componentId;
+                    this.componentsCount++;
+                    this.MakeDirty();
                 }
             }
         }
@@ -396,15 +422,22 @@ namespace Morpeh {
         public bool RemoveComponent<T>() where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
 
-            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+            for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                 if (this.components[i] == typeInfo.id) {
                     this.components[i] = -1;
                     if (!typeInfo.isMarker) {
                         this.World.GetCache<T>().Remove(this.components[i + 1]);
                         this.components[i + 1] = -1;
                     }
+                    --this.componentsCount;
 
-                    this.World.Filter.EntityChanged(this.internalID);
+                    if (this.componentsCount <= 0) {
+                        this.World.RemoveEntity(this);
+                    }
+                    else {
+                        this.MakeDirty();
+                    }
+                    
                     return true;
                 }
             }
@@ -414,7 +447,7 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool Has(int typeID) {
-            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+            for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                 if (this.components[i] == typeID) {
                     return true;
                 }
@@ -426,7 +459,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has<T>() where T : struct, IComponent {
             var typeID = CacheTypeIdentifier<T>.info.id;
-            for (int i = 0, length = this.componentsDoubleCount; i < length; i += 2) {
+            for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                 if (this.components[i] == typeID) {
                     return true;
                 }
@@ -437,6 +470,16 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsDisposed() => this.isDisposed;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void MakeDirty() {
+            if (this.isDirty) {
+                return;
+            }
+
+            this.isDirty = true;
+            this.World.Filter.EntityChanged(this.internalID);
+        }
 
         public void Dispose() {
             if (this.isDisposed) {
@@ -453,13 +496,17 @@ namespace Morpeh {
             this.components            = null;
             this.internalID            = -1;
             this.worldID               = -1;
-            this.componentsDoubleCount = -1;
+            this.componentsDoubleCapacity = -1;
+            this.componentsCount = -1;
 
             this.isDisposed = true;
         }
     }
 
-    [Serializable]
+    public static class EntityExtensions {
+        public static bool IsNullOrDisposed([CanBeNull]this IEntity entity) => entity == null || entity.IsDisposed();
+    }
+
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -467,46 +514,37 @@ namespace Morpeh {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> systems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> fixedSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> lateSystems;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> disabledSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> disabledFixedSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<ISystem> disabledLateSystems;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<IInitializer> newInitializers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        [NonSerialized]
         private List<IDisposable> disposables;
-
         private World world;
 
         private SystemsGroup() {
@@ -592,7 +630,20 @@ namespace Morpeh {
         }
 
         public void FixedUpdate(float deltaTime) {
+            foreach (var disposable in this.disposables) {
+                disposable.Dispose();
+            }
+
+            this.disposables.Clear();
+
             this.world.Filter.Update();
+
+            foreach (var initializer in this.newInitializers) {
+                initializer.OnAwake();
+                this.world.Filter.Update();
+            }
+
+            this.newInitializers.Clear();
 
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
                 this.fixedSystems[i].OnUpdate(deltaTime);
@@ -724,7 +775,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public sealed class World : IDisposable {
+    public sealed partial class World : IDisposable {
 #if UNITY_2019_1_OR_NEWER
         [CanBeNull]
 #endif
@@ -781,13 +832,16 @@ namespace Morpeh {
             this.systemsGroups = new SortedList<int, SystemsGroup>();
 
             this.Filter = new Filter(this);
+
+            this.InitializeGlobals();
         }
+
+        partial void InitializeGlobals();
 
         private World Initialize() {
 #if UNITY_2019_1_OR_NEWER
             worlds.Add(this);
 #endif
-
             this.freeEntityIDs = new List<int>();
             this.caches        = new CacheComponents[Constants.DEFAULT_WORLD_CACHES_CAPACITY];
 
@@ -859,7 +913,13 @@ namespace Morpeh {
 
             var cache = (CacheComponents<T>) this.caches[info.id];
             if (cache == null) {
-                this.caches[info.id] = cache = new CacheComponents<T>();
+                if (info.isDisposable) {
+                    var constructedType = typeof(CacheDisposableComponents<>).MakeGenericType(typeof(T));
+                    this.caches[info.id] = cache = (CacheComponents<T>)Activator.CreateInstance(constructedType);
+                }
+                else {
+                    this.caches[info.id] = cache = new CacheComponents<T>();
+                }
             }
 
             return cache;
@@ -897,12 +957,18 @@ namespace Morpeh {
         public void AddSystemsGroup(int order, SystemsGroup systemsGroup) {
             this.systemsGroups.Add(order, systemsGroup);
         }
+        
+        public void AddLastSystemsGroup(SystemsGroup systemsGroup) {
+            this.systemsGroups.Add(this.systemsGroups.Last().Key + 1, systemsGroup);
+        }
 
         public void RemoveSystemsGroup(SystemsGroup systemsGroup) {
+            systemsGroup.Dispose();
             this.systemsGroups.RemoveAt(this.systemsGroups.IndexOfValue(systemsGroup));
         }
 
         public void RemoveAtSystemsGroup(int order) {
+            this.systemsGroups[order].Dispose();
             this.systemsGroups.Remove(order);
         }
 
@@ -955,8 +1021,10 @@ namespace Morpeh {
             return this.entities[id];
         }
 
+        [CanBeNull]
         public IEntity GetEntity(in int id) => this.entities[id];
 
+        [CanBeNull]
         internal Entity GetEntityInternal(in int id) => this.entities[id];
 
         public void RemoveEntity(IEntity entity) {
@@ -967,6 +1035,7 @@ namespace Morpeh {
                     this.Filter.entities.Remove(id);
                     this.entities[id] = null;
                     --this.entitiesCount;
+                    ent.Dispose();
                 }
             }
         }
@@ -1011,6 +1080,8 @@ namespace Morpeh {
 #endif
         private List<int> removedList;
         private List<int> dirtyList;
+        
+        private int lastEntitiesCount = -1;
 
         //root filter ctor
         //don't allocate any trash
@@ -1059,13 +1130,13 @@ namespace Morpeh {
                 var entity = this.world.GetEntityInternal(id);
                 switch (this.filterMode) {
                     case FilterMode.Include:
-                        if (entity.Has(this.typeID)) {
+                        if (entity != null && !entity.IsDisposed() && entity.Has(this.typeID)) {
                             this.entities.Add(id);
                         }
 
                         break;
                     case FilterMode.Exclude:
-                        if (!entity.Has(this.typeID)) {
+                        if (entity != null && !entity.IsDisposed() && !entity.Has(this.typeID)) {
                             this.entities.Add(id);
                         }
 
@@ -1106,18 +1177,31 @@ namespace Morpeh {
 
             this.dirtyList.Clear();
             this.dirtyList = null;
+
+            this.lastEntitiesCount = -1;
         }
 
         internal void EntityChanged(int id) => this.dirtyList.Add(id);
 
         public void Update() {
             if (this.typeID == -1) {
-                for (int i = 0, length = this.childs.Count; i < length; i++) {
-                    this.childs[i].ChildrensUpdate(this.dirtyList);
+                var entitiesCount = this.entities.Count;
+                if (this.lastEntitiesCount != entitiesCount || this.dirtyList.Count > 0) {
+                    for (int i = 0, length = this.childs.Count; i < length; i++) {
+                        this.childs[i].UpdateChilds(this.dirtyList);
+                    }
+
+                    this.lastEntitiesCount = entitiesCount;
+                    
+                    for (int i = 0, length = this.dirtyList.Count; i < length; i++) {
+                        var entity  = this.world.GetEntityInternal(this.dirtyList[i]);
+                        if (!entity.IsNullOrDisposed()) {
+                            entity.isDirty = false;
+                        }
+                    }
+                    this.dirtyList.Clear();
                 }
-
-                this.dirtyList.Clear();
-
+                
                 return;
             }
 
@@ -1128,30 +1212,30 @@ namespace Morpeh {
             for (var i = this.dirtyList.Count - 1; i >= 0; i--) {
                 var dirtyId = this.dirtyList[i];
                 var entity  = this.world.GetEntityInternal(dirtyId);
-                //TODO maybe remove?
-                if (entity != null) {
-                    if (this.filterMode == FilterMode.Include) {
-                        if (entity.Has(this.typeID)) {
-                            if (this.entities.Add(dirtyId)) {
-                                this.dirtyList.RemoveAtFast(i);
-                            }
-                        }
-                        else {
-                            this.entities.Remove(dirtyId);
+                if (entity.IsNullOrDisposed()) {
+                    this.entities.Remove(dirtyId);
+                    this.dirtyList.RemoveAtFast(i);
+                }
+                else if(this.filterMode == FilterMode.Include) {
+                    if (entity.Has(this.typeID)) {
+                        if (this.entities.Add(dirtyId)) {
                             this.dirtyList.RemoveAtFast(i);
                         }
                     }
-
-                    if (this.filterMode == FilterMode.Exclude) {
-                        if (!entity.Has(this.typeID)) {
-                            if (this.entities.Add(dirtyId)) {
-                                this.dirtyList.RemoveAtFast(i);
-                            }
-                        }
-                        else {
-                            this.entities.Remove(dirtyId);
+                    else {
+                        this.entities.Remove(dirtyId);
+                        this.dirtyList.RemoveAtFast(i);
+                    }
+                }
+                else if(this.filterMode == FilterMode.Exclude) {
+                    if (!entity.Has(this.typeID)) {
+                        if (this.entities.Add(dirtyId)) {
                             this.dirtyList.RemoveAtFast(i);
                         }
+                    }
+                    else {
+                        this.entities.Remove(dirtyId);
+                        this.dirtyList.RemoveAtFast(i);
                     }
                 }
             }
@@ -1175,13 +1259,13 @@ namespace Morpeh {
                 var entity = this.world.GetEntityInternal(id);
                 switch (this.filterMode) {
                     case FilterMode.Include:
-                        if (entity.Has(this.typeID)) {
+                        if (entity != null && !entity.IsDisposed() && entity.Has(this.typeID)) {
                             this.entities.Add(id);
                         }
 
                         break;
                     case FilterMode.Exclude:
-                        if (!entity.Has(this.typeID)) {
+                        if (entity != null && !entity.IsDisposed() && !entity.Has(this.typeID)) {
                             this.entities.Add(id);
                         }
 
@@ -1192,7 +1276,7 @@ namespace Morpeh {
             this.addedList.Clear();
 
             for (int i = 0, length = this.childs.Count; i < length; i++) {
-                this.childs[i].ChildrensUpdate(this.dirtyList);
+                this.childs[i].UpdateChilds(this.dirtyList);
             }
 
             this.dirtyList.Clear();
@@ -1216,7 +1300,7 @@ namespace Morpeh {
             }
         }
 
-        private void ChildrensUpdate(List<int> parentDirtyList) {
+        private void UpdateChilds(List<int> parentDirtyList) {
             this.dirtyList.AddRange(parentDirtyList);
             this.Update();
         }
@@ -1445,9 +1529,14 @@ namespace Morpeh {
             [SerializeField]
 #endif
             internal bool isMarker;
+#if UNITY_2019_1_OR_NEWER
+            [SerializeField]
+#endif
+            internal bool isDisposable;
 
-            public TypeInfo(bool isMarker) {
+            public TypeInfo(bool isMarker, bool isDisposable) {
                 this.isMarker = isMarker;
+                this.isDisposable = isDisposable;
             }
 
             public void SetID(int id) {
@@ -1463,7 +1552,7 @@ namespace Morpeh {
         internal static CommonCacheTypeIdentifier.TypeInfo info;
 
         static CacheTypeIdentifier() {
-            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1);
+            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
 #if UNITY_EDITOR
             var id = CommonCacheTypeIdentifier.GetID<T>();
 #else
@@ -1498,7 +1587,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal sealed class CacheComponents<T> : CacheComponents where T : struct, IComponent {
+    internal class CacheComponents<T> : CacheComponents where T : struct, IComponent {
         private static T empty;
 
 #if UNITY_2019_1_OR_NEWER
@@ -1580,6 +1669,17 @@ namespace Morpeh {
         }
     }
 
+    [Serializable]
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    internal sealed class CacheDisposableComponents<T> : CacheComponents<T> where T : struct, IComponent, IDisposable {
+        public override bool Remove(in int id) {
+            this.Components[id].Dispose();
+            return base.Remove(in id);
+        }
+    }
+    
     namespace Utils {
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
