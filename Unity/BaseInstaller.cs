@@ -26,7 +26,7 @@ namespace Morpeh {
         }
 #endif
 #if UNITY_EDITOR
-        [MenuItem("GameObject/ECS/", true, 10)]
+        [MenuItem("GameObject/Morpeh/ECS/", true, 10)]
         private static bool OrderECS() => true;
 #endif
     }

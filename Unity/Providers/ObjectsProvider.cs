@@ -11,7 +11,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [AddComponentMenu("ECS/" + nameof(ObjectsProvider))]
+    [AddComponentMenu("Morpeh/" + nameof(ObjectsProvider))]
     public sealed class ObjectsProvider : MonoBehaviour {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Header("Global Variables")]

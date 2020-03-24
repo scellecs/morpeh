@@ -7,7 +7,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Variable List Int")]
+    [CreateAssetMenu(menuName = "Morpeh/Globals/Variable/Variables List Int")]
     public class GlobalVariableListInt : BaseGlobalVariable<List<int>> {
         public override IDataWrapper Wrapper {
             get => new ListIntWrapper {list = this.value};

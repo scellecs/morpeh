@@ -10,7 +10,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Configurator")]
+    [CreateAssetMenu(menuName = "Morpeh/Configurator")]
     public class Configurator : Initializer {
         public List<Configuration> configurations;
 

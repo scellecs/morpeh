@@ -6,7 +6,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Variable Bool")]
+    [CreateAssetMenu(menuName = "Morpeh/Globals/Variables/Variable Bool")]
     public class GlobalVariableBool : BaseGlobalVariable<bool> {
         public override IDataWrapper Wrapper {
             get => new BoolWrapper {value = this.value};

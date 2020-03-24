@@ -13,7 +13,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [AddComponentMenu("ECS/" + nameof(Installer))]
+    [AddComponentMenu("Morpeh/ECS/" + nameof(Installer))]
     public sealed class Installer : BaseInstaller {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Required]
@@ -116,10 +116,10 @@
         }
         
 #if UNITY_EDITOR
-        [MenuItem("GameObject/ECS/", true, 10)]
+        [MenuItem("GameObject/Morpeh/ECS/", true, 10)]
         private static bool OrderECS() => true;
 
-        [MenuItem("GameObject/ECS/Installer", false, 1)]
+        [MenuItem("GameObject/Morpeh/ECS/Installer", false, 1)]
         private static void CreateInstaller(MenuCommand menuCommand) {
             var go = new GameObject("[Installer]");
             go.AddComponent<Installer>();

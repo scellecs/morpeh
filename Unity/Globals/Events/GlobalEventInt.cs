@@ -5,7 +5,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Event Int")]
+    [CreateAssetMenu(menuName = "Morpeh/Globals/Events/Event Int")]
     public class GlobalEventInt : BaseGlobalEvent<int> {
     }
 }
