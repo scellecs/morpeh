@@ -15,8 +15,6 @@ namespace Morpeh.Utils.Editor {
 		}
 
 		public static ScriptableObject CreateAssetAtPath(string path, Type type) {
-			Debug.Log("CreateAssetAtPath (" + type.Name + ")");
-
 			ScriptableObject asset = ScriptableObject.CreateInstance(type);
 			asset.name = Path.GetFileName(path);
 			AssetDatabase.CreateAsset(asset, path);
