@@ -3,7 +3,7 @@ namespace Morpeh.Utils.Editor {
 	using UnityEngine;
 	using UnityEditor;
 
-	[CustomEditor(typeof(Discover))]
+	//[CustomEditor(typeof(Discover))]
 	public class DiscoverEditor : Editor {
 		private Discover discover;
 

@@ -1,44 +1,41 @@
 namespace Morpeh.Utils.Editor {
-	using UnityEngine;
-	using UnityEditor;
-	using UnityEditor.Callbacks;
+    using UnityEngine;
+    using UnityEditor;
+    using UnityEditor.Callbacks;
 
-	public class DiscoverAsset : ScriptableObject {
-		[MenuItem("Assets/Create/Discover Asset", priority = 202)]
-		static void Create() {
-			AssetFactory.CreateAssetInProjectWindow<DiscoverAsset>(null, "New DiscoverAsset.asset");
-		}
+    public class DiscoverAsset : ScriptableObject {
+        [OnOpenAsset]
+        static bool OpenAsset(int instanceID, int line) {
+            var asset = EditorUtility.InstanceIDToObject(instanceID);
+            if (asset is DiscoverAsset) {
+                DiscoverWindow.ShowDiscoverWindow(asset as DiscoverAsset);
+                return true;
+            }
+            else
+                return false;
+        }
 
-		[OnOpenAsset]
-		static bool OpenAsset(int instanceID, int line) {
-			var asset = EditorUtility.InstanceIDToObject(instanceID);
-			if (asset is DiscoverAsset) {
-				DiscoverWindow.ShowDiscoverWindow(asset as DiscoverAsset);
-				return true;
-			}
-			else
-				return false;
-		}
+        [Header("General Properties")]
+        public string WindowTitle = "Discover";
+        public Texture2D HeaderTexture;
+        public bool      dockable = false;
 
-		[Header("General Properties")] public string WindowTitle = "Discover";
-		public Texture2D HeaderTexture;
-		public bool dockable = false;
+        [Tooltip("Width of the Window, in pixels")]
+        public int WindowWidth = 640;
 
-		[Tooltip("Width of the Window, in pixels")]
-		public int WindowWidth = 640;
+        [Tooltip("Height of the Window, in pixels")]
+        public int WindowHeight = 520;
 
-		[Tooltip("Height of the Window, in pixels")]
-		public int WindowHeight = 520;
+        [Tooltip("Width of the Discover List, in pixels")]
+        public int DiscoverListWidth = 180;
 
-		[Tooltip("Width of the Discover List, in pixels")]
-		public int DiscoverListWidth = 180;
+        [Header("Show At Startup")]
+        public bool EnableShowAtStartup = true;
 
-		[Header("Show At Startup")] public bool EnableShowAtStartup = true;
+        [Tooltip("The name of the preference for auto showing at startup, will be ")]
+        public string PreferenceName = "Discover";
 
-		[Tooltip("The name of the preference for auto showing at startup, will be ")]
-		public string PreferenceName = "Discover";
-
-		[Header("Debug")] public bool Debug = false;
-	}
-	
+        [Header("Debug")]
+        public bool Debug = false;
+    }
 }
