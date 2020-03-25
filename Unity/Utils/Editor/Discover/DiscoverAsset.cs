@@ -4,6 +4,12 @@ namespace Morpeh.Utils.Editor {
     using UnityEditor.Callbacks;
 
     public class DiscoverAsset : ScriptableObject {
+        [MenuItem("Help/Morpeh Discover", priority = 0)]
+        internal static void Show() {
+            var asset = AssetDatabase.LoadAssetAtPath<DiscoverAsset>(AssetDatabase.GUIDToAssetPath(AssetDatabase.FindAssets("t:DiscoverAsset")[0]));
+            DiscoverWindow.ShowDiscoverWindow(asset);
+        }
+        
         [OnOpenAsset]
         static bool OpenAsset(int instanceID, int line) {
             var asset = EditorUtility.InstanceIDToObject(instanceID);

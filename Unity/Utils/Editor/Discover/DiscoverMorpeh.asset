@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99c49654b9bada340bfd165d70dc8296, type: 3}
   m_Name: DiscoverMorpeh
   m_EditorClassIdentifier: 
-  WindowTitle: Morpeh Guide
+  WindowTitle: Morpeh Discover
   HeaderTexture: {fileID: 0}
   dockable: 1
   WindowWidth: 640
   WindowHeight: 520
   DiscoverListWidth: 180
   EnableShowAtStartup: 1
-  PreferenceName: Morpeh Guide
+  PreferenceName: Morpeh Discover
   Debug: 0
