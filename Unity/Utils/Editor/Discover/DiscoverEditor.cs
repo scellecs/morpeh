@@ -14,7 +14,7 @@ namespace Morpeh.Utils.Editor {
 			GUILayout.Label(discover.Name, DiscoverWindow.Styles.header);
 
 			using (new GUILayout.VerticalScope(DiscoverWindow.Styles.indent)) {
-				if (discover.Description != null && discover.Description != string.Empty) {
+				if (!string.IsNullOrEmpty(discover.Description)) {
 					GUILayout.Label(discover.Description, DiscoverWindow.Styles.body);
 				}
 

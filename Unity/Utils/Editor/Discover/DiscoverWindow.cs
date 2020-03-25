@@ -84,8 +84,6 @@ namespace Morpeh.Utils.Editor {
         private void SetDiscoverAsset(DiscoverAsset discover) {
             this.discoverAsset = discover;
             this.titleContent  = new GUIContent(this.discoverAsset.WindowTitle);
-            this.minSize       = new Vector2(this.discoverAsset.WindowWidth, this.discoverAsset.WindowHeight);
-            this.maxSize       = new Vector2(this.discoverAsset.WindowWidth, this.discoverAsset.WindowHeight);
         }
 
         private Dictionary<string, List<Discover>> discoverObjects = null;
@@ -238,7 +236,7 @@ namespace Morpeh.Utils.Editor {
                             foreach (var category in this.discoverObjects.Keys.OrderBy(x => x.ToString())) {
                                 var show = true;
                                 if (!string.IsNullOrEmpty(category)) {
-                                    show = this.categoryFoldout[category] = EditorGUILayout.Foldout(this.categoryFoldout[category], category, EditorStyles.foldoutHeader);
+                                    show = this.categoryFoldout[category] = EditorGUILayout.Foldout(this.categoryFoldout[category], category, EditorStyles.foldout);
                                 }
 
                                 if (show) {
@@ -274,7 +272,7 @@ namespace Morpeh.Utils.Editor {
 
                     GUILayout.Space(4);
 
-                    using (new GUILayout.VerticalScope(GUILayout.Width(440))) {
+                    using (new GUILayout.VerticalScope()) {
                         this.contentScroll = GUILayout.BeginScrollView(this.contentScroll);
                         GUILayout.Space(8);
 

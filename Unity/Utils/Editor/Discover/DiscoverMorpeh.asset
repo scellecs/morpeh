@@ -15,8 +15,8 @@ MonoBehaviour:
   WindowTitle: Morpeh Discover
   HeaderTexture: {fileID: 0}
   dockable: 1
-  WindowWidth: 640
-  WindowHeight: 520
+  WindowWidth: 800
+  WindowHeight: 600
   DiscoverListWidth: 180
   EnableShowAtStartup: 1
   PreferenceName: Morpeh Discover
