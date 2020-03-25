@@ -65,7 +65,7 @@ namespace Morpeh.Utils.Editor {
         }
         
 
-        private static List<DiscoverWindow> windows;
+        private static List<DiscoverWindow> windows = default;
 
         public static void ShowDiscoverWindow(DiscoverAsset discoverAsset) {
             if (discoverAsset != null) {
