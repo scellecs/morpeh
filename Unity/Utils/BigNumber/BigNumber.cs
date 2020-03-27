@@ -27,7 +27,7 @@
     }
 
     [Serializable]
-    public struct BigNumber : IComparable<BigNumber>, IEquatable<BigNumber> {
+    public struct BigNumber  {
         private const int DIGIT_VALUE = 1000;
         private static readonly List<string> chars = new List<string>
         {
@@ -92,7 +92,7 @@
             var digitIndex = 0;
             var tmp = value;
             this.digits = new List<int> {0};
-            while (tmp > DIGIT_VALUE)
+            while (tmp >= DIGIT_VALUE)
             {
                 tmp /= DIGIT_VALUE;
                 digitIndex++;
