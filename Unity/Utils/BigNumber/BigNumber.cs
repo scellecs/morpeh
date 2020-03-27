@@ -92,7 +92,7 @@
             var digitIndex = 0;
             var tmp = value;
             this.digits = new List<int> {0};
-            while (tmp > DIGIT_VALUE)
+            while (tmp >= DIGIT_VALUE)
             {
                 tmp /= DIGIT_VALUE;
                 digitIndex++;
