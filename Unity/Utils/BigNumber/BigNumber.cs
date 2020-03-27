@@ -27,7 +27,7 @@
     }
 
     [Serializable]
-    public struct BigNumber  {
+    public struct BigNumber : IComparable<BigNumber>, IEquatable<BigNumber> {
         private const int DIGIT_VALUE = 1000;
         private static readonly List<string> chars = new List<string>
         {
