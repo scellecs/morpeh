@@ -2,7 +2,6 @@ namespace Morpeh.Globals {
     namespace ECS {
         using System;
         using System.Collections.Generic;
-        using UnityEngine;
 
         [Serializable]
         internal struct GlobalEventMarker : IComponent {

@@ -3,7 +3,6 @@ namespace Morpeh {
     using Sirenix.OdinInspector;
 #endif
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
 #if UNITY_EDITOR
     using UnityEditor;
 #endif

@@ -1,6 +1,5 @@
 ﻿namespace Morpeh.Globals {
     using System;
-    using System.Collections.Generic;
     using UnityEngine;
     using Unity.IL2CPP.CompilerServices;
     using Object = UnityEngine.Object;
