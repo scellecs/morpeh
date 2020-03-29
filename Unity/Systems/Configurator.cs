@@ -10,7 +10,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = MenuPaths.Core + nameof(Configurator))]
+    [CreateAssetMenu(menuName = MenuPaths.Globals + nameof(Configurator))]
     public class Configurator : Initializer {
         public List<Configuration> configurations;
 
