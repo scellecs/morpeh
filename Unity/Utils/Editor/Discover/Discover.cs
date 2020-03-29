@@ -3,7 +3,7 @@ namespace Morpeh.Utils.Editor {
     using UnityEngine;
     using Object = UnityEngine.Object;
 
-    [CreateAssetMenu(fileName = "DiscoverElement", menuName = "ECS/Utils/Discover", order = 1)]
+    [CreateAssetMenu(fileName = "DiscoverElement", menuName = MenuPaths.Utils + nameof(Discover), order = 1)]
     public class Discover : ScriptableObject {
         public string Name            = "Discover";
         public string Category        = "Category";

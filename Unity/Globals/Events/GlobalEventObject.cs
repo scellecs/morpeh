@@ -5,7 +5,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "Morpeh/Globals/Events/Event Object")]
+    [CreateAssetMenu(menuName = MenuPaths.GlobalEvents + "Event Object")]
     public sealed class GlobalEventObject : BaseGlobalEvent<Object> {
     }
 }

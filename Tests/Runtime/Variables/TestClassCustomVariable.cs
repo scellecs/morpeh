@@ -3,7 +3,7 @@
     using Globals;
     using UnityEngine;
 
-    [CreateAssetMenu(menuName = "Morpeh/Globals/Custom/Tests/" + nameof(TestClassCustomVariable))]
+    [CreateAssetMenu(menuName = MenuPaths.CustomGlobals + "Tests/" + nameof(TestClassCustomVariable))]
     public class TestClassCustomVariable : BaseGlobalVariable<DummyClass> {
         public override IDataWrapper Wrapper { get; set; }
 

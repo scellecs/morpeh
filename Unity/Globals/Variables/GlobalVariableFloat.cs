@@ -6,7 +6,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "Morpeh/Globals/Variables/Variable Float")]
+    [CreateAssetMenu(menuName = MenuPaths.GlobalVariables + "Variable Float")]
     public class GlobalVariableFloat : BaseGlobalVariable<float> {
         public override IDataWrapper Wrapper {
             get => new FloatWrapper {value = this.value};

@@ -9,7 +9,7 @@ namespace Morpeh.Unity.Utils.Editor {
     using UnityEditor;
     using UnityEngine;
 
-    [CreateAssetMenu(menuName = "Morpeh/Utils/Define")]
+    [CreateAssetMenu(menuName = MenuPaths.Utils + "Define")]
     public class DefineAsset : ScriptableObject {
         private const string PREFS_KEY = "__MORPEH_DEFINES";
 #if ODIN_INSPECTOR

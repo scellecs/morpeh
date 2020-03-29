@@ -11,7 +11,7 @@ namespace Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [AddComponentMenu("Morpeh/ECS/" + nameof(EntityProvider))]
+    [AddComponentMenu(MenuPaths.Core + nameof(EntityProvider))]
     public class EntityProvider : MonoBehaviour {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]

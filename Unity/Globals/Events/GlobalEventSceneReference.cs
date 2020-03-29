@@ -6,7 +6,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "Morpeh/Globals/Events/Event SceneReference")]
+    [CreateAssetMenu(menuName = MenuPaths.GlobalEvents + "Event SceneReference")]
     public class GlobalEventSceneReference : BaseGlobalEvent<SceneReference> {
         public void Publish(string level) {
             var newScene = new SceneReference {ScenePath = level};

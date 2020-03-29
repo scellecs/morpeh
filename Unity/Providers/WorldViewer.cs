@@ -10,7 +10,7 @@ namespace Morpeh {
 #if UNITY_EDITOR && ODIN_INSPECTOR
     [HideMonoScript]
 #endif
-    [AddComponentMenu("Morpeh/ECS/" + nameof(WorldViewer))]
+    [AddComponentMenu(MenuPaths.Core + nameof(WorldViewer))]
     public class WorldViewer : MonoBehaviour {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [DisableContextMenu]

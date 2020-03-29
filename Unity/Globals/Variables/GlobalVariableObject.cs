@@ -8,7 +8,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "Morpeh/Globals/Variables/Variable Object")]
+    [CreateAssetMenu(menuName = MenuPaths.GlobalVariables + "Variable Object")]
     public class GlobalVariableObject : BaseGlobalVariable<Object> {
         public override IDataWrapper Wrapper {
             get => new ObjectWrapper {obj = this.value};

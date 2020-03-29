@@ -7,7 +7,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "Morpeh/Globals/Variables/Variable List Bool")]
+    [CreateAssetMenu(menuName = MenuPaths.GlobalVariables + "Variable List Bool")]
     public class GlobalVariableListBool : BaseGlobalVariable<List<bool>> {
         public override IDataWrapper Wrapper {
             get => new ListBoolWrapper {list = this.value};

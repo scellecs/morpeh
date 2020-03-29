@@ -5,7 +5,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "Morpeh/Globals/Events/Event Float")]
+    [CreateAssetMenu(menuName = MenuPaths.GlobalEvents + "Event Float")]
     public class GlobalEventFloat : BaseGlobalEvent<float> {
     }
 }
