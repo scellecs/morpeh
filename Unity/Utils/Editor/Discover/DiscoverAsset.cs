@@ -1,7 +1,7 @@
 namespace Morpeh.Utils.Editor {
-    using UnityEngine;
     using UnityEditor;
     using UnityEditor.Callbacks;
+    using UnityEngine;
 
     public class DiscoverAsset : ScriptableObject {
         [MenuItem("Help/Morpeh Discover", priority = 0)]
