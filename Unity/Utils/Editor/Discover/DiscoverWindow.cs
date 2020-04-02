@@ -296,6 +296,7 @@ namespace Morpeh.Utils.Editor {
         public class GroupLabelScope : GUILayout.VerticalScope {
             public GroupLabelScope(string name) : base(Styles.box) {
                 if (!string.IsNullOrWhiteSpace(name)) {
+                    var s = Styles.boxHeader;
                     var n = new GUIContent(name);
                     var r = GUILayoutUtility.GetRect(n, Styles.boxHeader, GUILayout.ExpandWidth(true));
                     GUI.Label(r, n, Styles.boxHeader);
@@ -348,7 +349,7 @@ namespace Morpeh.Utils.Editor {
 
                 boxHeader                  = new GUIStyle(GUI.skin.box);
                 boxHeader.normal.textColor = GUI.skin.label.normal.textColor;
-                boxHeader.fixedHeight      = 24;
+                boxHeader.fixedHeight      = 27;
                 boxHeader.fontSize         = 16;
                 boxHeader.fontStyle        = FontStyle.Bold;
                 boxHeader.alignment        = TextAnchor.UpperLeft;
