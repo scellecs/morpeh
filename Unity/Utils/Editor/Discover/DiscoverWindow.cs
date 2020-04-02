@@ -76,7 +76,8 @@ namespace Morpeh.Utils.Editor {
             }
         }
 
-        public  DiscoverAsset discoverAsset { get; private set; }
+        
+        public DiscoverAsset discoverAsset;
         private Texture2D     header;
         private bool          forceGlobal;
 
