@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0dca1f0dde868a4aa93821382b07f95, type: 3}
-  m_Name: Installer
+  m_Name: '[Discover] Installer'
   m_EditorClassIdentifier: 
   Name: Installer
   Category: Core
