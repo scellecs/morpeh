@@ -63,13 +63,14 @@ namespace Morpeh {
                         break;
                     }
                 }
-
-                if (this.entityID < 0 || this.InternalEntity == null) {
-                    this.cachedEntity = World.Default.CreateEntityInternal(out this.entityID);
-                    foreach (var entityProvider in others) {
-                        entityProvider.entityID     = this.entityID;
-                        entityProvider.cachedEntity = this.cachedEntity;
-                    }
+            }
+            
+            if (this.InternalEntity == null || this.entityID < 0) {
+                var others = this.GetComponents<EntityProvider>();
+                this.cachedEntity = World.Default.CreateEntityInternal(out this.entityID);
+                foreach (var entityProvider in others) {
+                    entityProvider.entityID     = this.entityID;
+                    entityProvider.cachedEntity = this.cachedEntity;
                 }
             }
 
