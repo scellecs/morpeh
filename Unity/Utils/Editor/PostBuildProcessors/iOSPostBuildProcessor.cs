@@ -1,5 +1,5 @@
 ﻿#if UNITY_EDITOR
-namespace Morpeh.Hypercasual.Core.Apple {
+namespace Morpeh.Apple {
     using System;
     using System.Collections.Generic;
     using UnityEditor;
