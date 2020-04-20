@@ -206,22 +206,6 @@ namespace Morpeh.Apple {
             File.WriteAllText(plistPath, plist.WriteToString());
         }
 
-        //    [PostProcessBuild(700)]
-        //    public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject)
-        //    {
-        //        if (target != BuildTarget.iOS)
-        //        {
-        //            return;
-        //        }
-        // 
-        //        string projPath = pathToBuiltProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
-        //        PBXProject proj = new PBXProject();
-        //        proj.ReadFromString(File.ReadAllText(projPath));
-        //        string targetGUID = proj.TargetGuidByName("Unity-iPhone");
-        //        proj.AddBuildProperty(targetGUID, "OTHER_LDFLAGS", "-lxml2"); 
-        //        File.WriteAllText(projPath, proj.WriteToString());
-        //    }
-
         /// <summary>
         /// Adds properties to XCode project.
         /// For example it's common case to add
