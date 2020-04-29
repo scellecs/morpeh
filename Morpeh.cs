@@ -1364,10 +1364,20 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEntity GetEntity(in int id) => this.world.entities[this.entitiesCacheForBags[id]];
+        public IEntity GetEntity(in int id) {
+            if (this.isDirtyCache) {
+                this.UpdateCache();
+            }
+            return this.world.entities[this.entitiesCacheForBags[id]];
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEntity First() => this.world.entities[this.entitiesCacheForBags[0]];
+        public IEntity First() {
+            if (this.isDirtyCache) {
+                this.UpdateCache();
+            }
+            return this.world.entities[this.entitiesCacheForBags[0]];
+        }
 
         public Filter With<T>(bool fillWithPreviousEntities = true) where T : struct, IComponent
             => this.CreateFilter<T>(FilterMode.Include, fillWithPreviousEntities);
