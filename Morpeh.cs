@@ -1305,19 +1305,23 @@ namespace Morpeh {
             this.Update();
         }
 
+        private void UpdateCache() {
+            if (this.entitiesCacheForBagsCapacity < this.Length) {
+                Array.Resize(ref this.entitiesCacheForBags, this.Length);
+                this.entitiesCacheForBagsCapacity = this.Length;
+            }
+
+            var i = 0;
+            foreach (var id in this.entities) {
+                this.entitiesCacheForBags[i++] = id;
+            }
+
+            this.isDirtyCache = true;
+        }
+
         public ref ComponentsBag<T> Select<T>() where T : struct, IComponent {
             if (this.isDirtyCache) {
-                if (this.entitiesCacheForBagsCapacity < this.Length) {
-                    Array.Resize(ref this.entitiesCacheForBags, this.Length);
-                    this.entitiesCacheForBagsCapacity = this.Length;
-                }
-
-                var i = 0;
-                foreach (var id in this.entities) {
-                    this.entitiesCacheForBags[i++] = id;
-                }
-
-                this.isDirtyCache = true;
+                this.UpdateCache();
             }
             
             var typeInfo = CacheTypeIdentifier<T>.info;
@@ -1451,11 +1455,16 @@ namespace Morpeh {
             }
         }
 
-        public EntityEnumerator GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.Length);
+        public EntityEnumerator GetEnumerator() {
+            if (this.isDirtyCache) {
+                this.UpdateCache();
+            }
+            return new EntityEnumerator(this.world, this.entitiesCacheForBags, this.Length);
+        }
 
-        IEnumerator<IEntity> IEnumerable<IEntity>.GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.Length);
+        IEnumerator<IEntity> IEnumerable<IEntity>.GetEnumerator() => this.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => new EntityEnumerator(this.world, this.entitiesCacheForBags, this.Length);
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public struct EntityEnumerator : IEnumerator<IEntity> {
             private World  world;
