@@ -1098,6 +1098,8 @@ namespace Morpeh {
 
         private int lastEntitiesCount = -1;
 
+        private bool isDirtyCache = true;
+
         //root filter ctor
         //don't allocate any trash
         internal Filter(World world) {
@@ -1160,7 +1162,6 @@ namespace Morpeh {
             }
 
             this.Length = this.entities.Count;
-            this.CacheEntities();
         }
 
         public void Dispose() {
@@ -1221,8 +1222,6 @@ namespace Morpeh {
                 return;
             }
 
-            var changed = false;
-
             var originDirtyCount = this.dirtyList.Count;
 
             for (var i = this.dirtyList.Count - 1; i >= 0; i--) {
@@ -1261,7 +1260,7 @@ namespace Morpeh {
                     this.componentsBags[i] = 1;
                 }
 
-                changed = true;
+                this.isDirtyCache = true;
             }
 
             for (int i = 0, length = this.removedList.Count; i < length; i++) {
@@ -1299,22 +1298,6 @@ namespace Morpeh {
             this.dirtyList.Clear();
 
             this.Length = this.entities.Count;
-
-            if (changed) {
-                this.CacheEntities();
-            }
-        }
-
-        private void CacheEntities() {
-            if (this.entitiesCacheForBagsCapacity < this.Length) {
-                Array.Resize(ref this.entitiesCacheForBags, this.Length);
-                this.entitiesCacheForBagsCapacity = this.Length;
-            }
-
-            var i = 0;
-            foreach (var id in this.entities) {
-                this.entitiesCacheForBags[i++] = id;
-            }
         }
 
         private void UpdateChilds(List<int> parentDirtyList) {
@@ -1323,6 +1306,20 @@ namespace Morpeh {
         }
 
         public ref ComponentsBag<T> Select<T>() where T : struct, IComponent {
+            if (this.isDirtyCache) {
+                if (this.entitiesCacheForBagsCapacity < this.Length) {
+                    Array.Resize(ref this.entitiesCacheForBags, this.Length);
+                    this.entitiesCacheForBagsCapacity = this.Length;
+                }
+
+                var i = 0;
+                foreach (var id in this.entities) {
+                    this.entitiesCacheForBags[i++] = id;
+                }
+
+                this.isDirtyCache = true;
+            }
+            
             var typeInfo = CacheTypeIdentifier<T>.info;
             if (typeInfo.isMarker) {
 #if UNITY_EDITOR
