@@ -28,6 +28,10 @@
 
     [Serializable]
     public struct BigNumber : IComparable<BigNumber>, IEquatable<BigNumber> {
+        public override bool Equals(object obj) => obj is BigNumber other && Equals(other);
+
+        public override int GetHashCode() => (this.digits != null ? this.digits.GetHashCode() : 0);
+
         private const int DIGIT_VALUE = 1000;
         private static readonly List<string> chars = new List<string>
         {
