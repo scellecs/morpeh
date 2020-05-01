@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using Morpeh.BigNumber;
+using Morpeh.BigInt;
 using Sirenix.OdinInspector;
 
 namespace Morpeh.Globals {
@@ -11,14 +11,16 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Variable Big Integer")]
-    public class GlobalVariableBigInteger : BaseGlobalVariable<BigInt> {
+    public class GlobalVariableBigInteger : BaseGlobalVariable<BigInt.BigInt> {
         public override IDataWrapper Wrapper {
             get => new BigIntegerWrapper {value = this.value};
             set => this.Value = ((BigIntegerWrapper) value).value;
         }
         
-        protected override BigInt Load(string serializedData) {
-            return BigInt.Parse(serializedData);
+        protected override BigInt.BigInt Load(string serializedData) {
+            var result = BigInt.BigInt.Parse(serializedData);
+            newValue = result.ToString();
+            return result;
         }
 
         protected override string Save() {
@@ -28,15 +30,16 @@ namespace Morpeh.Globals {
 
         [System.Serializable]
         private class BigIntegerWrapper : IDataWrapper {
-            public BigInt value;
+            public BigInt.BigInt value;
         }
         
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [InlineButton("UpdateValue")]
-        public string newValue;
+        [SerializeField]
+        private string newValue;
 
         private void UpdateValue() {
-            this.value.value = BigInteger.Parse(newValue);
+            this.value.SetBitInteger(BigInteger.Parse(newValue));
             this.SaveData();
         }     
 #endif
