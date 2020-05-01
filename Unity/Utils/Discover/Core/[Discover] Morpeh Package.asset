@@ -10,21 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0dca1f0dde868a4aa93821382b07f95, type: 3}
-  m_Name: Initializer
+  m_Name: '[Discover] Morpeh Package'
   m_EditorClassIdentifier: 
-  Name: Initializer
-  Category: Core
+  Name: Morpeh
+  Category: Packages
   DefaultSelected: 0
   image: {fileID: 0}
-  Description: 'Some Description of the Component
-
-
-    Can be set as multiple lines.'
+  Description: ECS Framework.
   Priority: 0
   Sections:
-  - SectionName: Section
+  - SectionName: Git Packages
     image: {fileID: 0}
-    SectionContent: Content
+    SectionContent: By these actions you can switch branch or do force update.
     Actions:
-    - Description: What's that?
-      Target: {fileID: 12800000, guid: 1128f846845ff634d9b336a63a28d66e, type: 3}
+    - Description: Master Branch
+      Target: {fileID: 11400000, guid: dcee2629dfe02354dad09337338c069f, type: 2}
+    - Description: Develop Branch
+      Target: {fileID: 11400000, guid: 1b1580454f29ffe4caec4094b19726e1, type: 2}
