@@ -60,8 +60,8 @@ namespace Morpeh.BigNumber {
         
         public BigNumber(decimal number, string digit = "") {
             var digitIndex = symbols.IndexOf(digit);
-            this.value = new BigInteger(number);
-            for (var i = 0; i < digitIndex; i++)
+            this.value = digitIndex > 0 ? new BigInteger(number * DIGIT_VALUE) : new BigInteger(number);
+            for (var i = 0; i < digitIndex - 1; i++)
             {
                 this.value *= DIGIT_VALUE;
             }
@@ -96,17 +96,15 @@ namespace Morpeh.BigNumber {
         public override string ToString() {
             var digit_index = 0;
             var tmp = this.value;
-            BigInteger divider = 1;
-            BigInteger decimalDivider = DIGIT_VALUE;
-            while (tmp >= DIGIT_VALUE)
+            while (tmp >= DIGIT_VALUE * DIGIT_VALUE)
             {
                 tmp /= DIGIT_VALUE;
                 digit_index++;
-                divider *= DIGIT_VALUE;
-                decimalDivider *= DIGIT_VALUE;
             }
+            if(tmp >= DIGIT_VALUE)
+                digit_index++;
 
-            var dcml = (int)(this.value % decimalDivider) / (float)divider;
+            var dcml = (float) tmp / (digit_index == 0 ? 1 : (float)DIGIT_VALUE);
             var int_decimal = (int) dcml;
             if(dcml == int_decimal)
                 return $"{int_decimal}{symbols[digit_index]}";

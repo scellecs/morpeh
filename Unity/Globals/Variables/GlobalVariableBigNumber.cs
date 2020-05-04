@@ -33,7 +33,8 @@
         }
 
         internal override void OnEnable() {
-            this.value.SetBigInteger(BigNumber.Parse(this.defaultValue));
+            if(!string.IsNullOrEmpty(this.defaultValue)) 
+                this.value.SetBigInteger(BigNumber.Parse(this.defaultValue));
             base.OnEnable();
         }
 
