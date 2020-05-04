@@ -287,5 +287,9 @@
             }
             return ret;
         }
+        
+        public override bool Equals(object obj) => obj is BigNumber other && Equals(other);
+
+        public override int GetHashCode() => (this.digits != null ? this.digits.GetHashCode() : 0);
     }
 }
