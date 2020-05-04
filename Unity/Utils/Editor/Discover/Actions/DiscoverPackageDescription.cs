@@ -14,7 +14,7 @@
         private State state = State.None;
         private ListRequest listRequest;
         private AddRequest addRequest;
-        private RemoveRequest removeRequest;
+        //private RemoveRequest removeRequest;
 
         public override string ActionName {
             get {
@@ -59,20 +59,20 @@
             EditorApplication.update += this.ListProgress;
         }
         
-        private void RemoveProgress() {
-            var req = this.removeRequest;
-            if (req.IsCompleted)
-            {
-                if (req.Status == StatusCode.Success) {
-                    this.state = State.NotExist;
-                }
-                else if (req.Status >= StatusCode.Failure) {
-                    Debug.Log(req.Error.message);
-                }
-
-                EditorApplication.update -= this.RemoveProgress;
-            }
-        }
+        // private void RemoveProgress() {
+        //     var req = this.removeRequest;
+        //     if (req.IsCompleted)
+        //     {
+        //         if (req.Status == StatusCode.Success) {
+        //             this.state = State.NotExist;
+        //         }
+        //         else if (req.Status >= StatusCode.Failure) {
+        //             Debug.Log(req.Error.message);
+        //         }
+        //
+        //         EditorApplication.update -= this.RemoveProgress;
+        //     }
+        // }
 
         private void AddProgress() {
             var req = this.addRequest;
