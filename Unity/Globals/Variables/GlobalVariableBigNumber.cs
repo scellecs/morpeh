@@ -10,6 +10,7 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Variable Big Number")]
     public class GlobalVariableBigNumber : BaseGlobalVariable<BigNumber> {
+        private const string WARNING_MSG = "Only for PlayMode";
         public override IDataWrapper Wrapper {
             get => new BigNumberWrapper {value = this.value};
             set => this.Value = ((BigNumberWrapper) value).value;
@@ -17,7 +18,7 @@
         
         protected override BigNumber Load(string serializedData) {
             var result = BigNumber.Parse(serializedData);
-            newValue = result.ToString();
+            this.runtimeValue = result.ToString();
             return result;
         }
 
@@ -30,14 +31,32 @@
         private class BigNumberWrapper : IDataWrapper {
             public BigNumber value;
         }
+
+        internal override void OnEnable() {
+            this.value.SetBigInteger(BigNumber.Parse(this.defaultValue));
+            base.OnEnable();
+        }
+
+        [SerializeField]
+        private string defaultValue;
+        public string DefaultValue
+        {
+            private get => this.defaultValue;
+            set => this.defaultValue = value;
+        }
+        
+        [InlineButton("UpdateRuntimeValue")]
+        [SerializeField]
+        private string runtimeValue;
         
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [InlineButton("UpdateValue")]
-        [SerializeField]
-        private string newValue;
-
-        private void UpdateValue() {
-            this.value.SetBigInteger(BigInteger.Parse(newValue));
+        private void UpdateRuntimeValue() {
+            if (!Application.isPlaying)
+            {
+                Debug.Log(WARNING_MSG);
+                return;
+            }
+            this.value.SetBigInteger(BigNumber.Parse(this.runtimeValue));
             this.SaveData();
         }     
 #endif

@@ -88,6 +88,10 @@ namespace Morpeh.BigNumber {
         public void SetBigInteger(BigInteger value) {
             this.value = value;
         }
+        
+        public void SetBigInteger(BigNumber value) {
+            this.value = value.value;
+        }
 
         public override string ToString() {
             var digit_index = 0;
