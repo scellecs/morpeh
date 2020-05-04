@@ -28,7 +28,7 @@
         protected TData value;
         [HideInInspector]
         [SerializeField]
-        protected string defaultSerializedValue;
+        private string defaultSerializedValue;
         private const string COMMON_KEY = "MORPEH__GLOBALS_VARIABLES_";
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
