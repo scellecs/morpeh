@@ -50,7 +50,7 @@
             [HideIf("@variable == null")]
             [HideReferenceObjectPicker]
 #endif
-            public IDataWrapper wrapper;
+            public DataWrapper wrapper;
         }
     }
 }

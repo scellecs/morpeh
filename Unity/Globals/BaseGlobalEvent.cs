@@ -38,11 +38,11 @@ namespace Morpeh.Globals {
                     Action = null,
                     Data   = new Stack<TData>()
                 });
-            }
-
-            if (!GlobalEventComponent<TData>.Initialized) {
-                GlobalEventComponentUpdater.Updaters.Add(new GlobalEventComponentUpdater<TData>());
-                GlobalEventComponent<TData>.Initialized = true;
+                
+                if (!GlobalEventComponent<TData>.Initialized) {
+                    GlobalEventComponentUpdater.Updaters.Add(new GlobalEventComponentUpdater<TData>());
+                    GlobalEventComponent<TData>.Initialized = true;
+                }
             }
         }
 

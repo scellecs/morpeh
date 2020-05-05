@@ -7,12 +7,12 @@
     using Sirenix.OdinInspector;
 #endif
 
-    public interface IDataWrapper {
-        
+    public abstract class DataWrapper {
+        public abstract override string ToString();
     }
     
     public interface IDataVariable {
-        IDataWrapper Wrapper { get; set; }
+        DataWrapper Wrapper { get; set; }
     }
     
     public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData>, IDataVariable {
@@ -62,7 +62,7 @@
         private bool HasPlayerPrefsValueAndAutoSave => PlayerPrefs.HasKey(this.Key) && this.AutoSave;
         private bool isLoaded;
 
-        public abstract IDataWrapper Wrapper { get; set; }
+        public abstract DataWrapper Wrapper { get; set; }
         
         public TData Value {
             get {
