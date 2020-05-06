@@ -572,6 +572,10 @@ namespace Morpeh {
         }
 
         public void Dispose() {
+            if (this.disposables == null) {
+                return;
+            }
+            
             void DisposeSystems(List<ISystem> systemsToDispose) {
                 foreach (var system in systemsToDispose) {
                     system.Dispose();

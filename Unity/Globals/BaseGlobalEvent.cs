@@ -68,7 +68,7 @@ namespace Morpeh.Globals {
 
             var ent = this.InternalEntity;
             return new Unsubscriber(() => {
-                if (ent == null) {
+                if (ent.IsNullOrDisposed()) {
                     return;
                 }
 
