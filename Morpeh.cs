@@ -552,8 +552,6 @@ namespace Morpeh {
         private List<IDisposable> disposables;
         private World world;
 
-        private bool initialized;
-
         private SystemsGroup() {
         }
 
@@ -620,31 +618,22 @@ namespace Morpeh {
 
             this.disposables.Clear();
             this.disposables = null;
-
-            this.initialized = false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Initialize() {
-            if (this.initialized) {
-                return;
-            }
-            
-            this.world.Filter.Update();
-            
-            foreach (var initializer in this.newInitializers) {
-                initializer.OnAwake();
-                this.world.Filter.Update();
-                this.initializers.Add(initializer);
-            }
-
-            this.newInitializers.Clear();
-
-            this.initialized = true;
-        }
-
-        public void Update(float deltaTime) {
             foreach (var disposable in this.disposables) {
+#if UNITY_EDITOR
+                try {
+                    disposable.Dispose();
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not dispose {disposable.GetType()}");
+                    Debug.LogException(e);
+                }
+#else
                 disposable.Dispose();
+#endif
             }
 
             this.disposables.Clear();
@@ -652,38 +641,63 @@ namespace Morpeh {
             this.world.Filter.Update();
 
             foreach (var initializer in this.newInitializers) {
+#if UNITY_EDITOR
+                try {
+                    initializer.OnAwake();
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not initialize {initializer.GetType()}");
+                    Debug.LogException(e);
+                }
+#else
                 initializer.OnAwake();
+#endif
+                
                 this.world.Filter.Update();
                 this.initializers.Add(initializer);
             }
 
             this.newInitializers.Clear();
+        }
+        
+        public void Update(float deltaTime) {
+            this.Initialize();
 
             for (int i = 0, length = this.systems.Count; i < length; i++) {
-                this.systems[i].OnUpdate(deltaTime);
+                var system = this.systems[i];
+#if UNITY_EDITOR
+                try {
+                    system.OnUpdate(deltaTime);
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
+                    Debug.LogException(e);
+                    this.DisableSystem(system);
+                }
+#else
+                system.OnUpdate(deltaTime);
+#endif
                 this.world.Filter.Update();
             }
         }
 
         public void FixedUpdate(float deltaTime) {
-            foreach (var disposable in this.disposables) {
-                disposable.Dispose();
-            }
-
-            this.disposables.Clear();
-
-            this.world.Filter.Update();
-
-            foreach (var initializer in this.newInitializers) {
-                initializer.OnAwake();
-                this.world.Filter.Update();
-                this.initializers.Add(initializer);
-            }
-
-            this.newInitializers.Clear();
+            this.Initialize();
 
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
-                this.fixedSystems[i].OnUpdate(deltaTime);
+                var system = this.fixedSystems[i];
+#if UNITY_EDITOR
+                try {
+                    system.OnUpdate(deltaTime);
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
+                    Debug.LogException(e);
+                    this.DisableSystem(system);
+                }
+#else
+                system.OnUpdate(deltaTime);
+#endif
                 this.world.Filter.Update();
             }
         }
@@ -692,7 +706,19 @@ namespace Morpeh {
             this.world.Filter.Update();
 
             for (int i = 0, length = this.lateSystems.Count; i < length; i++) {
-                this.lateSystems[i].OnUpdate(deltaTime);
+                var system = this.lateSystems[i];
+#if UNITY_EDITOR
+                try {
+                    system.OnUpdate(deltaTime);
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
+                    Debug.LogException(e);
+                    this.DisableSystem(system);
+                }
+#else
+                system.OnUpdate(deltaTime);
+#endif
                 this.world.Filter.Update();
             }
         }
@@ -971,19 +997,19 @@ namespace Morpeh {
 
         public static void GlobalUpdate(float deltaTime) {
             foreach (var world in worlds) {
-                for (var i = 0; i < world.newSystemsGroups.Values.Count; i++) {
-                    var key = world.newSystemsGroups.Keys[i];
+                for (var i = 0; i < world.newSystemsGroups.Count; i++) {
+                    var key          = world.newSystemsGroups.Keys[i];
                     var systemsGroup = world.newSystemsGroups.Values[i];
 
                     systemsGroup.Initialize();
-
                     world.systemsGroups.Add(key, systemsGroup);
-                    world.newSystemsGroups.Remove(key);
                 }
+
+                world.newSystemsGroups.Clear();
             }
 
             foreach (var world in worlds) {
-                for (var i = 0; i < world.systemsGroups.Values.Count; i++) {
+                for (var i = 0; i < world.systemsGroups.Count; i++) {
                     var systemsGroup = world.systemsGroups.Values[i];
                     systemsGroup.Update(deltaTime);
                 }
@@ -992,7 +1018,7 @@ namespace Morpeh {
 
         public static void GlobalFixedUpdate(float deltaTime) {
             foreach (var world in worlds) {
-                for (var i = 0; i < world.systemsGroups.Values.Count; i++) {
+                for (var i = 0; i < world.systemsGroups.Count; i++) {
                     var systemsGroup = world.systemsGroups.Values[i];
                     systemsGroup.FixedUpdate(deltaTime);
                 }
@@ -1001,7 +1027,7 @@ namespace Morpeh {
 
         public static void GlobalLateUpdate(float deltaTime) {
             foreach (var world in worlds) {
-                for (var i = 0; i < world.systemsGroups.Values.Count; i++) {
+                for (var i = 0; i < world.systemsGroups.Count; i++) {
                     var systemsGroup = world.systemsGroups.Values[i];
                     systemsGroup.LateUpdate(deltaTime);
                 }
@@ -1016,12 +1042,12 @@ namespace Morpeh {
 
         public void RemoveSystemsGroup(SystemsGroup systemsGroup) {
             systemsGroup.Dispose();
-            this.systemsGroups.RemoveAt(this.systemsGroups.IndexOfValue(systemsGroup));
-        }
-
-        public void RemoveAtSystemsGroup(int order) {
-            this.systemsGroups[order].Dispose();
-            this.systemsGroups.Remove(order);
+            if (this.systemsGroups.ContainsValue(systemsGroup)) {
+                this.systemsGroups.RemoveAt(this.systemsGroups.IndexOfValue(systemsGroup));
+            }
+            else if (this.newSystemsGroups.ContainsValue(systemsGroup)) {
+                this.newSystemsGroups.RemoveAt(this.newSystemsGroups.IndexOfValue(systemsGroup));
+            }
         }
 
         public IEntity CreateEntity() => this.CreateEntityInternal();
