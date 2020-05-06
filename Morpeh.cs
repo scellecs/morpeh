@@ -551,7 +551,8 @@ namespace Morpeh {
 #endif
         private List<IDisposable> disposables;
         private World world;
-        private bool skipFirstFixedUpdate;
+        
+        private bool initialized;
 
         private SystemsGroup() {
         }
@@ -570,8 +571,6 @@ namespace Morpeh {
             this.newInitializers = new List<IInitializer>();
             this.initializers    = new List<IInitializer>();
             this.disposables     = new List<IDisposable>();
-
-            this.skipFirstFixedUpdate = true;
         }
 
         public void Dispose() {
@@ -622,7 +621,23 @@ namespace Morpeh {
             this.disposables.Clear();
             this.disposables = null;
 
-            this.skipFirstFixedUpdate = false;
+            this.initialized = false;
+        }
+
+        public void Initialize() {
+            if (this.initialized) {
+                return;
+            }
+            
+            foreach (var initializer in this.newInitializers) {
+                initializer.OnAwake();
+                this.world.Filter.Update();
+                this.initializers.Add(initializer);
+            }
+
+            this.newInitializers.Clear();
+
+            this.initialized = true;
         }
 
         public void Update(float deltaTime) {
@@ -649,11 +664,6 @@ namespace Morpeh {
         }
 
         public void FixedUpdate(float deltaTime) {
-            if (this.skipFirstFixedUpdate) {
-                this.skipFirstFixedUpdate = false;
-                return;
-            }
-
             this.world.Filter.Update();
 
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
@@ -804,6 +814,12 @@ namespace Morpeh {
 #endif
         [NonSerialized]
         internal SortedList<int, SystemsGroup> systemsGroups;
+        
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        [NonSerialized]
+        internal SortedList<int, SystemsGroup> newSystemsGroups;
 
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
@@ -841,6 +857,7 @@ namespace Morpeh {
 
         internal void Ctor() {
             this.systemsGroups = new SortedList<int, SystemsGroup>();
+            this.newSystemsGroups = new SortedList<int, SystemsGroup>();
 
             this.Filter = new Filter(this);
 
@@ -938,6 +955,15 @@ namespace Morpeh {
 
         public static void GlobalUpdate(float deltaTime) {
             foreach (var world in worlds) {
+                for (var i = 0; i < world.newSystemsGroups.Values.Count; i++) {
+                    var key = world.newSystemsGroups.Keys[i];
+                    var systemsGroup = world.newSystemsGroups.Values[i];
+                    systemsGroup.Initialize();
+                    
+                    world.systemsGroups.Add(key, systemsGroup);
+                    world.newSystemsGroups.Remove(key);
+                }
+                
                 for (var i = 0; i < world.systemsGroups.Values.Count; i++) {
                     var systemsGroup = world.systemsGroups.Values[i];
                     systemsGroup.Update(deltaTime);
@@ -966,11 +992,7 @@ namespace Morpeh {
         public SystemsGroup CreateSystemsGroup() => new SystemsGroup(this);
 
         public void AddSystemsGroup(int order, SystemsGroup systemsGroup) {
-            this.systemsGroups.Add(order, systemsGroup);
-        }
-
-        public void AddLastSystemsGroup(SystemsGroup systemsGroup) {
-            this.systemsGroups.Add(this.systemsGroups.Last().Key + 1, systemsGroup);
+            this.newSystemsGroups.Add(order, systemsGroup);
         }
 
         public void RemoveSystemsGroup(SystemsGroup systemsGroup) {
