@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99c49654b9bada340bfd165d70dc8296, type: 3}
+  m_Name: DiscoverMorpeh
+  m_EditorClassIdentifier: 
+  WindowTitle: Morpeh Discover
+  HeaderTexture: {fileID: 0}
+  dockable: 1
+  WindowWidth: 800
+  WindowHeight: 600
+  DiscoverListWidth: 180
+  EnableShowAtStartup: 1
+  PreferenceName: Morpeh Discover
+  Debug: 0

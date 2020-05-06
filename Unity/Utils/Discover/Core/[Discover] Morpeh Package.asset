@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0dca1f0dde868a4aa93821382b07f95, type: 3}
+  m_Name: '[Discover] Morpeh Package'
+  m_EditorClassIdentifier: 
+  Name: Morpeh
+  Category: Packages
+  DefaultSelected: 0
+  image: {fileID: 0}
+  Description: ECS Framework.
+  Priority: 0
+  Sections:
+  - SectionName: Git Packages
+    image: {fileID: 0}
+    SectionContent: By these actions you can switch branch or do force update.
+    Actions:
+    - Description: Master Branch
+      Target: {fileID: 11400000, guid: dcee2629dfe02354dad09337338c069f, type: 2}
+    - Description: Develop Branch
+      Target: {fileID: 11400000, guid: 1b1580454f29ffe4caec4094b19726e1, type: 2}

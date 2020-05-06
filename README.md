@@ -96,7 +96,7 @@ var filter = newWorld.Filter.With<HealthComponent>();
 
 ---
 
-### Getting Start
+### Getting Started
 > **IMPORTANT**  
 > For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.  
 > All GIFs are hidden under spoilers.
@@ -291,32 +291,16 @@ Now press the play button, and you will see Debug.Log with healthPoints.
 Nice!  
 
 ### Advanced
-TODO
+
+Globals
 
 ---
 
 ## How To Install
 
-### Unity Package Installation
-- Add to your project manifiest by path `UnityProject/Packages/manifiest.json` these lines:
-```json
-{
-  "dependencies": {
-  },
-  "scopedRegistries": [
-    {
-      "name": "XCrew",
-      "url": "http://xcrew.dev",
-      "scopes": [
-        "com.xcrew"
-      ]
-    }
-  ]
-}
-```
-- Open window Package Manager in Unity and install Morpeh
-
 ### Git Installation
+#### For Unity 2019+
+
 Add to your project manifiest by path `UnityProject/Packages/manifiest.json` next line:
 ```json
 {
@@ -325,6 +309,15 @@ Add to your project manifiest by path `UnityProject/Packages/manifiest.json` nex
   }
 }
 ```
+If you need develop branch add this line instead:
+```json
+{
+  "dependencies": {
+     "com.xcrew.morpeh": "https://github.com/X-Crew/Morpeh.git#develop"
+  }
+}
+```
+
 
 ### Manual Installation 
 - Go to [Releases](https://github.com/X-Crew/Morpeh/releases) and download latest package.

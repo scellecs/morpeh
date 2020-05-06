@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0dca1f0dde868a4aa93821382b07f95, type: 3}
+  m_Name: '[Discover] Installer'
+  m_EditorClassIdentifier: 
+  Name: Installer
+  Category: Core
+  DefaultSelected: 1
+  image: {fileID: 0}
+  Description: 'Wondering how to make your systems work, so your code will finally
+    became alive?
+
+    It''s just that time where you need to get to know this little
+    buddy Installer, which is holding the whole game on its shoulder just like Atlas.
+
+
+    1)
+    Create a GameObject in the Scene
+
+    2) Attach/add Installer component to the
+    GameObject
+
+
+    NIce! Now you can easily control your systems order with an
+    Installer component.'
+  Priority: 0
+  Sections:
+  - SectionName: Section
+    image: {fileID: 0}
+    SectionContent: Let's take a look at the component itself
+    Actions:
+    - Description: Component
+      Target: {fileID: 11500000, guid: 8f3e5db895821594790574b8473edacd, type: 3}
