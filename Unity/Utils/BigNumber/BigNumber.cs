@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Numerics;
-using System.Text.RegularExpressions;
-using Sirenix.OdinInspector;
-using UnityEngine;
-using UnityEngine.Assertions;
-
-namespace Morpeh.BigNumber {
+﻿namespace Morpeh.BigNumber {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Numerics;
+    using System.Text.RegularExpressions;
+    using UnityEngine;
+    
     public static class BigNumberSymbol {
         public const string EMPTY = "";
         public const string K = "K";
@@ -53,8 +51,7 @@ namespace Morpeh.BigNumber {
             BigNumberSymbol.DDd,
             BigNumberSymbol.EEe
         };
-
-        [HideLabel]
+        
         [SerializeField]
         private BigInteger value;
         

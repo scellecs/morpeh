@@ -1,16 +1,19 @@
 ﻿namespace Morpeh.Globals {
     using UnityEngine;
     using Unity.IL2CPP.CompilerServices;
-    using Morpeh.BigNumber;
-    using System.Numerics;
+    using BigNumber;
+#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Variable Big Number")]
     public class GlobalVariableBigNumber : BaseGlobalVariable<BigNumber> {
+#if UNITY_EDITOR
         private const string WARNING_MSG = "Only for PlayMode";
+#endif
         public override IDataWrapper Wrapper {
             get => new BigNumberWrapper {value = this.value};
             set => this.Value = ((BigNumberWrapper) value).value;
@@ -46,7 +49,9 @@
             set => this.defaultValue = value;
         }
         
+#if UNITY_EDITOR && ODIN_INSPECTOR
         [InlineButton("UpdateRuntimeValue")]
+#endif
         [SerializeField]
         private string runtimeValue;
         

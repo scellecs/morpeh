@@ -2,7 +2,7 @@
     using System.Collections.Generic;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    using Morpeh.BigNumber;
+    using BigNumber;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
