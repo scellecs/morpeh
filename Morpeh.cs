@@ -551,7 +551,7 @@ namespace Morpeh {
 #endif
         private List<IDisposable> disposables;
         private World world;
-        
+
         private bool initialized;
 
         private SystemsGroup() {
@@ -629,6 +629,8 @@ namespace Morpeh {
                 return;
             }
             
+            this.world.Filter.Update();
+            
             foreach (var initializer in this.newInitializers) {
                 initializer.OnAwake();
                 this.world.Filter.Update();
@@ -664,7 +666,21 @@ namespace Morpeh {
         }
 
         public void FixedUpdate(float deltaTime) {
+            foreach (var disposable in this.disposables) {
+                disposable.Dispose();
+            }
+
+            this.disposables.Clear();
+
             this.world.Filter.Update();
+
+            foreach (var initializer in this.newInitializers) {
+                initializer.OnAwake();
+                this.world.Filter.Update();
+                this.initializers.Add(initializer);
+            }
+
+            this.newInitializers.Clear();
 
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
                 this.fixedSystems[i].OnUpdate(deltaTime);
@@ -814,7 +830,7 @@ namespace Morpeh {
 #endif
         [NonSerialized]
         internal SortedList<int, SystemsGroup> systemsGroups;
-        
+
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
@@ -856,7 +872,7 @@ namespace Morpeh {
         }
 
         internal void Ctor() {
-            this.systemsGroups = new SortedList<int, SystemsGroup>();
+            this.systemsGroups    = new SortedList<int, SystemsGroup>();
             this.newSystemsGroups = new SortedList<int, SystemsGroup>();
 
             this.Filter = new Filter(this);
@@ -958,12 +974,15 @@ namespace Morpeh {
                 for (var i = 0; i < world.newSystemsGroups.Values.Count; i++) {
                     var key = world.newSystemsGroups.Keys[i];
                     var systemsGroup = world.newSystemsGroups.Values[i];
+
                     systemsGroup.Initialize();
-                    
+
                     world.systemsGroups.Add(key, systemsGroup);
                     world.newSystemsGroups.Remove(key);
                 }
-                
+            }
+
+            foreach (var world in worlds) {
                 for (var i = 0; i < world.systemsGroups.Values.Count; i++) {
                     var systemsGroup = world.systemsGroups.Values[i];
                     systemsGroup.Update(deltaTime);
@@ -1341,7 +1360,7 @@ namespace Morpeh {
             if (this.isDirtyCache) {
                 this.UpdateCache();
             }
-            
+
             var typeInfo = CacheTypeIdentifier<T>.info;
             if (typeInfo.isMarker) {
 #if UNITY_EDITOR
@@ -1386,6 +1405,7 @@ namespace Morpeh {
             if (this.isDirtyCache) {
                 this.UpdateCache();
             }
+
             return this.world.entities[this.entitiesCacheForBags[id]];
         }
 
@@ -1394,6 +1414,7 @@ namespace Morpeh {
             if (this.isDirtyCache) {
                 this.UpdateCache();
             }
+
             return this.world.entities[this.entitiesCacheForBags[0]];
         }
 
@@ -1487,6 +1508,7 @@ namespace Morpeh {
             if (this.isDirtyCache) {
                 this.UpdateCache();
             }
+
             return new EntityEnumerator(this.world, this.entitiesCacheForBags, this.Length);
         }
 
