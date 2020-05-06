@@ -551,6 +551,7 @@ namespace Morpeh {
 #endif
         private List<IDisposable> disposables;
         private World world;
+        private bool skipFirstFixedUpdate;
 
         private SystemsGroup() {
         }
@@ -569,6 +570,8 @@ namespace Morpeh {
             this.newInitializers = new List<IInitializer>();
             this.initializers    = new List<IInitializer>();
             this.disposables     = new List<IDisposable>();
+
+            this.skipFirstFixedUpdate = true;
         }
 
         public void Dispose() {
@@ -618,6 +621,8 @@ namespace Morpeh {
 
             this.disposables.Clear();
             this.disposables = null;
+
+            this.skipFirstFixedUpdate = false;
         }
 
         public void Update(float deltaTime) {
@@ -644,21 +649,12 @@ namespace Morpeh {
         }
 
         public void FixedUpdate(float deltaTime) {
-            foreach (var disposable in this.disposables) {
-                disposable.Dispose();
+            if (this.skipFirstFixedUpdate) {
+                this.skipFirstFixedUpdate = false;
+                return;
             }
-
-            this.disposables.Clear();
 
             this.world.Filter.Update();
-
-            foreach (var initializer in this.newInitializers) {
-                initializer.OnAwake();
-                this.world.Filter.Update();
-                this.initializers.Add(initializer);
-            }
-
-            this.newInitializers.Clear();
 
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
                 this.fixedSystems[i].OnUpdate(deltaTime);
