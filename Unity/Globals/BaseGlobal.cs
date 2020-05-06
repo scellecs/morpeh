@@ -6,7 +6,9 @@ namespace Morpeh.Globals {
     using Sirenix.OdinInspector;
 #endif
     using Unity.IL2CPP.CompilerServices;
+#if UNITY_EDITOR
     using UnityEditor;
+#endif
     using UnityEngine;
     
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -76,7 +78,9 @@ namespace Morpeh.Globals {
         }
 
         public virtual void Dispose() {
+#if UNITY_EDITOR
             EditorApplication.playModeStateChanged -= this.OnEditorApplicationOnplayModeStateChanged;
+#endif
             if (this.internalEntityID != -1) {
                 var entity = this.InternalEntity;
                 if (entity != null && !entity.IsDisposed()) {
