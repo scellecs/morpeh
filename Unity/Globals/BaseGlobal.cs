@@ -76,6 +76,7 @@ namespace Morpeh.Globals {
         }
 
         public virtual void Dispose() {
+            EditorApplication.playModeStateChanged -= this.OnEditorApplicationOnplayModeStateChanged;
             if (this.internalEntityID != -1) {
                 var entity = this.InternalEntity;
                 if (entity != null && !entity.IsDisposed()) {

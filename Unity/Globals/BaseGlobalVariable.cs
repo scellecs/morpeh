@@ -5,16 +5,16 @@
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+
 #endif
 
     public interface IDataWrapper {
-        
     }
-    
+
     public interface IDataVariable {
         IDataWrapper Wrapper { get; set; }
     }
-    
+
     public abstract class BaseGlobalVariable<TData> : BaseGlobalEvent<TData>, IDataVariable {
         [Space]
         [Header("Runtime Data")]
@@ -63,17 +63,9 @@
         private bool isLoaded;
 
         public abstract IDataWrapper Wrapper { get; set; }
-        
-        public TData Value {
-            get {
-                if (!this.isLoaded) {
-                    this.defaultSerializedValue = this.Save();
-                    this.LoadData();
-                    this.isLoaded = true;
-                }
 
-                return this.value;
-            }
+        public TData Value {
+            get => this.value;
             set => this.SetValue(value);
         }
 
@@ -101,15 +93,13 @@
 
         internal override void OnEnable() {
             base.OnEnable();
-            this.defaultSerializedValue               =  this.Save();
             UnityRuntimeHelper.OnApplicationFocusLost += this.SaveData;
 #if UNITY_EDITOR
             if (string.IsNullOrEmpty(this.customKey)) {
                 this.GenerateCustomKey();
             }
-#else
-            this.LoadData();
 #endif
+            this.LoadData();
         }
 #if UNITY_EDITOR
         internal override void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
@@ -120,7 +110,7 @@
                 this.defaultSerializedValue = default;
                 this.isLoaded               = false;
             }
-            else if (state == PlayModeStateChange.EnteredPlayMode) {
+            else if (state == PlayModeStateChange.ExitingEditMode) {
                 this.LoadData();
             }
         }
@@ -143,17 +133,26 @@
             }
 #endif
             this.SaveData();
+            this.isLoaded = false;
         }
 
         private void LoadData() {
-            if (!this.AutoSave) {
-                return;
-            }
 #if UNITY_EDITOR
-            if (!Application.isPlaying) {
+            if (!EditorApplication.isPlayingOrWillChangePlaymode) {
                 return;
             }
 #endif
+            
+            if (this.isLoaded) {
+                return;
+            }
+
+            this.defaultSerializedValue = this.Save();
+            this.isLoaded = true;
+            
+            if (!this.AutoSave) {
+                return;
+            }
             if (!PlayerPrefs.HasKey(this.Key)) {
                 return;
             }
@@ -184,7 +183,5 @@
 #endif
 
         #endregion
-
-
     }
 }
