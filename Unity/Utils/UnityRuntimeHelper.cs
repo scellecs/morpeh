@@ -42,6 +42,12 @@ namespace Morpeh {
             }
         }
 
+        private void OnDisable() {
+            if (instance == this) {
+                instance = null;
+            }
+        }
+
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredEditMode) {
                 for (var i = World.worlds.Count - 1; i >= 0; i--) {
