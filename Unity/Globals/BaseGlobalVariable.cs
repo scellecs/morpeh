@@ -76,11 +76,7 @@
         }
 
         private void OnChange() {
-            if (Application.isPlaying) {
-                this.CheckIsInitialized();
-                this.Publish(this.value);
-                this.SaveData();
-            }
+            this.OnChange(this.value);
         }
         
         private void OnChange(TData newValue) {
