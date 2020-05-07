@@ -3,9 +3,9 @@ namespace Morpeh.Globals {
         using System;
         using System.Collections.Generic;
         using UnityEngine;
-
+        
         [Serializable]
-        internal struct GlobalEventMarker : IComponent {
+        public struct GlobalEventMarker : IComponent {
         }
 
         internal abstract class GlobalEventComponentUpdater {
@@ -40,19 +40,23 @@ namespace Morpeh.Globals {
 
 
         [Serializable]
-        internal struct GlobalEventComponent<TData> : IComponent {
+        public struct GlobalEventComponent<TData> : IComponent {
             internal static bool Initialized;
 
             public Action<IEnumerable<TData>> Action;
             public Stack<TData>               Data;
         }
-
         [Serializable]
-        internal struct GlobalEventPublished : IComponent {
+        public struct GlobalEventLastToString : IComponent {
+            public Func<string> LastToString;
         }
 
         [Serializable]
-        internal struct GlobalEventNextFrame : IComponent {
+        public struct GlobalEventPublished : IComponent {
+        }
+
+        [Serializable]
+        public struct GlobalEventNextFrame : IComponent {
         }
 
         internal sealed class ProcessEventsSystem : ILateSystem {
