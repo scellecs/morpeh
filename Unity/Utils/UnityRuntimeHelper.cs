@@ -22,6 +22,7 @@ namespace Morpeh {
     internal class UnityRuntimeHelper : MonoBehaviour {
 #endif
         internal static Action OnApplicationFocusLost = () => { };
+        internal static UnityRuntimeHelper instance;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [OdinSerialize]
         private List<World> worldsSerialized = null;
@@ -32,7 +33,13 @@ namespace Morpeh {
 
 #if UNITY_EDITOR
         private void OnEnable() {
-            EditorApplication.playModeStateChanged += OnEditorApplicationOnplayModeStateChanged;
+            if (instance == null) {
+                instance = this;
+                EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
+            }
+            else {
+                Destroy(this);
+            }
         }
 
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
