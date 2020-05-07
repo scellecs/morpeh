@@ -140,7 +140,7 @@ namespace Morpeh {
 
             if (this.Has<T>()) {
 #if UNITY_EDITOR
-                Debug.LogError("You're trying to add a component that already exists! Use Get or SetComponent instead!");
+                Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
 #endif
                 return ref CacheComponents<T>.Empty();
             }
@@ -207,7 +207,7 @@ namespace Morpeh {
 
             if (this.Has<T>()) {
 #if UNITY_EDITOR
-                Debug.LogError("You're trying to add a component that already exists! Use Get or SetComponent instead!");
+                Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
 #endif
                 exist = true;
                 return ref CacheComponents<T>.Empty();
@@ -320,6 +320,9 @@ namespace Morpeh {
                 }
             }
 
+#if UNITY_EDITOR
+            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
+#endif
             return ref CacheComponents<T>.Empty();
         }
 
@@ -340,7 +343,7 @@ namespace Morpeh {
                     return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                 }
             }
-
+            
             exist = false;
             return ref CacheComponents<T>.Empty();
         }
@@ -575,10 +578,20 @@ namespace Morpeh {
             if (this.disposables == null) {
                 return;
             }
-            
+
             void DisposeSystems(List<ISystem> systemsToDispose) {
                 foreach (var system in systemsToDispose) {
-                    system.Dispose();
+#if UNITY_EDITOR
+                    try {
+#endif
+                        system.Dispose();
+#if UNITY_EDITOR
+                    }
+                    catch (Exception e) {
+                        Debug.LogError($"[MORPEH] Can not dispose system {system.GetType()}");
+                        Debug.LogException(e);
+                    }
+#endif
                 }
 
                 systemsToDispose.Clear();
@@ -603,21 +616,51 @@ namespace Morpeh {
             this.disabledLateSystems = null;
 
             foreach (var initializer in this.newInitializers) {
-                initializer.Dispose();
+#if UNITY_EDITOR
+                try {
+#endif
+                    initializer.Dispose();
+#if UNITY_EDITOR
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
+                    Debug.LogException(e);
+                }
+#endif
             }
 
             this.newInitializers.Clear();
             this.newInitializers = null;
 
             foreach (var initializer in this.initializers) {
-                initializer.Dispose();
+#if UNITY_EDITOR
+                try {
+#endif
+                    initializer.Dispose();
+#if UNITY_EDITOR
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
+                    Debug.LogException(e);
+                }
+#endif
             }
 
             this.initializers.Clear();
             this.initializers = null;
 
             foreach (var disposable in this.disposables) {
-                disposable.Dispose();
+#if UNITY_EDITOR
+                try {
+#endif
+                    disposable.Dispose();
+#if UNITY_EDITOR
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not dispose system group disposable {disposable.GetType()}");
+                    Debug.LogException(e);
+                }
+#endif
             }
 
             this.disposables.Clear();
@@ -656,14 +699,14 @@ namespace Morpeh {
 #else
                 initializer.OnAwake();
 #endif
-                
+
                 this.world.Filter.Update();
                 this.initializers.Add(initializer);
             }
 
             this.newInitializers.Clear();
         }
-        
+
         public void Update(float deltaTime) {
             this.Initialize();
 
@@ -928,13 +971,33 @@ namespace Morpeh {
 
         public void Dispose() {
             foreach (var systemsGroup in this.systemsGroups.Values) {
-                systemsGroup.Dispose();
+#if UNITY_EDITOR
+                try {
+#endif
+                    systemsGroup.Dispose();
+#if UNITY_EDITOR
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not dispose system group {systemsGroup.GetType()}");
+                    Debug.LogException(e);
+                }
+#endif
             }
 
             this.systemsGroups = null;
 
             foreach (var entity in this.entities) {
-                entity?.Dispose();
+#if UNITY_EDITOR
+                try {
+#endif
+                    entity?.Dispose();
+#if UNITY_EDITOR
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not dispose entity with ID {entity?.ID}");
+                    Debug.LogException(e);
+                }
+#endif
             }
 
             this.entities         = null;
@@ -943,12 +1006,31 @@ namespace Morpeh {
 
             this.freeEntityIDs.Clear();
             this.freeEntityIDs = null;
-
-            this.Filter.Dispose();
+#if UNITY_EDITOR
+            try {
+#endif
+                this.Filter.Dispose();
+#if UNITY_EDITOR
+            }
+            catch (Exception e) {
+                Debug.LogError("[MORPEH] Can not dispose root filter");
+                Debug.LogException(e);
+            }
+#endif
             this.Filter = null;
 
             foreach (var cache in this.caches) {
-                cache?.Dispose();
+#if UNITY_EDITOR
+                try {
+#endif
+                    cache?.Dispose();
+#if UNITY_EDITOR
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not dispose cache {cache?.GetType()}");
+                    Debug.LogException(e);
+                }
+#endif
             }
 
             this.caches = null;
