@@ -14,7 +14,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public abstract class BaseGlobal :  ScriptableObject, IDisposable {
+    public abstract class BaseGlobal : ScriptableObject, IDisposable {
         [SerializeField]
 #if ODIN_INSPECTOR
         [ReadOnly]
@@ -30,20 +30,20 @@ namespace Morpeh.Globals {
                 if (!Application.isPlaying) {
                     return default;
                 }
-#endif
                 this.CheckIsInitialized();
+#endif
                 return this.InternalEntity;
             }
         }
-
+        
         public bool IsPublished {
             get {
 #if UNITY_EDITOR
                 if (!Application.isPlaying) {
                     return default;
                 }
-#endif
                 this.CheckIsInitialized();
+#endif
                 return this.InternalEntity.Has<GlobalEventPublished>();
             }
         }
@@ -66,6 +66,8 @@ namespace Morpeh.Globals {
             }
         }
 #endif
+        
+        public abstract string LastToString();
 
         private protected abstract void CheckIsInitialized();
 

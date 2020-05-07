@@ -7,5 +7,6 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Event String")]
     public class GlobalEventString : BaseGlobalEvent<string> {
+        public override string LastToString() => this.BatchedChanges.Peek();
     }
 }

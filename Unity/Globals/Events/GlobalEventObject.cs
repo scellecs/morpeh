@@ -7,5 +7,6 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Event Object")]
     public sealed class GlobalEventObject : BaseGlobalEvent<Object> {
+        public override string LastToString() => this.BatchedChanges.Peek().ToString();
     }
 }
