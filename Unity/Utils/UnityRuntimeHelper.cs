@@ -110,7 +110,15 @@ namespace Morpeh {
                 }
 
                 foreach (var world in this.worldsSerialized) {
-                    world?.Ctor();
+                    if (world != null) {
+                        for (int i = 0, length = world.entities.Length; i < length; i++) {
+                            var e = world.entities[i];
+                            if (e.components == null) {
+                                world.entities[i] = null;
+                            }
+                        }
+                        world.Ctor();
+                    }
                 }
 
                 World.worlds = this.worldsSerialized;

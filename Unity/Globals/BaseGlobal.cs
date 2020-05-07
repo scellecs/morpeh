@@ -52,13 +52,13 @@ namespace Morpeh.Globals {
         public abstract Type GetValueType();
 #endif
         internal virtual void OnEnable() {
-            this.internalEntityID = -1;
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
 #else
             CheckIsInitialized();
 #endif
         }
+        
 #if UNITY_EDITOR
         internal virtual void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.EnteredEditMode) {
@@ -92,8 +92,11 @@ namespace Morpeh.Globals {
             }
         }
 
+        
         private void OnDestroy() {
-            this.Dispose();
+#if UNITY_EDITOR
+            EditorApplication.playModeStateChanged -= this.OnEditorApplicationOnplayModeStateChanged;
+#endif
         }
     }
 }
