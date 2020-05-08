@@ -48,11 +48,11 @@ namespace Morpeh.Globals {
         }
 
         [Serializable]
-        internal struct GlobalEventPublished : IComponent {
+        public struct GlobalEventPublished : IComponent {
         }
 
         [Serializable]
-        internal struct GlobalEventNextFrame : IComponent {
+        public struct GlobalEventNextFrame : IComponent {
         }
 
         internal sealed class ProcessEventsSystem : ILateSystem {
