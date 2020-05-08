@@ -41,7 +41,6 @@
                 if (this.Entity.Has<T>()) {
                     return ref this.Entity.GetComponent<T>();
                 }
-                return ref this.Entity.AddComponent<T>();
             }
 
             return ref this.serializedData;
