@@ -5,10 +5,11 @@ namespace Morpeh.Unity.Utils.Editor {
 
     [CreateAssetMenu(menuName = "ECS/Utils/AndroidKeystore")]
     public class AndroidKeystoreAsset : ScriptableObject {
-        public string       keyAlias;
-        public string       keyAliasPassword;
         public DefaultAsset keyStore;
-        public string       keyStorePassword;
+
+        public string keyStorePassword;
+        public string keyAlias;
+        public string keyAliasPassword;
 
         private void OnValidate() {
             Initialize();
