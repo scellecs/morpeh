@@ -15,17 +15,7 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [AddComponentMenu("ECS/" + nameof(Installer))]
     public sealed class Installer : BaseInstaller {
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        [Required]
-        [InfoBox("Order collision with other installer!", InfoMessageType.Error, nameof(IsCollisionWithOtherInstaller))]
-        [PropertyOrder(-5)]
-#endif
-        public int order;
-        
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        private bool IsCollisionWithOtherInstaller 
-            => FindObjectsOfType<Installer>().Where(i => i != this).Any(i => i.order == this.order);
-#endif
+        private int order;
         
         [Space]
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -70,10 +60,10 @@
                 this.AddSystems(this.lateUpdateSystems);
             }
         }
-        
 
         protected override void OnEnable() {
             this.group = World.Default.CreateSystemsGroup();
+            this.order = this.transform.GetSiblingIndex();
             
             for (int i = 0, length = this.initializers.Length; i < length; i++) {
                 var initializer = this.initializers[i];
