@@ -24,7 +24,9 @@
         
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool IsCollisionWithOtherInstaller 
-            => FindObjectsOfType<Installer>().Where(i => i != this).Any(i => i.order == this.order);
+            => this.IsPrefab() == false && FindObjectsOfType<Installer>().Where(i => i != this).Any(i => i.order == this.order);
+        
+        private bool IsPrefab() => this.gameObject.scene.name == null;
 #endif
         
         [Space]
