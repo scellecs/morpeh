@@ -1490,7 +1490,7 @@ namespace Morpeh {
                 this.entitiesCacheForBags[i++] = id;
             }
 
-            this.isDirtyCache = true;
+            this.isDirtyCache = false;
         }
 
         public ref ComponentsBag<T> Select<T>() where T : struct, IComponent {
