@@ -343,7 +343,7 @@ namespace Morpeh {
                     return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                 }
             }
-            
+
             exist = false;
             return ref CacheComponents<T>.Empty();
         }
@@ -897,7 +897,7 @@ namespace Morpeh {
 
         [NonSerialized]
         public Filter Filter;
-        
+
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
@@ -942,7 +942,7 @@ namespace Morpeh {
         [SerializeField]
 #endif
         internal CacheComponents[] caches;
-        
+
         public static World Create() => new World().Initialize();
 
         private World() {
@@ -1106,7 +1106,7 @@ namespace Morpeh {
             }
 
             this.newSystemsGroups.Clear();
-            
+
             for (var i = 0; i < this.systemsGroups.Count; i++) {
                 var systemsGroup = this.systemsGroups.Values[i];
                 systemsGroup.Update(deltaTime);
@@ -1257,18 +1257,23 @@ namespace Morpeh {
         private int   componentsBagsTripleCount;
 
         private List<Filter> childs;
-        private int          typeID;
-        private FilterMode   filterMode;
+        private int          childsCount;
+
+        private int        typeID;
+        private FilterMode filterMode;
 
 #if UNITY_2019_1_OR_NEWER
         [CanBeNull]
 #endif
         private List<int> addedList;
+        private int addedCount;
 #if UNITY_2019_1_OR_NEWER
         [CanBeNull]
 #endif
         private List<int> removedList;
+        private int removedCount;
         private List<int> dirtyList;
+        private int dirtyCount;
 
         private int lastEntitiesCount = -1;
 
@@ -1279,9 +1284,11 @@ namespace Morpeh {
         internal Filter(World world) {
             this.world = world;
 
-            this.entities  = new ObservableHashSet<int>();
-            this.dirtyList = new List<int>(Constants.DEFAULT_ROOT_FILTER_DIRTY_ENTITIES_CAPACITY);
-            this.childs    = new List<Filter>();
+            this.entities    = new ObservableHashSet<int>();
+            this.dirtyList   = new List<int>(Constants.DEFAULT_ROOT_FILTER_DIRTY_ENTITIES_CAPACITY);
+            this.dirtyCount = 0;
+            this.childs      = new List<Filter>();
+            this.childsCount = 0;
 
             this.typeID     = -1;
             this.filterMode = FilterMode.Include;
@@ -1296,10 +1303,14 @@ namespace Morpeh {
             this.world = world;
 
             this.addedList   = new List<int>(Constants.DEFAULT_FILTER_ADDED_ENTITIES_CAPACITY);
+            this.addedCount = 0;
             this.removedList = new List<int>(Constants.DEFAULT_FILTER_REMOVED_ENTITIES_CAPACITY);
+            this.removedCount = 0;
             this.entities    = new ObservableHashSet<int>();
             this.dirtyList   = new List<int>(Constants.DEFAULT_FILTER_DIRTY_ENTITIES_CAPACITY);
+            this.dirtyCount = 0;
             this.childs      = new List<Filter>();
+            this.childsCount = 0;
 
             this.typeID     = typeID;
             this.filterMode = mode;
@@ -1310,8 +1321,14 @@ namespace Morpeh {
             this.componentsBagsTripleCount    = 0;
             this.entitiesCacheForBagsCapacity = 0;
 
-            rootEntities.OnAddItem    += item => this.addedList.Add(item);
-            rootEntities.OnRemoveItem += item => this.removedList.Add(item);
+            rootEntities.OnAddItem    += item => {
+                this.addedList.Add(item);
+                this.addedCount++;
+            };
+            rootEntities.OnRemoveItem += item => {
+                this.removedList.Add(item);
+                this.removedCount++;
+            };
 
             if (!fillWithPreviousEntities) {
                 return;
@@ -1345,6 +1362,7 @@ namespace Morpeh {
 
             this.childs.Clear();
             this.childs = null;
+            this.childsCount = 0;
 
             this.Length = -1;
 
@@ -1362,28 +1380,34 @@ namespace Morpeh {
 
             this.addedList?.Clear();
             this.addedList = null;
+            this.addedCount = -1;
             this.removedList?.Clear();
             this.removedList = null;
+            this.removedCount = -1;
 
             this.dirtyList.Clear();
             this.dirtyList = null;
+            this.dirtyCount = -1;
 
             this.lastEntitiesCount = -1;
         }
 
-        internal void EntityChanged(int id) => this.dirtyList.Add(id);
+        internal void EntityChanged(int id) {
+            this.dirtyList.Add(id);
+            this.dirtyCount++;
+        }
 
         public void Update() {
             if (this.typeID == -1) {
                 var entitiesCount = this.entities.Count;
-                if (this.lastEntitiesCount != entitiesCount || this.dirtyList.Count > 0) {
-                    for (int i = 0, length = this.childs.Count; i < length; i++) {
-                        this.childs[i].UpdateChilds(this.dirtyList);
+                if (this.lastEntitiesCount != entitiesCount || this.dirtyCount > 0) {
+                    for (int i = 0, length = this.childsCount; i < length; i++) {
+                        this.childs[i].UpdateChilds(this.dirtyList, this.dirtyCount);
                     }
 
                     this.lastEntitiesCount = entitiesCount;
 
-                    for (int i = 0, length = this.dirtyList.Count; i < length; i++) {
+                    for (int i = 0, length = this.dirtyCount; i < length; i++) {
                         var entity = this.world.GetEntityInternal(this.dirtyList[i]);
                         if (!entity.IsNullOrDisposed()) {
                             entity.isDirty = false;
@@ -1391,45 +1415,51 @@ namespace Morpeh {
                     }
 
                     this.dirtyList.Clear();
+                    this.dirtyCount = 0;
                 }
 
                 return;
             }
 
-            var originDirtyCount = this.dirtyList.Count;
+            var newDirtyCount = this.dirtyCount;
 
-            for (var i = this.dirtyList.Count - 1; i >= 0; i--) {
+            for (var i = this.dirtyCount - 1; i >= 0; i--) {
                 var dirtyId = this.dirtyList[i];
                 var entity  = this.world.GetEntityInternal(dirtyId);
                 if (entity.IsNullOrDisposed()) {
                     this.entities.Remove(dirtyId);
                     this.dirtyList.RemoveAtFast(i);
+                    --newDirtyCount;
                 }
                 else if (this.filterMode == FilterMode.Include) {
                     if (entity.Has(this.typeID)) {
                         if (this.entities.Add(dirtyId)) {
                             this.dirtyList.RemoveAtFast(i);
+                            --newDirtyCount;
                         }
                     }
                     else {
                         this.entities.Remove(dirtyId);
                         this.dirtyList.RemoveAtFast(i);
+                        --newDirtyCount;
                     }
                 }
                 else if (this.filterMode == FilterMode.Exclude) {
                     if (!entity.Has(this.typeID)) {
                         if (this.entities.Add(dirtyId)) {
                             this.dirtyList.RemoveAtFast(i);
+                            --newDirtyCount;
                         }
                     }
                     else {
                         this.entities.Remove(dirtyId);
                         this.dirtyList.RemoveAtFast(i);
+                        --newDirtyCount;
                     }
                 }
             }
 
-            if (this.addedList.Count > 0 || this.removedList.Count > 0 || originDirtyCount != this.dirtyList.Count) {
+            if (this.addedCount > 0 || this.removedCount > 0 || this.dirtyCount != newDirtyCount) {
                 for (int i = 2, length = this.componentsBagsTripleCount; i < length; i += 3) {
                     this.componentsBags[i] = 1;
                 }
@@ -1437,14 +1467,15 @@ namespace Morpeh {
                 this.isDirtyCache = true;
             }
 
-            for (int i = 0, length = this.removedList.Count; i < length; i++) {
+            for (int i = 0, length = this.removedCount; i < length; i++) {
                 var id = this.removedList[i];
                 this.entities.Remove(id);
             }
 
             this.removedList.Clear();
+            this.removedCount = 0;
 
-            for (int i = 0, length = this.addedList.Count; i < length; i++) {
+            for (int i = 0, length = this.addedCount; i < length; i++) {
                 var id     = this.addedList[i];
                 var entity = this.world.GetEntityInternal(id);
                 switch (this.filterMode) {
@@ -1464,18 +1495,21 @@ namespace Morpeh {
             }
 
             this.addedList.Clear();
+            this.addedCount = 0;
 
             for (int i = 0, length = this.childs.Count; i < length; i++) {
-                this.childs[i].UpdateChilds(this.dirtyList);
+                this.childs[i].UpdateChilds(this.dirtyList, newDirtyCount);
             }
 
             this.dirtyList.Clear();
+            this.dirtyCount = 0;
 
             this.Length = this.entities.Count;
         }
 
-        private void UpdateChilds(List<int> parentDirtyList) {
+        private void UpdateChilds(List<int> parentDirtyList, int newDirtyCount) {
             this.dirtyList.AddRange(parentDirtyList);
+            this.dirtyCount = newDirtyCount;
             this.Update();
         }
 
@@ -1571,6 +1605,7 @@ namespace Morpeh {
 
             var newFilter = new Filter(this.world, this.entities, CacheTypeIdentifier<T>.info.id, mode, fillWithPreviousEntities);
             this.childs.Add(newFilter);
+            this.childsCount++;
 
             return newFilter;
         }
