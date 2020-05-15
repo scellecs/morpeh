@@ -897,6 +897,11 @@ namespace Morpeh {
 
         [NonSerialized]
         public Filter Filter;
+        
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        public bool UpdateByUnity;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
@@ -937,7 +942,7 @@ namespace Morpeh {
         [SerializeField]
 #endif
         internal CacheComponents[] caches;
-
+        
         public static World Create() => new World().Initialize();
 
         private World() {
@@ -1042,7 +1047,8 @@ namespace Morpeh {
 #endif
         public static void InitializationDefaultWorld() {
             worlds.Clear();
-            Create();
+            var defaultWorld = Create();
+            defaultWorld.UpdateByUnity = true;
 #if UNITY_2019_1_OR_NEWER
             var go = new GameObject {
                 name      = "MORPEH_UNITY_RUNTIME_HELPER",
@@ -1083,40 +1089,59 @@ namespace Morpeh {
 
         public static void GlobalUpdate(float deltaTime) {
             foreach (var world in worlds) {
-                for (var i = 0; i < world.newSystemsGroups.Count; i++) {
-                    var key          = world.newSystemsGroups.Keys[i];
-                    var systemsGroup = world.newSystemsGroups.Values[i];
-
-                    systemsGroup.Initialize();
-                    world.systemsGroups.Add(key, systemsGroup);
+                if (world.UpdateByUnity) {
+                    world.Update(deltaTime);
                 }
+            }
+        }
 
-                world.newSystemsGroups.Clear();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Update(float deltaTime) {
+            for (var i = 0; i < this.newSystemsGroups.Count; i++) {
+                var key          = this.newSystemsGroups.Keys[i];
+                var systemsGroup = this.newSystemsGroups.Values[i];
+
+                systemsGroup.Initialize();
+                this.systemsGroups.Add(key, systemsGroup);
             }
 
-            foreach (var world in worlds) {
-                for (var i = 0; i < world.systemsGroups.Count; i++) {
-                    var systemsGroup = world.systemsGroups.Values[i];
-                    systemsGroup.Update(deltaTime);
-                }
+            this.newSystemsGroups.Clear();
+            
+            for (var i = 0; i < this.systemsGroups.Count; i++) {
+                var systemsGroup = this.systemsGroups.Values[i];
+                systemsGroup.Update(deltaTime);
             }
         }
 
         public static void GlobalFixedUpdate(float deltaTime) {
             foreach (var world in worlds) {
-                for (var i = 0; i < world.systemsGroups.Count; i++) {
-                    var systemsGroup = world.systemsGroups.Values[i];
-                    systemsGroup.FixedUpdate(deltaTime);
+                if (world.UpdateByUnity) {
+                    world.FixedUpdate(deltaTime);
                 }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void FixedUpdate(float deltaTime) {
+            for (var i = 0; i < this.systemsGroups.Count; i++) {
+                var systemsGroup = this.systemsGroups.Values[i];
+                systemsGroup.FixedUpdate(deltaTime);
             }
         }
 
         public static void GlobalLateUpdate(float deltaTime) {
             foreach (var world in worlds) {
-                for (var i = 0; i < world.systemsGroups.Count; i++) {
-                    var systemsGroup = world.systemsGroups.Values[i];
-                    systemsGroup.LateUpdate(deltaTime);
+                if (world.UpdateByUnity) {
+                    world.LateUpdate(deltaTime);
                 }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void LateUpdate(float deltaTime) {
+            for (var i = 0; i < this.systemsGroups.Count; i++) {
+                var systemsGroup = this.systemsGroups.Values[i];
+                systemsGroup.LateUpdate(deltaTime);
             }
         }
 
