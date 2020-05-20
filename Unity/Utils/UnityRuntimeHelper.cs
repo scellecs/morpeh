@@ -28,7 +28,6 @@ namespace Morpeh {
         private List<World> worldsSerialized = null;
         [OdinSerialize]
         private List<string> types = null;
-        private bool hotReloaded = false;
 #endif
 
 #if UNITY_EDITOR
@@ -69,18 +68,6 @@ namespace Morpeh {
 
         private void Update() {
             World.GlobalUpdate(Time.deltaTime);
-#if UNITY_EDITOR && ODIN_INSPECTOR
-            if (this.hotReloaded) {
-                foreach (var world in World.worlds) {
-                    for (var index = 0; index < world.entitiesCount; index++) {
-                        var entity = world.entities[index];
-                        world.Filter.entities.Add(entity.internalID);
-                    }
-                }
-
-                this.hotReloaded = false;
-            }
-#endif
         }
 
         private void FixedUpdate() => World.GlobalFixedUpdate(Time.fixedDeltaTime);
@@ -135,7 +122,6 @@ namespace Morpeh {
                 }
 
                 World.worlds = this.worldsSerialized;
-                this.hotReloaded = true;
             }
         }
 #endif
