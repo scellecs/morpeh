@@ -1,4 +1,4 @@
-﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Runtime")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Editor")]
 
@@ -1519,7 +1519,8 @@ namespace Morpeh {
                 for (int i = 0, length = this.componentsBagsTripleCount; i < length; i += 3) {
                     this.componentsBags[i + 2] = 1;
                 }
-
+                
+                this.isDirty = false;
                 this.isDirtyCache = true;
             }
             
