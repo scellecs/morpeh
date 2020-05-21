@@ -1436,6 +1436,11 @@ namespace Morpeh {
             }
         }
 
+        public void AddFilter(Filter filter) {
+            this.filters.Add(filter);
+            this.onChange();
+        }
+
         public void Swap() {
             if (!this.isDirty) {
                 return;
@@ -1658,7 +1663,7 @@ namespace Morpeh {
                     if (check) {
                         temp = true;
                         this.archetypes.Add(arch);
-                        arch.filters.Add(this);
+                        arch.AddFilter(this);
                     }
                 }
             }
