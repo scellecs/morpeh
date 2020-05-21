@@ -129,7 +129,7 @@ namespace Morpeh {
             }
 
             this.currentArchetype = 0;
-            this.World.archetypes[this.currentArchetype].entities.Add(id);
+            this.World.originArchetype.Add(id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -502,7 +502,7 @@ namespace Morpeh {
 
             var world      = this.World;
             var arch = world.GetArchetype(this.components, out _);
-            arch.entities.Remove(this.internalID);
+            arch.Remove(this.internalID);
 
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 var typeId = this.components[i];
@@ -1281,7 +1281,6 @@ namespace Morpeh {
 
             this.entities[id] = new Entity(id, worlds.IndexOf(this));
             ++this.entitiesCount;
-            this.originArchetype.entities.Add(id);
 
             return this.entities[id];
         }
@@ -1328,6 +1327,11 @@ namespace Morpeh {
         }
 
         internal void FlushIds() {
+            foreach (var arch in this.archetypes) {
+                arch.Swap();
+            }
+            this.newArchetypes.Clear();
+            
             this.freeEntityIDs.AddRange(this.nextFreeEntityIDs);
             this.nextFreeEntityIDs.Clear();
         }
@@ -1339,12 +1343,15 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class Archetype : IDisposable {
         public int[] typeIds;
-        public List<int> entities;
         public bool isDirty;
+        public int[] currentEntities;
+        public int length;
+        private List<int> entities;
 
         internal Archetype(int[] typeIds) {
             this.typeIds = typeIds;
-            this.entities = new List<int>();
+            this.entities = new List<int>(1024);
+            this.currentEntities = new int[1024];
             this.isDirty = false;
         }
 
@@ -1359,10 +1366,26 @@ namespace Morpeh {
             }
         }
 
+        public void Swap() {
+            if (!this.isDirty) {
+                return;
+            }
+
+            var cap = this.entities.Capacity;
+            if (cap > this.currentEntities.Length) {
+                Array.Resize(ref this.currentEntities, cap);
+            }
+
+            this.entities.CopyTo(this.currentEntities);
+            this.length = this.entities.Count;
+            this.isDirty = false;
+        }
+
         public void Dispose() {
             this.typeIds = null;
             this.entities.Clear();
             this.entities = null;
+            this.currentEntities = null;
             this.isDirty = false;
         }
     }
@@ -1440,11 +1463,6 @@ namespace Morpeh {
             
             this.FindArchetypes(this.world.archetypes);
 
-            this.Length = 0;
-            for (int i = 0, length = this.archetypes.Count; i < length; i++) {
-                this.Length += this.archetypes[i].entities.Count;
-            }
-            
             this.UpdateCache();
         }
 
@@ -1482,8 +1500,7 @@ namespace Morpeh {
                 for (int i = 0, length = this.childsCount; i < length; i++) {
                     this.childs[i].Update();
                 }
-                this.world.newArchetypes.Clear();
-
+                
                 this.world.FlushIds();
                 return;
             }
@@ -1499,10 +1516,7 @@ namespace Morpeh {
             }
              
             if(isDirty || newArchetypes){
-                this.Length = 0;
-                for (int i = 0, length = this.archetypes.Count; i < length; i++) {
-                    this.Length += this.archetypes[i].entities.Count;
-                }
+                this.UpdateLength();
 
                 for (int i = 0, length = this.componentsBagsTripleCount; i < length; i += 3) {
                     this.componentsBags[i + 2] = 1;
@@ -1515,20 +1529,27 @@ namespace Morpeh {
                 this.childs[i].Update();
             }
         }
+
+        private void UpdateLength() {
+            this.Length = 0;
+            for (int i = 0, length = this.archetypes.Count; i < length; i++) {
+                this.Length += this.archetypes[i].length;
+            }
+        }
         
         private void UpdateCache() {
+            this.UpdateLength();
+            
             if (this.entitiesCacheForBagsCapacity < this.Length) {
                 Array.Resize(ref this.entitiesCacheForBags, this.Length);
                 this.entitiesCacheForBagsCapacity = this.Length;
             }
 
-            var i = 0;
+            var j = 0;
             foreach (var arch in this.archetypes) {
-                foreach (var id in arch.entities) {
-                    if (id < 0) {
-                        Debug.LogError("FUCK");
-                    }
-                    this.entitiesCacheForBags[i++] = id;
+                for (var index = 0; index < arch.length; index++) {
+                    var id = arch.currentEntities[index];
+                    this.entitiesCacheForBags[j++] = id;
                 }
             }
 
@@ -1784,7 +1805,7 @@ namespace Morpeh {
             public bool MoveNext() {
                 if (this.idList < this.archetypes.Count) {
                     var arch = this.archetypes[this.idList];
-                    while (this.id >= arch.entities.Count) {
+                    while (this.id >= arch.length) {
                         this.id = 0;
                         this.idList++;
                         if (this.idList < this.archetypes.Count) {
@@ -1794,8 +1815,8 @@ namespace Morpeh {
                             return false;
                         }
                     }
-                    if (this.id < arch.entities.Count) {
-                        var entId = arch.entities[this.id];
+                    if (this.id < arch.length) {
+                        var entId = arch.currentEntities[this.id];
                         this.current = this.world.entities[entId];
                         this.id++;
                         
