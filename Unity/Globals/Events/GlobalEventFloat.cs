@@ -6,7 +6,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Event Float")]
+    [CreateAssetMenu(menuName = "ECS/Globals/Events/Event Float")]
     public class GlobalEventFloat : BaseGlobalEvent<float> {
         public override string LastToString() => this.BatchedChanges.Peek().ToString(CultureInfo.InvariantCulture);
     }

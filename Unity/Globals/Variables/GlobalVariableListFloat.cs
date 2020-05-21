@@ -9,7 +9,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Variable List Float")]
+    [CreateAssetMenu(menuName = "ECS/Globals/Lists/Variable List Float")]
     public class GlobalVariableListFloat : BaseGlobalVariable<List<float>> {
         public override DataWrapper Wrapper {
             get => new ListFloatWrapper {list = this.value};
