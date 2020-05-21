@@ -921,6 +921,12 @@ namespace Morpeh {
 #endif
         public bool UpdateByUnity;
 
+        [NonSerialized]
+        internal List<Filter> filters;
+        
+        [NonSerialized]
+        internal List<Filter> dirtyFilters;
+
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
 #endif
@@ -978,6 +984,11 @@ namespace Morpeh {
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
+        internal List<Archetype> changedArchetypes;
+        
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
         internal List<Archetype> newArchetypes;
 
         public static World Create() => new World().Initialize();
@@ -991,6 +1002,8 @@ namespace Morpeh {
             this.newSystemsGroups = new SortedList<int, SystemsGroup>();
 
             this.Filter = new Filter(this);
+            this.filters = new List<Filter>();
+            this.dirtyFilters = new List<Filter>();
 
             this.InitializeGlobals();
         }
@@ -1011,6 +1024,7 @@ namespace Morpeh {
 
             this.originArchetype = new Archetype(new int[0]);
             this.archetypes      = new List<Archetype> {this.originArchetype};
+            this.changedArchetypes   = new List<Archetype>();
             this.newArchetypes   = new List<Archetype>();
             
 
@@ -1062,6 +1076,9 @@ namespace Morpeh {
             
             this.newArchetypes.Clear();
             this.newArchetypes = null;
+            
+            this.changedArchetypes.Clear();
+            this.changedArchetypes = null;
 
             this.freeEntityIDs.Clear();
             this.freeEntityIDs = null;
@@ -1079,6 +1096,12 @@ namespace Morpeh {
             }
 #endif
             this.Filter = null;
+            
+            this.filters.Clear();
+            this.filters = null;
+            
+            this.dirtyFilters.Clear();
+            this.dirtyFilters = null;
 
             foreach (var cache in this.caches) {
 #if UNITY_EDITOR
@@ -1159,6 +1182,15 @@ namespace Morpeh {
                 var newArchetype = new Archetype(this.archetypeCache.ToArray());
                 this.archetypes.Add(newArchetype);
                 this.newArchetypes.Add(newArchetype);
+                newArchetype.onChange += () => {
+                    this.changedArchetypes.Add(newArchetype);
+                    foreach (var filter in newArchetype.filters) {
+                        if (this.dirtyFilters.Contains(filter)) {
+                            continue;
+                        }
+                        this.dirtyFilters.Add(filter);
+                    }
+                };
                 archetypeId = this.archetypes.Count - 1;
                 archetype         = newArchetype;
             }
@@ -1330,11 +1362,22 @@ namespace Morpeh {
             }
         }
 
-        internal void FlushIds() {
-            foreach (var arch in this.archetypes) {
-                arch.Swap();
+        internal void Flush() {
+            if (this.newArchetypes.Count > 0) {
+                foreach (var filter in this.filters) {
+                    filter.FindArchetypes(this.newArchetypes);
+                }
+
+                this.newArchetypes.Clear();
             }
-            this.newArchetypes.Clear();
+            
+            if (this.changedArchetypes.Count > 0) {
+                foreach (var arch in this.changedArchetypes) {
+                    arch.Swap();
+                }
+
+                this.changedArchetypes.Clear();
+            }
 
             if (this.nextFreeEntityIDs.Count > 0) {
                 this.freeEntityIDs.AddRange(this.nextFreeEntityIDs);
@@ -1352,12 +1395,14 @@ namespace Morpeh {
         public bool isDirty;
         public int[] currentEntities;
         public int length;
-        private List<int> entities;
         public Action onChange = () => { };
+        public List<Filter> filters;
+        private List<int> entities;
 
         internal Archetype(int[] typeIds) {
             this.typeIds = typeIds;
             this.entities = new List<int>(1024);
+            this.filters = new List<Filter>();
             this.currentEntities = new int[1024];
             this.isDirty = false;
         }
@@ -1432,8 +1477,7 @@ namespace Morpeh {
         
         private int        typeID;
         private FilterMode filterMode;
-
-        private bool isDirty = true;
+        
         private bool isDirtyCache = true;
 
         //root filter ctor
@@ -1484,9 +1528,14 @@ namespace Morpeh {
             this.childs.Clear();
             this.childs      = null;
             this.childsCount = 0;
-            
-            this.archetypes?.Clear();
-            this.archetypes = null;
+
+            if (this.archetypes != null) {
+                foreach (var archetype in this.archetypes) {
+                    archetype.filters.Remove(this);
+                }
+                this.archetypes.Clear();
+                this.archetypes = null;
+            }
             
             this.includedTypeIds?.Clear();
             this.includedTypeIds = null;
@@ -1505,36 +1554,22 @@ namespace Morpeh {
             this.filterMode = FilterMode.None;
         }
 
-        public void Update(bool newCommonArchetypes = false) {
+        public void Update() {
             if (this.typeID == -1) {
-                newCommonArchetypes = this.world.newArchetypes.Count > 0;
-                for (int i = 0, length = this.childsCount; i < length; i++) {
-                    this.childs[i].Update(newCommonArchetypes);
+                foreach (var filter in this.world.dirtyFilters) {
+                    filter.Update();
                 }
-                
-                this.world.FlushIds();
+                this.world.Flush();
                 return;
             }
+            
+            this.UpdateLength();
 
-            var newArchetypes = false;
-            if (newCommonArchetypes) {
-                newArchetypes = this.FindArchetypes(this.world.newArchetypes);
+            for (int i = 0, length = this.componentsBagsTripleCount; i < length; i += 3) {
+                this.componentsBags[i + 2] = 1;
             }
             
-            if(this.isDirty || newArchetypes){
-                this.UpdateLength();
-
-                for (int i = 0, length = this.componentsBagsTripleCount; i < length; i += 3) {
-                    this.componentsBags[i + 2] = 1;
-                }
-                
-                this.isDirty = false;
-                this.isDirtyCache = true;
-            }
-            
-            for (int i = 0, length = this.childsCount; i < length; i++) {
-                this.childs[i].Update(newCommonArchetypes);
-            }
+            this.isDirtyCache = true;
         }
 
         private void UpdateLength() {
@@ -1612,9 +1647,7 @@ namespace Morpeh {
                     if (check) {
                         temp = true;
                         this.archetypes.Add(arch);
-                        arch.onChange += () => {
-                            this.isDirty = true;
-                        };
+                        arch.filters.Add(this);
                     }
                 }
             }
@@ -1720,6 +1753,7 @@ namespace Morpeh {
             var newFilter = new Filter(this.world,  newTypeId, includedTypeIds, excludedTypeIds, mode);
             this.childs.Add(newFilter);
             this.childsCount++;
+            this.world.filters.Add(newFilter);
             
             return newFilter;
         }
