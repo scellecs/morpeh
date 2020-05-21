@@ -743,8 +743,6 @@ namespace Morpeh {
         }
 
         public void FixedUpdate(float deltaTime) {
-            this.Initialize();
-
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
                 var system = this.fixedSystems[i];
 #if UNITY_EDITOR
