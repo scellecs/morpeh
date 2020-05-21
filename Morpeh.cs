@@ -1362,7 +1362,7 @@ namespace Morpeh {
             }
         }
 
-        internal void Flush() {
+        internal void UpdateFilters() {
             if (this.newArchetypes.Count > 0) {
                 foreach (var filter in this.filters) {
                     filter.FindArchetypes(this.newArchetypes);
@@ -1377,6 +1377,13 @@ namespace Morpeh {
                 }
 
                 this.changedArchetypes.Clear();
+            }
+
+            if (this.dirtyFilters.Count > 0) {
+                foreach (var filter in this.dirtyFilters) {
+                    filter.Update();
+                }
+                this.dirtyFilters.Clear();
             }
 
             if (this.nextFreeEntityIDs.Count > 0) {
@@ -1555,12 +1562,9 @@ namespace Morpeh {
         }
 
         public void Update() {
+            //legacy support
             if (this.typeID == -1) {
-                foreach (var filter in this.world.dirtyFilters) {
-                    filter.Update();
-                }
-                this.world.dirtyFilters.Clear();
-                this.world.Flush();
+                this.world.UpdateFilters();
                 return;
             }
             
