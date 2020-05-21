@@ -1484,7 +1484,6 @@ namespace Morpeh {
         private int   componentsBagsTripleCount;
 
         private List<Filter> childs;
-        private int          childsCount;
 
         private List<int> includedTypeIds;
         private List<int> excludedTypeIds;
@@ -1494,7 +1493,7 @@ namespace Morpeh {
         private int        typeID;
         private FilterMode filterMode;
 
-        private bool isDirtyCache = true;
+        private bool isDirtyCache;
 
         //root filter ctor
         //don't allocate any trash
@@ -1502,7 +1501,6 @@ namespace Morpeh {
             this.world = world;
 
             this.childs      = new List<Filter>();
-            this.childsCount = 0;
 
             this.typeID     = -1;
             this.filterMode = FilterMode.Include;
@@ -1516,7 +1514,6 @@ namespace Morpeh {
             this.world = world;
 
             this.childs      = new List<Filter>();
-            this.childsCount = 0;
             this.archetypes  = new List<Archetype>();
 
             this.typeID          = typeID;
@@ -1530,10 +1527,11 @@ namespace Morpeh {
 
             this.componentsBagsTripleCount    = 0;
             this.entitiesCacheForBagsCapacity = 0;
+            this.isDirtyCache = true;
 
             this.FindArchetypes(this.world.archetypes);
 
-            this.UpdateCache();
+            this.UpdateLength();
         }
 
         public void Dispose() {
@@ -1543,7 +1541,6 @@ namespace Morpeh {
 
             this.childs.Clear();
             this.childs      = null;
-            this.childsCount = 0;
 
             if (this.archetypes != null) {
                 foreach (var archetype in this.archetypes) {
@@ -1767,7 +1764,6 @@ namespace Morpeh {
 
             var newFilter = new Filter(this.world, newTypeId, includedTypeIds, excludedTypeIds, mode);
             this.childs.Add(newFilter);
-            this.childsCount++;
             this.world.filters.Add(newFilter);
 
             return newFilter;
