@@ -1559,6 +1559,7 @@ namespace Morpeh {
                 foreach (var filter in this.world.dirtyFilters) {
                     filter.Update();
                 }
+                this.world.dirtyFilters.Clear();
                 this.world.Flush();
                 return;
             }
