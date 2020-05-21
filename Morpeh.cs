@@ -23,10 +23,10 @@ namespace Morpeh {
     using System.Runtime.CompilerServices;
 
     internal static class Constants {
-        internal const int DEFAULT_WORLD_ENTITIES_CAPACITY             = 2048;
-        internal const int DEFAULT_WORLD_CACHES_CAPACITY               = 256;
-        internal const int DEFAULT_ENTITY_COMPONENTS_CAPACITY          = 2;
-        internal const int DEFAULT_CACHE_COMPONENTS_CAPACITY           = 2048;
+        internal const int DEFAULT_WORLD_ENTITIES_CAPACITY    = 2048;
+        internal const int DEFAULT_WORLD_CACHES_CAPACITY      = 256;
+        internal const int DEFAULT_ENTITY_COMPONENTS_CAPACITY = 2;
+        internal const int DEFAULT_CACHE_COMPONENTS_CAPACITY  = 2048;
     }
 
     public interface IEntity {
@@ -75,7 +75,9 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     [Serializable]
     internal sealed class Entity : IEntity {
-        internal World World => World.worlds[this.worldID];
+        internal World World => this.backfieldWorld ?? (this.backfieldWorld = World.worlds[this.worldID]);
+
+        internal World backfieldWorld;
 
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
@@ -119,6 +121,7 @@ namespace Morpeh {
         internal Entity(int id, int worldID) {
             this.internalID = id;
             this.worldID    = worldID;
+            this.backfieldWorld = World.worlds[this.worldID];
 
             this.componentsDoubleCapacity = 0;
             this.componentsCount          = 0;
@@ -135,7 +138,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddComponent<T>() where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
-            var world = this.World;
+            var world    = this.World;
 
             if (this.Has<T>()) {
 #if UNITY_EDITOR
@@ -210,8 +213,8 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddComponent<T>(out bool exist) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
-            var world = this.World;
-            
+            var world    = this.World;
+
             if (this.Has<T>()) {
 #if UNITY_EDITOR
                 Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
@@ -363,7 +366,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetComponent<T>(in T value) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
-            var world = this.World;
+            var world    = this.World;
 
             if (!typeInfo.isMarker) {
                 if (!this.Has(typeInfo.id)) {
@@ -376,7 +379,7 @@ namespace Morpeh {
                             this.componentsCount++;
 
                             world.GetCache<T>().Set(componentId, value);
-                            
+
                             world.archetypes[this.currentArchetype].Remove(this.internalID);
                             world.GetArchetype(this.components, out this.currentArchetype).Add(this.internalID);
                             return;
@@ -434,7 +437,7 @@ namespace Morpeh {
                     this.components[this.componentsDoubleCapacity - 2] = typeInfo.id;
                     this.components[this.componentsDoubleCapacity - 1] = componentId;
                     this.componentsCount++;
-                    
+
                     world.archetypes[this.currentArchetype].Remove(this.internalID);
                     world.GetArchetype(this.components, out this.currentArchetype).Add(this.internalID);
                 }
@@ -444,7 +447,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RemoveComponent<T>() where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
-            var world = this.World;
+            var world    = this.World;
 
             for (int i = 0, length = this.componentsDoubleCapacity; i < length; i += 2) {
                 if (this.components[i] == typeInfo.id) {
@@ -457,7 +460,7 @@ namespace Morpeh {
                     --this.componentsCount;
                     world.archetypes[this.currentArchetype].Remove(this.internalID);
                     world.GetArchetype(this.components, out this.currentArchetype).Add(this.internalID);
-                    
+
                     if (this.componentsCount <= 0) {
                         world.RemoveEntity(this);
                     }
@@ -500,8 +503,8 @@ namespace Morpeh {
                 return;
             }
 
-            var world      = this.World;
-            var arch = world.GetArchetype(this.components, out _);
+            var world = this.World;
+            var arch  = world.GetArchetype(this.components, out _);
             arch.Remove(this.internalID);
 
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
@@ -512,6 +515,7 @@ namespace Morpeh {
             }
 
             this.components               = null;
+            this.backfieldWorld           = null;
             this.internalID               = -1;
             this.worldID                  = -1;
             this.componentsDoubleCapacity = -1;
@@ -923,7 +927,7 @@ namespace Morpeh {
 
         [NonSerialized]
         internal List<Filter> filters;
-        
+
         [NonSerialized]
         internal List<Filter> dirtyFilters;
 
@@ -980,12 +984,12 @@ namespace Morpeh {
         [SerializeField]
 #endif
         internal List<Archetype> archetypes;
-        
+
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
         internal List<Archetype> changedArchetypes;
-        
+
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
 #endif
@@ -1001,8 +1005,8 @@ namespace Morpeh {
             this.systemsGroups    = new SortedList<int, SystemsGroup>();
             this.newSystemsGroups = new SortedList<int, SystemsGroup>();
 
-            this.Filter = new Filter(this);
-            this.filters = new List<Filter>();
+            this.Filter       = new Filter(this);
+            this.filters      = new List<Filter>();
             this.dirtyFilters = new List<Filter>();
 
             this.InitializeGlobals();
@@ -1022,11 +1026,11 @@ namespace Morpeh {
             this.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             this.entities         = new Entity[this.entitiesCapacity];
 
-            this.originArchetype = new Archetype(new int[0]);
-            this.archetypes      = new List<Archetype> {this.originArchetype};
-            this.changedArchetypes   = new List<Archetype>();
-            this.newArchetypes   = new List<Archetype>();
-            
+            this.originArchetype   = new Archetype(new int[0]);
+            this.archetypes        = new List<Archetype> {this.originArchetype};
+            this.changedArchetypes = new List<Archetype>();
+            this.newArchetypes     = new List<Archetype>();
+
 
             return this;
         }
@@ -1044,7 +1048,7 @@ namespace Morpeh {
                     Debug.LogException(e);
                 }
 #endif
-                }
+            }
 
             this.systemsGroups = null;
 
@@ -1073,10 +1077,10 @@ namespace Morpeh {
 
             this.archetypes.Clear();
             this.archetypes = null;
-            
+
             this.newArchetypes.Clear();
             this.newArchetypes = null;
-            
+
             this.changedArchetypes.Clear();
             this.changedArchetypes = null;
 
@@ -1096,10 +1100,10 @@ namespace Morpeh {
             }
 #endif
             this.Filter = null;
-            
+
             this.filters.Clear();
             this.filters = null;
-            
+
             this.dirtyFilters.Clear();
             this.dirtyFilters = null;
 
@@ -1144,7 +1148,7 @@ namespace Morpeh {
         internal Archetype GetArchetype(int[] typeIds, out int archetypeId, bool doubleStep = true) {
             Archetype archetype = null;
             archetypeId = -1;
-            
+
             this.archetypeCache.Clear();
             for (int i = 0, length = typeIds.Length; i < length; i += doubleStep ? 2 : 1) {
                 var typeId = typeIds[i];
@@ -1152,6 +1156,7 @@ namespace Morpeh {
                     this.archetypeCache.Add(typeIds[i]);
                 }
             }
+
             this.archetypeCache.Sort();
             var typesLength = this.archetypeCache.Count;
             //.Select(id => CommonCacheTypeIdentifier.editorTypeAssociation[id].type.Name)
@@ -1170,9 +1175,9 @@ namespace Morpeh {
                     }
 
                     if (check) {
-                        archetype = arch;
+                        archetype   = arch;
                         archetypeId = index;
-                        found     = true;
+                        found       = true;
                         break;
                     }
                 }
@@ -1188,14 +1193,17 @@ namespace Morpeh {
                         if (this.dirtyFilters.Contains(filter)) {
                             continue;
                         }
+
                         this.dirtyFilters.Add(filter);
                     }
                 };
                 archetypeId = this.archetypes.Count - 1;
-                archetype         = newArchetype;
+                archetype   = newArchetype;
             }
+
             return archetype;
         }
+
         internal CacheComponents GetCache(int typeId) => this.caches[typeId];
 
         internal CacheComponents<T> GetCache<T>() where T : struct, IComponent {
@@ -1370,7 +1378,7 @@ namespace Morpeh {
 
                 this.newArchetypes.Clear();
             }
-            
+
             if (this.changedArchetypes.Count > 0) {
                 foreach (var arch in this.changedArchetypes) {
                     arch.Swap();
@@ -1383,6 +1391,7 @@ namespace Morpeh {
                 foreach (var filter in this.dirtyFilters) {
                     filter.Update();
                 }
+
                 this.dirtyFilters.Clear();
             }
 
@@ -1398,20 +1407,20 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class Archetype : IDisposable {
-        public int[] typeIds;
-        public bool isDirty;
-        public int[] currentEntities;
-        public int length;
-        public Action onChange = () => { };
-        public List<Filter> filters;
-        private List<int> entities;
+        public  int[]        typeIds;
+        public  bool         isDirty;
+        public  int[]        currentEntities;
+        public  int          length;
+        public  Action       onChange = () => { };
+        public  List<Filter> filters;
+        private List<int>    entities;
 
         internal Archetype(int[] typeIds) {
-            this.typeIds = typeIds;
-            this.entities = new List<int>(1024);
-            this.filters = new List<Filter>();
+            this.typeIds         = typeIds;
+            this.entities        = new List<int>(1024);
+            this.filters         = new List<Filter>();
             this.currentEntities = new int[1024];
-            this.isDirty = false;
+            this.isDirty         = false;
         }
 
         public void Add(int entityId) {
@@ -1438,16 +1447,16 @@ namespace Morpeh {
             }
 
             this.entities.CopyTo(this.currentEntities);
-            this.length = this.entities.Count;
+            this.length  = this.entities.Count;
             this.isDirty = false;
         }
 
         public void Dispose() {
             this.typeIds = null;
             this.entities.Clear();
-            this.entities = null;
+            this.entities        = null;
             this.currentEntities = null;
-            this.isDirty = false;
+            this.isDirty         = false;
         }
     }
 
@@ -1462,7 +1471,7 @@ namespace Morpeh {
             Exclude = 2
         }
 
-        public int Length;
+        public           int   Length;
         private readonly World world;
 
         private int[] entitiesCacheForBags;
@@ -1479,19 +1488,19 @@ namespace Morpeh {
 
         private List<int> includedTypeIds;
         private List<int> excludedTypeIds;
-        
+
         private List<Archetype> archetypes;
-        
+
         private int        typeID;
         private FilterMode filterMode;
-        
+
         private bool isDirtyCache = true;
 
         //root filter ctor
         //don't allocate any trash
         internal Filter(World world) {
             this.world = world;
-            
+
             this.childs      = new List<Filter>();
             this.childsCount = 0;
 
@@ -1505,15 +1514,15 @@ namespace Morpeh {
         //full child filter
         private Filter(World world, int typeID, List<int> includedTypeIds, List<int> excludedTypeIds, FilterMode mode) {
             this.world = world;
-            
-            this.childs       = new List<Filter>();
-            this.childsCount  = 0;
-            this.archetypes = new List<Archetype>();
 
-            this.typeID     = typeID;
+            this.childs      = new List<Filter>();
+            this.childsCount = 0;
+            this.archetypes  = new List<Archetype>();
+
+            this.typeID          = typeID;
             this.includedTypeIds = includedTypeIds;
             this.excludedTypeIds = excludedTypeIds;
-            
+
             this.filterMode = mode;
 
             this.componentsBags       = new int[0];
@@ -1521,7 +1530,7 @@ namespace Morpeh {
 
             this.componentsBagsTripleCount    = 0;
             this.entitiesCacheForBagsCapacity = 0;
-            
+
             this.FindArchetypes(this.world.archetypes);
 
             this.UpdateCache();
@@ -1540,10 +1549,11 @@ namespace Morpeh {
                 foreach (var archetype in this.archetypes) {
                     archetype.filters.Remove(this);
                 }
+
                 this.archetypes.Clear();
                 this.archetypes = null;
             }
-            
+
             this.includedTypeIds?.Clear();
             this.includedTypeIds = null;
             this.excludedTypeIds?.Clear();
@@ -1567,13 +1577,13 @@ namespace Morpeh {
                 this.world.UpdateFilters();
                 return;
             }
-            
+
             this.UpdateLength();
 
             for (int i = 0, length = this.componentsBagsTripleCount; i < length; i += 3) {
                 this.componentsBags[i + 2] = 1;
             }
-            
+
             this.isDirtyCache = true;
         }
 
@@ -1583,10 +1593,10 @@ namespace Morpeh {
                 this.Length += this.archetypes[i].length;
             }
         }
-        
+
         private void UpdateCache() {
             this.UpdateLength();
-            
+
             if (this.entitiesCacheForBagsCapacity < this.Length) {
                 Array.Resize(ref this.entitiesCacheForBags, this.Length);
                 this.entitiesCacheForBagsCapacity = this.Length;
@@ -1602,17 +1612,17 @@ namespace Morpeh {
 
             this.isDirtyCache = false;
         }
-        
+
         internal bool FindArchetypes(List<Archetype> otherArchetypes) {
             var minLength = this.includedTypeIds.Count;
-            var temp = false;
+            var temp      = false;
             foreach (var arch in otherArchetypes) {
                 var typeIdsLength = arch.typeIds.Length;
                 if (typeIdsLength >= minLength) {
                     var check = true;
                     for (int i = 0, length = minLength; i < length; i++) {
                         var includedTypeId = this.includedTypeIds[i];
-                        var foundInclude = false;
+                        var foundInclude   = false;
                         for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
                             var typeId = arch.typeIds[j];
                             if (typeId > includedTypeId) {
@@ -1624,7 +1634,6 @@ namespace Morpeh {
                                 foundInclude = true;
                                 break;
                             }
-                            
                         }
 
                         if (foundInclude == false) {
@@ -1640,14 +1649,14 @@ namespace Morpeh {
                             if (typeId > excludedTypeId) {
                                 break;
                             }
+
                             if (typeId == excludedTypeId) {
                                 check = false;
                                 goto BREAK;
                             }
-                            
                         }
                     }
-                    
+
                     BREAK:
                     if (check) {
                         temp = true;
@@ -1703,22 +1712,22 @@ namespace Morpeh {
             newComponentsBag.Update(this.entitiesCacheForBags, this.Length);
             return ref newComponentsBag;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEntity GetEntity(in int id) {
             if (this.isDirtyCache) {
                 this.UpdateCache();
             }
-            
+
             return this.world.entities[this.entitiesCacheForBags[id]];
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEntity First() {
             if (this.isDirtyCache) {
                 this.UpdateCache();
             }
-            
+
             return this.world.entities[this.entitiesCacheForBags[0]];
         }
 
@@ -1748,18 +1757,19 @@ namespace Morpeh {
                 includedTypeIds = new List<int>(this.includedTypeIds);
                 excludedTypeIds = new List<int>(this.excludedTypeIds);
             }
-            
+
             if (mode == FilterMode.Include) {
                 includedTypeIds.Add(newTypeId);
             }
             else if (mode == FilterMode.Exclude) {
                 excludedTypeIds.Add(newTypeId);
             }
-            var newFilter = new Filter(this.world,  newTypeId, includedTypeIds, excludedTypeIds, mode);
+
+            var newFilter = new Filter(this.world, newTypeId, includedTypeIds, excludedTypeIds, mode);
             this.childs.Add(newFilter);
             this.childsCount++;
             this.world.filters.Add(newFilter);
-            
+
             return newFilter;
         }
 
@@ -1786,7 +1796,7 @@ namespace Morpeh {
                 cacheCapacity = 16;
                 cache         = new ComponentsBag<T>[cacheCapacity];
             }
-            
+
             internal void Update(int[] entities, in int len) {
                 Array.Resize(ref this.ids, len);
                 for (var i = 0; i < len; i++) {
@@ -1835,17 +1845,17 @@ namespace Morpeh {
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public struct EntityEnumerator : IEnumerator<IEntity> {
-            private World world;
+            private World           world;
             private List<Archetype> archetypes;
-            private Entity current;
+            private Entity          current;
 
             private int id;
             private int idList;
 
             internal EntityEnumerator(World world, List<Archetype> archetypes) {
-                this.world = world;
+                this.world      = world;
                 this.archetypes = archetypes;
-                this.current = null;
+                this.current    = null;
 
                 this.id     = 0;
                 this.idList = 0;
@@ -1864,14 +1874,14 @@ namespace Morpeh {
                             return false;
                         }
                     }
+
                     if (this.id < arch.length) {
                         var entId = arch.currentEntities[this.id];
                         this.current = this.world.entities[entId];
                         this.id++;
-                        
+
                         return true;
                     }
-                    
                 }
 
                 return false;
@@ -1880,7 +1890,7 @@ namespace Morpeh {
             public void Reset() {
                 this.current = null;
                 this.id      = 0;
-                this.idList = 0;
+                this.idList  = 0;
             }
 
             public IEntity Current => this.current;
@@ -1889,7 +1899,7 @@ namespace Morpeh {
 
             public void Dispose() {
                 this.id     = -1;
-                this.idList     = -1;
+                this.idList = -1;
 
                 this.current = null;
                 this.world   = null;
