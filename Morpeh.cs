@@ -1347,6 +1347,7 @@ namespace Morpeh {
         public int[] currentEntities;
         public int length;
         private List<int> entities;
+        public Action onChange = () => { };
 
         internal Archetype(int[] typeIds) {
             this.typeIds = typeIds;
@@ -1358,11 +1359,13 @@ namespace Morpeh {
         public void Add(int entityId) {
             this.entities.Add(entityId);
             this.isDirty = true;
+            this.onChange();
         }
 
         public void Remove(int entityId) {
             if (this.entities.Remove(entityId)) {
                 this.isDirty = true;
+                this.onChange();
             }
         }
 
@@ -1424,6 +1427,7 @@ namespace Morpeh {
         private int        typeID;
         private FilterMode filterMode;
 
+        private bool isDirty = true;
         private bool isDirtyCache = true;
 
         //root filter ctor
@@ -1495,27 +1499,23 @@ namespace Morpeh {
             this.filterMode = FilterMode.None;
         }
 
-        public void Update() {
+        public void Update(bool newCommonArchetypes = false) {
             if (this.typeID == -1) {
+                newCommonArchetypes = this.world.newArchetypes.Count > 0;
                 for (int i = 0, length = this.childsCount; i < length; i++) {
-                    this.childs[i].Update();
+                    this.childs[i].Update(newCommonArchetypes);
                 }
                 
                 this.world.FlushIds();
                 return;
             }
 
-            var newArchetypes = this.FindArchetypes(this.world.newArchetypes);
-
-            var isDirty = false;
-            for (int i = 0, length = this.archetypes.Count; i < length; i++) {
-                if (this.archetypes[i].isDirty) {
-                    isDirty = true;
-                    break;
-                }
+            var newArchetypes = false;
+            if (newCommonArchetypes) {
+                newArchetypes = this.FindArchetypes(this.world.newArchetypes);
             }
-             
-            if(isDirty || newArchetypes){
+            
+            if(this.isDirty || newArchetypes){
                 this.UpdateLength();
 
                 for (int i = 0, length = this.componentsBagsTripleCount; i < length; i += 3) {
@@ -1526,7 +1526,7 @@ namespace Morpeh {
             }
             
             for (int i = 0, length = this.childsCount; i < length; i++) {
-                this.childs[i].Update();
+                this.childs[i].Update(newCommonArchetypes);
             }
         }
 
@@ -1605,6 +1605,9 @@ namespace Morpeh {
                     if (check) {
                         temp = true;
                         this.archetypes.Add(arch);
+                        arch.onChange += () => {
+                            this.isDirty = true;
+                        };
                     }
                 }
             }
