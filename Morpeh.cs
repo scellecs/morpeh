@@ -705,11 +705,11 @@ namespace Morpeh {
                 }
 
                 this.disposables.Clear();
-
-                this.world.Filter.Update();
             }
+            
 
             if (this.newInitializers.Count > 0) {
+                this.world.Filter.Update();
                 foreach (var initializer in this.newInitializers) {
 #if UNITY_EDITOR
                     try {
@@ -1413,7 +1413,7 @@ namespace Morpeh {
         public  int          length;
         public  Action       onChange = () => { };
         public  List<Filter> filters;
-        private List<int>    entities;
+        internal List<int>    entities;
 
         internal Archetype(int[] typeIds) {
             this.typeIds         = typeIds;
