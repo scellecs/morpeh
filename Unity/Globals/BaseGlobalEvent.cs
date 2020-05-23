@@ -31,7 +31,8 @@ namespace Morpeh.Globals {
 
         private protected override void CheckIsInitialized() {
             if (this.internalEntityID < 0) {
-                var ent = World.Default.CreateEntityInternal(out this.internalEntityID);
+                var world = World.Default;
+                var ent = world.CreateEntityInternal(out this.internalEntityID);
 
                 ent.AddComponent<GlobalEventMarker>();
                 ent.SetComponent(new GlobalEventComponent<TData> {
@@ -42,9 +43,28 @@ namespace Morpeh.Globals {
                     LastToString = this.LastToString
                 });
                 
-                if (!GlobalEventComponent<TData>.Initialized) {
-                    GlobalEventComponentUpdater.Updaters.Add(new GlobalEventComponentUpdater<TData>());
-                    GlobalEventComponent<TData>.Initialized = true;
+                //todo rework to multiworld
+                if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.id, out var initialized)) {
+                    if (initialized == false) {
+                        var updater = new GlobalEventComponentUpdater<TData>();
+                        updater.Awake(world);
+                        if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
+                            updaters.Add(updater);
+                        }
+                        else {
+                            GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
+                        }
+                    }
+                }
+                else {
+                    var updater = new GlobalEventComponentUpdater<TData>();
+                    updater.Awake(world);
+                    if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
+                        updaters.Add(updater);
+                    }
+                    else {
+                        GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
+                    }
                 }
             }
         }
