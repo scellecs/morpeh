@@ -155,7 +155,7 @@ namespace Morpeh {
                         this.components[i + 1] = componentId;
                         this.componentsCount++;
 
-                        world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                        world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                         return ref CacheComponents<T>.Empty();
                     }
                 }
@@ -180,7 +180,7 @@ namespace Morpeh {
                         this.components[i + 1] = componentId;
                         this.componentsCount++;
 
-                        world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                        world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                         return ref this.World.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
@@ -197,11 +197,11 @@ namespace Morpeh {
                 this.components[this.componentsDoubleCapacity - 1] = componentId;
                 this.componentsCount++;
 
-                world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                 return ref this.World.GetCache<T>().Get(this.components[this.componentsDoubleCapacity - 1]);
             }
 
-            world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+            world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
 
             return ref CacheComponents<T>.Empty();
         }
@@ -229,7 +229,7 @@ namespace Morpeh {
                         this.components[i + 1] = componentId;
                         this.componentsCount++;
 
-                        world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                        world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                         return ref CacheComponents<T>.Empty();
                     }
                 }
@@ -254,7 +254,7 @@ namespace Morpeh {
                         this.components[i + 1] = componentId;
                         this.componentsCount++;
 
-                        world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                        world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                         return ref world.GetCache<T>().Get(this.components[i + 1]);
                     }
                 }
@@ -271,7 +271,7 @@ namespace Morpeh {
                 this.components[this.componentsDoubleCapacity - 1] = componentId;
                 this.componentsCount++;
 
-                world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                 return ref world.GetCache<T>().Get(this.components[this.componentsDoubleCapacity - 1]);
             }
 
@@ -373,7 +373,7 @@ namespace Morpeh {
 
                             world.GetCache<T>().Set(componentId, value);
 
-                            world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                            world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                             return;
                         }
                     }
@@ -392,7 +392,7 @@ namespace Morpeh {
 
                     world.GetCache<T>().Set(componentId, value);
 
-                    world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                    world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                     return;
                 }
 
@@ -411,7 +411,7 @@ namespace Morpeh {
                             this.components[i + 1] = componentId;
                             this.componentsCount++;
 
-                            world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                            world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                             return;
                         }
                     }
@@ -428,7 +428,7 @@ namespace Morpeh {
                     this.components[this.componentsDoubleCapacity - 1] = componentId;
                     this.componentsCount++;
 
-                    world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true);
+                    world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, true, out this.currentArchetype);
                 }
             }
         }
@@ -447,7 +447,7 @@ namespace Morpeh {
                     }
 
                     --this.componentsCount;
-                    world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, false);
+                    world.archetypes[this.currentArchetype].Transfer(this.internalID, typeInfo.id, false, out this.currentArchetype);
 
                     if (this.componentsCount <= 0) {
                         world.RemoveEntity(this);
@@ -971,6 +971,11 @@ namespace Morpeh {
         [SerializeField]
 #endif
         internal List<Archetype> archetypes;
+        
+#if UNITY_2019_1_OR_NEWER
+        [SerializeField]
+#endif
+        internal Dictionary<int, List<int>> archetypesByLength;
 
 #if UNITY_2019_1_OR_NEWER
         [SerializeField]
@@ -986,6 +991,9 @@ namespace Morpeh {
         [SerializeField]
 #endif
         internal int id;
+
+        [NonSerialized]
+        private List<int> archetypeCache;
 
         public static World Create() => new World().Initialize();
 
@@ -1019,6 +1027,10 @@ namespace Morpeh {
 
             this.originArchetype   = new Archetype(new int[0], this.id);
             this.archetypes        = new List<Archetype> {this.originArchetype};
+            this.archetypesByLength = new Dictionary<int, List<int>> {
+                [0] = new List<int> {0}
+            };
+            this.archetypeCache = new List<int>();
             this.changedArchetypes = new List<Archetype>();
             this.newArchetypes     = new List<Archetype>();
 
@@ -1068,6 +1080,12 @@ namespace Morpeh {
 
             this.archetypes.Clear();
             this.archetypes = null;
+
+            foreach (var pair in this.archetypesByLength) {
+                pair.Value.Clear();
+            }
+            this.archetypesByLength.Clear();
+            this.archetypesByLength = null;
 
             this.newArchetypes.Clear();
             this.newArchetypes = null;
@@ -1134,7 +1152,6 @@ namespace Morpeh {
 #endif
         }
 
-        private List<int> archetypeCache = new List<int>();
 
         //TODO refactor allocations and fast sort(maybe without it?)
         internal Archetype GetArchetype(int[] typeIds, int newTypeId, bool added, out int archetypeId) {
@@ -1142,7 +1159,7 @@ namespace Morpeh {
             archetypeId = -1;
 
             this.archetypeCache.Clear();
-            for (int i = 0, length = typeIds.Length; i < length; i ++) {
+            for (int i = 0, length = typeIds.Length; i < length; i++) {
                 var typeId = typeIds[i];
                 if (typeId >= 0) {
                     this.archetypeCache.Add(typeIds[i]);
@@ -1158,47 +1175,51 @@ namespace Morpeh {
 
             this.archetypeCache.Sort();
             var typesLength = this.archetypeCache.Count;
+            //.Where((_, index) => index % 2 == 0)
             //.Select(id => CommonCacheTypeIdentifier.editorTypeAssociation[id].type.Name)
-            // Debug.Log($"ARCH {string.Join(", ", typeIds.Where((_, index) => index % 2 == 0).Where(id => id != -1))}");
+            //Debug.Log($"ARCH {string.Join(", ", archetypeCache.Where(id => id != -1))}");
             // Debug.Log($"ARCH SORTED {string.Join(", ", this.archetypeCache)}");
-
-            var found = false;
-            for (var index = 0; index < this.archetypes.Count; index++) {
-                var arch = this.archetypes[index];
-                if (arch.typeIds.Length == typesLength) {
+            
+            if(this.archetypesByLength.TryGetValue(typesLength, out var archsl)) {
+                for (var index = 0; index < archsl.Count; index++) {
+                    archetypeId = archsl[index];
+                    archetype = this.archetypes[archetypeId];
                     var check = true;
                     for (int i = 0, length = typesLength; i < length; i++) {
-                        if (arch.typeIds[i] != this.archetypeCache[i]) {
+                        if (archetype.typeIds[i] != this.archetypeCache[i]) {
                             check = false;
+                            break;
                         }
                     }
 
                     if (check) {
-                        archetype   = arch;
-                        archetypeId = index;
-                        found       = true;
-                        break;
+                        return archetype;
                     }
                 }
             }
 
-            if (found == false) {
-                var newArchetype = new Archetype(this.archetypeCache.ToArray(), this.id);
-                this.archetypes.Add(newArchetype);
-                this.newArchetypes.Add(newArchetype);
-                newArchetype.onChange += () => {
-                    this.changedArchetypes.Add(newArchetype);
-                    foreach (var filter in newArchetype.filters) {
-                        if (this.dirtyFilters.Contains(filter)) {
-                            continue;
-                        }
-
-                        this.dirtyFilters.Add(filter);
-                    }
-                };
-                archetypeId = this.archetypes.Count - 1;
-                archetype   = newArchetype;
+            archetypeId = this.archetypes.Count;
+            var newArchetype = new Archetype(this.archetypeCache.ToArray(), this.id);
+            this.archetypes.Add(newArchetype);
+            if (this.archetypesByLength.TryGetValue(typesLength, out archsl)) {
+                archsl.Add(archetypeId);
             }
+            else {
+                this.archetypesByLength.Add(typesLength, new List<int>{archetypeId});
+            }
+            this.newArchetypes.Add(newArchetype);
+            newArchetype.onChange += () => {
+                this.changedArchetypes.Add(newArchetype);
+                foreach (var filter in newArchetype.filters) {
+                    if (this.dirtyFilters.Contains(filter)) {
+                        continue;
+                    }
+
+                    this.dirtyFilters.Add(filter);
+                }
+            };
+
+            archetype   = newArchetype;
 
             return archetype;
         }
@@ -1405,7 +1426,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal sealed class Archetype : IDisposable {
+    public sealed class Archetype : IDisposable {
         public  int[]        typeIds;
         public  bool         isDirty;
         public  int[]        currentEntities;
@@ -1429,11 +1450,11 @@ namespace Morpeh {
 
         internal Archetype(int[] typeIds, int worldId) {
             this.typeIds         = typeIds;
-            this.entities        = new List<int>(1024);
+            this.entities        = new List<int>(16);
             this.filters         = new List<Filter>();
             this.addTransfer = new Dictionary<int, int>();
             this.removeTransfer = new Dictionary<int, int>();
-            this.currentEntities = new int[1024];
+            this.currentEntities = new int[16];
             this.isDirty         = false;
             this.worldId = worldId;
             this.backfieldWorld = World.worlds[this.worldId];
@@ -1472,26 +1493,26 @@ namespace Morpeh {
             this.isDirty = false;
         }
 
-        public void Transfer(int entityId, int typeId, bool added) {
-            this.entities.Remove(entityId);
+        public void Transfer(int entityId, int typeId, bool added, out int archetypeId) {
+            this.Remove(entityId);
             if (added) {
-                if (this.addTransfer.TryGetValue(typeId, out var archId)) {
-                    this.world.archetypes[archId].Add(entityId);
+                if (this.addTransfer.TryGetValue(typeId, out archetypeId)) {
+                    this.world.archetypes[archetypeId].Add(entityId);
                 }
                 else {
-                    var arch = this.world.GetArchetype(this.typeIds, typeId, added, out archId);
+                    var arch = this.world.GetArchetype(this.typeIds, typeId, added, out archetypeId);
                     arch.Add(entityId);
-                    this.addTransfer.Add(typeId, archId);
+                    this.addTransfer.Add(typeId, archetypeId);
                 }
             }
             else {
-                if (this.removeTransfer.TryGetValue(typeId, out var archId)) {
-                    this.world.archetypes[archId].Add(entityId);
+                if (this.removeTransfer.TryGetValue(typeId, out archetypeId)) {
+                    this.world.archetypes[archetypeId].Add(entityId);
                 }
                 else {
-                    var arch = this.world.GetArchetype(this.typeIds, typeId, added, out archId);
+                    var arch = this.world.GetArchetype(this.typeIds, typeId, added, out archetypeId);
                     arch.Add(entityId);
-                    this.removeTransfer.Add(typeId, archId);
+                    this.removeTransfer.Add(typeId, archetypeId);
                 }
             }
         }
@@ -1543,7 +1564,7 @@ namespace Morpeh {
         private List<int> includedTypeIds;
         private List<int> excludedTypeIds;
 
-        private List<Archetype> archetypes;
+        public List<Archetype> archetypes;
 
         private int        typeID;
         private FilterMode filterMode;
