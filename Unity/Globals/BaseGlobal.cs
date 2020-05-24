@@ -24,7 +24,7 @@ namespace Morpeh.Globals {
 #endif
         private protected int internalEntityID = -1;
 
-        private Entity internalEntity;
+        private protected Entity internalEntity;
         
         [CanBeNull]
         private protected Entity InternalEntity {
@@ -58,7 +58,6 @@ namespace Morpeh.Globals {
                 this.CheckIsInitialized();
 #endif
                 return this.isPublished;
-                //return this.InternalEntity.Has<GlobalEventPublished>();
             }
         }
         

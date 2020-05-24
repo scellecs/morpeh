@@ -45,6 +45,8 @@ namespace Morpeh.Globals {
                 ent.SetComponent(new GlobalEventLastToString {
                     LastToString = this.LastToString
                 });
+
+                this.internalEntity = ent;
                 
                 //todo rework to multiworld
                 if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.id, out var initialized)) {
@@ -77,6 +79,7 @@ namespace Morpeh.Globals {
             this.CheckIsInitialized();
             ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Data.Push(data);
+            this.isPublished = true;
             this.InternalEntity.SetComponent(new GlobalEventPublished());
         }
 
