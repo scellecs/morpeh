@@ -1208,16 +1208,6 @@ namespace Morpeh {
                 this.archetypesByLength.Add(typesLength, new List<int>{archetypeId});
             }
             this.newArchetypes.Add(newArchetype);
-            newArchetype.onChange += () => {
-                this.changedArchetypes.Add(newArchetype);
-                foreach (var filter in newArchetype.filters) {
-                    if (this.dirtyFilters.Contains(filter)) {
-                        continue;
-                    }
-
-                    this.dirtyFilters.Add(filter);
-                }
-            };
 
             archetype   = newArchetype;
 
@@ -1431,7 +1421,6 @@ namespace Morpeh {
         public  bool         isDirty;
         public  int[]        currentEntities;
         public  int          length;
-        public  Action       onChange = () => { };
         public  List<Filter> filters;
         internal List<int>    entities;
         internal Dictionary<int, int> removeTransfer;
@@ -1463,19 +1452,31 @@ namespace Morpeh {
         public void Add(int entityId) {
             this.entities.Add(entityId);
             this.isDirty = true;
-            this.onChange();
+            this.OnChange();
         }
 
         public void Remove(int entityId) {
             if (this.entities.Remove(entityId)) {
                 this.isDirty = true;
-                this.onChange();
+                this.OnChange();
             }
         }
 
         public void AddFilter(Filter filter) {
             this.filters.Add(filter);
-            this.onChange();
+            this.OnChange();
+        }
+
+        private void OnChange() {
+            this.world.changedArchetypes.Add(this);
+            var dirtyFilters = this.world.dirtyFilters;
+            foreach (var filter in this.filters) {
+                if (dirtyFilters.Contains(filter)) {
+                    continue;
+                }
+
+                dirtyFilters.Add(filter);
+            }
         }
 
         public void Swap() {
