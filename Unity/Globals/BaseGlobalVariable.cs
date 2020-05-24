@@ -83,7 +83,6 @@
             if (Application.isPlaying) {
                 this.CheckIsInitialized();
                 this.Publish(newValue);
-                this.SaveData();
             }
         }
 
