@@ -1469,13 +1469,8 @@ namespace Morpeh {
 
         private void OnChange() {
             this.world.changedArchetypes.Add(this);
-            var dirtyFilters = this.world.dirtyFilters;
             foreach (var filter in this.filters) {
-                if (dirtyFilters.Contains(filter)) {
-                    continue;
-                }
-
-                dirtyFilters.Add(filter);
+                filter.MakeDirty();
             }
         }
 
@@ -1570,6 +1565,7 @@ namespace Morpeh {
         private int        typeID;
         private FilterMode filterMode;
 
+        private bool isDirty;
         private bool isDirtyCache;
 
         //root filter ctor
@@ -1658,7 +1654,15 @@ namespace Morpeh {
                 this.componentsBags[i + 2] = 1;
             }
 
+            this.isDirty = false;
             this.isDirtyCache = true;
+        }
+
+        public void MakeDirty() {
+            if (this.isDirty == false) {
+                this.world.dirtyFilters.Add(this);
+                this.isDirty = true;
+            }
         }
 
         private void UpdateLength() {
