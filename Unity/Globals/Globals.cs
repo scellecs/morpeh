@@ -48,6 +48,7 @@ namespace Morpeh.Globals {
                     ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
+                    evnt.Global.isPublished = false;
                     entity.RemoveComponent<GlobalEventPublished>();
                 }
                 foreach (var entity in this.filterPublishedNextFrame) {
@@ -55,6 +56,8 @@ namespace Morpeh.Globals {
                     evnt.Action?.Invoke(evnt.Data);
                 }
                 foreach (var entity in this.filterNextFrame) {
+                    ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
+                    evnt.Global.isPublished = true;
                     entity.SetComponent(new GlobalEventPublished ());
                     entity.RemoveComponent<GlobalEventNextFrame>();
                 }
@@ -68,6 +71,7 @@ namespace Morpeh.Globals {
 
         [Serializable]
         public struct GlobalEventComponent<TData> : IComponent {
+            public BaseGlobal Global;
 
             public Action<IEnumerable<TData>> Action;
             public Stack<TData>               Data;

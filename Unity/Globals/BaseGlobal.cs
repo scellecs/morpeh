@@ -16,6 +16,9 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class BaseGlobal : ScriptableObject, IDisposable {
         [SerializeField]
+        internal bool isPublished;
+        
+        [SerializeField]
 #if ODIN_INSPECTOR
         [ReadOnly]
 #endif
@@ -54,7 +57,8 @@ namespace Morpeh.Globals {
                 }
                 this.CheckIsInitialized();
 #endif
-                return this.InternalEntity.Has<GlobalEventPublished>();
+                return this.isPublished;
+                //return this.InternalEntity.Has<GlobalEventPublished>();
             }
         }
         

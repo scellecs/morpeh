@@ -31,11 +31,14 @@ namespace Morpeh.Globals {
 
         private protected override void CheckIsInitialized() {
             if (this.internalEntityID < 0) {
+                this.isPublished = false;
+                
                 var world = World.Default;
                 var ent = world.CreateEntityInternal(out this.internalEntityID);
 
                 ent.AddComponent<GlobalEventMarker>();
                 ent.SetComponent(new GlobalEventComponent<TData> {
+                    Global = this,
                     Action = null,
                     Data   = new Stack<TData>()
                 });

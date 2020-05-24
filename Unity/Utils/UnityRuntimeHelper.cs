@@ -80,6 +80,10 @@ namespace Morpeh {
             }
         }
 
+        internal void OnApplicationQuit() {
+            OnApplicationFocusLost.Invoke();
+        }
+
 #if UNITY_EDITOR && ODIN_INSPECTOR
         protected override void OnBeforeSerialize() {
             this.worldsSerialized = World.worlds;
