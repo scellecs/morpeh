@@ -1708,14 +1708,13 @@ namespace Morpeh {
                 Array.Resize(ref this.entitiesCacheForBags, this.Length);
                 this.entitiesCacheForBagsCapacity = this.Length;
             }
-
+            
             var j = 0;
             foreach (var arch in this.archetypes) {
-                for (var index = 0; index < arch.length; index++) {
-                    var id = arch.currentEntities[index];
-                    this.entitiesCacheForBags[j++] = id;
-                }
+                Array.Copy(arch.currentEntities, 0, this.entitiesCacheForBags, j, arch.length);
+                j += arch.length;
             }
+
 
             this.isDirtyCache = false;
         }
