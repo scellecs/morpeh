@@ -1914,6 +1914,8 @@ namespace Morpeh {
                 for (var i = 0; i < len; i++) {
                     this.ids[i] = this.world.entities[entities[i]].GetComponentId<T>();
                 }
+
+                this.sharedComponents = this.world.GetCache<T>().components;
             }
 
             [Il2Cpp(Option.NullChecks, false)]
