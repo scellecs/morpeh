@@ -499,7 +499,7 @@ namespace Morpeh {
 
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 var typeId = this.components[i];
-                var componentId = this.components[i];
+                var componentId = this.components[i + 1];
                 if (typeId >= 0 && componentId >= 0) {
                     world.GetCache(typeId)?.Remove(componentId);
                 }
