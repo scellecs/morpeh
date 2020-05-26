@@ -723,8 +723,10 @@ namespace Morpeh {
         }
 
         public void Update(float deltaTime) {
+#if UNITY_EDITOR
+            Action delayedAction = null;
+#endif
             this.Initialize();
-
             for (int i = 0, length = this.systems.Count; i < length; i++) {
                 var system = this.systems[i];
 #if UNITY_EDITOR
@@ -734,16 +736,22 @@ namespace Morpeh {
                 catch (Exception e) {
                     Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
                     Debug.LogException(e);
-                    this.DisableSystem(system);
+                    delayedAction += () => this.DisableSystem(system);
                 }
 #else
                 system.OnUpdate(deltaTime);
 #endif
                 this.world.Filter.Update();
             }
+#if UNITY_EDITOR
+            delayedAction?.Invoke();
+#endif
         }
 
         public void FixedUpdate(float deltaTime) {
+#if UNITY_EDITOR
+            Action delayedAction = null;
+#endif
             for (int i = 0, length = this.fixedSystems.Count; i < length; i++) {
                 var system = this.fixedSystems[i];
 #if UNITY_EDITOR
@@ -753,16 +761,22 @@ namespace Morpeh {
                 catch (Exception e) {
                     Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
                     Debug.LogException(e);
-                    this.DisableSystem(system);
+                    delayedAction += () => this.DisableSystem(system);
                 }
 #else
                 system.OnUpdate(deltaTime);
 #endif
                 this.world.Filter.Update();
             }
+#if UNITY_EDITOR
+            delayedAction?.Invoke();
+#endif
         }
 
         public void LateUpdate(float deltaTime) {
+#if UNITY_EDITOR
+            Action delayedAction = null;
+#endif
             this.world.Filter.Update();
 
             for (int i = 0, length = this.lateSystems.Count; i < length; i++) {
@@ -774,13 +788,16 @@ namespace Morpeh {
                 catch (Exception e) {
                     Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
                     Debug.LogException(e);
-                    this.DisableSystem(system);
+                    delayedAction += () => this.DisableSystem(system);
                 }
 #else
                 system.OnUpdate(deltaTime);
 #endif
                 this.world.Filter.Update();
             }
+#if UNITY_EDITOR
+            delayedAction?.Invoke();
+#endif
         }
 
         public void AddInitializer<T>(T initializer) where T : class, IInitializer {
