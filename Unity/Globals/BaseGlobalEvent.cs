@@ -30,10 +30,10 @@ namespace Morpeh.Globals {
         }
 
         private protected override void CheckIsInitialized() {
+            var world = World.Default;
             if (this.internalEntityID < 0) {
                 this.isPublished = false;
                 
-                var world = World.Default;
                 var ent = world.CreateEntityInternal(out this.internalEntityID);
 
                 ent.AddComponent<GlobalEventMarker>();
@@ -47,21 +47,9 @@ namespace Morpeh.Globals {
                 });
 
                 this.internalEntity = ent;
-                
-                //todo rework to multiworld
-                if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.id, out var initialized)) {
-                    if (initialized == false) {
-                        var updater = new GlobalEventComponentUpdater<TData>();
-                        updater.Awake(world);
-                        if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
-                            updaters.Add(updater);
-                        }
-                        else {
-                            GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
-                        }
-                    }
-                }
-                else {
+            }
+            if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.id, out var initialized)) {
+                if (initialized == false) {
                     var updater = new GlobalEventComponentUpdater<TData>();
                     updater.Awake(world);
                     if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
@@ -70,6 +58,16 @@ namespace Morpeh.Globals {
                     else {
                         GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
                     }
+                }
+            }
+            else {
+                var updater = new GlobalEventComponentUpdater<TData>();
+                updater.Awake(world);
+                if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
+                    updaters.Add(updater);
+                }
+                else {
+                    GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
                 }
             }
         }

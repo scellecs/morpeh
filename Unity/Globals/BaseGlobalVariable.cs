@@ -98,7 +98,7 @@
         internal override void OnEnable() {
             base.OnEnable();
             this.__internalKey = null;
-            UnityRuntimeHelper.OnApplicationFocusLost += this.SaveData;
+            UnityRuntimeHelper.onApplicationFocusLost += this.SaveData;
 #if UNITY_EDITOR
             if (string.IsNullOrEmpty(this.customKey)) {
                 this.GenerateCustomKey();
@@ -134,7 +134,7 @@
 #endif
         public override void Dispose() {
             base.Dispose();
-            UnityRuntimeHelper.OnApplicationFocusLost -= this.SaveData;
+            UnityRuntimeHelper.onApplicationFocusLost -= this.SaveData;
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
                 return;

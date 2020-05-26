@@ -21,7 +21,7 @@ namespace Morpeh {
 #else
     internal class UnityRuntimeHelper : MonoBehaviour {
 #endif
-        internal static Action OnApplicationFocusLost = () => { };
+        internal static Action             onApplicationFocusLost = () => { };
         internal static UnityRuntimeHelper instance;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [OdinSerialize]
@@ -33,7 +33,7 @@ namespace Morpeh {
 #if UNITY_EDITOR
         private void OnEnable() {
             if (instance == null) {
-                instance = this;
+                instance                               =  this;
                 EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
             }
             else {
@@ -75,13 +75,13 @@ namespace Morpeh {
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {
-                OnApplicationFocusLost.Invoke();
+                onApplicationFocusLost.Invoke();
                 GC.Collect();
             }
         }
 
         internal void OnApplicationQuit() {
-            OnApplicationFocusLost.Invoke();
+            onApplicationFocusLost.Invoke();
         }
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -117,10 +117,15 @@ namespace Morpeh {
                     if (world != null) {
                         for (int i = 0, length = world.entities.Length; i < length; i++) {
                             var e = world.entities[i];
+                            if (e == null) {
+                                continue;
+                            }
+
                             if (e.components == null) {
                                 world.entities[i] = null;
                             }
                         }
+
                         world.Ctor();
                     }
                 }
@@ -131,3 +136,4 @@ namespace Morpeh {
 #endif
     }
 }
+
