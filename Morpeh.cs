@@ -736,9 +736,7 @@ namespace Morpeh {
                     system.OnUpdate(deltaTime);
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
-                    Debug.LogException(e);
-                    this.delayedAction += () => this.DisableSystem(system);
+                    this.SystemThrowException(system, e);
                 }
 #else
                 system.OnUpdate(deltaTime);
@@ -761,9 +759,7 @@ namespace Morpeh {
                     system.OnUpdate(deltaTime);
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
-                    Debug.LogException(e);
-                    this.delayedAction += () => this.DisableSystem(system);
+                    this.SystemThrowException(system, e);
                 }
 #else
                 system.OnUpdate(deltaTime);
@@ -788,9 +784,7 @@ namespace Morpeh {
                     system.OnUpdate(deltaTime);
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
-                    Debug.LogException(e);
-                    this.delayedAction += () => this.DisableSystem(system);
+                    this.SystemThrowException(system, e);
                 }
 #else
                 system.OnUpdate(deltaTime);
@@ -801,7 +795,15 @@ namespace Morpeh {
             this.delayedAction?.Invoke();
 #endif
         }
-
+        
+#if UNITY_EDITOR
+        private void SystemThrowException(ISystem system, Exception exception) {
+            Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
+            Debug.LogException(exception);
+            this.delayedAction += () => this.DisableSystem(system);
+        }
+#endif
+        
         public void AddInitializer<T>(T initializer) where T : class, IInitializer {
             initializer.World = this.world;
 
