@@ -702,7 +702,7 @@ namespace Morpeh {
             
 
             if (this.newInitializers.Count > 0) {
-                this.world.Filter.Update();
+                this.world.UpdateFilters();
                 foreach (var initializer in this.newInitializers) {
 #if UNITY_EDITOR
                     try {
@@ -716,7 +716,7 @@ namespace Morpeh {
                     initializer.OnAwake();
 #endif
 
-                    this.world.Filter.Update();
+                    this.world.UpdateFilters();
                     this.initializers.Add(initializer);
                 }
 
@@ -741,7 +741,7 @@ namespace Morpeh {
 #else
                 system.OnUpdate(deltaTime);
 #endif
-                this.world.Filter.Update();
+                this.world.UpdateFilters();
             }
 #if UNITY_EDITOR
             this.delayedAction?.Invoke();
@@ -764,7 +764,7 @@ namespace Morpeh {
 #else
                 system.OnUpdate(deltaTime);
 #endif
-                this.world.Filter.Update();
+                this.world.UpdateFilters();
             }
 #if UNITY_EDITOR
             this.delayedAction?.Invoke();
@@ -775,7 +775,7 @@ namespace Morpeh {
 #if UNITY_EDITOR
             this.delayedAction = null;
 #endif
-            this.world.Filter.Update();
+            this.world.UpdateFilters();
 
             for (int i = 0, length = this.lateSystems.Count; i < length; i++) {
                 var system = this.lateSystems[i];
@@ -789,7 +789,7 @@ namespace Morpeh {
 #else
                 system.OnUpdate(deltaTime);
 #endif
-                this.world.Filter.Update();
+                this.world.UpdateFilters();
             }
 #if UNITY_EDITOR
             this.delayedAction?.Invoke();
@@ -1404,7 +1404,7 @@ namespace Morpeh {
             }
         }
 
-        internal void UpdateFilters() {
+        public void UpdateFilters() {
             if (this.newArchetypes.Count > 0) {
                 foreach (var filter in this.filters) {
                     filter.FindArchetypes(this.newArchetypes);
@@ -1423,7 +1423,7 @@ namespace Morpeh {
 
             if (this.dirtyFilters.Count > 0) {
                 foreach (var filter in this.dirtyFilters) {
-                    filter.Update();
+                    filter.InternalUpdate();
                 }
 
                 this.dirtyFilters.Clear();
@@ -1654,7 +1654,7 @@ namespace Morpeh {
 
             this.FindArchetypes();
 
-            this.UpdateLength();
+            this.UpdateCache();
         }
 
         public void Dispose() {
@@ -1691,13 +1691,12 @@ namespace Morpeh {
             this.filterMode = FilterMode.None;
         }
 
+        [Obsolete("Use World.UpdateFilters()")]
         public void Update() {
-            //legacy support
-            if (this.typeID == -1) {
-                this.world.UpdateFilters();
-                return;
-            }
+            this.world.UpdateFilters();
+        }
 
+        internal void InternalUpdate() {
             this.UpdateLength();
 
             for (int i = 0, length = this.componentsBagsTripleCount; i < length; i += 3) {
@@ -1827,7 +1826,7 @@ namespace Morpeh {
                         componentBag.Update(this.entitiesCacheForBags, this.Length);
                         this.componentsBags[i + 2] = 0;
                     }
-
+                    
                     return ref componentBag;
                 }
             }
