@@ -66,9 +66,7 @@ namespace Morpeh {
         }
 #endif
 
-        private void Update() {
-            World.GlobalUpdate(Time.deltaTime);
-        }
+        private void Update() => World.GlobalUpdate(Time.deltaTime);
 
         private void FixedUpdate() => World.GlobalFixedUpdate(Time.fixedDeltaTime);
         private void LateUpdate()  => World.GlobalLateUpdate(Time.deltaTime);
@@ -114,7 +112,7 @@ namespace Morpeh {
                 }
 
                 foreach (var world in this.worldsSerialized) {
-                    if (world != null) {
+                    if (world != null && world.entities != null) {
                         for (int i = 0, length = world.entities.Length; i < length; i++) {
                             var e = world.entities[i];
                             if (e == null) {
