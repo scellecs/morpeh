@@ -45,12 +45,15 @@ namespace Morpeh {
 
     public interface IComponent {
     }
+    
 #if UNITY_2019_1_OR_NEWER
+    //todo remove
     public interface IMonoComponent<T> : IComponent
         where T : UnityEngine.Component {
         T monoComponent { get; set; }
     }
 #endif
+    
     public interface IInitializer : IDisposable {
         World World { get; set; }
 
@@ -80,43 +83,25 @@ namespace Morpeh {
         [NonSerialized]
         internal World backfieldWorld;
 
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal int internalID;
-
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal int worldID;
 
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal int[] components;
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal int componentsDoubleCapacity;
-
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal int componentsCount;
 
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         private bool isDisposed;
 
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         private int currentArchetype;
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         public int ID => this.internalID;
 
         internal Entity(int id, int worldID) {
@@ -524,43 +509,25 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public sealed class SystemsGroup : IDisposable {
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<ISystem> systems;
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<ISystem> fixedSystems;
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<ISystem> lateSystems;
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<ISystem> disabledSystems;
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<ISystem> disabledFixedSystems;
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<ISystem> disabledLateSystems;
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<IInitializer> newInitializers;
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<IInitializer> initializers;
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         private List<IDisposable> disposables;
         private World world;
         private Action delayedAction;
@@ -920,21 +887,14 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public sealed partial class World : IDisposable {
-#if UNITY_2019_1_OR_NEWER
         [CanBeNull]
-#endif
         public static World Default => worlds[0];
-#if UNITY_2019_1_OR_NEWER
         [NotNull]
-#endif
         internal static List<World> worlds = new List<World> {null};
 
         [NonSerialized]
         public Filter Filter;
-
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         public bool UpdateByUnity;
 
         [NonSerialized]
@@ -943,77 +903,44 @@ namespace Morpeh {
         [NonSerialized]
         internal List<Filter> dirtyFilters;
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         [NonSerialized]
         internal SortedList<int, SystemsGroup> systemsGroups;
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
-#endif
         [NonSerialized]
         internal SortedList<int, SystemsGroup> newSystemsGroups;
 
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal Entity[] entities;
-
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal int entitiesCount;
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal int entitiesLength;
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal int entitiesCapacity;
 
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         private List<int> freeEntityIDs;
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         private List<int> nextFreeEntityIDs;
 
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal CacheComponents[] caches;
 
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal List<Archetype> archetypes;
-        
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal Dictionary<int, List<int>> archetypesByLength;
-
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal List<int> changedArchetypes;
-
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal List<int> newArchetypes;
-        
-#if UNITY_2019_1_OR_NEWER
-        [SerializeField]
-#endif
-        internal int id;
-
         [NonSerialized]
         private List<int> archetypeCache;
+        
+        [SerializeField]
+        internal int id;
 
         public static World Create() => new World().Initialize();
 
@@ -1199,11 +1126,7 @@ namespace Morpeh {
 
             this.archetypeCache.Sort();
             var typesLength = this.archetypeCache.Count;
-            //.Where((_, index) => index % 2 == 0)
-            //.Select(id => CommonCacheTypeIdentifier.editorTypeAssociation[id].type.Name)
-            //Debug.Log($"ARCH {string.Join(", ", archetypeCache.Where(id => id != -1))}");
-            // Debug.Log($"ARCH SORTED {string.Join(", ", this.archetypeCache)}");
-            
+
             if(this.archetypesByLength.TryGetValue(typesLength, out var archsl)) {
                 for (var index = 0; index < archsl.Count; index++) {
                     archetypeId = archsl[index];
@@ -1573,11 +1496,6 @@ namespace Morpeh {
             this.removeTransfer = null;
             this.backfieldWorld = null;
         }
-        
-        internal struct TransferData {
-            public int typeId;
-            public int archetypeId;
-        }
     }
 
     //TODO Separate RootFilter and ChildFilter
@@ -1608,7 +1526,7 @@ namespace Morpeh {
         private List<int> includedTypeIds;
         private List<int> excludedTypeIds;
 
-        public List<Archetype> archetypes;
+        private List<Archetype> archetypes;
 
         private int        typeID;
         private FilterMode filterMode;
@@ -2073,17 +1991,11 @@ namespace Morpeh {
 
         [Serializable]
         internal class TypeInfo {
-#if UNITY_2019_1_OR_NEWER
             [SerializeField]
-#endif
             internal int id;
-#if UNITY_2019_1_OR_NEWER
             [SerializeField]
-#endif
             internal bool isMarker;
-#if UNITY_2019_1_OR_NEWER
             [SerializeField]
-#endif
             internal bool isDisposable;
 
             public TypeInfo(bool isMarker, bool isDisposable) {
@@ -2140,23 +2052,13 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal class CacheComponents<T> : CacheComponents where T : struct, IComponent {
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         internal T[] components;
-
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         private int capacity;
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         private int length;
-
-#if UNITY_2019_1_OR_NEWER
         [SerializeField]
-#endif
         private List<int> freeIndexes;
 
         public CacheComponents() {
@@ -2343,3 +2245,24 @@ namespace Unity.IL2CPP.CompilerServices {
         }
     }
 }
+
+#if !UNITY_2019_1_OR_NEWER
+namespace UnityEngine {
+    public sealed class SerializeField : System.Attribute { }
+}
+namespace JetBrains.Annotations {
+    using System;
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Delegate)]
+    public sealed class NotNullAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Delegate)]
+    public sealed class CanBeNullAttribute : Attribute { }
+}
+#endif
+
+#if !ODIN_INSPECTOR
+namespace Sirenix.OdinInspector {
+    using System;
+    [AttributeUsage(AttributeTargets.All, Inherited = false)]
+    public class ShowInInspectorAttribute : Attribute { }
+}
+#endif
