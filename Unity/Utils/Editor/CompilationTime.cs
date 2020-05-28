@@ -57,9 +57,11 @@ namespace Morpeh.Utils.Editor {
         private static void AssemblyReloadEventsOnAfterAssemblyReload() {
             var binString                   = EditorPrefs.GetString(ASSEMBLY_RELOAD_EVENTS_EDITOR_PREF);
             var totalCompilationTimeString  = EditorPrefs.GetString(ASSEMBLY_TOTAL_COMPILATION_TIME_EDITOR_PREF);
-            var totalCompilationTimeSeconds = float.Parse(totalCompilationTimeString, NumberStyles.Any, CultureInfo.InvariantCulture);
+            if(float.TryParse(totalCompilationTimeString, NumberStyles.Any, CultureInfo.InvariantCulture, out var totalCompilationTimeSeconds) == false) {
+                return;
+            }
 
-            if (!long.TryParse(binString, out var bin)) {
+            if (long.TryParse(binString, out var bin) == false) {
                 return;
             }
 
