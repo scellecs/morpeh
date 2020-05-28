@@ -6,7 +6,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Event SceneReference")]
+    [CreateAssetMenu(menuName = "ECS/Globals/Events/Event SceneReference")]
     public class GlobalEventSceneReference : BaseGlobalEvent<SceneReference> {
         public override string LastToString() => this.BatchedChanges.Peek().ToString();
         

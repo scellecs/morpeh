@@ -8,7 +8,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Variable List Big Number")]
+    [CreateAssetMenu(menuName = "ECS/Globals/Lists/Variable List Big Number")]
     public class GlobalVariableListBigNumber : BaseGlobalVariable<List<BigNumber>> {
         public override DataWrapper Wrapper {
             get => new ListBigNumberWrapper(this.value);
