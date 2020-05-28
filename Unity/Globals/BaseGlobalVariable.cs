@@ -83,7 +83,6 @@
             if (Application.isPlaying) {
                 this.CheckIsInitialized();
                 this.Publish(newValue);
-                this.SaveData();
             }
         }
 
@@ -98,7 +97,8 @@
 
         internal override void OnEnable() {
             base.OnEnable();
-            UnityRuntimeHelper.OnApplicationFocusLost += this.SaveData;
+            this.__internalKey = null;
+            UnityRuntimeHelper.onApplicationFocusLost += this.SaveData;
 #if UNITY_EDITOR
             if (string.IsNullOrEmpty(this.customKey)) {
                 this.GenerateCustomKey();
@@ -127,11 +127,14 @@
         [HideInInlineEditors]
 #endif
 #if UNITY_EDITOR
-        private void GenerateCustomKey() => this.customKey = Guid.NewGuid().ToString().Replace("-", string.Empty);
+        private void GenerateCustomKey() {
+            this.__internalKey = null;
+            this.customKey = Guid.NewGuid().ToString().Replace("-", string.Empty);
+        } 
 #endif
         public override void Dispose() {
             base.Dispose();
-            UnityRuntimeHelper.OnApplicationFocusLost -= this.SaveData;
+            UnityRuntimeHelper.onApplicationFocusLost -= this.SaveData;
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
                 return;

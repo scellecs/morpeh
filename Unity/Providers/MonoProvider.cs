@@ -35,7 +35,8 @@
             }
         }
         
-        
+        public ref T GetSerializedData() => ref this.serializedData;
+
         public ref T GetData() {
             if (this.Entity != null) {
                 if (this.Entity.Has<T>()) {

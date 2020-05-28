@@ -9,7 +9,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Variable Big Number")]
+    [CreateAssetMenu(menuName = "ECS/Globals/Variables/Variable Big Number")]
     public class GlobalVariableBigNumber : BaseGlobalVariable<BigNumber> {
 #if UNITY_EDITOR
         private const string WARNING_MSG = "Only for PlayMode";

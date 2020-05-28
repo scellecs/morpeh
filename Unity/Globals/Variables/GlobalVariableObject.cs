@@ -8,7 +8,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Variable Object")]
+    [CreateAssetMenu(menuName = "ECS/Globals/Variables/Variable Object")]
     public class GlobalVariableObject : BaseGlobalVariable<Object> {
         public override DataWrapper Wrapper {
             get => new ObjectWrapper {value = this.value};
