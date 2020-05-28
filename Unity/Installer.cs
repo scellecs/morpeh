@@ -113,7 +113,7 @@
 
         private void SystemNullError() {
             var go = this.gameObject;
-            Debug.LogError($"[MORPEH] System null in installer {go.name} on scene {go.scene}", go);
+            Debug.LogError($"[MORPEH] System null in installer {go.name} on scene {go.scene.name}", go);
         }
 
         private void RemoveSystems<T>(BasePair<T>[] pairs) where T : class, ISystem {
