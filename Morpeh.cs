@@ -42,7 +42,7 @@ namespace Morpeh {
 
     public interface IComponent {
     }
-    
+
 #if UNITY_2019_1_OR_NEWER
     //todo remove
     public interface IMonoComponent<T> : IComponent
@@ -50,7 +50,7 @@ namespace Morpeh {
         T monoComponent { get; set; }
     }
 #endif
-    
+
     public interface IInitializer : IDisposable {
         World World { get; set; }
 
@@ -102,8 +102,8 @@ namespace Morpeh {
         public int ID => this.internalID;
 
         internal Entity(int id, int worldID) {
-            this.internalID = id;
-            this.worldID    = worldID;
+            this.internalID     = id;
+            this.worldID        = worldID;
             this.backfieldWorld = World.worlds[this.worldID];
 
             this.componentsDoubleCapacity = 0;
@@ -298,7 +298,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T GetComponent<T>() where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache = this.World.GetCache<T>();
+            var cache    = this.World.GetCache<T>();
 
             if (typeInfo.isMarker) {
                 if (this.Has<T>()) {
@@ -321,7 +321,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T GetComponent<T>(out bool exist) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache = this.World.GetCache<T>();
+            var cache    = this.World.GetCache<T>();
 
             if (typeInfo.isMarker) {
                 if (this.Has<T>()) {
@@ -480,19 +480,24 @@ namespace Morpeh {
             world.archetypes[this.currentArchetype].Remove(this.internalID);
 
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
-                var typeId = this.components[i];
+                var typeId      = this.components[i];
                 var componentId = this.components[i + 1];
                 if (typeId >= 0 && componentId >= 0) {
                     world.GetCache(typeId)?.Remove(componentId);
                 }
             }
 
+            this.DisposeFast();
+        }
+
+        internal void DisposeFast() {
             this.components               = null;
             this.backfieldWorld           = null;
             this.internalID               = -1;
             this.worldID                  = -1;
             this.componentsDoubleCapacity = -1;
             this.componentsCount          = -1;
+            this.currentArchetype         = -1;
 
             this.isDisposed = true;
         }
@@ -526,14 +531,14 @@ namespace Morpeh {
         private List<IInitializer> initializers;
         [ShowInInspector]
         private List<IDisposable> disposables;
-        private World world;
+        private World  world;
         private Action delayedAction;
 
         private SystemsGroup() {
         }
 
         internal SystemsGroup(World world) {
-            this.world = world;
+            this.world         = world;
             this.delayedAction = null;
 
             this.systems      = new List<ISystem>();
@@ -663,7 +668,7 @@ namespace Morpeh {
 
                 this.disposables.Clear();
             }
-            
+
 
             if (this.newInitializers.Count > 0) {
                 this.world.UpdateFilters();
@@ -759,7 +764,7 @@ namespace Morpeh {
             this.delayedAction?.Invoke();
 #endif
         }
-        
+
 #if UNITY_EDITOR
         private void SystemThrowException(ISystem system, Exception exception) {
             Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
@@ -767,7 +772,7 @@ namespace Morpeh {
             this.delayedAction += () => this.DisableSystem(system);
         }
 #endif
-        
+
         public void AddInitializer<T>(T initializer) where T : class, IInitializer {
             initializer.World = this.world;
 
@@ -935,7 +940,7 @@ namespace Morpeh {
         internal List<int> newArchetypes;
         [NonSerialized]
         private List<int> archetypeCache;
-        
+
         [SerializeField]
         internal int id;
 
@@ -949,9 +954,9 @@ namespace Morpeh {
             this.systemsGroups    = new SortedList<int, SystemsGroup>();
             this.newSystemsGroups = new SortedList<int, SystemsGroup>();
 
-            this.Filter       = new Filter(this);
-            this.filters      = new List<Filter>();
-            this.dirtyFilters = new List<Filter>();
+            this.Filter         = new Filter(this);
+            this.filters        = new List<Filter>();
+            this.dirtyFilters   = new List<Filter>();
             this.archetypeCache = new List<int>();
 
             if (this.archetypes != null) {
@@ -967,7 +972,7 @@ namespace Morpeh {
 
         private World Initialize() {
             worlds.Add(this);
-            this.id = worlds.Count - 1;
+            this.id                = worlds.Count - 1;
             this.freeEntityIDs     = new List<int>();
             this.nextFreeEntityIDs = new List<int>();
             this.caches            = new CacheComponents[Constants.DEFAULT_WORLD_CACHES_CAPACITY];
@@ -976,7 +981,7 @@ namespace Morpeh {
             this.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             this.entities         = new Entity[this.entitiesCapacity];
 
-            this.archetypes        = new List<Archetype> {new Archetype(0, new int[0], this.id)};
+            this.archetypes = new List<Archetype> {new Archetype(0, new int[0], this.id)};
             this.archetypesByLength = new Dictionary<int, List<int>> {
                 [0] = new List<int> {0}
             };
@@ -1008,7 +1013,7 @@ namespace Morpeh {
 #if UNITY_EDITOR
                 try {
 #endif
-                    entity?.Dispose();
+                    entity?.DisposeFast();
 #if UNITY_EDITOR
                 }
                 catch (Exception e) {
@@ -1060,7 +1065,7 @@ namespace Morpeh {
             }
 
             this.caches = null;
-            
+
             foreach (var archetype in this.archetypes) {
                 archetype.Dispose();
             }
@@ -1071,6 +1076,7 @@ namespace Morpeh {
             foreach (var pair in this.archetypesByLength) {
                 pair.Value.Clear();
             }
+
             this.archetypesByLength.Clear();
             this.archetypesByLength = null;
 
@@ -1124,10 +1130,10 @@ namespace Morpeh {
             this.archetypeCache.Sort();
             var typesLength = this.archetypeCache.Count;
 
-            if(this.archetypesByLength.TryGetValue(typesLength, out var archsl)) {
+            if (this.archetypesByLength.TryGetValue(typesLength, out var archsl)) {
                 for (var index = 0; index < archsl.Count; index++) {
                     archetypeId = archsl[index];
-                    archetype = this.archetypes[archetypeId];
+                    archetype   = this.archetypes[archetypeId];
                     var check = true;
                     for (int i = 0, length = typesLength; i < length; i++) {
                         if (archetype.typeIds[i] != this.archetypeCache[i]) {
@@ -1149,11 +1155,12 @@ namespace Morpeh {
                 archsl.Add(archetypeId);
             }
             else {
-                this.archetypesByLength.Add(typesLength, new List<int>{archetypeId});
+                this.archetypesByLength.Add(typesLength, new List<int> {archetypeId});
             }
+
             this.newArchetypes.Add(archetypeId);
 
-            archetype   = newArchetype;
+            archetype = newArchetype;
 
             return archetype;
         }
@@ -1362,17 +1369,17 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public sealed class Archetype : IDisposable {
         [SerializeField]
-        public  int[]        typeIds;
+        public int[] typeIds;
         [SerializeField]
-        public  bool         isDirty;
+        public bool isDirty;
         [SerializeField]
-        public  int[]        currentEntities;
+        public int[] currentEntities;
         [SerializeField]
-        public  int          length;
+        public int length;
         [NonSerialized]
-        public  List<Filter> filters;
+        public List<Filter> filters;
         [SerializeField]
-        internal List<int>    entities;
+        internal List<int> entities;
         [SerializeField]
         internal Dictionary<int, int> removeTransfer;
         [SerializeField]
@@ -1394,21 +1401,21 @@ namespace Morpeh {
         }
 
         internal Archetype(int id, int[] typeIds, int worldId) {
-            this.id = id;
+            this.id              = id;
             this.typeIds         = typeIds;
             this.entities        = new List<int>(16);
-            this.addTransfer = new Dictionary<int, int>();
-            this.removeTransfer = new Dictionary<int, int>();
+            this.addTransfer     = new Dictionary<int, int>();
+            this.removeTransfer  = new Dictionary<int, int>();
             this.currentEntities = new int[16];
             this.isDirty         = false;
-            this.worldId = worldId;
+            this.worldId         = worldId;
 
             this.Ctor();
         }
 
         internal void Ctor() {
             this.backfieldWorld = World.worlds[this.worldId];
-            this.filters = new List<Filter>();
+            this.filters        = new List<Filter>();
         }
 
         public void Add(int entityId) {
@@ -1482,16 +1489,20 @@ namespace Morpeh {
         }
 
         public void Dispose() {
-            this.typeIds = null;
+            this.isDirty = false;
+
+            this.typeIds        = null;
+            this.backfieldWorld = null;
+
             this.entities.Clear();
             this.entities        = null;
             this.currentEntities = null;
-            this.isDirty         = false;
+
             this.addTransfer.Clear();
             this.addTransfer = null;
+
             this.removeTransfer.Clear();
             this.removeTransfer = null;
-            this.backfieldWorld = null;
         }
     }
 
@@ -1536,7 +1547,7 @@ namespace Morpeh {
         internal Filter(World world) {
             this.world = world;
 
-            this.childs      = new List<Filter>();
+            this.childs = new List<Filter>();
 
             this.typeID     = -1;
             this.filterMode = FilterMode.Include;
@@ -1549,8 +1560,8 @@ namespace Morpeh {
         private Filter(World world, int typeID, List<int> includedTypeIds, List<int> excludedTypeIds, FilterMode mode) {
             this.world = world;
 
-            this.childs      = new List<Filter>();
-            this.archetypes  = new List<Archetype>();
+            this.childs     = new List<Filter>();
+            this.archetypes = new List<Archetype>();
 
             this.typeID          = typeID;
             this.includedTypeIds = includedTypeIds;
@@ -1563,8 +1574,8 @@ namespace Morpeh {
 
             this.componentsBagsTripleCount    = 0;
             this.entitiesCacheForBagsCapacity = 0;
-            this.isDirtyCache = true;
-            
+            this.isDirtyCache                 = true;
+
             this.world.filters.Add(this);
 
             this.FindArchetypes();
@@ -1578,7 +1589,7 @@ namespace Morpeh {
             }
 
             this.childs.Clear();
-            this.childs      = null;
+            this.childs = null;
 
             if (this.archetypes != null) {
                 foreach (var archetype in this.archetypes) {
@@ -1618,7 +1629,7 @@ namespace Morpeh {
                 this.componentsBags[i + 2] = 1;
             }
 
-            this.isDirty = false;
+            this.isDirty      = false;
             this.isDirtyCache = true;
         }
 
@@ -1643,7 +1654,7 @@ namespace Morpeh {
                 Array.Resize(ref this.entitiesCacheForBags, this.Length);
                 this.entitiesCacheForBagsCapacity = this.Length;
             }
-            
+
             var j = 0;
             foreach (var arch in this.archetypes) {
                 Array.Copy(arch.currentEntities, 0, this.entitiesCacheForBags, j, arch.length);
@@ -1717,7 +1728,7 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         public ref ComponentsBag<T> Select<T>() where T : struct, IComponent {
             if (this.isDirtyCache) {
                 this.UpdateCache();
@@ -1741,7 +1752,7 @@ namespace Morpeh {
                         componentBag.Update(this.entitiesCacheForBags, this.Length);
                         this.componentsBags[i + 2] = 0;
                     }
-                    
+
                     return ref componentBag;
                 }
             }
@@ -2052,11 +2063,11 @@ namespace Morpeh {
         [SerializeField]
         internal T[] components;
         [SerializeField]
-        private int capacity;
+        protected int capacity;
         [SerializeField]
-        private int length;
+        protected int length;
         [SerializeField]
-        private List<int> freeIndexes;
+        protected List<int> freeIndexes;
 
         public CacheComponents() {
             this.capacity = Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY;
@@ -2101,7 +2112,7 @@ namespace Morpeh {
         public override bool Remove(in int id) {
             this.components[id] = default;
 
-            if (this.length >= id && !this.freeIndexes.Contains(id)) {
+            if (this.length >= id) {
                 this.freeIndexes.Add(id);
                 return true;
             }
@@ -2126,6 +2137,14 @@ namespace Morpeh {
         public override bool Remove(in int id) {
             this.components[id].Dispose();
             return base.Remove(in id);
+        }
+
+        public override void Dispose() {
+            for (int i = 0; i < this.length; i++) {
+                this.components[i].Dispose();
+            }
+
+            base.Dispose();
         }
     }
 
