@@ -3,17 +3,14 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Editor")]
 
 namespace Morpeh {
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
     using System;
     using System.Collections;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
 #if UNITY_2019_1_OR_NEWER
     using JetBrains.Annotations;
-    using Unity.Collections.LowLevel.Unsafe;
     using UnityEngine;
     using Object = UnityEngine.Object;
 #endif
@@ -1823,6 +1820,9 @@ namespace Morpeh {
             return newFilter;
         }
 
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
         public struct ComponentsBag<T> where T : struct, IComponent {
             internal static ComponentsBag<T> Empty = new ComponentsBag<T>();
 
@@ -1856,15 +1856,9 @@ namespace Morpeh {
                 this.sharedComponents = this.world.GetCache<T>().components;
             }
 
-            [Il2Cpp(Option.NullChecks, false)]
-            [Il2Cpp(Option.ArrayBoundsChecks, false)]
-            [Il2Cpp(Option.DivideByZeroChecks, false)]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ref T GetComponent(in int index) => ref this.sharedComponents[this.ids[index]];
 
-            [Il2Cpp(Option.NullChecks, false)]
-            [Il2Cpp(Option.ArrayBoundsChecks, false)]
-            [Il2Cpp(Option.DivideByZeroChecks, false)]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void SetComponent(in int index, in T value) => this.sharedComponents[this.ids[index]] = value;
 
@@ -1896,6 +1890,9 @@ namespace Morpeh {
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
         public struct EntityEnumerator : IEnumerator<IEntity> {
             private World           world;
             private List<Archetype> archetypes;
@@ -2136,32 +2133,6 @@ namespace Morpeh {
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public class ObservableHashSet<T> : HashSet<T> {
-            public Action<T> OnAddItem;
-            public Action<T> OnRemoveItem;
-
-            public new bool Add(T item) {
-                var flag = base.Add(item);
-                if (flag) {
-                    this.OnAddItem?.Invoke(item);
-                }
-
-                return flag;
-            }
-
-            public new bool Remove(T item) {
-                var flag = base.Remove(item);
-                if (flag) {
-                    this.OnRemoveItem?.Invoke(item);
-                }
-
-                return flag;
-            }
-        }
-
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
         public static class ListExtensions {
             //remove with swap last and removed
             public static void RemoveAtFast<T>(this IList<T> list, int index) {
@@ -2234,7 +2205,7 @@ namespace Unity.IL2CPP.CompilerServices {
     ///     return tmp.ToString();
     ///     }
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
     public class Il2CppSetOptionAttribute : Attribute {
         public Option Option { get; }
         public object Value  { get; }
