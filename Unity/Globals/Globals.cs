@@ -3,71 +3,115 @@ namespace Morpeh.Globals {
         using System;
         using System.Collections.Generic;
         using UnityEngine;
-
+        
         [Serializable]
-        internal struct GlobalEventMarker : IComponent {
+        public struct GlobalEventMarker : IComponent {
         }
 
-        internal abstract class GlobalEventComponentUpdater {
-            internal static List<GlobalEventComponentUpdater> Updaters = new List<GlobalEventComponentUpdater>();
+        internal abstract class GlobalEventComponentUpdater : IDisposable {
+            internal static Dictionary<int, List<GlobalEventComponentUpdater>> updaters = new Dictionary<int, List<GlobalEventComponentUpdater>>();
 
-            protected Filter filter;
+            protected Filter filterPublishedWithoutNextFrame;
+            protected Filter filterPublishedNextFrame;
             protected Filter filterNextFrame;
 
+            internal abstract void Awake(World world);
 
-            internal abstract void Update(World world);
+            internal abstract void Update();
+
+            public abstract void Dispose();
         }
 
         internal sealed class GlobalEventComponentUpdater<T> : GlobalEventComponentUpdater {
-            internal override void Update(World world) {
+            public static Dictionary<int, bool> initialized = new Dictionary<int, bool>();
+
+            public int worldId;
+            
+            internal override void Awake(World world) {
+                this.worldId = world.id;
+
+                if (initialized.ContainsKey(this.worldId)) {
+                    initialized[this.worldId] = true;
+                }
+                else {
+                    initialized.Add(this.worldId, true);
+                }
+                
                 var common = world.Filter.With<GlobalEventMarker>().With<GlobalEventComponent<T>>();
-                foreach (var entity in common.With<GlobalEventPublished>().Without<GlobalEventNextFrame>()) {
+                this.filterPublishedWithoutNextFrame = common.With<GlobalEventPublished>().Without<GlobalEventNextFrame>();
+                this.filterPublishedNextFrame = common.With<GlobalEventPublished>().With<GlobalEventNextFrame>();
+                this.filterNextFrame = common.With<GlobalEventNextFrame>();
+            }
+
+            internal override void Update() {
+                foreach (var entity in this.filterPublishedWithoutNextFrame) {
                     ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
+                    evnt.Global.isPublished = false;
                     entity.RemoveComponent<GlobalEventPublished>();
                 }
-                foreach (var entity in common.With<GlobalEventPublished>().With<GlobalEventNextFrame>()) {
+                foreach (var entity in this.filterPublishedNextFrame) {
                     ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
                     evnt.Action?.Invoke(evnt.Data);
                 }
-                foreach (var entity in common.With<GlobalEventNextFrame>()) {
+                foreach (var entity in this.filterNextFrame) {
+                    ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
+                    evnt.Global.isPublished = true;
                     entity.SetComponent(new GlobalEventPublished ());
                     entity.RemoveComponent<GlobalEventNextFrame>();
                 }
             }
+
+            public override void Dispose() {
+                initialized[this.worldId] = false;
+            }
         }
 
 
         [Serializable]
-        internal struct GlobalEventComponent<TData> : IComponent {
-            internal static bool Initialized;
+        public struct GlobalEventComponent<TData> : IComponent {
+            public BaseGlobal Global;
 
             public Action<IEnumerable<TData>> Action;
             public Stack<TData>               Data;
         }
-
         [Serializable]
-        internal struct GlobalEventPublished : IComponent {
+        public struct GlobalEventLastToString : IComponent {
+            public Func<string> LastToString;
         }
 
         [Serializable]
-        internal struct GlobalEventNextFrame : IComponent {
+        public struct GlobalEventPublished : IComponent {
+        }
+
+        [Serializable]
+        public struct GlobalEventNextFrame : IComponent {
         }
 
         internal sealed class ProcessEventsSystem : ILateSystem {
             public World World { get; set; }
+            public int worldId;
 
             public void OnAwake() {
+                this.worldId = this.World.id;
             }
 
             public void OnUpdate(float deltaTime) {
-                foreach (var updater in GlobalEventComponentUpdater.Updaters) {
-                    updater.Update(this.World);
+                if (GlobalEventComponentUpdater.updaters.TryGetValue(this.worldId, out var updaters)) {
+                    foreach (var updater in updaters) {
+                        updater.Update();
+                    }
                 }
             }
 
             public void Dispose() {
+                if (GlobalEventComponentUpdater.updaters.TryGetValue(this.worldId, out var updaters)) {
+                    foreach (var updater in updaters) {
+                        updater.Dispose();
+                    }
+                    updaters.Clear();
+                }
             }
         }
     }
@@ -78,7 +122,7 @@ namespace Morpeh {
         partial void InitializeGlobals() {
             var sg = this.CreateSystemsGroup();
             sg.AddSystem(new Morpeh.Globals.ECS.ProcessEventsSystem());
-            this.AddSystemsGroup(9000, sg);
+            this.AddSystemsGroup(99999, sg);
         }
     }
 }

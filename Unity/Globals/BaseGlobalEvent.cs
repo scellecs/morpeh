@@ -30,19 +30,45 @@ namespace Morpeh.Globals {
         }
 
         private protected override void CheckIsInitialized() {
+            var world = World.Default;
             if (this.internalEntityID < 0) {
-                var ent = World.Default.CreateEntityInternal(out this.internalEntityID);
+                this.isPublished = false;
+                
+                var ent = world.CreateEntityInternal(out this.internalEntityID);
 
                 ent.AddComponent<GlobalEventMarker>();
                 ent.SetComponent(new GlobalEventComponent<TData> {
+                    Global = this,
                     Action = null,
                     Data   = new Stack<TData>()
                 });
-            }
+                ent.SetComponent(new GlobalEventLastToString {
+                    LastToString = this.LastToString
+                });
 
-            if (!GlobalEventComponent<TData>.Initialized) {
-                GlobalEventComponentUpdater.Updaters.Add(new GlobalEventComponentUpdater<TData>());
-                GlobalEventComponent<TData>.Initialized = true;
+                this.internalEntity = ent;
+            }
+            if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.id, out var initialized)) {
+                if (initialized == false) {
+                    var updater = new GlobalEventComponentUpdater<TData>();
+                    updater.Awake(world);
+                    if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
+                        updaters.Add(updater);
+                    }
+                    else {
+                        GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
+                    }
+                }
+            }
+            else {
+                var updater = new GlobalEventComponentUpdater<TData>();
+                updater.Awake(world);
+                if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
+                    updaters.Add(updater);
+                }
+                else {
+                    GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
+                }
             }
         }
 
@@ -51,6 +77,7 @@ namespace Morpeh.Globals {
             this.CheckIsInitialized();
             ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Data.Push(data);
+            this.isPublished = true;
             this.InternalEntity.SetComponent(new GlobalEventPublished());
         }
 
@@ -68,7 +95,7 @@ namespace Morpeh.Globals {
 
             var ent = this.InternalEntity;
             return new Unsubscriber(() => {
-                if (ent == null) {
+                if (ent.IsNullOrDisposed()) {
                     return;
                 }
 

@@ -35,9 +35,13 @@
             }
         }
         
+        public ref T GetSerializedData() => ref this.serializedData;
+
         public ref T GetData() {
             if (this.Entity != null) {
-                return ref this.Entity.GetComponent<T>();
+                if (this.Entity.Has<T>()) {
+                    return ref this.Entity.GetComponent<T>();
+                }
             }
 
             return ref this.serializedData;

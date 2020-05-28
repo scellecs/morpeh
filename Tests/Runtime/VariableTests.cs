@@ -44,7 +44,7 @@
             t.cpp    = newValue;
             t.csharp = newValue;
 
-            UnityRuntimeHelper.OnApplicationFocusLost();
+            UnityRuntimeHelper.onApplicationFocusLost();
             yield return null;
             temp.Reset();
 
@@ -77,7 +77,7 @@
             t.csharp   = newValue;
             temp.Value = t;
 
-            UnityRuntimeHelper.OnApplicationFocusLost();
+            UnityRuntimeHelper.onApplicationFocusLost();
             yield return null;
             temp.Reset();
 

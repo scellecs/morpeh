@@ -5,9 +5,9 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Variable String")]
+    [CreateAssetMenu(menuName = "ECS/Globals/Variables/Variable String")]
     public class GlobalVariableString : BaseGlobalVariable<string> {
-        public override IDataWrapper Wrapper {
+        public override DataWrapper Wrapper {
             get => new StringWrapper {value = this.value};
             set => this.Value = ((StringWrapper) value).value;
         }
@@ -16,12 +16,16 @@ namespace Morpeh.Globals {
 
         protected override string Save() => this.value;
         
+        public override string LastToString() => this.BatchedChanges.Peek();
+        
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         [System.Serializable]
-        private class StringWrapper : IDataWrapper {
+        private class StringWrapper : DataWrapper {
             public string value;
+            
+            public override string ToString() => this.value;
         }
     }
 }
