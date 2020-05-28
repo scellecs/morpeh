@@ -3,9 +3,7 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Editor")]
 
 namespace Morpeh {
-#if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
-#endif
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -1970,7 +1968,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal static class CommonCacheTypeIdentifier {
+    internal static class CommonCacheTypeIdentifier { 
         private static int counter;
 
         internal static int GetID() => counter++;
