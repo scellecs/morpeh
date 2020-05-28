@@ -105,7 +105,15 @@
                 if (system != null) {
                     this.group.AddSystem(system, pair.Enabled);
                 }
+                else {
+                    this.SystemNullError();
+                }
             }
+        }
+
+        private void SystemNullError() {
+            var go = this.gameObject;
+            Debug.LogError($"[MORPEH] System null in installer {go.name} on scene {go.scene}", go);
         }
 
         private void RemoveSystems<T>(BasePair<T>[] pairs) where T : class, ISystem {
@@ -155,6 +163,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HorizontalGroup("Pair")]
             [HideLabel]
+            [Required]
 #endif
             [CanBeNull]
             private T system;
