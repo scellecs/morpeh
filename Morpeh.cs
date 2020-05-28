@@ -1711,7 +1711,7 @@ namespace Morpeh {
                 }
 
                 BREAK:
-                if (check) {
+                if (check && !this.archetypes.Contains(archetype)) {
                     this.archetypes.Add(archetype);
                     archetype.AddFilter(this);
                 }
