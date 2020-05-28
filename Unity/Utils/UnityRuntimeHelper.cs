@@ -21,20 +21,19 @@ namespace Morpeh {
 #else
     internal class UnityRuntimeHelper : MonoBehaviour {
 #endif
-        internal static Action OnApplicationFocusLost = () => { };
+        internal static Action             onApplicationFocusLost = () => { };
         internal static UnityRuntimeHelper instance;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [OdinSerialize]
         private List<World> worldsSerialized = null;
         [OdinSerialize]
         private List<string> types = null;
-        private bool hotReloaded = false;
 #endif
 
 #if UNITY_EDITOR
         private void OnEnable() {
             if (instance == null) {
-                instance = this;
+                instance                               =  this;
                 EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
             }
             else {
@@ -67,30 +66,20 @@ namespace Morpeh {
         }
 #endif
 
-        private void Update() {
-            World.GlobalUpdate(Time.deltaTime);
-#if UNITY_EDITOR && ODIN_INSPECTOR
-            if (this.hotReloaded) {
-                foreach (var world in World.worlds) {
-                    for (var index = 0; index < world.entitiesCount; index++) {
-                        var entity = world.entities[index];
-                        world.Filter.entities.Add(entity.internalID);
-                    }
-                }
-
-                this.hotReloaded = false;
-            }
-#endif
-        }
+        private void Update() => World.GlobalUpdate(Time.deltaTime);
 
         private void FixedUpdate() => World.GlobalFixedUpdate(Time.fixedDeltaTime);
         private void LateUpdate()  => World.GlobalLateUpdate(Time.deltaTime);
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {
-                OnApplicationFocusLost.Invoke();
+                onApplicationFocusLost.Invoke();
                 GC.Collect();
             }
+        }
+
+        internal void OnApplicationQuit() {
+            onApplicationFocusLost.Invoke();
         }
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -123,21 +112,26 @@ namespace Morpeh {
                 }
 
                 foreach (var world in this.worldsSerialized) {
-                    if (world != null) {
+                    if (world != null && world.entities != null) {
                         for (int i = 0, length = world.entities.Length; i < length; i++) {
                             var e = world.entities[i];
+                            if (e == null) {
+                                continue;
+                            }
+
                             if (e.components == null) {
                                 world.entities[i] = null;
                             }
                         }
+
                         world.Ctor();
                     }
                 }
 
                 World.worlds = this.worldsSerialized;
-                this.hotReloaded = true;
             }
         }
 #endif
     }
 }
+

@@ -16,13 +16,26 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class BaseGlobal : ScriptableObject, IDisposable {
         [SerializeField]
+        internal bool isPublished;
+        
+        [SerializeField]
 #if ODIN_INSPECTOR
         [ReadOnly]
 #endif
         private protected int internalEntityID = -1;
 
+        private protected Entity internalEntity;
+        
         [CanBeNull]
-        private protected Entity InternalEntity => World.Default.entities[this.internalEntityID];
+        private protected Entity InternalEntity {
+            get {
+                if (this.internalEntity == null) {
+                    this.internalEntity = World.Default.entities[this.internalEntityID];
+                }
+
+                return this.internalEntity;
+            }
+        }
 
         public IEntity Entity {
             get {
@@ -44,7 +57,7 @@ namespace Morpeh.Globals {
                 }
                 this.CheckIsInitialized();
 #endif
-                return this.InternalEntity.Has<GlobalEventPublished>();
+                return this.isPublished;
             }
         }
         
@@ -52,6 +65,7 @@ namespace Morpeh.Globals {
         public abstract Type GetValueType();
 #endif
         internal virtual void OnEnable() {
+            this.internalEntity = null;
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
 #else
@@ -63,6 +77,7 @@ namespace Morpeh.Globals {
         internal virtual void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.EnteredEditMode) {
                 this.internalEntityID = -1;
+                this.internalEntity = null;
             }
         }
 #endif
@@ -89,6 +104,7 @@ namespace Morpeh.Globals {
                     World.Default.RemoveEntity(entity);
                 }
                 this.internalEntityID = -1;
+                this.internalEntity = null;
             }
         }
 

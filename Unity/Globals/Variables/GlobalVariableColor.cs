@@ -6,7 +6,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [CreateAssetMenu(menuName = "ECS/Globals/Variable Color")]
+    [CreateAssetMenu(menuName = "ECS/Globals/Variables/Variable Color")]
     public class GlobalVariableColor : BaseGlobalVariable<Color> {
         public override DataWrapper Wrapper {
             get => new ColorWrapper {value = this.value};
