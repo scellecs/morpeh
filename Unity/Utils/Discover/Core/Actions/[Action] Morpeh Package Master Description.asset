@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b7f930e8847b684fac4ac7aef557aef, type: 3}
-  m_Name: '[Action] Morpeh Package Description'
+  m_Name: '[Action] Morpeh Package Master Description'
   m_EditorClassIdentifier: 
   packageName: com.xcrew.morpeh
   packageURL: ssh://git@github.com/X-Crew/Morpeh.git
