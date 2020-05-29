@@ -82,7 +82,7 @@
         private void OnChange(TData newValue) {
             if (Application.isPlaying) {
                 this.CheckIsInitialized();
-                this.Publish(newValue);
+                this.NextFrame(newValue);
             }
         }
 
