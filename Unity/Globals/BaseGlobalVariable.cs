@@ -22,7 +22,7 @@
         [SerializeField]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(10)]
-        [OnValueChanged("OnChange")]
+        [OnValueChanged(nameof(OnChange))]
         [DelayedProperty]
         [HideLabel]
 #endif
@@ -74,7 +74,7 @@
             this.value = newValue;
             this.OnChange(newValue);
         }
-
+        
         private void OnChange() {
             this.OnChange(this.value);
         }
