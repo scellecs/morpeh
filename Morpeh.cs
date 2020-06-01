@@ -1329,7 +1329,6 @@ namespace Morpeh {
         }
 
         public void UpdateFilters() {
-            Debug.Log("UPDATE FILTERS");
             if (this.newArchetypes.Count > 0) {
                 foreach (var filter in this.filters) {
                     filter.FindArchetypes(this.newArchetypes);
