@@ -667,9 +667,8 @@ namespace Morpeh {
                 this.disposables.Clear();
             }
 
-
+            this.world.UpdateFilters();
             if (this.newInitializers.Count > 0) {
-                this.world.UpdateFilters();
                 foreach (var initializer in this.newInitializers) {
 #if UNITY_EDITOR
                     try {
@@ -1330,6 +1329,7 @@ namespace Morpeh {
         }
 
         public void UpdateFilters() {
+            Debug.Log("UPDATE FILTERS");
             if (this.newArchetypes.Count > 0) {
                 foreach (var filter in this.filters) {
                     filter.FindArchetypes(this.newArchetypes);

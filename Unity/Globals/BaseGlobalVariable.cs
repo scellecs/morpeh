@@ -22,7 +22,7 @@
         [SerializeField]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(10)]
-        [OnValueChanged(nameof(OnChangeNextFrame))]
+        [OnValueChanged(nameof(OnChange))]
         [DelayedProperty]
         [HideLabel]
 #endif
@@ -75,21 +75,14 @@
             this.OnChange(newValue);
         }
         
+        private void OnChange() {
+            this.OnChange(this.value);
+        }
+        
         private void OnChange(TData newValue) {
             if (Application.isPlaying) {
                 this.CheckIsInitialized();
                 this.Publish(newValue);
-            }
-        }
-
-        private void OnChangeNextFrame() {
-            this.OnChangeNextFrame(this.value);
-        }
-
-        private void OnChangeNextFrame(TData newValue) {
-            if (Application.isPlaying) {
-                this.CheckIsInitialized();
-                this.NextFrame(newValue);
             }
         }
 
