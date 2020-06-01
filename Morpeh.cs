@@ -619,7 +619,7 @@ namespace Morpeh {
 #if UNITY_EDITOR
                     }
                     catch (Exception e) {
-                        Debug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
+                        Debug.LogError($"[MORPEH] Can not dispose initializer {initializer.GetType()}");
                         Debug.LogException(e);
                     }
 #endif
