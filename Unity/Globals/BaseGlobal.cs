@@ -15,7 +15,6 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class BaseGlobal : ScriptableObject, IDisposable {
-        [SerializeField]
         internal bool isPublished;
         
         [SerializeField]
@@ -67,9 +66,12 @@ namespace Morpeh.Globals {
         internal virtual void OnEnable() {
             this.internalEntity = null;
 #if UNITY_EDITOR
+            if (Application.isPlaying) {
+                this.isPublished = this.InternalEntity.Has<GlobalEventPublished>();
+            }
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
 #else
-            CheckIsInitialized();
+            this.CheckIsInitialized();
 #endif
         }
         
