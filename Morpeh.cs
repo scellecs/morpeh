@@ -1,3 +1,4 @@
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Runtime")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Editor")]
@@ -1779,6 +1780,7 @@ namespace Morpeh {
             return this.world.entities[this.entitiesCacheForBags[id]];
         }
 
+        [Obsolete("Use Singleton Asset")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEntity First() {
             if (this.isDirtyCache) {
