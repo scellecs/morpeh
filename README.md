@@ -37,6 +37,13 @@ URLs:
 * Dev:  https://github.com/X-Crew/Morpeh.git#develop  
 * Tag:  https://github.com/X-Crew/Morpeh.git#2020.7.1  
 
+<details>
+    <summary>You can update Morpeh by Discover Window. Select Help/Morpeh Discover menu.   </summary>
+    
+![update_morpeh.png](Gifs~/update_morpeh.png)  
+</details>
+
+
 ## Introduction
 ### Base concept of ECS pattern
 
