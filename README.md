@@ -4,10 +4,10 @@
 ECS Framework for Unity Game Engine.  
    
 Adapted for the development mobile games like:  
-* Hyper Casual  
-* Idlers  
-* Arcades  
-* Other genres  
+* Hyper Casual.  
+* Idlers.  
+* Arcades.  
+* Other genres.  
   
 Features:
 * Simple Syntax.
@@ -15,7 +15,7 @@ Features:
 * No code generation and any C# Reflection in Runtime.
 * Structure-based and Cache-friendly.
 * Reactive and Fast Filters.
-* Built-in Events and Reactive Variables.
+* Built-in Events and Reactive Variables aka Globals.
 * Single-threaded.
 
 ## Table of Contents
