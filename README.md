@@ -2,6 +2,7 @@
 <img align="right" width="260px" height="260px" src="Unity/Utils/Editor/Resources/logo.png">
 
 ECS Framework for Unity Game Engine.  
+Adapted for the development mobile games like Hyper Casual, Idlers, Arcades and other genres.
 
 * Simple Syntax.
 * Simple Integration with Unity Engine.
@@ -10,7 +11,6 @@ ECS Framework for Unity Game Engine.
 * Reactive and Fast Filters.
 * Built-in Events and Reactive Variables.
 * Single-threaded.
-* Adapted for the development mobile games like Hyper Casual, Idlers, Arcades and other genres.
 
 ## Table of Contents
 
