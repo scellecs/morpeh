@@ -2,6 +2,7 @@
 <img align="right" width="260px" height="260px" src="Unity/Utils/Editor/Resources/logo.png">
 
 ECS Framework for Unity Game Engine.  
+Adapted for the development of Hyper Casual, Idlers, Arcades and other genres of the mobile market.
 
 * Simple Syntax.
 * Simple Integration with Unity Engine.
@@ -13,13 +14,28 @@ ECS Framework for Unity Game Engine.
 
 ## Table of Contents
 
+* [How To Install](#how-to-install)
 * [Introduction](#introduction)
   * [Base concept of ECS pattern](#base-concept-of-ecs-pattern)
   * [Getting Start](#getting-start)
   * [Advanced](#advanced)
-* [How To Install](#how-to-install)
 * [License](#license)
 * [Contacts](#contacts)
+
+
+## How To Install
+
+<details>
+    <summary>Open Package Manager and add Morpeh URL.  </summary>
+    
+![installation_step1.png](Gifs~/installation_step1.png)  
+![installation_step2.png](Gifs~/installation_step2.png)  
+</details>
+  
+URLs:  
+* Master: https://github.com/X-Crew/Morpeh.git  
+* Dev:  https://github.com/X-Crew/Morpeh.git#develop  
+* Tag:  https://github.com/X-Crew/Morpeh.git#2020.7.1  
 
 ## Introduction
 ### Base concept of ECS pattern
@@ -204,7 +220,7 @@ public sealed class HealthSystem : UpdateSystem {
 }
 ```
 > Don't forget about `ref` operator.  
-> Components are struct and if you wanna change them directly, then you must use reference operator.
+> Components are struct and if you want to change them directly, then you must use reference operator.
 
 For high performance, you can do cached sampling.  
 No need to do GetComponent from entity every time.  
@@ -295,33 +311,6 @@ Nice!
 Globals
 
 ---
-
-## How To Install
-
-### Git Installation
-#### For Unity 2019+
-
-Add to your project manifiest by path `UnityProject/Packages/manifiest.json` next line:
-```json
-{
-  "dependencies": {
-     "com.xcrew.morpeh": "https://github.com/X-Crew/Morpeh.git"
-  }
-}
-```
-If you need develop branch add this line instead:
-```json
-{
-  "dependencies": {
-     "com.xcrew.morpeh": "https://github.com/X-Crew/Morpeh.git#develop"
-  }
-}
-```
-
-
-### Manual Installation 
-- Go to [Releases](https://github.com/X-Crew/Morpeh/releases) and download latest package.
-- Import Morpeh.
 
 ## License
 
