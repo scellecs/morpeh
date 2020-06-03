@@ -1,5 +1,6 @@
 ﻿namespace Morpeh.Globals {
     using System;
+    using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
@@ -14,7 +15,7 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Singleton")]
-    public class Singleton : ScriptableObject, IDisposable {
+    public class Singleton : ScriptableObject, IEntity {
         [SerializeField]
 #if ODIN_INSPECTOR
         [ReadOnly]
@@ -27,6 +28,7 @@
         [ShowInInspector]
         [Space]
         private Morpeh.Editor.EntityViewer entityViewer = new Morpeh.Editor.EntityViewer();
+        private int id;
 #endif
 
         [CanBeNull]
@@ -40,7 +42,7 @@
             }
         }
 
-        [CanBeNull]
+        [NotNull]
         public IEntity Entity {
             get {
 #if UNITY_EDITOR
@@ -104,6 +106,24 @@
             EditorApplication.playModeStateChanged -= this.OnEditorApplicationOnplayModeStateChanged;
 #endif
         }
+        public int ID => this.Entity.ID;
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T AddComponent<T>() where T : struct, IComponent => ref this.Entity.AddComponent<T>();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T AddComponent<T>(out bool exist) where T : struct, IComponent => ref this.Entity.AddComponent<T>(out exist);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T GetComponent<T>() where T : struct, IComponent => ref this.Entity.GetComponent<T>();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T GetComponent<T>(out bool exist) where T : struct, IComponent => ref this.Entity.GetComponent<T>(out exist);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetComponent<T>(in T value) where T : struct, IComponent => this.Entity.SetComponent(in value);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool RemoveComponent<T>() where T : struct, IComponent => this.Entity.RemoveComponent<T>();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Has<T>() where T : struct, IComponent => this.Entity.Has<T>();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsDisposed() => this.Entity.IsDisposed();
         
         [Serializable]
         private struct SingletonMarker : IComponent { }
