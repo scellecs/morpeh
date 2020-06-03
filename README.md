@@ -32,7 +32,6 @@ Adapted for the development of Hyper Casual, Idlers, Arcades and other genres of
 ![installation_step2.png](Gifs~/installation_step2.png)  
 </details>
   
-URLs:  
 * Master: https://github.com/X-Crew/Morpeh.git  
 * Dev:  https://github.com/X-Crew/Morpeh.git#develop  
 * Tag:  https://github.com/X-Crew/Morpeh.git#2020.7.1  
