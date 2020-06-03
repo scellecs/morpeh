@@ -330,15 +330,17 @@ Secondly, it’s uncomfortable working with these events from MonoBehaviours, UI
 As a solution to this problem, global assets were created.  
 
 **Singleton** is a simple ScriptableObject that is associated with one specific entity.  
+It is usually used to add dynamic components to one entity without using filters.  
 
-**GlobalEvent** is a Singleton, which has the functionality of publishing events to the world by adding a tag to its essence.  
+**GlobalEvent** is a Singleton, which has the functionality of publishing events to the world by adding a tag to its entity.  
 It has 4 main methods for working with it:  
 1) Publish (arg) - publish within the frame, and all downstream systems will see this.  
 2) NextFrame (arg) - publish in the next frame, all systems will see this.  
 3) IsPublished - did anyone publish this event  
 4) BatchedChanges - a data stack where publication arguments are added.  
 
-**GlobalVariable** is a GlobalEvent that stores the start value and the last value after the changes. It also has the functionality of saving and loading data from PlayerPrefs.  
+**GlobalVariable** is a GlobalEvent that stores the start value and the last value after the changes.  
+It also has the functionality of saving and loading data from PlayerPrefs.  
 
 You can create globals by context menu Create/ECS/Globals/ in Project Window.
 You can declare globals in any systems, components and scripts and set it by Inspector Window, for example:  
