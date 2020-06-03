@@ -28,7 +28,6 @@
         [ShowInInspector]
         [Space]
         private Morpeh.Editor.EntityViewer entityViewer = new Morpeh.Editor.EntityViewer();
-        private int id;
 #endif
 
         [CanBeNull]
