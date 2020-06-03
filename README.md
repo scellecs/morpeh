@@ -342,7 +342,7 @@ It has 4 main methods for working with it:
 **GlobalVariable** is a GlobalEvent that stores the start value and the last value after the changes.  
 It also has the functionality of saving and loading data from PlayerPrefs.  
 
-You can create globals by context menu Create/ECS/Globals/ in Project Window.
+You can create globals by context menu `Create/ECS/Globals/` in Project Window.  
 You can declare globals in any systems, components and scripts and set it by Inspector Window, for example:  
 ```c#  
 public sealed class HealthSystem : UpdateSystem {
