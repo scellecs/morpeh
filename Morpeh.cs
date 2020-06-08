@@ -1086,7 +1086,7 @@ namespace Morpeh {
 
             worlds.Remove(this);
         }
-#if UNITY_2019_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER && !MORPEH_DISABLE_AUTOINITIALIZATION
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif
         public static void InitializationDefaultWorld() {
