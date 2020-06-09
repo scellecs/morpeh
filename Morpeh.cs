@@ -1418,13 +1418,11 @@ namespace Morpeh {
 
         public void Add(int entityId) {
             this.entities.Add(entityId);
-            this.isDirty = true;
             this.OnChange();
         }
 
         public void Remove(int entityId) {
             if (this.entities.Remove(entityId)) {
-                this.isDirty = true;
                 this.OnChange();
             }
         }
@@ -1441,9 +1439,13 @@ namespace Morpeh {
         }
 
         private void OnChange() {
-            this.world.changedArchetypes.Add(this.id);
-            foreach (var filter in this.filters) {
-                filter.MakeDirty();
+            if (this.isDirty == false) {
+                this.world.changedArchetypes.Add(this.id);
+                foreach (var filter in this.filters) {
+                    filter.MakeDirty();
+                }
+                
+                this.isDirty = true;
             }
         }
 
