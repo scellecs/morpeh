@@ -1377,7 +1377,7 @@ namespace Morpeh {
         [NonSerialized]
         public List<Filter> filters;
         [SerializeField]
-        internal List<int> entities;
+        internal HashSet<int> entities;
         [SerializeField]
         internal Dictionary<int, int> removeTransfer;
         [SerializeField]
@@ -1401,7 +1401,7 @@ namespace Morpeh {
         internal Archetype(int id, int[] typeIds, int worldId) {
             this.id              = id;
             this.typeIds         = typeIds;
-            this.entities        = new List<int>(16);
+            this.entities        = new HashSet<int>();
             this.addTransfer     = new Dictionary<int, int>();
             this.removeTransfer  = new Dictionary<int, int>();
             this.currentEntities = new int[16];
@@ -1418,13 +1418,11 @@ namespace Morpeh {
 
         public void Add(int entityId) {
             this.entities.Add(entityId);
-            this.isDirty = true;
             this.OnChange();
         }
 
         public void Remove(int entityId) {
             if (this.entities.Remove(entityId)) {
-                this.isDirty = true;
                 this.OnChange();
             }
         }
@@ -1441,9 +1439,13 @@ namespace Morpeh {
         }
 
         private void OnChange() {
-            this.world.changedArchetypes.Add(this.id);
-            foreach (var filter in this.filters) {
-                filter.MakeDirty();
+            if (this.isDirty == false) {
+                this.world.changedArchetypes.Add(this.id);
+                foreach (var filter in this.filters) {
+                    filter.MakeDirty();
+                }
+                
+                this.isDirty = true;
             }
         }
 
@@ -1452,7 +1454,7 @@ namespace Morpeh {
                 return;
             }
 
-            var cap = this.entities.Capacity;
+            var cap = this.entities.Count;
             if (cap > this.currentEntities.Length) {
                 Array.Resize(ref this.currentEntities, cap);
             }
