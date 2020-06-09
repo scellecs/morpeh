@@ -25,6 +25,10 @@
             return result;
         }
 
+        protected override string GetDefaultValue() {
+            return this.defaultValue;
+        }
+
         protected override string Save() {
             var str = this.value.ToBigIntegerString();
             return str;

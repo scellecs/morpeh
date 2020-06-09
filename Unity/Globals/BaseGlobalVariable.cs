@@ -88,6 +88,7 @@
 
         protected abstract TData  Load([NotNull] string serializedData);
         protected abstract string Save();
+        protected virtual string GetDefaultValue() => this.Save(); 
 
         public virtual void Reset() {
             if (!string.IsNullOrEmpty(this.defaultSerializedValue)) {
@@ -155,17 +156,26 @@
                 return;
             }
 
-            this.defaultSerializedValue = this.Save();
+            this.defaultSerializedValue = this.GetDefaultValue();
             this.isLoaded = true;
-            
-            if (!this.AutoSave) {
-                return;
-            }
-            if (!PlayerPrefs.HasKey(this.Key)) {
-                return;
-            }
 
-            this.value = this.Load(PlayerPrefs.GetString(this.Key));
+            if (!this.AutoSave)
+            {
+                if(!string.IsNullOrEmpty(this.defaultSerializedValue)) 
+                    this.value = this.Load(this.defaultSerializedValue);
+            }
+            else
+            {
+                if (PlayerPrefs.HasKey(this.Key))
+                {
+                    this.value = this.Load(PlayerPrefs.GetString(this.Key));
+                }
+                else
+                {
+                    if(!string.IsNullOrEmpty(this.defaultSerializedValue)) 
+                        this.value = this.Load(this.defaultSerializedValue);
+                }
+            }
         }
 
         internal void SaveData() {
