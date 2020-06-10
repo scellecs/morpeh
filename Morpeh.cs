@@ -1450,10 +1450,6 @@ namespace Morpeh {
         }
 
         public void Swap() {
-            if (!this.isDirty) {
-                return;
-            }
-
             var cap = this.entities.Count;
             if (cap > this.currentEntities.Length) {
                 Array.Resize(ref this.currentEntities, cap);
@@ -1725,6 +1721,7 @@ namespace Morpeh {
                 if (check && !this.archetypes.Contains(archetype)) {
                     this.archetypes.Add(archetype);
                     archetype.AddFilter(this);
+                    this.MakeDirty();
                 }
             }
         }
