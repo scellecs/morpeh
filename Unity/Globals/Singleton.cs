@@ -62,8 +62,12 @@
 #endif
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
+            if (Application.isPlaying) {
 #endif
-            CheckIsInitialized();
+                this.CheckIsInitialized();
+#if UNITY_EDITOR
+            }
+#endif
         }
         
 #if UNITY_EDITOR
@@ -75,11 +79,6 @@
         }
 #endif
         private protected virtual bool CheckIsInitialized() {
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                return default;
-            }
-#endif
             if (this.internalEntityID < 0) {
                 this.internalEntity = World.Default.CreateEntityInternal(out this.internalEntityID);
                 this.internalEntity.AddComponent<SingletonMarker>();
