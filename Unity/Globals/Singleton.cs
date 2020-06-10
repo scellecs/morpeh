@@ -58,13 +58,12 @@
         internal virtual void OnEnable() {
             this.internalEntity = null;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-            this.entityViewer.getter = () => this.internalEntity;
+            this.entityViewer = new Morpeh.Editor.EntityViewer {getter = () => this.internalEntity};
 #endif
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
-#else
-            CheckIsInitialized();
 #endif
+            CheckIsInitialized();
         }
         
 #if UNITY_EDITOR
@@ -76,6 +75,11 @@
         }
 #endif
         private protected virtual bool CheckIsInitialized() {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                return default;
+            }
+#endif
             if (this.internalEntityID < 0) {
                 this.internalEntity = World.Default.CreateEntityInternal(out this.internalEntityID);
                 this.internalEntity.AddComponent<SingletonMarker>();
