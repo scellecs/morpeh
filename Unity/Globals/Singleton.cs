@@ -58,12 +58,15 @@
         internal virtual void OnEnable() {
             this.internalEntity = null;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-            this.entityViewer.getter = () => this.internalEntity;
+            this.entityViewer = new Morpeh.Editor.EntityViewer {getter = () => this.internalEntity};
 #endif
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
-#else
-            CheckIsInitialized();
+            if (Application.isPlaying) {
+#endif
+                this.CheckIsInitialized();
+#if UNITY_EDITOR
+            }
 #endif
         }
         

@@ -1450,10 +1450,6 @@ namespace Morpeh {
         }
 
         public void Swap() {
-            if (!this.isDirty) {
-                return;
-            }
-
             var cap = this.entities.Count;
             if (cap > this.currentEntities.Length) {
                 Array.Resize(ref this.currentEntities, cap);
@@ -1725,6 +1721,7 @@ namespace Morpeh {
                 if (check && !this.archetypes.Contains(archetype)) {
                     this.archetypes.Add(archetype);
                     archetype.AddFilter(this);
+                    this.MakeDirty();
                 }
             }
         }
@@ -2154,19 +2151,10 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public static class ListExtensions {
-            //remove with swap last and removed
             public static void RemoveAtFast<T>(this IList<T> list, int index) {
-                var count = list.Count;
-                list[index] = list[count - 1];
-                list.RemoveAt(count - 1);
-            }
-
-            //remove with swap last and removed
-            public static void RemoveFast<T>(this IList<T> list, T item) {
-                var count = list.Count;
-                var index = list.IndexOf(item);
-                list[index] = list[count - 1];
-                list.RemoveAt(count - 1);
+                var count = list.Count  - 1;
+                list[index] = list[count];
+                list.RemoveAt(count);
             }
         }
     }
@@ -2174,57 +2162,13 @@ namespace Morpeh {
 
 namespace Unity.IL2CPP.CompilerServices {
     using System;
-
-    /// <summary>
-    ///     The code generation options available for IL to C++ conversion.
-    ///     Enable or disabled these with caution.
-    /// </summary>
+    
     public enum Option {
-        /// <summary>
-        ///     Enable or disable code generation for null checks.
-        ///     Global null check support is enabled by default when il2cpp.exe
-        ///     is launched from the Unity editor.
-        ///     Disabling this will prevent NullReferenceException exceptions from
-        ///     being thrown in generated code. In *most* cases, code that dereferences
-        ///     a null pointer will crash then. Sometimes the point where the crash
-        ///     happens is later than the location where the null reference check would
-        ///     have been emitted though.
-        /// </summary>
         NullChecks = 1,
-
-        /// <summary>
-        ///     Enable or disable code generation for array bounds checks.
-        ///     Global array bounds check support is enabled by default when il2cpp.exe
-        ///     is launched from the Unity editor.
-        ///     Disabling this will prevent IndexOutOfRangeException exceptions from
-        ///     being thrown in generated code. This will allow reading and writing to
-        ///     memory outside of the bounds of an array without any runtime checks.
-        ///     Disable this check with extreme caution.
-        /// </summary>
         ArrayBoundsChecks = 2,
-
-        /// <summary>
-        ///     Enable or disable code generation for divide by zero checks.
-        ///     Global divide by zero check support is disabled by default when il2cpp.exe
-        ///     is launched from the Unity editor.
-        ///     Enabling this will cause DivideByZeroException exceptions to be
-        ///     thrown in generated code. Most code doesn't need to handle this
-        ///     exception, so it is probably safe to leave it disabled.
-        /// </summary>
         DivideByZeroChecks = 3
     }
 
-    /// <summary>
-    ///     Use this attribute on a class, method, or property to inform the IL2CPP code conversion utility to override the
-    ///     global setting for one of a few different runtime checks.
-    ///     Example:
-    ///     [Il2CppSetOption(Option.NullChecks, false)]
-    ///     public static string MethodWithNullChecksDisabled()
-    ///     {
-    ///     var tmp = new Object();
-    ///     return tmp.ToString();
-    ///     }
-    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
     public class Il2CppSetOptionAttribute : Attribute {
         public Option Option { get; }
