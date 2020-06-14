@@ -74,8 +74,12 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     [Serializable]
     internal sealed class Entity : IEntity {
+#if UNITY_EDITOR
         internal World World => this.backfieldWorld ?? (this.backfieldWorld = World.worlds[this.worldID]);
-
+#else
+        internal World World => this.backfieldWorld;
+#endif
+        
         [NonSerialized]
         internal World backfieldWorld;
 
@@ -1907,6 +1911,7 @@ namespace Morpeh {
             private List<Archetype> archetypes;
             private Entity          current;
 
+            private int count;
             private int id;
             private int idList;
 
@@ -1917,15 +1922,17 @@ namespace Morpeh {
 
                 this.id     = 0;
                 this.idList = 0;
+                this.count = this.archetypes.Count;
             }
 
             public bool MoveNext() {
-                if (this.idList < this.archetypes.Count) {
+                if (this.idList < this.count) {
                     var arch = this.archetypes[this.idList];
                     while (this.id >= arch.length) {
                         this.id = 0;
                         this.idList++;
-                        if (this.idList < this.archetypes.Count) {
+                        
+                        if (this.idList < this.count) {
                             arch = this.archetypes[this.idList];
                         }
                         else {
@@ -1956,6 +1963,7 @@ namespace Morpeh {
             object IEnumerator.Current => this.current;
 
             public void Dispose() {
+                this.count  = -1;
                 this.id     = -1;
                 this.idList = -1;
 
