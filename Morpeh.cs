@@ -263,34 +263,10 @@ namespace Morpeh {
 
             return ref world.GetCache<T>().Empty();
         }
-
-#if UNITY_EDITOR
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int GetComponentId(int typeId) {
-            var typeInfo = CommonCacheTypeIdentifier.editorTypeAssociation[typeId].typeInfo;
-            if (typeInfo.isMarker) {
-                return -1;
-            }
-
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
-                if (this.components[i] == typeInfo.id) {
-                    return this.components[i + 1];
-                }
-            }
-
-            return -1;
-        }
-#endif
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal int GetComponentId<T>() where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            if (typeInfo.isMarker) {
-                return -1;
-            }
-
-            for (int i = 0, length = this.components.Length; i < length; i += 2) {
-                if (this.components[i] == typeInfo.id) {
+                if (this.components[i] == typeId) {
                     return this.components[i + 1];
                 }
             }
@@ -1458,7 +1434,7 @@ namespace Morpeh {
             if (cap > this.currentEntities.Length) {
                 Array.Resize(ref this.currentEntities, cap);
             }
-
+            
             this.entities.CopyTo(this.currentEntities);
             this.length  = this.entities.Count;
             this.isDirty = false;
@@ -1843,14 +1819,19 @@ namespace Morpeh {
 
             private static          int  cacheLength;
             private static          int  cacheCapacity;
+            private static readonly int  typeId;
             private static readonly bool isMarker;
 
+            private CacheComponents<T> cacheComponents;
             private T[]   sharedComponents;
             private int[] ids;
             private World world;
 
             static ComponentsBag() {
-                isMarker = CacheTypeIdentifier<T>.info.isMarker;
+                var info = CacheTypeIdentifier<T>.info;
+                isMarker = info.isMarker;
+                typeId = info.id;
+                
                 if (isMarker) {
                     return;
                 }
@@ -1863,10 +1844,10 @@ namespace Morpeh {
             internal void Update(int[] entities, in int len) {
                 Array.Resize(ref this.ids, len);
                 for (var i = 0; i < len; i++) {
-                    this.ids[i] = this.world.entities[entities[i]].GetComponentId<T>();
+                    this.ids[i] = this.world.entities[entities[i]].GetComponentId(typeId);
                 }
 
-                this.sharedComponents = this.world.GetCache<T>().components;
+                this.sharedComponents = this.cacheComponents.components;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1881,6 +1862,7 @@ namespace Morpeh {
                 var bag = new ComponentsBag<T> {
                     world            = world,
                     ids              = new int[1],
+                    cacheComponents = (CacheComponents<T>) world.GetCache(typeId),
                     sharedComponents = world.GetCache<T>().components
                 };
 
