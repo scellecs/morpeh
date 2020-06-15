@@ -2217,7 +2217,7 @@ namespace Morpeh {
                 }
 
                 ref var newSlot = ref this.slots[newIndex];
-
+                
                 newSlot.value = value;
                 newSlot.next  = this.buckets[rem] - 1;
 
@@ -2472,7 +2472,7 @@ namespace Morpeh {
                 }
                 
                 value = default;
-                return true;
+                return false;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
