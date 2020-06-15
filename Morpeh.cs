@@ -115,9 +115,7 @@ namespace Morpeh {
             this.currentArchetype = 0;
             var arch = this.world.archetypes[0];
             arch.entities.Add(id);
-            if (arch.isDirty == false) {
-                arch.OnChange();
-            }
+            arch.isDirty = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -459,9 +457,7 @@ namespace Morpeh {
             
             var arch = world.archetypes[this.currentArchetype];
             arch.entities.Remove(this.internalID);
-            if (arch.isDirty == false) {
-                arch.OnChange();
-            }
+            arch.isDirty = true;
 
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 var typeId      = this.components[i];
@@ -919,8 +915,6 @@ namespace Morpeh {
         [SerializeField]
         internal Dictionary<int, List<int>> archetypesByLength;
         [SerializeField]
-        internal List<int> changedArchetypes;
-        [SerializeField]
         internal List<int> newArchetypes;
         [NonSerialized]
         private List<int> archetypeCache;
@@ -969,10 +963,8 @@ namespace Morpeh {
             this.archetypesByLength = new Dictionary<int, List<int>> {
                 [0] = new List<int> {0}
             };
-            this.changedArchetypes = new List<int>();
             this.newArchetypes     = new List<int>();
-
-
+            
             return this;
         }
 
@@ -1066,9 +1058,6 @@ namespace Morpeh {
 
             this.newArchetypes.Clear();
             this.newArchetypes = null;
-
-            this.changedArchetypes.Clear();
-            this.changedArchetypes = null;
 
             worlds.Remove(this);
         }
@@ -1324,12 +1313,15 @@ namespace Morpeh {
                 this.newArchetypes.Clear();
             }
 
-            if (this.changedArchetypes.Count > 0) {
-                foreach (var archId in this.changedArchetypes) {
-                    this.archetypes[archId].Swap();
+            foreach (var archetype in this.archetypes) {
+                if (archetype.isDirty) {
+                    foreach (var filter in archetype.filters) {
+                        filter.MakeDirty();
+                    }
+                    archetype.Swap();
+                    
+                    archetype.isDirty = false;
                 }
-
-                this.changedArchetypes.Clear();
             }
 
             if (this.dirtyFilters.Count > 0) {
@@ -1397,22 +1389,13 @@ namespace Morpeh {
 
         public void AddFilter(Filter filter) {
             this.filters.Add(filter);
-            this.OnChange();
+            this.isDirty = true;
         }
 
         public void RemoveFilter(Filter filter) {
             if (this.filters.Remove(filter)) {
-                this.OnChange();
+                this.isDirty = true;
             }
-        }
-
-        public void OnChange() {
-            this.world.changedArchetypes.Add(this.id);
-            foreach (var filter in this.filters) {
-                filter.MakeDirty();
-            }
-
-            this.isDirty = true;
         }
 
         public void Swap() {
@@ -1429,23 +1412,18 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddTransfer(int entityId, int typeId, out int archetypeId) {
             this.entities.Remove(entityId);
-            if (this.isDirty == false) {
-                this.OnChange();
-            }
+            this.isDirty = true;
             
             if (this.addTransfer.TryGetValue(typeId, out archetypeId)) {
                 var arch = this.world.archetypes[archetypeId];
                 arch.entities.Add(entityId);
-                if (arch.isDirty == false) {
-                    arch.OnChange();
-                }
+                arch.isDirty = true;
             }
             else {
                 var arch = this.world.GetArchetype(this.typeIds, typeId, true, out archetypeId);
                 arch.entities.Add(entityId);
-                if (arch.isDirty == false) {
-                    arch.OnChange();
-                }
+                arch.isDirty = true;
+                
                 this.addTransfer.Add(typeId, archetypeId);
             }
         }
@@ -1453,23 +1431,18 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveTransfer(int entityId, int typeId, out int archetypeId) {
             this.entities.Remove(entityId);
-            if (this.isDirty == false) {
-                this.OnChange();
-            }
+            this.isDirty = true;
             
             if (this.removeTransfer.TryGetValue(typeId, out archetypeId)) {
                 var arch = this.world.archetypes[archetypeId];
                 arch.entities.Add(entityId);
-                if (arch.isDirty == false) {
-                    arch.OnChange();
-                }
+                arch.isDirty = true;
             }
             else {
                 var arch = this.world.GetArchetype(this.typeIds, typeId, false, out archetypeId);
                 arch.entities.Add(entityId);
-                if (arch.isDirty == false) {
-                    arch.OnChange();
-                }
+                arch.isDirty = true;
+                
                 this.removeTransfer.Add(typeId, archetypeId);
             }
         }
