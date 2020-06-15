@@ -1360,9 +1360,9 @@ namespace Morpeh {
         [SerializeField]
         internal IntHashSet entities;
         [SerializeField]
-        internal Dictionary<int, int> removeTransfer;
+        internal IntDictionary<int> removeTransfer;
         [SerializeField]
-        internal Dictionary<int, int> addTransfer;
+        internal IntDictionary<int> addTransfer;
         [SerializeField]
         internal int worldId;
         [SerializeField]
@@ -1383,8 +1383,8 @@ namespace Morpeh {
             this.id              = id;
             this.typeIds         = typeIds;
             this.entities        = new IntHashSet();
-            this.addTransfer     = new Dictionary<int, int>();
-            this.removeTransfer  = new Dictionary<int, int>();
+            this.addTransfer     = new IntDictionary<int>();
+            this.removeTransfer  = new IntDictionary<int>();
             this.currentEntities = new int[16];
             this.isDirty         = false;
             this.worldId         = worldId;
@@ -2461,7 +2461,7 @@ namespace Morpeh {
             }
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private bool TryGetValue(in int key, [CanBeNull] out T value) {
+            public bool TryGetValue(in int key, [CanBeNull] out T value) {
                 HashHelpers.DivRem(key, this.buckets.Length, out var rem);
                 
                 for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
