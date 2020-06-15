@@ -114,12 +114,15 @@
         public ref T AddComponent<T>() where T : struct, IComponent => ref this.Entity.AddComponent<T>();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddComponent<T>(out bool exist) where T : struct, IComponent => ref this.Entity.AddComponent<T>(out exist);
+
+        public bool AddComponentFast(in int typeId, in int componentId) => this.Entity.AddComponentFast(typeId, componentId);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T GetComponent<T>() where T : struct, IComponent => ref this.Entity.GetComponent<T>();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T GetComponent<T>(out bool exist) where T : struct, IComponent => ref this.Entity.GetComponent<T>(out exist);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetComponentId(in int typeId) => this.Entity.GetComponentId(typeId);
+        public int GetComponentFast(in int typeId) => this.Entity.GetComponentFast(typeId);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetComponent<T>(in T value) where T : struct, IComponent => this.Entity.SetComponent(in value);

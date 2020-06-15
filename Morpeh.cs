@@ -27,16 +27,19 @@ namespace Morpeh {
 
     public interface IEntity {
         int   ID { get; }
+        
         ref T AddComponent<T>() where T : struct, IComponent;
         ref T AddComponent<T>(out bool exist) where T : struct, IComponent;
+        bool AddComponentFast(in int typeId, in int componentId);
 
         ref T GetComponent<T>() where T : struct, IComponent;
         ref T GetComponent<T>(out bool exist) where T : struct, IComponent;
-        int GetComponentId(in int typeId);
+        int GetComponentFast(in int typeId);
 
         void SetComponent<T>(in T value) where T : struct, IComponent;
         bool RemoveComponent<T>() where T : struct, IComponent;
         bool RemoveComponentFast(int typeId, out int cacheIndex);
+        
         bool Has<T>() where T : struct, IComponent;
         bool IsDisposed();
     }
@@ -173,6 +176,15 @@ namespace Morpeh {
             return ref cache.Empty();
         }
 
+        public bool AddComponentFast(in int typeId, in int componentId) {
+            if (this.componentsIds.Add(typeId, componentId, out _)) {
+                this.currentArchetype.AddTransfer(this.internalID, typeId, out this.currentArchetypeId, out this.currentArchetype);
+                return true;
+            }
+
+            return false;
+        }
+
         public ref T GetComponent<T>() where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = this.world.GetCache<T>();
@@ -219,7 +231,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetComponentId(in int typeId) => this.componentsIds.GetValue(typeId);
+        public int GetComponentFast(in int typeId) => this.componentsIds.GetValue(typeId);
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetComponent<T>(in T value) where T : struct, IComponent {
@@ -1938,18 +1950,39 @@ namespace Morpeh {
             this.components.Add(this.components.count, value, out index);
             return index;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T AddComponent(in IEntity entity) {
+            var componentId = this.Add();
+            if (entity.AddComponentFast(this.typedId, componentId)) {
+                return ref this.components.data[componentId];
+            }
+            this.Remove(componentId);
+            return ref this.components.data[0];
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AddComponent(in IEntity entity, in T value) {
+            var componentId = this.Add(value);
+            if (entity.AddComponentFast(this.typedId, componentId)) {
+                return true;
+            }
+            
+            this.Remove(componentId);
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ref T Get(in int id) => ref this.components.data[id];
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent(in IEntity entity) => ref this.components.data[entity.GetComponentId(this.typedId)];
+        public ref T GetComponent(in IEntity entity) => ref this.components.data[entity.GetComponentFast(this.typedId)];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Set(in int id, in T value) => this.components.data[id] = value;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent(in IEntity entity, in T value) => this.components.data[entity.GetComponentId(this.typedId)] = value;
+        public void SetComponent(in IEntity entity, in T value) => this.components.data[entity.GetComponentFast(this.typedId)] = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ref T Empty() => ref this.components.data[0];
