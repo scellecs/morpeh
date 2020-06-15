@@ -119,7 +119,7 @@ namespace Morpeh {
                                 continue;
                             }
 
-                            if (e.components == null) {
+                            if (e.componentsIds == null) {
                                 world.entities[i] = null;
                             }
                         }

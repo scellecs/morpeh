@@ -4,6 +4,7 @@ namespace Morpeh.Editor {
     using System.Collections.Generic;
     using Morpeh;
     using Sirenix.OdinInspector;
+    using UnityEngine;
 
     [Serializable]
     [InlineProperty]
@@ -23,16 +24,13 @@ namespace Morpeh.Editor {
         [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
         private List<ComponentView> ComponentsOnEntity {
             get {
-                this.componentViews.Clear();
                 if (this.entity != null) {
-                    for (int i = 0, length = this.entity.componentsDoubleCapacity; i < length; i += 2) {
-                        if (this.entity.components[i] == -1) {
-                            continue;
-                        }
-
+                    this.componentViews.Clear();
+                    foreach (var slotIndex in this.entity.componentsIds) {
+                        var slot = this.entity.componentsIds.slots[slotIndex];
                         var view = new ComponentView {
-                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[this.entity.components[i]],
-                            ID        = this.entity.components[i + 1],
+                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[slot.key],
+                            id        = slot.value,
                             world     = this.entity.world
                         };
                         this.componentViews.Add(view);
@@ -61,7 +59,7 @@ namespace Morpeh.Editor {
             [ShowInInspector]
             internal string TypeName => this.debugInfo.type.Name;
 
-            internal int ID;
+            internal int id;
 
             [DisableContextMenu]
             [HideIf("$" + nameof(IsMarker))]
@@ -74,14 +72,14 @@ namespace Morpeh.Editor {
                         return null;
                     }
 
-                    return this.debugInfo.getBoxed(this.world, this.ID);
+                    return this.debugInfo.getBoxed(this.world, this.id);
                 }
                 set {
                     if (this.debugInfo.typeInfo.isMarker) {
                         return;
                     }
 
-                    this.debugInfo.setBoxed(this.world, this.ID, value);
+                    this.debugInfo.setBoxed(this.world, this.id, value);
                 }
             }
         }
