@@ -32,6 +32,7 @@ namespace Morpeh {
 
         ref T GetComponent<T>() where T : struct, IComponent;
         ref T GetComponent<T>(out bool exist) where T : struct, IComponent;
+        int GetComponentId(in int typeId);
 
         void SetComponent<T>(in T value) where T : struct, IComponent;
         bool RemoveComponent<T>() where T : struct, IComponent;
@@ -216,6 +217,9 @@ namespace Morpeh {
             return ref cache.Empty();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetComponentId(in int typeId) => this.componentsIds.TryGetIndex(typeId);
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetComponent<T>(in T value) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
@@ -974,7 +978,7 @@ namespace Morpeh {
             return null;
         }
 
-        internal CacheComponents<T> GetCache<T>() where T : struct, IComponent {
+        public CacheComponents<T> GetCache<T>() where T : struct, IComponent {
             var info          = CacheTypeIdentifier<T>.info;
             if (this.typedCaches.TryGetValue(info.id, out var typedIndex)) {
                 return CacheComponents<T>.typedCaches[typedIndex];
@@ -989,8 +993,8 @@ namespace Morpeh {
                 cache = new CacheComponents<T>();
             }
 
-            this.caches.Add(info.id, cache.id, out _);
-            this.typedCaches.Add(info.id, cache.typedId, out _);
+            this.caches.Add(info.id, cache.commonCacheId, out _);
+            this.typedCaches.Add(info.id, cache.typedCacheId, out _);
             
             return cache;
         }
@@ -1852,15 +1856,15 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal abstract class CacheComponents : IDisposable {
-        public static List<CacheComponents> caches = new List<CacheComponents>();
-        public static Action cleanup = () => caches.Clear();
+    public abstract class CacheComponents : IDisposable {
+        internal static List<CacheComponents> caches = new List<CacheComponents>();
+        internal static Action cleanup = () => caches.Clear();
 
         [SerializeField]
-        internal int id;
+        internal int commonCacheId;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract void Remove(in int id);
+        internal abstract void Remove(in int id);
 
         public abstract void Dispose();
     }
@@ -1869,13 +1873,15 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal class CacheComponents<T> : CacheComponents where T : struct, IComponent {
-        public static List<CacheComponents<T>> typedCaches = new List<CacheComponents<T>>();
+    public class CacheComponents<T> : CacheComponents where T : struct, IComponent {
+        internal static List<CacheComponents<T>> typedCaches = new List<CacheComponents<T>>();
 
         [SerializeField]
         internal IntDictionary<T> components;
         [SerializeField]
         internal IntStack freeIndexes;
+        [SerializeField]
+        internal int typedCacheId;
         [SerializeField]
         internal int typedId;
 
@@ -1883,21 +1889,23 @@ namespace Morpeh {
             cleanup += () => typedCaches.Clear();
         }
         
-        public CacheComponents() {
+        internal CacheComponents() {
+            this.typedId = CacheTypeIdentifier<T>.info.id;
+            
             this.components  = new IntDictionary<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
             this.freeIndexes = new IntStack();
 
             this.components.Add(0, default, out _);
 
-            this.typedId = typedCaches.Count;
+            this.typedCacheId = typedCaches.Count;
             typedCaches.Add(this);
 
-            this.id = caches.Count;
+            this.commonCacheId = caches.Count;
             caches.Add(this);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Add() {
+        internal int Add() {
             if (this.freeIndexes.size > 0) {
                 return this.freeIndexes.Pop();
             }
@@ -1907,7 +1915,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Add(in T value) {
+        internal int Add(in T value) {
             int index;
             if (this.freeIndexes.size > 0) {
                 index = this.freeIndexes.Pop();
@@ -1921,16 +1929,19 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T Get(in int id) => ref this.components.data[id];
+        internal ref T Get(in int id) => ref this.components.data[id];
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T GetComponent(in IEntity entity) => ref this.components.data[entity.GetComponentId(this.typedId)];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(in int id, in T value) => this.components.data[id] = value;
+        internal void Set(in int id, in T value) => this.components.data[id] = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T Empty() => ref this.components.data[0];
+        internal ref T Empty() => ref this.components.data[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override void Remove(in int id) {
+        internal override void Remove(in int id) {
             this.components.data[id] = default;
             this.freeIndexes.Push(id);
         }
@@ -1947,7 +1958,7 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class CacheDisposableComponents<T> : CacheComponents<T> where T : struct, IComponent, IDisposable {
-        public override void Remove(in int id) {
+        internal override void Remove(in int id) {
             this.components.data[id].Dispose();
             base.Remove(in id);
         }

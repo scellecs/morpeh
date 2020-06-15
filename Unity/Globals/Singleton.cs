@@ -119,6 +119,9 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T GetComponent<T>(out bool exist) where T : struct, IComponent => ref this.Entity.GetComponent<T>(out exist);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetComponentId(in int typeId) => this.Entity.GetComponentId(typeId);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetComponent<T>(in T value) where T : struct, IComponent => this.Entity.SetComponent(in value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RemoveComponent<T>() where T : struct, IComponent => this.Entity.RemoveComponent<T>();
