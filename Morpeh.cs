@@ -113,7 +113,11 @@ namespace Morpeh {
             }
 
             this.currentArchetype = 0;
-            this.world.archetypes[0].Add(id);
+            var arch = this.world.archetypes[0];
+            arch.entities.Add(id);
+            if (arch.isDirty == false) {
+                arch.OnChange();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -452,7 +456,12 @@ namespace Morpeh {
             }
 
             var world = this.world;
-            world.archetypes[this.currentArchetype].Remove(this.internalID);
+            
+            var arch = world.archetypes[this.currentArchetype];
+            arch.entities.Remove(this.internalID);
+            if (arch.isDirty == false) {
+                arch.OnChange();
+            }
 
             for (int i = 0, length = this.components.Length; i < length; i += 2) {
                 var typeId      = this.components[i];
@@ -1386,17 +1395,6 @@ namespace Morpeh {
             this.filters = new List<Filter>();
         }
 
-        public void Add(int entityId) {
-            this.entities.Add(entityId);
-            this.OnChange();
-        }
-
-        public void Remove(int entityId) {
-            if (this.entities.Remove(entityId)) {
-                this.OnChange();
-            }
-        }
-
         public void AddFilter(Filter filter) {
             this.filters.Add(filter);
             this.OnChange();
@@ -1408,15 +1406,13 @@ namespace Morpeh {
             }
         }
 
-        private void OnChange() {
-            if (this.isDirty == false) {
-                this.world.changedArchetypes.Add(this.id);
-                foreach (var filter in this.filters) {
-                    filter.MakeDirty();
-                }
-
-                this.isDirty = true;
+        public void OnChange() {
+            this.world.changedArchetypes.Add(this.id);
+            foreach (var filter in this.filters) {
+                filter.MakeDirty();
             }
+
+            this.isDirty = true;
         }
 
         public void Swap() {
@@ -1432,14 +1428,22 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddTransfer(int entityId, int typeId, out int archetypeId) {
-            this.Remove(entityId);
+            this.entities.Remove(entityId);
+            if (this.isDirty == false) {
+                this.OnChange();
+            }
+            
             if (this.addTransfer.TryGetValue(typeId, out archetypeId)) {
-                this.world.archetypes[archetypeId].Add(entityId);
+                var arch = this.world.archetypes[archetypeId];
+                arch.entities.Add(entityId);
+                if (arch.isDirty == false) {
+                    arch.OnChange();
+                }
             }
             else {
                 var arch = this.world.GetArchetype(this.typeIds, typeId, true, out archetypeId);
                 arch.entities.Add(entityId);
-                if (arch.isDirty) {
+                if (arch.isDirty == false) {
                     arch.OnChange();
                 }
                 this.addTransfer.Add(typeId, archetypeId);
@@ -1448,14 +1452,22 @@ namespace Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveTransfer(int entityId, int typeId, out int archetypeId) {
-            this.Remove(entityId);
+            this.entities.Remove(entityId);
+            if (this.isDirty == false) {
+                this.OnChange();
+            }
+            
             if (this.removeTransfer.TryGetValue(typeId, out archetypeId)) {
-                this.world.archetypes[archetypeId].Add(entityId);
+                var arch = this.world.archetypes[archetypeId];
+                arch.entities.Add(entityId);
+                if (arch.isDirty == false) {
+                    arch.OnChange();
+                }
             }
             else {
                 var arch = this.world.GetArchetype(this.typeIds, typeId, false, out archetypeId);
                 arch.entities.Add(entityId);
-                if (arch.isDirty) {
+                if (arch.isDirty == false) {
                     arch.OnChange();
                 }
                 this.removeTransfer.Add(typeId, archetypeId);
