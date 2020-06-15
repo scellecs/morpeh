@@ -117,13 +117,6 @@ namespace Morpeh {
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = this.world.GetCache<T>();
 
-            if (this.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
-#if UNITY_EDITOR
-                Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-#endif
-                return ref cache.Empty();
-            }
-
             if (typeInfo.isMarker) {
                 const int componentId = -1;
                 if (this.componentsIds.Add(typeInfo.id, componentId, out _)) {
@@ -132,13 +125,17 @@ namespace Morpeh {
                 }
             }
             else {
-                var componentId = this.world.GetCache<T>().Add();
+                var componentId = cache.Add();
                 if (this.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
                     this.currentArchetype.AddTransfer(this.internalID, typeInfo.id, out this.currentArchetypeId, out this.currentArchetype);
                     return ref cache.Get(this.componentsIds.slots[slotIndex].value);
                 }
+                cache.Remove(componentId);
             }
 
+#if UNITY_EDITOR
+            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+#endif
             return ref cache.Empty();
         }
 
@@ -147,14 +144,6 @@ namespace Morpeh {
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = this.world.GetCache<T>();
 
-            if (this.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
-#if UNITY_EDITOR
-                Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-#endif
-                exist = true;
-                return ref cache.Empty();
-            }
-
             if (typeInfo.isMarker) {
                 const int componentId = -1;
                 if (this.componentsIds.Add(typeInfo.id, componentId, out _)) {
@@ -164,14 +153,18 @@ namespace Morpeh {
                 }
             }
             else {
-                var componentId = this.world.GetCache<T>().Add();
+                var componentId = cache.Add();
                 if (this.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
                     this.currentArchetype.AddTransfer(this.internalID, typeInfo.id, out this.currentArchetypeId, out this.currentArchetype);
                     exist = false;
                     return ref cache.Get(this.componentsIds.slots[slotIndex].value);
                 }
+                cache.Remove(componentId);
             }
 
+#if UNITY_EDITOR
+            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+#endif
             exist = true;
             return ref cache.Empty();
         }
