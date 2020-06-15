@@ -1994,7 +1994,7 @@ namespace Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveComponentFast(in IEntity entity) {
+        public void RemoveComponent(in IEntity entity) {
             if (entity.RemoveComponentFast(this.typedId, out var cacheIndex)) {
                 this.Remove(cacheIndex);
             }
