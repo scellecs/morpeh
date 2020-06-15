@@ -1596,38 +1596,53 @@ namespace Morpeh {
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public sealed class ComponentsBag<T> : ComponentsBag where T : struct, IComponent {
             private IntDictionary<T> cacheComponents;
-            private IntHashSet       ids;
+            private IntDictionary<int> idsLookup;
+            private List<int> ids;
+            private int length;
 
             internal override void Update(IntDictionary<bool> modifications) {
                 foreach (var i in modifications) {
                     var entityId = modifications.slots[i].key;
                     var add      = modifications.data[i];
                     if (add) {
+                        this.idsLookup.Add(entityId, this.length, out _);
                         this.ids.Add(entityId);
+                        ++this.length;
                     }
                     else {
-                        this.ids.Remove(entityId);
+                        var index = this.idsLookup.GetValue(entityId);
+                        var lastIndex = this.length - 1;
+                        if (this.length > 1 && index != lastIndex) {
+                            var lastEntity = this.ids[lastIndex];
+                            this.ids[index] = lastEntity;
+                            this.idsLookup.Set(lastEntity, index, out _);
+                        }
+
+                        --this.length;
                     }
                 }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref T GetComponent(in int index) => ref this.cacheComponents.data[this.ids.Get(index)];
+            public ref T GetComponent(in int index) => ref this.cacheComponents.data[this.ids[index]];
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SetComponent(in int index, in T value) => this.cacheComponents.data[this.ids.Get(index)] = value;
+            public void SetComponent(in int index, in T value) => this.cacheComponents.data[this.ids[index]] = value;
 
             internal static ComponentsBag<T> Create(Filter filter) {
                 var worldCache = filter.world.GetCache<T>();
 
                 var bag = new ComponentsBag<T> {
-                    ids             = new IntHashSet(),
+                    idsLookup             = new IntDictionary<int>(),
+                    ids = new List<int>(),
                     cacheComponents = worldCache.components
                 };
                 
                 foreach (var archetype in filter.archetypes) {
-                    foreach (var entity in archetype.currentEntities) {
-                        bag.ids.Add(entity);
+                    foreach (var entityId in archetype.currentEntities) {
+                        bag.idsLookup.Add(entityId, bag.length, out _);
+                        bag.ids.Add(entityId);
+                        ++bag.length;
                     }
                 }
 
@@ -2061,23 +2076,6 @@ namespace Morpeh {
                 }
 
                 return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int Get(int index) {
-                var i = 0;
-                for (int counter = 0, length = this.lastIndex; counter < length; ++counter) {
-                    ref var slot = ref this.slots[counter];
-                    if (slot.value >= 0) {
-                        if (index == i) {
-                            return slot.value;
-                        }
-
-                        ++i;
-                    }
-                }
-
-                return -1;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
