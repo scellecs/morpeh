@@ -128,8 +128,9 @@ namespace Morpeh {
                 var componentId = cache.Add();
                 if (this.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
                     this.currentArchetype.AddTransfer(this.internalID, typeInfo.id, out this.currentArchetypeId, out this.currentArchetype);
-                    return ref cache.Get(this.componentsIds.slots[slotIndex].value);
+                    return ref cache.Get(this.componentsIds.data[slotIndex]);
                 }
+
                 cache.Remove(componentId);
             }
 
@@ -157,8 +158,9 @@ namespace Morpeh {
                 if (this.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
                     this.currentArchetype.AddTransfer(this.internalID, typeInfo.id, out this.currentArchetypeId, out this.currentArchetype);
                     exist = false;
-                    return ref cache.Get(this.componentsIds.slots[slotIndex].value);
+                    return ref cache.Get(this.componentsIds.data[slotIndex]);
                 }
+
                 cache.Remove(componentId);
             }
 
@@ -181,7 +183,7 @@ namespace Morpeh {
             else {
                 var index = this.componentsIds.TryGetIndex(typeInfo.id);
                 if (index >= 0) {
-                    return ref cache.Get(this.componentsIds.slots[index].value);
+                    return ref cache.Get(this.componentsIds.data[index]);
                 }
             }
 
@@ -206,7 +208,7 @@ namespace Morpeh {
                 var index = this.componentsIds.TryGetIndex(typeInfo.id);
                 if (index >= 0) {
                     exist = true;
-                    return ref cache.Get(this.componentsIds.slots[index].value);
+                    return ref cache.Get(this.componentsIds.data[index]);
                 }
             }
 
@@ -221,7 +223,7 @@ namespace Morpeh {
 
             if (!typeInfo.isMarker) {
                 if (this.componentsIds.TryGetValue(typeInfo.id, out var index)) {
-                    cache.Set(this.componentsIds.slots[index].value, value);
+                    cache.Set(this.componentsIds.data[index], value);
                 }
                 else {
                     var componentId = cache.Add(value);
@@ -277,9 +279,8 @@ namespace Morpeh {
             arch.isDirty = true;
 
             foreach (var slotIndex in this.componentsIds) {
-                var slot        = this.componentsIds.slots[slotIndex];
-                var typeId      = slot.key;
-                var componentId = slot.value;
+                var typeId      = this.componentsIds.slots[slotIndex].key;
+                var componentId = this.componentsIds.data[slotIndex];
 
                 if (componentId >= 0) {
                     world.GetCache(typeId)?.Remove(componentId);
@@ -292,7 +293,7 @@ namespace Morpeh {
         internal void DisposeFast() {
             this.componentsIds.Clear();
             this.componentsIds = null;
-            this.world      = null;
+            this.world         = null;
 
             this.internalID         = -1;
             this.worldID            = -1;
@@ -1653,10 +1654,10 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref T GetComponent(in int index) => ref this.sharedComponents.slots[this.ids[index]].value;
+            public ref T GetComponent(in int index) => ref this.sharedComponents.data[this.ids[index]];
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SetComponent(in int index, in T value) => this.sharedComponents.slots[this.ids[index]].value = value;
+            public void SetComponent(in int index, in T value) => this.sharedComponents.data[this.ids[index]] = value;
 
             internal static ref ComponentsBag<T> Get(in int index) => ref cache[index];
 
@@ -1773,8 +1774,8 @@ namespace Morpeh {
             var id = counter++;
             var info = new DebugInfo {
                 type     = typeof(T),
-                getBoxed = (world, componentId) => world.GetCache<T>().components.slots[componentId].value,
-                setBoxed = (world, componentId, value) => world.GetCache<T>().components.slots[componentId].value = (T) value,
+                getBoxed = (world, componentId) => world.GetCache<T>().components.data[componentId],
+                setBoxed = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T) value,
                 typeInfo = CacheTypeIdentifier<T>.info
             };
             editorTypeAssociation.Add(id, info);
@@ -1880,7 +1881,7 @@ namespace Morpeh {
             if (this.freeIndexes.size > 0) {
                 index = this.freeIndexes.Pop();
 
-                this.components.slots[index].value = value;
+                this.components.data[index] = value;
                 return index;
             }
 
@@ -1889,17 +1890,17 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T Get(in int id) => ref this.components.slots[id].value;
+        public ref T Get(in int id) => ref this.components.data[id];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(in int id, in T value) => this.components.slots[id].value = value;
+        public void Set(in int id, in T value) => this.components.data[id] = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T Empty() => ref this.components.slots[0].value;
+        public ref T Empty() => ref this.components.data[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void Remove(in int id) {
-            this.components.slots[id].value = default;
+            this.components.data[id] = default;
             this.freeIndexes.Push(id);
         }
 
@@ -1916,7 +1917,7 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class CacheDisposableComponents<T> : CacheComponents<T> where T : struct, IComponent, IDisposable {
         public override void Remove(in int id) {
-            this.components.slots[id].value.Dispose();
+            this.components.data[id].Dispose();
             base.Remove(in id);
         }
 
@@ -1924,7 +1925,7 @@ namespace Morpeh {
             for (int i = 0, length = this.components.slots.Length; i < length; i++) {
                 ref var slot = ref this.components.slots[i];
                 if (slot.key != -1) {
-                    slot.value.Dispose();
+                    this.components.data[i].Dispose();
                 }
             }
 
@@ -2154,6 +2155,7 @@ namespace Morpeh {
             public int    count;
             public int[]  buckets;
             public Slot[] slots;
+            public T[]    data;
 
             public int lastIndex;
             public int freeList;
@@ -2166,6 +2168,7 @@ namespace Morpeh {
                 var prime = HashHelpers.GetPrime(capacity);
                 this.buckets = new int[prime];
                 this.slots   = new Slot[prime];
+                this.data    = new T[prime];
 
                 for (var i = 0; i < prime; i++) {
                     this.slots[i].key = -1;
@@ -2191,6 +2194,7 @@ namespace Morpeh {
                         var newSize = HashHelpers.ExpandPrime(this.count);
 
                         Array.Resize(ref this.slots, newSize);
+                        Array.Resize(ref this.data, newSize);
 
                         var numArray = new int[newSize];
 
@@ -2217,9 +2221,10 @@ namespace Morpeh {
 
                 ref var newSlot = ref this.slots[slotIndex];
 
-                newSlot.key   = key;
-                newSlot.next  = this.buckets[rem] - 1;
-                newSlot.value = value;
+                newSlot.key  = key;
+                newSlot.next = this.buckets[rem] - 1;
+
+                this.data[slotIndex] = value;
 
                 this.buckets[rem] = slotIndex + 1;
 
@@ -2242,11 +2247,11 @@ namespace Morpeh {
 
                         ref var removedSlot = ref this.slots[i];
 
-                        lastValue = removedSlot.value;
+                        lastValue    = this.data[i];
+                        this.data[i] = default;
 
-                        removedSlot.key   = -1;
-                        removedSlot.next  = this.freeList;
-                        removedSlot.value = default;
+                        removedSlot.key  = -1;
+                        removedSlot.next = this.freeList;
 
                         --this.count;
                         if (this.count == 0) {
@@ -2273,7 +2278,7 @@ namespace Morpeh {
 
                 for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
                     if (this.slots[i].key == key) {
-                        value = this.slots[i].value;
+                        value = this.data[i];
                         return true;
                     }
                 }
@@ -2303,7 +2308,7 @@ namespace Morpeh {
                         continue;
                     }
 
-                    array[num] = this.slots[i].value;
+                    array[num] = this.data[i];
                     ++num;
                 }
             }
@@ -2333,8 +2338,6 @@ namespace Morpeh {
             public struct Slot {
                 public int key;
                 public int next;
-
-                public T value;
             }
 
             [Il2Cpp(Option.NullChecks, false)]
