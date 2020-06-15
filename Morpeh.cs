@@ -727,7 +727,9 @@ namespace Morpeh {
         private List<int> nextFreeEntityIDs;
 
         [SerializeField]
-        internal CacheComponents[] caches;
+        internal IntDictionary<int> caches;
+        [SerializeField]
+        internal IntDictionary<int> typedCaches;
 
         [SerializeField]
         internal List<Archetype> archetypes;
@@ -772,7 +774,8 @@ namespace Morpeh {
             this.id                = worlds.Count - 1;
             this.freeEntityIDs     = new List<int>();
             this.nextFreeEntityIDs = new List<int>();
-            this.caches            = new CacheComponents[Constants.DEFAULT_WORLD_CACHES_CAPACITY];
+            this.caches            = new IntDictionary<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            this.typedCaches       = new IntDictionary<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
             this.entitiesLength   = 0;
             this.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
@@ -849,17 +852,20 @@ namespace Morpeh {
 #if UNITY_EDITOR
                 try {
 #endif
-                    cache?.Dispose();
+                    CacheComponents.caches[cache].Dispose();
 #if UNITY_EDITOR
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not dispose cache {cache?.GetType()}");
+                    Debug.LogError($"[MORPEH] Can not dispose cache id {cache}");
                     Debug.LogException(e);
                 }
 #endif
             }
 
+            this.caches.Clear();
             this.caches = null;
+            this.typedCaches.Clear();
+            this.typedCaches = null;
 
             foreach (var archetype in this.archetypes) {
                 archetype.Dispose();
@@ -884,6 +890,8 @@ namespace Morpeh {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif
         public static void InitializationDefaultWorld() {
+            CacheComponents.cleanup();
+            
             worlds.Clear();
             var defaultWorld = Create();
             defaultWorld.UpdateByUnity = true;
@@ -957,30 +965,33 @@ namespace Morpeh {
             return archetype;
         }
 
-        internal CacheComponents GetCache(int typeId) => this.caches[typeId];
+        [CanBeNull]
+        internal CacheComponents GetCache(int typeId) {
+            if (this.caches.TryGetValue(typeId, out var index)) {
+                return CacheComponents.caches[index];
+            }
+
+            return null;
+        }
 
         internal CacheComponents<T> GetCache<T>() where T : struct, IComponent {
             var info          = CacheTypeIdentifier<T>.info;
-            var currentLength = this.caches.Length;
-            if (info.id >= currentLength) {
-                while (currentLength <= info.id) {
-                    currentLength <<= 1;
-                }
-
-                Array.Resize(ref this.caches, currentLength);
+            if (this.typedCaches.TryGetValue(info.id, out var typedIndex)) {
+                return CacheComponents<T>.typedCaches[typedIndex];
             }
 
-            var cache = (CacheComponents<T>) this.caches[info.id];
-            if (cache == null) {
-                if (info.isDisposable) {
-                    var constructedType          = typeof(CacheDisposableComponents<>).MakeGenericType(typeof(T));
-                    this.caches[info.id] = cache = (CacheComponents<T>) Activator.CreateInstance(constructedType);
-                }
-                else {
-                    this.caches[info.id] = cache = new CacheComponents<T>();
-                }
+            CacheComponents<T> cache;
+            if (info.isDisposable) {
+                var constructedType          = typeof(CacheDisposableComponents<>).MakeGenericType(typeof(T));
+                cache = (CacheComponents<T>) Activator.CreateInstance(constructedType);
+            }
+            else {
+                cache = new CacheComponents<T>();
             }
 
+            this.caches.Add(info.id, cache.id, out _);
+            this.typedCaches.Add(info.id, cache.typedId, out _);
+            
             return cache;
         }
 
@@ -1842,6 +1853,12 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal abstract class CacheComponents : IDisposable {
+        public static List<CacheComponents> caches = new List<CacheComponents>();
+        public static Action cleanup = () => caches.Clear();
+
+        [SerializeField]
+        internal int id;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract void Remove(in int id);
 
@@ -1853,16 +1870,30 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal class CacheComponents<T> : CacheComponents where T : struct, IComponent {
+        public static List<CacheComponents<T>> typedCaches = new List<CacheComponents<T>>();
+
         [SerializeField]
         internal IntDictionary<T> components;
         [SerializeField]
         internal IntStack freeIndexes;
+        [SerializeField]
+        internal int typedId;
 
+        static CacheComponents() {
+            cleanup += () => typedCaches.Clear();
+        }
+        
         public CacheComponents() {
             this.components  = new IntDictionary<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
             this.freeIndexes = new IntStack();
 
             this.components.Add(0, default, out _);
+
+            this.typedId = typedCaches.Count;
+            typedCaches.Add(this);
+
+            this.id = caches.Count;
+            caches.Add(this);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
