@@ -1861,7 +1861,7 @@ namespace Morpeh {
 
             internal static int Create(World world) {
                 var worldCache = world.GetCache<T>();
-                
+
                 var bag = new ComponentsBag<T> {
                     world            = world,
                     ids              = new int[1],
@@ -2158,7 +2158,7 @@ namespace Morpeh {
         public sealed class IntHashSet : IEnumerable<int> {
             public int count;
             [SerializeField]
-            private int[]  buckets;
+            private int[] buckets;
             [SerializeField]
             private Slot[] slots;
 
@@ -2178,7 +2178,7 @@ namespace Morpeh {
             }
 
             public bool Add(in int value) {
-                DivRem(value, this.buckets.Length, out var rem);
+                HashHelpers.DivRem(value, this.buckets.Length, out var rem);
 
                 for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
                     if (this.slots[i].value == value) {
@@ -2195,39 +2195,40 @@ namespace Morpeh {
                     if (this.lastIndex == this.slots.Length) {
                         var newSize = HashHelpers.ExpandPrime(this.count);
 
-                        //todo resize
-                        var slotArray = new Slot[newSize];
-                        Array.Copy(this.slots, 0, slotArray, 0, this.lastIndex);
+                        Array.Resize(ref this.slots, newSize);
 
                         var numArray = new int[newSize];
 
                         for (int i = 0, length = this.lastIndex; i < length; ++i) {
-                            ref var slot = ref slotArray[i];
-                            DivRem(slot.value, newSize, out var newResizeIndex);
+                            ref var slot = ref this.slots[i];
+                            HashHelpers.DivRem(slot.value, newSize, out var newResizeIndex);
                             slot.next = numArray[newResizeIndex] - 1;
 
                             numArray[newResizeIndex] = i + 1;
                         }
 
-                        this.slots   = slotArray;
                         this.buckets = numArray;
 
-                        DivRem(value, this.buckets.Length, out rem);
+                        HashHelpers.DivRem(value, this.buckets.Length, out rem);
                     }
 
                     newIndex = this.lastIndex;
                     ++this.lastIndex;
                 }
 
-                this.slots[newIndex].value = value;
-                this.slots[newIndex].next  = this.buckets[rem] - 1;
-                this.buckets[rem]          = newIndex + 1;
+                ref var newSlot = ref this.slots[newIndex];
+
+                newSlot.value = value;
+                newSlot.next  = this.buckets[rem] - 1;
+
+                this.buckets[rem] = newIndex + 1;
+
                 ++this.count;
                 return true;
             }
 
             public bool Remove(in int value) {
-                DivRem(value, this.buckets.Length, out var rem);
+                HashHelpers.DivRem(value, this.buckets.Length, out var rem);
 
                 var num = -1;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
@@ -2271,7 +2272,7 @@ namespace Morpeh {
                     ++num;
                 }
             }
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Clear() {
                 if (this.lastIndex <= 0) {
@@ -2292,19 +2293,12 @@ namespace Morpeh {
             IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
 
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static int DivRem(int left, int right, out int result) {
-                var div = left / right;
-                result = left - div * right;
-                return div;
-            }
-
             [Il2Cpp(Option.NullChecks, false)]
             [Il2Cpp(Option.ArrayBoundsChecks, false)]
             [Il2Cpp(Option.DivideByZeroChecks, false)]
             internal struct Slot {
-                internal int next;
                 internal int value;
+                internal int next;
             }
 
             [Il2Cpp(Option.NullChecks, false)]
@@ -2328,9 +2322,10 @@ namespace Morpeh {
                         if (slot.value < 0) {
                             continue;
                         }
+
                         this.current = slot.value;
                         ++this.index;
-                        
+
                         return true;
                     }
 
@@ -2351,6 +2346,222 @@ namespace Morpeh {
                 public void Dispose() {
                 }
             }
+        }
+
+        [Serializable]
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
+        public sealed class IntDictionary<T> {
+            public int count;
+            [SerializeField]
+            private int[] buckets;
+            [SerializeField]
+            private Slot[] slots;
+
+            [SerializeField]
+            private int lastIndex;
+            [SerializeField]
+            private int freeList;
+
+            public IntDictionary(in int capacity = 0) {
+                this.lastIndex = 0;
+                this.count     = 0;
+                this.freeList  = -1;
+
+                var prime = HashHelpers.GetPrime(capacity);
+                this.buckets = new int[prime];
+                this.slots   = new Slot[prime];
+            }
+
+            public bool Add(in int key, in T value) {
+                HashHelpers.DivRem(key, this.buckets.Length, out var rem);
+
+                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
+                    if (this.slots[i].key == key) {
+                        return false;
+                    }
+                }
+
+                int newIndex;
+                if (this.freeList >= 0) {
+                    newIndex      = this.freeList;
+                    this.freeList = this.slots[newIndex].next;
+                }
+                else {
+                    if (this.lastIndex == this.slots.Length) {
+                        var newSize = HashHelpers.ExpandPrime(this.count);
+
+                        Array.Resize(ref this.slots, newSize);
+
+                        var numArray = new int[newSize];
+
+                        for (int i = 0, length = this.lastIndex; i < length; ++i) {
+                            ref var slot = ref this.slots[i];
+                            HashHelpers.DivRem(slot.key, newSize, out var newResizeIndex);
+                            slot.next = numArray[newResizeIndex] - 1;
+
+                            numArray[newResizeIndex] = i + 1;
+                        }
+
+                        this.buckets = numArray;
+
+                        HashHelpers.DivRem(key, this.buckets.Length, out rem);
+                    }
+
+                    newIndex = this.lastIndex;
+                    ++this.lastIndex;
+                }
+
+                ref var newSlot = ref this.slots[newIndex];
+
+                newSlot.key   = key;
+                newSlot.next  = this.buckets[rem] - 1;
+                newSlot.value = value;
+
+                this.buckets[rem] = newIndex + 1;
+
+                ++this.count;
+                return true;
+            }
+
+            public bool Remove(in int key) {
+                HashHelpers.DivRem(key, this.buckets.Length, out var rem);
+
+                var num = -1;
+                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
+                    if (this.slots[i].key == key) {
+                        if (num < 0) {
+                            this.buckets[rem] = this.slots[i].next + 1;
+                        }
+                        else {
+                            this.slots[num].next = this.slots[i].next;
+                        }
+
+                        this.slots[i].key = -1;
+                        this.slots[i].next  = this.freeList;
+                        this.slots[i].value  = default;
+                        
+                        --this.count;
+                        if (this.count == 0) {
+                            this.lastIndex = 0;
+                            this.freeList  = -1;
+                        }
+                        else {
+                            this.freeList = i;
+                        }
+
+                        return true;
+                    }
+
+                    num = i;
+                }
+
+                return false;
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private bool TryGetValue(in int key, [CanBeNull] out T value) {
+                HashHelpers.DivRem(key, this.buckets.Length, out var rem);
+                
+                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
+                    if (this.slots[i].key == key) {
+                        value = this.slots[i].value;
+                        return true;
+                    }
+                }
+                
+                value = default;
+                return true;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CopyTo(T[] array) {
+                int num = 0;
+                for (int i = 0, li = this.lastIndex, length = this.count; i < li && num < length; ++i) {
+                    if (this.slots[i].key < 0) {
+                        continue;
+                    }
+
+                    array[num] = this.slots[i].value;
+                    ++num;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Clear() {
+                if (this.lastIndex <= 0) {
+                    return;
+                }
+
+                Array.Clear(this.slots, 0, this.lastIndex);
+                Array.Clear(this.buckets, 0, this.buckets.Length);
+                this.lastIndex = 0;
+                this.count     = 0;
+                this.freeList  = -1;
+            }
+
+            // public Enumerator GetEnumerator() => new Enumerator(this);
+            //
+            // IEnumerator<int> IEnumerable<int>.GetEnumerator() => new Enumerator(this);
+            //
+            // IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
+
+
+            [Il2Cpp(Option.NullChecks, false)]
+            [Il2Cpp(Option.ArrayBoundsChecks, false)]
+            [Il2Cpp(Option.DivideByZeroChecks, false)]
+            internal struct Slot {
+                internal int key;
+                internal int next;
+
+                internal T value;
+            }
+
+            // [Il2Cpp(Option.NullChecks, false)]
+            // [Il2Cpp(Option.ArrayBoundsChecks, false)]
+            // [Il2Cpp(Option.DivideByZeroChecks, false)]
+            // public struct Enumerator : IEnumerator<int> {
+            //     private readonly IntHashSet set;
+            //
+            //     private int index;
+            //     private int current;
+            //
+            //     internal Enumerator(IntHashSet set) {
+            //         this.set     = set;
+            //         this.index   = 0;
+            //         this.current = default;
+            //     }
+            //
+            //     public bool MoveNext() {
+            //         for (; this.index < this.set.lastIndex; ++this.index) {
+            //             ref var slot = ref this.set.slots[this.index];
+            //             if (slot.value < 0) {
+            //                 continue;
+            //             }
+            //             this.current = slot.value;
+            //             ++this.index;
+            //             
+            //             return true;
+            //         }
+            //
+            //         this.index   = this.set.lastIndex + 1;
+            //         this.current = default;
+            //         return false;
+            //     }
+            //
+            //     public int Current => this.current;
+            //
+            //     object IEnumerator.Current => this.current;
+            //
+            //     void IEnumerator.Reset() {
+            //         this.index   = 0;
+            //         this.current = default;
+            //     }
+            //
+            //     public void Dispose() {
+            //     }
+            // }
         }
 
         [Il2Cpp(Option.NullChecks, false)]
@@ -2452,8 +2663,16 @@ namespace Morpeh {
                 return min > 2146435069U && 2146435069 > oldSize ? 2146435069 : GetPrime(min);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int DivRem(int left, int right, out int result) {
+                var div = left / right;
+                result = left - div * right;
+                return div;
+            }
+
             //todo possible refactor?
-            internal static int Sqrt(int num) {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int Sqrt(int num) {
                 if (0 == num) {
                     return 0;
                 }
