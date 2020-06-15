@@ -1211,9 +1211,7 @@ namespace Morpeh {
         [NonSerialized]
         public List<Filter> filters;
         [SerializeField]
-        internal IntHashSet addOperations;
-        [SerializeField]
-        internal IntHashSet removeOperations;
+        internal IntDictionary<bool> operations;
         [SerializeField]
         internal IntDictionary<int> removeTransfer;
         [SerializeField]
@@ -1228,15 +1226,14 @@ namespace Morpeh {
         internal World world;
 
         internal Archetype(int id, int[] typeIds, int worldId) {
-            this.id               = id;
-            this.typeIds          = typeIds;
-            this.currentEntities  = new IntHashSet();
-            this.addOperations    = new IntHashSet();
-            this.removeOperations = new IntHashSet();
-            this.addTransfer      = new IntDictionary<int>();
-            this.removeTransfer   = new IntDictionary<int>();
-            this.isDirty          = false;
-            this.worldId          = worldId;
+            this.id              = id;
+            this.typeIds         = typeIds;
+            this.currentEntities = new IntHashSet();
+            this.operations      = new IntDictionary<bool>();
+            this.addTransfer     = new IntDictionary<int>();
+            this.removeTransfer  = new IntDictionary<int>();
+            this.isDirty         = false;
+            this.worldId         = worldId;
 
             this.Ctor();
         }
@@ -1248,18 +1245,16 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(int entityId) {
-            this.addOperations.Add(entityId);
-            this.removeOperations.Remove(entityId);
+            this.operations.Set(entityId, true, out _);
             this.isDirty = true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Remove(int entityId) {
-            this.removeOperations.Add(entityId);
-            this.addOperations.Remove(entityId);
+            this.operations.Set(entityId, false, out _);
             this.isDirty = true;
         }
-        
+
         public void AddFilter(Filter filter) {
             this.filters.Add(filter);
             this.isDirty = true;
@@ -1272,16 +1267,18 @@ namespace Morpeh {
         }
 
         public void Swap() {
-            foreach (var entityId in this.removeOperations) {
-                this.currentEntities.Remove(entityId);
+            foreach (var index in this.operations) {
+                var entityId = this.operations.slots[index].key;
+                var add = this.operations.data[index];
+                if (add) {
+                    this.currentEntities.Add(entityId);
+                }
+                else {
+                    this.currentEntities.Remove(entityId);
+                }
             }
 
-            this.removeOperations.Clear();
-            foreach (var entityId in this.addOperations) {
-                this.currentEntities.Add(entityId);
-            }
-
-            this.addOperations.Clear();
+            this.operations.Clear();
 
             this.length  = this.currentEntities.count;
             this.isDirty = false;
@@ -1327,11 +1324,9 @@ namespace Morpeh {
 
             this.currentEntities.Clear();
             this.currentEntities = null;
-            this.addOperations.Clear();
-            this.addOperations = null;
-            this.removeOperations.Clear();
-            this.removeOperations = null;
-            
+            this.operations.Clear();
+            this.operations = null;
+
             this.addTransfer.Clear();
             this.addTransfer = null;
 
@@ -1341,7 +1336,8 @@ namespace Morpeh {
     }
 
     internal struct Modification {
-        public int entityId;
+        public bool add;
+        public int  entityId;
     }
 
     //TODO Separate RootFilter and ChildFilter
@@ -1755,20 +1751,20 @@ namespace Morpeh {
         public struct EntityEnumerator : IEnumerator<IEntity> {
             private readonly World           world;
             private readonly List<Archetype> archetypes;
-            
-            private Entity          current;
 
-            private int archetypeId;
-            private int archetypeCount;
+            private Entity current;
+
+            private int                   archetypeId;
+            private int                   archetypeCount;
             private IntHashSet.Enumerator archetypeEnumerator;
 
             internal EntityEnumerator(World world, List<Archetype> archetypes) {
                 this.world      = world;
                 this.archetypes = archetypes;
                 this.current    = null;
-                
-                this.archetypeId = 0;
-                this.archetypeCount  = this.archetypes.Count;
+
+                this.archetypeId         = 0;
+                this.archetypeCount      = this.archetypes.Count;
                 this.archetypeEnumerator = this.archetypeCount > 0 ? this.archetypes[0].currentEntities.GetEnumerator() : default;
             }
 
@@ -1779,10 +1775,10 @@ namespace Morpeh {
                         this.current = this.world.entities[this.archetypeEnumerator.Current];
                         return true;
                     }
-                    
+
                     while (++this.archetypeId < this.archetypeCount) {
                         this.archetypeEnumerator = this.archetypes[this.archetypeId].currentEntities.GetEnumerator();
-                        move = this.archetypeEnumerator.MoveNext();
+                        move                     = this.archetypeEnumerator.MoveNext();
                         if (move) {
                             this.current = this.world.entities[this.archetypeEnumerator.Current];
                             return true;
@@ -1794,8 +1790,8 @@ namespace Morpeh {
             }
 
             public void Reset() {
-                this.current = null;
-                this.archetypeId  = 0;
+                this.current             = null;
+                this.archetypeId         = 0;
                 this.archetypeEnumerator = this.archetypeCount > 0 ? this.archetypes[0].currentEntities.GetEnumerator() : default;
             }
 
@@ -1804,8 +1800,8 @@ namespace Morpeh {
             object IEnumerator.Current => this.current;
 
             public void Dispose() {
-                this.archetypeCount  = -1;
-                this.archetypeId = -1;
+                this.archetypeCount = -1;
+                this.archetypeId    = -1;
                 this.archetypeEnumerator.Dispose();
 
                 this.current = null;
@@ -2344,6 +2340,64 @@ namespace Morpeh {
                 return true;
             }
 
+
+            public void Set(in int key, in T value, out int slotIndex) {
+                HashHelpers.DivRem(key, this.buckets.Length, out var rem);
+
+                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
+                    if (this.slots[i].key == key) {
+                        this.data[i] = value;
+                        slotIndex    = i;
+                        return;
+                    }
+                }
+
+                if (this.freeList >= 0) {
+                    slotIndex     = this.freeList;
+                    this.freeList = this.slots[slotIndex].next;
+                }
+                else {
+                    if (this.lastIndex == this.slots.Length) {
+                        var newSize = HashHelpers.ExpandPrime(this.count);
+
+                        Array.Resize(ref this.slots, newSize);
+                        Array.Resize(ref this.data, newSize);
+
+                        var numArray = new int[newSize];
+
+                        for (int i = 0, length = this.lastIndex; i < length; ++i) {
+                            ref var slot = ref this.slots[i];
+                            HashHelpers.DivRem(slot.key, newSize, out var newResizeIndex);
+                            slot.next = numArray[newResizeIndex] - 1;
+
+                            numArray[newResizeIndex] = i + 1;
+                        }
+
+                        for (int i = this.lastIndex + 1, length = newSize; i < length; i++) {
+                            this.slots[i].key = -1;
+                        }
+
+                        this.buckets = numArray;
+
+                        HashHelpers.DivRem(key, this.buckets.Length, out rem);
+                    }
+
+                    slotIndex = this.lastIndex;
+                    ++this.lastIndex;
+                }
+
+                ref var newSlot = ref this.slots[slotIndex];
+
+                newSlot.key  = key;
+                newSlot.next = this.buckets[rem] - 1;
+
+                this.data[slotIndex] = value;
+
+                this.buckets[rem] = slotIndex + 1;
+
+                ++this.count;
+            }
+
             public bool Remove(in int key, [CanBeNull] out T lastValue) {
                 HashHelpers.DivRem(key, this.buckets.Length, out var rem);
 
@@ -2446,6 +2500,8 @@ namespace Morpeh {
 
                 Array.Clear(this.slots, 0, this.lastIndex);
                 Array.Clear(this.buckets, 0, this.buckets.Length);
+                Array.Clear(this.data, 0, this.buckets.Length);
+                
                 this.lastIndex = 0;
                 this.count     = 0;
                 this.freeList  = -1;
