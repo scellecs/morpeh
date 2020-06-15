@@ -64,7 +64,7 @@ namespace Morpeh {
                             var view = new ComponentView {
                                 debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[this.entity.components[i]],
                                 id        = this.entity.components[i + 1],
-                                world     = this.entity.World
+                                world     = this.entity.world
                             };
                             this.componentViews.Add(view);
                         }
