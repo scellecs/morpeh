@@ -36,6 +36,7 @@ namespace Morpeh {
 
         void SetComponent<T>(in T value) where T : struct, IComponent;
         bool RemoveComponent<T>() where T : struct, IComponent;
+        bool RemoveComponentFast(int typeId, out int cacheIndex);
         bool Has<T>() where T : struct, IComponent;
         bool IsDisposed();
     }
@@ -253,6 +254,16 @@ namespace Morpeh {
                 }
 
                 this.currentArchetype.RemoveTransfer(this.internalID, typeInfo.id, out this.currentArchetypeId, out this.currentArchetype);
+                return true;
+            }
+
+            return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool RemoveComponentFast(int typeId, out int cacheIndex) {
+            if (this.componentsIds.Remove(typeId, out cacheIndex)) {
+                this.currentArchetype.RemoveTransfer(this.internalID, typeId, out this.currentArchetypeId, out this.currentArchetype);
                 return true;
             }
 
@@ -1947,6 +1958,13 @@ namespace Morpeh {
         internal override void Remove(in int id) {
             this.components.data[id] = default;
             this.freeIndexes.Push(id);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveComponentFast(in IEntity entity) {
+            if (entity.RemoveComponentFast(this.typedId, out var cacheIndex)) {
+                this.Remove(cacheIndex);
+            }
         }
 
         public override void Dispose() {

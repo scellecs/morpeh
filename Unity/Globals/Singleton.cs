@@ -125,6 +125,9 @@
         public void SetComponent<T>(in T value) where T : struct, IComponent => this.Entity.SetComponent(in value);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RemoveComponent<T>() where T : struct, IComponent => this.Entity.RemoveComponent<T>();
+
+        public bool RemoveComponentFast(int typeId, out int cacheIndex) => this.Entity.RemoveComponentFast(typeId, out cacheIndex);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has<T>() where T : struct, IComponent => this.Entity.Has<T>();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
