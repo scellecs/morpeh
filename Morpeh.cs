@@ -218,7 +218,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetComponentId(in int typeId) => this.componentsIds.TryGetIndex(typeId);
+        public int GetComponentId(in int typeId) => this.componentsIds.GetValue(typeId);
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetComponent<T>(in T value) where T : struct, IComponent {
@@ -1936,6 +1936,9 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Set(in int id, in T value) => this.components.data[id] = value;
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetComponent(in IEntity entity, in T value) => this.components.data[entity.GetComponentId(this.typedId)] = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ref T Empty() => ref this.components.data[0];
@@ -2327,6 +2330,19 @@ namespace Morpeh {
 
                 value = default;
                 return false;
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public T GetValue(in int key) {
+                HashHelpers.DivRem(key, this.buckets.Length, out var rem);
+
+                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
+                    if (this.slots[i].key == key) {
+                        return this.data[i];
+                    }
+                }
+                
+                return default;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
