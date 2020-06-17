@@ -1154,14 +1154,15 @@ namespace Morpeh {
 
         public void UpdateFilters() {
             if (this.newArchetypes.Count > 0) {
-                foreach (var filter in this.filters) {
-                    filter.FindArchetypes(this.newArchetypes);
+                for (var index = 0; index < this.filters.Count; index++) {
+                    this.filters[index].FindArchetypes(this.newArchetypes);
                 }
 
                 this.newArchetypes.Clear();
             }
 
-            foreach (var archetype in this.archetypes) {
+            for (var index = 0; index < this.archetypes.Count; index++) {
+                var archetype = this.archetypes[index];
                 if (archetype.isDirty) {
                     archetype.Proccess();
                 }
@@ -1262,6 +1263,10 @@ namespace Morpeh {
                     }
                     this.entities.Remove(entityId);
                 }
+            }
+            
+            for (var index = 0; index < this.filters.Count; index++) {
+                this.filters[index].UpdateLength();
             }
             
             this.modifications.Clear();
