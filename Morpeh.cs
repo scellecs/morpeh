@@ -1164,7 +1164,7 @@ namespace Morpeh {
             for (var index = 0; index < this.archetypes.Count; index++) {
                 var archetype = this.archetypes[index];
                 if (archetype.isDirty) {
-                    archetype.Proccess();
+                    archetype.Process();
                 }
             }
 
@@ -1189,7 +1189,7 @@ namespace Morpeh {
         [SerializeField]
         public int length;
         [NonSerialized]
-        public List<Filter> filters;
+        public FastList<Filter> filters;
         [SerializeField]
         internal IntDictionary<bool> modifications;
         [SerializeField]
@@ -1220,7 +1220,7 @@ namespace Morpeh {
 
         internal void Ctor() {
             this.world   = World.worlds[this.worldId];
-            this.filters = new List<Filter>();
+            this.filters = new FastList<Filter>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1241,32 +1241,33 @@ namespace Morpeh {
         }
 
         public void RemoveFilter(Filter filter) {
-            if (this.filters.Remove(filter)) {
-                this.isDirty = true;
-            }
+            this.filters.Remove(filter);
+            this.isDirty = true;
         }
 
-        public void Proccess() {
+        public void Process() {
+            var len = this.filters.length;
+            
             foreach (var i in this.modifications) {
                 var entityId = this.modifications.slots[i].key;
                 var add = this.modifications.data[i];
 
                 if (add) {
-                    for (var index = 0; index < this.filters.Count; index++) {
-                        this.filters[index].AddEntity(entityId);
+                    for (var index = 0; index < len; index++) {
+                        this.filters.data[index].AddEntity(entityId);
                     }
                     this.entities.Add(entityId);
                 }
                 else {
-                    for (var index = 0; index < this.filters.Count; index++) {
-                        this.filters[index].RemoveEntity(entityId);
+                    for (var index = 0; index < len; index++) {
+                        this.filters.data[index].RemoveEntity(entityId);
                     }
                     this.entities.Remove(entityId);
                 }
             }
             
-            for (var index = 0; index < this.filters.Count; index++) {
-                this.filters[index].UpdateLength();
+            for (var index = 0; index < len; index++) {
+                this.filters.data[index].UpdateLength();
             }
             
             this.modifications.Clear();
@@ -1449,6 +1450,7 @@ namespace Morpeh {
             this.world.UpdateFilters();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void AddEntity(int entityId) {
             this.entitiesMap.Add(entityId);
             foreach (var componentsBag in this.componentsBags) {
@@ -1456,6 +1458,7 @@ namespace Morpeh {
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void RemoveEntity(int entityId) {
             var index = this.entitiesMap.Remove(entityId);
             foreach (var componentsBag in this.componentsBags) {
@@ -1463,6 +1466,7 @@ namespace Morpeh {
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void UpdateLength() {
             this.Length = this.entitiesMap.values.length;
         }
