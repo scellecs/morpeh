@@ -1163,8 +1163,9 @@ namespace Morpeh {
 
             foreach (var archetype in this.archetypes) {
                 if (archetype.isDirty) {
+                    var modifications = archetype.GetModifications();
                     foreach (var filter in archetype.filters) {
-                        filter.InternalUpdate(archetype.modifications);
+                        filter.InternalUpdate(modifications);
                     }
 
                     archetype.Proccess();
@@ -1195,6 +1196,8 @@ namespace Morpeh {
         public List<Filter> filters;
         [SerializeField]
         internal IntDictionary<bool> modifications;
+        [NonSerialized]
+        private FastList<Modification> modificationsList;
         [SerializeField]
         internal IntDictionary<int> removeTransfer;
         [SerializeField]
@@ -1209,14 +1212,15 @@ namespace Morpeh {
         internal World world;
 
         internal Archetype(int id, int[] typeIds, int worldId) {
-            this.id              = id;
-            this.typeIds         = typeIds;
-            this.entities = new IntHashSet();
-            this.modifications   = new IntDictionary<bool>();
-            this.addTransfer     = new IntDictionary<int>();
-            this.removeTransfer  = new IntDictionary<int>();
-            this.isDirty         = false;
-            this.worldId         = worldId;
+            this.id                = id;
+            this.typeIds           = typeIds;
+            this.entities          = new IntHashSet();
+            this.modifications     = new IntDictionary<bool>();
+            this.modificationsList = new FastList<Modification>();
+            this.addTransfer       = new IntDictionary<int>();
+            this.removeTransfer    = new IntDictionary<int>();
+            this.isDirty           = false;
+            this.worldId           = worldId;
 
             this.Ctor();
         }
@@ -1224,6 +1228,19 @@ namespace Morpeh {
         internal void Ctor() {
             this.world   = World.worlds[this.worldId];
             this.filters = new List<Filter>();
+        }
+
+        internal FastList<Modification> GetModifications() {
+            this.modificationsList.Clear();
+            foreach (var i in this.modifications) {
+                Modification m;
+                m.add = this.modifications.data[i];
+                m.entityId = this.modifications.slots[i].key;
+                
+                this.modificationsList.Add(m);
+            }
+
+            return this.modificationsList;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1426,8 +1443,10 @@ namespace Morpeh {
                 foreach (var bag in this.componentsBags) {
                     bag.InternalDispose();
                 }
+
                 this.componentsBags.Clear();
             }
+
             this.componentsBags = null;
 
             this.typeID     = -1;
@@ -1439,12 +1458,11 @@ namespace Morpeh {
             this.world.UpdateFilters();
         }
 
-        internal void InternalUpdate(IntDictionary<bool> modifications) {
-            foreach (var i in modifications) {
-                var entityId = modifications.slots[i].key;
-                var add      = modifications.data[i];
-                
-                if (add) {
+        internal void InternalUpdate(FastList<Modification> modifications) {
+            foreach (var modification in modifications) {
+                var entityId = modification.entityId;
+
+                if (modification.add) {
                     this.entitiesMap.Add(entityId);
                     foreach (var componentsBag in this.componentsBags) {
                         componentsBag.Add(entityId);
@@ -1603,11 +1621,13 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public abstract void Add(int entityId);
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public abstract void RemoveAt(int index);
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal abstract void InternalDispose();
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public abstract void Dispose();
         }
@@ -1623,9 +1643,9 @@ namespace Morpeh {
                 var worldCache = filter.world.GetCache<T>();
                 var world      = filter.world;
 
-                this.filter = filter;
+                this.filter     = filter;
                 this.typeId     = CacheTypeIdentifier<T>.info.id;
-                this.ids = new FastList<int>(filter.entitiesMap.values.length);
+                this.ids        = new FastList<int>(filter.entitiesMap.values.length);
                 this.components = worldCache.components;
 
                 foreach (var entityId in filter.entitiesMap.values) {
@@ -1635,6 +1655,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public override void Add(int entityId) => this.ids.Add(this.filter.world.entities[entityId].GetComponentFast(this.typeId));
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public override void RemoveAt(int index) => this.ids.RemoveAtSwap(index, out _);
 
@@ -2548,6 +2569,7 @@ namespace Morpeh {
                 else {
                     this.capacity = 4;
                 }
+
                 this.data     = new T[this.capacity];
                 this.length   = 0;
                 this.comparer = EqualityComparer<T>.Default;
@@ -2560,7 +2582,7 @@ namespace Morpeh {
                     this.capacity <<= 1;
                     ArrayHelpers.Grow(ref this.data, this.capacity);
                 }
-                
+
                 this.data[index] = value;
                 return index;
             }
