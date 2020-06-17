@@ -1636,7 +1636,7 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public override void Add(int entityId) => this.ids.Add(this.filter.world.entities[entityId].GetComponentFast(this.typeId));
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override void RemoveAt(int index) => this.ids.RemoveAt(index);
+            public override void RemoveAt(int index) => this.ids.RemoveAtSwap(index, out _);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ref T GetComponent(in int index) => ref this.components.data[this.ids.data[index]];
