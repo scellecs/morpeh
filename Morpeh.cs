@@ -1163,11 +1163,6 @@ namespace Morpeh {
 
             foreach (var archetype in this.archetypes) {
                 if (archetype.isDirty) {
-                    var modifications = archetype.GetModifications();
-                    foreach (var filter in archetype.filters) {
-                        filter.InternalUpdate(modifications);
-                    }
-
                     archetype.Proccess();
                 }
             }
@@ -1196,8 +1191,6 @@ namespace Morpeh {
         public List<Filter> filters;
         [SerializeField]
         internal IntDictionary<bool> modifications;
-        [NonSerialized]
-        private FastList<Modification> modificationsList;
         [SerializeField]
         internal IntDictionary<int> removeTransfer;
         [SerializeField]
@@ -1216,7 +1209,6 @@ namespace Morpeh {
             this.typeIds           = typeIds;
             this.entities          = new IntHashSet();
             this.modifications     = new IntDictionary<bool>();
-            this.modificationsList = new FastList<Modification>();
             this.addTransfer       = new IntDictionary<int>();
             this.removeTransfer    = new IntDictionary<int>();
             this.isDirty           = false;
@@ -1228,19 +1220,6 @@ namespace Morpeh {
         internal void Ctor() {
             this.world   = World.worlds[this.worldId];
             this.filters = new List<Filter>();
-        }
-
-        internal FastList<Modification> GetModifications() {
-            this.modificationsList.Clear();
-            foreach (var i in this.modifications) {
-                Modification m;
-                m.add = this.modifications.data[i];
-                m.entityId = this.modifications.slots[i].key;
-                
-                this.modificationsList.Add(m);
-            }
-
-            return this.modificationsList;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1267,17 +1246,24 @@ namespace Morpeh {
         }
 
         public void Proccess() {
-            foreach (var index in this.modifications) {
-                var entityId = this.modifications.slots[index].key;
-                var add      = this.modifications.data[index];
+            foreach (var i in this.modifications) {
+                var entityId = this.modifications.slots[i].key;
+                var add = this.modifications.data[i];
+
                 if (add) {
+                    for (var index = 0; index < this.filters.Count; index++) {
+                        this.filters[index].AddEntity(entityId);
+                    }
                     this.entities.Add(entityId);
                 }
                 else {
+                    for (var index = 0; index < this.filters.Count; index++) {
+                        this.filters[index].RemoveEntity(entityId);
+                    }
                     this.entities.Remove(entityId);
                 }
             }
-
+            
             this.modifications.Clear();
 
             this.length  = this.entities.count;
@@ -1458,24 +1444,21 @@ namespace Morpeh {
             this.world.UpdateFilters();
         }
 
-        internal void InternalUpdate(FastList<Modification> modifications) {
-            foreach (var modification in modifications) {
-                var entityId = modification.entityId;
-
-                if (modification.add) {
-                    this.entitiesMap.Add(entityId);
-                    foreach (var componentsBag in this.componentsBags) {
-                        componentsBag.Add(entityId);
-                    }
-                }
-                else {
-                    var index = this.entitiesMap.Remove(entityId);
-                    foreach (var componentsBag in this.componentsBags) {
-                        componentsBag.RemoveAt(index);
-                    }
-                }
+        internal void AddEntity(int entityId) {
+            this.entitiesMap.Add(entityId);
+            foreach (var componentsBag in this.componentsBags) {
+                componentsBag.Add(entityId);
             }
+        }
 
+        internal void RemoveEntity(int entityId) {
+            var index = this.entitiesMap.Remove(entityId);
+            foreach (var componentsBag in this.componentsBags) {
+                componentsBag.RemoveAt(index);
+            }
+        }
+
+        internal void UpdateLength() {
             this.Length = this.entitiesMap.values.length;
         }
 
