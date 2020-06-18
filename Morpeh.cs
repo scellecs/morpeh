@@ -1265,7 +1265,7 @@ namespace Morpeh {
                 if (add) {
                     var check = this.entities.Add(entityId);
                     if (check) {
-                        for (var index = 0; index < this.bagParts.data.Length; index++) {
+                        for (var index = 0; index < this.bagParts.length; index++) {
                             this.bagParts.data[index].Add(entityId);
                         }
                     }
@@ -1273,7 +1273,7 @@ namespace Morpeh {
                 else {
                     var check = this.entities.Remove(entityId);
                     if (check > -1) {
-                        for (var index = 0; index < this.bagParts.data.Length; index++) {
+                        for (var index = 0; index < this.bagParts.length; index++) {
                             this.bagParts.data[index].Remove(check);
                         }
                     }
@@ -1561,6 +1561,11 @@ namespace Morpeh {
 
                 BREAK:
                 if (check) {
+                    for (int i = 0, length = this.archetypes.length; i < length; i++) {
+                        if (this.archetypes.data[i] == archetype) {
+                            return;
+                        }
+                    }
                     this.archetypes.Add(archetype);
                     archetype.AddFilter(this);
                     for (int i = 0, length = this.componentsBags.length; i < length; i++) {
