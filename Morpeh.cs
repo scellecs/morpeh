@@ -1788,6 +1788,7 @@ namespace Morpeh {
                 if (this.archetypeId < this.archetypeCount) {
                     if (this.index < this.archetype.entities.count) {
                         this.current = this.world.entities[this.archetype.entities.slots[this.index].value];
+                        ++this.index;
                         return true;
                     }
 
