@@ -1704,7 +1704,7 @@ namespace Morpeh {
                     var part  = this.parts.data[i];
                     var check = offset + part.ids.length;
                     if (index < check) {
-                        return ref this.components.data[part.ids.data[offset + index]];
+                        return ref this.components.data[part.ids.data[index - offset]];
                     }
 
                     offset = check;
@@ -1720,7 +1720,7 @@ namespace Morpeh {
                     var part  = this.parts.data[i];
                     var check = offset + part.ids.length;
                     if (index < check) {
-                        this.components.data[part.ids.data[offset + index]] = value;
+                        this.components.data[part.ids.data[index - offset]] = value;
                     }
 
                     offset = check;
