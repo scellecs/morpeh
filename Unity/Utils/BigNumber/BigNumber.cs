@@ -165,6 +165,10 @@ namespace Morpeh.BigNumber {
         public static implicit operator BigNumber(int value) => new BigNumber(value);
         public static implicit operator BigNumber(long value) => new BigNumber(value);
         public static implicit operator BigNumber(BigInteger value) => new BigNumber(value);
+        
+        public static explicit operator float(BigNumber bnValue) => (float)((double)bnValue.value);
+        public static explicit operator double(BigNumber bnValue) => (double)bnValue.value;
+        public static explicit operator BigInteger(BigNumber bnValue) => bnValue.value;
 
         public override int GetHashCode() =>  this.value.GetHashCode();
         public override bool Equals(object obj) =>  obj is BigNumber other && this.Equals(other);
