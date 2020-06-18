@@ -1566,6 +1566,7 @@ namespace Morpeh {
                             return;
                         }
                     }
+
                     this.archetypes.Add(archetype);
                     archetype.AddFilter(this);
                     for (int i = 0, length = this.componentsBags.length; i < length; i++) {
@@ -1672,7 +1673,7 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public abstract class ComponentsBag : IDisposable {
-            public int typeId;
+            public            int  typeId;
             internal abstract void AddArchetype(Archetype archetype);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1765,36 +1766,36 @@ namespace Morpeh {
             private readonly World               world;
             private readonly FastList<Archetype> archetypes;
 
+            private int    index;
             private Entity current;
 
-            private int archetypeId;
-            private int archetypeCount;
-
-            private IntOrderedHashSet.Enumerator archetypeEnumerator;
+            private Archetype archetype;
+            private int       archetypeId;
+            private int       archetypeCount;
 
             internal EntityEnumerator(Filter filter) {
                 this.world      = filter.world;
                 this.archetypes = filter.archetypes;
                 this.current    = null;
+                this.index      = 0;
 
-                this.archetypeId         = 0;
-                this.archetypeCount      = this.archetypes.length;
-                this.archetypeEnumerator = this.archetypeCount > 0 ? this.archetypes.data[0].entities.GetEnumerator() : default;
+                this.archetypeId    = 0;
+                this.archetypeCount = this.archetypes.length;
+                this.archetype      = this.archetypeCount == 0 ? null : this.archetypes.data[0];
             }
 
             public bool MoveNext() {
                 if (this.archetypeId < this.archetypeCount) {
-                    var move = this.archetypeEnumerator.MoveNext();
-                    if (move) {
-                        this.current = this.world.entities[this.archetypeEnumerator.Current];
+                    if (this.index < this.archetype.entities.count) {
+                        this.current = this.world.entities[this.archetype.entities.slots[this.index].value];
                         return true;
                     }
 
                     while (++this.archetypeId < this.archetypeCount) {
-                        this.archetypeEnumerator = this.archetypes.data[this.archetypeId].entities.GetEnumerator();
-                        move                     = this.archetypeEnumerator.MoveNext();
-                        if (move) {
-                            this.current = this.world.entities[this.archetypeEnumerator.Current];
+                        this.archetype = this.archetypes.data[this.archetypeId];
+                        if (this.archetype.entities.count > 0) {
+                            this.index   = 0;
+                            this.current = this.world.entities[this.archetype.entities.slots[this.index].value];
                             return true;
                         }
                     }
@@ -1804,9 +1805,10 @@ namespace Morpeh {
             }
 
             public void Reset() {
-                this.current             = null;
-                this.archetypeId         = 0;
-                this.archetypeEnumerator = this.archetypeCount > 0 ? this.archetypes.data[0].entities.GetEnumerator() : default;
+                this.index       = 0;
+                this.current     = null;
+                this.archetypeId = 0;
+                this.archetype   = this.archetypeCount == 0 ? null : this.archetypes.data[0];
             }
 
             public IEntity Current => this.current;
