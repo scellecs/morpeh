@@ -1265,16 +1265,16 @@ namespace Morpeh {
                 if (add) {
                     var check = this.entities.Add(entityId);
                     if (check) {
-                        foreach (var bagPart in this.bagParts) {
-                            bagPart.Add(entityId);
+                        for (var index = 0; index < this.bagParts.data.Length; index++) {
+                            this.bagParts.data[index].Add(entityId);
                         }
                     }
                 }
                 else {
                     var check = this.entities.Remove(entityId);
                     if (check > -1) {
-                        foreach (var bagPart in this.bagParts) {
-                            bagPart.Remove(check);
+                        for (var index = 0; index < this.bagParts.data.Length; index++) {
+                            this.bagParts.data[index].Remove(check);
                         }
                     }
                 }
