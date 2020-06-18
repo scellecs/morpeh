@@ -70,8 +70,10 @@ namespace Morpeh {
                 var others = this.GetComponents<EntityProvider>();
                 this.cachedEntity = World.Default.CreateEntityInternal(out this.entityID);
                 foreach (var entityProvider in others) {
-                    entityProvider.entityID     = this.entityID;
-                    entityProvider.cachedEntity = this.cachedEntity;
+                    if (entityProvider.enabled) {
+                        entityProvider.entityID     = this.entityID;
+                        entityProvider.cachedEntity = this.cachedEntity;
+                    }
                 }
             }
 
@@ -80,6 +82,9 @@ namespace Morpeh {
         }
 
         protected virtual void OnDisable() {
+            this.entityID = -1;
+            this.cachedEntity = null;
+            
             var others = this.GetComponents<EntityProvider>();
             foreach (var entityProvider in others) {
                 entityProvider.CheckEntityIsAlive();
