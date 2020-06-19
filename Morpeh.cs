@@ -1717,7 +1717,7 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public sealed class ComponentsBag<T> : ComponentsBag where T : struct, IComponent {
-            private IntHashMap<T> components;
+            private FastList<T> components;
             private Filter        filter;
             private FastList<int> firstPartIds;
 
@@ -1982,7 +1982,7 @@ namespace Morpeh {
         internal static List<ComponentsCache<T>> typedCaches = new List<ComponentsCache<T>>();
 
         [SerializeField]
-        internal IntHashMap<T> components;
+        internal FastList<T> components;
         [SerializeField]
         internal IntStack freeIndexes;
         [SerializeField]
@@ -1997,10 +1997,10 @@ namespace Morpeh {
         internal ComponentsCache() {
             this.typedId = CacheTypeIdentifier<T>.info.id;
 
-            this.components  = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
+            this.components  = new FastList<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
             this.freeIndexes = new IntStack();
 
-            this.components.Add(0, default, out _);
+            this.components.Add();
 
             this.typedCacheId = typedCaches.Count;
             typedCaches.Add(this);
@@ -2015,22 +2015,19 @@ namespace Morpeh {
                 return this.freeIndexes.Pop();
             }
 
-            this.components.Add(this.components.length, default, out var index);
-            return index;
+            return this.components.Add();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int Add(in T value) {
-            int index;
             if (this.freeIndexes.length > 0) {
-                index = this.freeIndexes.Pop();
+                var index = this.freeIndexes.Pop();
 
                 this.components.data[index] = value;
                 return index;
             }
 
-            this.components.Add(this.components.length, value, out index);
-            return index;
+            return this.components.Add(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2101,11 +2098,8 @@ namespace Morpeh {
         }
 
         public override void Dispose() {
-            for (int i = 0, length = this.components.slots.Length; i < length; i++) {
-                ref var slot = ref this.components.slots[i];
-                if (slot.key != -1) {
-                    this.components.data[i].Dispose();
-                }
+            for (int i = 0, length = this.components.length; i < length; i++) {
+                this.components.data[i].Dispose();
             }
 
             base.Dispose();
@@ -2948,7 +2942,7 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Push(in int value) {
                 if (this.length == this.capacity) {
-                    ArrayHelpers.Grow(ref this.data, this.capacity = HashHelpers.GetPrime(this.length));
+                    ArrayHelpers.Grow(ref this.data, this.capacity <<= 1);
                 }
 
                 this.data[this.length++] = value;
@@ -2989,12 +2983,22 @@ namespace Morpeh {
                 
                 this.comparer = EqualityComparer<T>.Default;
             }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public int Add() {
+                var index = this.length;
+                if (++this.length == this.capacity) {
+                    ArrayHelpers.Grow(ref this.data, this.capacity <<= 1);
+                }
+
+                return index;
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public int Add(T value) {
                 var index = this.length;
                 if (++this.length == this.capacity) {
-                    ArrayHelpers.Grow(ref this.data, this.capacity = HashHelpers.GetPrime(this.length));
+                    ArrayHelpers.Grow(ref this.data, this.capacity <<= 1);
                 }
 
                 this.data[index] = value;
