@@ -108,6 +108,7 @@ namespace Morpeh {
 
             this.componentsIds = new IntHashMap<int>(Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY);
 
+            this.indexInCurrentArchetype = -1;
             this.previousArchetypeId = -1;
             this.currentArchetypeId = 0;
 
@@ -308,6 +309,7 @@ namespace Morpeh {
             }
 
             this.world.dirtyEntities.Add(this.internalID);
+            this.isDirty = true;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -321,11 +323,12 @@ namespace Morpeh {
             }
 
             this.world.dirtyEntities.Add(this.internalID);
+            this.isDirty = true;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void ApplyTransfer() {
-            if (this.previousArchetypeId > 0) {
+            if (this.previousArchetypeId > 0 && this.indexInCurrentArchetype >= 0) {
                 this.world.archetypes[this.previousArchetypeId].Remove(this);
             }
             this.previousArchetypeId = -1;
@@ -1724,7 +1727,7 @@ namespace Morpeh {
                     this.parts.Add(archetype.Select<T>(this.typeId));
                 }
 
-                this.firstPartIds = this.parts.data[0].ids;
+                this.firstPartIds = this.parts.length > 0 ? this.parts.data[0].ids : null;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1765,7 +1768,13 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal override void AddArchetype(Archetype archetype) => this.parts.Add(archetype.Select<T>(this.typeId));
+            internal override void AddArchetype(Archetype archetype) {
+                var part = archetype.Select<T>(this.typeId);
+                if (this.parts.length == 0) {
+                    this.firstPartIds = part.ids;
+                }
+                this.parts.Add(part);
+            }
 
             internal override void InternalDispose() {
                 this.components = null;
