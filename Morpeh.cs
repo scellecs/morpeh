@@ -1296,7 +1296,7 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Remove(int index) {
-            this.entities.RemoveAt(index);
+            this.entities.RemoveAtSwap(index, out _);
             for (var i = 0; i < this.bagParts.length; i++) {
                 this.bagParts.data[i].Remove(index);
             }
