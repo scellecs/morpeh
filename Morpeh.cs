@@ -315,10 +315,11 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void ApplyTransfer() {
             if (this.previousArchetypeId > -1) {
-                this.world.archetypes[this.previousArchetypeId].Add(this.internalID);
+                this.world.archetypes[this.previousArchetypeId].Remove(this.internalID);
                 this.previousArchetypeId = -1;
             }
-            this.currentArchetype.Add(this.internalID);
+            this.currentArchetype.Add(this);
+            this.isDirty = false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1273,10 +1274,10 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(int entityId) {
-            this.entities.Add(entityId);
+        public void Add(Entity entity) {
+            this.entities.Add(entity.internalID);
             for (var i = 0; i < this.bagParts.length; i++) {
-                this.bagParts.data[i].Add(entityId);
+                this.bagParts.data[i].Add(entity);
             }
             this.isDirty = true;
         }
@@ -1369,7 +1370,7 @@ namespace Morpeh {
         public abstract class ComponentsBagPart {
             public          int           typeId;
             public          FastList<int> ids;
-            public abstract void          Add(int entityId);
+            public abstract void          Add(Entity entity);
             public abstract void          Remove(int index);
         }
 
@@ -1390,7 +1391,7 @@ namespace Morpeh {
                 }
             }
 
-            public override void Add(int entityId) => this.ids.Add(this.world.entities[entityId].GetComponentFast(this.typeId));
+            public override void Add(Entity entity) => this.ids.Add(entity.componentsIds.GetValue(this.typeId));
 
             public override void Remove(int index) => this.ids.RemoveAtSwap(index, out _);
         }
