@@ -924,7 +924,7 @@ namespace Morpeh {
 #if UNITY_EDITOR
                 try {
 #endif
-                    CacheComponents.caches[cache].Dispose();
+                    ComponentsCache.caches[cache].Dispose();
 #if UNITY_EDITOR
                 }
                 catch (Exception e) {
@@ -962,7 +962,7 @@ namespace Morpeh {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif
         public static void InitializationDefaultWorld() {
-            CacheComponents.cleanup();
+            ComponentsCache.cleanup();
 
             worlds.Clear();
             var defaultWorld = Create();
@@ -1037,33 +1037,33 @@ namespace Morpeh {
         }
 
         [CanBeNull]
-        internal CacheComponents GetCache(int typeId) {
+        internal ComponentsCache GetCache(int typeId) {
             if (this.caches.TryGetValue(typeId, out var index)) {
-                return CacheComponents.caches[index];
+                return ComponentsCache.caches[index];
             }
 
             return null;
         }
 
-        public CacheComponents<T> GetCache<T>() where T : struct, IComponent {
+        public ComponentsCache<T> GetCache<T>() where T : struct, IComponent {
             var info = CacheTypeIdentifier<T>.info;
             if (this.typedCaches.TryGetValue(info.id, out var typedIndex)) {
-                return CacheComponents<T>.typedCaches[typedIndex];
+                return ComponentsCache<T>.typedCaches[typedIndex];
             }
 
-            CacheComponents<T> cache;
+            ComponentsCache<T> componentsCache;
             if (info.isDisposable) {
-                var constructedType = typeof(CacheDisposableComponents<>).MakeGenericType(typeof(T));
-                cache = (CacheComponents<T>) Activator.CreateInstance(constructedType);
+                var constructedType = typeof(ComponentsCacheDisposable<>).MakeGenericType(typeof(T));
+                componentsCache = (ComponentsCache<T>) Activator.CreateInstance(constructedType);
             }
             else {
-                cache = new CacheComponents<T>();
+                componentsCache = new ComponentsCache<T>();
             }
 
-            this.caches.Add(info.id, cache.commonCacheId, out _);
-            this.typedCaches.Add(info.id, cache.typedCacheId, out _);
+            this.caches.Add(info.id, componentsCache.commonCacheId, out _);
+            this.typedCaches.Add(info.id, componentsCache.typedCacheId, out _);
 
-            return cache;
+            return componentsCache;
         }
 
         public static void GlobalUpdate(float deltaTime) {
@@ -1961,8 +1961,8 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public abstract class CacheComponents : IDisposable {
-        internal static List<CacheComponents> caches  = new List<CacheComponents>();
+    public abstract class ComponentsCache : IDisposable {
+        internal static List<ComponentsCache> caches  = new List<ComponentsCache>();
         internal static Action                cleanup = () => caches.Clear();
 
         [SerializeField]
@@ -1978,8 +1978,8 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public class CacheComponents<T> : CacheComponents where T : struct, IComponent {
-        internal static List<CacheComponents<T>> typedCaches = new List<CacheComponents<T>>();
+    public class ComponentsCache<T> : ComponentsCache where T : struct, IComponent {
+        internal static List<ComponentsCache<T>> typedCaches = new List<ComponentsCache<T>>();
 
         [SerializeField]
         internal IntHashMap<T> components;
@@ -1990,11 +1990,11 @@ namespace Morpeh {
         [SerializeField]
         internal int typedId;
 
-        static CacheComponents() {
+        static ComponentsCache() {
             cleanup += () => typedCaches.Clear();
         }
 
-        internal CacheComponents() {
+        internal ComponentsCache() {
             this.typedId = CacheTypeIdentifier<T>.info.id;
 
             this.components  = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
@@ -2094,7 +2094,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal sealed class CacheDisposableComponents<T> : CacheComponents<T> where T : struct, IComponent, IDisposable {
+    internal sealed class ComponentsCacheDisposable<T> : ComponentsCache<T> where T : struct, IComponent, IDisposable {
         internal override void Remove(in int id) {
             this.components.data[id].Dispose();
             base.Remove(in id);
