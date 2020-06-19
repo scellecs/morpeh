@@ -93,7 +93,7 @@ namespace Morpeh {
         [SerializeField]
         private int currentArchetypeId;
         [SerializeField]
-        private int indexInCurrentArchetype;
+        internal int indexInCurrentArchetype;
 
         [NonSerialized]
         private Archetype currentArchetype;
@@ -326,7 +326,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void ApplyTransfer() {
             if (this.previousArchetypeId > 0) {
-                this.world.archetypes[this.previousArchetypeId].Remove(this.indexInCurrentArchetype);
+                this.world.archetypes[this.previousArchetypeId].Remove(this);
             }
             this.previousArchetypeId = -1;
             this.currentArchetype.Add(this, out this.indexInCurrentArchetype);
@@ -344,7 +344,7 @@ namespace Morpeh {
             var world = this.world;
 
             var arch = world.archetypes[this.currentArchetypeId];
-            arch.Remove(this.indexInCurrentArchetype);
+            arch.Remove(this);
 
             foreach (var slotIndex in this.componentsIds) {
                 var typeId      = this.componentsIds.slots[slotIndex].key;
@@ -1244,7 +1244,7 @@ namespace Morpeh {
         [SerializeField]
         internal bool isDirty;
         [SerializeField]
-        internal FastList<int> entities;
+        internal FastList<Entity> entities;
         [NonSerialized]
         internal FastList<Filter> filters;
         [NonSerialized]
@@ -1268,7 +1268,7 @@ namespace Morpeh {
             this.id             = id;
             this.typeIds        = typeIds;
             this.length         = 0;
-            this.entities       = new FastList<int>();
+            this.entities       = new FastList<Entity>();
             this.addTransfer    = new IntHashMap<int>();
             this.removeTransfer = new IntHashMap<int>();
             this.bagParts       = new FastList<ComponentsBagPart>();
@@ -1287,7 +1287,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(Entity entity, out int index) {
             index = this.entities.length;
-            this.entities.Add(entity.internalID);
+            this.entities.Add(entity);
             for (var i = 0; i < this.bagParts.length; i++) {
                 this.bagParts.data[i].Add(entity);
             }
@@ -1295,8 +1295,10 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Remove(int index) {
+        public void Remove(Entity entity) {
+            var index = entity.indexInCurrentArchetype;
             this.entities.RemoveAtSwap(index, out _);
+            this.entities.data[index].indexInCurrentArchetype = index;
             for (var i = 0; i < this.bagParts.length; i++) {
                 this.bagParts.data[i].Remove(index);
             }
@@ -1398,8 +1400,8 @@ namespace Morpeh {
                 this.typeId = CacheTypeIdentifier<T>.info.id;
                 this.ids    = new FastList<int>(archetype.entities.length);
 
-                foreach (var entityId in archetype.entities) {
-                    this.ids.Add(this.world.entities[entityId].GetComponentFast(this.typeId));
+                foreach (var entity in archetype.entities) {
+                    this.ids.Add(entity.GetComponentFast(this.typeId));
                 }
             }
 
@@ -1625,7 +1627,7 @@ namespace Morpeh {
                 var archetype = this.archetypes.data[i];
                 var check     = num + archetype.length;
                 if (id < check) {
-                    return this.world.entities[archetype.entities.data[id - num]];
+                    return archetype.entities.data[id - num];
                 }
 
                 num = check;
@@ -1640,7 +1642,7 @@ namespace Morpeh {
             for (int i = 0, length = this.archetypes.length; i < length; i++) {
                 var archetype = this.archetypes.data[i];
                 if (archetype.length > 0) {
-                    return this.world.entities[archetype.entities.data[0]];
+                    return archetype.entities.data[0];
                 }
             }
 
@@ -1798,7 +1800,7 @@ namespace Morpeh {
             private int    index;
             private Entity current;
 
-            private FastList<int> archetype;
+            private FastList<Entity> archetype;
 
             private int archetypeId;
             private int archetypeCount;
@@ -1817,7 +1819,7 @@ namespace Morpeh {
             public bool MoveNext() {
                 if (this.archetypeCount == 1) {
                     if (this.index < this.archetype.length) {
-                        this.current = this.world.entities[this.archetype.data[this.index]];
+                        this.current = this.archetype.data[this.index];
                         ++this.index;
                         return true;
                     }
@@ -1827,7 +1829,7 @@ namespace Morpeh {
 
                 if (this.archetypeId < this.archetypeCount) {
                     if (this.index < this.archetype.length) {
-                        this.current = this.world.entities[this.archetype.data[this.index]];
+                        this.current = this.archetype.data[this.index];
                         ++this.index;
                         return true;
                     }
@@ -1836,7 +1838,7 @@ namespace Morpeh {
                         this.archetype = this.archetypes.data[this.archetypeId].entities;
                         if (this.archetype.length > 0) {
                             this.index   = 0;
-                            this.current = this.world.entities[this.archetype.data[this.index]];
+                            this.current = this.archetype.data[this.index];
                             return true;
                         }
                     }
