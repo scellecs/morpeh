@@ -3180,15 +3180,6 @@ namespace Morpeh {
             [Il2Cpp(Option.NullChecks, false)]
             [Il2Cpp(Option.ArrayBoundsChecks, false)]
             [Il2Cpp(Option.DivideByZeroChecks, false)]
-            [StructLayout(LayoutKind.Sequential)]
-            public struct Slot {
-                public int key;
-                public int next;
-            }
-
-            [Il2Cpp(Option.NullChecks, false)]
-            [Il2Cpp(Option.ArrayBoundsChecks, false)]
-            [Il2Cpp(Option.DivideByZeroChecks, false)]
             public struct Enumerator : IEnumerator<int> {
                 public UnsafeIntHashMap<T> hashMap;
 
