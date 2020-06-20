@@ -3707,23 +3707,6 @@ namespace Morpeh {
 
                 return -1;
             }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static unsafe int IndexOfUnsafe<T>(T[] array, T value, EqualityComparer<T> comparer) where T : unmanaged {
-                fixed (T* arr = &array[0]) {
-                    var i = 0;
-                    for (T* current = arr, length = arr + array.Length; current < length; ++current) {
-                        if (comparer.Equals(*current, value)) {
-                            return i;
-                        }
-
-                        ++i;
-                    }
-                }
-
-
-                return -1;
-            }
         }
 
         [Il2Cpp(Option.NullChecks, false)]
