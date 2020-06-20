@@ -1413,7 +1413,7 @@ namespace Morpeh {
             }
             else {
                 newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, true, out archetypeId);
-                newArchetype.addTransfer.Add(typeId, archetypeId, out _);
+                archetype.addTransfer.Add(typeId, archetypeId, out _);
             }
         }
         
