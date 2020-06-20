@@ -59,9 +59,9 @@ namespace Morpeh {
                         this.componentViews.Clear();
                         foreach (var slotIndex in this.entity.componentsIds) {
                             var slot = this.entity.componentsIds.slots[slotIndex];
-                            var data = this.entity.componentsIds.data[slotIndex];
+                            var data = this.entity.componentsIds.GetValueByIndex(slotIndex);
                             var view = new ComponentView {
-                                debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[slot.key],
+                                debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[slot],
                                 id        = data,
                                 world     = this.entity.world
                             };
