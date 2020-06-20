@@ -2153,7 +2153,7 @@ namespace Morpeh {
                     }
                 }
                 else {
-                    if (this.lastIndex == this.capacity) {
+                    if (this.lastIndex == this.capacity * 2) {
                         var newCapacityMinusOne = HashHelpers.ExpandPrime(this.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
@@ -2183,7 +2183,7 @@ namespace Morpeh {
                     }
 
                     newIndex = this.lastIndex;
-                    ++this.lastIndex;
+                    this.lastIndex += 2;
                 }
 
                 fixed (int* slotsPtr = &this.slots[0])
@@ -2222,6 +2222,8 @@ namespace Morpeh {
                                 *(slotsPtr + num + 1) = *slotNext;
                             }
 
+                            //
+                            
                             *slot     = -1;
                             *slotNext = this.freeIndex;
 
@@ -2349,6 +2351,7 @@ namespace Morpeh {
             }
         }
 
+        //todo unsafe
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
@@ -2961,16 +2964,23 @@ namespace Morpeh {
             public bool Add(in int key, in T value, out int slotIndex) {
                 var rem = key & this.capacityMinusOne;
 
-                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i + 1]) {
-                    if (this.slots[i] - 1 == key) {
-                        slotIndex = -1;
-                        return false;
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == key) {
+                            slotIndex = -1;
+                            return false;
+                        }
                     }
                 }
 
                 if (this.freeIndex >= 0) {
                     slotIndex      = this.freeIndex;
-                    this.freeIndex = this.slots[slotIndex + 1];
+                    fixed (int* s = &this.slots[0]) {
+                        this.freeIndex = *(s + slotIndex + 1);
+                    }
                 }
                 else {
                     if (this.lastIndex == this.capacity * 2) {
@@ -2982,11 +2992,18 @@ namespace Morpeh {
 
                         var newBuckets = new int[newCapacity];
 
-                        for (int i = 0, len = this.lastIndex; i < len; i += 2) {
-                            var newResizeIndex = (this.slots[i] - 1) & newCapacityMinusOne;
-                            this.slots[i + 1] = newBuckets[newResizeIndex] - 1;
+                        fixed (int* slotsPtr = &this.slots[0])
+                        fixed (int* bucketsPtr = &newBuckets[0]) {
+                            for (int i = 0, len = this.lastIndex; i < len; i += 2) {
+                                var slotPtr = slotsPtr + i;
 
-                            newBuckets[newResizeIndex] = i + 1;
+                                var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                                var newCurrentBucket = bucketsPtr + newResizeIndex;
+
+                                *(slotPtr + 1) = *newCurrentBucket - 1;
+
+                                *newCurrentBucket = i + 1;
+                            }
                         }
 
                         this.buckets          = newBuckets;
@@ -3000,12 +3017,19 @@ namespace Morpeh {
                     this.lastIndex += 2;
                 }
 
-                this.slots[slotIndex]     = key + 1;
-                this.slots[slotIndex + 1] = this.buckets[rem] - 1;
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0]) 
+                fixed (T* dataPtr = &this.data[0]) {
+                    var bucket = bucketsPtr + rem;
+                    var slot   = slotsPtr + slotIndex;
 
-                this.data[slotIndex / 2] = value;
+                    *slot       = key + 1;
+                    *(slot + 1) = *bucket - 1;
 
-                this.buckets[rem] = slotIndex + 1;
+                    *(dataPtr + slotIndex / 2) = value;
+
+                    *bucket = slotIndex + 1;
+                }
 
                 ++this.length;
                 return true;
@@ -3013,56 +3037,66 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Remove(in int key, out T lastValue) {
-                var rem = key & this.capacityMinusOne;
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0]) 
+                fixed (T* dataPtr = &this.data[0]) {
+                    var rem = key & this.capacityMinusOne;
 
-                int next;
-                int num = -1;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    if (this.slots[i] - 1 == key) {
-                        if (num < 0) {
-                            this.buckets[rem] = this.slots[i + 1] + 1;
+                    int next;
+                    var num = -1;
+
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        var slot     = slotsPtr + i;
+                        var slotNext = slot + 1;
+
+                        if (*slot - 1 == key) {
+                            if (num < 0) {
+                                *(bucketsPtr + rem) = *slotNext + 1;
+                            }
+                            else {
+                                *(slotsPtr + num + 1) = *slotNext;
+                            }
+
+                            lastValue = *(dataPtr + i / 2);
+                            
+                            *slot     = -1;
+                            *slotNext = this.freeIndex;
+
+                            if (--this.length == 0) {
+                                this.lastIndex = 0;
+                                this.freeIndex = -1;
+                            }
+                            else {
+                                this.freeIndex = i;
+                            }
+
+                            return true;
                         }
-                        else {
-                            this.slots[num + 1] = this.slots[i + 1];
-                        }
 
-                        lastValue = this.data[i / 2];
-
-                        this.slots[i]     = -1;
-                        this.slots[i + 1] = this.freeIndex;
-
-                        --this.length;
-                        if (this.length == 0) {
-                            this.lastIndex = 0;
-                            this.freeIndex = -1;
-                        }
-                        else {
-                            this.freeIndex = i;
-                        }
-
-                        return true;
+                        next = *slotNext;
+                        num  = i;
                     }
 
-                    next = this.slots[i + 1];
-                    num  = i;
+                    lastValue = default;
+                    return false;
                 }
-
-                lastValue = default;
-                return false;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool TryGetValue(in int key, out T value) {
                 var rem = key & this.capacityMinusOne;
 
-                int next;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    if (this.slots[i] - 1 == key) {
-                        value = this.data[i / 2];
-                        return true;
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0])
+                fixed (T* dataPtr = &this.data[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == key) {
+                            value = *(dataPtr + i / 2);
+                            return true;
+                        }
                     }
-
-                    next = this.slots[i + 1];
                 }
 
                 value = default;
@@ -3073,15 +3107,16 @@ namespace Morpeh {
             public T GetValueByKey(in int key) {
                 var rem = key & this.capacityMinusOne;
 
-                fixed (int* s = &this.slots[0])
-                fixed (T* d = &this.data[0]) {
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0])
+                fixed (T* dataPtr = &this.data[0]) {
                     int next;
-                    for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                        if (*(s + i) - 1 == key) {
-                            return *(d + i / 2);
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        if (*(slotsPtr + i) - 1 == key) {
+                            return *(dataPtr + i / 2);
                         }
 
-                        next = *(s + i + 1);
+                        next = *(slotsPtr + i + 1);
                     }
                 }
 
@@ -3106,13 +3141,15 @@ namespace Morpeh {
             public int TryGetIndex(in int key) {
                 var rem = key & this.capacityMinusOne;
 
-                int next;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    if (this.slots[i] - 1 == key) {
-                        return i;
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == key) {
+                            return i;
+                        }
                     }
-
-                    next = this.slots[i + 1];
                 }
 
                 return -1;
@@ -3156,15 +3193,17 @@ namespace Morpeh {
                 public int current;
 
                 public bool MoveNext() {
-                    for (; this.index < this.hashMap.lastIndex; this.index += 2) {
-                        if (this.hashMap.slots[this.index] - 1 < 0) {
-                            continue;
+                    fixed (int* slotsPtr = &this.hashMap.slots[0]) {
+                        for (; this.index < this.hashMap.lastIndex; this.index += 2) {
+                            if (*(slotsPtr + this.index) - 1 < 0) {
+                                continue;
+                            }
+
+                            this.current = this.index;
+                            ++this.index;
+
+                            return true;
                         }
-
-                        this.current = this.index;
-                        ++this.index;
-
-                        return true;
                     }
 
                     this.index   = this.hashMap.lastIndex + 1;
