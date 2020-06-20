@@ -67,10 +67,10 @@ namespace Morpeh {
         }
 #endif
 
-        private void Update() => World.GlobalUpdate(Time.deltaTime);
+        private void Update() => WorldExtensions.GlobalUpdate(Time.deltaTime);
 
-        private void FixedUpdate() => World.GlobalFixedUpdate(Time.fixedDeltaTime);
-        private void LateUpdate()  => World.GlobalLateUpdate(Time.deltaTime);
+        private void FixedUpdate() => WorldExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
+        private void LateUpdate()  => WorldExtensions.GlobalLateUpdate(Time.deltaTime);
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {

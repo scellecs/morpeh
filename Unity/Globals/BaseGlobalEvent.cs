@@ -44,26 +44,26 @@ namespace Morpeh.Globals {
                     LastToString = this.LastToString
                 });
             }
-            if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.worldId, out var initialized)) {
+            if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.identifier, out var initialized)) {
                 if (initialized == false) {
                     var updater = new GlobalEventComponentUpdater<TData>();
                     updater.Awake(world);
-                    if (GlobalEventComponentUpdater.updaters.TryGetValue(world.worldId, out var updaters)) {
+                    if (GlobalEventComponentUpdater.updaters.TryGetValue(world.identifier, out var updaters)) {
                         updaters.Add(updater);
                     }
                     else {
-                        GlobalEventComponentUpdater.updaters.Add(world.worldId, new List<GlobalEventComponentUpdater> {updater});
+                        GlobalEventComponentUpdater.updaters.Add(world.identifier, new List<GlobalEventComponentUpdater> {updater});
                     }
                 }
             }
             else {
                 var updater = new GlobalEventComponentUpdater<TData>();
                 updater.Awake(world);
-                if (GlobalEventComponentUpdater.updaters.TryGetValue(world.worldId, out var updaters)) {
+                if (GlobalEventComponentUpdater.updaters.TryGetValue(world.identifier, out var updaters)) {
                     updaters.Add(updater);
                 }
                 else {
-                    GlobalEventComponentUpdater.updaters.Add(world.worldId, new List<GlobalEventComponentUpdater> {updater});
+                    GlobalEventComponentUpdater.updaters.Add(world.identifier, new List<GlobalEventComponentUpdater> {updater});
                 }
             }
 
