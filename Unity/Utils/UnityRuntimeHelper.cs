@@ -12,6 +12,7 @@ namespace Morpeh {
     using Globals.ECS;
 #endif
     using Unity.IL2CPP.CompilerServices;
+    using Utils;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -25,9 +26,9 @@ namespace Morpeh {
         internal static UnityRuntimeHelper instance;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [OdinSerialize]
-        private List<World> worldsSerialized = null;
+        private FastList<World> worldsSerialized = null;
         [OdinSerialize]
-        private List<string> types = null;
+        private FastList<string> types = null;
 #endif
 
 #if UNITY_EDITOR
@@ -49,8 +50,8 @@ namespace Morpeh {
 
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredEditMode) {
-                for (var i = World.worlds.Count - 1; i >= 0; i--) {
-                    var world = World.worlds[i];
+                for (var i = World.worlds.length - 1; i >= 0; i--) {
+                    var world = World.worlds.data[i];
                     world?.Dispose();
                 }
 
@@ -86,7 +87,7 @@ namespace Morpeh {
         protected override void OnBeforeSerialize() {
             this.worldsSerialized = World.worlds;
             if (this.types == null) {
-                this.types = new List<string>();
+                this.types = new FastList<string>();
             }
 
             this.types.Clear();
