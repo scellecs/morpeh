@@ -51,7 +51,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public sealed class Entity  {
+    public sealed class Entity {
         //todo support hotreload
         [NonSerialized]
         internal World world;
@@ -832,7 +832,7 @@ namespace Morpeh {
 
         private World Initialize() {
             worlds.Add(this);
-            this.worldId                = worlds.length - 1;
+            this.worldId           = worlds.length - 1;
             this.dirtyEntities     = new FastList<Entity>();
             this.freeEntityIDs     = new IntFastList();
             this.nextFreeEntityIDs = new IntFastList();
@@ -1125,6 +1125,7 @@ namespace Morpeh {
                 this.newSystemsGroups.RemoveAt(this.newSystemsGroups.IndexOfValue(systemsGroup));
             }
         }
+
         public Entity CreateEntity() {
             var id = -1;
             if (this.freeEntityIDs.length > 0) {
@@ -1146,6 +1147,7 @@ namespace Morpeh {
 
             return this.entities[id];
         }
+
         public Entity CreateEntity(out int id) {
             if (this.freeEntityIDs.length > 0) {
                 id = this.freeEntityIDs.Get(0);
@@ -2097,22 +2099,20 @@ namespace Morpeh {
     }
 
     namespace Utils {
-        using System.Runtime.InteropServices;
-
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public sealed unsafe class IntHashSet : IEnumerable<int> {
-            public int   length;
-            public int   capacity;
-            public int   capacityMinusOne;
+            public int length;
+            public int capacity;
+            public int capacityMinusOne;
+            public int lastIndex;
+            public int freeIndex;
+
             public int[] buckets;
 
             private int[] slots;
-
-            public int lastIndex;
-            public int freeIndex;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public IntHashSet() : this(0) {
@@ -2182,7 +2182,7 @@ namespace Morpeh {
                         rem = value & newCapacityMinusOne;
                     }
 
-                    newIndex = this.lastIndex;
+                    newIndex       =  this.lastIndex;
                     this.lastIndex += 2;
                 }
 
@@ -2222,8 +2222,6 @@ namespace Morpeh {
                                 *(slotsPtr + num + 1) = *slotNext;
                             }
 
-                            //
-                            
                             *slot     = -1;
                             *slotNext = this.freeIndex;
 
@@ -2249,7 +2247,7 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CopyTo(int[] array) {
                 fixed (int* slotsPtr = &this.slots[0]) {
-                    int num = 0;
+                    var num = 0;
                     for (int i = 0, li = this.lastIndex, len = this.length; i < li && num < len; ++i) {
                         var v = *(slotsPtr + i) - 1;
                         if (v < 0) {
@@ -2350,22 +2348,22 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public sealed class IntHashMap<T> : IEnumerable<int> {
-            public int   length;
-            public int   capacity;
-            public int   capacityMinusOne;
+            public int length;
+            public int capacity;
+            public int capacityMinusOne;
+            public int lastIndex;
+            public int freeIndex;
+
             public int[] buckets;
 
             private T[]    data;
             private Slot[] slots;
-
-            public int lastIndex;
-            public int freeIndex;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public IntHashMap(in int capacity = 0) {
@@ -2708,16 +2706,16 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public sealed unsafe class UnsafeIntHashMap<T> : IEnumerable<int> where T : unmanaged {
-            public int   length;
-            public int   capacity;
-            public int   capacityMinusOne;
+            public int length;
+            public int capacity;
+            public int capacityMinusOne;
+            public int lastIndex;
+            public int freeIndex;
+
             public int[] buckets;
 
             private T[]   data;
             private int[] slots;
-
-            public int lastIndex;
-            public int freeIndex;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public UnsafeIntHashMap(in int capacity = 0) {
@@ -2750,7 +2748,7 @@ namespace Morpeh {
                 }
 
                 if (this.freeIndex >= 0) {
-                    slotIndex      = this.freeIndex;
+                    slotIndex = this.freeIndex;
                     fixed (int* s = &this.slots[0]) {
                         this.freeIndex = *(s + slotIndex + 1);
                     }
@@ -2791,7 +2789,7 @@ namespace Morpeh {
                 }
 
                 fixed (int* slotsPtr = &this.slots[0])
-                fixed (int* bucketsPtr = &this.buckets[0]) 
+                fixed (int* bucketsPtr = &this.buckets[0])
                 fixed (T* dataPtr = &this.data[0]) {
                     var bucket = bucketsPtr + rem;
                     var slot   = slotsPtr + slotIndex;
@@ -2811,7 +2809,7 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Remove(in int key, out T lastValue) {
                 fixed (int* slotsPtr = &this.slots[0])
-                fixed (int* bucketsPtr = &this.buckets[0]) 
+                fixed (int* bucketsPtr = &this.buckets[0])
                 fixed (T* dataPtr = &this.data[0]) {
                     var rem = key & this.capacityMinusOne;
 
@@ -2831,7 +2829,7 @@ namespace Morpeh {
                             }
 
                             lastValue = *(dataPtr + i / 2);
-                            
+
                             *slot     = -1;
                             *slotNext = this.freeIndex;
 
@@ -3521,15 +3519,6 @@ namespace Morpeh {
                 var min = oldSize << 1;
                 return min > 2146435069U && 2146435069 > oldSize ? 2146435069 : GetPrime(min);
             }
-
-            //better than % in mono
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static int DivRem(int left, int right, out int result) {
-                var div = left / right;
-                result = left - div * right;
-                return div;
-            }
-
 
             //todo possible refactor?
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
