@@ -27,7 +27,7 @@ namespace Morpeh.Editor {
                 if (this.entity != null) {
                     this.componentViews.Clear();
                     foreach (var slotIndex in this.entity.componentsIds) {
-                        var slot = this.entity.componentsIds.slots[slotIndex];
+                        var slot = this.entity.componentsIds.GetKeyByIndex(slotIndex);
                         var data = this.entity.componentsIds.GetValueByIndex(slotIndex);
                         var view = new ComponentView {
                             debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[slot],

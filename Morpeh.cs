@@ -354,8 +354,8 @@ namespace Morpeh {
             arch.Remove(this);
 
             foreach (var slotIndex in this.componentsIds) {
-                var typeId      = this.componentsIds.slots[slotIndex];
-                var componentId = this.componentsIds.GetValueByIndex(slotIndex+1);
+                var typeId      = this.componentsIds.GetKeyByIndex(slotIndex);
+                var componentId = this.componentsIds.GetValueByIndex(slotIndex + 1);
 
                 if (componentId >= 0) {
                     world.GetCache(typeId)?.Remove(componentId);
@@ -804,23 +804,23 @@ namespace Morpeh {
         internal FastList<Entity> dirtyEntities;
 
         [SerializeField]
-        private UnsafeFastIntList freeEntityIDs;
+        private IntFastList freeEntityIDs;
         [SerializeField]
-        private UnsafeFastIntList nextFreeEntityIDs;
+        private IntFastList nextFreeEntityIDs;
 
         [SerializeField]
-        internal IntHashMap<int> caches;
+        internal UnsafeIntHashMap<int> caches;
         [SerializeField]
-        internal IntHashMap<int> typedCaches;
+        internal UnsafeIntHashMap<int> typedCaches;
 
         [SerializeField]
         internal FastList<Archetype> archetypes;
         [SerializeField]
-        internal IntHashMap<UnsafeFastIntList> archetypesByLength;
+        internal IntHashMap<IntFastList> archetypesByLength;
         [SerializeField]
-        internal UnsafeFastIntList newArchetypes;
+        internal IntFastList newArchetypes;
         [NonSerialized]
-        private UnsafeFastIntList archetypeCache;
+        private IntFastList archetypeCache;
 
         [SerializeField]
         internal int id;
@@ -837,7 +837,7 @@ namespace Morpeh {
 
             this.Filter         = new Filter(this);
             this.filters        = new FastList<Filter>();
-            this.archetypeCache = new UnsafeFastIntList();
+            this.archetypeCache = new IntFastList();
 
             if (this.archetypes != null) {
                 foreach (var archetype in this.archetypes) {
@@ -854,19 +854,19 @@ namespace Morpeh {
             worlds.Add(this);
             this.id                = worlds.length - 1;
             this.dirtyEntities     = new FastList<Entity>();
-            this.freeEntityIDs     = new UnsafeFastIntList();
-            this.nextFreeEntityIDs = new UnsafeFastIntList();
-            this.caches            = new IntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
-            this.typedCaches       = new IntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            this.freeEntityIDs     = new IntFastList();
+            this.nextFreeEntityIDs = new IntFastList();
+            this.caches            = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            this.typedCaches       = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
             this.entitiesLength   = 0;
             this.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             this.entities         = new Entity[this.entitiesCapacity];
 
             this.archetypes         = new FastList<Archetype> {new Archetype(0, new int[0], this.id)};
-            this.archetypesByLength = new IntHashMap<UnsafeFastIntList>();
-            this.archetypesByLength.Add(0, new UnsafeFastIntList {0}, out _);
-            this.newArchetypes = new UnsafeFastIntList();
+            this.archetypesByLength = new IntHashMap<IntFastList>();
+            this.archetypesByLength.Add(0, new IntFastList {0}, out _);
+            this.newArchetypes = new IntFastList();
 
             return this;
         }
@@ -953,7 +953,7 @@ namespace Morpeh {
             this.archetypes = null;
 
             foreach (var index in this.archetypesByLength) {
-                this.archetypesByLength.data[index].Clear();
+                this.archetypesByLength.GetValueByIndex(index).Clear();
             }
 
             this.archetypesByLength.Clear();
@@ -1032,7 +1032,7 @@ namespace Morpeh {
                 archsl.Add(archetypeId);
             }
             else {
-                this.archetypesByLength.Add(typesLength, new UnsafeFastIntList {archetypeId}, out _);
+                this.archetypesByLength.Add(typesLength, new IntFastList {archetypeId}, out _);
             }
 
             this.newArchetypes.Add(archetypeId);
@@ -1263,9 +1263,9 @@ namespace Morpeh {
         [NonSerialized]
         internal FastList<ComponentsBagPart> bagParts;
         [SerializeField]
-        internal IntHashMap<int> removeTransfer;
+        internal UnsafeIntHashMap<int> removeTransfer;
         [SerializeField]
-        internal IntHashMap<int> addTransfer;
+        internal UnsafeIntHashMap<int> addTransfer;
         [SerializeField]
         internal int length;
         [SerializeField]
@@ -1282,8 +1282,8 @@ namespace Morpeh {
             this.typeIds        = typeIds;
             this.length         = 0;
             this.entities       = new FastList<Entity>();
-            this.addTransfer    = new IntHashMap<int>();
-            this.removeTransfer = new IntHashMap<int>();
+            this.addTransfer    = new UnsafeIntHashMap<int>();
+            this.removeTransfer = new UnsafeIntHashMap<int>();
             this.bagParts       = new FastList<ComponentsBagPart>();
 
             this.isDirty = false;
@@ -1399,7 +1399,7 @@ namespace Morpeh {
         internal abstract class ComponentsBagPart {
             internal int typeId;
 
-            internal UnsafeFastIntList ids;
+            internal IntFastList ids;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal abstract void Add(Entity entity);
@@ -1419,7 +1419,7 @@ namespace Morpeh {
                 this.world = archetype.world;
 
                 this.typeId = CacheTypeIdentifier<T>.info.id;
-                this.ids    = new UnsafeFastIntList(archetype.entities.length);
+                this.ids    = new IntFastList(archetype.entities.length);
 
                 foreach (var entity in archetype.entities) {
                     this.ids.Add(entity.GetComponentFast(this.typeId));
@@ -1453,8 +1453,8 @@ namespace Morpeh {
         private FastList<Archetype>     archetypes;
         private FastList<ComponentsBag> componentsBags;
 
-        private UnsafeFastIntList includedTypeIds;
-        private UnsafeFastIntList excludedTypeIds;
+        private IntFastList includedTypeIds;
+        private IntFastList excludedTypeIds;
 
         private int        typeID;
         private FilterMode filterMode;
@@ -1473,7 +1473,7 @@ namespace Morpeh {
         }
 
         //full child filter
-        private Filter(World world, int typeID, UnsafeFastIntList includedTypeIds, UnsafeFastIntList excludedTypeIds, FilterMode mode) {
+        private Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, FilterMode mode) {
             this.world = world;
 
             this.childs     = new FastList<Filter>();
@@ -1547,7 +1547,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void FindArchetypes(UnsafeFastIntList newArchetypes) {
+        internal void FindArchetypes(IntFastList newArchetypes) {
             var minLength = this.includedTypeIds.length;
             foreach (var archId in newArchetypes) {
                 var arch = this.world.archetypes.data[archId];
@@ -1695,15 +1695,15 @@ namespace Morpeh {
 
             var newTypeId = CacheTypeIdentifier<T>.info.id;
 
-            UnsafeFastIntList newIncludedTypeIds;
-            UnsafeFastIntList newExcludedTypeIds;
+            IntFastList newIncludedTypeIds;
+            IntFastList newExcludedTypeIds;
             if (this.typeID == -1) {
-                newIncludedTypeIds = new UnsafeFastIntList();
-                newExcludedTypeIds = new UnsafeFastIntList();
+                newIncludedTypeIds = new IntFastList();
+                newExcludedTypeIds = new IntFastList();
             }
             else {
-                newIncludedTypeIds = new UnsafeFastIntList(this.includedTypeIds);
-                newExcludedTypeIds = new UnsafeFastIntList(this.excludedTypeIds);
+                newIncludedTypeIds = new IntFastList(this.includedTypeIds);
+                newExcludedTypeIds = new IntFastList(this.excludedTypeIds);
             }
 
             if (mode == FilterMode.Include) {
@@ -1737,9 +1737,9 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public sealed class ComponentsBag<T> : ComponentsBag where T : struct, IComponent {
-            private FastList<T>   components;
-            private Filter        filter;
-            private UnsafeFastIntList firstPartIds;
+            private FastList<T> components;
+            private Filter      filter;
+            private IntFastList firstPartIds;
 
             private FastList<Archetype.ComponentsBagPart> parts;
 
@@ -2134,13 +2134,13 @@ namespace Morpeh {
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public sealed class IntHashSet : IEnumerable<int> {
+        public sealed unsafe class IntHashSet : IEnumerable<int> {
             public int   length;
             public int   capacity;
             public int   capacityMinusOne;
             public int[] buckets;
 
-            public Slot[] slots;
+            private int[] slots;
 
             public int lastIndex;
             public int freeIndex;
@@ -2158,40 +2158,52 @@ namespace Morpeh {
                 this.capacityMinusOne = HashHelpers.GetPrime(capacity);
                 this.capacity         = this.capacityMinusOne + 1;
                 this.buckets          = new int[this.capacity];
-                this.slots            = new Slot[this.capacity];
+                this.slots            = new int[this.capacity / 2];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Add(in int value) {
                 var rem = value & this.capacityMinusOne;
 
-                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
-                    if (this.slots[i].value - 1 == value) {
-                        return false;
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == value) {
+                            return false;
+                        }
                     }
                 }
 
                 int newIndex;
                 if (this.freeIndex >= 0) {
-                    newIndex       = this.freeIndex;
-                    this.freeIndex = this.slots[newIndex].next;
+                    newIndex = this.freeIndex;
+                    fixed (int* s = &this.slots[0]) {
+                        this.freeIndex = *(s + newIndex + 1);
+                    }
                 }
                 else {
                     if (this.lastIndex == this.capacity) {
                         var newCapacityMinusOne = HashHelpers.ExpandPrime(this.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
-                        ArrayHelpers.Grow(ref this.slots, newCapacity);
+                        ArrayHelpers.Grow(ref this.slots, newCapacity * 2);
 
                         var newBuckets = new int[newCapacity];
 
-                        for (int i = 0, len = this.lastIndex; i < len; ++i) {
-                            ref var slot           = ref this.slots[i];
-                            var     newResizeIndex = (slot.value - 1) & newCapacityMinusOne;
+                        fixed (int* slotsPtr = &this.slots[0])
+                        fixed (int* bucketsPtr = &newBuckets[0]) {
+                            for (int i = 0, len = this.lastIndex; i < len; i += 2) {
+                                var slotPtr = slotsPtr + i;
 
-                            slot.next = newBuckets[newResizeIndex] - 1;
+                                var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                                var newCurrentBucket = bucketsPtr + newResizeIndex;
 
-                            newBuckets[newResizeIndex] = i + 1;
+                                *(slotPtr + 1) = *newCurrentBucket - 1;
+
+                                *newCurrentBucket = i + 1;
+                            }
                         }
 
                         this.buckets          = newBuckets;
@@ -2205,12 +2217,16 @@ namespace Morpeh {
                     ++this.lastIndex;
                 }
 
-                ref var newSlot = ref this.slots[newIndex];
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0]) {
+                    var bucket = bucketsPtr + rem;
+                    var slot   = slotsPtr + newIndex;
 
-                newSlot.value = value + 1;
-                newSlot.next  = this.buckets[rem] - 1;
+                    *slot       = value + 1;
+                    *(slot + 1) = *bucket - 1;
 
-                this.buckets[rem] = newIndex + 1;
+                    *bucket = newIndex + 1;
+                }
 
                 ++this.length;
                 return true;
@@ -2218,73 +2234,81 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Remove(in int value) {
-                var rem = value & this.capacityMinusOne;
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0]) {
+                    var rem = value & this.capacityMinusOne;
 
-                int next;
-                var num = -1;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    ref var slot = ref this.slots[i];
+                    int next;
+                    var num = -1;
 
-                    if (slot.value - 1 == value) {
-                        if (num < 0) {
-                            this.buckets[rem] = slot.next + 1;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        var slot     = slotsPtr + i;
+                        var slotNext = slot + 1;
+
+                        if (*slot - 1 == value) {
+                            if (num < 0) {
+                                *(bucketsPtr + rem) = *slotNext + 1;
+                            }
+                            else {
+                                *(slotsPtr + num + 1) = *slotNext;
+                            }
+
+                            *slot     = -1;
+                            *slotNext = this.freeIndex;
+
+                            if (--this.length == 0) {
+                                this.lastIndex = 0;
+                                this.freeIndex = -1;
+                            }
+                            else {
+                                this.freeIndex = i;
+                            }
+
+                            return true;
                         }
-                        else {
-                            this.slots[num].next = slot.next;
-                        }
 
-                        slot.value = -1;
-                        slot.next  = this.freeIndex;
-
-                        --this.length;
-                        if (this.length == 0) {
-                            this.lastIndex = 0;
-                            this.freeIndex = -1;
-                        }
-                        else {
-                            this.freeIndex = i;
-                        }
-
-                        return true;
+                        next = *slotNext;
+                        num  = i;
                     }
 
-                    next = slot.next;
-                    num  = i;
+                    return false;
                 }
-
-                return false;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CopyTo(int[] array) {
-                int num = 0;
-                for (int i = 0, li = this.lastIndex, len = this.length; i < li && num < len; ++i) {
-                    ref var slot = ref this.slots[i];
-                    var     v    = slot.value - 1;
-                    if (v < 0) {
-                        continue;
-                    }
+                fixed (int* slotsPtr = &this.slots[0]) {
+                    int num = 0;
+                    for (int i = 0, li = this.lastIndex, len = this.length; i < li && num < len; ++i) {
+                        var v = *(slotsPtr + i) - 1;
+                        if (v < 0) {
+                            continue;
+                        }
 
-                    array[num] = v;
-                    ++num;
+                        array[num] = v;
+                        ++num;
+                    }
                 }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Has(in int key) {
-                var rem = key & this.capacityMinusOne;
+                fixed (int* slotsPtr = &this.slots[0])
+                fixed (int* bucketsPtr = &this.buckets[0]) {
+                    var rem = key & this.capacityMinusOne;
 
-                int next;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    ref var slot = ref this.slots[i];
-                    if (slot.value - 1 == key) {
-                        return true;
+                    int next;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        var slot = slotsPtr + i;
+                        if (*slot - 1 == key) {
+                            return true;
+                        }
+
+                        next = *(slot + 1);
                     }
 
-                    next = slot.next;
+                    return false;
                 }
-
-                return false;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2313,16 +2337,6 @@ namespace Morpeh {
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-
-            [Serializable]
-            [Il2Cpp(Option.NullChecks, false)]
-            [Il2Cpp(Option.ArrayBoundsChecks, false)]
-            [Il2Cpp(Option.DivideByZeroChecks, false)]
-            public struct Slot {
-                public int value;
-                public int next;
-            }
-
             [Il2Cpp(Option.NullChecks, false)]
             [Il2Cpp(Option.ArrayBoundsChecks, false)]
             [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -2333,22 +2347,23 @@ namespace Morpeh {
                 public int current;
 
                 public bool MoveNext() {
-                    for (; this.index < this.set.lastIndex; ++this.index) {
-                        ref var slot = ref this.set.slots[this.index];
-                        var     v    = slot.value - 1;
-                        if (v < 0) {
-                            continue;
+                    fixed (int* slotsPtr = &this.set.slots[0]) {
+                        for (var len = this.set.lastIndex; this.index < len; ++this.index) {
+                            var v = *slotsPtr - 1;
+                            if (v < 0) {
+                                continue;
+                            }
+
+                            this.current = v;
+                            ++this.index;
+
+                            return true;
                         }
 
-                        this.current = v;
-                        ++this.index;
-
-                        return true;
+                        this.index   = this.set.lastIndex + 1;
+                        this.current = default;
+                        return false;
                     }
-
-                    this.index   = this.set.lastIndex + 1;
-                    this.current = default;
-                    return false;
                 }
 
                 public int Current => this.current;
@@ -2601,8 +2616,8 @@ namespace Morpeh {
             public int   capacityMinusOne;
             public int[] buckets;
 
-            public Slot[] slots;
-            public T[]    data;
+            private T[]    data;
+            private Slot[] slots;
 
             public int lastIndex;
             public int freeIndex;
@@ -2814,7 +2829,7 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public T GetValue(in int key) {
+            public T GetValueByKey(in int key) {
                 var rem = key & this.capacityMinusOne;
 
                 int next;
@@ -2829,6 +2844,12 @@ namespace Morpeh {
 
                 return default;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public T GetValueByIndex(in int index) => this.data[index];
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public int GetKeyByIndex(in int index) => this.slots[index].key;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public int TryGetIndex(in int key) {
@@ -2936,7 +2957,7 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
@@ -2947,8 +2968,8 @@ namespace Morpeh {
             public int   capacityMinusOne;
             public int[] buckets;
 
-            public int[] slots;
-            private T[]  data;
+            private T[]   data;
+            private int[] slots;
 
             public int lastIndex;
             public int freeIndex;
@@ -3006,11 +3027,11 @@ namespace Morpeh {
                         rem = key & this.capacityMinusOne;
                     }
 
-                    slotIndex = this.lastIndex;
-                    this.lastIndex+=2;
+                    slotIndex      =  this.lastIndex;
+                    this.lastIndex += 2;
                 }
 
-                this.slots[slotIndex]  = key + 1;
+                this.slots[slotIndex]     = key + 1;
                 this.slots[slotIndex + 1] = this.buckets[rem] - 1;
 
                 this.data[slotIndex / 2] = value;
@@ -3030,16 +3051,16 @@ namespace Morpeh {
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
                     if (this.slots[i] - 1 == key) {
                         if (num < 0) {
-                            this.buckets[rem] = this.slots[i+1] + 1;
+                            this.buckets[rem] = this.slots[i + 1] + 1;
                         }
                         else {
-                            this.slots[num + 1] = this.slots[i+1];
+                            this.slots[num + 1] = this.slots[i + 1];
                         }
 
-                        lastValue = this.data[i/2];
+                        lastValue = this.data[i / 2];
 
-                        this.slots[i] = -1;
-                        this.slots[i+1] = this.freeIndex;
+                        this.slots[i]     = -1;
+                        this.slots[i + 1] = this.freeIndex;
 
                         --this.length;
                         if (this.length == 0) {
@@ -3053,7 +3074,7 @@ namespace Morpeh {
                         return true;
                     }
 
-                    next = this.slots[i+1];
+                    next = this.slots[i + 1];
                     num  = i;
                 }
 
@@ -3068,11 +3089,11 @@ namespace Morpeh {
                 int next;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
                     if (this.slots[i] - 1 == key) {
-                        value = this.data[i/2];
+                        value = this.data[i / 2];
                         return true;
                     }
 
-                    next = this.slots[i+1];
+                    next = this.slots[i + 1];
                 }
 
                 value = default;
@@ -3083,16 +3104,18 @@ namespace Morpeh {
             public T GetValueByKey(in int key) {
                 var rem = key & this.capacityMinusOne;
 
-                fixed (int* s = &this.slots[0]) fixed(T* d = &this.data[0]){
+                fixed (int* s = &this.slots[0])
+                fixed (T* d = &this.data[0]) {
                     int next;
                     for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
                         if (*(s + i) - 1 == key) {
-                            return *(d + i/2);
+                            return *(d + i / 2);
                         }
 
                         next = *(s + i + 1);
                     }
                 }
+
                 return default;
             }
 
@@ -3102,7 +3125,7 @@ namespace Morpeh {
                     return *(d + index / 2);
                 }
             }
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public int GetKeyByIndex(in int index) {
                 fixed (int* d = &this.slots[0]) {
@@ -3117,10 +3140,10 @@ namespace Morpeh {
                 int next;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
                     if (this.slots[i] - 1 == key) {
-                        return i / 2;
+                        return i;
                     }
 
-                    next = this.slots[i+1];
+                    next = this.slots[i + 1];
                 }
 
                 return -1;
@@ -3173,7 +3196,7 @@ namespace Morpeh {
                 public int current;
 
                 public bool MoveNext() {
-                    for (; this.index < this.hashMap.lastIndex; this.index+=2) {
+                    for (; this.index < this.hashMap.lastIndex; this.index += 2) {
                         if (this.hashMap.slots[this.index] - 1 < 0) {
                             continue;
                         }
@@ -3203,15 +3226,15 @@ namespace Morpeh {
             }
         }
 
-
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public sealed class IntStack {
-            public int[] data;
-            public int   length;
-            public int   capacity;
+        public sealed unsafe class IntStack {
+            public int length;
+            public int capacity;
+
+            private int[] data;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public IntStack() {
@@ -3226,11 +3249,17 @@ namespace Morpeh {
                     ArrayHelpers.Grow(ref this.data, this.capacity <<= 1);
                 }
 
-                this.data[this.length++] = value;
+                fixed (int* d = &this.data[0]) {
+                    *(d + this.length++) = value;
+                }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int Pop() => this.data[--this.length];
+            public int Pop() {
+                fixed (int* d = &this.data[0]) {
+                    return *(d + this.length--);
+                }
+            }
 
             public void Clear() {
                 this.data   = null;
@@ -3293,6 +3322,7 @@ namespace Morpeh {
                 if (++this.length == this.capacity) {
                     ArrayHelpers.Grow(ref this.data, this.capacity <<= 1);
                 }
+
                 this.data[index] = value;
                 return index;
             }
@@ -3432,33 +3462,33 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public sealed unsafe class UnsafeFastIntList : IEnumerable<int>{
+        public sealed unsafe class IntFastList : IEnumerable<int> {
             public int length;
             public int capacity;
-            
+
             private int[] data;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public UnsafeFastIntList() {
+            public IntFastList() {
                 this.capacity = 3;
                 this.data     = new int[this.capacity];
                 this.length   = 0;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public UnsafeFastIntList(int capacity) {
+            public IntFastList(int capacity) {
                 this.capacity = HashHelpers.GetPrime(capacity);
                 this.data     = new int[this.capacity];
                 this.length   = 0;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public UnsafeFastIntList(UnsafeFastIntList other) {
+            public IntFastList(IntFastList other) {
                 this.capacity = other.capacity;
                 this.data     = new int[this.capacity];
                 this.length   = other.length;
@@ -3481,7 +3511,7 @@ namespace Morpeh {
                     return *(d + index);
                 }
             }
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Set(in int index, in int value) {
                 fixed (int* d = &this.data[0]) {
@@ -3499,11 +3529,12 @@ namespace Morpeh {
                 fixed (int* p = &this.data[0]) {
                     *(p + index) = value;
                 }
+
                 return index;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void AddListRange(UnsafeFastIntList other) {
+            public void AddListRange(IntFastList other) {
                 if (other.length > 0) {
                     var newSize = this.length + other.length;
                     if (newSize > this.capacity) {
@@ -3553,6 +3584,7 @@ namespace Morpeh {
                     fixed (int* d = &this.data[0]) {
                         *(d + swap.newIndex) = *(d + swap.oldIndex);
                     }
+
                     return true;
                 }
 
@@ -3570,11 +3602,9 @@ namespace Morpeh {
                 this.length = 0;
             }
 
-            //todo rework
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Sort() => Array.Sort(this.data, 0, this.length, null);
 
-            //todo rework
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Sort(int index, int len) => Array.Sort(this.data, index, len, null);
 
@@ -3588,9 +3618,9 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Enumerator GetEnumerator() {
                 Enumerator e;
-                e.fastIntList    = this;
-                e.current = default;
-                e.index   = 0;
+                e.intFastList = this;
+                e.current     = default;
+                e.index       = 0;
                 return e;
             }
 
@@ -3610,19 +3640,20 @@ namespace Morpeh {
             [Il2Cpp(Option.ArrayBoundsChecks, false)]
             [Il2Cpp(Option.DivideByZeroChecks, false)]
             public struct Enumerator : IEnumerator<int> {
-                public UnsafeFastIntList fastIntList;
+                public IntFastList intFastList;
 
                 public int current;
                 public int index;
 
                 public bool MoveNext() {
-                    if (this.index >= this.fastIntList.length) {
+                    if (this.index >= this.intFastList.length) {
                         return false;
                     }
 
-                    fixed (int* d = &this.fastIntList.data[0]) {
+                    fixed (int* d = &this.intFastList.data[0]) {
                         this.current = *(d + this.index++);
                     }
+
                     return true;
                 }
 
@@ -3631,7 +3662,7 @@ namespace Morpeh {
                     this.current = default;
                 }
 
-                public int           Current => this.current;
+                public int         Current => this.current;
                 object IEnumerator.Current => this.current;
 
                 public void Dispose() {
@@ -3660,7 +3691,7 @@ namespace Morpeh {
 
                 return -1;
             }
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static unsafe int IndexOfUnsafeInt(int[] array, int value) {
                 fixed (int* arr = &array[0]) {
@@ -3673,13 +3704,13 @@ namespace Morpeh {
                         ++i;
                     }
                 }
-                
+
 
                 return -1;
             }
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static unsafe int IndexOfUnsafe<T>(T[] array, T value, EqualityComparer<T> comparer) where T: unmanaged {
+            public static unsafe int IndexOfUnsafe<T>(T[] array, T value, EqualityComparer<T> comparer) where T : unmanaged {
                 fixed (T* arr = &array[0]) {
                     var i = 0;
                     for (T* current = arr, length = arr + array.Length; current < length; ++current) {
@@ -3690,7 +3721,7 @@ namespace Morpeh {
                         ++i;
                     }
                 }
-                
+
 
                 return -1;
             }
