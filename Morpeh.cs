@@ -149,7 +149,7 @@ namespace Morpeh {
 #endif
             return ref cache.Empty();
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
@@ -180,7 +180,7 @@ namespace Morpeh {
             exist = true;
             return ref cache.Empty();
         }
-        
+
         public static bool AddComponentFast(this Entity entity, in int typeId, in int componentId) {
             if (entity.componentsIds.Add(typeId, componentId, out _)) {
                 entity.AddTransfer(typeId);
@@ -189,7 +189,7 @@ namespace Morpeh {
 
             return false;
         }
-        
+
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
@@ -211,7 +211,7 @@ namespace Morpeh {
 #endif
             return ref cache.Empty();
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
@@ -234,10 +234,10 @@ namespace Morpeh {
             exist = false;
             return ref cache.Empty();
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetComponentFast(this Entity entity, in int typeId) => entity.componentsIds.GetValueByKey(typeId);
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
@@ -260,7 +260,7 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
@@ -281,7 +281,7 @@ namespace Morpeh {
 
             return false;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponentFast(this Entity entity, int typeId, out int cacheIndex) {
             if (entity.componentsIds.Remove(typeId, out cacheIndex)) {
@@ -296,16 +296,16 @@ namespace Morpeh {
 
             return false;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has(this Entity entity, int typeID) => entity.componentsIds.TryGetIndex(typeID) >= 0;
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has<T>(this Entity entity) where T : struct, IComponent {
             var typeID = CacheTypeIdentifier<T>.info.id;
             return entity.componentsIds.TryGetIndex(typeID) >= 0;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddTransfer(this Entity entity, int typeId) {
             if (entity.previousArchetypeId == -1) {
@@ -320,7 +320,7 @@ namespace Morpeh {
             entity.world.dirtyEntities.Add(entity);
             entity.isDirty = true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveTransfer(this Entity entity, int typeId) {
             if (entity.previousArchetypeId == -1) {
@@ -335,7 +335,7 @@ namespace Morpeh {
             entity.world.dirtyEntities.Add(entity);
             entity.isDirty = true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransfer(this Entity entity) {
             if (entity.previousArchetypeId > 0 && entity.indexInCurrentArchetype >= 0) {
@@ -346,7 +346,7 @@ namespace Morpeh {
             entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
             entity.isDirty = false;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeFast(this Entity entity) {
             entity.componentsIds.Clear();
@@ -359,7 +359,7 @@ namespace Morpeh {
 
             entity.isDisposed = true;
         }
-        
+
         public static bool IsNullOrDisposed([CanBeNull] this Entity entity) => entity == null || entity.isDisposed;
     }
 
@@ -368,27 +368,27 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public sealed class SystemsGroup : IDisposable {
         [ShowInInspector]
-        private FastList<ISystem> systems;
+        internal FastList<ISystem> systems;
         [ShowInInspector]
-        private FastList<ISystem> fixedSystems;
+        internal FastList<ISystem> fixedSystems;
         [ShowInInspector]
-        private FastList<ISystem> lateSystems;
+        internal FastList<ISystem> lateSystems;
 
         [ShowInInspector]
-        private FastList<ISystem> disabledSystems;
+        internal FastList<ISystem> disabledSystems;
         [ShowInInspector]
-        private FastList<ISystem> disabledFixedSystems;
+        internal FastList<ISystem> disabledFixedSystems;
         [ShowInInspector]
-        private FastList<ISystem> disabledLateSystems;
+        internal FastList<ISystem> disabledLateSystems;
 
         [ShowInInspector]
-        private FastList<IInitializer> newInitializers;
+        internal FastList<IInitializer> newInitializers;
         [ShowInInspector]
-        private FastList<IInitializer> initializers;
+        internal FastList<IInitializer> initializers;
         [ShowInInspector]
-        private FastList<IDisposable> disposables;
-        private World  world;
-        private Action delayedAction;
+        internal FastList<IDisposable> disposables;
+        internal World  world;
+        internal Action delayedAction;
 
         private SystemsGroup() {
         }
@@ -504,11 +504,16 @@ namespace Morpeh {
                 this.disposables = null;
             }
         }
+    }
 
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    public static class SystemsGroupExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Initialize() {
-            if (this.disposables.length > 0) {
-                foreach (var disposable in this.disposables) {
+        public static void Initialize(this SystemsGroup systemsGroup) {
+            if (systemsGroup.disposables.length > 0) {
+                foreach (var disposable in systemsGroup.disposables) {
 #if UNITY_EDITOR
                     try {
                         disposable.Dispose();
@@ -522,12 +527,12 @@ namespace Morpeh {
 #endif
                 }
 
-                this.disposables.Clear();
+                systemsGroup.disposables.Clear();
             }
 
-            this.world.UpdateFilters();
-            if (this.newInitializers.length > 0) {
-                foreach (var initializer in this.newInitializers) {
+            systemsGroup.world.UpdateFilters();
+            if (systemsGroup.newInitializers.length > 0) {
+                foreach (var initializer in systemsGroup.newInitializers) {
 #if UNITY_EDITOR
                     try {
                         initializer.OnAwake();
@@ -540,144 +545,153 @@ namespace Morpeh {
                     initializer.OnAwake();
 #endif
 
-                    this.world.UpdateFilters();
-                    this.initializers.Add(initializer);
+                    systemsGroup.world.UpdateFilters();
+                    systemsGroup.initializers.Add(initializer);
                 }
 
-                this.newInitializers.Clear();
+                systemsGroup.newInitializers.Clear();
             }
         }
 
-        public void Update(float deltaTime) {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Update(this SystemsGroup systemsGroup, float deltaTime) {
 #if UNITY_EDITOR
-            this.delayedAction = null;
+            systemsGroup.delayedAction = null;
 #endif
-            this.Initialize();
-            for (int i = 0, length = this.systems.length; i < length; i++) {
-                var system = this.systems.data[i];
+            systemsGroup.Initialize();
+            for (int i = 0, length = systemsGroup.systems.length; i < length; i++) {
+                var system = systemsGroup.systems.data[i];
 #if UNITY_EDITOR
                 try {
                     system.OnUpdate(deltaTime);
                 }
                 catch (Exception e) {
-                    this.SystemThrowException(system, e);
+                    systemsGroup.SystemThrowException(system, e);
                 }
 #else
                 system.OnUpdate(deltaTime);
 #endif
-                this.world.UpdateFilters();
+                systemsGroup.world.UpdateFilters();
             }
 #if UNITY_EDITOR
-            this.delayedAction?.Invoke();
+            systemsGroup.delayedAction?.Invoke();
 #endif
         }
 
-        public void FixedUpdate(float deltaTime) {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void FixedUpdate(this SystemsGroup systemsGroup, float deltaTime) {
 #if UNITY_EDITOR
-            this.delayedAction = null;
+            systemsGroup.delayedAction = null;
 #endif
-            for (int i = 0, length = this.fixedSystems.length; i < length; i++) {
-                var system = this.fixedSystems.data[i];
+            for (int i = 0, length = systemsGroup.fixedSystems.length; i < length; i++) {
+                var system = systemsGroup.fixedSystems.data[i];
 #if UNITY_EDITOR
                 try {
                     system.OnUpdate(deltaTime);
                 }
                 catch (Exception e) {
-                    this.SystemThrowException(system, e);
+                    systemsGroup.SystemThrowException(system, e);
                 }
 #else
                 system.OnUpdate(deltaTime);
 #endif
-                this.world.UpdateFilters();
+                systemsGroup.world.UpdateFilters();
             }
 #if UNITY_EDITOR
-            this.delayedAction?.Invoke();
+            systemsGroup.delayedAction?.Invoke();
 #endif
         }
 
-        public void LateUpdate(float deltaTime) {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LateUpdate(this SystemsGroup systemsGroup, float deltaTime) {
 #if UNITY_EDITOR
-            this.delayedAction = null;
+            systemsGroup.delayedAction = null;
 #endif
-            this.world.UpdateFilters();
+            systemsGroup.world.UpdateFilters();
 
-            for (int i = 0, length = this.lateSystems.length; i < length; i++) {
-                var system = this.lateSystems.data[i];
+            for (int i = 0, length = systemsGroup.lateSystems.length; i < length; i++) {
+                var system = systemsGroup.lateSystems.data[i];
 #if UNITY_EDITOR
                 try {
                     system.OnUpdate(deltaTime);
                 }
                 catch (Exception e) {
-                    this.SystemThrowException(system, e);
+                    systemsGroup.SystemThrowException(system, e);
                 }
 #else
                 system.OnUpdate(deltaTime);
 #endif
-                this.world.UpdateFilters();
+                systemsGroup.world.UpdateFilters();
             }
 #if UNITY_EDITOR
-            this.delayedAction?.Invoke();
+            systemsGroup.delayedAction?.Invoke();
 #endif
         }
 
+
 #if UNITY_EDITOR
-        private void SystemThrowException(ISystem system, Exception exception) {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SystemThrowException(this SystemsGroup systemsGroup, ISystem system, Exception exception) {
             Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
             Debug.LogException(exception);
-            this.delayedAction += () => this.DisableSystem(system);
+            systemsGroup.delayedAction += () => systemsGroup.DisableSystem(system);
         }
 #endif
 
-        public void AddInitializer<T>(T initializer) where T : class, IInitializer {
-            initializer.World = this.world;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddInitializer<T>(this SystemsGroup systemsGroup, T initializer) where T : class, IInitializer {
+            initializer.World = systemsGroup.world;
 
-            this.newInitializers.Add(initializer);
+            systemsGroup.newInitializers.Add(initializer);
         }
 
-        public void RemoveInitializer<T>(T initializer) where T : class, IInitializer {
-            var index = this.newInitializers.IndexOf(initializer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void RemoveInitializer<T>(this SystemsGroup systemsGroup, T initializer) where T : class, IInitializer {
+            var index = systemsGroup.newInitializers.IndexOf(initializer);
             if (index >= 0) {
-                this.newInitializers.RemoveAt(index);
+                systemsGroup.newInitializers.RemoveAt(index);
             }
         }
 
-        public bool AddSystem<T>(T system, bool enabled = true) where T : class, ISystem {
-            var collection         = this.systems;
-            var disabledCollection = this.disabledSystems;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool AddSystem<T>(this SystemsGroup systemsGroup, T system, bool enabled = true) where T : class, ISystem {
+            var collection         = systemsGroup.systems;
+            var disabledCollection = systemsGroup.disabledSystems;
             if (system is IFixedSystem) {
-                collection         = this.fixedSystems;
-                disabledCollection = this.disabledFixedSystems;
+                collection         = systemsGroup.fixedSystems;
+                disabledCollection = systemsGroup.disabledFixedSystems;
             }
             else if (system is ILateSystem) {
-                collection         = this.lateSystems;
-                disabledCollection = this.disabledLateSystems;
+                collection         = systemsGroup.lateSystems;
+                disabledCollection = systemsGroup.disabledLateSystems;
             }
 
             if (enabled && collection.IndexOf(system) < 0) {
                 collection.Add(system);
-                this.AddInitializer(system);
+                systemsGroup.AddInitializer(system);
                 return true;
             }
 
             if (!enabled && disabledCollection.IndexOf(system) < 0) {
                 disabledCollection.Add(system);
-                this.AddInitializer(system);
+                systemsGroup.AddInitializer(system);
                 return true;
             }
 
             return false;
         }
 
-        public bool EnableSystem<T>(T system) where T : class, ISystem {
-            var collection         = this.systems;
-            var disabledCollection = this.disabledSystems;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EnableSystem<T>(this SystemsGroup systemsGroup, T system) where T : class, ISystem {
+            var collection         = systemsGroup.systems;
+            var disabledCollection = systemsGroup.disabledSystems;
             if (system is IFixedSystem) {
-                collection         = this.fixedSystems;
-                disabledCollection = this.disabledFixedSystems;
+                collection         = systemsGroup.fixedSystems;
+                disabledCollection = systemsGroup.disabledFixedSystems;
             }
             else if (system is ILateSystem) {
-                collection         = this.lateSystems;
-                disabledCollection = this.disabledLateSystems;
+                collection         = systemsGroup.lateSystems;
+                disabledCollection = systemsGroup.disabledLateSystems;
             }
 
             var index = disabledCollection.IndexOf(system);
@@ -690,16 +704,17 @@ namespace Morpeh {
             return false;
         }
 
-        public bool DisableSystem<T>(T system) where T : class, ISystem {
-            var collection         = this.systems;
-            var disabledCollection = this.disabledSystems;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool DisableSystem<T>(this SystemsGroup systemsGroup, T system) where T : class, ISystem {
+            var collection         = systemsGroup.systems;
+            var disabledCollection = systemsGroup.disabledSystems;
             if (system is IFixedSystem) {
-                collection         = this.fixedSystems;
-                disabledCollection = this.disabledFixedSystems;
+                collection         = systemsGroup.fixedSystems;
+                disabledCollection = systemsGroup.disabledFixedSystems;
             }
             else if (system is ILateSystem) {
-                collection         = this.lateSystems;
-                disabledCollection = this.disabledLateSystems;
+                collection         = systemsGroup.lateSystems;
+                disabledCollection = systemsGroup.disabledLateSystems;
             }
 
             var index = collection.IndexOf(system);
@@ -712,31 +727,31 @@ namespace Morpeh {
             return false;
         }
 
-        public bool RemoveSystem<T>(T system) where T : class, ISystem {
-            var collection         = this.systems;
-            var disabledCollection = this.disabledSystems;
+        public static bool RemoveSystem<T>(this SystemsGroup systemsGroup, T system) where T : class, ISystem {
+            var collection         = systemsGroup.systems;
+            var disabledCollection = systemsGroup.disabledSystems;
             if (system is IFixedSystem) {
-                collection         = this.fixedSystems;
-                disabledCollection = this.disabledFixedSystems;
+                collection         = systemsGroup.fixedSystems;
+                disabledCollection = systemsGroup.disabledFixedSystems;
             }
             else if (system is ILateSystem) {
-                collection         = this.lateSystems;
-                disabledCollection = this.disabledLateSystems;
+                collection         = systemsGroup.lateSystems;
+                disabledCollection = systemsGroup.disabledLateSystems;
             }
 
             var index = collection.IndexOf(system);
             if (index >= 0) {
                 collection.RemoveAt(index);
-                this.disposables.Add(system);
-                this.RemoveInitializer(system);
+                systemsGroup.disposables.Add(system);
+                systemsGroup.RemoveInitializer(system);
                 return true;
             }
 
             index = disabledCollection.IndexOf(system);
             if (index >= 0) {
                 disabledCollection.RemoveAt(index);
-                this.disposables.Add(system);
-                this.RemoveInitializer(system);
+                systemsGroup.disposables.Add(system);
+                systemsGroup.RemoveInitializer(system);
                 return true;
             }
 
