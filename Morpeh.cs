@@ -310,7 +310,7 @@ namespace Morpeh {
                 return;
             }
 
-            this.world.dirtyEntities.Add(this.internalID);
+            this.world.dirtyEntities.Add(this);
             this.isDirty = true;
         }
 
@@ -325,7 +325,7 @@ namespace Morpeh {
                 return;
             }
 
-            this.world.dirtyEntities.Add(this.internalID);
+            this.world.dirtyEntities.Add(this);
             this.isDirty = true;
         }
 
@@ -793,8 +793,8 @@ namespace Morpeh {
         [SerializeField]
         internal int entitiesCapacity;
 
-        [SerializeField]
-        internal FastList<int> dirtyEntities;
+        [NonSerialized]
+        internal FastList<Entity> dirtyEntities;
 
         [SerializeField]
         private List<int> freeEntityIDs;
@@ -846,7 +846,7 @@ namespace Morpeh {
         private World Initialize() {
             worlds.Add(this);
             this.id                = worlds.Count - 1;
-            this.dirtyEntities     = new FastList<int>();
+            this.dirtyEntities     = new FastList<Entity>();
             this.freeEntityIDs     = new List<int>();
             this.nextFreeEntityIDs = new List<int>();
             this.caches            = new IntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
@@ -1207,8 +1207,7 @@ namespace Morpeh {
 
         public void UpdateFilters() {
             for (var index = 0; index < this.dirtyEntities.length; index++) {
-                var ent = this.entities[this.dirtyEntities.data[index]];
-                ent.ApplyTransfer();
+                this.dirtyEntities.data[index].ApplyTransfer();
             }
 
             this.dirtyEntities.length = 0;
@@ -2125,6 +2124,7 @@ namespace Morpeh {
         public sealed class IntHashSet : IEnumerable<int> {
             public int   length;
             public int   capacity;
+            public int   realCapacity;
             public int[] buckets;
 
             public Slot[] slots;
@@ -2141,19 +2141,16 @@ namespace Morpeh {
                 this.freeIndex = -1;
 
                 this.capacity = HashHelpers.GetPrime(capacity);
-                this.buckets  = new int[this.capacity];
-                this.slots    = new Slot[this.capacity];
-
-                for (var i = 0; i < this.capacity; i++) {
-                    this.slots[i].value = -1;
-                }
+                this.realCapacity = this.capacity + 1;
+                this.buckets  = new int[this.realCapacity];
+                this.slots    = new Slot[this.realCapacity];
             }
 
             public bool Add(in int value) {
-                var rem = HashHelpers.Rem(value, this.capacity);
+                var rem = value & this.capacity;
 
                 for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
-                    if (this.slots[i].value == value) {
+                    if (this.slots[i].value - 1 == value) {
                         return false;
                     }
                 }
@@ -2164,30 +2161,28 @@ namespace Morpeh {
                     this.freeIndex = this.slots[newIndex].next;
                 }
                 else {
-                    if (this.lastIndex == this.slots.Length) {
+                    if (this.lastIndex == this.realCapacity) {
                         var newCapacity = HashHelpers.ExpandPrime(this.length);
+                        var newRealCapacity = newCapacity + 1;
 
-                        ArrayHelpers.Grow(ref this.slots, newCapacity);
+                        ArrayHelpers.Grow(ref this.slots, newRealCapacity);
 
-                        var newBuckets = new int[newCapacity];
+                        var newBuckets = new int[newRealCapacity];
 
                         for (int i = 0, length = this.lastIndex; i < length; ++i) {
                             ref var slot = ref this.slots[i];
-                            var newResizeIndex = HashHelpers.Rem(slot.value, newCapacity);
+                            var newResizeIndex = (slot.value - 1) & newCapacity;
 
                             slot.next = newBuckets[newResizeIndex] - 1;
 
                             newBuckets[newResizeIndex] = i + 1;
                         }
 
-                        for (int i = this.lastIndex + 1, length = newCapacity; i < length; i++) {
-                            this.slots[i].value = -1;
-                        }
-
                         this.buckets  = newBuckets;
                         this.capacity = newCapacity;
+                        this.realCapacity = newRealCapacity;
 
-                        rem = HashHelpers.Rem(value, newCapacity);
+                        rem = value & newCapacity;
                     }
 
                     newIndex = this.lastIndex;
@@ -2196,7 +2191,7 @@ namespace Morpeh {
 
                 ref var newSlot = ref this.slots[newIndex];
 
-                newSlot.value = value;
+                newSlot.value = value + 1;
                 newSlot.next  = this.buckets[rem] - 1;
 
                 this.buckets[rem] = newIndex + 1;
@@ -2206,14 +2201,14 @@ namespace Morpeh {
             }
 
             public bool Remove(in int value) {
-                var rem = HashHelpers.Rem(value, this.capacity);
+                var rem = value & this.capacity;
 
                 int next;
                 var num = -1;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
                     ref var slot = ref this.slots[i];
 
-                    if (slot.value == value) {
+                    if (slot.value - 1 == value) {
                         if (num < 0) {
                             this.buckets[rem] = slot.next + 1;
                         }
@@ -2246,7 +2241,7 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CopyTo(int[] array) {
                 int num = 0;
-                for (int i = 0, li = this.lastIndex, length = this.length; i < li && num < length; ++i) {
+                for (int i = 0, li = this.lastIndex, len = this.length; i < li && num < len; ++i) {
                     ref var slot = ref this.slots[i];
                     if (slot.value < 0) {
                         continue;
@@ -2259,7 +2254,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Has(in int key) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 int next;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -2378,7 +2373,7 @@ namespace Morpeh {
             }
 
             public bool Add(in int value) {
-                var rem = HashHelpers.Rem(value, this.capacity);
+                var rem = value & this.capacity;
 
                 for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
                     if (this.slots[i].value == value) {
@@ -2395,7 +2390,7 @@ namespace Morpeh {
 
                     for (int i = 0, length = this.length; i < length; ++i) {
                         ref var slot = ref this.slots[i];
-                        var newResizeIndex = HashHelpers.Rem(slot.value, newCapacity);
+                        var newResizeIndex = slot.value & newCapacity;
 
                         slot.next = newBuckets[newResizeIndex] - 1;
 
@@ -2409,7 +2404,7 @@ namespace Morpeh {
                     this.buckets  = newBuckets;
                     this.capacity = newCapacity;
 
-                    rem = HashHelpers.Rem(value, newCapacity);
+                    rem = value & newCapacity;
                 }
 
                 var newIndex = this.length++;
@@ -2425,7 +2420,7 @@ namespace Morpeh {
             }
 
             public int Remove(in int value) {
-                var rem = HashHelpers.Rem(value, this.capacity);
+                var rem = value & this.capacity;
 
                 int next;
                 var num = -1;
@@ -2443,7 +2438,7 @@ namespace Morpeh {
                         var lastIndex = this.length - 1;
                         if (lastIndex != i) {
                             ref var lastSlot = ref this.slots[lastIndex];
-                            var lastRem = HashHelpers.Rem(lastSlot.value, this.capacity);
+                            var lastRem = lastSlot.value & this.capacity;
 
                             if (this.buckets[lastRem] == this.length) {
                                 this.buckets[lastRem] = i + 1;
@@ -2485,7 +2480,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Has(in int key) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 int next;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -2608,7 +2603,7 @@ namespace Morpeh {
             }
 
             public bool Add(in int key, in T value, out int slotIndex) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
                     if (this.slots[i].key == key) {
@@ -2632,7 +2627,7 @@ namespace Morpeh {
 
                         for (int i = 0, length = this.lastIndex; i < length; ++i) {
                             ref var slot = ref this.slots[i];
-                            var newResizeIndex = HashHelpers.Rem(slot.key, newCapacity);
+                            var newResizeIndex = slot.key & newCapacity;
                             slot.next = newBuckets[newResizeIndex] - 1;
 
                             newBuckets[newResizeIndex] = i + 1;
@@ -2645,7 +2640,7 @@ namespace Morpeh {
                         this.buckets  = newBuckets;
                         this.capacity = newCapacity;
 
-                        rem = HashHelpers.Rem(key, this.capacity);
+                        rem = key & this.capacity;
                     }
 
                     slotIndex = this.lastIndex;
@@ -2666,7 +2661,7 @@ namespace Morpeh {
             }
 
             public void Set(in int key, in T value, out int slotIndex) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
                     if (this.slots[i].key == key) {
@@ -2691,7 +2686,7 @@ namespace Morpeh {
 
                         for (int i = 0, length = this.lastIndex; i < length; ++i) {
                             ref var slot = ref this.slots[i];
-                            var newResizeIndex = HashHelpers.Rem(slot.key, newCapacity);
+                            var newResizeIndex = slot.key & newCapacity;
                             slot.next = newBuckets[newResizeIndex] - 1;
 
                             newBuckets[newResizeIndex] = i + 1;
@@ -2704,7 +2699,7 @@ namespace Morpeh {
                         this.buckets  = newBuckets;
                         this.capacity = newCapacity;
 
-                        rem = HashHelpers.Rem(key, this.capacity);
+                        rem = key & this.capacity;
                     }
 
                     slotIndex = this.lastIndex;
@@ -2724,7 +2719,7 @@ namespace Morpeh {
             }
 
             public bool Remove(in int key, [CanBeNull] out T lastValue) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 int next;
                 int num = -1;
@@ -2766,7 +2761,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Has(in int key) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 int next;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -2783,7 +2778,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool TryGetValue(in int key, [CanBeNull] out T value) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 int next;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -2802,7 +2797,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public T GetValue(in int key) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 int next;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -2819,7 +2814,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public int TryGetIndex(in int key) {
-                var rem = HashHelpers.Rem(key, this.capacity);
+                var rem = key & this.capacity;
 
                 int next;
                 for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -3128,79 +3123,20 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         internal static class HashHelpers {
+            //https://github.com/dotnet/runtime/blob/master/src/libraries/System.Private.CoreLib/src/System/Collections/HashHelpers.cs#L32
+            //different primes to fit n^2 - 1
             internal static readonly int[] primes = {
                 3,
-                7,
-                11,
-                17,
-                23,
-                29,
-                37,
-                47,
-                59,
-                71,
-                89,
-                107,
-                131,
-                163,
-                197,
-                239,
-                293,
-                353,
-                431,
-                521,
-                631,
-                761,
-                919,
-                1103,
-                1327,
-                1597,
-                1931,
-                2333,
-                2801,
-                3371,
-                4049,
-                4861,
-                5839,
-                7013,
-                8419,
-                10103,
-                12143,
-                14591,
-                17519,
-                21023,
-                25229,
-                30293,
-                36353,
-                43627,
-                52361,
-                62851,
-                75431,
-                90523,
-                108631,
-                130363,
-                156437,
-                187751,
-                225307,
-                270371,
-                324449,
-                389357,
-                467237,
-                560689,
-                672827,
-                807403,
-                968897,
-                1162687,
-                1395263,
-                1674319,
-                2009191,
-                2411033,
-                2893249,
-                3471899,
-                4166287,
-                4999559,
-                5999471,
-                7199369
+                15,
+                63,
+                255,
+                1023,
+                4095,
+                16383,
+                65535,
+                262143,
+                1048575,
+                4194303,
             };
 
             internal static bool IsPrime(int candidate) {
@@ -3223,21 +3159,15 @@ namespace Morpeh {
                 return min > 2146435069U && 2146435069 > oldSize ? 2146435069 : GetPrime(min);
             }
 
-            //better than %
-            // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            // public static int DivRem(int left, int right, out int result) {
-            //     var div = left / right;
-            //     result = left - div * right;
-            //     return div;
-            // }
+            //better than % in mono
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int DivRem(int left, int right, out int result) {
+                var div = left / right;
+                result = left - div * right;
+                return div;
+            }
             
-            //better than DivRem
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static int Rem(int left, int right) => left & ((right << 1) - 1);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static int RemMutliplied(int left, int right, int multiplier) => (left & ((right << 1) - 1)) * multiplier;
-
+            
             //todo possible refactor?
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static int Sqrt(int num) {
