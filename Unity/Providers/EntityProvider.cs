@@ -45,7 +45,7 @@ namespace Morpeh {
         private Entity cachedEntity;
 
         [CanBeNull]
-        public IEntity Entity => this.InternalEntity;
+        public Entity Entity => this.InternalEntity;
 
         private protected virtual void OnEnable() {
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -68,7 +68,7 @@ namespace Morpeh {
 
             if (this.InternalEntity == null || this.entityID < 0) {
                 var others = this.GetComponents<EntityProvider>();
-                this.cachedEntity = World.Default.CreateEntityInternal(out this.entityID);
+                this.cachedEntity = World.Default.CreateEntity(out this.entityID);
                 foreach (var entityProvider in others) {
                     if (entityProvider.enabled) {
                         entityProvider.entityID     = this.entityID;

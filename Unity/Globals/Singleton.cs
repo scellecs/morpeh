@@ -15,7 +15,7 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Singleton")]
-    public class Singleton : ScriptableObject, IEntity {
+    public class Singleton : ScriptableObject {
         [SerializeField]
 #if ODIN_INSPECTOR
         [ReadOnly]
@@ -42,7 +42,7 @@
         }
 
         [NotNull]
-        public IEntity Entity {
+        public Entity Entity {
             get {
 #if UNITY_EDITOR
                 if (!Application.isPlaying) {
@@ -80,7 +80,7 @@
 #endif
         private protected virtual bool CheckIsInitialized() {
             if (this.internalEntityID < 0) {
-                this.internalEntity = World.Default.CreateEntityInternal(out this.internalEntityID);
+                this.internalEntity = World.Default.CreateEntity(out this.internalEntityID);
                 this.internalEntity.AddComponent<SingletonMarker>();
                 return true;
             }

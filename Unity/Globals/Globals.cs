@@ -28,7 +28,7 @@ namespace Morpeh.Globals {
             public int worldId;
             
             internal override void Awake(World world) {
-                this.worldId = world.id;
+                this.worldId = world.worldId;
 
                 if (initialized.ContainsKey(this.worldId)) {
                     initialized[this.worldId] = true;
@@ -94,7 +94,7 @@ namespace Morpeh.Globals {
             public int worldId;
 
             public void OnAwake() {
-                this.worldId = this.World.id;
+                this.worldId = this.World.worldId;
             }
 
             public void OnUpdate(float deltaTime) {
