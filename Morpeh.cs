@@ -1482,7 +1482,7 @@ namespace Morpeh {
         }
 
         //full child filter
-        private Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, FilterMode mode) {
+        internal Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, FilterMode mode) {
             this.world = world;
 
             this.childs     = new FastList<Filter>();
@@ -1541,198 +1541,12 @@ namespace Morpeh {
             this.filterMode = FilterMode.None;
         }
 
-        [Obsolete("Use World.UpdateFilters()")]
-        public void Update() {
-            this.world.UpdateFilters();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void UpdateLength() {
-            this.isDirty = false;
-            this.Length  = 0;
-            foreach (var archetype in this.archetypes) {
-                this.Length += archetype.length;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void FindArchetypes(IntFastList newArchetypes) {
-            var minLength = this.includedTypeIds.length;
-            foreach (var archId in newArchetypes) {
-                var arch = this.world.archetypes.data[archId];
-                this.CheckArchetype(arch, minLength);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void FindArchetypes() {
-            var minLength = this.includedTypeIds.length;
-            foreach (var arch in this.world.archetypes) {
-                this.CheckArchetype(arch, minLength);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CheckArchetype(Archetype archetype, int minLength) {
-            var typeIdsLength = archetype.typeIds.Length;
-            if (typeIdsLength >= minLength) {
-                var check = true;
-                for (int i = 0, length = minLength; i < length; i++) {
-                    var includedTypeId = this.includedTypeIds.Get(i);
-                    var foundInclude   = false;
-                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
-                        var typeId = archetype.typeIds[j];
-                        if (typeId > includedTypeId) {
-                            check = false;
-                            goto BREAK;
-                        }
-
-                        if (typeId == includedTypeId) {
-                            foundInclude = true;
-                            break;
-                        }
-                    }
-
-                    if (foundInclude == false) {
-                        check = false;
-                        goto BREAK;
-                    }
-                }
-
-                for (int i = 0, length = this.excludedTypeIds.length; i < length; i++) {
-                    var excludedTypeId = this.excludedTypeIds.Get(i);
-                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
-                        var typeId = archetype.typeIds[j];
-                        if (typeId > excludedTypeId) {
-                            break;
-                        }
-
-                        if (typeId == excludedTypeId) {
-                            check = false;
-                            goto BREAK;
-                        }
-                    }
-                }
-
-                BREAK:
-                if (check) {
-                    for (int i = 0, length = this.archetypes.length; i < length; i++) {
-                        if (this.archetypes.data[i] == archetype) {
-                            return;
-                        }
-                    }
-
-                    this.archetypes.Add(archetype);
-                    archetype.AddFilter(this);
-                    for (int i = 0, length = this.componentsBags.length; i < length; i++) {
-                        var bag = this.componentsBags.data[i];
-                        bag.AddArchetype(archetype);
-                    }
-                }
-            }
-        }
-
-        public ComponentsBag<T> Select<T>() where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            if (typeInfo.isMarker) {
-#if UNITY_EDITOR
-                Debug.LogError($"You Select<{typeof(T)}> marker component from filter! This makes no sense.");
-#endif
-                return null;
-            }
-
-            for (int i = 0, length = this.componentsBags.length; i < length; i++) {
-                var bag = this.componentsBags.data[i];
-                if (bag.typeId == typeInfo.id) {
-                    return (ComponentsBag<T>) bag;
-                }
-            }
-
-            var componentsBag = new ComponentsBag<T>(this);
-            this.componentsBags.Add(componentsBag);
-
-            return componentsBag;
-        }
-
-        [CanBeNull]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Entity GetEntity(in int id) {
-            if (this.archetypes.length == 1) {
-                return this.archetypes.data[0].entities.data[id];
-            }
-
-            var num = 0;
-            for (int i = 0, length = this.archetypes.length; i < length; i++) {
-                var archetype = this.archetypes.data[i];
-                var check     = num + archetype.length;
-                if (id < check) {
-                    return archetype.entities.data[id - num];
-                }
-
-                num = check;
-            }
-
-            return default;
-        }
-
-        [CanBeNull]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Entity First() {
-            for (int i = 0, length = this.archetypes.length; i < length; i++) {
-                var archetype = this.archetypes.data[i];
-                if (archetype.length > 0) {
-                    return archetype.entities.data[0];
-                }
-            }
-
-            return default;
-        }
-
-        public Filter With<T>() where T : struct, IComponent
-            => this.CreateFilter<T>(FilterMode.Include);
-
-        public Filter Without<T>() where T : struct, IComponent
-            => this.CreateFilter<T>(FilterMode.Exclude);
-
-        private Filter CreateFilter<T>(FilterMode mode) where T : struct, IComponent {
-            for (int i = 0, length = this.childs.length; i < length; i++) {
-                var child = this.childs.data[i];
-                if (child.filterMode == mode && child.typeID == CacheTypeIdentifier<T>.info.id) {
-                    return child;
-                }
-            }
-
-            var newTypeId = CacheTypeIdentifier<T>.info.id;
-
-            IntFastList newIncludedTypeIds;
-            IntFastList newExcludedTypeIds;
-            if (this.typeID == -1) {
-                newIncludedTypeIds = new IntFastList();
-                newExcludedTypeIds = new IntFastList();
-            }
-            else {
-                newIncludedTypeIds = new IntFastList(this.includedTypeIds);
-                newExcludedTypeIds = new IntFastList(this.excludedTypeIds);
-            }
-
-            if (mode == FilterMode.Include) {
-                newIncludedTypeIds.Add(newTypeId);
-            }
-            else if (mode == FilterMode.Exclude) {
-                newExcludedTypeIds.Add(newTypeId);
-            }
-
-            var newFilter = new Filter(this.world, newTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
-            this.childs.Add(newFilter);
-
-            return newFilter;
-        }
-
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public abstract class ComponentsBag : IDisposable {
             public            int  typeId;
+            
             internal abstract void AddArchetype(Archetype archetype);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1746,11 +1560,11 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public sealed class ComponentsBag<T> : ComponentsBag where T : struct, IComponent {
-            private FastList<T> components;
-            private Filter      filter;
-            private IntFastList firstPartIds;
+            internal FastList<T> components;
+            internal Filter      filter;
+            internal IntFastList firstPartIds;
 
-            private FastList<Archetype.ComponentsBagPart> parts;
+            internal FastList<Archetype.ComponentsBagPart> parts;
 
             public ComponentsBag(Filter filter) {
                 this.typeId = CacheTypeIdentifier<T>.info.id;
@@ -1764,43 +1578,6 @@ namespace Morpeh {
                 }
 
                 this.firstPartIds = this.parts.length > 0 ? this.parts.data[0].ids : null;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ref T GetComponent(in int index) {
-                if (this.parts.length > 1) {
-                    int offset = 0;
-                    for (int i = 0, length = this.parts.length; i < length; i++) {
-                        var part  = this.parts.data[i];
-                        var check = offset + part.ids.length;
-                        if (index < check) {
-                            return ref this.components.data[part.ids.Get(index - offset)];
-                        }
-
-                        offset = check;
-                    }
-                }
-
-                return ref this.components.data[this.firstPartIds.Get(index)];
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void SetComponent(in int index, in T value) {
-                if (this.parts.length > 1) {
-                    int offset = 0;
-                    for (int i = 0, length = this.parts.length; i < length; i++) {
-                        var part  = this.parts.data[i];
-                        var check = offset + part.ids.length;
-                        if (index < check) {
-                            this.components.data[part.ids.Get(index - offset)] = value;
-                        }
-
-                        offset = check;
-                    }
-                }
-                else {
-                    this.components.data[this.firstPartIds.Get(index)] = value;
-                }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1913,7 +1690,232 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public static class FilterExtensions {
+        [Obsolete("Use World.UpdateFilters()")]
+        public static void Update(this Filter filter) => filter.world.UpdateFilters();
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void UpdateLength(this Filter filter) {
+            filter.isDirty = false;
+            filter.Length  = 0;
+            foreach (var archetype in filter.archetypes) {
+                filter.Length += archetype.length;
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FindArchetypes(this Filter filter, IntFastList newArchetypes) {
+            var minLength = filter.includedTypeIds.length;
+            foreach (var archId in newArchetypes) {
+                var arch = filter.world.archetypes.data[archId];
+                filter.CheckArchetype(arch, minLength);
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FindArchetypes(this Filter filter) {
+            var minLength = filter.includedTypeIds.length;
+            foreach (var arch in filter.world.archetypes) {
+                filter.CheckArchetype(arch, minLength);
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void CheckArchetype(this Filter filter, Archetype archetype, int minLength) {
+            var typeIdsLength = archetype.typeIds.Length;
+            if (typeIdsLength >= minLength) {
+                var check = true;
+                for (int i = 0, length = minLength; i < length; i++) {
+                    var includedTypeId = filter.includedTypeIds.Get(i);
+                    var foundInclude   = false;
+                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
+                        var typeId = archetype.typeIds[j];
+                        if (typeId > includedTypeId) {
+                            check = false;
+                            goto BREAK;
+                        }
+
+                        if (typeId == includedTypeId) {
+                            foundInclude = true;
+                            break;
+                        }
+                    }
+
+                    if (foundInclude == false) {
+                        check = false;
+                        goto BREAK;
+                    }
+                }
+
+                for (int i = 0, length = filter.excludedTypeIds.length; i < length; i++) {
+                    var excludedTypeId = filter.excludedTypeIds.Get(i);
+                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
+                        var typeId = archetype.typeIds[j];
+                        if (typeId > excludedTypeId) {
+                            break;
+                        }
+
+                        if (typeId == excludedTypeId) {
+                            check = false;
+                            goto BREAK;
+                        }
+                    }
+                }
+
+                BREAK:
+                if (check) {
+                    for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+                        if (filter.archetypes.data[i] == archetype) {
+                            return;
+                        }
+                    }
+
+                    filter.archetypes.Add(archetype);
+                    archetype.AddFilter(filter);
+                    for (int i = 0, length = filter.componentsBags.length; i < length; i++) {
+                        var bag = filter.componentsBags.data[i];
+                        bag.AddArchetype(archetype);
+                    }
+                }
+            }
+        }
+        
+        public static Filter.ComponentsBag<T> Select<T>(this Filter filter) where T : struct, IComponent {
+            var typeInfo = CacheTypeIdentifier<T>.info;
+            if (typeInfo.isMarker) {
+#if UNITY_EDITOR
+                Debug.LogError($"You Select<{typeof(T)}> marker component from filter! This makes no sense.");
+#endif
+                return null;
+            }
+
+            for (int i = 0, length = filter.componentsBags.length; i < length; i++) {
+                var bag = filter.componentsBags.data[i];
+                if (bag.typeId == typeInfo.id) {
+                    return (Filter.ComponentsBag<T>) bag;
+                }
+            }
+
+            var componentsBag = new Filter.ComponentsBag<T>(filter);
+            filter.componentsBags.Add(componentsBag);
+
+            return componentsBag;
+        }
+        
+        [CanBeNull]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Entity GetEntity(this Filter filter, in int id) {
+            if (filter.archetypes.length == 1) {
+                return filter.archetypes.data[0].entities.data[id];
+            }
+
+            var num = 0;
+            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+                var archetype = filter.archetypes.data[i];
+                var check     = num + archetype.length;
+                if (id < check) {
+                    return archetype.entities.data[id - num];
+                }
+
+                num = check;
+            }
+
+            return default;
+        }
+        
+        [CanBeNull]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Entity First(this Filter filter) {
+            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+                var archetype = filter.archetypes.data[i];
+                if (archetype.length > 0) {
+                    return archetype.entities.data[0];
+                }
+            }
+
+            return default;
+        }
+        
+        public static Filter With<T>(this Filter filter) where T : struct, IComponent
+            => filter.CreateFilter<T>(Filter.FilterMode.Include);
+
+        public static Filter Without<T>(this Filter filter) where T : struct, IComponent
+            => filter.CreateFilter<T>(Filter.FilterMode.Exclude);
+        
+        private static Filter CreateFilter<T>(this Filter filter, Filter.FilterMode mode) where T : struct, IComponent {
+            for (int i = 0, length = filter.childs.length; i < length; i++) {
+                var child = filter.childs.data[i];
+                if (child.filterMode == mode && child.typeID == CacheTypeIdentifier<T>.info.id) {
+                    return child;
+                }
+            }
+
+            var newTypeId = CacheTypeIdentifier<T>.info.id;
+
+            IntFastList newIncludedTypeIds;
+            IntFastList newExcludedTypeIds;
+            if (filter.typeID == -1) {
+                newIncludedTypeIds = new IntFastList();
+                newExcludedTypeIds = new IntFastList();
+            }
+            else {
+                newIncludedTypeIds = new IntFastList(filter.includedTypeIds);
+                newExcludedTypeIds = new IntFastList(filter.excludedTypeIds);
+            }
+
+            if (mode == Filter.FilterMode.Include) {
+                newIncludedTypeIds.Add(newTypeId);
+            }
+            else if (mode == Filter.FilterMode.Exclude) {
+                newExcludedTypeIds.Add(newTypeId);
+            }
+
+            var newFilter = new Filter(filter.world, newTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
+            filter.childs.Add(newFilter);
+
+            return newFilter;
+        }
+    }
+    
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    public static class ComponentsBagExtensions {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T GetComponent<T>(this Filter.ComponentsBag<T> bag, in int index) where T : struct, IComponent {
+            if (bag.parts.length > 1) {
+                int offset = 0;
+                for (int i = 0, length = bag.parts.length; i < length; i++) {
+                    var part  = bag.parts.data[i];
+                    var check = offset + part.ids.length;
+                    if (index < check) {
+                        return ref bag.components.data[part.ids.Get(index - offset)];
+                    }
+
+                    offset = check;
+                }
+            }
+
+            return ref bag.components.data[bag.firstPartIds.Get(index)];
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetComponent<T>(this Filter.ComponentsBag<T> bag,in int index, in T value)  where T : struct, IComponent {
+            if (bag.parts.length > 1) {
+                int offset = 0;
+                for (int i = 0, length = bag.parts.length; i < length; i++) {
+                    var part  = bag.parts.data[i];
+                    var check = offset + part.ids.length;
+                    if (index < check) {
+                        bag.components.data[part.ids.Get(index - offset)] = value;
+                    }
+
+                    offset = check;
+                }
+            }
+            else {
+                bag.components.data[bag.firstPartIds.Get(index)] = value;
+            }
+        }
     }
     
     [Il2Cpp(Option.NullChecks, false)]
