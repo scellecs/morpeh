@@ -1396,20 +1396,26 @@ namespace Morpeh {
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public abstract class ComponentsBagPart {
-            public          int           typeId;
-            public          FastList<int> ids;
-            public abstract void          Add(Entity entity);
-            public abstract void          Remove(int index);
+        internal abstract class ComponentsBagPart {
+            internal int typeId;
+
+            internal FastList<int> ids;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal abstract void Add(Entity entity);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal abstract void Remove(int index);
         }
 
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public sealed class ComponentsBagPart<T> : ComponentsBagPart where T : struct, IComponent {
-            public World world;
+        internal sealed class ComponentsBagPart<T> : ComponentsBagPart where T : struct, IComponent {
+            internal World world;
 
-            public ComponentsBagPart(Archetype archetype) {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal ComponentsBagPart(Archetype archetype) {
                 this.world = archetype.world;
 
                 this.typeId = CacheTypeIdentifier<T>.info.id;
@@ -1420,9 +1426,11 @@ namespace Morpeh {
                 }
             }
 
-            public override void Add(Entity entity) => this.ids.Add(entity.componentsIds.GetValue(this.typeId));
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal override void Add(Entity entity) => this.ids.Add(entity.componentsIds.GetValue(this.typeId));
 
-            public override void Remove(int index) => this.ids.RemoveAtSwap(index, out _);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal override void Remove(int index) => this.ids.RemoveAtSwap(index, out _);
         }
     }
 
@@ -2001,14 +2009,14 @@ namespace Morpeh {
         [SerializeField]
         internal int typedCacheId;
         [SerializeField]
-        internal int typedId;
+        internal int typeId;
 
         static ComponentsCache() {
             cleanup += () => typedCaches.Clear();
         }
 
         internal ComponentsCache() {
-            this.typedId = CacheTypeIdentifier<T>.info.id;
+            this.typeId = CacheTypeIdentifier<T>.info.id;
 
             this.components  = new FastList<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
             this.freeIndexes = new IntStack();
@@ -2046,7 +2054,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddComponent(in IEntity entity) {
             var componentId = this.Add();
-            if (entity.AddComponentFast(this.typedId, componentId)) {
+            if (entity.AddComponentFast(this.typeId, componentId)) {
                 return ref this.components.data[componentId];
             }
 
@@ -2057,7 +2065,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AddComponent(in IEntity entity, in T value) {
             var componentId = this.Add(value);
-            if (entity.AddComponentFast(this.typedId, componentId)) {
+            if (entity.AddComponentFast(this.typeId, componentId)) {
                 return true;
             }
 
@@ -2069,13 +2077,13 @@ namespace Morpeh {
         internal ref T Get(in int id) => ref this.components.data[id];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent(in IEntity entity) => ref this.components.data[entity.GetComponentFast(this.typedId)];
+        public ref T GetComponent(in IEntity entity) => ref this.components.data[entity.GetComponentFast(this.typeId)];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Set(in int id, in T value) => this.components.data[id] = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent(in IEntity entity, in T value) => this.components.data[entity.GetComponentFast(this.typedId)] = value;
+        public void SetComponent(in IEntity entity, in T value) => this.components.data[entity.GetComponentFast(this.typeId)] = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ref T Empty() => ref this.components.data[0];
@@ -2088,7 +2096,7 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveComponent(in IEntity entity) {
-            if (entity.RemoveComponentFast(this.typedId, out var cacheIndex)) {
+            if (entity.RemoveComponentFast(this.typeId, out var cacheIndex)) {
                 this.Remove(cacheIndex);
             }
         }
