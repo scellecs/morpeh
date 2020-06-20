@@ -1292,89 +1292,6 @@ namespace Morpeh {
             this.Ctor();
         }
 
-        internal void Ctor() {
-            this.world   = World.worlds.data[this.worldId];
-            this.filters = new FastList<Filter>();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(Entity entity, out int index) {
-            index = this.entities.length;
-            this.entities.Add(entity);
-            for (var i = 0; i < this.bagParts.length; i++) {
-                this.bagParts.data[i].Add(entity);
-            }
-
-            this.isDirty = true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Remove(Entity entity) {
-            var index = entity.indexInCurrentArchetype;
-            this.entities.RemoveAtSwap(index, out _);
-            this.entities.data[index].indexInCurrentArchetype = index;
-            for (var i = 0; i < this.bagParts.length; i++) {
-                this.bagParts.data[i].Remove(index);
-            }
-
-            this.isDirty = true;
-        }
-
-        public void AddFilter(Filter filter) {
-            this.filters.Add(filter);
-            this.isDirty = true;
-        }
-
-        public void RemoveFilter(Filter filter) {
-            this.filters.Remove(filter);
-            this.isDirty = true;
-        }
-
-        public void Process() {
-            for (int i = 0, len = this.filters.length; i < len; i++) {
-                this.filters.data[i].isDirty = true;
-            }
-
-            this.length  = this.entities.length;
-            this.isDirty = false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddTransfer(int typeId, out int archetypeId, out Archetype archetype) {
-            if (this.addTransfer.TryGetValue(typeId, out archetypeId)) {
-                archetype = this.world.archetypes.data[archetypeId];
-            }
-            else {
-                archetype = this.world.GetArchetype(this.typeIds, typeId, true, out archetypeId);
-                this.addTransfer.Add(typeId, archetypeId, out _);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveTransfer(int typeId, out int archetypeId, out Archetype archetype) {
-            if (this.removeTransfer.TryGetValue(typeId, out archetypeId)) {
-                archetype = this.world.archetypes.data[archetypeId];
-            }
-            else {
-                archetype = this.world.GetArchetype(this.typeIds, typeId, false, out archetypeId);
-                this.removeTransfer.Add(typeId, archetypeId, out _);
-            }
-        }
-
-        internal ComponentsBagPart<T> Select<T>(int typeId) where T : struct, IComponent {
-            for (int i = 0, len = this.bagParts.length; i < len; i++) {
-                var bag = this.bagParts.data[i];
-                if (bag.typeId == typeId) {
-                    return (ComponentsBagPart<T>) bag;
-                }
-            }
-
-            var bagPart = new ComponentsBagPart<T>(this);
-            this.bagParts.Add(bagPart);
-
-            return bagPart;
-        }
-
         public void Dispose() {
             this.id      = -1;
             this.length  = -1;
@@ -1434,12 +1351,104 @@ namespace Morpeh {
         }
     }
 
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    internal static class ArchetypeExtensions {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Ctor(this Archetype archetype) {
+            archetype.world   = World.worlds.data[archetype.worldId];
+            archetype.filters = new FastList<Filter>();
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Add(this Archetype archetype, Entity entity, out int index) {
+            index = archetype.entities.length;
+            archetype.entities.Add(entity);
+            for (var i = 0; i < archetype.bagParts.length; i++) {
+                archetype.bagParts.data[i].Add(entity);
+            }
+
+            archetype.isDirty = true;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Remove(this Archetype archetype, Entity entity) {
+            var index = entity.indexInCurrentArchetype;
+            archetype.entities.RemoveAtSwap(index, out _);
+            archetype.entities.data[index].indexInCurrentArchetype = index;
+            for (var i = 0; i < archetype.bagParts.length; i++) {
+                archetype.bagParts.data[i].Remove(index);
+            }
+
+            archetype.isDirty = true;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddFilter(this Archetype archetype, Filter filter) {
+            archetype.filters.Add(filter);
+            archetype.isDirty = true;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void RemoveFilter(this Archetype archetype, Filter filter) {
+            archetype.filters.Remove(filter);
+            archetype.isDirty = true;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Process(this Archetype archetype) {
+            for (int i = 0, len = archetype.filters.length; i < len; i++) {
+                archetype.filters.data[i].isDirty = true;
+            }
+
+            archetype.length  = archetype.entities.length;
+            archetype.isDirty = false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddTransfer(this Archetype archetype, int typeId, out int archetypeId, out Archetype newArchetype) {
+            if (archetype.addTransfer.TryGetValue(typeId, out archetypeId)) {
+                newArchetype = archetype.world.archetypes.data[archetypeId];
+            }
+            else {
+                newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, true, out archetypeId);
+                newArchetype.addTransfer.Add(typeId, archetypeId, out _);
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void RemoveTransfer(this Archetype archetype, int typeId, out int archetypeId, out Archetype newArchetype) {
+            if (archetype.removeTransfer.TryGetValue(typeId, out archetypeId)) {
+                newArchetype = archetype.world.archetypes.data[archetypeId];
+            }
+            else {
+                newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, false, out archetypeId);
+                archetype.removeTransfer.Add(typeId, archetypeId, out _);
+            }
+        }
+        
+        internal static Archetype.ComponentsBagPart<T> Select<T>(this Archetype archetype, int typeId) where T : struct, IComponent {
+            for (int i = 0, len = archetype.bagParts.length; i < len; i++) {
+                var bag = archetype.bagParts.data[i];
+                if (bag.typeId == typeId) {
+                    return (Archetype.ComponentsBagPart<T>) bag;
+                }
+            }
+
+            var bagPart = new Archetype.ComponentsBagPart<T>(archetype);
+            archetype.bagParts.Add(bagPart);
+
+            return bagPart;
+        }
+    }
+
     //TODO Separate RootFilter and ChildFilter
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public sealed class Filter : IEnumerable<Entity>, IDisposable {
-        private enum FilterMode {
+        internal enum FilterMode {
             None    = 0,
             Include = 1,
             Exclude = 2
@@ -1447,17 +1456,17 @@ namespace Morpeh {
 
         public int Length;
 
-        private World world;
+        internal World world;
 
-        private FastList<Filter>        childs;
-        private FastList<Archetype>     archetypes;
-        private FastList<ComponentsBag> componentsBags;
+        internal FastList<Filter>        childs;
+        internal FastList<Archetype>     archetypes;
+        internal FastList<ComponentsBag> componentsBags;
 
-        private IntFastList includedTypeIds;
-        private IntFastList excludedTypeIds;
+        internal IntFastList includedTypeIds;
+        internal IntFastList excludedTypeIds;
 
-        private int        typeID;
-        private FilterMode filterMode;
+        internal int        typeID;
+        internal FilterMode filterMode;
 
         internal bool isDirty;
 
@@ -1900,6 +1909,13 @@ namespace Morpeh {
         }
     }
 
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
+    public static class FilterExtensions {
+        
+    }
+    
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
