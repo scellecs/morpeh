@@ -94,7 +94,7 @@
 #endif
             if (this.internalEntityID != -1) {
                 var entity = this.InternalEntity;
-                if (entity != null && !entity.IsDisposed()) {
+                if (entity != null && !entity.isDisposed) {
                     World.Default.RemoveEntity(entity);
                 }
                 this.internalEntityID = -1;
@@ -133,8 +133,6 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has<T>() where T : struct, IComponent => this.Entity.Has<T>();
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsDisposed() => this.Entity.IsDisposed();
         
         [Serializable]
         private struct SingletonMarker : IComponent { }

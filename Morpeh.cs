@@ -70,14 +70,14 @@ namespace Morpeh {
         internal bool isDisposed;
 
         [SerializeField]
-        private int previousArchetypeId;
+        internal int previousArchetypeId;
         [SerializeField]
-        private int currentArchetypeId;
+        internal int currentArchetypeId;
         [SerializeField]
         internal int indexInCurrentArchetype;
 
         [NonSerialized]
-        private Archetype currentArchetype;
+        internal Archetype currentArchetype;
 
         [ShowInInspector]
         public int ID => this.internalID;
@@ -95,234 +95,6 @@ namespace Morpeh {
 
             this.currentArchetype = this.world.archetypes.data[0];
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddComponent<T>() where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = this.world.GetCache<T>();
-
-            if (typeInfo.isMarker) {
-                const int componentId = -1;
-                if (this.componentsIds.Add(typeInfo.id, componentId, out _)) {
-                    this.AddTransfer(typeInfo.id);
-                    return ref cache.Empty();
-                }
-            }
-            else {
-                var componentId = cache.Add();
-                if (this.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
-                    this.AddTransfer(typeInfo.id);
-                    return ref cache.Get(this.componentsIds.GetValueByIndex(slotIndex));
-                }
-
-                cache.Remove(componentId);
-            }
-
-#if UNITY_EDITOR
-            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-#endif
-            return ref cache.Empty();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddComponent<T>(out bool exist) where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = this.world.GetCache<T>();
-
-            if (typeInfo.isMarker) {
-                const int componentId = -1;
-                if (this.componentsIds.Add(typeInfo.id, componentId, out _)) {
-                    this.AddTransfer(typeInfo.id);
-                    exist = false;
-                    return ref cache.Empty();
-                }
-            }
-            else {
-                var componentId = cache.Add();
-                if (this.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
-                    this.AddTransfer(typeInfo.id);
-                    exist = false;
-                    return ref cache.Get(this.componentsIds.GetValueByIndex(slotIndex));
-                }
-
-                cache.Remove(componentId);
-            }
-
-#if UNITY_EDITOR
-            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-#endif
-            exist = true;
-            return ref cache.Empty();
-        }
-
-        public bool AddComponentFast(in int typeId, in int componentId) {
-            if (this.componentsIds.Add(typeId, componentId, out _)) {
-                this.AddTransfer(typeId);
-                return true;
-            }
-
-            return false;
-        }
-
-        public ref T GetComponent<T>() where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = this.world.GetCache<T>();
-
-            if (typeInfo.isMarker) {
-                if (this.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
-                    return ref cache.Empty();
-                }
-            }
-            else {
-                var index = this.componentsIds.TryGetIndex(typeInfo.id);
-                if (index >= 0) {
-                    return ref cache.Get(this.componentsIds.GetValueByIndex(index));
-                }
-            }
-
-#if UNITY_EDITOR
-            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
-#endif
-            return ref cache.Empty();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent<T>(out bool exist) where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = this.world.GetCache<T>();
-
-            if (typeInfo.isMarker) {
-                if (this.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
-                    exist = true;
-                    return ref cache.Empty();
-                }
-            }
-            else {
-                var index = this.componentsIds.TryGetIndex(typeInfo.id);
-                if (index >= 0) {
-                    exist = true;
-                    return ref cache.Get(this.componentsIds.GetValueByIndex(index));
-                }
-            }
-
-            exist = false;
-            return ref cache.Empty();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetComponentFast(in int typeId) => this.componentsIds.GetValueByKey(typeId);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent<T>(in T value) where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = this.world.GetCache<T>();
-
-            if (!typeInfo.isMarker) {
-                if (this.componentsIds.TryGetValue(typeInfo.id, out var index)) {
-                    cache.Set(this.componentsIds.GetValueByIndex(index), value);
-                }
-                else {
-                    var componentId = cache.Add(value);
-                    this.componentsIds.Add(typeInfo.id, componentId, out _);
-                }
-
-                this.AddTransfer(typeInfo.id);
-            }
-            else {
-                if (this.componentsIds.Add(typeInfo.id, -1, out _)) {
-                    this.AddTransfer(typeInfo.id);
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool RemoveComponent<T>() where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-
-            if (this.componentsIds.Remove(typeInfo.id, out var index)) {
-                if (this.componentsIds.length == 0) {
-                    this.world.RemoveEntity(this);
-                    return true;
-                }
-
-                if (typeInfo.isMarker == false) {
-                    this.world.GetCache<T>().Remove(index);
-                }
-
-                this.RemoveTransfer(typeInfo.id);
-                return true;
-            }
-
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool RemoveComponentFast(int typeId, out int cacheIndex) {
-            if (this.componentsIds.Remove(typeId, out cacheIndex)) {
-                if (this.componentsIds.length == 0) {
-                    this.world.RemoveEntity(this);
-                    return true;
-                }
-
-                this.RemoveTransfer(typeId);
-                return true;
-            }
-
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool Has(int typeID) => this.componentsIds.TryGetIndex(typeID) >= 0;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Has<T>() where T : struct, IComponent {
-            var typeID = CacheTypeIdentifier<T>.info.id;
-            return this.componentsIds.TryGetIndex(typeID) >= 0;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void AddTransfer(int typeId) {
-            if (this.previousArchetypeId == -1) {
-                this.previousArchetypeId = this.currentArchetypeId;
-            }
-
-            this.currentArchetype.AddTransfer(typeId, out this.currentArchetypeId, out this.currentArchetype);
-            if (this.isDirty == true) {
-                return;
-            }
-
-            this.world.dirtyEntities.Add(this);
-            this.isDirty = true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void RemoveTransfer(int typeId) {
-            if (this.previousArchetypeId == -1) {
-                this.previousArchetypeId = this.currentArchetypeId;
-            }
-
-            this.currentArchetype.RemoveTransfer(typeId, out this.currentArchetypeId, out this.currentArchetype);
-            if (this.isDirty == true) {
-                return;
-            }
-
-            this.world.dirtyEntities.Add(this);
-            this.isDirty = true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void ApplyTransfer() {
-            if (this.previousArchetypeId > 0 && this.indexInCurrentArchetype >= 0) {
-                this.world.archetypes.data[this.previousArchetypeId].Remove(this);
-            }
-
-            this.previousArchetypeId = -1;
-            this.currentArchetype.Add(this, out this.indexInCurrentArchetype);
-            this.isDirty = false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsDisposed() => this.isDisposed;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() {
@@ -344,22 +116,251 @@ namespace Morpeh {
 
             this.DisposeFast();
         }
-
-        internal void DisposeFast() {
-            this.componentsIds.Clear();
-            this.componentsIds = null;
-            this.world         = null;
-
-            this.internalID         = -1;
-            this.worldID            = -1;
-            this.currentArchetypeId = -1;
-
-            this.isDisposed = true;
-        }
     }
 
+    [Il2Cpp(Option.NullChecks, false)]
+    [Il2Cpp(Option.ArrayBoundsChecks, false)]
+    [Il2Cpp(Option.DivideByZeroChecks, false)]
     public static class EntityExtensions {
-        public static bool IsNullOrDisposed([CanBeNull] this Entity entity) => entity == null || entity.IsDisposed();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
+            var typeInfo = CacheTypeIdentifier<T>.info;
+            var cache    = entity.world.GetCache<T>();
+
+            if (typeInfo.isMarker) {
+                const int componentId = -1;
+                if (entity.componentsIds.Add(typeInfo.id, componentId, out _)) {
+                    entity.AddTransfer(typeInfo.id);
+                    return ref cache.Empty();
+                }
+            }
+            else {
+                var componentId = cache.Add();
+                if (entity.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
+                    entity.AddTransfer(typeInfo.id);
+                    return ref cache.Get(entity.componentsIds.GetValueByIndex(slotIndex));
+                }
+
+                cache.Remove(componentId);
+            }
+
+#if UNITY_EDITOR
+            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+#endif
+            return ref cache.Empty();
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
+            var typeInfo = CacheTypeIdentifier<T>.info;
+            var cache    = entity.world.GetCache<T>();
+
+            if (typeInfo.isMarker) {
+                const int componentId = -1;
+                if (entity.componentsIds.Add(typeInfo.id, componentId, out _)) {
+                    entity.AddTransfer(typeInfo.id);
+                    exist = false;
+                    return ref cache.Empty();
+                }
+            }
+            else {
+                var componentId = cache.Add();
+                if (entity.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
+                    entity.AddTransfer(typeInfo.id);
+                    exist = false;
+                    return ref cache.Get(entity.componentsIds.GetValueByIndex(slotIndex));
+                }
+
+                cache.Remove(componentId);
+            }
+
+#if UNITY_EDITOR
+            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+#endif
+            exist = true;
+            return ref cache.Empty();
+        }
+        
+        public static bool AddComponentFast(this Entity entity, in int typeId, in int componentId) {
+            if (entity.componentsIds.Add(typeId, componentId, out _)) {
+                entity.AddTransfer(typeId);
+                return true;
+            }
+
+            return false;
+        }
+        
+        public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
+            var typeInfo = CacheTypeIdentifier<T>.info;
+            var cache    = entity.world.GetCache<T>();
+
+            if (typeInfo.isMarker) {
+                if (entity.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
+                    return ref cache.Empty();
+                }
+            }
+            else {
+                var index = entity.componentsIds.TryGetIndex(typeInfo.id);
+                if (index >= 0) {
+                    return ref cache.Get(entity.componentsIds.GetValueByIndex(index));
+                }
+            }
+
+#if UNITY_EDITOR
+            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
+#endif
+            return ref cache.Empty();
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
+            var typeInfo = CacheTypeIdentifier<T>.info;
+            var cache    = entity.world.GetCache<T>();
+
+            if (typeInfo.isMarker) {
+                if (entity.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
+                    exist = true;
+                    return ref cache.Empty();
+                }
+            }
+            else {
+                var index = entity.componentsIds.TryGetIndex(typeInfo.id);
+                if (index >= 0) {
+                    exist = true;
+                    return ref cache.Get(entity.componentsIds.GetValueByIndex(index));
+                }
+            }
+
+            exist = false;
+            return ref cache.Empty();
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetComponentFast(this Entity entity, in int typeId) => entity.componentsIds.GetValueByKey(typeId);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
+            var typeInfo = CacheTypeIdentifier<T>.info;
+            var cache    = entity.world.GetCache<T>();
+
+            if (!typeInfo.isMarker) {
+                if (entity.componentsIds.TryGetValue(typeInfo.id, out var index)) {
+                    cache.Set(entity.componentsIds.GetValueByIndex(index), value);
+                }
+                else {
+                    var componentId = cache.Add(value);
+                    entity.componentsIds.Add(typeInfo.id, componentId, out _);
+                }
+
+                entity.AddTransfer(typeInfo.id);
+            }
+            else {
+                if (entity.componentsIds.Add(typeInfo.id, -1, out _)) {
+                    entity.AddTransfer(typeInfo.id);
+                }
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
+            var typeInfo = CacheTypeIdentifier<T>.info;
+
+            if (entity.componentsIds.Remove(typeInfo.id, out var index)) {
+                if (entity.componentsIds.length == 0) {
+                    entity.world.RemoveEntity(entity);
+                    return true;
+                }
+
+                if (typeInfo.isMarker == false) {
+                    entity.world.GetCache<T>().Remove(index);
+                }
+
+                entity.RemoveTransfer(typeInfo.id);
+                return true;
+            }
+
+            return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool RemoveComponentFast(this Entity entity, int typeId, out int cacheIndex) {
+            if (entity.componentsIds.Remove(typeId, out cacheIndex)) {
+                if (entity.componentsIds.length == 0) {
+                    entity.world.RemoveEntity(entity);
+                    return true;
+                }
+
+                entity.RemoveTransfer(typeId);
+                return true;
+            }
+
+            return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Has(this Entity entity, int typeID) => entity.componentsIds.TryGetIndex(typeID) >= 0;
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Has<T>(this Entity entity) where T : struct, IComponent {
+            var typeID = CacheTypeIdentifier<T>.info.id;
+            return entity.componentsIds.TryGetIndex(typeID) >= 0;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddTransfer(this Entity entity, int typeId) {
+            if (entity.previousArchetypeId == -1) {
+                entity.previousArchetypeId = entity.currentArchetypeId;
+            }
+
+            entity.currentArchetype.AddTransfer(typeId, out entity.currentArchetypeId, out entity.currentArchetype);
+            if (entity.isDirty == true) {
+                return;
+            }
+
+            entity.world.dirtyEntities.Add(entity);
+            entity.isDirty = true;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void RemoveTransfer(this Entity entity, int typeId) {
+            if (entity.previousArchetypeId == -1) {
+                entity.previousArchetypeId = entity.currentArchetypeId;
+            }
+
+            entity.currentArchetype.RemoveTransfer(typeId, out entity.currentArchetypeId, out entity.currentArchetype);
+            if (entity.isDirty == true) {
+                return;
+            }
+
+            entity.world.dirtyEntities.Add(entity);
+            entity.isDirty = true;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void ApplyTransfer(this Entity entity) {
+            if (entity.previousArchetypeId > 0 && entity.indexInCurrentArchetype >= 0) {
+                entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
+            }
+
+            entity.previousArchetypeId = -1;
+            entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
+            entity.isDirty = false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void DisposeFast(this Entity entity) {
+            entity.componentsIds.Clear();
+            entity.componentsIds = null;
+            entity.world         = null;
+
+            entity.internalID         = -1;
+            entity.worldID            = -1;
+            entity.currentArchetypeId = -1;
+
+            entity.isDisposed = true;
+        }
+        
+        public static bool IsNullOrDisposed([CanBeNull] this Entity entity) => entity == null || entity.isDisposed;
     }
 
     [Il2Cpp(Option.NullChecks, false)]

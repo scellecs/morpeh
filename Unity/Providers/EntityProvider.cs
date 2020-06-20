@@ -33,7 +33,7 @@ namespace Morpeh {
                         this.cachedEntity = World.Default.entities[this.entityID];
                     }
                 }
-                else if (this.cachedEntity != null && this.cachedEntity.IsDisposed()) {
+                else if (this.cachedEntity != null && this.cachedEntity.isDisposed) {
                     this.cachedEntity = null;
                     this.entityID     = -1;
                 }
@@ -92,7 +92,7 @@ namespace Morpeh {
         }
 
         private void CheckEntityIsAlive() {
-            if (this.InternalEntity == null || this.InternalEntity.IsDisposed()) {
+            if (this.InternalEntity == null || this.InternalEntity.isDisposed) {
                 this.entityID = -1;
             }
         }
