@@ -764,7 +764,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public sealed partial class World : IDisposable {
+    public sealed class World : IDisposable {
         [CanBeNull]
         public static World Default => worlds.data[0];
         [NotNull]
