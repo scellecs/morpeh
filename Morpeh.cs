@@ -1985,16 +1985,6 @@ namespace Morpeh {
         }
     }
 
-    internal static class UnsafeUtility {
-        public static int SizeOf<T>() where T : struct {
-#if UNITY_2019_1_OR_NEWER
-            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
-#else
-            return System.Runtime.InteropServices.Marshal.SizeOf(default(T));
-#endif
-        }
-    }
-
     [Serializable]
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
@@ -2146,6 +2136,19 @@ namespace Morpeh {
     }
 
     namespace Utils {
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
+        internal static class UnsafeUtility {
+            public static int SizeOf<T>() where T : struct {
+#if UNITY_2019_1_OR_NEWER
+                return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
+#else
+                return System.Runtime.InteropServices.Marshal.SizeOf(default(T));
+#endif
+            }
+        }
+        
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
