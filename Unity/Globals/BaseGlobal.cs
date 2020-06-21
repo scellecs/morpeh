@@ -14,7 +14,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public abstract class BaseGlobal : Singleton, IDisposable {
+    public abstract class BaseGlobal : BaseSingleton, IDisposable {
         internal bool isPublished;
 
         public bool IsPublished {
