@@ -1,5 +1,6 @@
 namespace Morpeh {
     using System;
+    using Collections;
     using UnityEngine;
 #if UNITY_EDITOR
     using UnityEditor;

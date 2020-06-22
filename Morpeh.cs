@@ -4,19 +4,25 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Editor")]
 
 namespace Morpeh {
-    using Sirenix.OdinInspector;
+    //System
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
+    //UnityEditor
 #if UNITY_2019_1_OR_NEWER
     using JetBrains.Annotations;
     using UnityEngine;
     using Object = UnityEngine.Object;
 #endif
+    //Odin
+    using Sirenix.OdinInspector;
+    //Morpeh
     using Utils;
+    using Collections;
+    //Unity
     using Unity.IL2CPP.CompilerServices;
     using Il2Cpp = Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute;
-    using System.Runtime.CompilerServices;
 
     internal static class Constants {
         internal const int DEFAULT_WORLD_ENTITIES_CAPACITY    = 256;
@@ -948,13 +954,14 @@ namespace Morpeh {
 
             world.InitializeGlobals();
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static partial void InitializeGlobals(this World world);
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
             World.worlds.Add(world);
-            world.identifier           = World.worlds.length - 1;
+            world.identifier        = World.worlds.length - 1;
             world.dirtyEntities     = new FastList<Entity>();
             world.freeEntityIDs     = new IntFastList();
             world.nextFreeEntityIDs = new IntFastList();
@@ -972,7 +979,7 @@ namespace Morpeh {
 
             return world;
         }
-        
+
 #if UNITY_2019_1_OR_NEWER && !MORPEH_DISABLE_AUTOINITIALIZATION
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif
@@ -992,7 +999,7 @@ namespace Morpeh {
             Object.DontDestroyOnLoad(go);
 #endif
         }
-        
+
         //TODO refactor allocations and fast sort(maybe without it?)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Archetype GetArchetype(this World world, int[] typeIds, int newTypeId, bool added, out int archetypeId) {
@@ -1051,7 +1058,7 @@ namespace Morpeh {
 
             return archetype;
         }
-        
+
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ComponentsCache GetCache(this World world, int typeId) {
@@ -1061,7 +1068,7 @@ namespace Morpeh {
 
             return null;
         }
-        
+
         public static ComponentsCache<T> GetCache<T>(this World world) where T : struct, IComponent {
             var info = CacheTypeIdentifier<T>.info;
             if (world.typedCaches.TryGetValue(info.id, out var typedIndex)) {
@@ -1082,7 +1089,7 @@ namespace Morpeh {
 
             return componentsCache;
         }
-        
+
         public static void GlobalUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -1090,7 +1097,7 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this World world, float deltaTime) {
             for (var i = 0; i < world.newSystemsGroups.Count; i++) {
@@ -1108,7 +1115,7 @@ namespace Morpeh {
                 systemsGroup.Update(deltaTime);
             }
         }
-        
+
         public static void GlobalFixedUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -1116,7 +1123,7 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FixedUpdate(this World world, float deltaTime) {
             for (var i = 0; i < world.systemsGroups.Count; i++) {
@@ -1124,7 +1131,7 @@ namespace Morpeh {
                 systemsGroup.FixedUpdate(deltaTime);
             }
         }
-        
+
         public static void GlobalLateUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -1132,7 +1139,7 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LateUpdate(this World world, float deltaTime) {
             for (var i = 0; i < world.systemsGroups.Count; i++) {
@@ -1140,15 +1147,15 @@ namespace Morpeh {
                 systemsGroup.LateUpdate(deltaTime);
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SystemsGroup CreateSystemsGroup(this World world) => new SystemsGroup(world);
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
             world.newSystemsGroups.Add(order, systemsGroup);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveSystemsGroup(this World world, SystemsGroup systemsGroup) {
             systemsGroup.Dispose();
@@ -1159,7 +1166,7 @@ namespace Morpeh {
                 world.newSystemsGroups.RemoveAt(world.newSystemsGroups.IndexOfValue(systemsGroup));
             }
         }
-        
+
         public static Entity CreateEntity(this World world) {
             var id = -1;
             if (world.freeEntityIDs.length > 0) {
@@ -1181,7 +1188,7 @@ namespace Morpeh {
 
             return world.entities[id];
         }
-        
+
         public static Entity CreateEntity(this World world, out int id) {
             if (world.freeEntityIDs.length > 0) {
                 id = world.freeEntityIDs.Get(0);
@@ -1201,11 +1208,11 @@ namespace Morpeh {
             ++world.entitiesCount;
             return world.entities[id];
         }
-        
+
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this World world, in int id) => world.entities[id];
-        
+
         public static void RemoveEntity(this World world, Entity entity) {
             var id = entity.ID;
             if (world.entities[id] == entity) {
@@ -1215,7 +1222,7 @@ namespace Morpeh {
                 entity.Dispose();
             }
         }
-        
+
         public static void UpdateFilters(this World world) {
             for (var index = 0; index < world.dirtyEntities.length; index++) {
                 world.dirtyEntities.data[index].ApplyTransfer();
@@ -1250,8 +1257,8 @@ namespace Morpeh {
                 world.nextFreeEntityIDs.Clear();
             }
         }
-    } 
-    
+    }
+
     [Serializable]
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
@@ -1365,7 +1372,7 @@ namespace Morpeh {
             archetype.world   = World.worlds.data[archetype.worldId];
             archetype.filters = new FastList<Filter>();
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Add(this Archetype archetype, Entity entity, out int index) {
             index = archetype.entities.length;
@@ -1376,7 +1383,7 @@ namespace Morpeh {
 
             archetype.isDirty = true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove(this Archetype archetype, Entity entity) {
             var index = entity.indexInCurrentArchetype;
@@ -1388,19 +1395,19 @@ namespace Morpeh {
 
             archetype.isDirty = true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddFilter(this Archetype archetype, Filter filter) {
             archetype.filters.Add(filter);
             archetype.isDirty = true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveFilter(this Archetype archetype, Filter filter) {
             archetype.filters.Remove(filter);
             archetype.isDirty = true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Process(this Archetype archetype) {
             for (int i = 0, len = archetype.filters.length; i < len; i++) {
@@ -1410,7 +1417,7 @@ namespace Morpeh {
             archetype.length  = archetype.entities.length;
             archetype.isDirty = false;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddTransfer(this Archetype archetype, int typeId, out int archetypeId, out Archetype newArchetype) {
             if (archetype.addTransfer.TryGetValue(typeId, out archetypeId)) {
@@ -1421,7 +1428,7 @@ namespace Morpeh {
                 archetype.addTransfer.Add(typeId, archetypeId, out _);
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveTransfer(this Archetype archetype, int typeId, out int archetypeId, out Archetype newArchetype) {
             if (archetype.removeTransfer.TryGetValue(typeId, out archetypeId)) {
@@ -1432,7 +1439,7 @@ namespace Morpeh {
                 archetype.removeTransfer.Add(typeId, archetypeId, out _);
             }
         }
-        
+
         internal static Archetype.ComponentsBagPart<T> Select<T>(this Archetype archetype, int typeId) where T : struct, IComponent {
             for (int i = 0, len = archetype.bagParts.length; i < len; i++) {
                 var bag = archetype.bagParts.data[i];
@@ -1550,8 +1557,8 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public abstract class ComponentsBag : IDisposable {
-            public            int  typeId;
-            
+            public int typeId;
+
             internal abstract void AddArchetype(Archetype archetype);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1697,7 +1704,7 @@ namespace Morpeh {
     public static class FilterExtensions {
         [Obsolete("Use World.UpdateFilters()")]
         public static void Update(this Filter filter) => filter.world.UpdateFilters();
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void UpdateLength(this Filter filter) {
             filter.isDirty = false;
@@ -1706,7 +1713,7 @@ namespace Morpeh {
                 filter.Length += archetype.length;
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void FindArchetypes(this Filter filter, IntFastList newArchetypes) {
             var minLength = filter.includedTypeIds.length;
@@ -1715,7 +1722,7 @@ namespace Morpeh {
                 filter.CheckArchetype(arch, minLength);
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void FindArchetypes(this Filter filter) {
             var minLength = filter.includedTypeIds.length;
@@ -1723,7 +1730,7 @@ namespace Morpeh {
                 filter.CheckArchetype(arch, minLength);
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void CheckArchetype(this Filter filter, Archetype archetype, int minLength) {
             var typeIdsLength = archetype.typeIds.Length;
@@ -1783,7 +1790,7 @@ namespace Morpeh {
                 }
             }
         }
-        
+
         public static Filter.ComponentsBag<T> Select<T>(this Filter filter) where T : struct, IComponent {
             var typeInfo = CacheTypeIdentifier<T>.info;
             if (typeInfo.isMarker) {
@@ -1805,7 +1812,7 @@ namespace Morpeh {
 
             return componentsBag;
         }
-        
+
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this Filter filter, in int id) {
@@ -1826,7 +1833,7 @@ namespace Morpeh {
 
             return default;
         }
-        
+
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity First(this Filter filter) {
@@ -1839,13 +1846,13 @@ namespace Morpeh {
 
             return default;
         }
-        
+
         public static Filter With<T>(this Filter filter) where T : struct, IComponent
             => filter.CreateFilter<T>(Filter.FilterMode.Include);
 
         public static Filter Without<T>(this Filter filter) where T : struct, IComponent
             => filter.CreateFilter<T>(Filter.FilterMode.Exclude);
-        
+
         private static Filter CreateFilter<T>(this Filter filter, Filter.FilterMode mode) where T : struct, IComponent {
             for (int i = 0, length = filter.childs.length; i < length; i++) {
                 var child = filter.childs.data[i];
@@ -1880,7 +1887,7 @@ namespace Morpeh {
             return newFilter;
         }
     }
-    
+
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -1902,9 +1909,9 @@ namespace Morpeh {
 
             return ref bag.components.data[bag.firstPartIds.Get(index)];
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetComponent<T>(this Filter.ComponentsBag<T> bag,in int index, in T value)  where T : struct, IComponent {
+        public static void SetComponent<T>(this Filter.ComponentsBag<T> bag, in int index, in T value) where T : struct, IComponent {
             if (bag.parts.length > 1) {
                 int offset = 0;
                 for (int i = 0, length = bag.parts.length; i < length; i++) {
@@ -1922,7 +1929,7 @@ namespace Morpeh {
             }
         }
     }
-    
+
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -2153,7 +2160,9 @@ namespace Morpeh {
 #endif
             }
         }
-        
+    }
+
+    namespace Collections {
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
