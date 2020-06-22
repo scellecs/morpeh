@@ -314,10 +314,8 @@ namespace Morpeh {
         public static bool Has(this Entity entity, int typeID) => entity.componentsIds.TryGetIndex(typeID) >= 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has<T>(this Entity entity) where T : struct, IComponent {
-            var typeID = CacheTypeIdentifier<T>.info.id;
-            return entity.componentsIds.TryGetIndex(typeID) >= 0;
-        }
+        public static bool Has<T>(this Entity entity) where T : struct, IComponent 
+            => entity.componentsIds.TryGetIndex(CacheTypeIdentifier<T>.info.id) >= 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddTransfer(this Entity entity, int typeId) {
@@ -375,7 +373,11 @@ namespace Morpeh {
 
             entity.isDisposed = true;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsDisposed([NotNull] this Entity entity) => entity.isDisposed;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed([CanBeNull] this Entity entity) => entity == null || entity.isDisposed;
     }
 
@@ -434,11 +436,11 @@ namespace Morpeh {
 
             void DisposeSystems(FastList<ISystem> systemsToDispose) {
                 foreach (var system in systemsToDispose) {
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                     try {
 #endif
                         system.Dispose();
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                     }
                     catch (Exception e) {
                         MDebug.LogError($"[MORPEH] Can not dispose system {system.GetType()}");
@@ -467,14 +469,15 @@ namespace Morpeh {
 
             DisposeSystems(this.disabledLateSystems);
             this.disabledLateSystems = null;
-
+            
+            //todo rework defines to conditionals
             if (this.newInitializers.length > 0) {
                 foreach (var initializer in this.newInitializers) {
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                     try {
 #endif
                         initializer.Dispose();
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                     }
                     catch (Exception e) {
                         MDebug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
@@ -487,11 +490,11 @@ namespace Morpeh {
                 this.newInitializers = null;
 
                 foreach (var initializer in this.initializers) {
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                     try {
 #endif
                         initializer.Dispose();
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                     }
                     catch (Exception e) {
                         MDebug.LogError($"[MORPEH] Can not dispose initializer {initializer.GetType()}");
@@ -504,11 +507,11 @@ namespace Morpeh {
                 this.initializers = null;
 
                 foreach (var disposable in this.disposables) {
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                     try {
 #endif
                         disposable.Dispose();
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                     }
                     catch (Exception e) {
                         MDebug.LogError($"[MORPEH] Can not dispose system group disposable {disposable.GetType()}");
@@ -853,13 +856,14 @@ namespace Morpeh {
 
         private World() => this.Ctor();
 
+        //todo rework defines to conditionals
         public void Dispose() {
             foreach (var systemsGroup in this.systemsGroups.Values) {
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                 try {
 #endif
                     systemsGroup.Dispose();
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                 }
                 catch (Exception e) {
                     Debug.LogError($"[MORPEH] Can not dispose system group {systemsGroup.GetType()}");
@@ -871,11 +875,11 @@ namespace Morpeh {
             this.systemsGroups = null;
 
             foreach (var entity in this.entities) {
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                 try {
 #endif
                     entity?.DisposeFast();
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                 }
                 catch (Exception e) {
                     Debug.LogError($"[MORPEH] Can not dispose entity with ID {entity?.ID}");
@@ -892,11 +896,11 @@ namespace Morpeh {
             this.freeEntityIDs = null;
             this.nextFreeEntityIDs.Clear();
             this.nextFreeEntityIDs = null;
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
             try {
 #endif
                 this.Filter.Dispose();
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
             }
             catch (Exception e) {
                 Debug.LogError("[MORPEH] Can not dispose root filter");
@@ -909,11 +913,11 @@ namespace Morpeh {
             this.filters = null;
 
             foreach (var cache in this.caches) {
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                 try {
 #endif
                     ComponentsCache.caches.data[cache].Dispose();
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
                 }
                 catch (Exception e) {
                     Debug.LogError($"[MORPEH] Can not dispose cache id {cache}");
@@ -928,7 +932,17 @@ namespace Morpeh {
             this.typedCaches = null;
 
             foreach (var archetype in this.archetypes) {
-                archetype.Dispose();
+#if MORPEH_DEBUG
+                try {
+#endif
+                    archetype.Dispose();
+#if MORPEH_DEBUG
+                }
+                catch (Exception e) {
+                    Debug.LogError($"[MORPEH] Can not dispose archetype id {archetype.id}");
+                    Debug.LogException(e);
+                }
+#endif
             }
 
             this.archetypes.Clear();
@@ -1356,12 +1370,8 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         internal sealed class ComponentsBagPart<T> : ComponentsBagPart where T : struct, IComponent {
-            internal World world;
-
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal ComponentsBagPart(Archetype archetype) {
-                this.world = archetype.world;
-
                 this.typeId = CacheTypeIdentifier<T>.info.id;
                 this.ids    = new IntFastList(archetype.entities.length);
 
@@ -1644,7 +1654,6 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public struct EntityEnumerator : IEnumerator<Entity> {
-            private readonly World               world;
             private readonly FastList<Archetype> archetypes;
 
             private int    index;
@@ -1656,7 +1665,6 @@ namespace Morpeh {
             private int archetypeCount;
 
             internal EntityEnumerator(Filter filter) {
-                this.world      = filter.world;
                 this.archetypes = filter.archetypes;
                 this.current    = null;
                 this.index      = 0;
