@@ -1645,9 +1645,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EntityEnumerator GetEnumerator() {
-            return new EntityEnumerator(this);
-        }
+        public EntityEnumerator GetEnumerator() => new EntityEnumerator(this);
 
         IEnumerator<Entity> IEnumerable<Entity>.GetEnumerator() => this.GetEnumerator();
 
