@@ -1,3 +1,10 @@
+#if UNITY_EDITOR
+#define MORPEH_DEBUG
+#endif
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Runtime")]
@@ -8,6 +15,7 @@ namespace Morpeh {
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Runtime.CompilerServices;
     //UnityEditor
 #if UNITY_2019_1_OR_NEWER
@@ -22,6 +30,7 @@ namespace Morpeh {
     using Collections;
     //Unity
     using Unity.IL2CPP.CompilerServices;
+    using Debug = UnityEngine.Debug;
     using Il2Cpp = Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute;
 
     internal static class Constants {
@@ -104,6 +113,7 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() {
+            MDebug.LogError("[MORPEH] You're trying to dispose disposed entity.");
             if (this.isDisposed) {
                 return;
             }
@@ -152,9 +162,7 @@ namespace Morpeh {
                 cache.Remove(componentId);
             }
 
-#if UNITY_EDITOR
-            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-#endif
+            MDebug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
             return ref cache.Empty();
         }
 
@@ -182,9 +190,8 @@ namespace Morpeh {
                 cache.Remove(componentId);
             }
 
-#if UNITY_EDITOR
-            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-#endif
+            MDebug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+
             exist = true;
             return ref cache.Empty();
         }
@@ -214,9 +221,7 @@ namespace Morpeh {
                 }
             }
 
-#if UNITY_EDITOR
-            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
-#endif
+            MDebug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
             return ref cache.Empty();
         }
 
@@ -398,6 +403,7 @@ namespace Morpeh {
         internal FastList<IInitializer> initializers;
         [ShowInInspector]
         internal FastList<IDisposable> disposables;
+        
         internal World  world;
         internal Action delayedAction;
 
@@ -435,8 +441,8 @@ namespace Morpeh {
 #if UNITY_EDITOR
                     }
                     catch (Exception e) {
-                        Debug.LogError($"[MORPEH] Can not dispose system {system.GetType()}");
-                        Debug.LogException(e);
+                        MDebug.LogError($"[MORPEH] Can not dispose system {system.GetType()}");
+                        MDebug.LogException(e);
                     }
 #endif
                 }
@@ -471,8 +477,8 @@ namespace Morpeh {
 #if UNITY_EDITOR
                     }
                     catch (Exception e) {
-                        Debug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
-                        Debug.LogException(e);
+                        MDebug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
+                        MDebug.LogException(e);
                     }
 #endif
                 }
@@ -488,8 +494,8 @@ namespace Morpeh {
 #if UNITY_EDITOR
                     }
                     catch (Exception e) {
-                        Debug.LogError($"[MORPEH] Can not dispose initializer {initializer.GetType()}");
-                        Debug.LogException(e);
+                        MDebug.LogError($"[MORPEH] Can not dispose initializer {initializer.GetType()}");
+                        MDebug.LogException(e);
                     }
 #endif
                 }
@@ -505,8 +511,8 @@ namespace Morpeh {
 #if UNITY_EDITOR
                     }
                     catch (Exception e) {
-                        Debug.LogError($"[MORPEH] Can not dispose system group disposable {disposable.GetType()}");
-                        Debug.LogException(e);
+                        MDebug.LogError($"[MORPEH] Can not dispose system group disposable {disposable.GetType()}");
+                        MDebug.LogException(e);
                     }
 #endif
                 }
@@ -525,17 +531,8 @@ namespace Morpeh {
         public static void Initialize(this SystemsGroup systemsGroup) {
             if (systemsGroup.disposables.length > 0) {
                 foreach (var disposable in systemsGroup.disposables) {
-#if UNITY_EDITOR
-                    try {
-                        disposable.Dispose();
-                    }
-                    catch (Exception e) {
-                        Debug.LogError($"[MORPEH] Can not dispose {disposable.GetType()}");
-                        Debug.LogException(e);
-                    }
-#else
-                    disposable.Dispose();
-#endif
+                    disposable.TryCatchDispose();
+                    disposable.ForwardDispose();
                 }
 
                 systemsGroup.disposables.Clear();
@@ -544,18 +541,9 @@ namespace Morpeh {
             systemsGroup.world.UpdateFilters();
             if (systemsGroup.newInitializers.length > 0) {
                 foreach (var initializer in systemsGroup.newInitializers) {
-#if UNITY_EDITOR
-                    try {
-                        initializer.OnAwake();
-                    }
-                    catch (Exception e) {
-                        Debug.LogError($"[MORPEH] Can not initialize {initializer.GetType()}");
-                        Debug.LogException(e);
-                    }
-#else
-                    initializer.OnAwake();
-#endif
-
+                    initializer.TryCatchAwake();
+                    initializer.ForwardAwake();
+                    
                     systemsGroup.world.UpdateFilters();
                     systemsGroup.initializers.Add(initializer);
                 }
@@ -566,88 +554,115 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this SystemsGroup systemsGroup, float deltaTime) {
-#if UNITY_EDITOR
-            systemsGroup.delayedAction = null;
-#endif
+            systemsGroup.DropDelayedAction();
+            
             systemsGroup.Initialize();
             for (int i = 0, length = systemsGroup.systems.length; i < length; i++) {
                 var system = systemsGroup.systems.data[i];
-#if UNITY_EDITOR
-                try {
-                    system.OnUpdate(deltaTime);
-                }
-                catch (Exception e) {
-                    systemsGroup.SystemThrowException(system, e);
-                }
-#else
-                system.OnUpdate(deltaTime);
-#endif
+                
+                system.TryCatchUpdate(systemsGroup, deltaTime);
+                system.ForwardUpdate(deltaTime);
+                
                 systemsGroup.world.UpdateFilters();
             }
-#if UNITY_EDITOR
-            systemsGroup.delayedAction?.Invoke();
-#endif
+            systemsGroup.InvokeDelayedAction();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FixedUpdate(this SystemsGroup systemsGroup, float deltaTime) {
-#if UNITY_EDITOR
-            systemsGroup.delayedAction = null;
-#endif
+            systemsGroup.DropDelayedAction();
             for (int i = 0, length = systemsGroup.fixedSystems.length; i < length; i++) {
                 var system = systemsGroup.fixedSystems.data[i];
-#if UNITY_EDITOR
-                try {
-                    system.OnUpdate(deltaTime);
-                }
-                catch (Exception e) {
-                    systemsGroup.SystemThrowException(system, e);
-                }
-#else
-                system.OnUpdate(deltaTime);
-#endif
+                
+                system.TryCatchUpdate(systemsGroup, deltaTime);
+                system.ForwardUpdate(deltaTime);
+                
                 systemsGroup.world.UpdateFilters();
             }
-#if UNITY_EDITOR
-            systemsGroup.delayedAction?.Invoke();
-#endif
+            systemsGroup.InvokeDelayedAction();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LateUpdate(this SystemsGroup systemsGroup, float deltaTime) {
-#if UNITY_EDITOR
-            systemsGroup.delayedAction = null;
-#endif
+            systemsGroup.DropDelayedAction();
             systemsGroup.world.UpdateFilters();
 
             for (int i = 0, length = systemsGroup.lateSystems.length; i < length; i++) {
                 var system = systemsGroup.lateSystems.data[i];
-#if UNITY_EDITOR
-                try {
-                    system.OnUpdate(deltaTime);
-                }
-                catch (Exception e) {
-                    systemsGroup.SystemThrowException(system, e);
-                }
-#else
-                system.OnUpdate(deltaTime);
-#endif
+                system.TryCatchUpdate(systemsGroup, deltaTime);
+                system.ForwardUpdate(deltaTime);
+                
                 systemsGroup.world.UpdateFilters();
             }
-#if UNITY_EDITOR
-            systemsGroup.delayedAction?.Invoke();
-#endif
+            systemsGroup.InvokeDelayedAction();
         }
 
+        [Conditional("MORPEH_DEBUG")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void DropDelayedAction(this SystemsGroup systemsGroup) {
+            systemsGroup.delayedAction = null;
+        }
+        
+        [Conditional("MORPEH_DEBUG")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void InvokeDelayedAction(this SystemsGroup systemsGroup) {
+            systemsGroup.delayedAction?.Invoke();
+        }
 
-#if UNITY_EDITOR
+        [Conditional("MORPEH_DEBUG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SystemThrowException(this SystemsGroup systemsGroup, ISystem system, Exception exception) {
             Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
             Debug.LogException(exception);
             systemsGroup.delayedAction += () => systemsGroup.DisableSystem(system);
         }
-#endif
+
+        [Conditional("MORPEH_DEBUG")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void TryCatchUpdate(this ISystem system, SystemsGroup systemsGroup, float deltaTime) {
+            try {
+                system.OnUpdate(deltaTime);
+            }
+            catch (Exception exception) {
+                systemsGroup.SystemThrowException(system, exception);
+            }
+        }
+        
+        [Conditional("MORPEH_DEBUG")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void TryCatchAwake(this IInitializer initializer) {
+            try {
+                initializer.OnAwake();
+            }
+            catch (Exception exception) {
+                MDebug.LogError($"[MORPEH] Can not initialize {initializer.GetType()}");
+                MDebug.LogException(exception);
+            }
+        }
+        
+        [Conditional("MORPEH_DEBUG")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void TryCatchDispose(this IDisposable disposable) {
+            try {
+                disposable.Dispose();
+            }
+            catch (Exception exception) {
+                MDebug.LogError($"[MORPEH] Can not dispose {disposable.GetType()}");
+                MDebug.LogException(exception);
+            }
+        }
+        
+        [Conditional("MORPEH_DEBUG_DISABLED")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ForwardDispose(this IDisposable disposable) => disposable.Dispose();
+        
+        [Conditional("MORPEH_DEBUG_DISABLED")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ForwardAwake(this IInitializer initializer) => initializer.OnAwake();
+
+        [Conditional("MORPEH_DEBUG_DISABLED")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ForwardUpdate(this ISystem system, float deltaTime) => system.OnUpdate(deltaTime);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddInitializer<T>(this SystemsGroup systemsGroup, T initializer) where T : class, IInitializer {
@@ -2147,20 +2162,7 @@ namespace Morpeh {
         }
     }
 
-    namespace Utils {
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        internal static class UnsafeUtility {
-            public static int SizeOf<T>() where T : struct {
-#if UNITY_2019_1_OR_NEWER
-                return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
-#else
-                return System.Runtime.InteropServices.Marshal.SizeOf(default(T));
-#endif
-            }
-        }
-    }
+
 
     namespace Collections {
         [Serializable]
@@ -3618,6 +3620,62 @@ namespace Morpeh {
             }
         }
     }
+    
+    namespace Utils {
+        using System.Diagnostics;
+        using Debug = UnityEngine.Debug;
+
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
+        internal static class UnsafeUtility {
+            public static int SizeOf<T>() where T : struct {
+#if UNITY_2019_1_OR_NEWER
+                return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
+#else
+                return System.Runtime.InteropServices.Marshal.SizeOf(default(T));
+#endif
+            }
+        }
+#if UNITY_2019_1_OR_NEWER
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
+        public static class MDebug {
+            [Conditional("MORPEH_DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void Log(object message) => Debug.Log(message);
+            
+            [Conditional("MORPEH_DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void Log(object message, Object context) => Debug.Log(message, context);
+            
+            [Conditional("MORPEH_DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void LogError(object message) => Debug.LogError(message);
+            
+            [Conditional("MORPEH_DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void LogError(object message, Object context) => Debug.LogError(message, context);
+            
+            [Conditional("MORPEH_DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void LogWarning(object message) => Debug.LogWarning(message);
+            
+            [Conditional("MORPEH_DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void LogWarning(object message, Object context) => Debug.LogWarning(message, context);
+            
+            [Conditional("MORPEH_DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void LogException(Exception exception) => Debug.LogException(exception);
+            
+            [Conditional("MORPEH_DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void LogException(Exception exception, Object context) => Debug.LogException(exception, context);
+        }
+    }
+#endif
 }
 
 namespace Unity.IL2CPP.CompilerServices {
