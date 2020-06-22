@@ -314,7 +314,7 @@ namespace Morpeh {
         public static bool Has(this Entity entity, int typeID) => entity.componentsIds.TryGetIndex(typeID) >= 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has<T>(this Entity entity) where T : struct, IComponent 
+        public static bool Has<T>(this Entity entity) where T : struct, IComponent
             => entity.componentsIds.TryGetIndex(CacheTypeIdentifier<T>.info.id) >= 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -373,7 +373,7 @@ namespace Morpeh {
 
             entity.isDisposed = true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsDisposed([NotNull] this Entity entity) => entity.isDisposed;
 
@@ -405,7 +405,7 @@ namespace Morpeh {
         internal FastList<IInitializer> initializers;
         [ShowInInspector]
         internal FastList<IDisposable> disposables;
-        
+
         internal World  world;
         internal Action delayedAction;
 
@@ -469,7 +469,7 @@ namespace Morpeh {
 
             DisposeSystems(this.disabledLateSystems);
             this.disabledLateSystems = null;
-            
+
             //todo rework defines to conditionals
             if (this.newInitializers.length > 0) {
                 foreach (var initializer in this.newInitializers) {
@@ -546,7 +546,7 @@ namespace Morpeh {
                 foreach (var initializer in systemsGroup.newInitializers) {
                     initializer.TryCatchAwake();
                     initializer.ForwardAwake();
-                    
+
                     systemsGroup.world.UpdateFilters();
                     systemsGroup.initializers.Add(initializer);
                 }
@@ -558,16 +558,17 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this SystemsGroup systemsGroup, float deltaTime) {
             systemsGroup.DropDelayedAction();
-            
+
             systemsGroup.Initialize();
             for (int i = 0, length = systemsGroup.systems.length; i < length; i++) {
                 var system = systemsGroup.systems.data[i];
-                
+
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
-                
+
                 systemsGroup.world.UpdateFilters();
             }
+
             systemsGroup.InvokeDelayedAction();
         }
 
@@ -576,12 +577,13 @@ namespace Morpeh {
             systemsGroup.DropDelayedAction();
             for (int i = 0, length = systemsGroup.fixedSystems.length; i < length; i++) {
                 var system = systemsGroup.fixedSystems.data[i];
-                
+
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
-                
+
                 systemsGroup.world.UpdateFilters();
             }
+
             systemsGroup.InvokeDelayedAction();
         }
 
@@ -594,9 +596,10 @@ namespace Morpeh {
                 var system = systemsGroup.lateSystems.data[i];
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
-                
+
                 systemsGroup.world.UpdateFilters();
             }
+
             systemsGroup.InvokeDelayedAction();
         }
 
@@ -605,7 +608,7 @@ namespace Morpeh {
         private static void DropDelayedAction(this SystemsGroup systemsGroup) {
             systemsGroup.delayedAction = null;
         }
-        
+
         [Conditional("MORPEH_DEBUG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void InvokeDelayedAction(this SystemsGroup systemsGroup) {
@@ -630,7 +633,7 @@ namespace Morpeh {
                 systemsGroup.SystemThrowException(system, exception);
             }
         }
-        
+
         [Conditional("MORPEH_DEBUG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void TryCatchAwake(this IInitializer initializer) {
@@ -642,7 +645,7 @@ namespace Morpeh {
                 MDebug.LogException(exception);
             }
         }
-        
+
         [Conditional("MORPEH_DEBUG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void TryCatchDispose(this IDisposable disposable) {
@@ -654,11 +657,11 @@ namespace Morpeh {
                 MDebug.LogException(exception);
             }
         }
-        
+
         [Conditional("MORPEH_DEBUG_DISABLED")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ForwardDispose(this IDisposable disposable) => disposable.Dispose();
-        
+
         [Conditional("MORPEH_DEBUG_DISABLED")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ForwardAwake(this IInitializer initializer) => initializer.OnAwake();
@@ -1655,29 +1658,29 @@ namespace Morpeh {
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public struct EntityEnumerator : IEnumerator<Entity> {
             private readonly FastList<Archetype> archetypes;
+            private readonly int                 archetypeCount;
 
-            private int    index;
+            private int index;
+            private int archetypeId;
+
             private Entity current;
 
-            private FastList<Entity> archetype;
-
-            private int archetypeId;
-            private int archetypeCount;
+            private FastList<Entity> archetypeEntities;
 
             internal EntityEnumerator(Filter filter) {
                 this.archetypes = filter.archetypes;
                 this.current    = null;
                 this.index      = 0;
 
-                this.archetypeId    = 0;
-                this.archetypeCount = this.archetypes.length;
-                this.archetype      = this.archetypeCount == 0 ? null : this.archetypes.data[0].entities;
+                this.archetypeId       = 0;
+                this.archetypeCount    = this.archetypes.length;
+                this.archetypeEntities = this.archetypeCount == 0 ? null : this.archetypes.data[0].entities;
             }
 
             public bool MoveNext() {
                 if (this.archetypeCount == 1) {
-                    if (this.index < this.archetype.length) {
-                        this.current = this.archetype.data[this.index];
+                    if (this.index < this.archetypeEntities.length) {
+                        this.current = this.archetypeEntities.data[this.index];
                         ++this.index;
                         return true;
                     }
@@ -1686,17 +1689,17 @@ namespace Morpeh {
                 }
 
                 if (this.archetypeId < this.archetypeCount) {
-                    if (this.index < this.archetype.length) {
-                        this.current = this.archetype.data[this.index];
+                    if (this.index < this.archetypeEntities.length) {
+                        this.current = this.archetypeEntities.data[this.index];
                         ++this.index;
                         return true;
                     }
 
                     while (++this.archetypeId < this.archetypeCount) {
-                        this.archetype = this.archetypes.data[this.archetypeId].entities;
-                        if (this.archetype.length > 0) {
+                        this.archetypeEntities = this.archetypes.data[this.archetypeId].entities;
+                        if (this.archetypeEntities.length > 0) {
                             this.index   = 0;
-                            this.current = this.archetype.data[this.index];
+                            this.current = this.archetypeEntities.data[this.index];
                             return true;
                         }
                     }
@@ -1706,10 +1709,10 @@ namespace Morpeh {
             }
 
             public void Reset() {
-                this.index       = 0;
-                this.current     = null;
-                this.archetypeId = 0;
-                this.archetype   = this.archetypeCount == 0 ? null : this.archetypes.data[0].entities;
+                this.index             = 0;
+                this.current           = null;
+                this.archetypeId       = 0;
+                this.archetypeEntities = this.archetypeCount == 0 ? null : this.archetypes.data[0].entities;
             }
 
             public Entity Current => this.current;
@@ -2169,7 +2172,6 @@ namespace Morpeh {
             base.Dispose();
         }
     }
-
 
 
     namespace Collections {
@@ -3628,7 +3630,7 @@ namespace Morpeh {
             }
         }
     }
-    
+
     namespace Utils {
         using System.Diagnostics;
         using Debug = UnityEngine.Debug;
@@ -3653,31 +3655,31 @@ namespace Morpeh {
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void Log(object message) => Debug.Log(message);
-            
+
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void Log(object message, Object context) => Debug.Log(message, context);
-            
+
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void LogError(object message) => Debug.LogError(message);
-            
+
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void LogError(object message, Object context) => Debug.LogError(message, context);
-            
+
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void LogWarning(object message) => Debug.LogWarning(message);
-            
+
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void LogWarning(object message, Object context) => Debug.LogWarning(message, context);
-            
+
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void LogException(Exception exception) => Debug.LogException(exception);
-            
+
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void LogException(Exception exception, Object context) => Debug.LogException(exception, context);
