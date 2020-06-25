@@ -31,6 +31,8 @@ Features:
 
 ## How To Install
 
+Minimal Unity Version is 2019.3.*  
+
 <details>
     <summary>Open Package Manager and add Morpeh URL.  </summary>
     
