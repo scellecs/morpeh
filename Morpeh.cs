@@ -310,11 +310,28 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has(this Entity entity, int typeID) => entity.componentsIds.TryGetIndex(typeID) >= 0;
+        public static bool Has([CanBeNull]this Entity entity, int typeID) {
+#if MORPEH_DEBUG
+            if (entity == null) {
+                Debug.LogError("[MORPEH] You are trying check Has on null entity");
+                return false;
+            }
+#endif
+            
+            return entity.componentsIds.TryGetIndex(typeID) >= 0;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has<T>(this Entity entity) where T : struct, IComponent
-            => entity.componentsIds.TryGetIndex(CacheTypeIdentifier<T>.info.id) >= 0;
+        public static bool Has<T>([CanBeNull]this Entity entity) where T : struct, IComponent {
+#if MORPEH_DEBUG
+            if (entity == null) {
+                Debug.LogError("[MORPEH] You are trying check Has on null entity");
+                return false;
+            }
+#endif
+            
+            return entity.componentsIds.TryGetIndex(CacheTypeIdentifier<T>.info.id) >= 0;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddTransfer(this Entity entity, int typeId) {
