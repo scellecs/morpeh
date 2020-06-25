@@ -65,7 +65,7 @@
 
         protected override void OnDisable() {
             var ent = this.Entity;
-            if (ent != null && !ent.isDisposed) {
+            if (ent.IsNullOrDisposed() == false) {
                 ent.RemoveComponent<T>();
             }
             base.OnDisable();

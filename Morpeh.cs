@@ -112,8 +112,8 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() {
-            MDebug.LogError("[MORPEH] You're trying to dispose disposed entity.");
             if (this.isDisposed) {
+                MDebug.LogError("[MORPEH] You're trying to dispose disposed entity.");
                 return;
             }
 
