@@ -25,7 +25,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
         [Space]
-        private Morpeh.Editor.EntityViewer entityViewer = new Morpeh.Editor.EntityViewer();
+        private Morpeh.Editor.EntityViewerWithHeader entityViewer = new Morpeh.Editor.EntityViewerWithHeader();
 #endif
 
         [CanBeNull]
@@ -56,7 +56,7 @@
         internal virtual void OnEnable() {
             this.internalEntity = null;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-            this.entityViewer = new Morpeh.Editor.EntityViewer {getter = () => this.internalEntity};
+            this.entityViewer = new Morpeh.Editor.EntityViewerWithHeader {getter = () => this.internalEntity};
 #endif
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;

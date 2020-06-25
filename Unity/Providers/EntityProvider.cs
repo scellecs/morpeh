@@ -110,7 +110,7 @@ namespace Morpeh {
 
         [HideIf("$" + nameof(IsNotEntityProvider))]
         [ShowInInspector]
-        private Editor.EntityViewer entityViewer = new Editor.EntityViewer();
+        private Editor.EntityViewerWithHeader entityViewer = new Editor.EntityViewerWithHeader();
 #endif
     }
 }

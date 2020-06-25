@@ -10,7 +10,6 @@ namespace Morpeh.Editor {
     [InlineProperty]
     [HideReferenceObjectPicker]
     [HideLabel]
-    [Title("","Debug Info", HorizontalLine = true)]
     internal class EntityViewer {
         internal Func<Entity> getter = () => null;
         private  Entity       entity => this.getter();
@@ -84,6 +83,15 @@ namespace Morpeh.Editor {
                 }
             }
         }
+    }
+
+    [Serializable]
+    [InlineProperty]
+    [HideReferenceObjectPicker]
+    [HideLabel]
+    [Title("","Debug Info", HorizontalLine = true)]
+    internal class EntityViewerWithHeader : EntityViewer {
+        
     }
 }
 #endif
