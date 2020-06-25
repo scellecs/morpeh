@@ -6,9 +6,8 @@
 #endif
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Editor")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Runtime")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Tests.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite.Editor")]
 
 namespace Morpeh {
     //System
@@ -3650,6 +3649,9 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         public static class MDebug {
+            public static void Initialize() {
+            }
+            
             [Conditional("MORPEH_DEBUG")]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void Log(object message) => Debug.Log(message);
