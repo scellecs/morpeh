@@ -16,6 +16,7 @@ namespace Morpeh {
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
+    using System.Threading;
     //UnityEditor
 #if UNITY_2019_1_OR_NEWER
     using JetBrains.Annotations;
@@ -312,7 +313,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has([CanBeNull]this Entity entity, int typeID) {
 #if MORPEH_DEBUG
-            if (entity == null) {
+            if (entity.IsNullOrDisposed()) {
                 Debug.LogError("[MORPEH] You are trying check Has on null entity");
                 return false;
             }
@@ -324,7 +325,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has<T>([CanBeNull]this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
-            if (entity == null) {
+            if (entity.IsNullOrDisposed()) {
                 Debug.LogError("[MORPEH] You are trying check Has on null entity");
                 return false;
             }
@@ -930,7 +931,7 @@ namespace Morpeh {
 
             this.filters.Clear();
             this.filters = null;
-
+            
             foreach (var cache in this.caches) {
 #if MORPEH_DEBUG
                 try {
@@ -1216,7 +1217,7 @@ namespace Morpeh {
         }
 
         public static Entity CreateEntity(this World world) {
-            var id = -1;
+            int id;
             if (world.freeEntityIDs.length > 0) {
                 id = world.freeEntityIDs.Get(0);
                 world.freeEntityIDs.RemoveAtSwap(0, out _);
@@ -1976,8 +1977,10 @@ namespace Morpeh {
     internal static class CommonCacheTypeIdentifier {
         private static int counter;
 
-        internal static int GetID() => counter++;
-#if UNITY_EDITOR
+        //todo need this?
+        internal static TypeInfo GetTypeInfo<T>(this T component) where T : struct, IComponent => CacheTypeIdentifier<T>.info;
+        internal static int GetID() => Interlocked.Increment(ref counter);
+#if MORPEH_DEBUG
         internal static Dictionary<int, DebugInfo> editorTypeAssociation = new Dictionary<int, DebugInfo>();
 
         internal static int GetID<T>() where T : struct, IComponent {
@@ -2028,7 +2031,7 @@ namespace Morpeh {
 
         static CacheTypeIdentifier() {
             info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
-#if UNITY_EDITOR
+#if MORPEH_DEBUG
             var id = CommonCacheTypeIdentifier.GetID<T>();
 #else
             var id = CommonCacheTypeIdentifier.GetID();
@@ -2036,7 +2039,7 @@ namespace Morpeh {
             info.SetID(id);
         }
     }
-
+    
     [Serializable]
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
@@ -3059,9 +3062,8 @@ namespace Morpeh {
                             if (*(slotsPtr + this.index) - 1 < 0) {
                                 continue;
                             }
-
                             this.current = this.index;
-                            ++this.index;
+                            this.index += 2;
 
                             return true;
                         }
