@@ -326,7 +326,7 @@ namespace Morpeh {
         public static bool Has<T>([CanBeNull]this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                Debug.LogError("[MORPEH] You are trying check Has on null entity");
+                Debug.LogError("[MORPEH] You are trying check Has on null or disposed entity");
                 return false;
             }
 #endif
@@ -931,12 +931,19 @@ namespace Morpeh {
 
             this.filters.Clear();
             this.filters = null;
+
+            var tempCaches = new FastList<ComponentsCache>();
             
-            foreach (var cache in this.caches) {
+            foreach (var cacheId in this.caches) {
+                var cache = ComponentsCache.caches.data[this.caches.GetValueByIndex(cacheId)];
+                tempCaches.Add(cache);
+            }
+            
+            foreach (var cache in tempCaches) {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    ComponentsCache.caches.data[cache].Dispose();
+                    cache.Dispose();
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
@@ -1134,6 +1141,7 @@ namespace Morpeh {
             }
 
             world.caches.Add(info.id, componentsCache.commonCacheId, out _);
+            Debug.Log($"Add Cache with index {componentsCache.commonCacheId} {info.id}");
             world.typedCaches.Add(info.id, componentsCache.typedCacheId, out _);
 
             return componentsCache;
@@ -2090,6 +2098,7 @@ namespace Morpeh {
             typedCaches.Add(this);
 
             this.commonCacheId = caches.length;
+            Debug.Log(this.commonCacheId);
             caches.Add(this);
         }
 
@@ -2168,6 +2177,9 @@ namespace Morpeh {
             this.components = null;
             this.freeIndexes.Clear();
             this.freeIndexes = null;
+
+            typedCaches.RemoveSwap(this, out _);
+            caches.RemoveSwap(this, out _);
         }
     }
 
