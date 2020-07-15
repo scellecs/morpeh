@@ -325,11 +325,6 @@ namespace Morpeh {
             var typeInfo = CacheTypeIdentifier<T>.info;
 
             if (entity.componentsIds.Remove(typeInfo.id, out var index)) {
-                if (entity.componentsIds.length == 0) {
-                    entity.world.RemoveEntity(entity);
-                    return true;
-                }
-
                 if (typeInfo.isMarker == false) {
                     entity.world.GetCache<T>().Remove(index);
                 }
@@ -422,7 +417,13 @@ namespace Morpeh {
                 }
 
                 entity.previousArchetypeId = -1;
-                entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
+                if (entity.currentArchetypeId == 0) {
+                    entity.indexInCurrentArchetype = -1;
+                    entity.world.RemoveEntity(entity);
+                }
+                else {
+                    entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
+                }
             }
 
             entity.isDirty = false;
@@ -1489,8 +1490,10 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove(this Archetype archetype, Entity entity) {
             var index = entity.indexInCurrentArchetype;
-            archetype.entities.RemoveAtSwap(index, out _);
-            archetype.entities.data[index].indexInCurrentArchetype = index;
+            if (archetype.entities.RemoveAtSwap(index, out _)) {
+                archetype.entities.data[index].indexInCurrentArchetype = index;
+            }
+
             for (var i = 0; i < archetype.bagParts.length; i++) {
                 archetype.bagParts.data[i].Remove(index);
             }
