@@ -62,7 +62,6 @@ namespace Morpeh {
     public interface ILateSystem : ISystem {
     }
 
-    [Serializable]
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
