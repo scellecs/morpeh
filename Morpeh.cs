@@ -142,6 +142,11 @@ namespace Morpeh {
     public static class EntityExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+            }
+#endif
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
@@ -168,6 +173,11 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+            }
+#endif
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
@@ -197,6 +207,11 @@ namespace Morpeh {
         }
 
         public static bool AddComponentFast(this Entity entity, in int typeId, in int componentId) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying AddComponentFast on null or disposed entity");
+            }
+#endif
             if (entity.componentsIds.Add(typeId, componentId, out _)) {
                 entity.AddTransfer(typeId);
                 return true;
@@ -206,6 +221,11 @@ namespace Morpeh {
         }
 
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+            }
+#endif
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
@@ -227,6 +247,12 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+            }
+#endif
+            
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
@@ -249,10 +275,24 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetComponentFast(this Entity entity, in int typeId) => entity.componentsIds.GetValueByKey(typeId);
+        public static int GetComponentFast(this Entity entity, in int typeId) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying GetComponentFast on null or disposed entity");
+            }
+#endif
+            
+            return entity.componentsIds.GetValueByKey(typeId);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying SetComponent on null or disposed entity");
+            }
+#endif
+            
             var typeInfo = CacheTypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
@@ -276,6 +316,12 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying RemoveComponent on null or disposed entity");
+            }
+#endif
+            
             var typeInfo = CacheTypeIdentifier<T>.info;
 
             if (entity.componentsIds.Remove(typeInfo.id, out var index)) {
@@ -296,8 +342,14 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool RemoveComponentFast(this Entity entity, int typeId, out int cacheIndex) {
-            if (entity.componentsIds.Remove(typeId, out cacheIndex)) {
+        public static bool RemoveComponentFast(this Entity entity, int typeId, out int indexInCache) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying RemoveComponentFast on null or disposed entity");
+            }
+#endif
+            
+            if (entity.componentsIds.Remove(typeId, out indexInCache)) {
                 if (entity.componentsIds.length == 0) {
                     entity.world.RemoveEntity(entity);
                     return true;
@@ -314,8 +366,7 @@ namespace Morpeh {
         public static bool Has([CanBeNull]this Entity entity, int typeID) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                Debug.LogError("[MORPEH] You are trying check Has on null entity");
-                return false;
+                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
             
@@ -326,8 +377,7 @@ namespace Morpeh {
         public static bool Has<T>([CanBeNull]this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                Debug.LogError("[MORPEH] You are trying check Has on null or disposed entity");
-                return false;
+                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
             
