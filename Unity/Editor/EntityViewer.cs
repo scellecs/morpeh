@@ -4,7 +4,6 @@ namespace Morpeh.Editor {
     using System.Collections.Generic;
     using Morpeh;
     using Sirenix.OdinInspector;
-    using UnityEngine;
 
     [Serializable]
     [InlineProperty]

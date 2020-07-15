@@ -125,7 +125,7 @@ namespace Morpeh {
 
             foreach (var slotIndex in this.componentsIds) {
                 var typeId      = this.componentsIds.GetKeyByIndex(slotIndex);
-                var componentId = this.componentsIds.GetValueByIndex(slotIndex + 1);
+                var componentId = this.componentsIds.GetValueByIndex(slotIndex);
 
                 if (componentId >= 0) {
                     this.world.GetCache(typeId)?.Remove(componentId);
@@ -1141,7 +1141,6 @@ namespace Morpeh {
             }
 
             world.caches.Add(info.id, componentsCache.commonCacheId, out _);
-            Debug.Log($"Add Cache with index {componentsCache.commonCacheId} {info.id}");
             world.typedCaches.Add(info.id, componentsCache.typedCacheId, out _);
 
             return componentsCache;
@@ -1723,6 +1722,7 @@ namespace Morpeh {
                         if (this.archetypeEntities.length > 0) {
                             this.index   = 0;
                             this.current = this.archetypeEntities.data[this.index];
+                            ++this.index;
                             return true;
                         }
                     }
@@ -2098,7 +2098,6 @@ namespace Morpeh {
             typedCaches.Add(this);
 
             this.commonCacheId = caches.length;
-            Debug.Log(this.commonCacheId);
             caches.Add(this);
         }
 
@@ -3009,7 +3008,7 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public int GetKeyByIndex(in int index) {
                 fixed (int* d = &this.slots[0]) {
-                    return *(d + index);
+                    return *(d + index) - 1;
                 }
             }
 
