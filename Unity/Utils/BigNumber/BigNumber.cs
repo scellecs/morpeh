@@ -126,22 +126,22 @@ namespace Morpeh.BigNumber {
         
         public static BigNumber operator *(BigNumber left, int right) => new BigNumber(left.value * right);
         public static BigNumber operator *(BigNumber left, float right) {
-            var result = (left.value * (int)(right * 100)) / 100;
+            var result = (left.value * new BigInteger(right * 100)) / 100;
             return new BigNumber(result);
         }
         public static BigNumber operator *(BigNumber left, double right) {
-            var result = (left.value * (int)(right * 100)) / 100;
+            var result = (left.value * new BigInteger(right * 100)) / 100;
             return new BigNumber(result);
         }
         public static BigNumber operator *(BigNumber left, BigNumber right) => new BigNumber(left.value * right.value);
         
         public static BigNumber operator /(BigNumber left, int right) => new BigNumber(left.value / right);
         public static BigNumber operator /(BigNumber left, float right) {
-            var result = (left.value * 100 / (int)(right * 100)) ;
+            var result = (left.value * 100 / new BigInteger(right * 100));
             return new BigNumber(result);
         }
         public static BigNumber operator /(BigNumber left, double right) {
-            var result = (left.value * 100 / (int)(right * 100)) ;
+            var result = (left.value * 100 / new BigInteger(right * 100));
             return new BigNumber(result);
         }
         public static BigNumber operator /(BigNumber left, BigNumber right) => new BigNumber(left.value / right.value);
