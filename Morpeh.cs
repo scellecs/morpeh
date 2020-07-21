@@ -2360,6 +2360,9 @@ namespace Morpeh {
             }
         }
 
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
         public static unsafe class IntHashSetExtensions {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool Add(this IntHashSet hashSet, in int value) {
@@ -2431,7 +2434,7 @@ namespace Morpeh {
                 ++hashSet.length;
                 return true;
             }
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool Remove(this IntHashSet hashSet, in int value) {
                 fixed (int* slotsPtr = &hashSet.slots[0])
@@ -2618,6 +2621,9 @@ namespace Morpeh {
             }
         }
 
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
         public static class IntHashMapExtensions {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool Add<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {
@@ -2631,7 +2637,7 @@ namespace Morpeh {
                 }
 
                 if (hashMap.freeIndex >= 0) {
-                    slotIndex      = hashMap.freeIndex;
+                    slotIndex         = hashMap.freeIndex;
                     hashMap.freeIndex = hashMap.slots[slotIndex].next;
                 }
                 else {
@@ -2684,13 +2690,13 @@ namespace Morpeh {
                 for (var i = hashMap.buckets[rem] - 1; i >= 0; i = hashMap.slots[i].next) {
                     if (hashMap.slots[i].key - 1 == key) {
                         hashMap.data[i] = value;
-                        slotIndex    = i;
+                        slotIndex       = i;
                         return;
                     }
                 }
 
                 if (hashMap.freeIndex >= 0) {
-                    slotIndex      = hashMap.freeIndex;
+                    slotIndex         = hashMap.freeIndex;
                     hashMap.freeIndex = hashMap.slots[slotIndex].next;
                 }
                 else {
@@ -2878,14 +2884,13 @@ namespace Morpeh {
                 hashMap.length    = 0;
                 hashMap.freeIndex = -1;
             }
-
         }
 
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public sealed unsafe class UnsafeIntHashMap<T> : IEnumerable<int> where T : unmanaged {
+        public sealed class UnsafeIntHashMap<T> : IEnumerable<int> where T : unmanaged {
             public int length;
             public int capacity;
             public int capacityMinusOne;
@@ -2927,7 +2932,7 @@ namespace Morpeh {
             [Il2Cpp(Option.NullChecks, false)]
             [Il2Cpp(Option.ArrayBoundsChecks, false)]
             [Il2Cpp(Option.DivideByZeroChecks, false)]
-            public struct Enumerator : IEnumerator<int> {
+            public unsafe struct Enumerator : IEnumerator<int> {
                 public UnsafeIntHashMap<T> hashMap;
 
                 public int index;
@@ -2966,6 +2971,9 @@ namespace Morpeh {
             }
         }
 
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
         public static unsafe class UnsafeIntHashMapExtensions {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool Add<T>(this UnsafeIntHashMap<T> hashMap, in int key, in T value, out int slotIndex) where T : unmanaged {
@@ -3020,7 +3028,7 @@ namespace Morpeh {
                         rem = key & hashMap.capacityMinusOne;
                     }
 
-                    slotIndex      = hashMap.lastIndex;
+                    slotIndex         =  hashMap.lastIndex;
                     hashMap.lastIndex += 2;
                 }
 
@@ -3176,18 +3184,17 @@ namespace Morpeh {
                 hashMap.length    = 0;
                 hashMap.freeIndex = -1;
             }
-
         }
 
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public sealed unsafe class IntStack {
+        public sealed class IntStack {
             public int length;
             public int capacity;
 
-            private int[] data;
+            public int[] data;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public IntStack() {
@@ -3195,28 +3202,33 @@ namespace Morpeh {
                 this.data     = new int[this.capacity];
                 this.length   = 0;
             }
+        }
 
+        [Il2Cpp(Option.NullChecks, false)]
+        [Il2Cpp(Option.ArrayBoundsChecks, false)]
+        [Il2Cpp(Option.DivideByZeroChecks, false)]
+        public static unsafe class IntStackExtensions {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Push(in int value) {
-                if (this.length == this.capacity) {
-                    ArrayHelpers.Grow(ref this.data, this.capacity <<= 1);
+            public static void Push(this IntStack stack, in int value) {
+                if (stack.length == stack.capacity) {
+                    ArrayHelpers.Grow(ref stack.data, stack.capacity <<= 1);
                 }
 
-                fixed (int* d = &this.data[0]) {
-                    *(d + this.length++) = value;
+                fixed (int* d = &stack.data[0]) {
+                    *(d + stack.length++) = value;
                 }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int Pop() {
-                fixed (int* d = &this.data[0]) {
-                    return *(d + this.length--);
+            public static int Pop(this IntStack stack) {
+                fixed (int* d = &stack.data[0]) {
+                    return *(d + stack.length--);
                 }
             }
 
-            public void Clear() {
-                this.data   = null;
-                this.length = this.capacity = 0;
+            public static void Clear(this IntStack stack) {
+                stack.data   = null;
+                stack.length = stack.capacity = 0;
             }
         }
 
