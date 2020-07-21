@@ -96,42 +96,29 @@ namespace Morpeh {
         [ShowInInspector]
         public int ID => this.internalID;
 
-        internal Entity(int id, int worldID) {
-            this.internalID = id;
-            this.worldID    = worldID;
-            this.world      = World.worlds.data[this.worldID];
-
-            this.componentsIds = new UnsafeIntHashMap<int>(Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY);
-
-            this.indexInCurrentArchetype = -1;
-            this.previousArchetypeId     = -1;
-            this.currentArchetypeId      = 0;
-
-            this.currentArchetype = this.world.archetypes.data[0];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Dispose() {
-            if (this.isDisposed) {
-                MDebug.LogError("[MORPEH] You're trying to dispose disposed entity.");
-                return;
-            }
-
-            if (this.indexInCurrentArchetype > -1) {
-                this.previousArchetypeId = this.currentArchetypeId;
-                this.currentArchetypeId = -1;
-                if (this.isDirty == false) {
-                    this.world.dirtyEntities.Add(this);
-                    this.isDirty = true;
-                }
-            }
-        }
+        internal Entity() { }
     }
 
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public static class EntityExtensions {
+        internal static Entity Create(int id, int worldID) {
+            var newEntity = new Entity {internalID = id, worldID = worldID};
+            
+            newEntity.world      = World.worlds.data[newEntity.worldID];
+
+            newEntity.componentsIds = new UnsafeIntHashMap<int>(Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY);
+
+            newEntity.indexInCurrentArchetype = -1;
+            newEntity.previousArchetypeId     = -1;
+            newEntity.currentArchetypeId      = 0;
+
+            newEntity.currentArchetype = newEntity.world.archetypes.data[0];
+
+            return newEntity;
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -422,7 +409,7 @@ namespace Morpeh {
                     entity.DisposeFast();
                     return;
                 }
-                else if (entity.currentArchetypeId == 0) {
+                if (entity.currentArchetypeId == 0) {
                     entity.indexInCurrentArchetype = -1;
                     entity.world.RemoveEntity(entity);
                 }
@@ -432,6 +419,24 @@ namespace Morpeh {
             }
 
             entity.isDirty = false;
+        }
+        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Dispose(this Entity entity) {
+            if (entity.isDisposed) {
+                MDebug.LogError("[MORPEH] You're trying to dispose disposed entity.");
+                return;
+            }
+
+            if (entity.indexInCurrentArchetype > -1) {
+                entity.previousArchetypeId = entity.currentArchetypeId;
+                entity.currentArchetypeId  = -1;
+                if (entity.isDirty == false) {
+                    entity.world.dirtyEntities.Add(entity);
+                    entity.isDirty = true;
+                }
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1300,7 +1305,7 @@ namespace Morpeh {
                 world.entitiesCapacity = newCapacity;
             }
 
-            world.entities[id] = new Entity(id, World.worlds.IndexOf(world));
+            world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
             ++world.entitiesCount;
 
             return world.entities[id];
@@ -1321,7 +1326,7 @@ namespace Morpeh {
                 world.entitiesCapacity = newCapacity;
             }
 
-            world.entities[id] = new Entity(id, World.worlds.IndexOf(world));
+            world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
             ++world.entitiesCount;
             return world.entities[id];
         }
@@ -1380,7 +1385,7 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal sealed class Archetype : IDisposable {
+    internal sealed class Archetype {
         [SerializeField]
         internal int[] typeIds;
         [SerializeField]
@@ -1419,24 +1424,6 @@ namespace Morpeh {
             this.worldId = worldId;
 
             this.Ctor();
-        }
-
-        public void Dispose() {
-            this.id      = -1;
-            this.length  = -1;
-            this.isDirty = false;
-
-            this.typeIds = null;
-            this.world   = null;
-
-            this.entities.Clear();
-            this.entities = null;
-
-            this.addTransfer.Clear();
-            this.addTransfer = null;
-
-            this.removeTransfer.Clear();
-            this.removeTransfer = null;
         }
 
         [Il2Cpp(Option.NullChecks, false)]
@@ -1484,6 +1471,25 @@ namespace Morpeh {
         internal static void Ctor(this Archetype archetype) {
             archetype.world   = World.worlds.data[archetype.worldId];
             archetype.filters = new FastList<Filter>();
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Dispose(this Archetype archetype) {
+            archetype.id      = -1;
+            archetype.length  = -1;
+            archetype.isDirty = false;
+
+            archetype.typeIds = null;
+            archetype.world   = null;
+
+            archetype.entities.Clear();
+            archetype.entities = null;
+
+            archetype.addTransfer.Clear();
+            archetype.addTransfer = null;
+
+            archetype.removeTransfer.Clear();
+            archetype.removeTransfer = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1815,6 +1821,7 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public static class FilterExtensions {
         [Obsolete("Use World.UpdateFilters()")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this Filter filter) => filter.world.UpdateFilters();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
