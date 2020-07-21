@@ -28,7 +28,7 @@ namespace Morpeh.Globals {
             }
         }
 
-        private protected override bool CheckIsInitialized() {
+        protected override bool CheckIsInitialized() {
             var world = World.Default;
             var check = base.CheckIsInitialized();
             if (check) {
@@ -44,26 +44,26 @@ namespace Morpeh.Globals {
                     LastToString = this.LastToString
                 });
             }
-            if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.id, out var initialized)) {
+            if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.identifier, out var initialized)) {
                 if (initialized == false) {
                     var updater = new GlobalEventComponentUpdater<TData>();
                     updater.Awake(world);
-                    if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
+                    if (GlobalEventComponentUpdater.updaters.TryGetValue(world.identifier, out var updaters)) {
                         updaters.Add(updater);
                     }
                     else {
-                        GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
+                        GlobalEventComponentUpdater.updaters.Add(world.identifier, new List<GlobalEventComponentUpdater> {updater});
                     }
                 }
             }
             else {
                 var updater = new GlobalEventComponentUpdater<TData>();
                 updater.Awake(world);
-                if (GlobalEventComponentUpdater.updaters.TryGetValue(world.id, out var updaters)) {
+                if (GlobalEventComponentUpdater.updaters.TryGetValue(world.identifier, out var updaters)) {
                     updaters.Add(updater);
                 }
                 else {
-                    GlobalEventComponentUpdater.updaters.Add(world.id, new List<GlobalEventComponentUpdater> {updater});
+                    GlobalEventComponentUpdater.updaters.Add(world.identifier, new List<GlobalEventComponentUpdater> {updater});
                 }
             }
 

@@ -33,7 +33,7 @@ namespace Morpeh {
                         this.cachedEntity = World.Default.entities[this.entityID];
                     }
                 }
-                else if (this.cachedEntity != null && this.cachedEntity.IsDisposed()) {
+                else if (this.cachedEntity != null && this.cachedEntity.isDisposed) {
                     this.cachedEntity = null;
                     this.entityID     = -1;
                 }
@@ -45,7 +45,7 @@ namespace Morpeh {
         private Entity cachedEntity;
 
         [CanBeNull]
-        public IEntity Entity => this.InternalEntity;
+        public Entity Entity => this.InternalEntity;
 
         private protected virtual void OnEnable() {
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -68,7 +68,7 @@ namespace Morpeh {
 
             if (this.InternalEntity == null || this.entityID < 0) {
                 var others = this.GetComponents<EntityProvider>();
-                this.cachedEntity = World.Default.CreateEntityInternal(out this.entityID);
+                this.cachedEntity = World.Default.CreateEntity(out this.entityID);
                 foreach (var entityProvider in others) {
                     if (entityProvider.enabled) {
                         entityProvider.entityID     = this.entityID;
@@ -92,7 +92,7 @@ namespace Morpeh {
         }
 
         private void CheckEntityIsAlive() {
-            if (this.InternalEntity == null || this.InternalEntity.IsDisposed()) {
+            if (this.InternalEntity == null || this.InternalEntity.isDisposed) {
                 this.entityID = -1;
             }
         }
@@ -110,7 +110,7 @@ namespace Morpeh {
 
         [HideIf("$" + nameof(IsNotEntityProvider))]
         [ShowInInspector]
-        private Editor.EntityViewer entityViewer = new Editor.EntityViewer();
+        private Editor.EntityViewerWithHeader entityViewer = new Editor.EntityViewerWithHeader();
 #endif
     }
 }

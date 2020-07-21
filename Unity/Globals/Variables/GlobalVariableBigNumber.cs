@@ -42,7 +42,7 @@
             public override string ToString() => this.value.ToString();
         }
 
-        internal override void OnEnable() {
+        protected override void OnEnable() {
             if(!string.IsNullOrEmpty(this.defaultValue)) 
                 this.value.SetBigInteger(BigNumber.Parse(this.defaultValue));
             base.OnEnable();

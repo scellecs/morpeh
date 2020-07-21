@@ -4,9 +4,9 @@
     using UnityEngine;
 #if UNITY_EDITOR
     using UnityEditor;
-
 #endif
-
+    
+//https://gist.github.com/JohannesMP/ec7d3f0bcf167dab3d0d3bb480e0e07b
 // Author: JohannesMP (2018-08-12)
 //
 // A wrapper that provides the means to safely serialize Scene Asset References.

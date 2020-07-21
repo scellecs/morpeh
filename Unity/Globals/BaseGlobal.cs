@@ -14,7 +14,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public abstract class BaseGlobal : Singleton, IDisposable {
+    public abstract class BaseGlobal : BaseSingleton, IDisposable {
         internal bool isPublished;
 
         public bool IsPublished {
@@ -32,7 +32,7 @@ namespace Morpeh.Globals {
 #if UNITY_EDITOR
         public abstract Type GetValueType();
 #endif
-        internal override void OnEnable() {
+        protected override void OnEnable() {
             base.OnEnable();
 #if UNITY_EDITOR
             if (Application.isPlaying) {
@@ -45,7 +45,7 @@ namespace Morpeh.Globals {
 
         public static implicit operator bool(BaseGlobal exists) => exists != null && exists.IsPublished;
 
-        private protected class Unsubscriber : IDisposable {
+        protected class Unsubscriber : IDisposable {
             private readonly Action unsubscribe;
             public Unsubscriber(Action unsubscribe) => this.unsubscribe = unsubscribe;
             public void Dispose() => this.unsubscribe();

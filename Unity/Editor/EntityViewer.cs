@@ -4,13 +4,11 @@ namespace Morpeh.Editor {
     using System.Collections.Generic;
     using Morpeh;
     using Sirenix.OdinInspector;
-    using UnityEngine;
 
     [Serializable]
     [InlineProperty]
     [HideReferenceObjectPicker]
     [HideLabel]
-    [Title("","Debug Info", HorizontalLine = true)]
     internal class EntityViewer {
         internal Func<Entity> getter = () => null;
         private  Entity       entity => this.getter();
@@ -27,10 +25,10 @@ namespace Morpeh.Editor {
                 if (this.entity != null) {
                     this.componentViews.Clear();
                     foreach (var slotIndex in this.entity.componentsIds) {
-                        var slot = this.entity.componentsIds.slots[slotIndex];
-                        var data = this.entity.componentsIds.data[slotIndex];
+                        var slot = this.entity.componentsIds.GetKeyByIndex(slotIndex);
+                        var data = this.entity.componentsIds.GetValueByIndex(slotIndex);
                         var view = new ComponentView {
-                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[slot.key],
+                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[slot],
                             id        = data,
                             world     = this.entity.world
                         };
@@ -84,6 +82,15 @@ namespace Morpeh.Editor {
                 }
             }
         }
+    }
+
+    [Serializable]
+    [InlineProperty]
+    [HideReferenceObjectPicker]
+    [HideLabel]
+    [Title("","Debug Info", HorizontalLine = true)]
+    internal class EntityViewerWithHeader : EntityViewer {
+        
     }
 }
 #endif
