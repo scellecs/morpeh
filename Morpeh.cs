@@ -3227,7 +3227,7 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static int Pop(this IntStack stack) {
                 fixed (int* d = &stack.data[0]) {
-                    return *(d + stack.length--);
+                    return *(d + --stack.length);
                 }
             }
 
@@ -3697,6 +3697,7 @@ namespace Morpeh {
         internal static class HashHelpers {
             //https://github.com/dotnet/runtime/blob/master/src/libraries/System.Private.CoreLib/src/System/Collections/HashHelpers.cs#L32
             //different primes to fit n^2 - 1
+            //todo expand to maxInt
             internal static readonly int[] primes = {
                 3,
                 15,
