@@ -1580,8 +1580,8 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public sealed class Filter : IEnumerable<Entity>, IDisposable {
-        internal enum FilterMode {
+    public sealed class Filter : IEnumerable<Entity> {
+        internal enum Mode {
             None    = 0,
             Include = 1,
             Exclude = 2
@@ -1599,7 +1599,7 @@ namespace Morpeh {
         internal IntFastList excludedTypeIds;
 
         internal int        typeID;
-        internal FilterMode filterMode;
+        internal Mode mode;
 
         internal bool isDirty;
 
@@ -1611,11 +1611,11 @@ namespace Morpeh {
             this.childs = new FastList<Filter>();
 
             this.typeID     = -1;
-            this.filterMode = FilterMode.Include;
+            this.mode = Mode.Include;
         }
 
         //full child filter
-        internal Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, FilterMode mode) {
+        internal Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, Mode mode) {
             this.world = world;
 
             this.childs     = new FastList<Filter>();
@@ -1625,7 +1625,7 @@ namespace Morpeh {
             this.includedTypeIds = includedTypeIds;
             this.excludedTypeIds = excludedTypeIds;
 
-            this.filterMode = mode;
+            this.mode = mode;
 
             this.componentsBags = new FastList<ComponentsBag>();
 
@@ -1634,44 +1634,6 @@ namespace Morpeh {
             this.FindArchetypes();
 
             this.UpdateLength();
-        }
-
-        public void Dispose() {
-            foreach (var child in this.childs) {
-                child.Dispose();
-            }
-
-            this.childs.Clear();
-            this.childs = null;
-
-            if (this.archetypes != null) {
-                foreach (var archetype in this.archetypes) {
-                    archetype.RemoveFilter(this);
-                }
-
-                this.archetypes.Clear();
-                this.archetypes = null;
-            }
-
-            this.includedTypeIds?.Clear();
-            this.includedTypeIds = null;
-            this.excludedTypeIds?.Clear();
-            this.excludedTypeIds = null;
-
-            this.Length = -1;
-
-            if (this.componentsBags != null) {
-                foreach (var bag in this.componentsBags) {
-                    bag.InternalDispose();
-                }
-
-                this.componentsBags.Clear();
-            }
-
-            this.componentsBags = null;
-
-            this.typeID     = -1;
-            this.filterMode = FilterMode.None;
         }
 
         [Il2Cpp(Option.NullChecks, false)]
@@ -1820,6 +1782,44 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public static class FilterExtensions {
+        internal static void Dispose(this Filter filter) {
+            foreach (var child in filter.childs) {
+                child.Dispose();
+            }
+
+            filter.childs.Clear();
+            filter.childs = null;
+
+            if (filter.archetypes != null) {
+                foreach (var archetype in filter.archetypes) {
+                    archetype.RemoveFilter(filter);
+                }
+
+                filter.archetypes.Clear();
+                filter.archetypes = null;
+            }
+
+            filter.includedTypeIds?.Clear();
+            filter.includedTypeIds = null;
+            filter.excludedTypeIds?.Clear();
+            filter.excludedTypeIds = null;
+
+            filter.Length = -1;
+
+            if (filter.componentsBags != null) {
+                foreach (var bag in filter.componentsBags) {
+                    bag.InternalDispose();
+                }
+
+                filter.componentsBags.Clear();
+            }
+
+            filter.componentsBags = null;
+
+            filter.typeID     = -1;
+            filter.mode = Filter.Mode.None;
+        }
+        
         [Obsolete("Use World.UpdateFilters()")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this Filter filter) => filter.world.UpdateFilters();
@@ -1967,15 +1967,15 @@ namespace Morpeh {
         }
 
         public static Filter With<T>(this Filter filter) where T : struct, IComponent
-            => filter.CreateFilter<T>(Filter.FilterMode.Include);
+            => filter.CreateFilter<T>(Filter.Mode.Include);
 
         public static Filter Without<T>(this Filter filter) where T : struct, IComponent
-            => filter.CreateFilter<T>(Filter.FilterMode.Exclude);
+            => filter.CreateFilter<T>(Filter.Mode.Exclude);
 
-        private static Filter CreateFilter<T>(this Filter filter, Filter.FilterMode mode) where T : struct, IComponent {
+        private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
             for (int i = 0, length = filter.childs.length; i < length; i++) {
                 var child = filter.childs.data[i];
-                if (child.filterMode == mode && child.typeID == CacheTypeIdentifier<T>.info.id) {
+                if (child.mode == mode && child.typeID == CacheTypeIdentifier<T>.info.id) {
                     return child;
                 }
             }
@@ -1993,10 +1993,10 @@ namespace Morpeh {
                 newExcludedTypeIds = new IntFastList(filter.excludedTypeIds);
             }
 
-            if (mode == Filter.FilterMode.Include) {
+            if (mode == Filter.Mode.Include) {
                 newIncludedTypeIds.Add(newTypeId);
             }
-            else if (mode == Filter.FilterMode.Exclude) {
+            else if (mode == Filter.Mode.Exclude) {
                 newExcludedTypeIds.Add(newTypeId);
             }
 
