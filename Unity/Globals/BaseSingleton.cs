@@ -18,9 +18,9 @@
 #if ODIN_INSPECTOR
         [ReadOnly]
 #endif
-        private protected int internalEntityID = -1;
+        protected int internalEntityID = -1;
 
-        private protected Entity internalEntity;
+        protected Entity internalEntity;
         
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
@@ -53,7 +53,7 @@
             }
         }
         
-        internal virtual void OnEnable() {
+        protected virtual void OnEnable() {
             this.internalEntity = null;
 #if UNITY_EDITOR && ODIN_INSPECTOR
             this.entityViewer = new Morpeh.Editor.EntityViewerWithHeader {getter = () => this.internalEntity};
@@ -69,14 +69,14 @@
         }
         
 #if UNITY_EDITOR
-        internal virtual void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
+        protected virtual void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.EnteredEditMode) {
                 this.internalEntityID = -1;
                 this.internalEntity   = null;
             }
         }
 #endif
-        private protected virtual bool CheckIsInitialized() {
+        protected virtual bool CheckIsInitialized() {
             if (this.internalEntityID < 0) {
                 this.internalEntity = World.Default.CreateEntity(out this.internalEntityID);
                 this.internalEntity.AddComponent<SingletonMarker>();

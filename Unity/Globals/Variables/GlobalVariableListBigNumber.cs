@@ -22,7 +22,7 @@
             return JsonUtility.ToJson(new ListBigNumberWrapper(this.value));
         }
 
-        internal override void OnEnable() {
+        protected override void OnEnable() {
             if (this.defaultValue != null) {
                 this.value = ListBigNumberWrapper.ConvertToBigNumberList(this.defaultValue);
             }

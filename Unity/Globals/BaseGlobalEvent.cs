@@ -28,7 +28,7 @@ namespace Morpeh.Globals {
             }
         }
 
-        private protected override bool CheckIsInitialized() {
+        protected override bool CheckIsInitialized() {
             var world = World.Default;
             var check = base.CheckIsInitialized();
             if (check) {
