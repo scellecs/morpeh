@@ -3711,41 +3711,9 @@ namespace Morpeh {
                 4194303,
             };
 
-            internal static bool IsPrime(int candidate) {
-                if ((candidate & 1) == 0) {
-                    return candidate == 2;
-                }
-
-                var num = Sqrt(candidate);
-                for (var index = 3; index <= num; index += 2) {
-                    if (candidate % index == 0) {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
             public static int ExpandPrime(int oldSize) {
                 var min = oldSize << 1;
                 return min > 2146435069U && 2146435069 > oldSize ? 2146435069 : GetPrime(min);
-            }
-
-            //todo possible refactor?
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static int Sqrt(int num) {
-                if (0 == num) {
-                    return 0;
-                }
-
-                var n  = num / 2 + 1;
-                var n1 = (n + num / n) / 2;
-                while (n1 < n) {
-                    n  = n1;
-                    n1 = (n + num / n) / 2;
-                }
-
-                return n;
             }
 
             public static int GetPrime(int min) {
@@ -3756,12 +3724,7 @@ namespace Morpeh {
                     }
                 }
 
-                for (int candidate = min | 1, length = int.MaxValue; candidate < length; candidate += 2) {
-                    if (IsPrime(candidate) && (candidate - 1) % 101 != 0)
-                        return candidate;
-                }
-
-                return min;
+                throw new Exception("Prime is too big");
             }
         }
     }
