@@ -2538,8 +2538,8 @@ namespace Morpeh {
 
             public int[] buckets;
 
-            private T[]    data;
-            private Slot[] slots;
+            public T[]    data;
+            public Slot[] slots;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public IntHashMap(in int capacity = 0) {
@@ -2556,266 +2556,6 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Add(in int key, in T value, out int slotIndex) {
-                var rem = key & this.capacityMinusOne;
-
-                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
-                    if (this.slots[i].key - 1 == key) {
-                        slotIndex = -1;
-                        return false;
-                    }
-                }
-
-                if (this.freeIndex >= 0) {
-                    slotIndex      = this.freeIndex;
-                    this.freeIndex = this.slots[slotIndex].next;
-                }
-                else {
-                    if (this.lastIndex == this.capacity) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(this.length);
-                        var newCapacity         = newCapacityMinusOne + 1;
-
-                        ArrayHelpers.Grow(ref this.slots, newCapacity);
-                        ArrayHelpers.Grow(ref this.data, newCapacity);
-
-                        var newBuckets = new int[newCapacity];
-
-                        for (int i = 0, len = this.lastIndex; i < len; ++i) {
-                            ref var slot = ref this.slots[i];
-
-                            var newResizeIndex = (slot.key - 1) & newCapacityMinusOne;
-                            slot.next = newBuckets[newResizeIndex] - 1;
-
-                            newBuckets[newResizeIndex] = i + 1;
-                        }
-
-                        this.buckets          = newBuckets;
-                        this.capacity         = newCapacity;
-                        this.capacityMinusOne = newCapacityMinusOne;
-
-                        rem = key & this.capacityMinusOne;
-                    }
-
-                    slotIndex = this.lastIndex;
-                    ++this.lastIndex;
-                }
-
-                ref var newSlot = ref this.slots[slotIndex];
-
-                newSlot.key  = key + 1;
-                newSlot.next = this.buckets[rem] - 1;
-
-                this.data[slotIndex] = value;
-
-                this.buckets[rem] = slotIndex + 1;
-
-                ++this.length;
-                return true;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Set(in int key, in T value, out int slotIndex) {
-                var rem = key & this.capacityMinusOne;
-
-                for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
-                    if (this.slots[i].key - 1 == key) {
-                        this.data[i] = value;
-                        slotIndex    = i;
-                        return;
-                    }
-                }
-
-                if (this.freeIndex >= 0) {
-                    slotIndex      = this.freeIndex;
-                    this.freeIndex = this.slots[slotIndex].next;
-                }
-                else {
-                    if (this.lastIndex == this.capacity) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(this.length);
-                        var newCapacity         = newCapacityMinusOne + 1;
-
-                        ArrayHelpers.Grow(ref this.slots, newCapacity);
-                        ArrayHelpers.Grow(ref this.data, newCapacity);
-
-                        var newBuckets = new int[newCapacity];
-
-                        for (int i = 0, len = this.lastIndex; i < len; ++i) {
-                            ref var slot           = ref this.slots[i];
-                            var     newResizeIndex = (slot.key - 1) & newCapacityMinusOne;
-                            slot.next = newBuckets[newResizeIndex] - 1;
-
-                            newBuckets[newResizeIndex] = i + 1;
-                        }
-
-                        this.buckets          = newBuckets;
-                        this.capacity         = newCapacity;
-                        this.capacityMinusOne = newCapacityMinusOne;
-
-                        rem = key & this.capacityMinusOne;
-                    }
-
-                    slotIndex = this.lastIndex;
-                    ++this.lastIndex;
-                }
-
-                ref var newSlot = ref this.slots[slotIndex];
-
-                newSlot.key  = key + 1;
-                newSlot.next = this.buckets[rem] - 1;
-
-                this.data[slotIndex] = value;
-
-                this.buckets[rem] = slotIndex + 1;
-
-                ++this.length;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Remove(in int key, [CanBeNull] out T lastValue) {
-                var rem = key & this.capacityMinusOne;
-
-                int next;
-                int num = -1;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    ref var slot = ref this.slots[i];
-                    if (slot.key - 1 == key) {
-                        if (num < 0) {
-                            this.buckets[rem] = slot.next + 1;
-                        }
-                        else {
-                            this.slots[num].next = slot.next;
-                        }
-
-                        lastValue = this.data[i];
-
-                        slot.key  = -1;
-                        slot.next = this.freeIndex;
-
-                        --this.length;
-                        if (this.length == 0) {
-                            this.lastIndex = 0;
-                            this.freeIndex = -1;
-                        }
-                        else {
-                            this.freeIndex = i;
-                        }
-
-                        return true;
-                    }
-
-                    next = slot.next;
-                    num  = i;
-                }
-
-                lastValue = default;
-                return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Has(in int key) {
-                var rem = key & this.capacityMinusOne;
-
-                int next;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    ref var slot = ref this.slots[i];
-                    if (slot.key - 1 == key) {
-                        return true;
-                    }
-
-                    next = slot.next;
-                }
-
-                return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool TryGetValue(in int key, [CanBeNull] out T value) {
-                var rem = key & this.capacityMinusOne;
-
-                int next;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    ref var slot = ref this.slots[i];
-                    if (slot.key - 1 == key) {
-                        value = this.data[i];
-                        return true;
-                    }
-
-                    next = slot.next;
-                }
-
-                value = default;
-                return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public T GetValueByKey(in int key) {
-                var rem = key & this.capacityMinusOne;
-
-                int next;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    ref var slot = ref this.slots[i];
-                    if (slot.key - 1 == key) {
-                        return this.data[i];
-                    }
-
-                    next = slot.next;
-                }
-
-                return default;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public T GetValueByIndex(in int index) => this.data[index];
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int GetKeyByIndex(in int index) => this.slots[index].key;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int TryGetIndex(in int key) {
-                var rem = key & this.capacityMinusOne;
-
-                int next;
-                for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
-                    ref var slot = ref this.slots[i];
-                    if (slot.key - 1 == key) {
-                        return i;
-                    }
-
-                    next = slot.next;
-                }
-
-                return -1;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void CopyTo(T[] array) {
-                int num = 0;
-                for (int i = 0, li = this.lastIndex; i < li && num < this.length; ++i) {
-                    if (this.slots[i].key - 1 < 0) {
-                        continue;
-                    }
-
-                    array[num] = this.data[i];
-                    ++num;
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Clear() {
-                if (this.lastIndex <= 0) {
-                    return;
-                }
-
-                Array.Clear(this.slots, 0, this.lastIndex);
-                Array.Clear(this.buckets, 0, this.capacity);
-                Array.Clear(this.data, 0, this.capacity);
-
-                this.lastIndex = 0;
-                this.length    = 0;
-                this.freeIndex = -1;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Enumerator GetEnumerator() {
                 Enumerator e;
                 e.hashMap = this;
@@ -2828,6 +2568,7 @@ namespace Morpeh {
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
+            [Serializable]
             [Il2Cpp(Option.NullChecks, false)]
             [Il2Cpp(Option.ArrayBoundsChecks, false)]
             [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -2877,6 +2618,269 @@ namespace Morpeh {
             }
         }
 
+        public static class IntHashMapExtensions {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Add<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = hashMap.slots[i].next) {
+                    if (hashMap.slots[i].key - 1 == key) {
+                        slotIndex = -1;
+                        return false;
+                    }
+                }
+
+                if (hashMap.freeIndex >= 0) {
+                    slotIndex      = hashMap.freeIndex;
+                    hashMap.freeIndex = hashMap.slots[slotIndex].next;
+                }
+                else {
+                    if (hashMap.lastIndex == hashMap.capacity) {
+                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacity         = newCapacityMinusOne + 1;
+
+                        ArrayHelpers.Grow(ref hashMap.slots, newCapacity);
+                        ArrayHelpers.Grow(ref hashMap.data, newCapacity);
+
+                        var newBuckets = new int[newCapacity];
+
+                        for (int i = 0, len = hashMap.lastIndex; i < len; ++i) {
+                            ref var slot = ref hashMap.slots[i];
+
+                            var newResizeIndex = (slot.key - 1) & newCapacityMinusOne;
+                            slot.next = newBuckets[newResizeIndex] - 1;
+
+                            newBuckets[newResizeIndex] = i + 1;
+                        }
+
+                        hashMap.buckets          = newBuckets;
+                        hashMap.capacity         = newCapacity;
+                        hashMap.capacityMinusOne = newCapacityMinusOne;
+
+                        rem = key & hashMap.capacityMinusOne;
+                    }
+
+                    slotIndex = hashMap.lastIndex;
+                    ++hashMap.lastIndex;
+                }
+
+                ref var newSlot = ref hashMap.slots[slotIndex];
+
+                newSlot.key  = key + 1;
+                newSlot.next = hashMap.buckets[rem] - 1;
+
+                hashMap.data[slotIndex] = value;
+
+                hashMap.buckets[rem] = slotIndex + 1;
+
+                ++hashMap.length;
+                return true;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void Set<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = hashMap.slots[i].next) {
+                    if (hashMap.slots[i].key - 1 == key) {
+                        hashMap.data[i] = value;
+                        slotIndex    = i;
+                        return;
+                    }
+                }
+
+                if (hashMap.freeIndex >= 0) {
+                    slotIndex      = hashMap.freeIndex;
+                    hashMap.freeIndex = hashMap.slots[slotIndex].next;
+                }
+                else {
+                    if (hashMap.lastIndex == hashMap.capacity) {
+                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacity         = newCapacityMinusOne + 1;
+
+                        ArrayHelpers.Grow(ref hashMap.slots, newCapacity);
+                        ArrayHelpers.Grow(ref hashMap.data, newCapacity);
+
+                        var newBuckets = new int[newCapacity];
+
+                        for (int i = 0, len = hashMap.lastIndex; i < len; ++i) {
+                            ref var slot           = ref hashMap.slots[i];
+                            var     newResizeIndex = (slot.key - 1) & newCapacityMinusOne;
+                            slot.next = newBuckets[newResizeIndex] - 1;
+
+                            newBuckets[newResizeIndex] = i + 1;
+                        }
+
+                        hashMap.buckets          = newBuckets;
+                        hashMap.capacity         = newCapacity;
+                        hashMap.capacityMinusOne = newCapacityMinusOne;
+
+                        rem = key & hashMap.capacityMinusOne;
+                    }
+
+                    slotIndex = hashMap.lastIndex;
+                    ++hashMap.lastIndex;
+                }
+
+                ref var newSlot = ref hashMap.slots[slotIndex];
+
+                newSlot.key  = key + 1;
+                newSlot.next = hashMap.buckets[rem] - 1;
+
+                hashMap.data[slotIndex] = value;
+
+                hashMap.buckets[rem] = slotIndex + 1;
+
+                ++hashMap.length;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Remove<T>(this IntHashMap<T> hashMap, in int key, [CanBeNull] out T lastValue) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                int num = -1;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        if (num < 0) {
+                            hashMap.buckets[rem] = slot.next + 1;
+                        }
+                        else {
+                            hashMap.slots[num].next = slot.next;
+                        }
+
+                        lastValue = hashMap.data[i];
+
+                        slot.key  = -1;
+                        slot.next = hashMap.freeIndex;
+
+                        --hashMap.length;
+                        if (hashMap.length == 0) {
+                            hashMap.lastIndex = 0;
+                            hashMap.freeIndex = -1;
+                        }
+                        else {
+                            hashMap.freeIndex = i;
+                        }
+
+                        return true;
+                    }
+
+                    next = slot.next;
+                    num  = i;
+                }
+
+                lastValue = default;
+                return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Has<T>(this IntHashMap<T> hashMap, in int key) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        return true;
+                    }
+
+                    next = slot.next;
+                }
+
+                return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool TryGetValue<T>(this IntHashMap<T> hashMap, in int key, [CanBeNull] out T value) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        value = hashMap.data[i];
+                        return true;
+                    }
+
+                    next = slot.next;
+                }
+
+                value = default;
+                return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static T GetValueByKey<T>(this IntHashMap<T> hashMap, in int key) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        return hashMap.data[i];
+                    }
+
+                    next = slot.next;
+                }
+
+                return default;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static T GetValueByIndex<T>(this IntHashMap<T> hashMap, in int index) => hashMap.data[index];
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int GetKeyByIndex<T>(this IntHashMap<T> hashMap, in int index) => hashMap.slots[index].key;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int TryGetIndex<T>(this IntHashMap<T> hashMap, in int key) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        return i;
+                    }
+
+                    next = slot.next;
+                }
+
+                return -1;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void CopyTo<T>(this IntHashMap<T> hashMap, T[] array) {
+                int num = 0;
+                for (int i = 0, li = hashMap.lastIndex; i < li && num < hashMap.length; ++i) {
+                    if (hashMap.slots[i].key - 1 < 0) {
+                        continue;
+                    }
+
+                    array[num] = hashMap.data[i];
+                    ++num;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void Clear<T>(this IntHashMap<T> hashMap) {
+                if (hashMap.lastIndex <= 0) {
+                    return;
+                }
+
+                Array.Clear(hashMap.slots, 0, hashMap.lastIndex);
+                Array.Clear(hashMap.buckets, 0, hashMap.capacity);
+                Array.Clear(hashMap.data, 0, hashMap.capacity);
+
+                hashMap.lastIndex = 0;
+                hashMap.length    = 0;
+                hashMap.freeIndex = -1;
+            }
+
+        }
+
         [Serializable]
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
@@ -2890,8 +2894,8 @@ namespace Morpeh {
 
             public int[] buckets;
 
-            private T[]   data;
-            private int[] slots;
+            public T[]   data;
+            public int[] slots;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public UnsafeIntHashMap(in int capacity = 0) {
@@ -2905,216 +2909,6 @@ namespace Morpeh {
                 this.buckets = new int[this.capacity];
                 this.slots   = new int[this.capacity * 2];
                 this.data    = new T[this.capacity];
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Add(in int key, in T value, out int slotIndex) {
-                var rem = key & this.capacityMinusOne;
-
-                fixed (int* slotsPtr = &this.slots[0])
-                fixed (int* bucketsPtr = &this.buckets[0]) {
-                    int* slot;
-                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
-                        slot = slotsPtr + i;
-                        if (*slot - 1 == key) {
-                            slotIndex = -1;
-                            return false;
-                        }
-                    }
-                }
-
-                if (this.freeIndex >= 0) {
-                    slotIndex = this.freeIndex;
-                    fixed (int* s = &this.slots[0]) {
-                        this.freeIndex = *(s + slotIndex + 1);
-                    }
-                }
-                else {
-                    if (this.lastIndex == this.capacity * 2) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(this.length);
-                        var newCapacity         = newCapacityMinusOne + 1;
-
-                        ArrayHelpers.Grow(ref this.slots, newCapacity * 2);
-                        ArrayHelpers.Grow(ref this.data, newCapacity);
-
-                        var newBuckets = new int[newCapacity];
-
-                        fixed (int* slotsPtr = &this.slots[0])
-                        fixed (int* bucketsPtr = &newBuckets[0]) {
-                            for (int i = 0, len = this.lastIndex; i < len; i += 2) {
-                                var slotPtr = slotsPtr + i;
-
-                                var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
-                                var newCurrentBucket = bucketsPtr + newResizeIndex;
-
-                                *(slotPtr + 1) = *newCurrentBucket - 1;
-
-                                *newCurrentBucket = i + 1;
-                            }
-                        }
-
-                        this.buckets          = newBuckets;
-                        this.capacity         = newCapacity;
-                        this.capacityMinusOne = newCapacityMinusOne;
-
-                        rem = key & this.capacityMinusOne;
-                    }
-
-                    slotIndex      =  this.lastIndex;
-                    this.lastIndex += 2;
-                }
-
-                fixed (int* slotsPtr = &this.slots[0])
-                fixed (int* bucketsPtr = &this.buckets[0])
-                fixed (T* dataPtr = &this.data[0]) {
-                    var bucket = bucketsPtr + rem;
-                    var slot   = slotsPtr + slotIndex;
-
-                    *slot       = key + 1;
-                    *(slot + 1) = *bucket - 1;
-
-                    *(dataPtr + slotIndex / 2) = value;
-
-                    *bucket = slotIndex + 1;
-                }
-
-                ++this.length;
-                return true;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Remove(in int key, out T lastValue) {
-                fixed (int* slotsPtr = &this.slots[0])
-                fixed (int* bucketsPtr = &this.buckets[0])
-                fixed (T* dataPtr = &this.data[0]) {
-                    var rem = key & this.capacityMinusOne;
-
-                    int next;
-                    var num = -1;
-
-                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
-                        var slot     = slotsPtr + i;
-                        var slotNext = slot + 1;
-
-                        if (*slot - 1 == key) {
-                            if (num < 0) {
-                                *(bucketsPtr + rem) = *slotNext + 1;
-                            }
-                            else {
-                                *(slotsPtr + num + 1) = *slotNext;
-                            }
-
-                            lastValue = *(dataPtr + i / 2);
-
-                            *slot     = -1;
-                            *slotNext = this.freeIndex;
-
-                            if (--this.length == 0) {
-                                this.lastIndex = 0;
-                                this.freeIndex = -1;
-                            }
-                            else {
-                                this.freeIndex = i;
-                            }
-
-                            return true;
-                        }
-
-                        next = *slotNext;
-                        num  = i;
-                    }
-
-                    lastValue = default;
-                    return false;
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool TryGetValue(in int key, out T value) {
-                var rem = key & this.capacityMinusOne;
-
-                fixed (int* slotsPtr = &this.slots[0])
-                fixed (int* bucketsPtr = &this.buckets[0])
-                fixed (T* dataPtr = &this.data[0]) {
-                    int* slot;
-                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
-                        slot = slotsPtr + i;
-                        if (*slot - 1 == key) {
-                            value = *(dataPtr + i / 2);
-                            return true;
-                        }
-                    }
-                }
-
-                value = default;
-                return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public T GetValueByKey(in int key) {
-                var rem = key & this.capacityMinusOne;
-
-                fixed (int* slotsPtr = &this.slots[0])
-                fixed (int* bucketsPtr = &this.buckets[0])
-                fixed (T* dataPtr = &this.data[0]) {
-                    int next;
-                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
-                        if (*(slotsPtr + i) - 1 == key) {
-                            return *(dataPtr + i / 2);
-                        }
-
-                        next = *(slotsPtr + i + 1);
-                    }
-                }
-
-                return default;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public T GetValueByIndex(in int index) {
-                fixed (T* d = &this.data[0]) {
-                    return *(d + index / 2);
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int GetKeyByIndex(in int index) {
-                fixed (int* d = &this.slots[0]) {
-                    return *(d + index) - 1;
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int TryGetIndex(in int key) {
-                var rem = key & this.capacityMinusOne;
-
-                fixed (int* slotsPtr = &this.slots[0])
-                fixed (int* bucketsPtr = &this.buckets[0]) {
-                    int* slot;
-                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
-                        slot = slotsPtr + i;
-                        if (*slot - 1 == key) {
-                            return i;
-                        }
-                    }
-                }
-
-                return -1;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Clear() {
-                if (this.lastIndex <= 0) {
-                    return;
-                }
-
-                Array.Clear(this.slots, 0, this.lastIndex);
-                Array.Clear(this.buckets, 0, this.capacity);
-                Array.Clear(this.data, 0, this.capacity);
-
-                this.lastIndex = 0;
-                this.length    = 0;
-                this.freeIndex = -1;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -3170,6 +2964,219 @@ namespace Morpeh {
                 public void Dispose() {
                 }
             }
+        }
+
+        public static unsafe class UnsafeIntHashMapExtensions {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Add<T>(this UnsafeIntHashMap<T> hashMap, in int key, in T value, out int slotIndex) where T : unmanaged {
+                var rem = key & hashMap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &hashMap.slots[0])
+                fixed (int* bucketsPtr = &hashMap.buckets[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == key) {
+                            slotIndex = -1;
+                            return false;
+                        }
+                    }
+                }
+
+                if (hashMap.freeIndex >= 0) {
+                    slotIndex = hashMap.freeIndex;
+                    fixed (int* s = &hashMap.slots[0]) {
+                        hashMap.freeIndex = *(s + slotIndex + 1);
+                    }
+                }
+                else {
+                    if (hashMap.lastIndex == hashMap.capacity * 2) {
+                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacity         = newCapacityMinusOne + 1;
+
+                        ArrayHelpers.Grow(ref hashMap.slots, newCapacity * 2);
+                        ArrayHelpers.Grow(ref hashMap.data, newCapacity);
+
+                        var newBuckets = new int[newCapacity];
+
+                        fixed (int* slotsPtr = &hashMap.slots[0])
+                        fixed (int* bucketsPtr = &newBuckets[0]) {
+                            for (int i = 0, len = hashMap.lastIndex; i < len; i += 2) {
+                                var slotPtr = slotsPtr + i;
+
+                                var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                                var newCurrentBucket = bucketsPtr + newResizeIndex;
+
+                                *(slotPtr + 1) = *newCurrentBucket - 1;
+
+                                *newCurrentBucket = i + 1;
+                            }
+                        }
+
+                        hashMap.buckets          = newBuckets;
+                        hashMap.capacity         = newCapacity;
+                        hashMap.capacityMinusOne = newCapacityMinusOne;
+
+                        rem = key & hashMap.capacityMinusOne;
+                    }
+
+                    slotIndex      = hashMap.lastIndex;
+                    hashMap.lastIndex += 2;
+                }
+
+                fixed (int* slotsPtr = &hashMap.slots[0])
+                fixed (int* bucketsPtr = &hashMap.buckets[0])
+                fixed (T* dataPtr = &hashMap.data[0]) {
+                    var bucket = bucketsPtr + rem;
+                    var slot   = slotsPtr + slotIndex;
+
+                    *slot       = key + 1;
+                    *(slot + 1) = *bucket - 1;
+
+                    *(dataPtr + slotIndex / 2) = value;
+
+                    *bucket = slotIndex + 1;
+                }
+
+                ++hashMap.length;
+                return true;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Remove<T>(this UnsafeIntHashMap<T> hashMap, in int key, out T lastValue) where T : unmanaged {
+                fixed (int* slotsPtr = &hashMap.slots[0])
+                fixed (int* bucketsPtr = &hashMap.buckets[0])
+                fixed (T* dataPtr = &hashMap.data[0]) {
+                    var rem = key & hashMap.capacityMinusOne;
+
+                    int next;
+                    var num = -1;
+
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        var slot     = slotsPtr + i;
+                        var slotNext = slot + 1;
+
+                        if (*slot - 1 == key) {
+                            if (num < 0) {
+                                *(bucketsPtr + rem) = *slotNext + 1;
+                            }
+                            else {
+                                *(slotsPtr + num + 1) = *slotNext;
+                            }
+
+                            lastValue = *(dataPtr + i / 2);
+
+                            *slot     = -1;
+                            *slotNext = hashMap.freeIndex;
+
+                            if (--hashMap.length == 0) {
+                                hashMap.lastIndex = 0;
+                                hashMap.freeIndex = -1;
+                            }
+                            else {
+                                hashMap.freeIndex = i;
+                            }
+
+                            return true;
+                        }
+
+                        next = *slotNext;
+                        num  = i;
+                    }
+
+                    lastValue = default;
+                    return false;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool TryGetValue<T>(this UnsafeIntHashMap<T> hashMap, in int key, out T value) where T : unmanaged {
+                var rem = key & hashMap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &hashMap.slots[0])
+                fixed (int* bucketsPtr = &hashMap.buckets[0])
+                fixed (T* dataPtr = &hashMap.data[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == key) {
+                            value = *(dataPtr + i / 2);
+                            return true;
+                        }
+                    }
+                }
+
+                value = default;
+                return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static T GetValueByKey<T>(this UnsafeIntHashMap<T> hashMap, in int key) where T : unmanaged {
+                var rem = key & hashMap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &hashMap.slots[0])
+                fixed (int* bucketsPtr = &hashMap.buckets[0])
+                fixed (T* dataPtr = &hashMap.data[0]) {
+                    int next;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        if (*(slotsPtr + i) - 1 == key) {
+                            return *(dataPtr + i / 2);
+                        }
+
+                        next = *(slotsPtr + i + 1);
+                    }
+                }
+
+                return default;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static T GetValueByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged {
+                fixed (T* d = &hashMap.data[0]) {
+                    return *(d + index / 2);
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int GetKeyByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged {
+                fixed (int* d = &hashMap.slots[0]) {
+                    return *(d + index) - 1;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int TryGetIndex<T>(this UnsafeIntHashMap<T> hashMap, in int key) where T : unmanaged {
+                var rem = key & hashMap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &hashMap.slots[0])
+                fixed (int* bucketsPtr = &hashMap.buckets[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == key) {
+                            return i;
+                        }
+                    }
+                }
+
+                return -1;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void Clear<T>(this UnsafeIntHashMap<T> hashMap) where T : unmanaged {
+                if (hashMap.lastIndex <= 0) {
+                    return;
+                }
+
+                Array.Clear(hashMap.slots, 0, hashMap.lastIndex);
+                Array.Clear(hashMap.buckets, 0, hashMap.capacity);
+                Array.Clear(hashMap.data, 0, hashMap.capacity);
+
+                hashMap.lastIndex = 0;
+                hashMap.length    = 0;
+                hashMap.freeIndex = -1;
+            }
+
         }
 
         [Serializable]
