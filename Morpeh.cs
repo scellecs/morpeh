@@ -146,8 +146,9 @@ namespace Morpeh {
 
                 cache.Remove(componentId);
             }
-
-            MDebug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+#if MORPEH_DEBUG
+            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+#endif
             return ref cache.Empty();
         }
 
@@ -179,9 +180,9 @@ namespace Morpeh {
 
                 cache.Remove(componentId);
             }
-
-            MDebug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-
+#if MORPEH_DEBUG
+            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+#endif
             exist = true;
             return ref cache.Empty();
         }
@@ -221,7 +222,9 @@ namespace Morpeh {
                 }
             }
 
-            MDebug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
+#if MORPEH_DEBUG
+            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
+#endif
             return ref cache.Empty();
         }
 
@@ -427,7 +430,9 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Entity entity) {
             if (entity.isDisposed) {
-                MDebug.LogError("[MORPEH] You're trying to dispose disposed entity.");
+#if MORPEH_DEBUG
+                Debug.LogError("[MORPEH] You're trying to dispose disposed entity.");
+#endif
                 return;
             }
 
@@ -528,8 +533,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                     }
                     catch (Exception e) {
-                        MDebug.LogError($"[MORPEH] Can not dispose system {system.GetType()}");
-                        MDebug.LogException(e);
+                        Debug.LogError($"[MORPEH] Can not dispose system {system.GetType()}");
+                        Debug.LogException(e);
                     }
 #endif
                 }
@@ -565,8 +570,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                     }
                     catch (Exception e) {
-                        MDebug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
-                        MDebug.LogException(e);
+                        Debug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
+                        Debug.LogException(e);
                     }
 #endif
                 }
@@ -582,8 +587,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                     }
                     catch (Exception e) {
-                        MDebug.LogError($"[MORPEH] Can not dispose initializer {initializer.GetType()}");
-                        MDebug.LogException(e);
+                        Debug.LogError($"[MORPEH] Can not dispose initializer {initializer.GetType()}");
+                        Debug.LogException(e);
                     }
 #endif
                 }
@@ -599,8 +604,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                     }
                     catch (Exception e) {
-                        MDebug.LogError($"[MORPEH] Can not dispose system group disposable {disposable.GetType()}");
-                        MDebug.LogException(e);
+                        Debug.LogError($"[MORPEH] Can not dispose system group disposable {disposable.GetType()}");
+                        Debug.LogException(e);
                     }
 #endif
                 }
@@ -726,8 +731,8 @@ namespace Morpeh {
                 initializer.OnAwake();
             }
             catch (Exception exception) {
-                MDebug.LogError($"[MORPEH] Can not initialize {initializer.GetType()}");
-                MDebug.LogException(exception);
+                Debug.LogError($"[MORPEH] Can not initialize {initializer.GetType()}");
+                Debug.LogException(exception);
             }
         }
 
@@ -738,8 +743,8 @@ namespace Morpeh {
                 disposable.Dispose();
             }
             catch (Exception exception) {
-                MDebug.LogError($"[MORPEH] Can not dispose {disposable.GetType()}");
-                MDebug.LogException(exception);
+                Debug.LogError($"[MORPEH] Can not dispose {disposable.GetType()}");
+                Debug.LogException(exception);
             }
         }
 
@@ -3777,48 +3782,7 @@ namespace Morpeh {
 #endif
             }
         }
-#if UNITY_2019_1_OR_NEWER
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public static class MDebug {
-            public static void Initialize() {
-            }
-
-            [Conditional("MORPEH_DEBUG")]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void Log(object message) => Debug.Log(message);
-
-            [Conditional("MORPEH_DEBUG")]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void Log(object message, Object context) => Debug.Log(message, context);
-
-            [Conditional("MORPEH_DEBUG")]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void LogError(object message) => Debug.LogError(message);
-
-            [Conditional("MORPEH_DEBUG")]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void LogError(object message, Object context) => Debug.LogError(message, context);
-
-            [Conditional("MORPEH_DEBUG")]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void LogWarning(object message) => Debug.LogWarning(message);
-
-            [Conditional("MORPEH_DEBUG")]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void LogWarning(object message, Object context) => Debug.LogWarning(message, context);
-
-            [Conditional("MORPEH_DEBUG")]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void LogException(Exception exception) => Debug.LogException(exception);
-
-            [Conditional("MORPEH_DEBUG")]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void LogException(Exception exception, Object context) => Debug.LogException(exception, context);
-        }
     }
-#endif
 }
 
 namespace Unity.IL2CPP.CompilerServices {

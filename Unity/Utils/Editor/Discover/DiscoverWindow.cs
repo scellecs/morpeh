@@ -79,7 +79,7 @@ namespace Morpeh.Utils.Editor {
         
         public DiscoverAsset discoverAsset;
         private Texture2D     header;
-        private bool          forceGlobal;
+        //private bool          forceGlobal;
 
         private void SetDiscoverAsset(DiscoverAsset discover) {
             this.discoverAsset = discover;
@@ -220,7 +220,7 @@ namespace Morpeh.Utils.Editor {
             }
         }
 
-        private Vector2 globalContentScroll;
+        //private Vector2 globalContentScroll;
 
         private Discover selectedDiscover;
         private Vector2  listScroll;
