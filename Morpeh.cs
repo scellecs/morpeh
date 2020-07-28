@@ -394,33 +394,34 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransfer(this Entity entity) {
+            if (entity.currentArchetypeId == 0) {
+                entity.indexInCurrentArchetype = -1;
+                entity.world.RemoveEntity(entity);
+            }
+            if (entity.currentArchetypeId < 0) {
+                foreach (var slotIndex in entity.componentsIds) {
+                    var typeId      = entity.componentsIds.GetKeyByIndex(slotIndex);
+                    var componentId = entity.componentsIds.GetValueByIndex(slotIndex);
+
+                    if (componentId >= 0) {
+                        entity.world.GetCache(typeId)?.Remove(componentId);
+                    }
+                }
+
+                entity.DisposeFast();
+                entity.isDirty = false;
+                return;
+            }
+            
             if (entity.previousArchetypeId != entity.currentArchetypeId) {
                 if (entity.previousArchetypeId > 0 && entity.indexInCurrentArchetype >= 0) {
                     entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
                 }
 
                 entity.previousArchetypeId = -1;
-                if (entity.currentArchetypeId < 0) {
-                    foreach (var slotIndex in entity.componentsIds) {
-                        var typeId      = entity.componentsIds.GetKeyByIndex(slotIndex);
-                        var componentId = entity.componentsIds.GetValueByIndex(slotIndex);
 
-                        if (componentId >= 0) {
-                            entity.world.GetCache(typeId)?.Remove(componentId);
-                        }
-                    }
 
-                    entity.DisposeFast();
-                    return;
-                }
-
-                if (entity.currentArchetypeId == 0) {
-                    entity.indexInCurrentArchetype = -1;
-                    entity.world.RemoveEntity(entity);
-                }
-                else {
-                    entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
-                }
+                entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
             }
 
             entity.isDirty = false;
@@ -436,13 +437,11 @@ namespace Morpeh {
                 return;
             }
 
-            if (entity.indexInCurrentArchetype > -1) {
-                entity.previousArchetypeId = entity.currentArchetypeId;
-                entity.currentArchetypeId  = -1;
-                if (entity.isDirty == false) {
-                    entity.world.dirtyEntities.Add(entity);
-                    entity.isDirty = true;
-                }
+            entity.previousArchetypeId = entity.currentArchetypeId;
+            entity.currentArchetypeId  = -1;
+            if (entity.isDirty == false) {
+                entity.world.dirtyEntities.Add(entity);
+                entity.isDirty = true;
             }
         }
 
@@ -2064,7 +2063,8 @@ namespace Morpeh {
 
         //todo need this?
         internal static TypeInfo GetTypeInfo<T>(this T component) where T : struct, IComponent => CacheTypeIdentifier<T>.info;
-        internal static int      GetID()                                                       => Interlocked.Increment(ref counter);
+        
+        internal static int  GetID() => Interlocked.Increment(ref counter);
 #if MORPEH_DEBUG
         internal static Dictionary<int, DebugInfo> editorTypeAssociation = new Dictionary<int, DebugInfo>();
 
