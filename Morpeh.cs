@@ -769,6 +769,10 @@ namespace Morpeh {
             if (index >= 0) {
                 systemsGroup.newInitializers.RemoveAt(index);
             }
+            index = systemsGroup.initializers.IndexOf(initializer);
+            if (index >= 0) {
+                systemsGroup.initializers.RemoveAt(index);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
