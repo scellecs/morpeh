@@ -26,7 +26,7 @@ namespace Morpeh.Utils {
         internal class CustomPackageInfo {
             public string name;
             public string version;
-            public string[] customDependencies;
+            public string[] gitDependencies;
         }
 
         static DependencyResolver() {
@@ -58,9 +58,9 @@ namespace Morpeh.Utils {
                 var packageFilePath = package.resolvedPath + "\\package.json";
                 if (!File.Exists(packageFilePath)) continue;
                 var customInfo = JsonUtility.FromJson<CustomPackageInfo>(File.ReadAllText(packageFilePath));
-                if(customInfo.customDependencies == null) continue;
+                if(customInfo.gitDependencies == null) continue;
 
-                foreach (var dependency in customInfo.customDependencies) {
+                foreach (var dependency in customInfo.gitDependencies) {
                     var dependencyInfo = dependency.Split('#');
                     var match = gitPackages.Find(p => p.packageId.Contains(dependencyInfo[0]));
                     if(match == null) {
