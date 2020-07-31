@@ -5,13 +5,9 @@
 // Dependency updater is a simple script that add dependencies for custom packages.
 // This is a feature that won't be added into Unity for security reasons.
 // To be able to add custom dependencies, you have to add a "customDependencies" array on your package.json file like the sample below.
+#if UNITY_EDITOR
 
-using System.Linq;
-using System.Threading.Tasks;
-using UnityEditor.Compilation;
-
-namespace Morpeh.Utils {
-    #if UNITY_EDITOR
+namespace Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -19,6 +15,9 @@ namespace Morpeh.Utils {
     using UnityEditor.PackageManager;
     using UnityEngine;
     using PackageInfo = UnityEditor.PackageManager.PackageInfo;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using UnityEditor.Compilation;
 
     [InitializeOnLoad]
     public class DependencyResolver : MonoBehaviour {
@@ -103,5 +102,5 @@ namespace Morpeh.Utils {
             EditorUtility.ClearProgressBar();
         }
     }
-    #endif
 }
+#endif
