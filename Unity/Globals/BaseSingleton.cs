@@ -101,10 +101,8 @@
         }
 
         
-        private void OnDestroy() {
-#if UNITY_EDITOR
-            EditorApplication.playModeStateChanged -= this.OnEditorApplicationOnplayModeStateChanged;
-#endif
+        protected virtual void OnDestroy() {
+            this.Dispose();
         }
         
         [Serializable]
