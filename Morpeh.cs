@@ -216,9 +216,8 @@ namespace Morpeh {
                 }
             }
             else {
-                var index = entity.componentsIds.TryGetIndex(typeInfo.id);
-                if (index >= 0) {
-                    return ref cache.Get(entity.componentsIds.GetValueByIndex(index));
+                if (entity.componentsIds.TryGetValue(typeInfo.id, out var componentId)) {
+                    return ref cache.Get(componentId);
                 }
             }
 
@@ -246,13 +245,16 @@ namespace Morpeh {
                 }
             }
             else {
-                var index = entity.componentsIds.TryGetIndex(typeInfo.id);
-                if (index >= 0) {
+                if (entity.componentsIds.TryGetValue(typeInfo.id, out var componentId)) {
                     exist = true;
-                    return ref cache.Get(entity.componentsIds.GetValueByIndex(index));
+                    return ref cache.Get(componentId);
                 }
             }
 
+            
+#if MORPEH_DEBUG
+            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
+#endif
             exist = false;
             return ref cache.Empty();
         }
@@ -328,11 +330,6 @@ namespace Morpeh {
 #endif
 
             if (entity.componentsIds.Remove(typeId, out indexInCache)) {
-                if (entity.componentsIds.length == 0) {
-                    entity.world.RemoveEntity(entity);
-                    return true;
-                }
-
                 entity.RemoveTransfer(typeId);
                 return true;
             }
