@@ -284,9 +284,8 @@ namespace Morpeh {
                 else {
                     var componentId = cache.Add(value);
                     entity.componentsIds.Add(typeInfo.id, componentId, out _);
+                    entity.AddTransfer(typeInfo.id);
                 }
-
-                entity.AddTransfer(typeInfo.id);
             }
             else {
                 if (entity.componentsIds.Add(typeInfo.id, -1, out _)) {
