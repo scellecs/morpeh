@@ -82,7 +82,6 @@ namespace Morpeh {
         }
 
         protected virtual void OnDisable() {
-            this.entityID = -1;
             this.cachedEntity = null;
             
             var others = this.GetComponents<EntityProvider>();
