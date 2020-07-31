@@ -251,10 +251,6 @@ namespace Morpeh {
                 }
             }
 
-            
-#if MORPEH_DEBUG
-            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
-#endif
             exist = false;
             return ref cache.Empty();
         }
