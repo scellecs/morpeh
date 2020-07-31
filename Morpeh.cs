@@ -395,34 +395,29 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransfer(this Entity entity) {
             if (entity.currentArchetypeId == 0) {
-                entity.indexInCurrentArchetype = -1;
                 entity.world.RemoveEntity(entity);
             }
-            if (entity.currentArchetypeId < 0) {
-                foreach (var slotIndex in entity.componentsIds) {
-                    var typeId      = entity.componentsIds.GetKeyByIndex(slotIndex);
-                    var componentId = entity.componentsIds.GetValueByIndex(slotIndex);
 
-                    if (componentId >= 0) {
-                        entity.world.GetCache(typeId)?.Remove(componentId);
-                    }
-                }
-                
-                entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
-                entity.DisposeFast();
-                entity.isDirty = false;
-                return;
-            }
-            
             if (entity.previousArchetypeId != entity.currentArchetypeId) {
-                if (entity.previousArchetypeId > 0 && entity.indexInCurrentArchetype >= 0) {
+                if (entity.previousArchetypeId >= 0 && entity.indexInCurrentArchetype >= 0) {
                     entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
                 }
-
                 entity.previousArchetypeId = -1;
 
+                if (entity.currentArchetypeId < 0) {
+                    foreach (var slotIndex in entity.componentsIds) {
+                        var typeId      = entity.componentsIds.GetKeyByIndex(slotIndex);
+                        var componentId = entity.componentsIds.GetValueByIndex(slotIndex);
 
-                entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
+                        if (componentId >= 0) {
+                            entity.world.GetCache(typeId)?.Remove(componentId);
+                        }
+                    }
+                    entity.DisposeFast();
+                }
+                else {
+                    entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
+                }
             }
 
             entity.isDirty = false;
@@ -438,7 +433,6 @@ namespace Morpeh {
                 return;
             }
 
-            entity.previousArchetypeId = entity.currentArchetypeId;
             entity.currentArchetypeId  = -1;
             if (entity.isDirty == false) {
                 entity.world.dirtyEntities.Add(entity);
