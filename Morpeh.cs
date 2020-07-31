@@ -281,7 +281,7 @@ namespace Morpeh {
 
             if (!typeInfo.isMarker) {
                 if (entity.componentsIds.TryGetValue(typeInfo.id, out var index)) {
-                    cache.Set(entity.componentsIds.GetValueByIndex(index), value);
+                    cache.Set(index, value);
                 }
                 else {
                     var componentId = cache.Add(value);

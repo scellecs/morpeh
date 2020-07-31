@@ -21,7 +21,7 @@
         protected int internalEntityID = -1;
 
         protected Entity internalEntity;
-        
+
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
         [Space]
@@ -52,7 +52,7 @@
                 return this.InternalEntity;
             }
         }
-        
+
         protected virtual void OnEnable() {
             this.internalEntity = null;
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -67,7 +67,7 @@
             }
 #endif
         }
-        
+
 #if UNITY_EDITOR
         protected virtual void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.EnteredEditMode) {
@@ -85,7 +85,7 @@
 
             return false;
         }
-        
+
         public virtual void Dispose() {
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged -= this.OnEditorApplicationOnplayModeStateChanged;
@@ -95,17 +95,19 @@
                 if (entity != null && !entity.isDisposed) {
                     World.Default.RemoveEntity(entity);
                 }
+
                 this.internalEntityID = -1;
                 this.internalEntity   = null;
             }
         }
 
-        
+
         protected virtual void OnDestroy() {
             this.Dispose();
         }
-        
+
         [Serializable]
-        private struct SingletonMarker : IComponent { }
+        private struct SingletonMarker : IComponent {
+        }
     }
 }
