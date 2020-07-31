@@ -407,7 +407,8 @@ namespace Morpeh {
                         entity.world.GetCache(typeId)?.Remove(componentId);
                     }
                 }
-
+                
+                entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
                 entity.DisposeFast();
                 entity.isDirty = false;
                 return;
