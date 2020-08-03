@@ -1,22 +1,22 @@
-# 🏡 Morpeh
+# 🎲 Morpeh
 <img align="right" width="260px" height="260px" src="Unity/Utils/Editor/Resources/logo.png">
 
 ECS Framework for Unity Game Engine.  
    
 Adapted for the development mobile games like:  
-* Hyper Casual.  
-* Idlers.  
-* Arcades.  
-* Other genres.  
+* ⭐ Hyper Casual.  
+* ⭐ Idlers.  
+* ⭐ Arcades.  
+* ⭐ Other genres.  
   
 Features:
-* Simple Syntax.
-* Simple Integration with Unity Engine.
-* No code generation and any C# Reflection in Runtime.
-* Structure-based and Cache-friendly.
-* Reactive and Fast Filters.
-* Built-in Events and Reactive Variables aka Globals.
-* Single-threaded.
+* ✔️ Simple Syntax.
+* ✔️ Simple Integration with Unity Engine.
+* ✔️ No code generation and any C# Reflection in Runtime.
+* ✔️ Structure-based and Cache-friendly.
+* ✔️ Reactive and Fast Filters.
+* ✔️ Built-in Events and Reactive Variables aka Globals.
+* ✔️ Single-threaded.
 
 ## 📖 Table of Contents
 
