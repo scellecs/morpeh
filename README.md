@@ -389,7 +389,7 @@ public sealed class HealthSystem : UpdateSystem {
 
 ## 📘 License
 
-[MIT License](LICENSE)
+📄 [MIT License](LICENSE)
 
 ## 💬 Contacts
 
