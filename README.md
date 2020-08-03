@@ -10,13 +10,13 @@ Adapted for the development mobile games like:
 &nbsp;&nbsp;&nbsp;&nbsp;📚 Other genres  
   
 Features:  
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ Simple Syntax.  
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ Simple Integration with Unity Engine.  
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ No code generation and any C# Reflection in Runtime.  
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ Structure-based and Cache-friendly.  
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ Reactive and Fast Filters.  
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ Built-in Events and Reactive Variables aka Globals.  
-&nbsp;&nbsp;&nbsp;&nbsp;✔️ Single-threaded.  
+* Simple Syntax.  
+* Simple Integration with Unity Engine.  
+* No code generation and any C# Reflection in Runtime.  
+* Structure-based and Cache-friendly.  
+* Reactive and Fast Filters.  
+* Built-in Events and Reactive Variables aka Globals.  
+* Single-threaded.  
 
 ## 📖 Table of Contents
 
