@@ -393,5 +393,5 @@ public sealed class HealthSystem : UpdateSystem {
 
 ## 💬 Contacts
 
-Telegram: [benjminmoore](https://t.me/benjminmoore)  
-E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)
+✉️ Telegram: [benjminmoore](https://t.me/benjminmoore)  
+📧 E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)
