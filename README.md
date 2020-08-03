@@ -1,4 +1,4 @@
-# Morpeh
+# 🏡 Morpeh
 <img align="right" width="260px" height="260px" src="Unity/Utils/Editor/Resources/logo.png">
 
 ECS Framework for Unity Game Engine.  
@@ -40,9 +40,9 @@ Minimal Unity Version is 2019.3.*
 ![installation_step2.png](Gifs~/installation_step2.png)  
 </details>
   
-* Master: https://github.com/X-Crew/Morpeh.git  
-* Dev:  https://github.com/X-Crew/Morpeh.git#develop  
-* Tag:  https://github.com/X-Crew/Morpeh.git#2020.7.1  
+* ⭐ Master: https://github.com/X-Crew/Morpeh.git  
+* 🚧 Dev:  https://github.com/X-Crew/Morpeh.git#develop  
+* 🏷️ Tag:  https://github.com/X-Crew/Morpeh.git#2020.7.1  
 
 <details>
     <summary>You can update Morpeh by Discover Window. Select Help/Morpeh Discover menu.   </summary>
