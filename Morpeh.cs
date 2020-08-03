@@ -519,6 +519,7 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                     try {
 #endif
+                        this.world.UpdateFilters();
                         system.Dispose();
 #if MORPEH_DEBUG
                     }
@@ -554,6 +555,7 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
+                    this.world.UpdateFilters();
                     initializer.Dispose();
 #if MORPEH_DEBUG
                 }
@@ -571,6 +573,7 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
+                    this.world.UpdateFilters();
                     initializer.Dispose();
 #if MORPEH_DEBUG
                 }
@@ -588,6 +591,7 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
+                    this.world.UpdateFilters();
                     disposable.Dispose();
 #if MORPEH_DEBUG
                 }
