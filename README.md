@@ -2,8 +2,8 @@
     <img src="Unity/Utils/Editor/Resources/logo.png" width="260" height="260" alt="Morpeh">
 </p>
 
-# 🎲 Morpeh
-**ECS Framework for Unity Game Engine.**  
+# Morpeh
+🎲 **ECS Framework for Unity Game Engine.**  
    
 Adapted for the development mobile games like:  
 &nbsp;&nbsp;&nbsp;&nbsp;📕 Hyper Casual  
