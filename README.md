@@ -4,10 +4,10 @@
 ECS Framework for Unity Game Engine.  
    
 Adapted for the development mobile games like:  
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Hyper Casual.  
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Idlers.  
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Arcades.  
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Other genres.  
+&nbsp;&nbsp;&nbsp;&nbsp;📕 Hyper Casual.  
+&nbsp;&nbsp;&nbsp;&nbsp;📗 Idlers.  
+&nbsp;&nbsp;&nbsp;&nbsp;📘 Arcades.  
+&nbsp;&nbsp;&nbsp;&nbsp;📚 Other genres.  
   
 Features:  
 &nbsp;&nbsp;&nbsp;&nbsp;✔️ Simple Syntax.  
