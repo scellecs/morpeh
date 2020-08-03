@@ -9,14 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 712a7a6b39e11f04ba6e7bbf7fe773ec, type: 3}
-  m_Name: Test Struct Custom Variable
+  m_Script: {fileID: 11500000, guid: 7b7f930e8847b684fac4ac7aef557aef, type: 3}
+  m_Name: '[Action] Morpeh Package Develop SSH Description'
   m_EditorClassIdentifier: 
-  internalEntityID: -1
-  value:
-    clang: 0
-    cpp: 0
-    csharp: 0
-  defaultSerializedValue: 
-  customKey: eb92916d5a28462496fc40fde3038ded
-  AutoSave: 1
+  packageName: com.xcrew.morpeh
+  packageURL: ssh://git@github.com/X-Crew/Morpeh.git#develop

@@ -5,7 +5,7 @@ namespace Morpeh.Utils.Editor {
 
     //[CustomEditor(typeof(Discover))]
     public class DiscoverEditor : Editor {
-        private Discover discover;
+        //private Discover discover;
 
         public static void DrawDiscoverContentGUI(Discover discover) {
             if (!string.IsNullOrEmpty(discover.Category))

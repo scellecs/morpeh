@@ -1,4 +1,4 @@
-﻿namespace Morpeh.BigNumber {
+namespace Morpeh.BigNumber {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -64,7 +64,9 @@
             }
         }
         public BigNumber(float value) => this.value = new BigInteger(value);
+        public BigNumber(double value) => this.value = new BigInteger(value);
         public BigNumber(int value) => this.value = new BigInteger(value);
+        public BigNumber(long value) => this.value = new BigInteger(value);
         public BigNumber(BigInteger value) => this.value = value;
         
         public static BigNumber Parse(string value) {
@@ -112,10 +114,14 @@
 
         public static BigNumber operator +(BigNumber left, int right) => new BigNumber(left.value + right);
         public static BigNumber operator +(BigNumber left, float right) => new BigNumber(left.value + new BigInteger(right));
+        public static BigNumber operator +(BigNumber left, double right) => new BigNumber(left.value + new BigInteger(right));
+        public static BigNumber operator +(BigNumber left, BigInteger right) => new BigNumber(left.value + right);
         public static BigNumber operator +(BigNumber left, BigNumber right) => new BigNumber(left.value + right.value);
         
         public static BigNumber operator -(BigNumber left, int right) => new BigNumber(left.value - right);
         public static BigNumber operator -(BigNumber left, float right) => new BigNumber(left.value - new BigInteger(right));
+        public static BigNumber operator -(BigNumber left, double right) => new BigNumber(left.value - new BigInteger(right));
+        public static BigNumber operator -(BigNumber left, BigInteger right) => new BigNumber(left.value - right);
         public static BigNumber operator -(BigNumber left, BigNumber right) => new BigNumber(left.value - right.value);
         
         public static BigNumber operator *(BigNumber left, int right) => new BigNumber(left.value * right);
@@ -123,10 +129,18 @@
             var result = (left.value * (int)(right * 100)) / 100;
             return new BigNumber(result);
         }
+        public static BigNumber operator *(BigNumber left, double right) {
+            var result = (left.value * (int)(right * 100)) / 100;
+            return new BigNumber(result);
+        }
         public static BigNumber operator *(BigNumber left, BigNumber right) => new BigNumber(left.value * right.value);
         
         public static BigNumber operator /(BigNumber left, int right) => new BigNumber(left.value / right);
         public static BigNumber operator /(BigNumber left, float right) {
+            var result = (left.value * 100 / (int)(right * 100)) ;
+            return new BigNumber(result);
+        }
+        public static BigNumber operator /(BigNumber left, double right) {
             var result = (left.value * 100 / (int)(right * 100)) ;
             return new BigNumber(result);
         }
@@ -145,6 +159,16 @@
         public static bool operator >=(BigNumber left, BigNumber right) => left.CompareTo(right) >= 0;
         public static bool operator ==(BigNumber left, BigNumber right) => left.Equals(right);
         public static bool operator !=(BigNumber left, BigNumber right) => !left.Equals(right);
+        
+        public static implicit operator BigNumber(double value) => new BigNumber(value);
+        public static implicit operator BigNumber(float value) => new BigNumber(value);
+        public static implicit operator BigNumber(int value) => new BigNumber(value);
+        public static implicit operator BigNumber(long value) => new BigNumber(value);
+        public static implicit operator BigNumber(BigInteger value) => new BigNumber(value);
+        
+        public static explicit operator float(BigNumber bnValue) => (float)((double)bnValue.value);
+        public static explicit operator double(BigNumber bnValue) => (double)bnValue.value;
+        public static explicit operator BigInteger(BigNumber bnValue) => bnValue.value;
 
         public override int GetHashCode() =>  this.value.GetHashCode();
         public override bool Equals(object obj) =>  obj is BigNumber other && this.Equals(other);

@@ -19,11 +19,21 @@ MonoBehaviour:
   Description: ECS Framework.
   Priority: 0
   Sections:
-  - SectionName: Git Packages
+  - SectionName: Git HTTPS Packages
     image: {fileID: 0}
-    SectionContent: By these actions you can switch branch or do force update.
+    SectionContent: By these actions you can switch branch or do force update by
+      HTTPS.
     Actions:
     - Description: Master Branch
       Target: {fileID: 11400000, guid: dcee2629dfe02354dad09337338c069f, type: 2}
     - Description: Develop Branch
       Target: {fileID: 11400000, guid: 1b1580454f29ffe4caec4094b19726e1, type: 2}
+  - SectionName: Git SSH Packages
+    image: {fileID: 0}
+    SectionContent: By these actions you can switch branch or do force update by
+      SSH.
+    Actions:
+    - Description: Master Branch
+      Target: {fileID: 11400000, guid: 7effb0bc828507e4682753bf4f741d6f, type: 2}
+    - Description: Develop Branch
+      Target: {fileID: 11400000, guid: d440358b7fd72cc4f86b91b94684a84b, type: 2}

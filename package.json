@@ -3,8 +3,8 @@
   "author": "Oleg Morozov",
   "displayName": "Morpeh",
   "description": "Fast and Simple ECS Framework for Unity Game Engine.",
-  "unity": "2019.1",
-  "version": "2020.7.1",
+  "unity": "2019.3",
+  "version": "2020.8.0",
   "keywords": [
     "morpeh",
     "ecs"
