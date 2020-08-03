@@ -23,9 +23,9 @@ namespace Morpeh.Utils.Editor {
     public class DependencyResolver : MonoBehaviour {
         [Serializable]
         internal class CustomPackageInfo {
-            public string name;
-            public string version;
-            public string[] gitDependencies;
+            public string name = default;
+            public string version = default;
+            public string[] gitDependencies = default;
         }
 
         static DependencyResolver() {
