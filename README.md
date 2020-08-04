@@ -22,13 +22,13 @@ Features:
 
 ## 📖 Table of Contents
 
-* [How To Install](#how-to-install)
-* [Introduction](#introduction)
-  * [Base concept of ECS pattern](#base-concept-of-ecs-pattern)
-  * [Getting Start](#getting-start)
-  * [Advanced](#advanced)
-* [License](#license)
-* [Contacts](#contacts)
+* [How To Install](#-how-to-install)
+* [Introduction](#-introduction)
+  * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
+  * [Getting Start](#-getting-start)
+  * [Advanced](#-advanced)
+* [License](#-license)
+* [Contacts](#-contacts)
 
 
 ## 📖 How To Install
