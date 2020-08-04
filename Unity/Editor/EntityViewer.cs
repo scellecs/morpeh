@@ -5,6 +5,7 @@ namespace Morpeh.Editor {
     using Collections;
     using Morpeh;
     using Sirenix.OdinInspector;
+    using UnityEngine;
 
     [Serializable]
     [InlineProperty]
@@ -23,8 +24,8 @@ namespace Morpeh.Editor {
         [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
         private List<ComponentView> ComponentsOnEntity {
             get {
+                this.componentViews.Clear();
                 if (this.entity != null) {
-                    this.componentViews.Clear();
                     foreach (var slotIndex in this.entity.componentsIds) {
                         var slot = this.entity.componentsIds.GetKeyByIndex(slotIndex);
                         var data = this.entity.componentsIds.GetValueByIndex(slotIndex);
@@ -68,14 +69,14 @@ namespace Morpeh.Editor {
             [HideReferenceObjectPickerAttribute]
             public object Data {
                 get {
-                    if (this.debugInfo.typeInfo.isMarker) {
+                    if (this.debugInfo.typeInfo.isMarker || Application.isPlaying == false) {
                         return null;
                     }
 
                     return this.debugInfo.getBoxed(this.world, this.id);
                 }
                 set {
-                    if (this.debugInfo.typeInfo.isMarker) {
+                    if (this.debugInfo.typeInfo.isMarker || Application.isPlaying == false) {
                         return;
                     }
 
