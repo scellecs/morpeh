@@ -187,7 +187,7 @@ namespace Morpeh {
             return ref cache.Empty();
         }
 
-        public static bool AddComponentFast(this Entity entity, in int typeId, in int componentId) {
+        internal static bool AddComponentFast(this Entity entity, in int typeId, in int componentId) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying AddComponentFast on null or disposed entity");
@@ -256,7 +256,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetComponentFast(this Entity entity, in int typeId) {
+        internal static int GetComponentFast(this Entity entity, in int typeId) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying GetComponentFast on null or disposed entity");
@@ -317,7 +317,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool RemoveComponentFast(this Entity entity, int typeId, out int indexInCache) {
+        internal static bool RemoveComponentFast(this Entity entity, int typeId, out int indexInCache) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying RemoveComponentFast on null or disposed entity");
@@ -333,7 +333,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has([CanBeNull] this Entity entity, int typeID) {
+        internal static bool Has([CanBeNull] this Entity entity, int typeID) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
@@ -414,7 +414,6 @@ namespace Morpeh {
 
             entity.isDirty = false;
         }
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Entity entity) {
