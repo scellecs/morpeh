@@ -70,9 +70,14 @@
             set => this.SetValue(value);
         }
 
-        private void SetValue(TData newValue) {
+        public void SetValue(TData newValue) {
             this.value = newValue;
             this.OnChange(newValue);
+        }
+        
+        public void SetValueNextFrame(TData newValue) {
+            this.value = newValue;
+            this.OnChangeNextFrame(newValue);
         }
         
         private void OnChange() {
@@ -85,7 +90,14 @@
                 this.Publish(newValue);
             }
         }
-
+        
+        private void OnChangeNextFrame(TData newValue) {
+            if (Application.isPlaying) {
+                this.CheckIsInitialized();
+                this.NextFrame(newValue);
+            }
+        }
+        
         protected abstract TData  Load([NotNull] string serializedData);
         protected abstract string Save();
 
