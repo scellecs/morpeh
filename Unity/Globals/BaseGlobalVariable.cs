@@ -158,32 +158,50 @@
 
         private void LoadData() {
 #if UNITY_EDITOR
-            if (!EditorApplication.isPlayingOrWillChangePlaymode) {
-                return;
+            try {
+#endif
+    #if UNITY_EDITOR
+                if (!EditorApplication.isPlayingOrWillChangePlaymode) {
+                    return;
+                }
+    #endif
+                
+                if (this.isLoaded) {
+                    return;
+                }
+
+                this.defaultSerializedValue = this.Save();
+                this.isLoaded = true;
+                
+                if (!this.AutoSave) {
+                    return;
+                }
+                if (!PlayerPrefs.HasKey(this.Key)) {
+                    return;
+                }
+
+                this.value = this.Load(PlayerPrefs.GetString(this.Key));
+#if UNITY_EDITOR
+            }
+            catch (Exception e) {
+                Debug.LogException(e);
             }
 #endif
-            
-            if (this.isLoaded) {
-                return;
-            }
-
-            this.defaultSerializedValue = this.Save();
-            this.isLoaded = true;
-            
-            if (!this.AutoSave) {
-                return;
-            }
-            if (!PlayerPrefs.HasKey(this.Key)) {
-                return;
-            }
-
-            this.value = this.Load(PlayerPrefs.GetString(this.Key));
         }
 
         internal void SaveData() {
-            if (this.AutoSave) {
-                PlayerPrefs.SetString(this.Key, this.Save());
+#if UNITY_EDITOR
+            try {
+#endif
+                if (this.AutoSave) {
+                    PlayerPrefs.SetString(this.Key, this.Save());
+                }
+#if UNITY_EDITOR
             }
+            catch (Exception e) {
+                Debug.LogException(e);
+            }
+#endif
         }
 
         #region EDITOR
