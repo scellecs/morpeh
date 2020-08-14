@@ -79,6 +79,11 @@ namespace Morpeh {
                 GC.Collect();
             }
         }
+        
+        void OnApplicationPause(bool pauseStatus) {
+            if(pauseStatus)
+                onApplicationFocusLost.Invoke();
+        }   
 
         internal void OnApplicationQuit() {
             onApplicationFocusLost.Invoke();
