@@ -72,6 +72,13 @@ namespace Morpeh {
 
         private void FixedUpdate() => WorldExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
         private void LateUpdate()  => WorldExtensions.GlobalLateUpdate(Time.deltaTime);
+        
+        internal void OnApplicationPause(bool pauseStatus) {
+            if (pauseStatus) {
+                onApplicationFocusLost.Invoke();
+                GC.Collect();
+            }
+        }   
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {
