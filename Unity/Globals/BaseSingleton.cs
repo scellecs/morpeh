@@ -31,7 +31,7 @@
         [CanBeNull]
         private protected Entity InternalEntity {
             get {
-                if (this.internalEntity == null) {
+                if (this.internalEntity == null && this.internalEntityID > -1) {
                     this.internalEntity = World.Default.entities[this.internalEntityID];
                 }
 
