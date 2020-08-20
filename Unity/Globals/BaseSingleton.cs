@@ -81,9 +81,11 @@
             if (this.internalEntityID < 0) {
                 this.internalEntity = World.Default.CreateEntity(out this.internalEntityID);
                 this.internalEntity.AddComponent<SingletonMarker>();
+                
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         public virtual void Dispose() {
