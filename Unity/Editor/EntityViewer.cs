@@ -30,7 +30,7 @@ namespace Morpeh.Editor {
                         var slot = this.entity.componentsIds.GetKeyByIndex(slotIndex);
                         var data = this.entity.componentsIds.GetValueByIndex(slotIndex);
                         var view = new ComponentView {
-                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[slot],
+                            internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[slot],
                             id        = data,
                             world     = this.entity.world
                         };
@@ -47,18 +47,18 @@ namespace Morpeh.Editor {
         [PropertyTooltip("$" + nameof(FullName))]
         [Serializable]
         private struct ComponentView {
-            internal CommonCacheTypeIdentifier.DebugInfo debugInfo;
+            internal CommonTypeIdentifier.InternalTypeDefinition internalTypeDefinition;
 
             internal World world;
 
-            internal bool   IsMarker => this.debugInfo.typeInfo.isMarker;
-            internal string FullName => this.debugInfo.type.FullName;
+            internal bool   IsMarker => this.internalTypeDefinition.typeInfo.isMarker;
+            internal string FullName => this.internalTypeDefinition.type.FullName;
 
             [ShowIf("$" + nameof(IsMarker))]
             [HideLabel]
             [DisplayAsString(false)]
             [ShowInInspector]
-            internal string TypeName => this.debugInfo.type.Name;
+            internal string TypeName => this.internalTypeDefinition.type.Name;
 
             internal int id;
 
@@ -69,18 +69,18 @@ namespace Morpeh.Editor {
             [HideReferenceObjectPickerAttribute]
             public object Data {
                 get {
-                    if (this.debugInfo.typeInfo.isMarker || Application.isPlaying == false) {
+                    if (this.internalTypeDefinition.typeInfo.isMarker || Application.isPlaying == false) {
                         return null;
                     }
 
-                    return this.debugInfo.getBoxed(this.world, this.id);
+                    return this.internalTypeDefinition.getBoxed(this.world, this.id);
                 }
                 set {
-                    if (this.debugInfo.typeInfo.isMarker || Application.isPlaying == false) {
+                    if (this.internalTypeDefinition.typeInfo.isMarker || Application.isPlaying == false) {
                         return;
                     }
 
-                    this.debugInfo.setBoxed(this.world, this.id, value);
+                    this.internalTypeDefinition.setBoxed(this.world, this.id, value);
                 }
             }
         }

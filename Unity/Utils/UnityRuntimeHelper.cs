@@ -99,7 +99,7 @@ namespace Morpeh {
             }
 
             this.types.Clear();
-            foreach (var info in CommonCacheTypeIdentifier.editorTypeAssociation.Values) {
+            foreach (var info in CommonTypeIdentifier.intTypeAssociation.Values) {
                 this.types.Add(info.type.AssemblyQualifiedName);
             }
         }
@@ -110,14 +110,15 @@ namespace Morpeh {
                 foreach (var t in this.types) {
                     var genType = Type.GetType(t);
                     if (genType != null) {
-                        var openGeneric   = typeof(CacheTypeIdentifier<>);
+                        var openGeneric   = typeof(TypeIdentifier<>);
                         var closedGeneric = openGeneric.MakeGenericType(genType);
                         var infoFI        = closedGeneric.GetField("info", BindingFlags.Static | BindingFlags.NonPublic);
                         infoFI.GetValue(null);
                     }
-                    else {
-                        CommonCacheTypeIdentifier.GetID();
-                    }
+                    //todo idk how it is works
+                    // else {
+                    //     CommonCacheTypeIdentifier.GetID();
+                    // }
                 }
 
                 foreach (var world in this.worldsSerialized) {

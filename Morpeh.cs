@@ -30,6 +30,7 @@ namespace Morpeh {
     using Collections;
     //Unity
     using Unity.IL2CPP.CompilerServices;
+    using UnityEngine.Scripting;
     using Debug = UnityEngine.Debug;
     using Il2Cpp = Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute;
 
@@ -127,7 +128,7 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var typeInfo = CacheTypeIdentifier<T>.info;
+            var typeInfo = TypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
             if (typeInfo.isMarker) {
@@ -159,7 +160,7 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var typeInfo = CacheTypeIdentifier<T>.info;
+            var typeInfo = TypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
             if (typeInfo.isMarker) {
@@ -207,7 +208,7 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            var typeInfo = CacheTypeIdentifier<T>.info;
+            var typeInfo = TypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
             if (typeInfo.isMarker) {
@@ -235,7 +236,7 @@ namespace Morpeh {
             }
 #endif
 
-            var typeInfo = CacheTypeIdentifier<T>.info;
+            var typeInfo = TypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
             if (typeInfo.isMarker) {
@@ -274,7 +275,7 @@ namespace Morpeh {
             }
 #endif
 
-            var typeInfo = CacheTypeIdentifier<T>.info;
+            var typeInfo = TypeIdentifier<T>.info;
             var cache    = entity.world.GetCache<T>();
 
             if (!typeInfo.isMarker) {
@@ -302,7 +303,7 @@ namespace Morpeh {
             }
 #endif
 
-            var typeInfo = CacheTypeIdentifier<T>.info;
+            var typeInfo = TypeIdentifier<T>.info;
 
             if (entity.componentsIds.Remove(typeInfo.id, out var index)) {
                 if (typeInfo.isMarker == false) {
@@ -351,7 +352,7 @@ namespace Morpeh {
             }
 #endif
 
-            return entity.componentsIds.TryGetIndex(CacheTypeIdentifier<T>.info.id) >= 0;
+            return entity.componentsIds.TryGetIndex(TypeIdentifier<T>.info.id) >= 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -394,6 +395,7 @@ namespace Morpeh {
                 if (entity.previousArchetypeId >= 0 && entity.indexInCurrentArchetype >= 0) {
                     entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
                 }
+
                 entity.previousArchetypeId = -1;
 
                 if (entity.currentArchetypeId < 0) {
@@ -405,6 +407,7 @@ namespace Morpeh {
                             entity.world.GetCache(typeId)?.Remove(componentId);
                         }
                     }
+
                     entity.DisposeFast();
                 }
                 else {
@@ -427,8 +430,8 @@ namespace Morpeh {
             if (entity.previousArchetypeId < 0) {
                 entity.previousArchetypeId = entity.currentArchetypeId;
             }
-            
-            entity.currentArchetypeId  = -1;
+
+            entity.currentArchetypeId = -1;
             if (entity.isDirty == false) {
                 entity.world.dirtyEntities.Add(entity);
                 entity.isDirty = true;
@@ -549,7 +552,7 @@ namespace Morpeh {
 
             DisposeSystems(this.disabledLateSystems);
             this.disabledLateSystems = null;
-            
+
             foreach (var initializer in this.newInitializers) {
 #if MORPEH_DEBUG
                 try {
@@ -763,6 +766,7 @@ namespace Morpeh {
             if (index >= 0) {
                 systemsGroup.newInitializers.RemoveAt(index);
             }
+
             index = systemsGroup.initializers.IndexOf(initializer);
             if (index >= 0) {
                 systemsGroup.initializers.RemoveAt(index);
@@ -1193,7 +1197,7 @@ namespace Morpeh {
         }
 
         public static ComponentsCache<T> GetCache<T>(this World world) where T : struct, IComponent {
-            var info = CacheTypeIdentifier<T>.info;
+            var info = TypeIdentifier<T>.info;
             if (world.typedCaches.TryGetValue(info.id, out var typedIndex)) {
                 return ComponentsCache<T>.typedCaches.data[typedIndex];
             }
@@ -1448,7 +1452,7 @@ namespace Morpeh {
         internal sealed class ComponentsBagPart<T> : ComponentsBagPart where T : struct, IComponent {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal ComponentsBagPart(Archetype archetype) {
-                this.typeId = CacheTypeIdentifier<T>.info.id;
+                this.typeId = TypeIdentifier<T>.info.id;
                 this.ids    = new IntFastList(archetype.entities.length);
 
                 foreach (var entity in archetype.entities) {
@@ -1663,7 +1667,7 @@ namespace Morpeh {
             internal FastList<Archetype.ComponentsBagPart> parts;
 
             public ComponentsBag(Filter filter) {
-                this.typeId = CacheTypeIdentifier<T>.info.id;
+                this.typeId = TypeIdentifier<T>.info.id;
 
                 this.parts      = new FastList<Archetype.ComponentsBagPart>();
                 this.filter     = filter;
@@ -1912,7 +1916,7 @@ namespace Morpeh {
         }
 
         public static Filter.ComponentsBag<T> Select<T>(this Filter filter) where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
+            var typeInfo = TypeIdentifier<T>.info;
             if (typeInfo.isMarker) {
 #if UNITY_EDITOR
                 Debug.LogError($"You Select<{typeof(T)}> marker component from filter! This makes no sense.");
@@ -1976,12 +1980,12 @@ namespace Morpeh {
         private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
             for (int i = 0, length = filter.childs.length; i < length; i++) {
                 var child = filter.childs.data[i];
-                if (child.mode == mode && child.typeID == CacheTypeIdentifier<T>.info.id) {
+                if (child.mode == mode && child.typeID == TypeIdentifier<T>.info.id) {
                     return child;
                 }
             }
 
-            var newTypeId = CacheTypeIdentifier<T>.info.id;
+            var newTypeId = TypeIdentifier<T>.info.id;
 
             IntFastList newIncludedTypeIds;
             IntFastList newExcludedTypeIds;
@@ -2053,35 +2057,36 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal static class CommonCacheTypeIdentifier {
+    internal static class CommonTypeIdentifier {
         private static int counter;
 
-        //todo need this?
-        internal static TypeInfo GetTypeInfo<T>(this T component) where T : struct, IComponent => CacheTypeIdentifier<T>.info;
-        
-        internal static int  GetID() => Interlocked.Increment(ref counter);
-#if MORPEH_DEBUG
-        internal static Dictionary<int, DebugInfo> editorTypeAssociation = new Dictionary<int, DebugInfo>();
+        internal static Dictionary<int, InternalTypeDefinition>  intTypeAssociation = new Dictionary<int, InternalTypeDefinition>();
+        internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
 
         internal static int GetID<T>() where T : struct, IComponent {
-            var id = counter++;
-            var info = new DebugInfo {
-                type     = typeof(T),
-                getBoxed = (world, componentId) => world.GetCache<T>().components.data[componentId],
-                setBoxed = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T) value,
-                typeInfo = CacheTypeIdentifier<T>.info
+            var id   = Interlocked.Increment(ref counter);
+            var type = typeof(T);
+            var info = new InternalTypeDefinition {
+                id             = id,
+                type           = type,
+                getBoxed       = (world, componentId) => world.GetCache<T>().components.data[componentId],
+                setBoxed       = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T) value,
+                entitySetBoxed = (entity, component) => entity.SetComponent((T) component),
+                typeInfo       = TypeIdentifier<T>.info
             };
-            editorTypeAssociation.Add(id, info);
+            intTypeAssociation.Add(id, info);
+            typeAssociation.Add(type, info);
             return id;
         }
 
-        internal struct DebugInfo {
+        internal struct InternalTypeDefinition {
+            public int                        id;
             public Type                       type;
             public Func<World, int, object>   getBoxed;
             public Action<World, int, object> setBoxed;
+            public Action<Entity, object>     entitySetBoxed;
             public TypeInfo                   typeInfo;
         }
-#endif
 
         [Serializable]
         internal class TypeInfo {
@@ -2106,16 +2111,21 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal static class CacheTypeIdentifier<T> where T : struct, IComponent {
-        internal static CommonCacheTypeIdentifier.TypeInfo info;
+    [Preserve]
+    public static class TypeIdentifier<T> where T : struct, IComponent {
+        internal static CommonTypeIdentifier.TypeInfo info;
 
-        static CacheTypeIdentifier() {
-            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
-#if MORPEH_DEBUG
-            var id = CommonCacheTypeIdentifier.GetID<T>();
-#else
-            var id = CommonCacheTypeIdentifier.GetID();
-#endif
+        static TypeIdentifier() {
+            Warmup();
+        }
+
+        public static void Warmup() {
+            if (info != null) {
+                return;
+            }
+
+            info = new CommonTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
+            var id = CommonTypeIdentifier.GetID<T>();
             info.SetID(id);
         }
     }
@@ -2159,7 +2169,7 @@ namespace Morpeh {
         }
 
         internal ComponentsCache() {
-            this.typeId = CacheTypeIdentifier<T>.info.id;
+            this.typeId = TypeIdentifier<T>.info.id;
 
             this.components  = new FastList<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
             this.freeIndexes = new IntStack();

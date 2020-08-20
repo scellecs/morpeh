@@ -23,6 +23,7 @@
         protected Entity internalEntity;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
+        [PropertyOrder(100)]
         [ShowInInspector]
         [Space]
         private Morpeh.Editor.EntityViewerWithHeader entityViewer = new Morpeh.Editor.EntityViewerWithHeader();
@@ -80,10 +81,9 @@
             if (this.internalEntityID < 0) {
                 this.internalEntity = World.Default.CreateEntity(out this.internalEntityID);
                 this.internalEntity.AddComponent<SingletonMarker>();
-                return true;
             }
 
-            return false;
+            return true;
         }
 
         public virtual void Dispose() {
