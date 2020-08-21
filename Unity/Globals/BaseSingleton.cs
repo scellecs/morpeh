@@ -32,10 +32,11 @@
         [CanBeNull]
         private protected Entity InternalEntity {
             get {
-                if (this.internalEntity == null && this.internalEntityID > -1) {
+#if UNITY_EDITOR 
+                if (this.internalEntityID > -1 && this.internalEntity == null) {
                     this.internalEntity = World.Default.entities[this.internalEntityID];
                 }
-
+#endif
                 return this.internalEntity;
             }
         }

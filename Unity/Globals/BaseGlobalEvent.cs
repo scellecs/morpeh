@@ -32,11 +32,8 @@ namespace Morpeh.Globals {
             var world = World.Default;
             var check = base.CheckIsInitialized();
             if (check) {
-                this.isPublished = false;
-                
                 this.internalEntity.AddComponent<GlobalEventMarker>();
                 this.internalEntity.SetComponent(new GlobalEventComponent<TData> {
-                    Global = this,
                     Action = null,
                     Data   = new Stack<TData>()
                 });
@@ -75,7 +72,6 @@ namespace Morpeh.Globals {
             this.CheckIsInitialized();
             ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Data.Push(data);
-            this.isPublished = true;
             this.InternalEntity.SetComponent(new GlobalEventPublished());
         }
 
