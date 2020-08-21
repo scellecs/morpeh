@@ -13,12 +13,10 @@ namespace Morpeh.Globals {
             set => this.Value = ((IntWrapper) value).value;
         }
         
-        protected override int Load(string serializedData) => int.Parse(serializedData, CultureInfo.InvariantCulture);
+        public override int Deserialize(string serializedData) => int.Parse(serializedData, CultureInfo.InvariantCulture);
 
-        protected override string Save() => this.value.ToString(CultureInfo.InvariantCulture);
-        
-        public override string LastToString() => this.BatchedChanges.Peek().ToString(CultureInfo.InvariantCulture);
-        
+        public override string Serialize(int data) => data.ToString(CultureInfo.InvariantCulture);
+
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]

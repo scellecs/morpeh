@@ -13,21 +13,17 @@
             set => this.Value = ((ColorWrapper) value).value;
         }
         
-        public override bool CanBeAutoSaved => false;
+        public override Color Deserialize(string serializedData) => JsonUtility.FromJson<ColorWrapper>(serializedData).value;
 
-        protected override Color Load(string serializedData) => JsonUtility.FromJson<ColorWrapper>(serializedData).value;
+        public override string Serialize(Color data) => JsonUtility.ToJson(new ColorWrapper {value = data});
 
-        protected override string Save() => JsonUtility.ToJson(new ColorWrapper() {value = this.value});
-        
-        public override string LastToString() => this.BatchedChanges.Peek().ToString();
-        
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         [Serializable]
         private class ColorWrapper : DataWrapper {
             public Color value;
-            
+
             public override string ToString() => this.value.ToString();
         }
     }

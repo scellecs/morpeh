@@ -13,11 +13,9 @@
             set => this.Value = ((BoolWrapper) value).value;
         }
 
-        protected override bool Load(string serializedData) => bool.Parse(serializedData);
+        public override bool Deserialize(string serializedData) => bool.Parse(serializedData);
 
-        protected override string Save() => this.value.ToString(CultureInfo.InvariantCulture);
-        
-        public override string LastToString() => this.BatchedChanges.Peek().ToString(CultureInfo.InvariantCulture);
+        public override string Serialize(bool data) => data.ToString(CultureInfo.InvariantCulture);
 
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

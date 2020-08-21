@@ -17,11 +17,9 @@
         
         public override bool CanBeAutoSaved => false;
 
-        protected override Object Load(string serializedData) => JsonUtility.FromJson<ObjectWrapper>(serializedData).value;
+        public override Object Deserialize(string serializedData) => JsonUtility.FromJson<ObjectWrapper>(serializedData).value;
 
-        protected override string Save() => JsonUtility.ToJson(new ObjectWrapper {value = this.value});
-        
-        public override string LastToString() => this.BatchedChanges.Peek().ToString();
+        public override string Serialize(Object data) => JsonUtility.ToJson(new ObjectWrapper {value = data});
         
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

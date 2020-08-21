@@ -5,7 +5,6 @@
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
-
 #endif
 
     public abstract class DataWrapper {
@@ -97,13 +96,10 @@
                 this.NextFrame(newValue);
             }
         }
-        
-        protected abstract TData  Load([NotNull] string serializedData);
-        protected abstract string Save();
 
         public virtual void Reset() {
             if (!string.IsNullOrEmpty(this.defaultSerializedValue)) {
-                this.value = this.Load(this.defaultSerializedValue);
+                this.value = this.Deserialize(this.defaultSerializedValue);
             }
         }
 
@@ -170,7 +166,7 @@
                     return;
                 }
 
-                this.defaultSerializedValue = this.Save();
+                this.defaultSerializedValue = this.Serialize(this.value);
                 this.isLoaded = true;
                 
                 if (!this.AutoSave) {
@@ -180,7 +176,7 @@
                     return;
                 }
 
-                this.value = this.Load(PlayerPrefs.GetString(this.Key));
+                this.value = this.Deserialize(PlayerPrefs.GetString(this.Key));
 #if UNITY_EDITOR
             }
             catch (Exception e) {
@@ -194,7 +190,7 @@
             try {
 #endif
                 if (this.AutoSave) {
-                    PlayerPrefs.SetString(this.Key, this.Save());
+                    PlayerPrefs.SetString(this.Key, this.Serialize(this.value));
                 }
 #if UNITY_EDITOR
             }

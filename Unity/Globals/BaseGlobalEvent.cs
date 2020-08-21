@@ -14,7 +14,7 @@ namespace Morpeh.Globals {
 #if UNITY_EDITOR
         public override Type GetValueType() => typeof(TData);
 #endif
-        
+
         public Stack<TData> BatchedChanges {
             get {
 #if UNITY_EDITOR
@@ -27,6 +27,10 @@ namespace Morpeh.Globals {
                 return component.Data;
             }
         }
+
+        public sealed override string LastToString() => this.Serialize(this.BatchedChanges.Peek());
+        public abstract string Serialize(TData data);
+        public abstract TData  Deserialize(string serializedData);
 
         protected override bool CheckIsInitialized() {
             var world = World.Default;
@@ -41,6 +45,7 @@ namespace Morpeh.Globals {
                     LastToString = this.LastToString
                 });
             }
+
             if (GlobalEventComponentUpdater<TData>.initialized.TryGetValue(world.identifier, out var initialized)) {
                 if (initialized == false) {
                     var updater = new GlobalEventComponentUpdater<TData>();
@@ -68,14 +73,14 @@ namespace Morpeh.Globals {
         }
 
 
-        public void Publish(TData data) {
+        public virtual void Publish(TData data) {
             this.CheckIsInitialized();
             ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Data.Push(data);
             this.InternalEntity.SetComponent(new GlobalEventPublished());
         }
 
-        public void NextFrame(TData data) {
+        public virtual void NextFrame(TData data) {
             this.CheckIsInitialized();
             ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Data.Push(data);
