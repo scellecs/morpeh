@@ -67,6 +67,10 @@ namespace Morpeh {
     public interface IValidatable {
         void OnValidate();
     }
+    
+    public interface IValidatableWithGameObject {
+        void OnValidate(GameObject gameObject);
+    }
 
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]

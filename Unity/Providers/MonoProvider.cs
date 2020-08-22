@@ -1,5 +1,4 @@
 ﻿namespace Morpeh {
-    using System.Diagnostics;
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
@@ -60,6 +59,9 @@
         protected virtual void OnValidate() {
             if (this.serializedData is IValidatable validatable) {
                 validatable.OnValidate();
+            }
+            if (this.serializedData is IValidatableWithGameObject validatableWithGameObject) {
+                validatableWithGameObject.OnValidate(this.gameObject);
             }
         }
 

@@ -2,8 +2,6 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
-    using System;
-    using System.Diagnostics;
     using UnityEngine;
     using Debug = UnityEngine.Debug;
 
@@ -23,6 +21,9 @@
             foreach (var component in this.serializedComponents) {
                 if (component is IValidatable validatable) {
                     validatable.OnValidate();
+                }
+                if (component is IValidatableWithGameObject validatableWithGameObject) {
+                    validatableWithGameObject.OnValidate(this.gameObject);
                 }
             }
         }
