@@ -15,6 +15,7 @@ namespace Morpeh {
     using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Threading;
     //UnityEditor
@@ -1125,6 +1126,17 @@ namespace Morpeh {
             go.hideFlags = HideFlags.HideAndDontSave;
             Object.DontDestroyOnLoad(go);
 #endif
+            //Warm Types
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                foreach (var type in assembly.GetTypes()) {
+                    if (typeof(IComponent).IsAssignableFrom(type) && type.IsValueType && !type.ContainsGenericParameters) {
+                        typeof(TypeIdentifier<>)
+                            .MakeGenericType(type)
+                            .GetMethod("Warmup", BindingFlags.Static | BindingFlags.Public)
+                            .Invoke(null, null);
+                    }
+                }
+            }
         }
 
         //TODO refactor allocations and fast sort(maybe without it?)
