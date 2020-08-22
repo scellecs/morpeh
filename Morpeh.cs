@@ -64,6 +64,10 @@ namespace Morpeh {
     public interface ILateSystem : ISystem {
     }
 
+    public interface IValidatable {
+        void OnValidate();
+    }
+
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]

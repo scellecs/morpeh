@@ -55,6 +55,12 @@
             existOnEntity = false;
             return ref this.serializedData;
         }
+        
+        protected virtual void OnValidate() {
+            if (this.serializedData is IValidatable validatable) {
+                validatable.OnValidate();
+            }
+        }
 
         protected sealed override void PreInitialize() {
             var ent = this.Entity;
