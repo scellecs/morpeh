@@ -2079,12 +2079,13 @@ namespace Morpeh {
             var id   = Interlocked.Increment(ref counter);
             var type = typeof(T);
             var info = new InternalTypeDefinition {
-                id             = id,
-                type           = type,
-                getBoxed       = (world, componentId) => world.GetCache<T>().components.data[componentId],
-                setBoxed       = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T) value,
-                entitySetBoxed = (entity, component) => entity.SetComponent((T) component),
-                typeInfo       = TypeIdentifier<T>.info
+                id                      = id,
+                type                    = type,
+                cacheGetComponentBoxed  = (world, componentId) => world.GetCache<T>().components.data[componentId],
+                cacheSetComponentBoxed  = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T) value,
+                entitySetComponentBoxed = (entity, component) => entity.SetComponent((T) component),
+                entityRemoveComponent   = (entity) => entity.RemoveComponent<T>(),
+                typeInfo                = TypeIdentifier<T>.info
             };
             intTypeAssociation.Add(id, info);
             typeAssociation.Add(type, info);
@@ -2094,9 +2095,10 @@ namespace Morpeh {
         internal struct InternalTypeDefinition {
             public int                        id;
             public Type                       type;
-            public Func<World, int, object>   getBoxed;
-            public Action<World, int, object> setBoxed;
-            public Action<Entity, object>     entitySetBoxed;
+            public Func<World, int, object>   cacheGetComponentBoxed;
+            public Action<World, int, object> cacheSetComponentBoxed;
+            public Action<Entity, object>     entitySetComponentBoxed;
+            public Action<Entity>             entityRemoveComponent;
             public TypeInfo                   typeInfo;
         }
 

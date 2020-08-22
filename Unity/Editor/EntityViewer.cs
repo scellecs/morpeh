@@ -73,14 +73,14 @@ namespace Morpeh.Editor {
                         return null;
                     }
 
-                    return this.internalTypeDefinition.getBoxed(this.world, this.id);
+                    return this.internalTypeDefinition.cacheGetComponentBoxed(this.world, this.id);
                 }
                 set {
                     if (this.internalTypeDefinition.typeInfo.isMarker || Application.isPlaying == false) {
                         return;
                     }
 
-                    this.internalTypeDefinition.setBoxed(this.world, this.id, value);
+                    this.internalTypeDefinition.cacheSetComponentBoxed(this.world, this.id, value);
                 }
             }
         }

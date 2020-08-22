@@ -1,6 +1,8 @@
 ﻿namespace Morpeh.Globals {
     using System.Runtime.CompilerServices;
+#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#endif
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -26,7 +28,7 @@
                 foreach (var component in this.serializedComponents) {
                     var type = component.GetType();
                     if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                        definition.entitySetBoxed(this.internalEntity, component);
+                        definition.entitySetComponentBoxed(this.internalEntity, component);
                     }
                     else {
                         Debug.LogError(
