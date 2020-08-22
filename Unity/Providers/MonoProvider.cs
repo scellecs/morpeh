@@ -56,8 +56,7 @@
             existOnEntity = false;
             return ref this.serializedData;
         }
-
-        [Conditional("UNITY_EDITOR")]
+        
         protected virtual void OnValidate() {
             if (this.serializedData is IValidatable validatable) {
                 validatable.OnValidate();

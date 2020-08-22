@@ -18,8 +18,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool ShowSerializedComponents => this.internalEntityID > -1;
 #endif
-
-        [Conditional("UNITY_EDITOR")]
+        
         protected virtual void OnValidate() {
             foreach (var component in this.serializedComponents) {
                 if (component is IValidatable validatable) {
