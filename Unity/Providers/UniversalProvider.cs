@@ -3,7 +3,9 @@
     using Sirenix.OdinInspector;
 #endif
     using System;
+    using System.Diagnostics;
     using UnityEngine;
+    using Debug = UnityEngine.Debug;
 
     public class UniversalProvider : EntityProvider {
         [Space]
@@ -17,6 +19,7 @@
         private bool ShowSerializedComponents => this.internalEntityID > -1;
 #endif
 
+        [Conditional("UNITY_EDITOR")]
         protected virtual void OnValidate() {
             foreach (var component in this.serializedComponents) {
                 if (component is IValidatable validatable) {
@@ -24,7 +27,6 @@
                 }
             }
         }
-
         protected sealed override void PreInitialize() {
             var ent = this.Entity;
             if (ent != null && !ent.isDisposed) {
