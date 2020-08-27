@@ -1,5 +1,6 @@
 namespace Morpeh {
     using System;
+    using Collections;
     using UnityEngine;
 #if UNITY_EDITOR
     using UnityEditor;
@@ -12,6 +13,7 @@ namespace Morpeh {
     using Globals.ECS;
 #endif
     using Unity.IL2CPP.CompilerServices;
+    using Utils;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -25,9 +27,9 @@ namespace Morpeh {
         internal static UnityRuntimeHelper instance;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [OdinSerialize]
-        private List<World> worldsSerialized = null;
+        private FastList<World> worldsSerialized = null;
         [OdinSerialize]
-        private List<string> types = null;
+        private FastList<string> types = null;
 #endif
 
 #if UNITY_EDITOR
@@ -49,8 +51,8 @@ namespace Morpeh {
 
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredEditMode) {
-                for (var i = World.worlds.Count - 1; i >= 0; i--) {
-                    var world = World.worlds[i];
+                for (var i = World.worlds.length - 1; i >= 0; i--) {
+                    var world = World.worlds.data[i];
                     world?.Dispose();
                 }
 
@@ -66,10 +68,10 @@ namespace Morpeh {
         }
 #endif
 
-        private void Update() => World.GlobalUpdate(Time.deltaTime);
+        private void Update() => WorldExtensions.GlobalUpdate(Time.deltaTime);
 
-        private void FixedUpdate() => World.GlobalFixedUpdate(Time.fixedDeltaTime);
-        private void LateUpdate()  => World.GlobalLateUpdate(Time.deltaTime);
+        private void FixedUpdate() => WorldExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
+        private void LateUpdate()  => WorldExtensions.GlobalLateUpdate(Time.deltaTime);
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {
@@ -86,7 +88,7 @@ namespace Morpeh {
         protected override void OnBeforeSerialize() {
             this.worldsSerialized = World.worlds;
             if (this.types == null) {
-                this.types = new List<string>();
+                this.types = new FastList<string>();
             }
 
             this.types.Clear();
@@ -119,7 +121,7 @@ namespace Morpeh {
                                 continue;
                             }
 
-                            if (e.components == null) {
+                            if (e.componentsIds == null) {
                                 world.entities[i] = null;
                             }
                         }
