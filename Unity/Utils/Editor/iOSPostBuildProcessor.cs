@@ -25,7 +25,7 @@ namespace Morpeh.Apple {
 #if UNITY_IOS
         [UnityEditor.Callbacks.PostProcessBuild(999)]
         public static void OnPostprocessBuild(BuildTarget buildTarget, string path) {
-            var guids = AssetDatabase.FindAssets("t:iOSPostBuildProcessor");
+            var guids = AssetDatabase.FindAssets("t:Morpeh.Apple.iOSPostBuildProcessor");
             var settings = new PostBuildProcessingSettings();
 
             foreach (var guid in guids) {
