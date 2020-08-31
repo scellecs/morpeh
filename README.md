@@ -1,62 +1,30 @@
-<p align="center">
-    <img src="Unity/Utils/Editor/Resources/logo.png" width="260" height="260" alt="Morpeh">
-</p>
-
 # Morpeh
-🎲 **ECS Framework for Unity Game Engine.**  
-   
-Adapted for the development mobile games like:  
-&nbsp;&nbsp;&nbsp;&nbsp;📕 Hyper Casual  
-&nbsp;&nbsp;&nbsp;&nbsp;📗 Idlers  
-&nbsp;&nbsp;&nbsp;&nbsp;📘 Arcades  
-&nbsp;&nbsp;&nbsp;&nbsp;📚 Other genres  
-  
-Features:  
-* Simple Syntax.  
-* Simple Integration with Unity Engine.  
-* No code generation and any C# Reflection in Runtime.  
-* Structure-based and Cache-friendly.  
-* Reactive and Fast Filters.  
-* Built-in Events and Reactive Variables aka Globals.  
-* Single-threaded.  
+<img align="right" width="260px" height="260px" src="Unity/Utils/Editor/Resources/logo.png">
 
-## 📖 Table of Contents
+ECS Framework for Unity Game Engine.  
 
-* [How To Install](#-how-to-install)
-* [Introduction](#-introduction)
-  * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
-  * [Getting Start](#-getting-start)
-  * [Advanced](#-advanced)
-* [License](#-license)
-* [Contacts](#-contacts)
+* Simple Syntax.
+* Simple Integration with Unity Engine.
+* No code generation and any C# Reflection in Runtime.
+* Structure-based and Cache-friendly.
+* Reactive and Fast Filters.
+* Built-in Events and Reactive Variables.
+* Single-threaded.
 
+## Table of Contents
 
-## 📖 How To Install
+* [Introduction](#introduction)
+  * [Base concept of ECS pattern](#base-concept-of-ecs-pattern)
+  * [Getting Start](#getting-start)
+  * [Advanced](#advanced)
+* [How To Install](#how-to-install)
+* [License](#license)
+* [Contacts](#contacts)
 
-Minimal Unity Version is 2019.3.*  
+## Introduction
+### Base concept of ECS pattern
 
-<details>
-    <summary>Open Package Manager and add Morpeh URL.  </summary>
-    
-![installation_step1.png](Gifs~/installation_step1.png)  
-![installation_step2.png](Gifs~/installation_step2.png)  
-</details>
-  
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/X-Crew/Morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/X-Crew/Morpeh.git#develop  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/X-Crew/Morpeh.git#2020.8.0  
-
-<details>
-    <summary>You can update Morpeh by Discover Window. Select Help/Morpeh Discover menu.   </summary>
-    
-![update_morpeh.png](Gifs~/update_morpeh.png)  
-</details>
-
-
-## 📖 Introduction
-### 📘 Base concept of ECS pattern
-
-#### 🔖 Entity
+#### Entity
 Container of components.  
 Has a set of methods for add, get, set, remove components.
 
@@ -73,7 +41,7 @@ bool hasHealthComponent = entity.Has<HealthComponent>();
 ```
 
 
-#### 🔖 Component
+#### Component
 Components are types which include only data.  
 In Morpeh components are value types for performance purposes.
 ```c#
@@ -82,7 +50,7 @@ public struct HealthComponent : IComponent {
 }
 ```
 
-#### 🔖 System
+#### System
 
 Types that process entities with a specific set of components.  
 Entities are selected using a filter.
@@ -109,7 +77,7 @@ public class HealthSystem : ISystem {
 }
 ```
 
-#### 🔖 World
+#### World
 A type that contains entities, components caches, systems and root filter.
 ```c#
 var newWorld = World.Create();
@@ -128,8 +96,8 @@ var filter = newWorld.Filter.With<HealthComponent>();
 
 ---
 
-### 📘 Getting Started
-> 💡 **IMPORTANT**  
+### Getting Started
+> **IMPORTANT**  
 > For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.  
 > All GIFs are hidden under spoilers.
   
@@ -160,7 +128,7 @@ using Unity.IL2CPP.CompilerServices;
 public struct HealthComponent : IComponent {
 }
 ```
-> 💡 Don't care about attributes.  
+> Don't care about attributes.  
 > Il2CppSetOption attribute can give you better performance.  
 
 Add health points field to the component.  
@@ -180,7 +148,7 @@ Now let's create first system.
 ![create_system.gif](Gifs~/create_system.gif)
 </details>
  
-> 💡 Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem.  
+> Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem.  
 > They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate.
 
 System looks like this.
@@ -215,7 +183,7 @@ public sealed class HealthSystem : UpdateSystem {
     }
 }
 ```
-> 💡 You can chain filters by two operators `With<>` and `Without<>`.  
+> You can chain filters by two operators `With<>` and `Without<>`.  
 > For example `this.World.Filter.With<FooComponent>().With<BarComponent>().Without<BeeComponent>();`
   
 Now we can iterate all needed entities.
@@ -235,8 +203,8 @@ public sealed class HealthSystem : UpdateSystem {
     }
 }
 ```
-> 💡 Don't forget about `ref` operator.  
-> Components are struct and if you want to change them directly, then you must use reference operator.
+> Don't forget about `ref` operator.  
+> Components are struct and if you wanna change them directly, then you must use reference operator.
 
 For high performance, you can do cached sampling.  
 No need to do GetComponent from entity every time.  
@@ -322,78 +290,44 @@ public sealed class HealthProvider : MonoProvider<HealthComponent> {
 Now press the play button, and you will see Debug.Log with healthPoints.  
 Nice!  
 
-### 📖 Advanced
+### Advanced
 
-#### 📘 Event system. Singletons and Globals Assets.  
-There is an execution order in the ECS pattern, so we cannot use standard delegates or events, they will break it.  
-
-ECS uses the concept of a deferred call, or the events are data.  
-In the simplest cases, events are used as entities with empty components called tags or markers.  
-That is, in order to notify someone about the event, you need to create an entity and add an empty component to it.  
-Another system creates a filter for this component, and if there are entities, we believe that the event is published.  
-
-In general, this is a working approach, but there are several problems.  
-Firstly, these tags overwhelm the project with their types, if you wrote a message bus, then you understand what I mean.  
-Each event in the game has its own unique type and there is not enough imagination to give everyone a name.  
-Secondly, it’s uncomfortable working with these events from MonoBehaviours, UI, Visual Scripting Frameworks (Playmaker, Bolt, etc.)  
-
-As a solution to this problem, global assets were created.  
-
-🔖 **Singleton** is a simple ScriptableObject that is associated with one specific entity.  
-It is usually used to add dynamic components to one entity without using filters.  
-
-🔖 **GlobalEvent** is a Singleton, which has the functionality of publishing events to the world by adding a tag to its entity.  
-It has 4 main methods for working with it:  
-1) Publish (arg) - publish within the frame, and all downstream systems will see this.  
-2) NextFrame (arg) - publish in the next frame, all systems will see this.  
-3) IsPublished - did anyone publish this event  
-4) BatchedChanges - a data stack where publication arguments are added.  
-
-🔖 **GlobalVariable** is a GlobalEvent that stores the start value and the last value after the changes.  
-It also has the functionality of saving and loading data from PlayerPrefs.  
-
-You can create globals by context menu `Create/ECS/Globals/` in Project Window.  
-You can declare globals in any systems, components and scripts and set it by Inspector Window, for example:  
-```c#  
-public sealed class HealthSystem : UpdateSystem {
-    public GlobalEvent myEvent;
-    ...
-}
-```
-
-And check their publication with:  
-```c#  
-public sealed class HealthSystem : UpdateSystem {
-    public GlobalEvent myEvent;
-    ...
-    public override void OnUpdate(float deltaTime) {
-        if (myEvent.IsPublished) {
-            Debug.Log("Event is published");
-        }
-    }
-}
-```
-
-And there is also a variation with checking for null:  
-```c#  
-public sealed class HealthSystem : UpdateSystem {
-    public GlobalEvent myEvent;
-    ...
-    public override void OnUpdate(float deltaTime) {
-        if (myEvent) {
-            Debug.Log("Event is not null and is published");
-        }
-    }
-}
-```
+Globals
 
 ---
 
-## 📘 License
+## How To Install
 
-📄 [MIT License](LICENSE)
+### Git Installation
+#### For Unity 2019+
 
-## 💬 Contacts
+Add to your project manifiest by path `UnityProject/Packages/manifiest.json` next line:
+```json
+{
+  "dependencies": {
+     "com.xcrew.morpeh": "https://github.com/X-Crew/Morpeh.git"
+  }
+}
+```
+If you need develop branch add this line instead:
+```json
+{
+  "dependencies": {
+     "com.xcrew.morpeh": "https://github.com/X-Crew/Morpeh.git#develop"
+  }
+}
+```
 
-✉️ Telegram: [benjminmoore](https://t.me/benjminmoore)  
-📧 E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)
+
+### Manual Installation 
+- Go to [Releases](https://github.com/X-Crew/Morpeh/releases) and download latest package.
+- Import Morpeh.
+
+## License
+
+[MIT License](LICENSE)
+
+## Contacts
+
+Telegram: [benjminmoore](https://t.me/benjminmoore)  
+E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)

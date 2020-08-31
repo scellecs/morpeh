@@ -95,7 +95,7 @@
             }
         }
 
-        protected override void OnEnable() {
+        internal override void OnEnable() {
             base.OnEnable();
             this.__internalKey = null;
             UnityRuntimeHelper.onApplicationFocusLost += this.SaveData;
@@ -107,7 +107,7 @@
             this.LoadData();
         }
 #if UNITY_EDITOR
-        protected override void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
+        internal override void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             base.OnEditorApplicationOnplayModeStateChanged(state);
             if (state == PlayModeStateChange.EnteredEditMode) {
                 this.SaveData();

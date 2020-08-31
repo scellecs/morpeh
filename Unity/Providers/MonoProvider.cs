@@ -58,14 +58,14 @@
 
         protected sealed override void PreInitialize() {
             var ent = this.Entity;
-            if (ent != null && !ent.isDisposed) {
+            if (ent != null && !ent.IsDisposed()) {
                 ent.SetComponent(this.serializedData);
             }
         }
 
         protected override void OnDisable() {
             var ent = this.Entity;
-            if (ent.IsNullOrDisposed() == false) {
+            if (ent != null && !ent.IsDisposed()) {
                 ent.RemoveComponent<T>();
             }
             base.OnDisable();

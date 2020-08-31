@@ -28,7 +28,7 @@ namespace Morpeh.Globals {
             public int worldId;
             
             internal override void Awake(World world) {
-                this.worldId = world.identifier;
+                this.worldId = world.id;
 
                 if (initialized.ContainsKey(this.worldId)) {
                     initialized[this.worldId] = true;
@@ -94,7 +94,7 @@ namespace Morpeh.Globals {
             public int worldId;
 
             public void OnAwake() {
-                this.worldId = this.World.identifier;
+                this.worldId = this.World.id;
             }
 
             public void OnUpdate(float deltaTime) {
@@ -118,11 +118,11 @@ namespace Morpeh.Globals {
 }
 
 namespace Morpeh {
-    partial class WorldExtensions {
-        static partial void InitializeGlobals(this World world) {
-            var sg = world.CreateSystemsGroup();
+    partial class World {
+        partial void InitializeGlobals() {
+            var sg = this.CreateSystemsGroup();
             sg.AddSystem(new Morpeh.Globals.ECS.ProcessEventsSystem());
-            world.AddSystemsGroup(99999, sg);
+            this.AddSystemsGroup(99999, sg);
         }
     }
 }
