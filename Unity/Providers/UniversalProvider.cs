@@ -2,10 +2,14 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
+    using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
     using Debug = UnityEngine.Debug;
 
     public class UniversalProvider : EntityProvider {
+        private static TypeComponentEqualityComparer comparer = new TypeComponentEqualityComparer();
+        
         [Space]
         [SerializeReference]
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -16,7 +20,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool ShowSerializedComponents => this.internalEntityID > -1;
 #endif
-        
+
         protected virtual void OnValidate() {
             foreach (var component in this.serializedComponents) {
                 if (component is IValidatable validatable) {
@@ -26,6 +30,8 @@
                     validatableWithGameObject.OnValidate(this.gameObject);
                 }
             }
+
+            this.serializedComponents = this.serializedComponents.Distinct(comparer).ToArray();
         }
         protected sealed override void PreInitialize() {
             var ent = this.Entity;
@@ -58,6 +64,12 @@
                 }
             }
             base.OnDisable();
+        }
+        
+        private class TypeComponentEqualityComparer : IEqualityComparer<IComponent> {
+            public bool Equals(IComponent x, IComponent y) => x != null && y != null && x.GetType() == y.GetType();
+
+            public int GetHashCode(IComponent obj) => obj.GetType().GetHashCode();
         }
     }
 }
