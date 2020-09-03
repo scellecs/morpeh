@@ -1138,10 +1138,15 @@ namespace Morpeh {
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
                 foreach (var type in assembly.GetTypes()) {
                     if (typeof(IComponent).IsAssignableFrom(type) && type.IsValueType && !type.ContainsGenericParameters) {
-                        typeof(TypeIdentifier<>)
-                            .MakeGenericType(type)
-                            .GetMethod("Warmup", BindingFlags.Static | BindingFlags.Public)
-                            .Invoke(null, null);
+                        try {
+                            typeof(TypeIdentifier<>)
+                                .MakeGenericType(type)
+                                .GetMethod("Warmup", BindingFlags.Static | BindingFlags.Public)
+                                .Invoke(null, null);
+                        }
+                        catch {
+                            Debug.LogWarning($"[MORPEH] Attention component type {type.FullName} not used, but exists in build");
+                        }
                     }
                 }
             }
