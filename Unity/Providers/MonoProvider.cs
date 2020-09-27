@@ -59,9 +59,11 @@
         protected virtual void OnValidate() {
             if (this.serializedData is IValidatable validatable) {
                 validatable.OnValidate();
+                this.serializedData = (T)validatable;
             }
             if (this.serializedData is IValidatableWithGameObject validatableWithGameObject) {
                 validatableWithGameObject.OnValidate(this.gameObject);
+                this.serializedData = (T)validatableWithGameObject;
             }
         }
 
