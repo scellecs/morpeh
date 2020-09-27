@@ -22,12 +22,16 @@
 #endif
 
         protected virtual void OnValidate() {
-            foreach (var component in this.serializedComponents) {
+            for (var i = 0; i < this.serializedComponents.Length; i++) {
+                var component = this.serializedComponents[i];
                 if (component is IValidatable validatable) {
                     validatable.OnValidate();
+                    this.serializedComponents[i] = (IComponent) validatable;
                 }
+
                 if (component is IValidatableWithGameObject validatableWithGameObject) {
                     validatableWithGameObject.OnValidate(this.gameObject);
+                    this.serializedComponents[i] = (IComponent) validatableWithGameObject;
                 }
             }
 
