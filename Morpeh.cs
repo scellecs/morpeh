@@ -2336,7 +2336,7 @@ namespace Morpeh {
                 this.length    = 0;
                 this.freeIndex = -1;
 
-                this.capacityMinusOne = HashHelpers.GetPrime(capacity);
+                this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
                 this.capacity         = this.capacityMinusOne + 1;
                 this.buckets          = new int[this.capacity];
                 this.slots            = new int[this.capacity / 2];
@@ -2426,7 +2426,7 @@ namespace Morpeh {
                 }
                 else {
                     if (hashSet.lastIndex == hashSet.capacity * 2) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashSet.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashSet.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref hashSet.slots, newCapacity * 2);
@@ -2588,7 +2588,7 @@ namespace Morpeh {
                 this.length    = 0;
                 this.freeIndex = -1;
 
-                this.capacityMinusOne = HashHelpers.GetPrime(capacity);
+                this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
                 this.capacity         = this.capacityMinusOne + 1;
 
                 this.buckets = new int[this.capacity];
@@ -2680,7 +2680,7 @@ namespace Morpeh {
                 }
                 else {
                     if (hashMap.lastIndex == hashMap.capacity) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref hashMap.slots, newCapacity);
@@ -2739,7 +2739,7 @@ namespace Morpeh {
                 }
                 else {
                     if (hashMap.lastIndex == hashMap.capacity) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref hashMap.slots, newCapacity);
@@ -2946,7 +2946,7 @@ namespace Morpeh {
                 this.length    = 0;
                 this.freeIndex = -1;
 
-                this.capacityMinusOne = HashHelpers.GetPrime(capacity);
+                this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
                 this.capacity         = this.capacityMinusOne + 1;
 
                 this.buckets = new int[this.capacity];
@@ -3037,7 +3037,7 @@ namespace Morpeh {
                 }
                 else {
                     if (hashMap.lastIndex == hashMap.capacity * 2) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref hashMap.slots, newCapacity * 2);
@@ -3293,7 +3293,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public FastList(int capacity) {
-                this.capacity = HashHelpers.GetPrime(capacity);
+                this.capacity = HashHelpers.GetCapacity(capacity);
                 this.data     = new T[this.capacity];
                 this.length   = 0;
 
@@ -3491,7 +3491,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public IntFastList(int capacity) {
-                this.capacity = HashHelpers.GetPrime(capacity);
+                this.capacity = HashHelpers.GetCapacity(capacity);
                 this.data     = new int[this.capacity];
                 this.length   = 0;
             }
@@ -3731,7 +3731,7 @@ namespace Morpeh {
             //https://github.com/dotnet/runtime/blob/master/src/libraries/System.Private.CoreLib/src/System/Collections/HashHelpers.cs#L32
             //different primes to fit n^2 - 1
             //todo expand to maxInt
-            internal static readonly int[] primes = {
+            internal static readonly int[] capacitySizes = {
                 3,
                 15,
                 63,
@@ -3745,20 +3745,20 @@ namespace Morpeh {
                 4194303,
             };
 
-            public static int ExpandPrime(int oldSize) {
+            public static int ExpandCapacity(int oldSize) {
                 var min = oldSize << 1;
-                return min > 2146435069U && 2146435069 > oldSize ? 2146435069 : GetPrime(min);
+                return min > 2146435069U && 2146435069 > oldSize ? 2146435069 : GetCapacity(min);
             }
 
-            public static int GetPrime(int min) {
-                for (int index = 0, length = primes.Length; index < length; ++index) {
-                    var prime = primes[index];
+            public static int GetCapacity(int min) {
+                for (int index = 0, length = capacitySizes.Length; index < length; ++index) {
+                    var prime = capacitySizes[index];
                     if (prime >= min) {
                         return prime;
                     }
                 }
 
-                throw new Exception("Prime is too big");
+                throw new Exception("Capacity is too big");
             }
         }
     }
