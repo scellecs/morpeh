@@ -39,7 +39,8 @@ namespace Morpeh.Globals {
                 this.internalEntity.AddComponent<GlobalEventMarker>();
                 this.internalEntity.SetComponent(new GlobalEventComponent<TData> {
                     Action = null,
-                    Data   = new Stack<TData>()
+                    Data   = new Stack<TData>(),
+                    NewData = new Queue<TData>()
                 });
                 this.internalEntity.SetComponent(new GlobalEventLastToString {
                     LastToString = this.LastToString
@@ -76,7 +77,7 @@ namespace Morpeh.Globals {
         public virtual void Publish(TData data) {
             this.CheckIsInitialized();
             ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
-            component.Data.Push(data);
+            component.NewData.Enqueue(data);
             this.InternalEntity.SetComponent(new GlobalEventNextFrame());
         }
 

@@ -45,6 +45,9 @@ namespace Morpeh.Globals {
                     ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
+                    while (evnt.NewData.Count > 0) {
+                        evnt.Data.Push(evnt.NewData.Dequeue());
+                    }
                     entity.RemoveComponent<GlobalEventPublished>();
                 }
                 foreach (var entity in this.filterNextFrame) {
@@ -63,6 +66,7 @@ namespace Morpeh.Globals {
         public struct GlobalEventComponent<TData> : IComponent {
             public Action<IEnumerable<TData>> Action;
             public Stack<TData>               Data;
+            public Queue<TData>               NewData;
         }
         [Serializable]
         public struct GlobalEventLastToString : IComponent {
