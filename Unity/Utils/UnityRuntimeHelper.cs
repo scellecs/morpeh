@@ -150,6 +150,9 @@ namespace Morpeh {
                             if (e.componentsIds == null) {
                                 world.entities[i] = null;
                             }
+
+                            e.world            = world;
+                            e.currentArchetype = world.archetypes.data[e.currentArchetypeId];
                         }
 
                         world.Ctor();
