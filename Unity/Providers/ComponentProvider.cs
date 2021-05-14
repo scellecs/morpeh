@@ -9,7 +9,8 @@
     public abstract class ComponentProvider<T0, T1> : MonoProvider<T1>
         where T0 : UnityEngine.Component
         where T1 : struct, IMonoComponent<T0> {
-        private void OnValidate() {
+        protected override void OnValidate() {
+            base.OnValidate();
             ref var data = ref GetData(out _);
             if (data.monoComponent == null) {
                 data.monoComponent = this.gameObject.GetComponent<T0>();
