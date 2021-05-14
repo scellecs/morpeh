@@ -11,10 +11,5 @@ namespace Morpeh.Globals {
         public virtual void Publish() {
             base.Publish(-1);
         }
-        
-        [ContextMenu("NextFrame")]
-        public virtual void NextFrame() {
-            base.NextFrame(-1);
-        }
     }
 }

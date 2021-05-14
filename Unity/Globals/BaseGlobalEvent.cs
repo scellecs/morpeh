@@ -77,13 +77,6 @@ namespace Morpeh.Globals {
             this.CheckIsInitialized();
             ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
             component.Data.Push(data);
-            this.InternalEntity.SetComponent(new GlobalEventPublished());
-        }
-
-        public virtual void NextFrame(TData data) {
-            this.CheckIsInitialized();
-            ref var component = ref this.InternalEntity.GetComponent<GlobalEventComponent<TData>>(out _);
-            component.Data.Push(data);
             this.InternalEntity.SetComponent(new GlobalEventNextFrame());
         }
 

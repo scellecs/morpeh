@@ -12,7 +12,6 @@ namespace Morpeh.Globals {
             internal static Dictionary<int, List<GlobalEventComponentUpdater>> updaters = new Dictionary<int, List<GlobalEventComponentUpdater>>();
 
             protected Filter filterPublishedWithoutNextFrame;
-            protected Filter filterPublishedNextFrame;
             protected Filter filterNextFrame;
 
             internal abstract void Awake(World world);
@@ -38,8 +37,7 @@ namespace Morpeh.Globals {
                 }
                 
                 var common = world.Filter.With<GlobalEventMarker>().With<GlobalEventComponent<T>>();
-                this.filterPublishedWithoutNextFrame = common.With<GlobalEventPublished>().Without<GlobalEventNextFrame>();
-                this.filterPublishedNextFrame = common.With<GlobalEventPublished>().With<GlobalEventNextFrame>();
+                this.filterPublishedWithoutNextFrame = common.With<GlobalEventPublished>();
                 this.filterNextFrame = common.With<GlobalEventNextFrame>();
             }
 
@@ -49,10 +47,6 @@ namespace Morpeh.Globals {
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
                     entity.RemoveComponent<GlobalEventPublished>();
-                }
-                foreach (var entity in this.filterPublishedNextFrame) {
-                    ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
-                    evnt.Action?.Invoke(evnt.Data);
                 }
                 foreach (var entity in this.filterNextFrame) {
                     entity.SetComponent(new GlobalEventPublished ());
