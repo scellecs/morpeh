@@ -1994,6 +1994,19 @@ namespace Morpeh {
                 }
             }
 
+            throw new InvalidOperationException("The source sequence is empty.");
+        }
+        
+        [CanBeNull]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Entity FirstOrDefault(this Filter filter) {
+            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+                var archetype = filter.archetypes.data[i];
+                if (archetype.length > 0) {
+                    return archetype.entities.data[0];
+                }
+            }
+
             return default;
         }
 
