@@ -2152,7 +2152,8 @@ namespace Morpeh {
                 return;
             }
 
-            info = new CommonTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
+            var typeFieldsLength = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length;
+            info = new CommonTypeIdentifier.TypeInfo(typeFieldsLength == 0, typeof(IDisposable).IsAssignableFrom(typeof(T)));
             var id = CommonTypeIdentifier.GetID<T>();
             info.SetID(id);
         }
