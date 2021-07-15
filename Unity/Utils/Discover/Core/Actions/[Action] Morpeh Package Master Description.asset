@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: '[Action] Morpeh Package Master Description'
   m_EditorClassIdentifier: 
   packageName: com.xcrew.morpeh
-  packageURL: https://github.com/X-Crew/Morpeh.git
+  packageURL: https://github.com/scellecs/Morpeh.git

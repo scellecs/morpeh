@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: '[Action] Morpeh Package Master SSH Description'
   m_EditorClassIdentifier: 
   packageName: com.xcrew.morpeh
-  packageURL: ssh://git@github.com/X-Crew/Morpeh.git
+  packageURL: ssh://git@github.com/scellecs/Morpeh.git
