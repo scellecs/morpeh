@@ -10,7 +10,7 @@
     "ecs"
   ],
   "dependencies": {},
-  "gitDependencies": [
+  "simpleGitDependencies": [
     "https://github.com/scellecs/frigg.git"
   ],
   "repository": {
