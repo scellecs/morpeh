@@ -11,7 +11,7 @@
   ],
   "dependencies": {},
   "gitDependencies": [
-    "ssh://git@github.com/scellecs/frigg.git"
+    "https://github.com/scellecs/frigg.git"
   ],
   "repository": {
     "type": "git",

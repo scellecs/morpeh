@@ -5,7 +5,7 @@
 # Morpeh
 🎲 **ECS Framework for Unity Game Engine.**  
    
-Adapted for the development mobile games like:  
+Adapted for the rapid development mobile games like:  
 &nbsp;&nbsp;&nbsp;&nbsp;📕 Hyper Casual  
 &nbsp;&nbsp;&nbsp;&nbsp;📗 Idlers  
 &nbsp;&nbsp;&nbsp;&nbsp;📘 Arcades  
@@ -13,11 +13,10 @@ Adapted for the development mobile games like:
   
 Features:  
 * Simple Syntax.  
-* Simple Integration with Unity Engine.  
-* No code generation and any C# Reflection in Runtime.  
-* Structure-based and Cache-friendly.  
-* Reactive and Fast Filters.  
-* Built-in Events and Reactive Variables aka Globals.  
+* Plug & Play Installation.  
+* No code generation.  
+* Structure-Based and Cache-Friendly.  
+* Built-in Events and Reactive Variables.  
 * Single-threaded.  
 
 ## 📖 Table of Contents
@@ -33,7 +32,9 @@ Features:
 
 ## 📖 How To Install
 
-Minimal Unity Version is 2019.3.*  
+> 💡 **IMPORTANT**  
+> Check if you have Git LFS installed.  
+> Minimal Unity Version is 2019.4
 
 <details>
     <summary>Open Package Manager and add Morpeh URL.  </summary>
@@ -44,7 +45,7 @@ Minimal Unity Version is 2019.3.*
   
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/X-Crew/Morpeh.git  
 &nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/X-Crew/Morpeh.git#develop  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/X-Crew/Morpeh.git#2020.8.0  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/X-Crew/Morpeh.git#2021.1.0  
 
 <details>
     <summary>You can update Morpeh by Discover Window. Select Help/Morpeh Discover menu.   </summary>
