@@ -24,12 +24,13 @@ namespace Morpeh.Utils.Editor {
     public class DependencyResolver : MonoBehaviour {
         [Serializable]
         internal class CustomPackageInfo {
-            public string   name            = default;
-            public string   version         = default;
             public string[] simpleGitDependencies = default;
         }
 
         static DependencyResolver() {
+            //todo
+            //UnityEditor.PackageManager.Events.registeredPackages replace for unity 2020+
+            //we still support 2019.4 so we use assemblyReload event
             CompilationPipeline.assemblyCompilationStarted += CompilationPipelineOnAssemblyCompilationStarted;
             AssemblyReloadEvents.afterAssemblyReload       += AssemblyReloadEventsOnAfterAssemblyReload;
         }
@@ -42,6 +43,7 @@ namespace Morpeh.Utils.Editor {
         private static void CompilationPipelineOnAssemblyCompilationStarted(string obj) {
             CompilationPipeline.assemblyCompilationStarted -= CompilationPipelineOnAssemblyCompilationStarted;
             ResolveDependencies();
+           
         }
 
         private static async void ResolveDependencies() {
