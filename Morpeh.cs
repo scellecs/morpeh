@@ -365,6 +365,28 @@ namespace Morpeh {
 
             return entity.componentsIds.TryGetIndex(TypeIdentifier<T>.info.id) >= 0;
         }
+        
+        public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
+#if MORPEH_DEBUG
+            if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying MigrateTo on null or disposed entities");
+            }
+#endif
+            
+            foreach (var index in from.componentsIds) {
+                var key   = from.componentsIds.GetKeyByIndex(index);
+                var value = from.componentsIds.GetValueByIndex(index);
+
+                from.RemoveComponentFast(key, out _);
+                if (to.Has(key)) {
+                    if (overwrite == false) {
+                        return;
+                    }
+                    to.RemoveComponentFast(key, out _);
+                }
+                to.AddComponentFast(key, value);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddTransfer(this Entity entity, int typeId) {
