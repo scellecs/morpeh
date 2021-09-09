@@ -3880,49 +3880,55 @@ namespace Morpeh {
                             return;
                         }
                     }
+                }
 
-                    int slotIndex;
-                    if (bitmap.freeIndex >= 0) {
-                        slotIndex        = bitmap.freeIndex;
+                int slotIndex;
+                if (bitmap.freeIndex >= 0) {
+                    slotIndex = bitmap.freeIndex;
+                    fixed (int* slotsPtr = &bitmap.slots[0]) {
                         bitmap.freeIndex = *(slotsPtr + slotIndex + 1);
                     }
-                    else {
-                        if (bitmap.lastIndex == bitmap.capacity << 1) {
-                            var newCapacityMinusOne = HashHelpers.ExpandCapacity(bitmap.length);
-                            var newCapacity         = newCapacityMinusOne + 1;
+                }
+                else {
+                    if (bitmap.lastIndex == bitmap.capacity << 1) {
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(bitmap.length);
+                        var newCapacity         = newCapacityMinusOne + 1;
 
-                            ArrayHelpers.Grow(ref bitmap.slots, newCapacity << 1);
-                            ArrayHelpers.Grow(ref bitmap.data, newCapacity);
+                        ArrayHelpers.Grow(ref bitmap.slots, newCapacity << 1);
+                        ArrayHelpers.Grow(ref bitmap.data, newCapacity);
 
-                            var newBuckets = new int[newCapacity];
+                        var newBuckets = new int[newCapacity];
 
-                            fixed (int* newBucketsPtr = &newBuckets[0]) {
-                                for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
-                                    var slotPtr = slotsPtr + i;
+                        fixed (int* slotsPtr = &bitmap.slots[0])
+                        fixed (int* newBucketsPtr = &newBuckets[0]) {
+                            for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
+                                var slotPtr = slotsPtr + i;
 
-                                    var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
-                                    var newCurrentBucket = newBucketsPtr + newResizeIndex;
+                                var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                                var newCurrentBucket = newBucketsPtr + newResizeIndex;
 
-                                    *(slotPtr + 1) = *newCurrentBucket - 1;
+                                *(slotPtr + 1) = *newCurrentBucket - 1;
 
-                                    *newCurrentBucket = i + 1;
-                                }
+                                *newCurrentBucket = i + 1;
                             }
-
-                            bitmap.buckets          = newBuckets;
-                            bitmap.capacity         = newCapacity;
-                            bitmap.capacityMinusOne = newCapacityMinusOne;
-
-                            rem = index & bitmap.capacityMinusOne;
                         }
 
-                        slotIndex        =  bitmap.lastIndex;
-                        bitmap.lastIndex += 2;
+                        bitmap.buckets          = newBuckets;
+                        bitmap.capacity         = newCapacity;
+                        bitmap.capacityMinusOne = newCapacityMinusOne;
+
+                        rem = dataIndex & bitmap.capacityMinusOne;
                     }
 
+                    slotIndex        =  bitmap.lastIndex;
+                    bitmap.lastIndex += 2;
+                }
 
+                fixed (int* slotsPtr = &bitmap.slots[0])
+                fixed (int* bucketsPtr = &bitmap.buckets[0])
+                fixed (int* dataPtr = &bitmap.data[0]) {
                     var bucket = bucketsPtr + rem;
-                    slot = slotsPtr + slotIndex;
+                    var slot   = slotsPtr + slotIndex;
 
                     *slot       = dataIndex + 1;
                     *(slot + 1) = *bucket - 1;
@@ -3930,10 +3936,9 @@ namespace Morpeh {
                     *(dataPtr + (slotIndex >> 1)) |= 1 << bitIndex;
 
                     *bucket = slotIndex + 1;
-
-
-                    ++bitmap.length;
                 }
+
+                ++bitmap.length;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
