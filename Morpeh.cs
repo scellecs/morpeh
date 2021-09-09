@@ -159,7 +159,7 @@ namespace Morpeh {
                 cache.Remove(componentId);
             }
 #if MORPEH_DEBUG
-            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
 #endif
             return ref cache.Empty();
         }
@@ -193,7 +193,7 @@ namespace Morpeh {
                 cache.Remove(componentId);
             }
 #if MORPEH_DEBUG
-            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
+            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
 #endif
             exist = true;
             return ref cache.Empty();
@@ -234,7 +234,7 @@ namespace Morpeh {
             }
 
 #if MORPEH_DEBUG
-            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
+            Debug.LogError($"[MORPEH] You're trying to get on entity {entity.internalID} a component that doesn't exists!");
 #endif
             return ref cache.Empty();
         }
