@@ -399,7 +399,7 @@ namespace Morpeh {
                 return;
             }
 
-            entity.world.dirtyEntities.Add(entity);
+            entity.world.dirtyEntities.Set(entity.internalID);
             entity.isDirty = true;
         }
 
@@ -414,7 +414,7 @@ namespace Morpeh {
                 return;
             }
 
-            entity.world.dirtyEntities.Add(entity);
+            entity.world.dirtyEntities.Set(entity.internalID);
             entity.isDirty = true;
         }
 
@@ -466,7 +466,7 @@ namespace Morpeh {
 
             entity.currentArchetypeId = -1;
             if (entity.isDirty == false) {
-                entity.world.dirtyEntities.Add(entity);
+                entity.world.dirtyEntities.Set(entity.internalID);
                 entity.isDirty = true;
             }
         }
@@ -951,7 +951,7 @@ namespace Morpeh {
         internal int entitiesCapacity;
 
         [NonSerialized]
-        internal FastList<Entity> dirtyEntities;
+        internal BitMap dirtyEntities;
 
         [SerializeField]
         internal IntFastList freeEntityIDs;
@@ -1105,7 +1105,7 @@ namespace Morpeh {
             world.Filter         = new Filter(world);
             world.filters        = new FastList<Filter>();
             world.archetypeCache = new IntFastList();
-            world.dirtyEntities  = new FastList<Entity>();
+            world.dirtyEntities  = new BitMap();
 
             if (world.archetypes != null) {
                 foreach (var archetype in world.archetypes) {
@@ -1400,11 +1400,11 @@ namespace Morpeh {
         }
 
         public static void UpdateFilters(this World world) {
-            for (var index = 0; index < world.dirtyEntities.length; index++) {
-                world.dirtyEntities.data[index].ApplyTransfer();
+            foreach (var entityId in world.dirtyEntities) {
+                world.entities[entityId].ApplyTransfer();
             }
 
-            world.dirtyEntities.length = 0;
+            world.dirtyEntities.FastClear();
 
             if (world.newArchetypes.length > 0) {
                 for (var index = 0; index < world.filters.length; index++) {
@@ -4047,6 +4047,19 @@ namespace Morpeh {
                 Array.Clear(bitMap.slots, 0, bitMap.lastIndex);
                 Array.Clear(bitMap.buckets, 0, bitMap.capacity);
                 Array.Clear(bitMap.data, 0, bitMap.capacity);
+
+                bitMap.lastIndex = 0;
+                bitMap.length    = 0;
+                bitMap.freeIndex = -1;
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void FastClear(this BitMap bitMap) {
+                if (bitMap.lastIndex <= 0) {
+                    return;
+                }
+
+                Array.Clear(bitMap.buckets, 0, bitMap.capacity);
 
                 bitMap.lastIndex = 0;
                 bitMap.length    = 0;
