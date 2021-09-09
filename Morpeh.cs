@@ -68,7 +68,7 @@ namespace Morpeh {
     public interface IValidatable {
         void OnValidate();
     }
-    
+
     public interface IValidatableWithGameObject {
         void OnValidate(GameObject gameObject);
     }
@@ -117,7 +117,7 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public static class EntityExtensions {
         internal static Entity Create(int id, int worldID) {
-            var newEntity = new Entity {internalID = id, worldID = worldID};
+            var newEntity = new Entity { internalID = id, worldID = worldID };
 
             newEntity.world = World.worlds.data[newEntity.worldID];
 
@@ -365,14 +365,14 @@ namespace Morpeh {
 
             return entity.componentsIds.TryGetIndex(TypeIdentifier<T>.info.id) >= 0;
         }
-        
+
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying MigrateTo on null or disposed entities");
             }
 #endif
-            
+
             foreach (var index in from.componentsIds) {
                 var key   = from.componentsIds.GetKeyByIndex(index);
                 var value = from.componentsIds.GetValueByIndex(index);
@@ -921,7 +921,7 @@ namespace Morpeh {
         [CanBeNull]
         public static World Default => worlds.data[0];
         [NotNull]
-        internal static FastList<World> worlds = new FastList<World> {null};
+        internal static FastList<World> worlds = new FastList<World> { null };
 
         [NonSerialized]
         public Filter Filter;
@@ -1132,9 +1132,9 @@ namespace Morpeh {
             world.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             world.entities         = new Entity[world.entitiesCapacity];
 
-            world.archetypes         = new FastList<Archetype> {new Archetype(0, new int[0], world.identifier)};
+            world.archetypes         = new FastList<Archetype> { new Archetype(0, new int[0], world.identifier) };
             world.archetypesByLength = new IntHashMap<IntFastList>();
-            world.archetypesByLength.Add(0, new IntFastList {0}, out _);
+            world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
             world.newArchetypes = new IntFastList();
 
             return world;
@@ -1225,7 +1225,7 @@ namespace Morpeh {
                 archsl.Add(archetypeId);
             }
             else {
-                world.archetypesByLength.Add(typesLength, new IntFastList {archetypeId}, out _);
+                world.archetypesByLength.Add(typesLength, new IntFastList { archetypeId }, out _);
             }
 
             world.newArchetypes.Add(archetypeId);
@@ -1254,7 +1254,7 @@ namespace Morpeh {
             ComponentsCache<T> componentsCache;
             if (info.isDisposable) {
                 var constructedType = typeof(ComponentsCacheDisposable<>).MakeGenericType(typeof(T));
-                componentsCache = (ComponentsCache<T>) Activator.CreateInstance(constructedType);
+                componentsCache = (ComponentsCache<T>)Activator.CreateInstance(constructedType);
             }
             else {
                 componentsCache = new ComponentsCache<T>();
@@ -1445,7 +1445,7 @@ namespace Morpeh {
         [SerializeField]
         internal bool isDirty;
         [SerializeField]
-        internal FastList<Entity> entities;
+        internal BitMap entitiesBitMap;
         [NonSerialized]
         internal FastList<Filter> filters;
         [NonSerialized]
@@ -1468,7 +1468,7 @@ namespace Morpeh {
             this.id             = id;
             this.typeIds        = typeIds;
             this.length         = 0;
-            this.entities       = new FastList<Entity>();
+            this.entitiesBitMap = new BitMap();
             this.addTransfer    = new UnsafeIntHashMap<int>();
             this.removeTransfer = new UnsafeIntHashMap<int>();
 
@@ -1500,10 +1500,11 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal ComponentsBagPart(Archetype archetype) {
                 this.typeId = TypeIdentifier<T>.info.id;
-                this.ids    = new IntFastList(archetype.entities.length);
+                this.ids    = new IntFastList(archetype.entitiesBitMap.length);
+                var entities = archetype.world.entities;
 
-                foreach (var entity in archetype.entities) {
-                    this.ids.Add(entity.GetComponentFast(this.typeId));
+                foreach (var entity in archetype.entitiesBitMap) {
+                    this.ids.Add(entities[entity].GetComponentFast(this.typeId));
                 }
             }
 
@@ -1535,8 +1536,8 @@ namespace Morpeh {
             archetype.typeIds = null;
             archetype.world   = null;
 
-            archetype.entities.Clear();
-            archetype.entities = null;
+            archetype.entitiesBitMap.Clear();
+            archetype.entitiesBitMap = null;
 
             archetype.addTransfer.Clear();
             archetype.addTransfer = null;
@@ -1547,8 +1548,8 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Add(this Archetype archetype, Entity entity, out int index) {
-            index = archetype.entities.length;
-            archetype.entities.Add(entity);
+            index = archetype.entitiesBitMap.length;
+            archetype.entitiesBitMap.Set(entity.internalID);
             for (var i = 0; i < archetype.bagParts.length; i++) {
                 archetype.bagParts.data[i].Add(entity);
             }
@@ -1559,9 +1560,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove(this Archetype archetype, Entity entity) {
             var index = entity.indexInCurrentArchetype;
-            if (archetype.entities.RemoveAtSwap(index, out _)) {
-                archetype.entities.data[index].indexInCurrentArchetype = index;
-            }
+            archetype.entitiesBitMap.Unset(entity.internalID);
 
             for (var i = 0; i < archetype.bagParts.length; i++) {
                 archetype.bagParts.data[i].Remove(index);
@@ -1588,7 +1587,7 @@ namespace Morpeh {
                 archetype.filters.data[i].isDirty = true;
             }
 
-            archetype.length  = archetype.entities.length;
+            archetype.length  = archetype.entitiesBitMap.length;
             archetype.isDirty = false;
         }
 
@@ -1618,7 +1617,7 @@ namespace Morpeh {
             for (int i = 0, len = archetype.bagParts.length; i < len; i++) {
                 var bag = archetype.bagParts.data[i];
                 if (bag.typeId == typeId) {
-                    return (Archetype.ComponentsBagPart<T>) bag;
+                    return (Archetype.ComponentsBagPart<T>)bag;
                 }
             }
 
@@ -1766,28 +1765,36 @@ namespace Morpeh {
             private readonly FastList<Archetype> archetypes;
             private readonly int                 archetypeCount;
 
-            private int index;
             private int archetypeId;
 
             private Entity current;
 
-            private FastList<Entity> archetypeEntities;
+            private World  world;
+            private BitMap archetypeEntities;
+
+            private BitMap.Enumerator currentEnumerator;
 
             internal EntityEnumerator(Filter filter) {
+                this.world      = filter.world;
                 this.archetypes = filter.archetypes;
                 this.current    = null;
-                this.index      = 0;
 
                 this.archetypeId       = 0;
                 this.archetypeCount    = this.archetypes.length;
-                this.archetypeEntities = this.archetypeCount == 0 ? null : this.archetypes.data[0].entities;
+                if (this.archetypeCount != 0) {
+                    this.archetypeEntities = this.archetypes.data[0].entitiesBitMap;
+                    this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                }
+                else {
+                    this.archetypeEntities = default;
+                    this.currentEnumerator = default;
+                }
             }
 
             public bool MoveNext() {
                 if (this.archetypeCount == 1) {
-                    if (this.index < this.archetypeEntities.length) {
-                        this.current = this.archetypeEntities.data[this.index];
-                        ++this.index;
+                    if (this.currentEnumerator.MoveNext()) {
+                        this.current = this.world.entities[this.currentEnumerator.current];
                         return true;
                     }
 
@@ -1795,18 +1802,18 @@ namespace Morpeh {
                 }
 
                 if (this.archetypeId < this.archetypeCount) {
-                    if (this.index < this.archetypeEntities.length) {
-                        this.current = this.archetypeEntities.data[this.index];
-                        ++this.index;
+                    if (this.currentEnumerator.MoveNext()) {
+                        this.current = this.world.entities[this.currentEnumerator.current];
                         return true;
                     }
 
                     while (++this.archetypeId < this.archetypeCount) {
-                        this.archetypeEntities = this.archetypes.data[this.archetypeId].entities;
+                        this.archetypeEntities = this.archetypes.data[this.archetypeId].entitiesBitMap;
                         if (this.archetypeEntities.length > 0) {
-                            this.index   = 0;
-                            this.current = this.archetypeEntities.data[this.index];
-                            ++this.index;
+                            this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                            this.currentEnumerator.MoveNext();
+                            
+                            this.current = this.world.entities[this.currentEnumerator.current];
                             return true;
                         }
                     }
@@ -1816,10 +1823,16 @@ namespace Morpeh {
             }
 
             public void Reset() {
-                this.index             = 0;
                 this.current           = null;
                 this.archetypeId       = 0;
-                this.archetypeEntities = this.archetypeCount == 0 ? null : this.archetypes.data[0].entities;
+                if (this.archetypeCount != 0) {
+                    this.archetypeEntities = this.archetypes.data[0].entitiesBitMap;
+                    this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                }
+                else {
+                    this.archetypeEntities = default;
+                    this.currentEnumerator = default;
+                }
             }
 
             public Entity Current => this.current;
@@ -1975,7 +1988,7 @@ namespace Morpeh {
             for (int i = 0, length = filter.componentsBags.length; i < length; i++) {
                 var bag = filter.componentsBags.data[i];
                 if (bag.typeId == typeInfo.id) {
-                    return (Filter.ComponentsBag<T>) bag;
+                    return (Filter.ComponentsBag<T>)bag;
                 }
             }
 
@@ -1985,26 +1998,26 @@ namespace Morpeh {
             return componentsBag;
         }
 
-        [CanBeNull]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Entity GetEntity(this Filter filter, in int id) {
-            if (filter.archetypes.length == 1) {
-                return filter.archetypes.data[0].entities.data[id];
-            }
-
-            var num = 0;
-            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
-                var archetype = filter.archetypes.data[i];
-                var check     = num + archetype.length;
-                if (id < check) {
-                    return archetype.entities.data[id - num];
-                }
-
-                num = check;
-            }
-
-            return default;
-        }
+        // [CanBeNull]
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public static Entity GetEntity(this Filter filter, in int id) {
+        //     if (filter.archetypes.length == 1) {
+        //         return filter.archetypes.data[0].entities.data[id];
+        //     }
+        //
+        //     var num = 0;
+        //     for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+        //         var archetype = filter.archetypes.data[i];
+        //         var check     = num + archetype.length;
+        //         if (id < check) {
+        //             return archetype.entities.data[id - num];
+        //         }
+        //
+        //         num = check;
+        //     }
+        //
+        //     return default;
+        // }
 
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2012,20 +2025,24 @@ namespace Morpeh {
             for (int i = 0, length = filter.archetypes.length; i < length; i++) {
                 var archetype = filter.archetypes.data[i];
                 if (archetype.length > 0) {
-                    return archetype.entities.data[0];
+                    var temp = archetype.entitiesBitMap.GetEnumerator();
+                    temp.MoveNext();
+                    return filter.world.entities[temp.current];
                 }
             }
 
             throw new InvalidOperationException("The source sequence is empty.");
         }
-        
+
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
             for (int i = 0, length = filter.archetypes.length; i < length; i++) {
                 var archetype = filter.archetypes.data[i];
                 if (archetype.length > 0) {
-                    return archetype.entities.data[0];
+                    var temp = archetype.entitiesBitMap.GetEnumerator();
+                    temp.MoveNext();
+                    return filter.world.entities[temp.current];
                 }
             }
 
@@ -2131,8 +2148,8 @@ namespace Morpeh {
                 id                      = id,
                 type                    = type,
                 cacheGetComponentBoxed  = (world, componentId) => world.GetCache<T>().components.data[componentId],
-                cacheSetComponentBoxed  = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T) value,
-                entitySetComponentBoxed = (entity, component) => entity.SetComponent((T) component),
+                cacheSetComponentBoxed  = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T)value,
+                entitySetComponentBoxed = (entity, component) => entity.SetComponent((T)component),
                 entityRemoveComponent   = (entity) => entity.RemoveComponent<T>(),
                 typeInfo                = TypeIdentifier<T>.info
             };
@@ -2238,7 +2255,7 @@ namespace Morpeh {
                 typedCaches = new FastList<ComponentsCache<T>>();
             }
             typedCaches.Clear();
-            
+
             foreach (var cache in caches) {
                 if (cache.typeId == id) {
                     typedCaches.Add((ComponentsCache<T>)cache);
@@ -3732,6 +3749,312 @@ namespace Morpeh {
                 Array.Copy(list.data, 0, newArray, 0, list.length);
                 return newArray;
             }
+        }
+
+        [Serializable]
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        public sealed class BitMap : IEnumerable<int> {
+            internal const int BITS_PER_BYTE        = 8;
+            internal const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
+            internal const int BITS_PER_FIELD_SHIFT = 5; //6 for long
+
+            public int length;
+            public int capacity;
+            public int capacityMinusOne;
+            public int lastIndex;
+            public int freeIndex;
+
+            public int[] buckets;
+
+            public int[] data;
+            public int[] slots;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public BitMap(in int capacity = 0) {
+                this.lastIndex = 0;
+                this.length    = 0;
+                this.freeIndex = -1;
+
+                this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
+                this.capacity         = this.capacityMinusOne + 1;
+
+                this.buckets = new int[this.capacity];
+                this.slots   = new int[this.capacity << 1];
+                this.data    = new int[this.capacity];
+            }
+
+            IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public Enumerator GetEnumerator() {
+                Enumerator e;
+                e.hashMap          = this;
+                e.index            = default;
+                e.current          = default;
+                e.currentData      = default;
+                e.currentDataIndex = default;
+                return e;
+            }
+
+            [Il2CppSetOption(Option.NullChecks, false)]
+            [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+            [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+            public unsafe struct Enumerator : IEnumerator<int> {
+                public BitMap hashMap;
+
+                public int index;
+                public int current;
+                public int currentData;
+                public int currentDataIndex;
+
+                public bool MoveNext() {
+                    if (this.currentData != 0) {
+                        this.current     =  this.currentDataIndex + BitMapExtensions.NumberOfTrailingZeros(this.currentData);
+                        this.currentData &= this.currentData - 1;
+                        return true;
+                    }
+
+                    fixed (int* slotsPtr = &this.hashMap.slots[0])
+                    fixed (int* dataPtr = &this.hashMap.data[0]) {
+                        for (; this.index < this.hashMap.lastIndex; this.index += 2) {
+                            var dataIndex = *(slotsPtr + this.index) - 1;
+                            if (dataIndex < 0) {
+                                continue;
+                            }
+
+                            this.currentData      =  *(dataPtr + (this.index >> 1));
+                            this.currentDataIndex =  dataIndex * BITS_PER_FIELD;
+                            this.current          =  this.currentDataIndex + BitMapExtensions.NumberOfTrailingZeros(this.currentData);
+                            this.currentData      &= this.currentData - 1;
+
+                            this.index += 2;
+                            return true;
+                        }
+                    }
+
+                    this.index       = this.hashMap.lastIndex + 1;
+                    this.current     = default;
+                    this.currentData = default;
+                    return false;
+                }
+
+                public int Current => this.current;
+
+                object IEnumerator.Current => this.current;
+
+                void IEnumerator.Reset() {
+                    this.index            = default;
+                    this.current          = default;
+                    this.currentData      = default;
+                    this.currentDataIndex = default;
+                }
+
+                public void Dispose() {
+                }
+            }
+        }
+
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        public static unsafe class BitMapExtensions {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void Set(this BitMap bitmap, in int index) {
+                var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+
+                var rem = dataIndex & bitmap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &bitmap.slots[0])
+                fixed (int* bucketsPtr = &bitmap.buckets[0])
+                fixed (int* dataPtr = &bitmap.data[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == dataIndex) {
+                            *(dataPtr + (i >> 1)) |= 1 << bitIndex;
+                            return;
+                        }
+                    }
+
+                    int slotIndex;
+                    if (bitmap.freeIndex >= 0) {
+                        slotIndex        = bitmap.freeIndex;
+                        bitmap.freeIndex = *(slotsPtr + slotIndex + 1);
+                    }
+                    else {
+                        if (bitmap.lastIndex == bitmap.capacity << 1) {
+                            var newCapacityMinusOne = HashHelpers.ExpandCapacity(bitmap.length);
+                            var newCapacity         = newCapacityMinusOne + 1;
+
+                            ArrayHelpers.Grow(ref bitmap.slots, newCapacity << 1);
+                            ArrayHelpers.Grow(ref bitmap.data, newCapacity);
+
+                            var newBuckets = new int[newCapacity];
+
+                            fixed (int* newBucketsPtr = &newBuckets[0]) {
+                                for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
+                                    var slotPtr = slotsPtr + i;
+
+                                    var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                                    var newCurrentBucket = newBucketsPtr + newResizeIndex;
+
+                                    *(slotPtr + 1) = *newCurrentBucket - 1;
+
+                                    *newCurrentBucket = i + 1;
+                                }
+                            }
+
+                            bitmap.buckets          = newBuckets;
+                            bitmap.capacity         = newCapacity;
+                            bitmap.capacityMinusOne = newCapacityMinusOne;
+
+                            rem = index & bitmap.capacityMinusOne;
+                        }
+
+                        slotIndex        =  bitmap.lastIndex;
+                        bitmap.lastIndex += 2;
+                    }
+
+
+                    var bucket = bucketsPtr + rem;
+                    slot = slotsPtr + slotIndex;
+
+                    *slot       = dataIndex + 1;
+                    *(slot + 1) = *bucket - 1;
+
+                    *(dataPtr + (slotIndex >> 1)) |= 1 << bitIndex;
+
+                    *bucket = slotIndex + 1;
+
+
+                    ++bitmap.length;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Unset(this BitMap bitmap, in int index) {
+                var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+                var rem       = dataIndex & bitmap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &bitmap.slots[0])
+                fixed (int* bucketsPtr = &bitmap.buckets[0])
+                fixed (int* dataPtr = &bitmap.data[0]) {
+                    int next;
+                    var num = -1;
+
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        var slot     = slotsPtr + i;
+                        var slotNext = slot + 1;
+
+                        if (*slot - 1 == dataIndex) {
+                            var data = *(dataPtr + (i >> 1));
+                            data &= ~(1 << bitIndex);
+                            if (data == 0) {
+                                if (num < 0) {
+                                    *(bucketsPtr + rem) = *slotNext + 1;
+                                }
+                                else {
+                                    *(slotsPtr + num + 1) = *slotNext;
+                                }
+                                *slot     = -1;
+                                *slotNext = bitmap.freeIndex;
+
+                                if (--bitmap.length == 0) {
+                                    bitmap.lastIndex = 0;
+                                    bitmap.freeIndex = -1;
+                                }
+                                else {
+                                    bitmap.freeIndex = i;
+                                }
+
+                            }
+                            *(dataPtr + (i >> 1)) = data;
+                            return true;
+                        }
+
+                        next = *slotNext;
+                        num  = i;
+                    }
+
+                    return false;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool TryGet(this BitMap bitmap, in int index, out int value) {
+                var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+
+                var rem = dataIndex & bitmap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &bitmap.slots[0])
+                fixed (int* bucketsPtr = &bitmap.buckets[0])
+                fixed (int* dataPtr = &bitmap.data[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == dataIndex) {
+                            value = *(dataPtr + (i >> 1)) & (1 << bitIndex);
+                            return true;
+                        }
+                    }
+                }
+
+                value = default;
+                return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int Get(this BitMap bitMap, in int index) {
+                var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+
+                var rem = dataIndex & bitMap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &bitMap.slots[0])
+                fixed (int* bucketsPtr = &bitMap.buckets[0])
+                fixed (int* dataPtr = &bitMap.data[0]) {
+                    int next;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        if (*(slotsPtr + i) - 1 == dataIndex) {
+                            return *(dataPtr + (i >> 1)) & (1 << bitIndex);
+                        }
+
+                        next = *(slotsPtr + i + 1);
+                    }
+                }
+
+                return default;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void Clear(this BitMap bitMap) {
+                if (bitMap.lastIndex <= 0) {
+                    return;
+                }
+
+                Array.Clear(bitMap.slots, 0, bitMap.lastIndex);
+                Array.Clear(bitMap.buckets, 0, bitMap.capacity);
+                Array.Clear(bitMap.data, 0, bitMap.capacity);
+
+                bitMap.lastIndex = 0;
+                bitMap.length    = 0;
+                bitMap.freeIndex = -1;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int NumberOfTrailingZeros(int i) => lookupTrailingZeros[((uint)(i & -i) * 0x077CB531u) >> 27];
+
+            private static readonly int[] lookupTrailingZeros = {
+                0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
+                31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
+            };
         }
 
         [Il2Cpp(Option.NullChecks, false)]
