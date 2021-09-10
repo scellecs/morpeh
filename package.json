@@ -10,9 +10,6 @@
     "ecs"
   ],
   "dependencies": {},
-  "simpleGitDependencies": [
-    "https://github.com/scellecs/frigg.git"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/scellecs/Morpeh"
