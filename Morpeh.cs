@@ -266,12 +266,6 @@ namespace Morpeh {
                 entity.previousArchetypeId = -1;
 
                 if (entity.currentArchetypeId < 0) {
-                    //todo rework
-                    foreach (var slotIndex in entity.world.caches) {
-                        var cache = ComponentsCache.caches.data[slotIndex];
-                        cache?.RemoveComponent(entity);
-                    }
-
                     entity.DisposeFast();
                 }
                 else {
