@@ -26,12 +26,16 @@ namespace Morpeh.Editor {
             get {
                 this.componentViews.Clear();
                 if (this.entity != null) {
-                    foreach (var typeId in this.entity.components) {
-                        var view = new ComponentView {
-                            internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[typeId],
-                            entity                 = this.entity
-                        };
-                        this.componentViews.Add(view);
+                    //todo refactor
+                    foreach (var cacheId in this.entity.world.caches) {
+                        var cache = ComponentsCache.caches.data[cacheId];
+                        if (cache.Has(this.entity)) {
+                            var view = new ComponentView {
+                                internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[cache.typeId],
+                                entity                 = this.entity
+                            };
+                            this.componentViews.Add(view);
+                        }
                     }
                 }
 

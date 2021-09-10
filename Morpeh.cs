@@ -89,9 +89,6 @@ namespace Morpeh {
         internal int worldID;
 
         [SerializeField]
-        internal BitMap components;
-
-        [SerializeField]
         internal bool isDirty;
         [SerializeField]
         internal bool isDisposed;
@@ -120,8 +117,6 @@ namespace Morpeh {
 
             newEntity.world = World.worlds.data[newEntity.worldID];
 
-            newEntity.components = new BitMap(Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY);
-
             newEntity.previousArchetypeId = -1;
             newEntity.currentArchetypeId  = 0;
 
@@ -134,197 +129,71 @@ namespace Morpeh {
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
-            var typeInfo = TypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
+            var cache = entity.world.GetCache<T>();
 
-            if (typeInfo.isMarker) {
-                if (entity.components.Set(typeInfo.id)) {
-                    entity.AddTransfer(typeInfo.id);
-                }
-                return ref cache.Empty();
-            }
-            if (entity.components.Set(typeInfo.id)) {
-                entity.AddTransfer(typeInfo.id);
-                return ref cache.AddComponent(entity);
-            }
-#if MORPEH_DEBUG
-            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
-#endif
-            return ref cache.Empty();
+            return ref cache.AddComponent(entity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
-            var typeInfo = TypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
+            var cache = entity.world.GetCache<T>();
 
-            if (typeInfo.isMarker) {
-                if (entity.components.Set(typeInfo.id)) {
-                    entity.AddTransfer(typeInfo.id);
-                }
-                exist = false;
-                return ref cache.Empty();
-            }
-            if (entity.components.Set(typeInfo.id)) {
-                entity.AddTransfer(typeInfo.id);
-                
-                exist = false;
-                return ref cache.AddComponent(entity);
-            }
-#if MORPEH_DEBUG
-            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
-#endif
-            exist = true;
-            return ref cache.Empty();
-        }
-        
-        internal static bool AddComponentFast(this Entity entity, in int typeId) {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying AddComponentFast on null or disposed entity");
-            }
-#endif
-            if (entity.components.Set(typeId)) {
-                entity.AddTransfer(typeId);
-                return true;
-            }
-
-            return false;
+            return ref cache.AddComponent(entity, out exist);
         }
 
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
-            var typeInfo = TypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
+            var cache = entity.world.GetCache<T>();
 
-            if (typeInfo.isMarker) {
-                if (entity.components.Get(typeInfo.id)) {
-                    return ref cache.Empty();
-                }
-            }
-            if (entity.components.Get(typeInfo.id)) {
-                return ref cache.GetComponent(entity);
-            }
-
-#if MORPEH_DEBUG
-            Debug.LogError($"[MORPEH] You're trying to get on entity {entity.internalID} a component that doesn't exists!");
-#endif
-            return ref cache.Empty();
+            return ref cache.GetComponent(entity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
+            var cache = entity.world.GetCache<T>();
 
-            var typeInfo = TypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
-
-            if (typeInfo.isMarker) {
-                if (entity.components.Get(typeInfo.id)) {
-                    exist = true;
-                    return ref cache.Empty();
-                }
-            }
-            if (entity.components.Get(typeInfo.id)) {
-                exist = true;
-                return ref cache.GetComponent(entity);
-            }
-
-            exist = false;
-            return ref cache.Empty();
+            return ref cache.TryGetComponent(entity, out exist);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying SetComponent on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
+            var cache = entity.world.GetCache<T>();
 
-            var typeInfo = TypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
-
-            if (!typeInfo.isMarker) {
-                if (entity.components.Get(typeInfo.id)) {
-                    cache.SetComponent(entity, value);
-                }
-                else {
-                    entity.components.Set(typeInfo.id);
-                    entity.AddTransfer(typeInfo.id);
-                    cache.AddComponent(entity, value);
-                }
-            }
-            else {
-                if (entity.components.Set(typeInfo.id)) {
-                    entity.AddTransfer(typeInfo.id);
-                }
-            }
+            cache.SetComponent(entity, value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying RemoveComponent on null or disposed entity");
-            }
-#endif
-
-            var typeInfo = TypeIdentifier<T>.info;
-
-            if (entity.components.Unset(typeInfo.id)) {
-                if (typeInfo.isMarker == false) {
-                    entity.world.GetCache<T>().RemoveComponent(entity);
-                }
-
-                entity.RemoveTransfer(typeInfo.id);
-                return true;
-            }
-
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool RemoveComponentFast(this Entity entity, int typeId) {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying RemoveComponentFast on null or disposed entity");
-            }
-#endif
-
-            if (entity.components.Unset(typeId)) {
-                entity.RemoveTransfer(typeId);
-                return true;
-            }
-
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool Has(this Entity entity, int typeID) {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
+            var cache = entity.world.GetCache<T>();
 
-            return entity.components.Get(typeID);
+            return cache.RemoveComponent(entity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -335,8 +204,8 @@ namespace Morpeh {
             }
 #endif
 
-            var typeInfo = TypeIdentifier<T>.info;
-            return entity.components.Get(typeInfo.id);
+            var cache = entity.world.GetCache<T>();
+            return cache.Has(entity);
         }
 
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
@@ -347,10 +216,9 @@ namespace Morpeh {
 #endif
 
             var world = from.world;
-            foreach (var typeId in from.components) {
-                from.RemoveComponentFast(typeId);
-                to.AddComponentFast(typeId);
-                world.GetCache(typeId).MigrateComponent(from, to, overwrite);
+            foreach (var slotIndex in world.caches) {
+                var cache = ComponentsCache.caches.data[slotIndex];
+                cache.MigrateComponent(from, to, overwrite);
             }
         }
 
@@ -398,8 +266,10 @@ namespace Morpeh {
                 entity.previousArchetypeId = -1;
 
                 if (entity.currentArchetypeId < 0) {
-                    foreach (var typeId in entity.components) {
-                        entity.world.GetCache(typeId)?.RemoveComponent(entity);
+                    //todo rework
+                    foreach (var slotIndex in entity.world.caches) {
+                        var cache = ComponentsCache.caches.data[slotIndex];
+                        cache?.RemoveComponent(entity);
                     }
 
                     entity.DisposeFast();
@@ -438,9 +308,7 @@ namespace Morpeh {
             entity.previousArchetypeId = -1;
             entity.currentArchetypeId  = -1;
 
-            entity.components.Clear();
-            entity.components = null;
-            entity.world      = null;
+            entity.world = null;
 
             entity.internalID         = -1;
             entity.worldID            = -1;
@@ -1362,7 +1230,7 @@ namespace Morpeh {
 
         public static void UpdateFilters(this World world) {
             foreach (var entityId in world.dirtyEntities) {
-                world.entities[entityId].ApplyTransfer();
+                world.entities[entityId]?.ApplyTransfer();
             }
 
             world.dirtyEntities.FastClear();
@@ -1913,12 +1781,12 @@ namespace Morpeh {
         }
 
         internal struct InternalTypeDefinition {
-            public int                        id;
-            public Type                       type;
-            public Func<Entity, object>     entityGetComponentBoxed;
-            public Action<Entity, object>     entitySetComponentBoxed;
-            public Action<Entity>             entityRemoveComponent;
-            public TypeInfo                   typeInfo;
+            public int                    id;
+            public Type                   type;
+            public Func<Entity, object>   entityGetComponentBoxed;
+            public Action<Entity, object> entitySetComponentBoxed;
+            public Action<Entity>         entityRemoveComponent;
+            public TypeInfo               typeInfo;
         }
 
         [Serializable]
@@ -1981,9 +1849,11 @@ namespace Morpeh {
         internal int typeId;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract void RemoveComponent(Entity entity);
-        
-        
+        public abstract bool RemoveComponent(Entity entity);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract bool Has(Entity entity);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract void MigrateComponent(Entity from, Entity to, bool overwrite = true);
 
@@ -2037,29 +1907,108 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddComponent(Entity entity) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+            }
+#endif
             if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+                entity.AddTransfer(this.typeId);
                 return ref this.components.data[slotIndex];
             }
+#if MORPEH_DEBUG
+            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
+#endif
             return ref this.components.data[0];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AddComponent(Entity entity, in T value) => this.components.Add(entity.internalID, value, out _);
+        public ref T AddComponent(Entity entity, out bool exist) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+            }
+#endif
+            if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+                entity.AddTransfer(this.typeId);
+                exist = false;
+                return ref this.components.data[slotIndex];
+            }
+
+            exist = true;
+            return ref this.components.data[0];
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent(Entity entity) => ref this.components.GetValueRefByKey(entity.internalID);
+        public bool AddComponent(Entity entity, in T value) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+            }
+#endif
+            if (this.components.Add(entity.internalID, value, out _)) {
+                entity.AddTransfer(this.typeId);
+                return true;
+            }
+
+#if MORPEH_DEBUG
+            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
+#endif
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent(Entity entity, in T value) => this.components.Set(entity.internalID, value, out _);
+        public ref T GetComponent(Entity entity) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+            }
+            
+            if (!this.components.Has(entity.internalID)) {
+                throw new Exception($"[MORPEH] You're trying to get on entity {entity.internalID} a component that doesn't exists!");
+            }
+#endif
+            return ref this.components.GetValueRefByKey(entity.internalID);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T TryGetComponent(Entity entity, out bool exist) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+            }
+#endif
+            return ref this.components.TryGetValueRefByKey(entity.internalID, out exist);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetComponent(Entity entity, in T value) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+            }
+#endif
+
+            if (this.components.Set(entity.internalID, value, out _)) {
+                entity.AddTransfer(this.typeId);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ref T Empty() => ref this.components.data[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override void RemoveComponent(Entity entity) {
-            this.components.Remove(entity.internalID, out _);
+        public override bool RemoveComponent(Entity entity) {
+            if (this.components.Remove(entity.internalID, out _)) {
+                entity.RemoveTransfer(this.typeId);
+                return true;
+            }
+            return false;
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Has(Entity entity) => this.components.Has(entity.internalID);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void MigrateComponent(Entity from, Entity to, bool overwrite = true) {
             if (this.components.TryGetValue(from.internalID, out var component)) {
@@ -2095,9 +2044,9 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class ComponentsCacheDisposable<T> : ComponentsCache<T> where T : struct, IComponent, IDisposable {
         //todo bench it
-        public override void RemoveComponent(Entity entity) {
+        public override bool RemoveComponent(Entity entity) {
             this.components.GetValueRefByKey(entity.internalID).Dispose();
-            base.RemoveComponent(entity);
+            return base.RemoveComponent(entity);
         }
 
         public override void Dispose() {
@@ -2520,14 +2469,14 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void Set<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {
+            public static bool Set<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {
                 var rem = key & hashMap.capacityMinusOne;
 
                 for (var i = hashMap.buckets[rem] - 1; i >= 0; i = hashMap.slots[i].next) {
                     if (hashMap.slots[i].key - 1 == key) {
                         hashMap.data[i] = value;
                         slotIndex       = i;
-                        return;
+                        return false;
                     }
                 }
 
@@ -2574,6 +2523,7 @@ namespace Morpeh {
                 hashMap.buckets[rem] = slotIndex + 1;
 
                 ++hashMap.length;
+                return true;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2668,6 +2618,25 @@ namespace Morpeh {
                 }
 
                 return default;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static ref T TryGetValueRefByKey<T>(this IntHashMap<T> hashMap, in int key, out bool exist) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        exist = true;
+                        return ref hashMap.data[i];
+                    }
+
+                    next = slot.next;
+                }
+
+                exist = false;
+                return ref hashMap.data[0];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
