@@ -26,13 +26,10 @@ namespace Morpeh.Editor {
             get {
                 this.componentViews.Clear();
                 if (this.entity != null) {
-                    foreach (var slotIndex in this.entity.componentsIds) {
-                        var slot = this.entity.componentsIds.GetKeyByIndex(slotIndex);
-                        var data = this.entity.componentsIds.GetValueByIndex(slotIndex);
+                    foreach (var typeId in this.entity.components) {
                         var view = new ComponentView {
-                            internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[slot],
-                            id        = data,
-                            world     = this.entity.world
+                            internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[typeId],
+                            entity                 = this.entity
                         };
                         this.componentViews.Add(view);
                     }
@@ -49,8 +46,6 @@ namespace Morpeh.Editor {
         private struct ComponentView {
             internal CommonTypeIdentifier.InternalTypeDefinition internalTypeDefinition;
 
-            internal World world;
-
             internal bool   IsMarker => this.internalTypeDefinition.typeInfo.isMarker;
             internal string FullName => this.internalTypeDefinition.type.FullName;
 
@@ -60,7 +55,7 @@ namespace Morpeh.Editor {
             [ShowInInspector]
             internal string TypeName => this.internalTypeDefinition.type.Name;
 
-            internal int id;
+            internal Entity entity;
 
             [DisableContextMenu]
             [HideIf("$" + nameof(IsMarker))]
@@ -73,14 +68,14 @@ namespace Morpeh.Editor {
                         return null;
                     }
 
-                    return this.internalTypeDefinition.cacheGetComponentBoxed(this.world, this.id);
+                    return this.internalTypeDefinition.entityGetComponentBoxed(this.entity);
                 }
                 set {
                     if (this.internalTypeDefinition.typeInfo.isMarker || Application.isPlaying == false) {
                         return;
                     }
 
-                    this.internalTypeDefinition.cacheSetComponentBoxed(this.world, this.id, value);
+                    this.internalTypeDefinition.entitySetComponentBoxed(this.entity, value);
                 }
             }
         }

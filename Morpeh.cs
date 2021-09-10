@@ -89,7 +89,7 @@ namespace Morpeh {
         internal int worldID;
 
         [SerializeField]
-        internal UnsafeIntHashMap<int> componentsIds;
+        internal BitMap components;
 
         [SerializeField]
         internal bool isDirty;
@@ -120,7 +120,7 @@ namespace Morpeh {
 
             newEntity.world = World.worlds.data[newEntity.worldID];
 
-            newEntity.componentsIds = new UnsafeIntHashMap<int>(Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY);
+            newEntity.components = new BitMap(Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY);
 
             newEntity.previousArchetypeId = -1;
             newEntity.currentArchetypeId  = 0;
@@ -141,20 +141,14 @@ namespace Morpeh {
             var cache    = entity.world.GetCache<T>();
 
             if (typeInfo.isMarker) {
-                const int componentId = -1;
-                if (entity.componentsIds.Add(typeInfo.id, componentId, out _)) {
+                if (entity.components.Set(typeInfo.id)) {
                     entity.AddTransfer(typeInfo.id);
-                    return ref cache.Empty();
                 }
+                return ref cache.Empty();
             }
-            else {
-                var componentId = cache.Add();
-                if (entity.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
-                    entity.AddTransfer(typeInfo.id);
-                    return ref cache.Get(entity.componentsIds.GetValueByIndex(slotIndex));
-                }
-
-                cache.Remove(componentId);
+            if (entity.components.Set(typeInfo.id)) {
+                entity.AddTransfer(typeInfo.id);
+                return ref cache.AddComponent(entity);
             }
 #if MORPEH_DEBUG
             Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
@@ -173,22 +167,17 @@ namespace Morpeh {
             var cache    = entity.world.GetCache<T>();
 
             if (typeInfo.isMarker) {
-                const int componentId = -1;
-                if (entity.componentsIds.Add(typeInfo.id, componentId, out _)) {
+                if (entity.components.Set(typeInfo.id)) {
                     entity.AddTransfer(typeInfo.id);
-                    exist = false;
-                    return ref cache.Empty();
                 }
+                exist = false;
+                return ref cache.Empty();
             }
-            else {
-                var componentId = cache.Add();
-                if (entity.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
-                    entity.AddTransfer(typeInfo.id);
-                    exist = false;
-                    return ref cache.Get(entity.componentsIds.GetValueByIndex(slotIndex));
-                }
-
-                cache.Remove(componentId);
+            if (entity.components.Set(typeInfo.id)) {
+                entity.AddTransfer(typeInfo.id);
+                
+                exist = false;
+                return ref cache.AddComponent(entity);
             }
 #if MORPEH_DEBUG
             Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
@@ -196,14 +185,14 @@ namespace Morpeh {
             exist = true;
             return ref cache.Empty();
         }
-
-        internal static bool AddComponentFast(this Entity entity, in int typeId, in int componentId) {
+        
+        internal static bool AddComponentFast(this Entity entity, in int typeId) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying AddComponentFast on null or disposed entity");
             }
 #endif
-            if (entity.componentsIds.Add(typeId, componentId, out _)) {
+            if (entity.components.Set(typeId)) {
                 entity.AddTransfer(typeId);
                 return true;
             }
@@ -221,14 +210,12 @@ namespace Morpeh {
             var cache    = entity.world.GetCache<T>();
 
             if (typeInfo.isMarker) {
-                if (entity.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
+                if (entity.components.Get(typeInfo.id)) {
                     return ref cache.Empty();
                 }
             }
-            else {
-                if (entity.componentsIds.TryGetValue(typeInfo.id, out var componentId)) {
-                    return ref cache.Get(componentId);
-                }
+            if (entity.components.Get(typeInfo.id)) {
+                return ref cache.GetComponent(entity);
             }
 
 #if MORPEH_DEBUG
@@ -249,31 +236,18 @@ namespace Morpeh {
             var cache    = entity.world.GetCache<T>();
 
             if (typeInfo.isMarker) {
-                if (entity.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
+                if (entity.components.Get(typeInfo.id)) {
                     exist = true;
                     return ref cache.Empty();
                 }
             }
-            else {
-                if (entity.componentsIds.TryGetValue(typeInfo.id, out var componentId)) {
-                    exist = true;
-                    return ref cache.Get(componentId);
-                }
+            if (entity.components.Get(typeInfo.id)) {
+                exist = true;
+                return ref cache.GetComponent(entity);
             }
 
             exist = false;
             return ref cache.Empty();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int GetComponentFast(this Entity entity, in int typeId) {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying GetComponentFast on null or disposed entity");
-            }
-#endif
-
-            return entity.componentsIds.GetValueByKey(typeId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -288,17 +262,17 @@ namespace Morpeh {
             var cache    = entity.world.GetCache<T>();
 
             if (!typeInfo.isMarker) {
-                if (entity.componentsIds.TryGetValue(typeInfo.id, out var index)) {
-                    cache.Set(index, value);
+                if (entity.components.Get(typeInfo.id)) {
+                    cache.SetComponent(entity, value);
                 }
                 else {
-                    var componentId = cache.Add(value);
-                    entity.componentsIds.Add(typeInfo.id, componentId, out _);
+                    entity.components.Set(typeInfo.id);
                     entity.AddTransfer(typeInfo.id);
+                    cache.AddComponent(entity, value);
                 }
             }
             else {
-                if (entity.componentsIds.Add(typeInfo.id, -1, out _)) {
+                if (entity.components.Set(typeInfo.id)) {
                     entity.AddTransfer(typeInfo.id);
                 }
             }
@@ -314,9 +288,9 @@ namespace Morpeh {
 
             var typeInfo = TypeIdentifier<T>.info;
 
-            if (entity.componentsIds.Remove(typeInfo.id, out var index)) {
+            if (entity.components.Unset(typeInfo.id)) {
                 if (typeInfo.isMarker == false) {
-                    entity.world.GetCache<T>().Remove(index);
+                    entity.world.GetCache<T>().RemoveComponent(entity);
                 }
 
                 entity.RemoveTransfer(typeInfo.id);
@@ -327,14 +301,14 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool RemoveComponentFast(this Entity entity, int typeId, out int indexInCache) {
+        internal static bool RemoveComponentFast(this Entity entity, int typeId) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying RemoveComponentFast on null or disposed entity");
             }
 #endif
 
-            if (entity.componentsIds.Remove(typeId, out indexInCache)) {
+            if (entity.components.Unset(typeId)) {
                 entity.RemoveTransfer(typeId);
                 return true;
             }
@@ -343,25 +317,26 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool Has([CanBeNull] this Entity entity, int typeID) {
+        internal static bool Has(this Entity entity, int typeID) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
 
-            return entity.componentsIds.TryGetIndex(typeID) >= 0;
+            return entity.components.Get(typeID);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has<T>([CanBeNull] this Entity entity) where T : struct, IComponent {
+        public static bool Has<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
 
-            return entity.componentsIds.TryGetIndex(TypeIdentifier<T>.info.id) >= 0;
+            var typeInfo = TypeIdentifier<T>.info;
+            return entity.components.Get(typeInfo.id);
         }
 
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
@@ -371,18 +346,11 @@ namespace Morpeh {
             }
 #endif
 
-            foreach (var index in from.componentsIds) {
-                var key   = from.componentsIds.GetKeyByIndex(index);
-                var value = from.componentsIds.GetValueByIndex(index);
-
-                from.RemoveComponentFast(key, out _);
-                if (to.Has(key)) {
-                    if (overwrite == false) {
-                        return;
-                    }
-                    to.RemoveComponentFast(key, out _);
-                }
-                to.AddComponentFast(key, value);
+            var world = from.world;
+            foreach (var typeId in from.components) {
+                from.RemoveComponentFast(typeId);
+                to.AddComponentFast(typeId);
+                world.GetCache(typeId).MigrateComponent(from, to, overwrite);
             }
         }
 
@@ -430,13 +398,8 @@ namespace Morpeh {
                 entity.previousArchetypeId = -1;
 
                 if (entity.currentArchetypeId < 0) {
-                    foreach (var slotIndex in entity.componentsIds) {
-                        var typeId      = entity.componentsIds.GetKeyByIndex(slotIndex);
-                        var componentId = entity.componentsIds.GetValueByIndex(slotIndex);
-
-                        if (componentId >= 0) {
-                            entity.world.GetCache(typeId)?.Remove(componentId);
-                        }
+                    foreach (var typeId in entity.components) {
+                        entity.world.GetCache(typeId)?.RemoveComponent(entity);
                     }
 
                     entity.DisposeFast();
@@ -468,16 +431,16 @@ namespace Morpeh {
                 entity.isDirty = true;
             }
         }
-        
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeFast(this Entity entity) {
             entity.previousArchetypeId = -1;
             entity.currentArchetypeId  = -1;
 
-            entity.componentsIds.Clear();
-            entity.componentsIds = null;
-            entity.world         = null;
+            entity.components.Clear();
+            entity.components = null;
+            entity.world      = null;
 
             entity.internalID         = -1;
             entity.worldID            = -1;
@@ -1481,8 +1444,8 @@ namespace Morpeh {
     internal static class ArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Ctor(this Archetype archetype) {
-            archetype.world    = World.worlds.data[archetype.worldId];
-            archetype.filters  = new FastList<Filter>();
+            archetype.world   = World.worlds.data[archetype.worldId];
+            archetype.filters = new FastList<Filter>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1537,7 +1500,7 @@ namespace Morpeh {
             for (int i = 0, len = archetype.filters.length; i < len; i++) {
                 archetype.filters.data[i].isDirty = true;
             }
-            
+
             archetype.isDirty = false;
         }
 
@@ -1579,8 +1542,8 @@ namespace Morpeh {
 
         internal World world;
 
-        internal FastList<Filter>        childs;
-        internal FastList<Archetype>     archetypes;
+        internal FastList<Filter>    childs;
+        internal FastList<Archetype> archetypes;
 
         internal IntFastList includedTypeIds;
         internal IntFastList excludedTypeIds;
@@ -1939,8 +1902,7 @@ namespace Morpeh {
             var info = new InternalTypeDefinition {
                 id                      = id,
                 type                    = type,
-                cacheGetComponentBoxed  = (world, componentId) => world.GetCache<T>().components.data[componentId],
-                cacheSetComponentBoxed  = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T)value,
+                entityGetComponentBoxed = (entity) => entity.GetComponent<T>(),
                 entitySetComponentBoxed = (entity, component) => entity.SetComponent((T)component),
                 entityRemoveComponent   = (entity) => entity.RemoveComponent<T>(),
                 typeInfo                = TypeIdentifier<T>.info
@@ -1953,8 +1915,7 @@ namespace Morpeh {
         internal struct InternalTypeDefinition {
             public int                        id;
             public Type                       type;
-            public Func<World, int, object>   cacheGetComponentBoxed;
-            public Action<World, int, object> cacheSetComponentBoxed;
+            public Func<Entity, object>     entityGetComponentBoxed;
             public Action<Entity, object>     entitySetComponentBoxed;
             public Action<Entity>             entityRemoveComponent;
             public TypeInfo                   typeInfo;
@@ -2020,7 +1981,11 @@ namespace Morpeh {
         internal int typeId;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal abstract void Remove(in int id);
+        public abstract void RemoveComponent(Entity entity);
+        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract void MigrateComponent(Entity from, Entity to, bool overwrite = true);
 
         public abstract void Dispose();
     }
@@ -2033,7 +1998,7 @@ namespace Morpeh {
         internal static FastList<ComponentsCache<T>> typedCaches = new FastList<ComponentsCache<T>>();
 
         [SerializeField]
-        internal FastList<T> components;
+        internal IntHashMap<T> components;
         [SerializeField]
         internal IntStack freeIndexes;
 
@@ -2058,10 +2023,10 @@ namespace Morpeh {
         internal ComponentsCache() {
             this.typeId = TypeIdentifier<T>.info.id;
 
-            this.components  = new FastList<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
+            this.components  = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
             this.freeIndexes = new IntStack();
 
-            this.components.Add();
+            this.components.Add(-1, default, out _);
 
             this.typedCacheId = typedCaches.length;
             typedCaches.Add(this);
@@ -2071,73 +2036,46 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal int Add() {
-            if (this.freeIndexes.length > 0) {
-                return this.freeIndexes.Pop();
+        public ref T AddComponent(Entity entity) {
+            if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+                return ref this.components.data[slotIndex];
             }
-
-            return this.components.Add();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal int Add(in T value) {
-            if (this.freeIndexes.length > 0) {
-                var index = this.freeIndexes.Pop();
-
-                this.components.data[index] = value;
-                return index;
-            }
-
-            return this.components.Add(value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddComponent(in Entity entity) {
-            var componentId = this.Add();
-            if (entity.AddComponentFast(this.typeId, componentId)) {
-                return ref this.components.data[componentId];
-            }
-
-            this.Remove(componentId);
             return ref this.components.data[0];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AddComponent(in Entity entity, in T value) {
-            var componentId = this.Add(value);
-            if (entity.AddComponentFast(this.typeId, componentId)) {
-                return true;
-            }
-
-            this.Remove(componentId);
-            return false;
-        }
+        public bool AddComponent(Entity entity, in T value) => this.components.Add(entity.internalID, value, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ref T Get(int id) => ref this.components.data[id];
+        public ref T GetComponent(Entity entity) => ref this.components.GetValueRefByKey(entity.internalID);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent(in Entity entity) => ref this.components.data[entity.GetComponentFast(this.typeId)];
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Set(in int id, in T value) => this.components.data[id] = value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent(in Entity entity, in T value) => this.components.data[entity.GetComponentFast(this.typeId)] = value;
+        public void SetComponent(Entity entity, in T value) => this.components.Set(entity.internalID, value, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ref T Empty() => ref this.components.data[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override void Remove(in int id) {
-            this.components.data[id] = default;
-            this.freeIndexes.Push(id);
+        public override void RemoveComponent(Entity entity) {
+            this.components.Remove(entity.internalID, out _);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveComponent(in Entity entity) {
-            if (entity.RemoveComponentFast(this.typeId, out var cacheIndex)) {
-                this.Remove(cacheIndex);
+        public override void MigrateComponent(Entity from, Entity to, bool overwrite = true) {
+            if (this.components.TryGetValue(from.internalID, out var component)) {
+                if (overwrite) {
+                    if (this.components.Has(to.internalID)) {
+                        this.components.Set(to.internalID, component, out _);
+                    }
+                    else {
+                        this.components.Add(to.internalID, component, out _);
+                    }
+                }
+                else {
+                    if (this.components.Has(to.internalID) == false) {
+                        this.components.Add(to.internalID, component, out _);
+                    }
+                }
             }
         }
 
@@ -2156,9 +2094,10 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class ComponentsCacheDisposable<T> : ComponentsCache<T> where T : struct, IComponent, IDisposable {
-        internal override void Remove(in int id) {
-            this.components.data[id].Dispose();
-            base.Remove(in id);
+        //todo bench it
+        public override void RemoveComponent(Entity entity) {
+            this.components.GetValueRefByKey(entity.internalID).Dispose();
+            base.RemoveComponent(entity);
         }
 
         public override void Dispose() {
@@ -2729,6 +2668,23 @@ namespace Morpeh {
                 }
 
                 return default;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static ref T GetValueRefByKey<T>(this IntHashMap<T> hashMap, in int key) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        return ref hashMap.data[i];
+                    }
+
+                    next = slot.next;
+                }
+
+                return ref hashMap.data[0];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -3655,7 +3611,7 @@ namespace Morpeh {
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public static unsafe class BitMapExtensions {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void Set(this BitMap bitmap, in int index) {
+            public static bool Set(this BitMap bitmap, in int index) {
                 var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
                 var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
 
@@ -3668,8 +3624,13 @@ namespace Morpeh {
                     for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
                         slot = slotsPtr + i;
                         if (*slot - 1 == dataIndex) {
-                            *(dataPtr + (i >> 1)) |= 1 << bitIndex;
-                            return;
+                            var data    = *(dataPtr + (i >> 1));
+                            var dataOld = data;
+
+                            data |= 1 << bitIndex;
+
+                            *(dataPtr + (i >> 1)) = data;
+                            return data != dataOld;
                         }
                     }
                 }
@@ -3731,6 +3692,7 @@ namespace Morpeh {
                 }
 
                 ++bitmap.length;
+                return true;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -3784,7 +3746,7 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool TryGet(this BitMap bitmap, in int index, out int value) {
+            public static bool Get(this BitMap bitmap, in int index) {
                 var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
                 var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
 
@@ -3797,37 +3759,12 @@ namespace Morpeh {
                     for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
                         slot = slotsPtr + i;
                         if (*slot - 1 == dataIndex) {
-                            value = *(dataPtr + (i >> 1)) & (1 << bitIndex);
-                            return true;
+                            return (*(dataPtr + (i >> 1)) & (1 << bitIndex)) > 0;
                         }
                     }
                 }
 
-                value = default;
                 return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static int Get(this BitMap bitMap, in int index) {
-                var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
-                var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
-
-                var rem = dataIndex & bitMap.capacityMinusOne;
-
-                fixed (int* slotsPtr = &bitMap.slots[0])
-                fixed (int* bucketsPtr = &bitMap.buckets[0])
-                fixed (int* dataPtr = &bitMap.data[0]) {
-                    int next;
-                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
-                        if (*(slotsPtr + i) - 1 == dataIndex) {
-                            return *(dataPtr + (i >> 1)) & (1 << bitIndex);
-                        }
-
-                        next = *(slotsPtr + i + 1);
-                    }
-                }
-
-                return default;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -3844,7 +3781,7 @@ namespace Morpeh {
                 bitMap.length    = 0;
                 bitMap.freeIndex = -1;
             }
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void FastClear(this BitMap bitMap) {
                 if (bitMap.lastIndex <= 0) {

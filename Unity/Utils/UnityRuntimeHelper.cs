@@ -147,7 +147,7 @@ namespace Morpeh {
                                 continue;
                             }
 
-                            if (e.componentsIds == null) {
+                            if (e.components == null) {
                                 world.entities[i] = null;
                             }
 
