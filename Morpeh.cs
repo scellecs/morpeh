@@ -1506,6 +1506,7 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Add(this Archetype archetype, Entity entity) {
+            archetype.length++;
             archetype.entitiesBitMap.Set(entity.internalID);
 
             archetype.isDirty = true;
@@ -1513,6 +1514,7 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove(this Archetype archetype, Entity entity) {
+            archetype.length--;
             archetype.entitiesBitMap.Unset(entity.internalID);
 
             archetype.isDirty = true;
@@ -1536,7 +1538,6 @@ namespace Morpeh {
                 archetype.filters.data[i].isDirty = true;
             }
             
-            archetype.length = archetype.entitiesBitMap.Count();
             archetype.isDirty = false;
         }
 
