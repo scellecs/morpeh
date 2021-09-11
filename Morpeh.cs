@@ -3515,7 +3515,6 @@ namespace Morpeh {
                 public int currentData;
                 public int currentDataIndex;
 
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public bool MoveNext() {
                     if (this.currentData != 0) {
                         this.current     =  this.currentDataIndex + BitMapExtensions.NumberOfTrailingZeros(this.currentData);
