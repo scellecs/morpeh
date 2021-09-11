@@ -123,6 +123,9 @@ namespace Morpeh {
             return newEntity;
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -135,6 +138,9 @@ namespace Morpeh {
             return ref cache.AddComponent(entity);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -147,6 +153,9 @@ namespace Morpeh {
             return ref cache.AddComponent(entity, out exist);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
@@ -158,6 +167,9 @@ namespace Morpeh {
             return ref cache.GetComponent(entity);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -170,6 +182,9 @@ namespace Morpeh {
             return ref cache.TryGetComponent(entity, out exist);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -182,6 +197,9 @@ namespace Morpeh {
             cache.SetComponent(entity, value);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -194,6 +212,9 @@ namespace Morpeh {
             return cache.RemoveComponent(entity);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -206,6 +227,9 @@ namespace Morpeh {
             return cache.Has(entity);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
@@ -953,7 +977,7 @@ namespace Morpeh {
             world.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             world.entities         = new Entity[world.entitiesCapacity];
 
-            world.archetypes         = new FastList<Archetype> { new Archetype(0, new int[0], world.identifier) };
+            world.archetypes         = new FastList<Archetype> { new Archetype(0, Array.Empty<int>(), world.identifier) };
             world.archetypesByLength = new IntHashMap<IntFastList>();
             world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
             world.newArchetypes = new IntFastList();
@@ -2030,7 +2054,6 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class ComponentsCacheDisposable<T> : ComponentsCache<T> where T : struct, IComponent, IDisposable {
-        //todo bench it
         public override bool RemoveComponent(Entity entity) {
             this.components.GetValueRefByKey(entity.internalID).Dispose();
             return base.RemoveComponent(entity);
