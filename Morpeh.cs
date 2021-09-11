@@ -1862,9 +1862,7 @@ namespace Morpeh {
         internal static FastList<ComponentsCache<T>> typedCaches = new FastList<ComponentsCache<T>>();
 
         [SerializeField]
-        internal IntHashMap<T> components;
-        [SerializeField]
-        internal IntStack freeIndexes;
+        public IntHashMap<T> components;
 
         static ComponentsCache() {
             cleanup += () => typedCaches.Clear();
@@ -1888,7 +1886,6 @@ namespace Morpeh {
             this.typeId = TypeIdentifier<T>.info.id;
 
             this.components  = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
-            this.freeIndexes = new IntStack();
 
             this.components.Add(-1, default, out _);
 
@@ -2024,8 +2021,6 @@ namespace Morpeh {
 
         public override void Dispose() {
             this.components = null;
-            this.freeIndexes.Clear();
-            this.freeIndexes = null;
 
             typedCaches.RemoveSwap(this, out _);
             caches.RemoveSwap(this, out _);
