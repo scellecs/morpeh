@@ -216,8 +216,8 @@ namespace Morpeh {
 #endif
 
             var world = from.world;
-            foreach (var slotIndex in world.caches) {
-                var cache = ComponentsCache.caches.data[slotIndex];
+            foreach (var cacheId in world.caches) {
+                var cache = ComponentsCache.caches.data[world.caches.GetValueByIndex(cacheId)];
                 cache.MigrateComponent(from, to, overwrite);
             }
         }
@@ -1177,7 +1177,7 @@ namespace Morpeh {
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = world.entitiesCapacity << 1;
+                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity);
                 Array.Resize(ref world.entities, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
@@ -3607,7 +3607,7 @@ namespace Morpeh {
                 }
                 else {
                     if (bitmap.lastIndex == bitmap.capacity << 1) {
-                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(bitmap.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacitySmall(bitmap.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref bitmap.slots, newCapacity << 1);
@@ -3811,31 +3811,89 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         internal static class HashHelpers {
-            //https://github.com/dotnet/runtime/blob/master/src/libraries/System.Private.CoreLib/src/System/Collections/HashHelpers.cs#L32
-            //different primes to fit n^2 - 1
-            //todo expand to maxInt
             internal static readonly int[] capacitySizes = {
                 3,
                 15,
                 63,
                 255,
-                1023,
-                4095,
-                16383,
-                65535,
-                262143,
-                1048575,
-                4194303,
+                1_023,
+                4_095,
+                16_383,
+                65_535,
+                131_071,
+                262_143,
+                524_287,
+                1_048_575,
+                2_097_151,
+                4_194_303,
+                8_388_607,
+                16_777_215,
+                33_554_431,
+                67_108_863,
+                134_217_727,
+                268_435_455,
+                536_870_912,
+                1_073_741_823
+            };
+            
+            internal static readonly int[] smallCapacitySizes = {
+                3,
+                7,
+                15,
+                31,
+                63,
+                127,
+                255,
+                511,
+                1_023,
+                2_047,
+                4_095,
+                16_383,
+                65_535,
+                131_071,
+                262_143,
+                524_287,
+                1_048_575,
+                2_097_151,
+                4_194_303,
+                8_388_607,
+                16_777_215,
+                33_554_431,
+                67_108_863,
+                134_217_727,
+                268_435_455,
+                536_870_912,
+                1_073_741_823
             };
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static int ExpandCapacity(int oldSize) {
                 var min = oldSize << 1;
-                return min > 2146435069U && 2146435069 > oldSize ? 2146435069 : GetCapacity(min);
+                return min > 2_146_435_069U && 2_146_435_069 > oldSize ? 2_146_435_069 : GetCapacity(min);
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int ExpandCapacitySmall(int oldSize) {
+                var min = oldSize << 1;
+                return min > 2_146_435_069U && 2_146_435_069 > oldSize ? 2_146_435_069 : GetCapacitySmall(min);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static int GetCapacity(int min) {
                 for (int index = 0, length = capacitySizes.Length; index < length; ++index) {
                     var prime = capacitySizes[index];
+                    if (prime >= min) {
+                        return prime;
+                    }
+                }
+
+                throw new Exception("Capacity is too big");
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int GetCapacitySmall(int min) {
+                for (int index = 0, length = smallCapacitySizes.Length; index < length; ++index) {
+                    var prime = smallCapacitySizes[index];
                     if (prime >= min) {
                         return prime;
                     }
