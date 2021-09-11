@@ -16,7 +16,6 @@ namespace Morpeh {
     using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Threading;
@@ -29,7 +28,6 @@ namespace Morpeh {
     //Odin
     using Sirenix.OdinInspector;
     //Morpeh
-    using Utils;
     using Collections;
     //Unity
     using Unity.IL2CPP.CompilerServices;
@@ -3498,7 +3496,7 @@ namespace Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Enumerator GetEnumerator() {
                 Enumerator e;
-                e.hashMap          = this;
+                e.bitMap          = this;
                 e.index            = default;
                 e.current          = default;
                 e.currentData      = default;
@@ -3510,13 +3508,14 @@ namespace Morpeh {
             [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
             [Il2CppSetOption(Option.DivideByZeroChecks, false)]
             public unsafe struct Enumerator : IEnumerator<int> {
-                public BitMap hashMap;
+                public BitMap bitMap;
 
                 public int index;
                 public int current;
                 public int currentData;
                 public int currentDataIndex;
 
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public bool MoveNext() {
                     if (this.currentData != 0) {
                         this.current     =  this.currentDataIndex + BitMapExtensions.NumberOfTrailingZeros(this.currentData);
@@ -3524,9 +3523,9 @@ namespace Morpeh {
                         return true;
                     }
 
-                    fixed (int* slotsPtr = &this.hashMap.slots[0])
-                    fixed (int* dataPtr = &this.hashMap.data[0]) {
-                        for (; this.index < this.hashMap.lastIndex; this.index += 2) {
+                    fixed (int* slotsPtr = &this.bitMap.slots[0])
+                    fixed (int* dataPtr = &this.bitMap.data[0]) {
+                        for (; this.index < this.bitMap.lastIndex; this.index += 2) {
                             var dataIndex = *(slotsPtr + this.index) - 1;
                             if (dataIndex < 0) {
                                 continue;
@@ -3542,7 +3541,7 @@ namespace Morpeh {
                         }
                     }
 
-                    this.index       = this.hashMap.lastIndex + 1;
+                    this.index       = this.bitMap.lastIndex + 1;
                     this.current     = default;
                     this.currentData = default;
                     return false;
@@ -3895,24 +3894,6 @@ namespace Morpeh {
                 }
 
                 throw new Exception("Capacity is too big");
-            }
-        }
-    }
-
-    namespace Utils {
-        using System.Diagnostics;
-        using Debug = UnityEngine.Debug;
-
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        internal static class UnsafeUtility {
-            public static int SizeOf<T>() where T : struct {
-#if UNITY_2019_1_OR_NEWER
-                return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
-#else
-                return System.Runtime.InteropServices.Marshal.SizeOf(default(T));
-#endif
             }
         }
     }
