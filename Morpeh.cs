@@ -1897,7 +1897,7 @@ namespace Morpeh {
         public ref T AddComponent(Entity entity) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
             if (this.components.Add(entity.internalID, default, out var slotIndex)) {
@@ -1914,7 +1914,7 @@ namespace Morpeh {
         public ref T AddComponent(Entity entity, out bool exist) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
             if (this.components.Add(entity.internalID, default, out var slotIndex)) {
@@ -1931,7 +1931,7 @@ namespace Morpeh {
         public bool AddComponent(Entity entity, in T value) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
+                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
             if (this.components.Add(entity.internalID, value, out _)) {
@@ -1949,7 +1949,7 @@ namespace Morpeh {
         public ref T GetComponent(Entity entity) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+                throw new Exception($"[MORPEH] You are trying GetComponent on null or disposed entity {entity.internalID}");
             }
             
             if (!this.components.Has(entity.internalID)) {
@@ -1963,7 +1963,7 @@ namespace Morpeh {
         public ref T TryGetComponent(Entity entity, out bool exist) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+                throw new Exception($"[MORPEH] You are trying TryGetComponent on null or disposed entity {entity.internalID}");
             }
 #endif
             return ref this.components.TryGetValueRefByKey(entity.internalID, out exist);
@@ -1973,7 +1973,7 @@ namespace Morpeh {
         public void SetComponent(Entity entity, in T value) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
+                throw new Exception($"[MORPEH] You are trying SetComponent on null or disposed entity {entity.internalID}");
             }
 #endif
 
@@ -1987,6 +1987,12 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool RemoveComponent(Entity entity) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying RemoveComponent on null or disposed entity {entity.internalID}");
+            }
+#endif
+            
             if (this.components.Remove(entity.internalID, out _)) {
                 entity.RemoveTransfer(this.typeId);
                 return true;
@@ -1995,10 +2001,26 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Has(Entity entity) => this.components.Has(entity.internalID);
+        public override bool Has(Entity entity) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity.internalID}");
+            }
+#endif
+            return this.components.Has(entity.internalID);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void MigrateComponent(Entity from, Entity to, bool overwrite = true) {
+#if MORPEH_DEBUG
+            if (from.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying MigrateComponent FROM null or disposed entity {from.internalID}");
+            }
+            if (to.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying MigrateComponent TO null or disposed entity {to.internalID}");
+            }
+#endif
+            
             if (this.components.TryGetValue(from.internalID, out var component)) {
                 if (overwrite) {
                     if (this.components.Has(to.internalID)) {
