@@ -28,14 +28,14 @@ namespace Morpeh {
                     return default;
                 }
 
-                if (this.cachedEntity == null) {
+                if (this.cachedEntity is null) {
                     if (World.Default != null && this.internalEntityID >= 0 && World.Default.entitiesLength > this.internalEntityID) {
                         this.cachedEntity = World.Default.entities[this.internalEntityID];
                     }
                 }
-                else if (this.cachedEntity != null && this.cachedEntity.isDisposed) {
-                    this.cachedEntity = null;
-                    this.internalEntityID     = -1;
+                else if (this.cachedEntity is { isDisposed: true }) {
+                    this.cachedEntity     = null;
+                    this.internalEntityID = -1;
                 }
 
                 return this.cachedEntity;
@@ -59,8 +59,8 @@ namespace Morpeh {
                 var others = this.GetComponents<EntityProvider>();
                 foreach (var entityProvider in others) {
                     if (entityProvider.internalEntityID >= 0) {
-                        this.internalEntityID     = entityProvider.internalEntityID;
-                        this.cachedEntity = entityProvider.cachedEntity;
+                        this.internalEntityID = entityProvider.internalEntityID;
+                        this.cachedEntity     = entityProvider.cachedEntity;
                         break;
                     }
                 }
@@ -71,8 +71,8 @@ namespace Morpeh {
                 this.cachedEntity = World.Default.CreateEntity(out this.internalEntityID);
                 foreach (var entityProvider in others) {
                     if (entityProvider.enabled) {
-                        entityProvider.internalEntityID     = this.internalEntityID;
-                        entityProvider.cachedEntity = this.cachedEntity;
+                        entityProvider.internalEntityID = this.internalEntityID;
+                        entityProvider.cachedEntity     = this.cachedEntity;
                     }
                 }
             }

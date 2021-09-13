@@ -48,9 +48,6 @@ namespace Morpeh {
     public interface IInitializer : IDisposable {
         World World { get; set; }
 
-        /// <summary>
-        ///     Called 1 time on registration in the World
-        /// </summary>
         void OnAwake();
     }
 
@@ -77,7 +74,6 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     [Serializable]
     public sealed class Entity {
-        //todo support hotreload
         [NonSerialized]
         internal World world;
 
@@ -1249,7 +1245,7 @@ namespace Morpeh {
                 world.entities[entityId]?.ApplyTransfer();
             }
 
-            world.dirtyEntities.FastClear();
+            world.dirtyEntities.ClearFast();
 
             if (world.newArchetypes.length > 0) {
                 for (var index = 0; index < world.filters.length; index++) {
@@ -1411,7 +1407,6 @@ namespace Morpeh {
         }
     }
 
-    //TODO Separate RootFilter and ChildFilter
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -1436,19 +1431,17 @@ namespace Morpeh {
         internal Mode mode;
 
         internal bool isDirty;
-
-        //root filter ctor
-        //don't allocate any trash
+        
         internal Filter(World world) {
             this.world = world;
 
-            this.childs = new FastList<Filter>();
+            this.childs     = new FastList<Filter>();
+            this.archetypes = world.archetypes;
 
             this.typeID = -1;
             this.mode   = Mode.Include;
         }
 
-        //full child filter
         internal Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, Mode mode) {
             this.world = world;
 
@@ -1593,10 +1586,6 @@ namespace Morpeh {
             filter.mode   = Filter.Mode.None;
         }
 
-        [Obsolete("Use World.UpdateFilters()")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Update(this Filter filter) => filter.world.UpdateFilters();
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void UpdateLength(this Filter filter) {
             filter.isDirty = false;
@@ -1679,37 +1668,24 @@ namespace Morpeh {
             }
         }
 
-        // [CanBeNull]
-        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        // public static Entity GetEntity(this Filter filter, in int id) {
-        //     if (filter.archetypes.length == 1) {
-        //         return filter.archetypes.data[0].entities.data[id];
-        //     }
-        //
-        //     var num = 0;
-        //     for (int i = 0, length = filter.archetypes.length; i < length; i++) {
-        //         var archetype = filter.archetypes.data[i];
-        //         var check     = num + archetype.length;
-        //         if (id < check) {
-        //             return archetype.entities.data[id - num];
-        //         }
-        //
-        //         num = check;
-        //     }
-        //
-        //     return default;
-        // }
+        [CanBeNull]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Entity GetEntity(this Filter filter, in int id) {
+            var enumerator = filter.GetEnumerator();
+            for (int i = 0, length = id + 1; i < length; i++) {
+                if (enumerator.MoveNext() == false) {
+                    throw new IndexOutOfRangeException();
+                }
+            }
+            return enumerator.Current;
+        }
 
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity First(this Filter filter) {
-            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
-                var archetype = filter.archetypes.data[i];
-                if (archetype.length > 0) {
-                    var temp = archetype.entitiesBitMap.GetEnumerator();
-                    temp.MoveNext();
-                    return filter.world.entities[temp.current];
-                }
+            var enumerator = filter.GetEnumerator();
+            if (enumerator.MoveNext()) {
+                return enumerator.Current;
             }
 
             throw new InvalidOperationException("The source sequence is empty.");
@@ -1718,13 +1694,9 @@ namespace Morpeh {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
-            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
-                var archetype = filter.archetypes.data[i];
-                if (archetype.length > 0) {
-                    var temp = archetype.entitiesBitMap.GetEnumerator();
-                    temp.MoveNext();
-                    return filter.world.entities[temp.current];
-                }
+            var enumerator = filter.GetEnumerator();
+            if (enumerator.MoveNext()) {
+                return enumerator.Current;
             }
 
             return default;
@@ -1780,9 +1752,11 @@ namespace Morpeh {
         internal static Dictionary<int, InternalTypeDefinition>  intTypeAssociation = new Dictionary<int, InternalTypeDefinition>();
         internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
 
+        #pragma warning disable 0612
         internal static int GetID<T>() where T : struct, IComponent {
             var id   = Interlocked.Increment(ref counter);
             var type = typeof(T);
+            
             var info = new InternalTypeDefinition {
                 id                      = id,
                 type                    = type,
@@ -1795,7 +1769,8 @@ namespace Morpeh {
             typeAssociation.Add(type, info);
             return id;
         }
-
+        #pragma warning restore 0612
+        
         internal struct InternalTypeDefinition {
             public int                    id;
             public Type                   type;
@@ -3590,9 +3565,9 @@ namespace Morpeh {
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public static unsafe class BitMapExtensions {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool Set(this BitMap bitmap, in int index) {
-                var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
-                var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+            public static bool Set(this BitMap bitmap, in int key) {
+                var dataIndex = key >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
 
                 var rem = dataIndex & bitmap.capacityMinusOne;
 
@@ -3675,9 +3650,9 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool Unset(this BitMap bitmap, in int index) {
-                var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
-                var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+            public static bool Unset(this BitMap bitmap, in int key) {
+                var dataIndex = key >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
                 var rem       = dataIndex & bitmap.capacityMinusOne;
 
                 fixed (int* slotsPtr = &bitmap.slots[0])
@@ -3725,9 +3700,9 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool Get(this BitMap bitmap, in int index) {
-                var dataIndex = index >> BitMap.BITS_PER_FIELD_SHIFT;
-                var bitIndex  = index - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+            public static bool Get(this BitMap bitmap, in int key) {
+                var dataIndex = key >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
 
                 var rem = dataIndex & bitmap.capacityMinusOne;
 
@@ -3762,7 +3737,7 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void FastClear(this BitMap bitMap) {
+            public static void ClearFast(this BitMap bitMap) {
                 if (bitMap.lastIndex <= 0) {
                     return;
                 }
@@ -3929,6 +3904,7 @@ namespace Unity.IL2CPP.CompilerServices {
         ArrayBoundsChecks  = 2,
         DivideByZeroChecks = 3
     }
+    
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
     public class Il2CppSetOptionAttribute : Attribute {

@@ -2,7 +2,8 @@ namespace Morpeh.Globals {
     namespace ECS {
         using System;
         using System.Collections.Generic;
-        
+        using Collections;
+
         [Serializable]
         public struct GlobalEventMarker : IComponent {
         }
@@ -21,43 +22,44 @@ namespace Morpeh.Globals {
         }
 
         internal sealed class GlobalEventComponentUpdater<T> : GlobalEventComponentUpdater {
-            public static Dictionary<int, bool> initialized = new Dictionary<int, bool>();
+            public static BitMap initialized = new BitMap();
 
-            public int worldId;
+            private int worldId;
+            
+            private ComponentsCache<GlobalEventComponent<T>> eventsCache;
+            private ComponentsCache<GlobalEventPublished>    publishedCache;
+            private ComponentsCache<GlobalEventNextFrame>    nextFrameCache;
             
             internal override void Awake(World world) {
                 this.worldId = world.identifier;
-
-                if (initialized.ContainsKey(this.worldId)) {
-                    initialized[this.worldId] = true;
-                }
-                else {
-                    initialized.Add(this.worldId, true);
-                }
+                
+                initialized.Set(this.worldId);
                 
                 var common = world.Filter.With<GlobalEventMarker>().With<GlobalEventComponent<T>>();
                 this.filterPublishedWithoutNextFrame = common.With<GlobalEventPublished>();
                 this.filterNextFrame = common.With<GlobalEventNextFrame>();
+
+                this.eventsCache = world.GetCache<GlobalEventComponent<T>>();
             }
 
             internal override void Update() {
                 foreach (var entity in this.filterPublishedWithoutNextFrame) {
-                    ref var evnt = ref entity.GetComponent<GlobalEventComponent<T>>(out _);
+                    ref var evnt = ref this.eventsCache.GetComponent(entity);
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
                     while (evnt.NewData.Count > 0) {
                         evnt.Data.Push(evnt.NewData.Dequeue());
                     }
-                    entity.RemoveComponent<GlobalEventPublished>();
+                    this.publishedCache.RemoveComponent(entity);
                 }
                 foreach (var entity in this.filterNextFrame) {
-                    entity.SetComponent(new GlobalEventPublished ());
-                    entity.RemoveComponent<GlobalEventNextFrame>();
+                    this.publishedCache.SetComponent(entity, default);
+                    this.nextFrameCache.RemoveComponent(entity);
                 }
             }
 
             public override void Dispose() {
-                initialized[this.worldId] = false;
+                initialized.Unset(this.worldId);
             }
         }
 
