@@ -284,6 +284,7 @@ namespace Morpeh {
                 entity.previousArchetypeId = -1;
 
                 if (entity.currentArchetypeId < 0) {
+                    entity.world.ApplyRemoveEntity(entity.internalID);
                     entity.DisposeFast();
                 }
                 else {
@@ -1233,11 +1234,14 @@ namespace Morpeh {
         public static void RemoveEntity(this World world, Entity entity) {
             var id = entity.ID;
             if (world.entities[id] == entity) {
-                world.nextFreeEntityIDs.Add(id);
-                world.entities[id] = null;
-                --world.entitiesCount;
                 entity.Dispose();
             }
+        }
+
+        internal static void ApplyRemoveEntity(this World world, int id) {
+            world.nextFreeEntityIDs.Add(id);
+            world.entities[id] = null;
+            --world.entitiesCount;
         }
 
         public static void UpdateFilters(this World world) {
