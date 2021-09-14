@@ -280,16 +280,14 @@ namespace Morpeh {
                 if (entity.previousArchetypeId >= 0) {
                     entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
                 }
-
-                entity.previousArchetypeId = -1;
-
-                if (entity.currentArchetypeId < 0) {
-                    entity.world.ApplyRemoveEntity(entity.internalID);
-                    entity.DisposeFast();
+                
+                if (entity.isDisposed) {
+                    entity.DisposeInternal();
                 }
                 else {
                     entity.currentArchetype.Add(entity);
                 }
+                entity.previousArchetypeId = -1;
             }
 
             entity.isDirty = false;
@@ -303,29 +301,39 @@ namespace Morpeh {
 #endif
                 return;
             }
-
-            if (entity.previousArchetypeId < 0) {
-                entity.previousArchetypeId = entity.currentArchetypeId;
-            }
-
-            entity.currentArchetypeId = -1;
+            
             if (entity.isDirty == false) {
                 entity.world.dirtyEntities.Set(entity.internalID);
                 entity.isDirty = true;
             }
+            
+            entity.isDisposed = true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void DisposeInternal(this Entity entity) {
+            entity.world.ApplyRemoveEntity(entity.internalID);
+            var archetype = entity.currentArchetype;
+            var caches = archetype.world.typedCaches;
+            foreach (var typeId in archetype.typeIds) {
+                if (caches.TryGetValue(typeId, out var index)) {
+                    ComponentsCache.caches.data[index].RemoveComponent(entity);
+                }
+            }
+            
+            entity.DisposeFast();
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeFast(this Entity entity) {
             entity.previousArchetypeId = -1;
             entity.currentArchetypeId  = -1;
 
-            entity.world = null;
+            entity.world            = null;
+            entity.currentArchetype = null;
 
-            entity.internalID         = -1;
-            entity.worldID            = -1;
-            entity.currentArchetypeId = -1;
+            entity.internalID = -1;
+            entity.worldID    = -1;
 
             entity.isDirty    = false;
             entity.isDisposed = true;
@@ -1863,7 +1871,7 @@ namespace Morpeh {
         internal static FastList<ComponentsCache<T>> typedCaches = new FastList<ComponentsCache<T>>();
 
         [SerializeField]
-        public IntHashMap<T> components;
+        internal IntHashMap<T> components;
 
         static ComponentsCache() {
             cleanup += () => typedCaches.Clear();
