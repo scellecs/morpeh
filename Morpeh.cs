@@ -313,6 +313,8 @@ namespace Morpeh {
             if (entity.previousArchetypeId < 0) {
                 entity.previousArchetypeId = entity.currentArchetypeId;
             }
+
+            entity.currentArchetypeId = -1;
             
             if (entity.isDirty == false) {
                 entity.world.dirtyEntities.Set(entity.internalID);
