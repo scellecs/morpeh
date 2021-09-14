@@ -313,11 +313,12 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeInternal(this Entity entity) {
             entity.world.ApplyRemoveEntity(entity.internalID);
+            
             var archetype = entity.currentArchetype;
             var caches = archetype.world.typedCaches;
             foreach (var typeId in archetype.typeIds) {
                 if (caches.TryGetValue(typeId, out var index)) {
-                    ComponentsCache.caches.data[index].RemoveComponent(entity);
+                    ComponentsCache.caches.data[index].Clean(entity);
                 }
             }
             
@@ -1853,6 +1854,9 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract bool RemoveComponent(Entity entity);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal abstract bool Clean(Entity entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract bool Has(Entity entity);
@@ -2011,6 +2015,9 @@ namespace Morpeh {
             }
             return false;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal override bool Clean(Entity entity) => this.components.Remove(entity.internalID, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
