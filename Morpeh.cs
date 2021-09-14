@@ -126,7 +126,7 @@ namespace Morpeh {
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
             var cache = entity.world.GetCache<T>();
@@ -141,7 +141,7 @@ namespace Morpeh {
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
             var cache = entity.world.GetCache<T>();
@@ -155,7 +155,7 @@ namespace Morpeh {
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
             var cache = entity.world.GetCache<T>();
@@ -170,7 +170,7 @@ namespace Morpeh {
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
             var cache = entity.world.GetCache<T>();
@@ -185,7 +185,7 @@ namespace Morpeh {
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying SetComponent on null or disposed entity");
             }
 #endif
             var cache = entity.world.GetCache<T>();
@@ -195,12 +195,12 @@ namespace Morpeh {
 
 #if MORPEH_LEGACY
         [Obsolete]
-#endif 
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying RemoveComponent on null or disposed entity");
             }
 #endif
             var cache = entity.world.GetCache<T>();
