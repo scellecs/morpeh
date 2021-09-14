@@ -310,6 +310,10 @@ namespace Morpeh {
                 }
             }
             
+            if (entity.previousArchetypeId < 0) {
+                entity.previousArchetypeId = entity.currentArchetypeId;
+            }
+            
             if (entity.isDirty == false) {
                 entity.world.dirtyEntities.Set(entity.internalID);
                 entity.isDirty = true;
