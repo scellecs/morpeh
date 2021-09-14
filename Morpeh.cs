@@ -1249,7 +1249,7 @@ namespace Morpeh {
                 world.entities[entityId]?.ApplyTransfer();
             }
 
-            world.dirtyEntities.ClearFast();
+            world.dirtyEntities.Clear();
 
             if (world.newArchetypes.length > 0) {
                 for (var index = 0; index < world.filters.length; index++) {
@@ -3756,19 +3756,6 @@ namespace Morpeh {
                 Array.Clear(bitMap.slots, 0, bitMap.lastIndex);
                 Array.Clear(bitMap.buckets, 0, bitMap.capacity);
                 Array.Clear(bitMap.data, 0, bitMap.capacity);
-
-                bitMap.lastIndex = 0;
-                bitMap.length    = 0;
-                bitMap.freeIndex = -1;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void ClearFast(this BitMap bitMap) {
-                if (bitMap.lastIndex <= 0) {
-                    return;
-                }
-
-                Array.Clear(bitMap.buckets, 0, bitMap.capacity);
 
                 bitMap.lastIndex = 0;
                 bitMap.length    = 0;
