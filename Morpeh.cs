@@ -302,6 +302,14 @@ namespace Morpeh {
                 return;
             }
             
+            var archetype = entity.currentArchetype;
+            var caches    = archetype.world.typedCaches;
+            foreach (var typeId in archetype.typeIds) {
+                if (caches.TryGetValue(typeId, out var index)) {
+                    ComponentsCache.caches.data[index].Clean(entity);
+                }
+            }
+            
             if (entity.isDirty == false) {
                 entity.world.dirtyEntities.Set(entity.internalID);
                 entity.isDirty = true;
@@ -313,14 +321,6 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeInternal(this Entity entity) {
             entity.world.ApplyRemoveEntity(entity.internalID);
-            
-            var archetype = entity.currentArchetype;
-            var caches = archetype.world.typedCaches;
-            foreach (var typeId in archetype.typeIds) {
-                if (caches.TryGetValue(typeId, out var index)) {
-                    ComponentsCache.caches.data[index].Clean(entity);
-                }
-            }
             
             entity.DisposeFast();
         }
