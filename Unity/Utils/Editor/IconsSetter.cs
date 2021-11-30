@@ -29,7 +29,7 @@
 
         [InitializeOnLoadMethod]
         private static void Initialize() {
-            var method  = typeof(EditorGUIUtility).GetMethod("SetIconForObject", BindingFlags.Static | BindingFlags.NonPublic);
+            var method  = typeof(EditorGUIUtility).GetMethod("SetIconForObject", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
             var method2 = typeof(MonoImporter).GetMethod("CopyMonoScriptIconToImporters", BindingFlags.Static | BindingFlags.NonPublic);
             SelectIcon = (Action<Object, Texture2D>) Delegate.CreateDelegate(typeof(Action<Object, Texture2D>), method);
             SaveIcon   = (Action<MonoScript>) Delegate.CreateDelegate(typeof(Action<MonoScript>), method2);
