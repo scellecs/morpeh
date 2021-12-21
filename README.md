@@ -42,9 +42,9 @@ Minimal Unity Version is 2019.3.*
 ![installation_step2.png](Gifs~/installation_step2.png)  
 </details>
   
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/X-Crew/Morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/X-Crew/Morpeh.git#develop  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/X-Crew/Morpeh.git#2020.8.0  
+&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
+&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh#develop  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh#2020.9.0  
 
 <details>
     <summary>You can update Morpeh by Discover Window. Select Help/Morpeh Discover menu.   </summary>
