@@ -8,6 +8,7 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Workaround")]
 
 namespace Morpeh {
     //System
@@ -15,6 +16,7 @@ namespace Morpeh {
     using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Threading;
     //UnityEditor
@@ -26,10 +28,10 @@ namespace Morpeh {
     //Odin
     using Sirenix.OdinInspector;
     //Morpeh
-    using Utils;
     using Collections;
     //Unity
     using Unity.IL2CPP.CompilerServices;
+    using UnityEngine.Scripting;
     using Debug = UnityEngine.Debug;
     using Il2Cpp = Unity.IL2CPP.CompilerServices.Il2CppSetOptionAttribute;
 
@@ -46,9 +48,6 @@ namespace Morpeh {
     public interface IInitializer : IDisposable {
         World World { get; set; }
 
-        /// <summary>
-        ///     Called 1 time on registration in the World
-        /// </summary>
         void OnAwake();
     }
 
@@ -62,11 +61,19 @@ namespace Morpeh {
     public interface ILateSystem : ISystem {
     }
 
+    public interface IValidatable {
+        void OnValidate();
+    }
+
+    public interface IValidatableWithGameObject {
+        void OnValidate(GameObject gameObject);
+    }
+
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
+    [Serializable]
     public sealed class Entity {
-        //todo support hotreload
         [NonSerialized]
         internal World world;
 
@@ -74,9 +81,6 @@ namespace Morpeh {
         internal int internalID;
         [SerializeField]
         internal int worldID;
-
-        [SerializeField]
-        internal UnsafeIntHashMap<int> componentsIds;
 
         [SerializeField]
         internal bool isDirty;
@@ -87,8 +91,6 @@ namespace Morpeh {
         internal int previousArchetypeId;
         [SerializeField]
         internal int currentArchetypeId;
-        [SerializeField]
-        internal int indexInCurrentArchetype;
 
         [NonSerialized]
         internal Archetype currentArchetype;
@@ -105,21 +107,21 @@ namespace Morpeh {
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     public static class EntityExtensions {
         internal static Entity Create(int id, int worldID) {
-            var newEntity = new Entity {internalID = id, worldID = worldID};
+            var newEntity = new Entity { internalID = id, worldID = worldID };
 
             newEntity.world = World.worlds.data[newEntity.worldID];
 
-            newEntity.componentsIds = new UnsafeIntHashMap<int>(Constants.DEFAULT_ENTITY_COMPONENTS_CAPACITY);
-
-            newEntity.indexInCurrentArchetype = -1;
-            newEntity.previousArchetypeId     = -1;
-            newEntity.currentArchetypeId      = 0;
+            newEntity.previousArchetypeId = -1;
+            newEntity.currentArchetypeId  = 0;
 
             newEntity.currentArchetype = newEntity.world.archetypes.data[0];
 
             return newEntity;
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -127,31 +129,14 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
+            var cache = entity.world.GetCache<T>();
 
-            if (typeInfo.isMarker) {
-                const int componentId = -1;
-                if (entity.componentsIds.Add(typeInfo.id, componentId, out _)) {
-                    entity.AddTransfer(typeInfo.id);
-                    return ref cache.Empty();
-                }
-            }
-            else {
-                var componentId = cache.Add();
-                if (entity.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
-                    entity.AddTransfer(typeInfo.id);
-                    return ref cache.Get(entity.componentsIds.GetValueByIndex(slotIndex));
-                }
-
-                cache.Remove(componentId);
-            }
-#if MORPEH_DEBUG
-            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-#endif
-            return ref cache.Empty();
+            return ref cache.AddComponent(entity);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -159,74 +144,28 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
+            var cache = entity.world.GetCache<T>();
 
-            if (typeInfo.isMarker) {
-                const int componentId = -1;
-                if (entity.componentsIds.Add(typeInfo.id, componentId, out _)) {
-                    entity.AddTransfer(typeInfo.id);
-                    exist = false;
-                    return ref cache.Empty();
-                }
-            }
-            else {
-                var componentId = cache.Add();
-                if (entity.componentsIds.Add(typeInfo.id, componentId, out var slotIndex)) {
-                    entity.AddTransfer(typeInfo.id);
-                    exist = false;
-                    return ref cache.Get(entity.componentsIds.GetValueByIndex(slotIndex));
-                }
-
-                cache.Remove(componentId);
-            }
-#if MORPEH_DEBUG
-            Debug.LogError("[MORPEH] You're trying to add a component that already exists! Use Get or SetComponent instead!");
-#endif
-            exist = true;
-            return ref cache.Empty();
+            return ref cache.AddComponent(entity, out exist);
         }
 
-        public static bool AddComponentFast(this Entity entity, in int typeId, in int componentId) {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying AddComponentFast on null or disposed entity");
-            }
+#if MORPEH_LEGACY
+        [Obsolete]
 #endif
-            if (entity.componentsIds.Add(typeId, componentId, out _)) {
-                entity.AddTransfer(typeId);
-                return true;
-            }
-
-            return false;
-        }
-
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
+            var cache = entity.world.GetCache<T>();
 
-            if (typeInfo.isMarker) {
-                if (entity.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
-                    return ref cache.Empty();
-                }
-            }
-            else {
-                if (entity.componentsIds.TryGetValue(typeInfo.id, out var componentId)) {
-                    return ref cache.Get(componentId);
-                }
-            }
-
-#if MORPEH_DEBUG
-            Debug.LogError("[MORPEH] You're trying to get a component that doesn't exists!");
-#endif
-            return ref cache.Empty();
+            return ref cache.GetComponent(entity);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -234,38 +173,14 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
+            var cache = entity.world.GetCache<T>();
 
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
-
-            if (typeInfo.isMarker) {
-                if (entity.componentsIds.TryGetIndex(typeInfo.id) >= 0) {
-                    exist = true;
-                    return ref cache.Empty();
-                }
-            }
-            else {
-                if (entity.componentsIds.TryGetValue(typeInfo.id, out var componentId)) {
-                    exist = true;
-                    return ref cache.Get(componentId);
-                }
-            }
-
-            exist = false;
-            return ref cache.Empty();
+            return ref cache.TryGetComponent(entity, out exist);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetComponentFast(this Entity entity, in int typeId) {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying GetComponentFast on null or disposed entity");
-            }
+#if MORPEH_LEGACY
+        [Obsolete]
 #endif
-
-            return entity.componentsIds.GetValueByKey(typeId);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -273,27 +188,14 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying SetComponent on null or disposed entity");
             }
 #endif
+            var cache = entity.world.GetCache<T>();
 
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            var cache    = entity.world.GetCache<T>();
-
-            if (!typeInfo.isMarker) {
-                if (entity.componentsIds.TryGetValue(typeInfo.id, out var index)) {
-                    cache.Set(index, value);
-                }
-                else {
-                    var componentId = cache.Add(value);
-                    entity.componentsIds.Add(typeInfo.id, componentId, out _);
-                    entity.AddTransfer(typeInfo.id);
-                }
-            }
-            else {
-                if (entity.componentsIds.Add(typeInfo.id, -1, out _)) {
-                    entity.AddTransfer(typeInfo.id);
-                }
-            }
+            cache.SetComponent(entity, value);
         }
 
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -301,57 +203,41 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying RemoveComponent on null or disposed entity");
             }
 #endif
+            var cache = entity.world.GetCache<T>();
 
-            var typeInfo = CacheTypeIdentifier<T>.info;
-
-            if (entity.componentsIds.Remove(typeInfo.id, out var index)) {
-                if (typeInfo.isMarker == false) {
-                    entity.world.GetCache<T>().Remove(index);
-                }
-
-                entity.RemoveTransfer(typeInfo.id);
-                return true;
-            }
-
-            return false;
+            return cache.RemoveComponent(entity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool RemoveComponentFast(this Entity entity, int typeId, out int indexInCache) {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying RemoveComponentFast on null or disposed entity");
-            }
+#if MORPEH_LEGACY
+        [Obsolete]
 #endif
-
-            if (entity.componentsIds.Remove(typeId, out indexInCache)) {
-                entity.RemoveTransfer(typeId);
-                return true;
-            }
-
-            return false;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has([CanBeNull] this Entity entity, int typeID) {
+        public static bool Has<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
 
-            return entity.componentsIds.TryGetIndex(typeID) >= 0;
+            var cache = entity.world.GetCache<T>();
+            return cache.Has(entity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has<T>([CanBeNull] this Entity entity) where T : struct, IComponent {
+#if MORPEH_LEGACY
+        [Obsolete]
+#endif
+        public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
+            if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying MigrateTo on null or disposed entities");
             }
 #endif
 
-            return entity.componentsIds.TryGetIndex(CacheTypeIdentifier<T>.info.id) >= 0;
+            var world = from.world;
+            foreach (var cacheId in world.caches) {
+                var cache = ComponentsCache.caches.data[world.caches.GetValueByIndex(cacheId)];
+                cache.MigrateComponent(from, to, overwrite);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -365,7 +251,7 @@ namespace Morpeh {
                 return;
             }
 
-            entity.world.dirtyEntities.Add(entity);
+            entity.world.dirtyEntities.Set(entity.internalID);
             entity.isDirty = true;
         }
 
@@ -380,7 +266,7 @@ namespace Morpeh {
                 return;
             }
 
-            entity.world.dirtyEntities.Add(entity);
+            entity.world.dirtyEntities.Set(entity.internalID);
             entity.isDirty = true;
         }
 
@@ -391,30 +277,21 @@ namespace Morpeh {
             }
 
             if (entity.previousArchetypeId != entity.currentArchetypeId) {
-                if (entity.previousArchetypeId >= 0 && entity.indexInCurrentArchetype >= 0) {
+                if (entity.previousArchetypeId >= 0) {
                     entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
                 }
-                entity.previousArchetypeId = -1;
-
-                if (entity.currentArchetypeId < 0) {
-                    foreach (var slotIndex in entity.componentsIds) {
-                        var typeId      = entity.componentsIds.GetKeyByIndex(slotIndex);
-                        var componentId = entity.componentsIds.GetValueByIndex(slotIndex);
-
-                        if (componentId >= 0) {
-                            entity.world.GetCache(typeId)?.Remove(componentId);
-                        }
-                    }
-                    entity.DisposeFast();
+                
+                if (entity.isDisposed) {
+                    entity.DisposeInternal();
                 }
                 else {
-                    entity.currentArchetype.Add(entity, out entity.indexInCurrentArchetype);
+                    entity.currentArchetype.Add(entity);
                 }
+                entity.previousArchetypeId = -1;
             }
 
             entity.isDirty = false;
         }
-
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Entity entity) {
@@ -424,31 +301,46 @@ namespace Morpeh {
 #endif
                 return;
             }
-
+            
+            var archetype = entity.currentArchetype;
+            var caches    = archetype.world.typedCaches;
+            foreach (var typeId in archetype.typeIds) {
+                if (caches.TryGetValue(typeId, out var index)) {
+                    ComponentsCache.caches.data[index].Clean(entity);
+                }
+            }
+            
             if (entity.previousArchetypeId < 0) {
                 entity.previousArchetypeId = entity.currentArchetypeId;
             }
+
+            entity.currentArchetypeId = -1;
             
-            entity.currentArchetypeId  = -1;
             if (entity.isDirty == false) {
-                entity.world.dirtyEntities.Add(entity);
+                entity.world.dirtyEntities.Set(entity.internalID);
                 entity.isDirty = true;
             }
+            
+            entity.isDisposed = true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void DisposeInternal(this Entity entity) {
+            entity.world.ApplyRemoveEntity(entity.internalID);
+            
+            entity.DisposeFast();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeFast(this Entity entity) {
-            entity.indexInCurrentArchetype = -1;
-            entity.previousArchetypeId     = -1;
-            entity.currentArchetypeId      = -1;
+            entity.previousArchetypeId = -1;
+            entity.currentArchetypeId  = -1;
 
-            entity.componentsIds.Clear();
-            entity.componentsIds = null;
-            entity.world         = null;
+            entity.world            = null;
+            entity.currentArchetype = null;
 
-            entity.internalID         = -1;
-            entity.worldID            = -1;
-            entity.currentArchetypeId = -1;
+            entity.internalID = -1;
+            entity.worldID    = -1;
 
             entity.isDirty    = false;
             entity.isDisposed = true;
@@ -550,7 +442,7 @@ namespace Morpeh {
 
             DisposeSystems(this.disabledLateSystems);
             this.disabledLateSystems = null;
-            
+
             foreach (var initializer in this.newInitializers) {
 #if MORPEH_DEBUG
                 try {
@@ -764,6 +656,7 @@ namespace Morpeh {
             if (index >= 0) {
                 systemsGroup.newInitializers.RemoveAt(index);
             }
+
             index = systemsGroup.initializers.IndexOf(initializer);
             if (index >= 0) {
                 systemsGroup.initializers.RemoveAt(index);
@@ -885,7 +778,7 @@ namespace Morpeh {
         [CanBeNull]
         public static World Default => worlds.data[0];
         [NotNull]
-        internal static FastList<World> worlds = new FastList<World> {null};
+        internal static FastList<World> worlds = new FastList<World> { null };
 
         [NonSerialized]
         public Filter Filter;
@@ -915,7 +808,7 @@ namespace Morpeh {
         internal int entitiesCapacity;
 
         [NonSerialized]
-        internal FastList<Entity> dirtyEntities;
+        internal BitMap dirtyEntities;
 
         [SerializeField]
         internal IntFastList freeEntityIDs;
@@ -1069,6 +962,7 @@ namespace Morpeh {
             world.Filter         = new Filter(world);
             world.filters        = new FastList<Filter>();
             world.archetypeCache = new IntFastList();
+            world.dirtyEntities  = new BitMap();
 
             if (world.archetypes != null) {
                 foreach (var archetype in world.archetypes) {
@@ -1086,7 +980,6 @@ namespace Morpeh {
         internal static World Initialize(this World world) {
             World.worlds.Add(world);
             world.identifier        = World.worlds.length - 1;
-            world.dirtyEntities     = new FastList<Entity>();
             world.freeEntityIDs     = new IntFastList();
             world.nextFreeEntityIDs = new IntFastList();
             world.caches            = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
@@ -1096,9 +989,9 @@ namespace Morpeh {
             world.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             world.entities         = new Entity[world.entitiesCapacity];
 
-            world.archetypes         = new FastList<Archetype> {new Archetype(0, new int[0], world.identifier)};
+            world.archetypes         = new FastList<Archetype> { new Archetype(0, Array.Empty<int>(), world.identifier) };
             world.archetypesByLength = new IntHashMap<IntFastList>();
-            world.archetypesByLength.Add(0, new IntFastList {0}, out _);
+            world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
             world.newArchetypes = new IntFastList();
 
             return world;
@@ -1122,6 +1015,22 @@ namespace Morpeh {
             go.hideFlags = HideFlags.HideAndDontSave;
             Object.DontDestroyOnLoad(go);
 #endif
+            //Warm Types
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                foreach (var type in assembly.GetTypes()) {
+                    if (typeof(IComponent).IsAssignableFrom(type) && type.IsValueType && !type.ContainsGenericParameters) {
+                        try {
+                            typeof(TypeIdentifier<>)
+                                .MakeGenericType(type)
+                                .GetMethod("Warmup", BindingFlags.Static | BindingFlags.Public)
+                                .Invoke(null, null);
+                        }
+                        catch {
+                            Debug.LogWarning($"[MORPEH] Attention component type {type.FullName} not used, but exists in build");
+                        }
+                    }
+                }
+            }
         }
 
         //TODO refactor allocations and fast sort(maybe without it?)
@@ -1173,7 +1082,7 @@ namespace Morpeh {
                 archsl.Add(archetypeId);
             }
             else {
-                world.archetypesByLength.Add(typesLength, new IntFastList {archetypeId}, out _);
+                world.archetypesByLength.Add(typesLength, new IntFastList { archetypeId }, out _);
             }
 
             world.newArchetypes.Add(archetypeId);
@@ -1194,7 +1103,7 @@ namespace Morpeh {
         }
 
         public static ComponentsCache<T> GetCache<T>(this World world) where T : struct, IComponent {
-            var info = CacheTypeIdentifier<T>.info;
+            var info = TypeIdentifier<T>.info;
             if (world.typedCaches.TryGetValue(info.id, out var typedIndex)) {
                 return ComponentsCache<T>.typedCaches.data[typedIndex];
             }
@@ -1202,7 +1111,7 @@ namespace Morpeh {
             ComponentsCache<T> componentsCache;
             if (info.isDisposable) {
                 var constructedType = typeof(ComponentsCacheDisposable<>).MakeGenericType(typeof(T));
-                componentsCache = (ComponentsCache<T>) Activator.CreateInstance(constructedType);
+                componentsCache = (ComponentsCache<T>)Activator.CreateInstance(constructedType);
             }
             else {
                 componentsCache = new ComponentsCache<T>();
@@ -1302,7 +1211,7 @@ namespace Morpeh {
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = world.entitiesCapacity << 1;
+                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity);
                 Array.Resize(ref world.entities, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
@@ -1340,19 +1249,22 @@ namespace Morpeh {
         public static void RemoveEntity(this World world, Entity entity) {
             var id = entity.ID;
             if (world.entities[id] == entity) {
-                world.nextFreeEntityIDs.Add(id);
-                world.entities[id] = null;
-                --world.entitiesCount;
                 entity.Dispose();
             }
         }
 
+        internal static void ApplyRemoveEntity(this World world, int id) {
+            world.nextFreeEntityIDs.Add(id);
+            world.entities[id] = null;
+            --world.entitiesCount;
+        }
+
         public static void UpdateFilters(this World world) {
-            for (var index = 0; index < world.dirtyEntities.length; index++) {
-                world.dirtyEntities.data[index].ApplyTransfer();
+            foreach (var entityId in world.dirtyEntities) {
+                world.entities[entityId]?.ApplyTransfer();
             }
 
-            world.dirtyEntities.length = 0;
+            world.dirtyEntities.Clear();
 
             if (world.newArchetypes.length > 0) {
                 for (var index = 0; index < world.filters.length; index++) {
@@ -1393,11 +1305,9 @@ namespace Morpeh {
         [SerializeField]
         internal bool isDirty;
         [SerializeField]
-        internal FastList<Entity> entities;
+        internal BitMap entitiesBitMap;
         [NonSerialized]
         internal FastList<Filter> filters;
-        [NonSerialized]
-        internal FastList<ComponentsBagPart> bagParts;
         [SerializeField]
         internal UnsafeIntHashMap<int> removeTransfer;
         [SerializeField]
@@ -1409,7 +1319,6 @@ namespace Morpeh {
         [SerializeField]
         internal int id;
 
-        //todo support hotreload
         [NonSerialized]
         internal World world;
 
@@ -1417,51 +1326,14 @@ namespace Morpeh {
             this.id             = id;
             this.typeIds        = typeIds;
             this.length         = 0;
-            this.entities       = new FastList<Entity>();
+            this.entitiesBitMap = new BitMap();
             this.addTransfer    = new UnsafeIntHashMap<int>();
             this.removeTransfer = new UnsafeIntHashMap<int>();
-            this.bagParts       = new FastList<ComponentsBagPart>();
 
             this.isDirty = false;
             this.worldId = worldId;
 
             this.Ctor();
-        }
-
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        internal abstract class ComponentsBagPart {
-            internal int typeId;
-
-            internal IntFastList ids;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal abstract void Add(Entity entity);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal abstract void Remove(int index);
-        }
-
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        internal sealed class ComponentsBagPart<T> : ComponentsBagPart where T : struct, IComponent {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal ComponentsBagPart(Archetype archetype) {
-                this.typeId = CacheTypeIdentifier<T>.info.id;
-                this.ids    = new IntFastList(archetype.entities.length);
-
-                foreach (var entity in archetype.entities) {
-                    this.ids.Add(entity.GetComponentFast(this.typeId));
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal override void Add(Entity entity) => this.ids.Add(entity.componentsIds.GetValueByKey(this.typeId));
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal override void Remove(int index) => this.ids.RemoveAtSwap(index, out _);
         }
     }
 
@@ -1484,8 +1356,8 @@ namespace Morpeh {
             archetype.typeIds = null;
             archetype.world   = null;
 
-            archetype.entities.Clear();
-            archetype.entities = null;
+            archetype.entitiesBitMap.Clear();
+            archetype.entitiesBitMap = null;
 
             archetype.addTransfer.Clear();
             archetype.addTransfer = null;
@@ -1495,26 +1367,17 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Add(this Archetype archetype, Entity entity, out int index) {
-            index = archetype.entities.length;
-            archetype.entities.Add(entity);
-            for (var i = 0; i < archetype.bagParts.length; i++) {
-                archetype.bagParts.data[i].Add(entity);
-            }
+        public static void Add(this Archetype archetype, Entity entity) {
+            archetype.length++;
+            archetype.entitiesBitMap.Set(entity.internalID);
 
             archetype.isDirty = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove(this Archetype archetype, Entity entity) {
-            var index = entity.indexInCurrentArchetype;
-            if (archetype.entities.RemoveAtSwap(index, out _)) {
-                archetype.entities.data[index].indexInCurrentArchetype = index;
-            }
-
-            for (var i = 0; i < archetype.bagParts.length; i++) {
-                archetype.bagParts.data[i].Remove(index);
-            }
+            archetype.length--;
+            archetype.entitiesBitMap.Unset(entity.internalID);
 
             archetype.isDirty = true;
         }
@@ -1537,7 +1400,6 @@ namespace Morpeh {
                 archetype.filters.data[i].isDirty = true;
             }
 
-            archetype.length  = archetype.entities.length;
             archetype.isDirty = false;
         }
 
@@ -1562,23 +1424,8 @@ namespace Morpeh {
                 archetype.removeTransfer.Add(typeId, archetypeId, out _);
             }
         }
-
-        internal static Archetype.ComponentsBagPart<T> Select<T>(this Archetype archetype, int typeId) where T : struct, IComponent {
-            for (int i = 0, len = archetype.bagParts.length; i < len; i++) {
-                var bag = archetype.bagParts.data[i];
-                if (bag.typeId == typeId) {
-                    return (Archetype.ComponentsBagPart<T>) bag;
-                }
-            }
-
-            var bagPart = new Archetype.ComponentsBagPart<T>(archetype);
-            archetype.bagParts.Add(bagPart);
-
-            return bagPart;
-        }
     }
 
-    //TODO Separate RootFilter and ChildFilter
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -1593,9 +1440,8 @@ namespace Morpeh {
 
         internal World world;
 
-        internal FastList<Filter>        childs;
-        internal FastList<Archetype>     archetypes;
-        internal FastList<ComponentsBag> componentsBags;
+        internal FastList<Filter>    childs;
+        internal FastList<Archetype> archetypes;
 
         internal IntFastList includedTypeIds;
         internal IntFastList excludedTypeIds;
@@ -1604,19 +1450,17 @@ namespace Morpeh {
         internal Mode mode;
 
         internal bool isDirty;
-
-        //root filter ctor
-        //don't allocate any trash
+        
         internal Filter(World world) {
             this.world = world;
 
-            this.childs = new FastList<Filter>();
+            this.childs     = new FastList<Filter>();
+            this.archetypes = world.archetypes;
 
             this.typeID = -1;
             this.mode   = Mode.Include;
         }
 
-        //full child filter
         internal Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, Mode mode) {
             this.world = world;
 
@@ -1629,76 +1473,11 @@ namespace Morpeh {
 
             this.mode = mode;
 
-            this.componentsBags = new FastList<ComponentsBag>();
-
             this.world.filters.Add(this);
 
             this.FindArchetypes();
 
             this.UpdateLength();
-        }
-
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public abstract class ComponentsBag : IDisposable {
-            public int typeId;
-
-            internal abstract void AddArchetype(Archetype archetype);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal abstract void InternalDispose();
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public abstract void Dispose();
-        }
-
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        public sealed class ComponentsBag<T> : ComponentsBag where T : struct, IComponent {
-            internal FastList<T> components;
-            internal Filter      filter;
-            internal IntFastList firstPartIds;
-
-            internal FastList<Archetype.ComponentsBagPart> parts;
-
-            public ComponentsBag(Filter filter) {
-                this.typeId = CacheTypeIdentifier<T>.info.id;
-
-                this.parts      = new FastList<Archetype.ComponentsBagPart>();
-                this.filter     = filter;
-                this.components = filter.world.GetCache<T>().components;
-
-                foreach (var archetype in filter.archetypes) {
-                    this.parts.Add(archetype.Select<T>(this.typeId));
-                }
-
-                this.firstPartIds = this.parts.length > 0 ? this.parts.data[0].ids : null;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal override void AddArchetype(Archetype archetype) {
-                var part = archetype.Select<T>(this.typeId);
-                if (this.parts.length == 0) {
-                    this.firstPartIds = part.ids;
-                }
-
-                this.parts.Add(part);
-            }
-
-            internal override void InternalDispose() {
-                this.components = null;
-                this.filter     = null;
-
-                this.parts.Clear();
-                this.parts = null;
-            }
-
-            public override void Dispose() {
-                this.filter.componentsBags.Remove(this);
-                this.InternalDispose();
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1715,28 +1494,36 @@ namespace Morpeh {
             private readonly FastList<Archetype> archetypes;
             private readonly int                 archetypeCount;
 
-            private int index;
             private int archetypeId;
 
             private Entity current;
 
-            private FastList<Entity> archetypeEntities;
+            private World  world;
+            private BitMap archetypeEntities;
+
+            private BitMap.Enumerator currentEnumerator;
 
             internal EntityEnumerator(Filter filter) {
+                this.world      = filter.world;
                 this.archetypes = filter.archetypes;
                 this.current    = null;
-                this.index      = 0;
 
-                this.archetypeId       = 0;
-                this.archetypeCount    = this.archetypes.length;
-                this.archetypeEntities = this.archetypeCount == 0 ? null : this.archetypes.data[0].entities;
+                this.archetypeId    = 0;
+                this.archetypeCount = this.archetypes.length;
+                if (this.archetypeCount != 0) {
+                    this.archetypeEntities = this.archetypes.data[0].entitiesBitMap;
+                    this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                }
+                else {
+                    this.archetypeEntities = default;
+                    this.currentEnumerator = default;
+                }
             }
 
             public bool MoveNext() {
                 if (this.archetypeCount == 1) {
-                    if (this.index < this.archetypeEntities.length) {
-                        this.current = this.archetypeEntities.data[this.index];
-                        ++this.index;
+                    if (this.currentEnumerator.MoveNext()) {
+                        this.current = this.world.entities[this.currentEnumerator.current];
                         return true;
                     }
 
@@ -1744,18 +1531,18 @@ namespace Morpeh {
                 }
 
                 if (this.archetypeId < this.archetypeCount) {
-                    if (this.index < this.archetypeEntities.length) {
-                        this.current = this.archetypeEntities.data[this.index];
-                        ++this.index;
+                    if (this.currentEnumerator.MoveNext()) {
+                        this.current = this.world.entities[this.currentEnumerator.current];
                         return true;
                     }
 
                     while (++this.archetypeId < this.archetypeCount) {
-                        this.archetypeEntities = this.archetypes.data[this.archetypeId].entities;
+                        this.archetypeEntities = this.archetypes.data[this.archetypeId].entitiesBitMap;
                         if (this.archetypeEntities.length > 0) {
-                            this.index   = 0;
-                            this.current = this.archetypeEntities.data[this.index];
-                            ++this.index;
+                            this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                            this.currentEnumerator.MoveNext();
+
+                            this.current = this.world.entities[this.currentEnumerator.current];
                             return true;
                         }
                     }
@@ -1765,10 +1552,16 @@ namespace Morpeh {
             }
 
             public void Reset() {
-                this.index             = 0;
-                this.current           = null;
-                this.archetypeId       = 0;
-                this.archetypeEntities = this.archetypeCount == 0 ? null : this.archetypes.data[0].entities;
+                this.current     = null;
+                this.archetypeId = 0;
+                if (this.archetypeCount != 0) {
+                    this.archetypeEntities = this.archetypes.data[0].entitiesBitMap;
+                    this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                }
+                else {
+                    this.archetypeEntities = default;
+                    this.currentEnumerator = default;
+                }
             }
 
             public Entity Current => this.current;
@@ -1808,23 +1601,9 @@ namespace Morpeh {
 
             filter.Length = -1;
 
-            if (filter.componentsBags != null) {
-                foreach (var bag in filter.componentsBags) {
-                    bag.InternalDispose();
-                }
-
-                filter.componentsBags.Clear();
-            }
-
-            filter.componentsBags = null;
-
             filter.typeID = -1;
             filter.mode   = Filter.Mode.None;
         }
-
-        [Obsolete("Use World.UpdateFilters()")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Update(this Filter filter) => filter.world.UpdateFilters();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void UpdateLength(this Filter filter) {
@@ -1904,65 +1683,39 @@ namespace Morpeh {
 
                     filter.archetypes.Add(archetype);
                     archetype.AddFilter(filter);
-                    for (int i = 0, length = filter.componentsBags.length; i < length; i++) {
-                        var bag = filter.componentsBags.data[i];
-                        bag.AddArchetype(archetype);
-                    }
                 }
             }
-        }
-
-        public static Filter.ComponentsBag<T> Select<T>(this Filter filter) where T : struct, IComponent {
-            var typeInfo = CacheTypeIdentifier<T>.info;
-            if (typeInfo.isMarker) {
-#if UNITY_EDITOR
-                Debug.LogError($"You Select<{typeof(T)}> marker component from filter! This makes no sense.");
-#endif
-                return null;
-            }
-
-            for (int i = 0, length = filter.componentsBags.length; i < length; i++) {
-                var bag = filter.componentsBags.data[i];
-                if (bag.typeId == typeInfo.id) {
-                    return (Filter.ComponentsBag<T>) bag;
-                }
-            }
-
-            var componentsBag = new Filter.ComponentsBag<T>(filter);
-            filter.componentsBags.Add(componentsBag);
-
-            return componentsBag;
         }
 
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this Filter filter, in int id) {
-            if (filter.archetypes.length == 1) {
-                return filter.archetypes.data[0].entities.data[id];
-            }
-
-            var num = 0;
-            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
-                var archetype = filter.archetypes.data[i];
-                var check     = num + archetype.length;
-                if (id < check) {
-                    return archetype.entities.data[id - num];
+            var enumerator = filter.GetEnumerator();
+            for (int i = 0, length = id + 1; i < length; i++) {
+                if (enumerator.MoveNext() == false) {
+                    throw new IndexOutOfRangeException();
                 }
-
-                num = check;
             }
-
-            return default;
+            return enumerator.Current;
         }
 
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity First(this Filter filter) {
-            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
-                var archetype = filter.archetypes.data[i];
-                if (archetype.length > 0) {
-                    return archetype.entities.data[0];
-                }
+            var enumerator = filter.GetEnumerator();
+            if (enumerator.MoveNext()) {
+                return enumerator.Current;
+            }
+
+            throw new InvalidOperationException("The source sequence is empty.");
+        }
+
+        [CanBeNull]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Entity FirstOrDefault(this Filter filter) {
+            var enumerator = filter.GetEnumerator();
+            if (enumerator.MoveNext()) {
+                return enumerator.Current;
             }
 
             return default;
@@ -1977,12 +1730,12 @@ namespace Morpeh {
         private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
             for (int i = 0, length = filter.childs.length; i < length; i++) {
                 var child = filter.childs.data[i];
-                if (child.mode == mode && child.typeID == CacheTypeIdentifier<T>.info.id) {
+                if (child.mode == mode && child.typeID == TypeIdentifier<T>.info.id) {
                     return child;
                 }
             }
 
-            var newTypeId = CacheTypeIdentifier<T>.info.id;
+            var newTypeId = TypeIdentifier<T>.info.id;
 
             IntFastList newIncludedTypeIds;
             IntFastList newExcludedTypeIds;
@@ -2012,77 +1765,39 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    public static class ComponentsBagExtensions {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T GetComponent<T>(this Filter.ComponentsBag<T> bag, in int index) where T : struct, IComponent {
-            if (bag.parts.length > 1) {
-                int offset = 0;
-                for (int i = 0, length = bag.parts.length; i < length; i++) {
-                    var part  = bag.parts.data[i];
-                    var check = offset + part.ids.length;
-                    if (index < check) {
-                        return ref bag.components.data[part.ids.Get(index - offset)];
-                    }
-
-                    offset = check;
-                }
-            }
-
-            return ref bag.components.data[bag.firstPartIds.Get(index)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetComponent<T>(this Filter.ComponentsBag<T> bag, in int index, in T value) where T : struct, IComponent {
-            if (bag.parts.length > 1) {
-                int offset = 0;
-                for (int i = 0, length = bag.parts.length; i < length; i++) {
-                    var part  = bag.parts.data[i];
-                    var check = offset + part.ids.length;
-                    if (index < check) {
-                        bag.components.data[part.ids.Get(index - offset)] = value;
-                    }
-
-                    offset = check;
-                }
-            }
-            else {
-                bag.components.data[bag.firstPartIds.Get(index)] = value;
-            }
-        }
-    }
-
-    [Il2Cpp(Option.NullChecks, false)]
-    [Il2Cpp(Option.ArrayBoundsChecks, false)]
-    [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal static class CommonCacheTypeIdentifier {
+    internal static class CommonTypeIdentifier {
         private static int counter;
 
-        //todo need this?
-        internal static TypeInfo GetTypeInfo<T>(this T component) where T : struct, IComponent => CacheTypeIdentifier<T>.info;
-        
-        internal static int  GetID() => Interlocked.Increment(ref counter);
-#if MORPEH_DEBUG
-        internal static Dictionary<int, DebugInfo> editorTypeAssociation = new Dictionary<int, DebugInfo>();
+        internal static Dictionary<int, InternalTypeDefinition>  intTypeAssociation = new Dictionary<int, InternalTypeDefinition>();
+        internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
 
+        #pragma warning disable 0612
         internal static int GetID<T>() where T : struct, IComponent {
-            var id = counter++;
-            var info = new DebugInfo {
-                type     = typeof(T),
-                getBoxed = (world, componentId) => world.GetCache<T>().components.data[componentId],
-                setBoxed = (world, componentId, value) => world.GetCache<T>().components.data[componentId] = (T) value,
-                typeInfo = CacheTypeIdentifier<T>.info
+            var id   = Interlocked.Increment(ref counter);
+            var type = typeof(T);
+            
+            var info = new InternalTypeDefinition {
+                id                      = id,
+                type                    = type,
+                entityGetComponentBoxed = (entity) => entity.GetComponent<T>(),
+                entitySetComponentBoxed = (entity, component) => entity.SetComponent((T)component),
+                entityRemoveComponent   = (entity) => entity.RemoveComponent<T>(),
+                typeInfo                = TypeIdentifier<T>.info
             };
-            editorTypeAssociation.Add(id, info);
+            intTypeAssociation.Add(id, info);
+            typeAssociation.Add(type, info);
             return id;
         }
-
-        internal struct DebugInfo {
-            public Type                       type;
-            public Func<World, int, object>   getBoxed;
-            public Action<World, int, object> setBoxed;
-            public TypeInfo                   typeInfo;
+        #pragma warning restore 0612
+        
+        internal struct InternalTypeDefinition {
+            public int                    id;
+            public Type                   type;
+            public Func<Entity, object>   entityGetComponentBoxed;
+            public Action<Entity, object> entitySetComponentBoxed;
+            public Action<Entity>         entityRemoveComponent;
+            public TypeInfo               typeInfo;
         }
-#endif
 
         [Serializable]
         internal class TypeInfo {
@@ -2107,16 +1822,22 @@ namespace Morpeh {
     [Il2Cpp(Option.NullChecks, false)]
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
-    internal static class CacheTypeIdentifier<T> where T : struct, IComponent {
-        internal static CommonCacheTypeIdentifier.TypeInfo info;
+    [Preserve]
+    public static class TypeIdentifier<T> where T : struct, IComponent {
+        internal static CommonTypeIdentifier.TypeInfo info;
 
-        static CacheTypeIdentifier() {
-            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
-#if MORPEH_DEBUG
-            var id = CommonCacheTypeIdentifier.GetID<T>();
-#else
-            var id = CommonCacheTypeIdentifier.GetID();
-#endif
+        static TypeIdentifier() {
+            Warmup();
+        }
+
+        public static void Warmup() {
+            if (info != null) {
+                return;
+            }
+
+            var typeFieldsLength = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length;
+            info = new CommonTypeIdentifier.TypeInfo(typeFieldsLength == 0, typeof(IDisposable).IsAssignableFrom(typeof(T)));
+            var id = CommonTypeIdentifier.GetID<T>();
             info.SetID(id);
         }
     }
@@ -2132,9 +1853,22 @@ namespace Morpeh {
 
         [SerializeField]
         internal int commonCacheId;
+        [SerializeField]
+        internal int typedCacheId;
+        [SerializeField]
+        internal int typeId;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal abstract void Remove(in int id);
+        public abstract bool RemoveComponent(Entity entity);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal abstract bool Clean(Entity entity);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract bool Has(Entity entity);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract void MigrateComponent(Entity from, Entity to, bool overwrite = true);
 
         public abstract void Dispose();
     }
@@ -2147,25 +1881,32 @@ namespace Morpeh {
         internal static FastList<ComponentsCache<T>> typedCaches = new FastList<ComponentsCache<T>>();
 
         [SerializeField]
-        internal FastList<T> components;
-        [SerializeField]
-        internal IntStack freeIndexes;
-        [SerializeField]
-        internal int typedCacheId;
-        [SerializeField]
-        internal int typeId;
+        internal IntHashMap<T> components;
 
         static ComponentsCache() {
             cleanup += () => typedCaches.Clear();
         }
 
+        static void Refill() {
+            var id = TypeIdentifier<T>.info.id;
+            if (typedCaches == null) {
+                typedCaches = new FastList<ComponentsCache<T>>();
+            }
+            typedCaches.Clear();
+
+            foreach (var cache in caches) {
+                if (cache.typeId == id) {
+                    typedCaches.Add((ComponentsCache<T>)cache);
+                }
+            }
+        }
+
         internal ComponentsCache() {
-            this.typeId = CacheTypeIdentifier<T>.info.id;
+            this.typeId = TypeIdentifier<T>.info.id;
 
-            this.components  = new FastList<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
-            this.freeIndexes = new IntStack();
+            this.components  = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
 
-            this.components.Add();
+            this.components.Add(-1, default, out _);
 
             this.typedCacheId = typedCaches.length;
             typedCaches.Add(this);
@@ -2175,80 +1916,155 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal int Add() {
-            if (this.freeIndexes.length > 0) {
-                return this.freeIndexes.Pop();
+        public ref T AddComponent(Entity entity) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
-
-            return this.components.Add();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal int Add(in T value) {
-            if (this.freeIndexes.length > 0) {
-                var index = this.freeIndexes.Pop();
-
-                this.components.data[index] = value;
-                return index;
+#endif
+            if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+                entity.AddTransfer(this.typeId);
+                return ref this.components.data[slotIndex];
             }
-
-            return this.components.Add(value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddComponent(in Entity entity) {
-            var componentId = this.Add();
-            if (entity.AddComponentFast(this.typeId, componentId)) {
-                return ref this.components.data[componentId];
-            }
-
-            this.Remove(componentId);
+#if MORPEH_DEBUG
+            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
+#endif
             return ref this.components.data[0];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AddComponent(in Entity entity, in T value) {
-            var componentId = this.Add(value);
-            if (entity.AddComponentFast(this.typeId, componentId)) {
+        public ref T AddComponent(Entity entity, out bool exist) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
+            }
+#endif
+            if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+                entity.AddTransfer(this.typeId);
+                exist = false;
+                return ref this.components.data[slotIndex];
+            }
+
+            exist = true;
+            return ref this.components.data[0];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AddComponent(Entity entity, in T value) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
+            }
+#endif
+            if (this.components.Add(entity.internalID, value, out _)) {
+                entity.AddTransfer(this.typeId);
                 return true;
             }
 
-            this.Remove(componentId);
+#if MORPEH_DEBUG
+            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
+#endif
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ref T Get(int id) => ref this.components.data[id];
+        public ref T GetComponent(Entity entity) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying GetComponent on null or disposed entity {entity.internalID}");
+            }
+            
+            if (!this.components.Has(entity.internalID)) {
+                throw new Exception($"[MORPEH] You're trying to get on entity {entity.internalID} a component that doesn't exists!");
+            }
+#endif
+            return ref this.components.GetValueRefByKey(entity.internalID);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent(in Entity entity) => ref this.components.data[entity.GetComponentFast(this.typeId)];
+        public ref T TryGetComponent(Entity entity, out bool exist) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying TryGetComponent on null or disposed entity {entity.internalID}");
+            }
+#endif
+            return ref this.components.TryGetValueRefByKey(entity.internalID, out exist);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Set(in int id, in T value) => this.components.data[id] = value;
+        public void SetComponent(Entity entity, in T value) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying SetComponent on null or disposed entity {entity.internalID}");
+            }
+#endif
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent(in Entity entity, in T value) => this.components.data[entity.GetComponentFast(this.typeId)] = value;
+            if (this.components.Set(entity.internalID, value, out _)) {
+                entity.AddTransfer(this.typeId);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ref T Empty() => ref this.components.data[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override void Remove(in int id) {
-            this.components.data[id] = default;
-            this.freeIndexes.Push(id);
+        public override bool RemoveComponent(Entity entity) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying RemoveComponent on null or disposed entity {entity.internalID}");
+            }
+#endif
+            
+            if (this.components.Remove(entity.internalID, out _)) {
+                entity.RemoveTransfer(this.typeId);
+                return true;
+            }
+            return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal override bool Clean(Entity entity) => this.components.Remove(entity.internalID, out _);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Has(Entity entity) {
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity.internalID}");
+            }
+#endif
+            return this.components.Has(entity.internalID);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveComponent(in Entity entity) {
-            if (entity.RemoveComponentFast(this.typeId, out var cacheIndex)) {
-                this.Remove(cacheIndex);
+        public override void MigrateComponent(Entity from, Entity to, bool overwrite = true) {
+#if MORPEH_DEBUG
+            if (from.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying MigrateComponent FROM null or disposed entity {from.internalID}");
+            }
+            if (to.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying MigrateComponent TO null or disposed entity {to.internalID}");
+            }
+#endif
+            
+            if (this.components.TryGetValue(from.internalID, out var component)) {
+                if (overwrite) {
+                    if (this.components.Has(to.internalID)) {
+                        this.components.Set(to.internalID, component, out _);
+                    }
+                    else {
+                        this.components.Add(to.internalID, component, out _);
+                    }
+                }
+                else {
+                    if (this.components.Has(to.internalID) == false) {
+                        this.components.Add(to.internalID, component, out _);
+                    }
+                }
             }
         }
 
         public override void Dispose() {
             this.components = null;
-            this.freeIndexes.Clear();
-            this.freeIndexes = null;
 
             typedCaches.RemoveSwap(this, out _);
             caches.RemoveSwap(this, out _);
@@ -2260,9 +2076,9 @@ namespace Morpeh {
     [Il2Cpp(Option.ArrayBoundsChecks, false)]
     [Il2Cpp(Option.DivideByZeroChecks, false)]
     internal sealed class ComponentsCacheDisposable<T> : ComponentsCache<T> where T : struct, IComponent, IDisposable {
-        internal override void Remove(in int id) {
-            this.components.data[id].Dispose();
-            base.Remove(in id);
+        public override bool RemoveComponent(Entity entity) {
+            this.components.GetValueRefByKey(entity.internalID).Dispose();
+            return base.RemoveComponent(entity);
         }
 
         public override void Dispose() {
@@ -2299,7 +2115,7 @@ namespace Morpeh {
                 this.length    = 0;
                 this.freeIndex = -1;
 
-                this.capacityMinusOne = HashHelpers.GetPrime(capacity);
+                this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
                 this.capacity         = this.capacityMinusOne + 1;
                 this.buckets          = new int[this.capacity];
                 this.slots            = new int[this.capacity / 2];
@@ -2389,7 +2205,7 @@ namespace Morpeh {
                 }
                 else {
                     if (hashSet.lastIndex == hashSet.capacity * 2) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashSet.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashSet.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref hashSet.slots, newCapacity * 2);
@@ -2551,7 +2367,7 @@ namespace Morpeh {
                 this.length    = 0;
                 this.freeIndex = -1;
 
-                this.capacityMinusOne = HashHelpers.GetPrime(capacity);
+                this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
                 this.capacity         = this.capacityMinusOne + 1;
 
                 this.buckets = new int[this.capacity];
@@ -2643,7 +2459,7 @@ namespace Morpeh {
                 }
                 else {
                     if (hashMap.lastIndex == hashMap.capacity) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref hashMap.slots, newCapacity);
@@ -2685,14 +2501,14 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static void Set<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {
+            public static bool Set<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {
                 var rem = key & hashMap.capacityMinusOne;
 
                 for (var i = hashMap.buckets[rem] - 1; i >= 0; i = hashMap.slots[i].next) {
                     if (hashMap.slots[i].key - 1 == key) {
                         hashMap.data[i] = value;
                         slotIndex       = i;
-                        return;
+                        return false;
                     }
                 }
 
@@ -2702,7 +2518,7 @@ namespace Morpeh {
                 }
                 else {
                     if (hashMap.lastIndex == hashMap.capacity) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref hashMap.slots, newCapacity);
@@ -2739,6 +2555,7 @@ namespace Morpeh {
                 hashMap.buckets[rem] = slotIndex + 1;
 
                 ++hashMap.length;
+                return true;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2836,6 +2653,42 @@ namespace Morpeh {
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static ref T TryGetValueRefByKey<T>(this IntHashMap<T> hashMap, in int key, out bool exist) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        exist = true;
+                        return ref hashMap.data[i];
+                    }
+
+                    next = slot.next;
+                }
+
+                exist = false;
+                return ref hashMap.data[0];
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static ref T GetValueRefByKey<T>(this IntHashMap<T> hashMap, in int key) {
+                var rem = key & hashMap.capacityMinusOne;
+
+                int next;
+                for (var i = hashMap.buckets[rem] - 1; i >= 0; i = next) {
+                    ref var slot = ref hashMap.slots[i];
+                    if (slot.key - 1 == key) {
+                        return ref hashMap.data[i];
+                    }
+
+                    next = slot.next;
+                }
+
+                return ref hashMap.data[0];
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static T GetValueByIndex<T>(this IntHashMap<T> hashMap, in int index) => hashMap.data[index];
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2909,7 +2762,7 @@ namespace Morpeh {
                 this.length    = 0;
                 this.freeIndex = -1;
 
-                this.capacityMinusOne = HashHelpers.GetPrime(capacity);
+                this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
                 this.capacity         = this.capacityMinusOne + 1;
 
                 this.buckets = new int[this.capacity];
@@ -3000,7 +2853,7 @@ namespace Morpeh {
                 }
                 else {
                     if (hashMap.lastIndex == hashMap.capacity * 2) {
-                        var newCapacityMinusOne = HashHelpers.ExpandPrime(hashMap.length);
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
                         var newCapacity         = newCapacityMinusOne + 1;
 
                         ArrayHelpers.Grow(ref hashMap.slots, newCapacity * 2);
@@ -3256,7 +3109,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public FastList(int capacity) {
-                this.capacity = HashHelpers.GetPrime(capacity);
+                this.capacity = HashHelpers.GetCapacity(capacity);
                 this.data     = new T[this.capacity];
                 this.length   = 0;
 
@@ -3454,7 +3307,7 @@ namespace Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public IntFastList(int capacity) {
-                this.capacity = HashHelpers.GetPrime(capacity);
+                this.capacity = HashHelpers.GetCapacity(capacity);
                 this.data     = new int[this.capacity];
                 this.length   = 0;
             }
@@ -3647,6 +3500,298 @@ namespace Morpeh {
             }
         }
 
+        [Serializable]
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        public sealed class BitMap : IEnumerable<int> {
+            internal const int BITS_PER_BYTE        = 8;
+            internal const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
+            internal const int BITS_PER_FIELD_SHIFT = 5; //6 for long
+
+            public int length;
+            public int capacity;
+            public int capacityMinusOne;
+            public int lastIndex;
+            public int freeIndex;
+
+            public int[] buckets;
+
+            public int[] data;
+            public int[] slots;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public BitMap(in int capacity = 0) {
+                this.lastIndex = 0;
+                this.length    = 0;
+                this.freeIndex = -1;
+
+                this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
+                this.capacity         = this.capacityMinusOne + 1;
+
+                this.buckets = new int[this.capacity];
+                this.slots   = new int[this.capacity << 1];
+                this.data    = new int[this.capacity];
+            }
+
+            IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public Enumerator GetEnumerator() {
+                Enumerator e;
+                e.bitMap          = this;
+                e.index            = default;
+                e.current          = default;
+                e.currentData      = default;
+                e.currentDataIndex = default;
+                return e;
+            }
+
+            [Il2CppSetOption(Option.NullChecks, false)]
+            [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+            [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+            public unsafe struct Enumerator : IEnumerator<int> {
+                public BitMap bitMap;
+
+                public int index;
+                public int current;
+                public int currentData;
+                public int currentDataIndex;
+
+                public bool MoveNext() {
+                    if (this.currentData != 0) {
+                        this.current     =  this.currentDataIndex + BitMapExtensions.NumberOfTrailingZeros(this.currentData);
+                        this.currentData &= this.currentData - 1;
+                        return true;
+                    }
+
+                    fixed (int* slotsPtr = &this.bitMap.slots[0])
+                    fixed (int* dataPtr = &this.bitMap.data[0]) {
+                        for (; this.index < this.bitMap.lastIndex; this.index += 2) {
+                            var dataIndex = *(slotsPtr + this.index) - 1;
+                            if (dataIndex < 0) {
+                                continue;
+                            }
+
+                            this.currentData      =  *(dataPtr + (this.index >> 1));
+                            this.currentDataIndex =  dataIndex * BITS_PER_FIELD;
+                            this.current          =  this.currentDataIndex + BitMapExtensions.NumberOfTrailingZeros(this.currentData);
+                            this.currentData      &= this.currentData - 1;
+
+                            this.index += 2;
+                            return true;
+                        }
+                    }
+
+                    this.index       = this.bitMap.lastIndex + 1;
+                    this.current     = default;
+                    this.currentData = default;
+                    return false;
+                }
+
+                public int Current => this.current;
+
+                object IEnumerator.Current => this.current;
+
+                void IEnumerator.Reset() {
+                    this.index            = default;
+                    this.current          = default;
+                    this.currentData      = default;
+                    this.currentDataIndex = default;
+                }
+
+                public void Dispose() {
+                }
+            }
+        }
+
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        public static unsafe class BitMapExtensions {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Set(this BitMap bitmap, in int key) {
+                var dataIndex = key >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+
+                var rem = dataIndex & bitmap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &bitmap.slots[0])
+                fixed (int* bucketsPtr = &bitmap.buckets[0])
+                fixed (int* dataPtr = &bitmap.data[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == dataIndex) {
+                            var data    = *(dataPtr + (i >> 1));
+                            var dataOld = data;
+
+                            data |= 1 << bitIndex;
+
+                            *(dataPtr + (i >> 1)) = data;
+                            return data != dataOld;
+                        }
+                    }
+                }
+
+                int slotIndex;
+                if (bitmap.freeIndex >= 0) {
+                    slotIndex = bitmap.freeIndex;
+                    fixed (int* slotsPtr = &bitmap.slots[0]) {
+                        bitmap.freeIndex = *(slotsPtr + slotIndex + 1);
+                    }
+                }
+                else {
+                    if (bitmap.lastIndex == bitmap.capacity << 1) {
+                        var newCapacityMinusOne = HashHelpers.ExpandCapacitySmall(bitmap.length);
+                        var newCapacity         = newCapacityMinusOne + 1;
+
+                        ArrayHelpers.Grow(ref bitmap.slots, newCapacity << 1);
+                        ArrayHelpers.Grow(ref bitmap.data, newCapacity);
+
+                        var newBuckets = new int[newCapacity];
+
+                        fixed (int* slotsPtr = &bitmap.slots[0])
+                        fixed (int* newBucketsPtr = &newBuckets[0]) {
+                            for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
+                                var slotPtr = slotsPtr + i;
+
+                                var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                                var newCurrentBucket = newBucketsPtr + newResizeIndex;
+
+                                *(slotPtr + 1) = *newCurrentBucket - 1;
+
+                                *newCurrentBucket = i + 1;
+                            }
+                        }
+
+                        bitmap.buckets          = newBuckets;
+                        bitmap.capacity         = newCapacity;
+                        bitmap.capacityMinusOne = newCapacityMinusOne;
+
+                        rem = dataIndex & bitmap.capacityMinusOne;
+                    }
+
+                    slotIndex        =  bitmap.lastIndex;
+                    bitmap.lastIndex += 2;
+                }
+
+                fixed (int* slotsPtr = &bitmap.slots[0])
+                fixed (int* bucketsPtr = &bitmap.buckets[0])
+                fixed (int* dataPtr = &bitmap.data[0]) {
+                    var bucket = bucketsPtr + rem;
+                    var slot   = slotsPtr + slotIndex;
+
+                    *slot       = dataIndex + 1;
+                    *(slot + 1) = *bucket - 1;
+
+                    *(dataPtr + (slotIndex >> 1)) |= 1 << bitIndex;
+
+                    *bucket = slotIndex + 1;
+                }
+
+                ++bitmap.length;
+                return true;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Unset(this BitMap bitmap, in int key) {
+                var dataIndex = key >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+                var rem       = dataIndex & bitmap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &bitmap.slots[0])
+                fixed (int* bucketsPtr = &bitmap.buckets[0])
+                fixed (int* dataPtr = &bitmap.data[0]) {
+                    int next;
+                    var num = -1;
+
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
+                        var slot     = slotsPtr + i;
+                        var slotNext = slot + 1;
+
+                        if (*slot - 1 == dataIndex) {
+                            var data = *(dataPtr + (i >> 1));
+                            data &= ~(1 << bitIndex);
+                            if (data == 0) {
+                                if (num < 0) {
+                                    *(bucketsPtr + rem) = *slotNext + 1;
+                                }
+                                else {
+                                    *(slotsPtr + num + 1) = *slotNext;
+                                }
+                                *slot     = -1;
+                                *slotNext = bitmap.freeIndex;
+
+                                if (--bitmap.length == 0) {
+                                    bitmap.lastIndex = 0;
+                                    bitmap.freeIndex = -1;
+                                }
+                                else {
+                                    bitmap.freeIndex = i;
+                                }
+
+                            }
+                            *(dataPtr + (i >> 1)) = data;
+                            return true;
+                        }
+
+                        next = *slotNext;
+                        num  = i;
+                    }
+
+                    return false;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool Get(this BitMap bitmap, in int key) {
+                var dataIndex = key >> BitMap.BITS_PER_FIELD_SHIFT;
+                var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
+
+                var rem = dataIndex & bitmap.capacityMinusOne;
+
+                fixed (int* slotsPtr = &bitmap.slots[0])
+                fixed (int* bucketsPtr = &bitmap.buckets[0])
+                fixed (int* dataPtr = &bitmap.data[0]) {
+                    int* slot;
+                    for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                        slot = slotsPtr + i;
+                        if (*slot - 1 == dataIndex) {
+                            return (*(dataPtr + (i >> 1)) & (1 << bitIndex)) > 0;
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static void Clear(this BitMap bitMap) {
+                if (bitMap.lastIndex <= 0) {
+                    return;
+                }
+
+                Array.Clear(bitMap.slots, 0, bitMap.lastIndex);
+                Array.Clear(bitMap.buckets, 0, bitMap.capacity);
+                Array.Clear(bitMap.data, 0, bitMap.capacity);
+
+                bitMap.lastIndex = 0;
+                bitMap.length    = 0;
+                bitMap.freeIndex = -1;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int NumberOfTrailingZeros(int i) => lookupTrailingZeros[((uint)(i & -i) * 0x077CB531u) >> 27];
+
+            private static readonly int[] lookupTrailingZeros = {
+                0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
+                31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
+            };
+        }
+
         [Il2Cpp(Option.NullChecks, false)]
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
@@ -3691,55 +3836,95 @@ namespace Morpeh {
         [Il2Cpp(Option.ArrayBoundsChecks, false)]
         [Il2Cpp(Option.DivideByZeroChecks, false)]
         internal static class HashHelpers {
-            //https://github.com/dotnet/runtime/blob/master/src/libraries/System.Private.CoreLib/src/System/Collections/HashHelpers.cs#L32
-            //different primes to fit n^2 - 1
-            //todo expand to maxInt
-            internal static readonly int[] primes = {
+            internal static readonly int[] capacitySizes = {
                 3,
                 15,
                 63,
                 255,
-                1023,
-                4095,
-                16383,
-                65535,
-                262143,
-                1048575,
-                4194303,
+                1_023,
+                4_095,
+                16_383,
+                65_535,
+                131_071,
+                262_143,
+                524_287,
+                1_048_575,
+                2_097_151,
+                4_194_303,
+                8_388_607,
+                16_777_215,
+                33_554_431,
+                67_108_863,
+                134_217_727,
+                268_435_455,
+                536_870_912,
+                1_073_741_823
+            };
+            
+            internal static readonly int[] smallCapacitySizes = {
+                3,
+                7,
+                15,
+                31,
+                63,
+                127,
+                255,
+                511,
+                1_023,
+                2_047,
+                4_095,
+                16_383,
+                65_535,
+                131_071,
+                262_143,
+                524_287,
+                1_048_575,
+                2_097_151,
+                4_194_303,
+                8_388_607,
+                16_777_215,
+                33_554_431,
+                67_108_863,
+                134_217_727,
+                268_435_455,
+                536_870_912,
+                1_073_741_823
             };
 
-            public static int ExpandPrime(int oldSize) {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int ExpandCapacity(int oldSize) {
                 var min = oldSize << 1;
-                return min > 2146435069U && 2146435069 > oldSize ? 2146435069 : GetPrime(min);
+                return min > 2_146_435_069U && 2_146_435_069 > oldSize ? 2_146_435_069 : GetCapacity(min);
+            }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int ExpandCapacitySmall(int oldSize) {
+                var min = oldSize << 1;
+                return min > 2_146_435_069U && 2_146_435_069 > oldSize ? 2_146_435_069 : GetCapacitySmall(min);
             }
 
-            public static int GetPrime(int min) {
-                for (int index = 0, length = primes.Length; index < length; ++index) {
-                    var prime = primes[index];
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int GetCapacity(int min) {
+                for (int index = 0, length = capacitySizes.Length; index < length; ++index) {
+                    var prime = capacitySizes[index];
                     if (prime >= min) {
                         return prime;
                     }
                 }
 
-                throw new Exception("Prime is too big");
+                throw new Exception("Capacity is too big");
             }
-        }
-    }
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static int GetCapacitySmall(int min) {
+                for (int index = 0, length = smallCapacitySizes.Length; index < length; ++index) {
+                    var prime = smallCapacitySizes[index];
+                    if (prime >= min) {
+                        return prime;
+                    }
+                }
 
-    namespace Utils {
-        using System.Diagnostics;
-        using Debug = UnityEngine.Debug;
-
-        [Il2Cpp(Option.NullChecks, false)]
-        [Il2Cpp(Option.ArrayBoundsChecks, false)]
-        [Il2Cpp(Option.DivideByZeroChecks, false)]
-        internal static class UnsafeUtility {
-            public static int SizeOf<T>() where T : struct {
-#if UNITY_2019_1_OR_NEWER
-                return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
-#else
-                return System.Runtime.InteropServices.Marshal.SizeOf(default(T));
-#endif
+                throw new Exception("Capacity is too big");
             }
         }
     }
@@ -3753,6 +3938,7 @@ namespace Unity.IL2CPP.CompilerServices {
         ArrayBoundsChecks  = 2,
         DivideByZeroChecks = 3
     }
+    
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
     public class Il2CppSetOptionAttribute : Attribute {

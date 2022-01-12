@@ -30,6 +30,8 @@ namespace Morpeh {
         private FastList<World> worldsSerialized = null;
         [OdinSerialize]
         private FastList<string> types = null;
+        [OdinSerialize]
+        private FastList<ComponentsCache> caches = null;
 #endif
 
 #if UNITY_EDITOR
@@ -72,6 +74,13 @@ namespace Morpeh {
 
         private void FixedUpdate() => WorldExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
         private void LateUpdate()  => WorldExtensions.GlobalLateUpdate(Time.deltaTime);
+        
+        internal void OnApplicationPause(bool pauseStatus) {
+            if (pauseStatus) {
+                onApplicationFocusLost.Invoke();
+                GC.Collect();
+            }
+        }   
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {
@@ -87,32 +96,49 @@ namespace Morpeh {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         protected override void OnBeforeSerialize() {
             this.worldsSerialized = World.worlds;
+            foreach (var world in this.worldsSerialized) {
+                world.UpdateFilters();
+            }
             if (this.types == null) {
                 this.types = new FastList<string>();
             }
 
             this.types.Clear();
-            foreach (var info in CommonCacheTypeIdentifier.editorTypeAssociation.Values) {
+            foreach (var info in CommonTypeIdentifier.intTypeAssociation.Values) {
                 this.types.Add(info.type.AssemblyQualifiedName);
             }
+
+            this.caches = ComponentsCache.caches;
         }
 
 
         protected override void OnAfterDeserialize() {
             if (this.worldsSerialized != null) {
+                ComponentsCache.caches = this.caches;
+                
                 foreach (var t in this.types) {
                     var genType = Type.GetType(t);
                     if (genType != null) {
-                        var openGeneric   = typeof(CacheTypeIdentifier<>);
-                        var closedGeneric = openGeneric.MakeGenericType(genType);
-                        var infoFI        = closedGeneric.GetField("info", BindingFlags.Static | BindingFlags.NonPublic);
-                        infoFI.GetValue(null);
+                        {
+                            var openGeneric   = typeof(TypeIdentifier<>);
+                            var closedGeneric = openGeneric.MakeGenericType(genType);
+                            var infoFI        = closedGeneric.GetField("info", BindingFlags.Static | BindingFlags.NonPublic);
+                            infoFI.GetValue(null);
+                        }
+                        {
+                            var openGeneric   = typeof(ComponentsCache<>);
+                            var closedGeneric = openGeneric.MakeGenericType(genType);
+                            var infoFI        = closedGeneric.GetMethod("Refill", BindingFlags.Static | BindingFlags.NonPublic);
+                            infoFI.Invoke(null, null);
+                        }
                     }
-                    else {
-                        CommonCacheTypeIdentifier.GetID();
-                    }
+                    //todo idk how it is works
+                    // else {
+                    //     CommonCacheTypeIdentifier.GetID();
+                    // }
                 }
-
+                
+                World.worlds = this.worldsSerialized;
                 foreach (var world in this.worldsSerialized) {
                     if (world != null && world.entities != null) {
                         for (int i = 0, length = world.entities.Length; i < length; i++) {
@@ -121,16 +147,17 @@ namespace Morpeh {
                                 continue;
                             }
 
-                            if (e.componentsIds == null) {
+                            if (e.IsNullOrDisposed()) {
                                 world.entities[i] = null;
                             }
+
+                            e.world            = world;
+                            e.currentArchetype = world.archetypes.data[e.currentArchetypeId];
                         }
 
                         world.Ctor();
                     }
                 }
-
-                World.worlds = this.worldsSerialized;
             }
         }
 #endif

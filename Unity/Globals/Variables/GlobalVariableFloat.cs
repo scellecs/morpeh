@@ -13,11 +13,9 @@ namespace Morpeh.Globals {
             set => this.Value = ((FloatWrapper) value).value;
         }
 
-        protected override float Load(string serializedData) => float.Parse(serializedData, CultureInfo.InvariantCulture);
+        public override float Deserialize(string serializedData) => float.Parse(serializedData, CultureInfo.InvariantCulture);
 
-        protected override string Save() => this.value.ToString(CultureInfo.InvariantCulture);
-        
-        public override string LastToString() => this.BatchedChanges.Peek().ToString(CultureInfo.InvariantCulture);
+        public override string Serialize(float data) => data.ToString(CultureInfo.InvariantCulture);
         
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

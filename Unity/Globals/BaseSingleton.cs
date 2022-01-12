@@ -23,6 +23,7 @@
         protected Entity internalEntity;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
+        [PropertyOrder(100)]
         [ShowInInspector]
         [Space]
         private Morpeh.Editor.EntityViewerWithHeader entityViewer = new Morpeh.Editor.EntityViewerWithHeader();
@@ -31,10 +32,11 @@
         [CanBeNull]
         private protected Entity InternalEntity {
             get {
-                if (this.internalEntity == null) {
+#if UNITY_EDITOR 
+                if (this.internalEntityID > -1 && this.internalEntity == null) {
                     this.internalEntity = World.Default.entities[this.internalEntityID];
                 }
-
+#endif
                 return this.internalEntity;
             }
         }
@@ -78,8 +80,12 @@
 #endif
         protected virtual bool CheckIsInitialized() {
             if (this.internalEntityID < 0) {
-                this.internalEntity = World.Default.CreateEntity(out this.internalEntityID);
-                this.internalEntity.AddComponent<SingletonMarker>();
+                var world = World.Default;
+                var cache = world.GetCache<SingletonMarker>();
+                
+                this.internalEntity = world.CreateEntity(out this.internalEntityID);
+                cache.AddComponent(this.internalEntity);
+                
                 return true;
             }
 

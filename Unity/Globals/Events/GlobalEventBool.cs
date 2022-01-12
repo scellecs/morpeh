@@ -8,6 +8,8 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [CreateAssetMenu(menuName = "ECS/Globals/Events/Event Bool")]
     public class GlobalEventBool : BaseGlobalEvent<bool> {
-        public override string LastToString() => this.BatchedChanges.Peek().ToString(CultureInfo.InvariantCulture);
+        public override string Serialize(bool data) => data.ToString(CultureInfo.InvariantCulture);
+
+        public override bool Deserialize(string serializedData) => bool.Parse(serializedData);
     }
 }

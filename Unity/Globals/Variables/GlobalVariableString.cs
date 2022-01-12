@@ -12,11 +12,9 @@ namespace Morpeh.Globals {
             set => this.Value = ((StringWrapper) value).value;
         }
         
-        protected override string Load(string serializedData) => serializedData;
+        public override string Deserialize(string serializedData) => serializedData;
 
-        protected override string Save() => this.value;
-        
-        public override string LastToString() => this.BatchedChanges.Peek();
+        public override string Serialize(string data) => data;
         
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

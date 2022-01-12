@@ -8,13 +8,8 @@ namespace Morpeh.Globals {
     [CreateAssetMenu(menuName = "ECS/Globals/Events/Event")]
     public class GlobalEvent : GlobalEventInt {
         [ContextMenu("Publish")]
-        public void Publish() {
+        public virtual void Publish() {
             base.Publish(-1);
-        }
-        
-        [ContextMenu("NextFrame")]
-        public void NextFrame() {
-            base.NextFrame(-1);
         }
     }
 }

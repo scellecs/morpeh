@@ -8,6 +8,8 @@
     public abstract class UpdateSystem : ScriptableObject, ISystem {
         public World World { get; set; }
 
+        public Filter Filter => this.World.Filter;
+
         public abstract void OnAwake();
 
         public abstract void OnUpdate(float deltaTime);
