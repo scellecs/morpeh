@@ -35,6 +35,8 @@ Features:
 ## 📖 How To Install
 
 Minimal Unity Version is 2019.3.*  
+Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
+Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.  
 
 <details>
     <summary>Open Package Manager and add Morpeh URL.  </summary>
