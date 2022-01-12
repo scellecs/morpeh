@@ -26,15 +26,17 @@ Features:
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
   * [Getting Start](#-getting-start)
   * [Advanced](#-advanced)
+* [Examples](#-examples)
+* [Games](#-games)
 * [License](#-license)
 * [Contacts](#-contacts)
 
 
 ## 📖 How To Install
 
-> 💡 **IMPORTANT**  
-> Check if you have Git LFS installed.  
-> Minimal Unity Version is 2019.4
+Minimal Unity Version is 2019.4.*  
+Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
+Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.  
 
 <details>
     <summary>Open Package Manager and add Morpeh URL.  </summary>
@@ -44,7 +46,7 @@ Features:
 </details>
   
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh.git#develop  
+&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh#develop  
 &nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2021.1.0  
 
 <details>
@@ -389,6 +391,20 @@ public sealed class HealthSystem : UpdateSystem {
 ```
 
 ---
+
+## 📚 Examples
+
+* [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
+* [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*  
+
+## 🔥 Games
+
+* **Zombie City** by *GreenButtonGames*  
+[Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/kh/app/zombie-city-master/id1543420906)  
+
+
+* **Fish Idle** by *GreenButtonGames*  
+[Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.FishIdle) [iOS](https://apps.apple.com/ru/app/fish-idle-hooked-tycoon/id1534396279)  
 
 ## 📘 License
 
