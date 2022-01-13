@@ -70,6 +70,11 @@ namespace Unity.IL2CPP.CompilerServices {
 namespace UnityEngine {
     public sealed class SerializeField : System.Attribute { }
 }
+
+namespace UnityEngine.Scripting {
+    public sealed class Preserve : System.Attribute { }
+}
+
 namespace JetBrains.Annotations {
     using System;
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Delegate)]
