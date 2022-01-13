@@ -97,7 +97,7 @@ namespace Morpeh {
         protected override void OnBeforeSerialize() {
             this.worldsSerialized = World.worlds;
             foreach (var world in this.worldsSerialized) {
-                world.UpdateFilters();
+                world?.UpdateFilters();
             }
             if (this.types == null) {
                 this.types = new FastList<string>();
