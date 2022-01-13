@@ -51,6 +51,7 @@ namespace Morpeh {
             world.caches            = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
             world.typedCaches       = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
+            world.entitiesCount    = 0;
             world.entitiesLength   = 0;
             world.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             world.entities         = new Entity[world.entitiesCapacity];
@@ -277,7 +278,7 @@ namespace Morpeh {
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity);
+                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
@@ -298,7 +299,7 @@ namespace Morpeh {
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = world.entitiesCapacity << 1;
+                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }

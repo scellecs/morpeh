@@ -44,10 +44,14 @@ namespace Morpeh {
 
         [SerializeField]
         internal Entity[] entities;
+        
+        //real entities count
         [SerializeField]
         internal int entitiesCount;
+        //count + unused slots
         [SerializeField]
         internal int entitiesLength;
+        //all possible slots
         [SerializeField]
         internal int entitiesCapacity;
 
@@ -123,6 +127,7 @@ namespace Morpeh {
             }
 
             this.entities         = null;
+            this.entitiesCount    = -1;
             this.entitiesLength   = -1;
             this.entitiesCapacity = -1;
 
