@@ -14,8 +14,7 @@ namespace Morpeh {
       
 #if UNITY_EDITOR && ODIN_INSPECTOR
         public World World { get; private set; }
-        public void Ctor(World world)
-        {
+        public void Ctor(World world) {
             this.World = world;
         }
 

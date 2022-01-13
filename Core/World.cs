@@ -82,8 +82,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
 
-        public static World Create(string friendlyName)
-        {
+        public static World Create(string friendlyName) {
             var world = Create();
             world.SetFriendlyName(friendlyName);
             return world;

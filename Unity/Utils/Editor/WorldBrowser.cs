@@ -7,26 +7,22 @@ namespace Morpeh.Unity.Utils.Editor {
     using UnityEditor;
     using UnityEngine;
 
-    internal class EditorReference : IDisposable
-    {
+    internal class EditorReference : IDisposable {
         private GameObject gameObject;
         private Editor editor;
         
         public Vector2 ScrollPos;
 
-        public EditorReference(GameObject gameObject, Editor editor)
-        {
+        public EditorReference(GameObject gameObject, Editor editor) {
             this.gameObject = gameObject;
             this.editor = editor;
         }
 
-        public void HandleInspectorGUI()
-        {
+        public void HandleInspectorGUI() {
             this.editor.OnInspectorGUI();
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             Object.DestroyImmediate(this.gameObject);
             this.gameObject = null;
             
@@ -55,8 +51,7 @@ namespace Morpeh.Unity.Utils.Editor {
         {
             this.references = new List<EditorReference>();
             
-            foreach (var world in World.worlds)
-            {
+            foreach (var world in World.worlds) {
                 var gameObject = new GameObject("MORPEH__WORLD_VIEWER") {hideFlags = HideFlags.HideAndDontSave};
                 DontDestroyOnLoad(gameObject);
                 var viewer = gameObject.AddComponent<WorldViewer>();
@@ -67,8 +62,7 @@ namespace Morpeh.Unity.Utils.Editor {
         }
 
         private void Flush() {
-            foreach (var reference in this.references)
-            {
+            foreach (var reference in this.references) {
                 reference.Dispose();
             }
 
@@ -92,8 +86,7 @@ namespace Morpeh.Unity.Utils.Editor {
                 return;
             }
 
-            foreach (var reference in this.references)
-            {
+            foreach (var reference in this.references) {
                 reference.ScrollPos = EditorGUILayout.BeginScrollView(reference.ScrollPos);
                 GUIHelper.PushHierarchyMode(false);
                 reference.HandleInspectorGUI();

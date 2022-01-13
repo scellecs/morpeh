@@ -360,15 +360,12 @@ namespace Morpeh {
             }
         }
 
-        public static void SetFriendlyName(this World world, string friendlyName)
-        {
+        public static void SetFriendlyName(this World world, string friendlyName) {
             world.friendlyName = friendlyName;
         }
-        
-        public static string GetFriendlyName(this World world)
-        {
-            if (string.IsNullOrEmpty(world.friendlyName))
-            {
+
+        public static string GetFriendlyName(this World world) {
+            if (string.IsNullOrEmpty(world.friendlyName)) {
                 return world.ToString() + world.identifier;
             }
 
