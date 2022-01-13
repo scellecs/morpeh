@@ -76,8 +76,18 @@ namespace Morpeh {
         [SerializeField]
         internal int identifier;
 
+        [NonSerialized]
+        internal string friendlyName;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
+
+        public static World Create(string friendlyName)
+        {
+            var world = Create();
+            world.SetFriendlyName(friendlyName);
+            return world;
+        }
 
         private World() => this.Ctor();
 

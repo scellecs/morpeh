@@ -1,36 +1,81 @@
-﻿#if UNITY_EDITOR && ODIN_INSPECTOR
+﻿using System;
+using System.Collections.Generic;
+
+#if UNITY_EDITOR && ODIN_INSPECTOR
 namespace Morpeh.Unity.Utils.Editor {
     using Sirenix.Utilities.Editor;
     using UnityEditor;
     using UnityEngine;
 
-    public class WorldBrowser : EditorWindow {
-        private Editor editor;
-        private Vector2 scrollPos;
+    internal class EditorReference : IDisposable
+    {
         private GameObject gameObject;
+        private Editor editor;
+        
+        public Vector2 ScrollPos;
+
+        public EditorReference(GameObject gameObject, Editor editor)
+        {
+            this.gameObject = gameObject;
+            this.editor = editor;
+        }
+
+        public void HandleInspectorGUI()
+        {
+            editor.OnInspectorGUI();
+        }
+
+        public void Dispose()
+        {
+            Object.DestroyImmediate(gameObject);
+            gameObject = null;
+            
+            Object.DestroyImmediate(editor);
+            editor = null;
+        }
+    }
+
+    public class WorldBrowser : EditorWindow {
+        private List<EditorReference> references;
         
         [MenuItem("Tools/Morpeh/World Browser")]
         private static void OpenWindow() => GetWindow<WorldBrowser>().Show();
 
         private void EditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredPlayMode) {
-                this.Initialize();
+                Initialize();
             }
 
             if (state == PlayModeStateChange.ExitingPlayMode) {
-                this.Flush();
+                Flush();
             }
         }
 
-        private void Initialize() {
-            this.gameObject = new GameObject("MORPEH__WORLD_VIEWER") {hideFlags = HideFlags.HideAndDontSave};
-            var viewer = this.gameObject.AddComponent<WorldViewer>();
-            this.editor = Editor.CreateEditor(viewer);
+        private void Initialize()
+        {
+            references = new List<EditorReference>();
+            
+            foreach (var world in World.worlds)
+            {
+                var gameObject = new GameObject("MORPEH__WORLD_VIEWER") {hideFlags = HideFlags.HideAndDontSave};
+                DontDestroyOnLoad(gameObject);
+                
+                var viewer = gameObject.AddComponent<WorldViewer>();
+                viewer.Ctor(world);
+                
+                var editor = Editor.CreateEditor(viewer);
+                
+                references.Add(new EditorReference(gameObject, editor));
+            }
         }
 
         private void Flush() {
-            DestroyImmediate(this.gameObject);
-            DestroyImmediate(this.editor);
+            foreach (var reference in references)
+            {
+                reference.Dispose();
+            }
+
+            references = null;
         }
         
         private void OnEnable() {
@@ -46,10 +91,13 @@ namespace Morpeh.Unity.Utils.Editor {
 
         private void OnGUI()
         {
-            if (this.editor != null) {
-                this.scrollPos = EditorGUILayout.BeginScrollView(this.scrollPos);
+            if (references == null) return;
+            
+            foreach (var reference in references)
+            {
+                reference.ScrollPos = EditorGUILayout.BeginScrollView(reference.ScrollPos);
                 GUIHelper.PushHierarchyMode(false);
-                this.editor.OnInspectorGUI();
+                reference.HandleInspectorGUI();
                 GUIHelper.PopHierarchyMode();
                 EditorGUILayout.EndScrollView();
 
