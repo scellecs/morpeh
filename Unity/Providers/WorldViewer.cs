@@ -1,11 +1,10 @@
-using Sirenix.OdinInspector.Editor;
-
 namespace Morpeh {
     using System;
     using System.Collections.Generic;
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+    using Sirenix.OdinInspector.Editor;
 #endif
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
