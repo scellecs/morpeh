@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Unity\**" />
+      <Compile Remove="Packages\**" />
+      <Compile Remove="Gifs~\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Unity\**" />
+      <EmbeddedResource Remove="Packages\**" />
+      <EmbeddedResource Remove="Gifs~\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Unity\**" />
+      <None Remove="Packages\**" />
+      <None Remove="Gifs~\**" />
+      <None Remove=".gitattributes" />
+      <None Remove=".gitignore" />
+      <None Remove="Core.meta" />
+      <None Remove="LICENSE.md.meta" />
+      <None Remove="package.json" />
+      <None Remove="package.json.meta" />
+      <None Remove="Packages.meta" />
+      <None Remove="README.md.meta" />
+      <None Remove="Scellecs.Morpeh.asmdef" />
+      <None Remove="Scellecs.Morpeh.asmdef.meta" />
+      <None Remove="Scellecs.Morpeh.csproj.meta" />
+      <None Remove="Unity.meta" />
+      <None Remove="Core\WorldExtensions.cs.meta" />
+      <None Remove="Core\World.cs.meta" />
+      <None Remove="Core\TypeIdentifier.cs.meta" />
+      <None Remove="Core\SystemsGroupExtensions.cs.meta" />
+      <None Remove="Core\SystemsGroup.cs.meta" />
+      <None Remove="Core\Morpeh.cs.meta" />
+      <None Remove="Core\FilterExtensions.cs.meta" />
+      <None Remove="Core\Filter.cs.meta" />
+      <None Remove="Core\EntityExtensions.cs.meta" />
+      <None Remove="Core\Entity.cs.meta" />
+      <None Remove="Core\Constants.cs.meta" />
+      <None Remove="Core\ComponentsCache.cs.meta" />
+      <None Remove="Core\Collections.meta" />
+      <None Remove="Core\ArchetypeExtensions.cs.meta" />
+      <None Remove="Core\Archetype.cs.meta" />
+      <None Remove="Core\Collections\ArrayHelpers.cs.meta" />
+      <None Remove="Core\Collections\BitMap.cs.meta" />
+      <None Remove="Core\Collections\BitMapExtensions.cs.meta" />
+      <None Remove="Core\Collections\FastList.cs.meta" />
+      <None Remove="Core\Collections\FastListExtensions.cs.meta" />
+      <None Remove="Core\Collections\HashHelpers.cs.meta" />
+      <None Remove="Core\Collections\IntFastList.cs.meta" />
+      <None Remove="Core\Collections\IntFastListExtensions.cs.meta" />
+      <None Remove="Core\Collections\IntHashMap.cs.meta" />
+      <None Remove="Core\Collections\IntHashMapExtensions.cs.meta" />
+      <None Remove="Core\Collections\IntHashSet.cs.meta" />
+      <None Remove="Core\Collections\IntHashSetExtensions.cs.meta" />
+      <None Remove="Core\Collections\IntStack.cs.meta" />
+      <None Remove="Core\Collections\IntStackExtensions.cs.meta" />
+      <None Remove="Core\Collections\UnsafeIntHashMap.cs.meta" />
+      <None Remove="Core\Collections\UnsafeIntHashMapExtensions.cs.meta" />
+    </ItemGroup>
+
+</Project>
