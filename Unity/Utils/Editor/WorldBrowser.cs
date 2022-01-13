@@ -11,7 +11,7 @@ namespace Morpeh.Unity.Utils.Editor {
         private GameObject gameObject;
         private Editor editor;
         
-        public Vector2 ScrollPos;
+        public Vector2 scrollPos;
 
         public EditorReference(GameObject gameObject, Editor editor) {
             this.gameObject = gameObject;
@@ -87,7 +87,7 @@ namespace Morpeh.Unity.Utils.Editor {
             }
 
             foreach (var reference in this.references) {
-                reference.ScrollPos = EditorGUILayout.BeginScrollView(reference.ScrollPos);
+                reference.scrollPos = EditorGUILayout.BeginScrollView(reference.scrollPos);
                 GUIHelper.PushHierarchyMode(false);
                 reference.HandleInspectorGUI();
                 GUIHelper.PopHierarchyMode();
