@@ -1,3 +1,10 @@
+#if UNITY_EDITOR
+#define MORPEH_DEBUG
+#endif
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
 namespace Morpeh {
     using System;
     using System.Runtime.CompilerServices;
