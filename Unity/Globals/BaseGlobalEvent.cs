@@ -84,12 +84,16 @@ namespace Morpeh.Globals {
             return check;
         }
 
-
         public virtual void Publish(TData data) {
             this.CheckIsInitialized();
             ref var component = ref this.dataCache.GetComponent(this.InternalEntity);
             component.NewData.Enqueue(data);
             this.nextFrameCache.SetComponent(this.InternalEntity, default);
+        }
+        
+        [Obsolete("Use Publish Instead")]
+        public virtual void NextFrame(TData data) {
+            this.Publish(data);
         }
 
         public IDisposable Subscribe(Action<IEnumerable<TData>> callback) {
