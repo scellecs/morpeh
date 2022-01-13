@@ -76,7 +76,7 @@ namespace Morpeh {
         [SerializeField]
         internal int identifier;
 
-        [NonSerialized]
+        [SerializeField]
         internal string friendlyName;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
