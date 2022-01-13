@@ -16,10 +16,10 @@ namespace Morpeh {
         public World World { get; private set; }
         public void Ctor(World world)
         {
-            World = world;
+            this.World = world;
         }
 
-        private string GetWorldTitle(InspectorProperty property) => World.GetFriendlyName();
+        private string GetWorldTitle(InspectorProperty property) => this.World.GetFriendlyName();
 
         [DisableContextMenu]
         [PropertySpace]
@@ -31,10 +31,10 @@ namespace Morpeh {
         private List<EntityView> Entities {
             get {
                 if (Application.isPlaying) {
-                    if (World.entitiesCount != this.entityViews.Count) {
+                    if (this.World.entitiesCount != this.entityViews.Count) {
                         this.entityViews.Clear();
-                        for (int i = 0, length = World.entitiesLength; i < length; i++) {
-                            var entity = World.entities[i];
+                        for (int i = 0, length = this.World.entitiesLength; i < length; i++) {
+                            var entity = this.World.entities[i];
                             if (entity != null) {
                                 var view = new EntityView {ID = entity.internalID, entityViewer = {getter = () => entity}};
                                 this.entityViews.Add(view);

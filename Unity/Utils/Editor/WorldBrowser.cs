@@ -22,16 +22,16 @@ namespace Morpeh.Unity.Utils.Editor {
 
         public void HandleInspectorGUI()
         {
-            editor.OnInspectorGUI();
+            this.editor.OnInspectorGUI();
         }
 
         public void Dispose()
         {
-            Object.DestroyImmediate(gameObject);
-            gameObject = null;
+            Object.DestroyImmediate(this.gameObject);
+            this.gameObject = null;
             
-            Object.DestroyImmediate(editor);
-            editor = null;
+            Object.DestroyImmediate(this.editor);
+            this.editor = null;
         }
     }
 
@@ -43,43 +43,40 @@ namespace Morpeh.Unity.Utils.Editor {
 
         private void EditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             if (state == PlayModeStateChange.EnteredPlayMode) {
-                Initialize();
+                this.Initialize();
             }
 
             if (state == PlayModeStateChange.ExitingPlayMode) {
-                Flush();
+                this.Flush();
             }
         }
 
         private void Initialize()
         {
-            references = new List<EditorReference>();
+            this.references = new List<EditorReference>();
             
             foreach (var world in World.worlds)
             {
                 var gameObject = new GameObject("MORPEH__WORLD_VIEWER") {hideFlags = HideFlags.HideAndDontSave};
                 DontDestroyOnLoad(gameObject);
-                
                 var viewer = gameObject.AddComponent<WorldViewer>();
                 viewer.Ctor(world);
-                
                 var editor = Editor.CreateEditor(viewer);
-                
-                references.Add(new EditorReference(gameObject, editor));
+                this.references.Add(new EditorReference(gameObject, editor));
             }
         }
 
         private void Flush() {
-            foreach (var reference in references)
+            foreach (var reference in this.references)
             {
                 reference.Dispose();
             }
 
-            references = null;
+            this.references = null;
         }
         
         private void OnEnable() {
-            titleContent = new GUIContent("World Browser",
+            this.titleContent = new GUIContent("World Browser",
                 Resources.Load<Texture>("MorpehIcons/64x64_W"),
                 "Entities Browser");
             
@@ -91,9 +88,11 @@ namespace Morpeh.Unity.Utils.Editor {
 
         private void OnGUI()
         {
-            if (references == null) return;
-            
-            foreach (var reference in references)
+            if (this.references == null) {
+                return;
+            }
+
+            foreach (var reference in this.references)
             {
                 reference.ScrollPos = EditorGUILayout.BeginScrollView(reference.ScrollPos);
                 GUIHelper.PushHierarchyMode(false);
