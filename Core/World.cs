@@ -18,11 +18,14 @@ namespace Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class World : IDisposable {
+    public class World : IDisposable {
         [CanBeNull]
         public static World Default => worlds.data[0];
         [NotNull]
         internal static FastList<World> worlds = new FastList<World> { null };
+        
+        [NotNull]
+        public virtual string FriendlyName { get; private set; }
 
         [NonSerialized]
         public Filter Filter;
@@ -80,19 +83,13 @@ namespace Morpeh {
         [SerializeField]
         internal int identifier;
 
-        [SerializeField]
-        internal string friendlyName;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
 
-        public static World Create(string friendlyName) {
-            var world = Create();
-            world.SetFriendlyName(friendlyName);
-            return world;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static World Create<T>() where T : World, new() => new T().Initialize();
 
-        private World() => this.Ctor();
+        protected World() => this.Ctor();
 
         //todo rework defines to conditionals
         public void Dispose() {

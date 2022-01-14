@@ -18,7 +18,15 @@ namespace Morpeh {
             this.World = world;
         }
 
-        private string GetWorldTitle(InspectorProperty property) => this.World.GetFriendlyName();
+        private string GetWorldTitle(InspectorProperty property) {
+            var friendlyName = this.World.FriendlyName;
+
+            if (string.IsNullOrEmpty(friendlyName)) {
+                friendlyName = this.World.ToString() + this.World.identifier;
+            }
+
+            return friendlyName;
+        }
 
         [DisableContextMenu]
         [PropertySpace]

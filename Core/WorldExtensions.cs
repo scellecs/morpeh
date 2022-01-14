@@ -71,7 +71,7 @@ namespace Morpeh {
             ComponentsCache.cleanup();
 
             World.worlds.Clear();
-            var defaultWorld = World.Create("Default");
+            var defaultWorld = World.Create();
             defaultWorld.UpdateByUnity = true;
 #if UNITY_2019_1_OR_NEWER
             var go = new GameObject {
@@ -359,18 +359,6 @@ namespace Morpeh {
                 world.freeEntityIDs.AddListRange(world.nextFreeEntityIDs);
                 world.nextFreeEntityIDs.Clear();
             }
-        }
-
-        public static void SetFriendlyName(this World world, string friendlyName) {
-            world.friendlyName = friendlyName;
-        }
-
-        public static string GetFriendlyName(this World world) {
-            if (string.IsNullOrEmpty(world.friendlyName)) {
-                return world.ToString() + world.identifier;
-            }
-
-            return world.friendlyName;
         }
     }
 }
