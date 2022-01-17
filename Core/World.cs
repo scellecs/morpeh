@@ -87,7 +87,12 @@ namespace Morpeh {
         public static World Create() => new World().Initialize();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static World Create<T>() where T : World, new() => new T().Initialize();
+        public static T Create<T>() where T : World, new()
+        {
+            var world = new T();
+            world.Initialize();
+            return world;
+        }
 
         protected World() => this.Ctor();
 
