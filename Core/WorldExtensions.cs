@@ -268,23 +268,29 @@ namespace Morpeh {
         }
 
         public static Entity CreateEntity(this World world) {
+            MDebug.LogVerbose("Create Entity");
             int id;
             if (world.freeEntityIDs.length > 0) {
                 id = world.freeEntityIDs.Get(0);
                 world.freeEntityIDs.RemoveAtSwap(0, out _);
+                MDebug.LogVerbose($"Get Free Entity ID {id}");
             }
             else {
                 id = world.entitiesLength++;
+                MDebug.LogVerbose($"Get Entity ID by increment length {id}");
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
                 var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
+                MDebug.LogVerbose($"Resize Entities Capacity -- Length {world.entitiesLength} | Old Capacity {world.entitiesCapacity} | New Capacity {newCapacity}");
                 Array.Resize(ref world.entities, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
 
             world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
             ++world.entitiesCount;
+            
+            MDebug.LogVerbose($"Finish entity creation ID {id} | Entities Count {world.entitiesCount}");
 
             return world.entities[id];
         }
