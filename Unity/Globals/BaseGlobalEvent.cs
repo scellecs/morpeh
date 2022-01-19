@@ -60,17 +60,7 @@ namespace Morpeh.Globals {
                 this.nextFrameCache = world.GetCache<GlobalEventNextFrame>();
             }
 
-            if (GlobalEventComponentUpdater<TData>.initialized.Get(world.identifier)) {
-                var updater = new GlobalEventComponentUpdater<TData>();
-                updater.Awake(world);
-                if (GlobalEventComponentUpdater.updaters.TryGetValue(world.identifier, out var updaters)) {
-                    updaters.Add(updater);
-                }
-                else {
-                    GlobalEventComponentUpdater.updaters.Add(world.identifier, new List<GlobalEventComponentUpdater> {updater});
-                }
-            }
-            else {
+            if (GlobalEventComponentUpdater<TData>.initialized.Get(world.identifier) == false) {
                 var updater = new GlobalEventComponentUpdater<TData>();
                 updater.Awake(world);
                 if (GlobalEventComponentUpdater.updaters.TryGetValue(world.identifier, out var updaters)) {
@@ -88,7 +78,7 @@ namespace Morpeh.Globals {
             this.CheckIsInitialized();
             ref var component = ref this.dataCache.GetComponent(this.InternalEntity);
             component.NewData.Enqueue(data);
-            this.nextFrameCache.SetComponent(this.InternalEntity, default);
+            this.nextFrameCache.SetComponent(this.InternalEntity);
         }
         
         [Obsolete("Use Publish Instead")]

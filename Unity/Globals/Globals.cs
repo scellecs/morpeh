@@ -3,6 +3,7 @@ namespace Morpeh.Globals {
         using System;
         using System.Collections.Generic;
         using Collections;
+        using UnityEngine;
 
         [Serializable]
         public struct GlobalEventMarker : IComponent {
@@ -11,7 +12,7 @@ namespace Morpeh.Globals {
         internal abstract class GlobalEventComponentUpdater : IDisposable {
             internal static Dictionary<int, List<GlobalEventComponentUpdater>> updaters = new Dictionary<int, List<GlobalEventComponentUpdater>>();
 
-            protected Filter filterPublishedWithoutNextFrame;
+            protected Filter filterPublished;
             protected Filter filterNextFrame;
 
             internal abstract void Awake(World world);
@@ -36,25 +37,30 @@ namespace Morpeh.Globals {
                 initialized.Set(this.worldId);
                 
                 var common = world.Filter.With<GlobalEventMarker>().With<GlobalEventComponent<T>>();
-                this.filterPublishedWithoutNextFrame = common.With<GlobalEventPublished>();
+                this.filterPublished = common.With<GlobalEventPublished>().Without<GlobalEventNextFrame>();
                 this.filterNextFrame = common.With<GlobalEventNextFrame>();
 
-                this.eventsCache = world.GetCache<GlobalEventComponent<T>>();
+                this.eventsCache    = world.GetCache<GlobalEventComponent<T>>();
+                this.publishedCache = world.GetCache<GlobalEventPublished>();
+                this.nextFrameCache = world.GetCache<GlobalEventNextFrame>();
             }
 
             internal override void Update() {
-                foreach (var entity in this.filterPublishedWithoutNextFrame) {
+                foreach (var entity in this.filterPublished) {
                     ref var evnt = ref this.eventsCache.GetComponent(entity);
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
+                    this.publishedCache.RemoveComponent(entity);
+                }
+                
+                foreach (var entity in this.filterNextFrame) {
+                    this.publishedCache.SetComponent(entity);
+                    this.nextFrameCache.RemoveComponent(entity);
+                    
+                    ref var evnt = ref this.eventsCache.GetComponent(entity);
                     while (evnt.NewData.Count > 0) {
                         evnt.Data.Push(evnt.NewData.Dequeue());
                     }
-                    this.publishedCache.RemoveComponent(entity);
-                }
-                foreach (var entity in this.filterNextFrame) {
-                    this.publishedCache.SetComponent(entity, default);
-                    this.nextFrameCache.RemoveComponent(entity);
                 }
             }
 
