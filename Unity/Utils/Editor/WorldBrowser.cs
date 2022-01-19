@@ -55,7 +55,7 @@ namespace Morpeh.Unity.Utils.Editor {
                 var gameObject = new GameObject("MORPEH__WORLD_VIEWER") {hideFlags = HideFlags.HideAndDontSave};
                 DontDestroyOnLoad(gameObject);
                 var viewer = gameObject.AddComponent<WorldViewer>();
-                viewer.Ctor(world);
+                viewer.World = world;
                 var editor = Editor.CreateEditor(viewer);
                 this.references.Add(new EditorReference(gameObject, editor));
             }

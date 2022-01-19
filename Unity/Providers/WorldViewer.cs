@@ -20,13 +20,10 @@ namespace Morpeh {
                 }
                 return this.world;
             }
-            private set => this.world = value;
+            set => this.world = value;
         }
-        public void Ctor(World world) {
-            this.World = world;
-        }
-
-        private string GetWorldTitle(InspectorProperty property) => this.World.GetFriendlyName();
+        
+        private string GetWorldTitle() => this.World.GetFriendlyName();
 
         [DisableContextMenu]
         [PropertySpace]
