@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 #define MORPEH_DEBUG
+#define MORPEH_DEBUG_VERBOSE
 #endif
 #if !MORPEH_DEBUG
 #define MORPEH_DEBUG_DISABLED
@@ -211,7 +212,8 @@ namespace Morpeh {
                 MDebug.LogError("You're trying to dispose disposed entity.");
                 return;
             }
-            
+            MDebug.LogVerbose($"Dispose Entity with ID {entity.internalID}");
+            MDebug.LogVerbose($"Remove data from caches");
             var archetype = entity.currentArchetype;
             var caches    = archetype.world.typedCaches;
             foreach (var typeId in archetype.typeIds) {
@@ -219,6 +221,7 @@ namespace Morpeh {
                     ComponentsCache.caches.data[index].Clean(entity);
                 }
             }
+            MDebug.LogVerbose($"End remove data from caches");
 
             foreach (var c in caches) {
                 var cc = caches.GetValueByIndex(c);
@@ -236,9 +239,11 @@ namespace Morpeh {
             if (entity.isDirty == false) {
                 entity.world.dirtyEntities.Set(entity.internalID);
                 entity.isDirty = true;
+                MDebug.LogVerbose($"Set isDirty");
             }
             
             entity.isDisposed = true;
+            MDebug.LogVerbose($"Finish Dispose Entity with ID {entity.internalID}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
