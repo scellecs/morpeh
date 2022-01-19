@@ -208,9 +208,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Entity entity) {
             if (entity.isDisposed) {
-#if MORPEH_DEBUG
-                Debug.LogError("[MORPEH] You're trying to dispose disposed entity.");
-#endif
+                MDebug.LogError("You're trying to dispose disposed entity.");
                 return;
             }
             
@@ -219,6 +217,13 @@ namespace Morpeh {
             foreach (var typeId in archetype.typeIds) {
                 if (caches.TryGetValue(typeId, out var index)) {
                     ComponentsCache.caches.data[index].Clean(entity);
+                }
+            }
+
+            foreach (var c in caches) {
+                var cc = caches.GetValueByIndex(c);
+                if (ComponentsCache.caches.data[cc].Has(entity)) {
+                    MDebug.LogError("WTF");
                 }
             }
             
