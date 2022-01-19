@@ -9,6 +9,7 @@ namespace Morpeh.Globals {
         public struct GlobalEventMarker : IComponent {
         }
 
+        //rework for multithread
         internal abstract class GlobalEventComponentUpdater : IDisposable {
             internal static Dictionary<int, List<GlobalEventComponentUpdater>> updaters = new Dictionary<int, List<GlobalEventComponentUpdater>>();
 
