@@ -214,21 +214,22 @@ namespace Morpeh {
             }
             MDebug.LogVerbose($"Dispose Entity with ID {entity.internalID}");
             MDebug.LogVerbose($"Remove data from caches");
-            var archetype = entity.currentArchetype;
-            var caches    = archetype.world.typedCaches;
-            foreach (var typeId in archetype.typeIds) {
-                if (caches.TryGetValue(typeId, out var index)) {
-                    ComponentsCache.caches.data[index].Clean(entity);
-                }
-            }
-            MDebug.LogVerbose($"End remove data from caches");
+            // var archetype = entity.currentArchetype;
+            // var caches    = archetype.world.typedCaches;
+            // foreach (var typeId in archetype.typeIds) {
+            //     if (caches.TryGetValue(typeId, out var index)) {
+            //         ComponentsCache.caches.data[index].Clean(entity);
+            //     }
+            // }
 
             foreach (var c in ComponentsCache.caches.data) {
                 if (c != null && c.Has(entity)) {
-                    MDebug.LogError("WTF");
+                    c.Clean(entity);
                 }
             }
             
+            MDebug.LogVerbose($"End remove data from caches");
+
             if (entity.previousArchetypeId < 0) {
                 entity.previousArchetypeId = entity.currentArchetypeId;
             }
