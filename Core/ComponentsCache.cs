@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 #define MORPEH_DEBUG
+#define MORPEH_DEBUG_VERBOSE
 #endif
 #if !MORPEH_DEBUG
 #define MORPEH_DEBUG_DISABLED
@@ -193,7 +194,11 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override bool Clean(Entity entity) => this.components.Remove(entity.internalID, out _);
+        internal override bool Clean(Entity entity) {
+            var result = this.components.Remove(entity.internalID, out _);
+            MDebug.LogVerbose($"Clean Cache {typeof(T)} | Type Cache ID {this.typedCacheId} | Entity ID {entity.internalID} | Result {result}");
+            return this.components.Remove(entity.internalID, out _);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
