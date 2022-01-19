@@ -223,9 +223,8 @@ namespace Morpeh {
             }
             MDebug.LogVerbose($"End remove data from caches");
 
-            foreach (var c in caches) {
-                var cc = caches.GetValueByIndex(c);
-                if (ComponentsCache.caches.data[cc].Has(entity)) {
+            foreach (var c in ComponentsCache.caches.data) {
+                if (c != null && c.Has(entity)) {
                     MDebug.LogError("WTF");
                 }
             }
