@@ -162,7 +162,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent(Entity entity, in T value) {
+        public void SetComponent(Entity entity, in T value = default) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying SetComponent on null or disposed entity {entity.internalID}");
