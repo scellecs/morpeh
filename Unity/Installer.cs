@@ -75,10 +75,8 @@
         
 
         protected override void OnEnable() {
-            if (this.group == null) {
-                this.group = World.Default.CreateSystemsGroup();
-            }
-
+            this.group = World.Default.CreateSystemsGroup();
+            
             for (int i = 0, length = this.initializers.Length; i < length; i++) {
                 var initializer = this.initializers[i];
                 this.group.AddInitializer(initializer);
