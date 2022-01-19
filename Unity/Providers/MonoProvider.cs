@@ -36,7 +36,7 @@
             }
         }
 
-        private ComponentsCache<T> Cache {
+        public ComponentsCache<T> Cache {
             get {
                 if (this.cache == null) {
                     this.cache = World.Default.GetCache<T>();
