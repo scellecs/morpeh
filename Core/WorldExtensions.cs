@@ -71,7 +71,7 @@ namespace Morpeh {
             ComponentsCache.cleanup();
 
             World.worlds.Clear();
-            var defaultWorld = World.Create("Default");
+            var defaultWorld = World.Create("Default World");
             defaultWorld.UpdateByUnity = true;
 #if UNITY_2019_1_OR_NEWER
             var go = new GameObject {
@@ -124,9 +124,9 @@ namespace Morpeh {
             world.archetypeCache.Sort();
             var typesLength = world.archetypeCache.length;
 
-            if (world.archetypesByLength.TryGetValue(typesLength, out var archsl)) {
-                for (var index = 0; index < archsl.length; index++) {
-                    archetypeId = archsl.Get(index);
+            if (world.archetypesByLength.TryGetValue(typesLength, out var archetypesList)) {
+                for (var index = 0; index < archetypesList.length; index++) {
+                    archetypeId = archetypesList.Get(index);
                     archetype   = world.archetypes.data[archetypeId];
                     var check = true;
                     for (int i = 0, length = typesLength; i < length; i++) {
@@ -145,8 +145,8 @@ namespace Morpeh {
             archetypeId = world.archetypes.length;
             var newArchetype = new Archetype(archetypeId, world.archetypeCache.ToArray(), world.identifier);
             world.archetypes.Add(newArchetype);
-            if (world.archetypesByLength.TryGetValue(typesLength, out archsl)) {
-                archsl.Add(archetypeId);
+            if (world.archetypesByLength.TryGetValue(typesLength, out archetypesList)) {
+                archetypesList.Add(archetypeId);
             }
             else {
                 world.archetypesByLength.Add(typesLength, new IntFastList { archetypeId }, out _);

@@ -13,7 +13,15 @@ namespace Morpeh {
     public class WorldViewer : MonoBehaviour {
       
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        public World World { get; private set; }
+        public World World {
+            get {
+                if (this.world == null) {
+                    this.world = World.Default;
+                }
+                return this.world;
+            }
+            private set => this.world = value;
+        }
         public void Ctor(World world) {
             this.World = world;
         }
@@ -48,6 +56,7 @@ namespace Morpeh {
         }
 
         private readonly List<EntityView> entityViews = new List<EntityView>();
+        private          World            world;
 
         [DisableContextMenu]
         [Serializable]
