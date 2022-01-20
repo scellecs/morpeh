@@ -229,6 +229,7 @@ namespace Morpeh {
             }
 
             entity.world.ApplyRemoveEntity(entity.internalID);
+            entity.world.dirtyEntities.Unset(entity.internalID);
 
             entity.DisposeFast();
         }
