@@ -204,6 +204,8 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Entity entity) {
+            MDebug.Log($"Dispose {entity.ID}");
+            
             if (entity.isDisposed) {
                 MDebug.LogError("You're trying to dispose disposed entity.");
                 return;

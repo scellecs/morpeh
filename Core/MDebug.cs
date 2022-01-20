@@ -10,6 +10,9 @@ namespace Morpeh {
     
     internal static class MDebug {
         [Conditional("MORPEH_DEBUG")]
-        public static void LogError(object message) => UnityEngine.Debug.Log($"[MORPEH] {message}");
+        public static void LogError(object message) => UnityEngine.Debug.LogError($"[MORPEH] {message}");
+        
+        [Conditional("MORPEH_DEBUG")]
+        public static void Log(object message) => UnityEngine.Debug.Log($"[MORPEH] {message}");
     }
 }
