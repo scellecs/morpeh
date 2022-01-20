@@ -207,7 +207,8 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity.internalID}");
             }
 #endif
-            return this.components.Has(entity.internalID);
+            
+            return this.components != null && this.components.Has(entity.internalID);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
