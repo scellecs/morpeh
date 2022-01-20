@@ -208,12 +208,6 @@ namespace Morpeh {
                 MDebug.LogError("You're trying to dispose disposed entity.");
                 return;
             }
-
-            // foreach (var c in ComponentsCache.caches.data) {
-            //     if (c != null && c.Has(entity)) {
-            //         c.Clean(entity);
-            //     }
-            // }
             
             var currentArchetype = entity.currentArchetype;
 
