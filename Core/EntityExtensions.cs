@@ -217,7 +217,7 @@ namespace Morpeh {
             
             var currentArchetype = entity.currentArchetype;
 
-            var caches = currentArchetype.world.typedCaches;
+            var caches = currentArchetype.world.caches;
             foreach (var typeId in currentArchetype.typeIds) {
                 if (caches.TryGetValue(typeId, out var index)) {
                     ComponentsCache.caches.data[index].Clean(entity);
