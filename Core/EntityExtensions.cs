@@ -215,19 +215,21 @@ namespace Morpeh {
             //     }
             // }
             
-            if (entity.previousArchetypeId >= 0) {
-                entity.currentArchetypeId = entity.previousArchetypeId;
-            }
-            
-            var archetype = entity.world.archetypes.data[entity.currentArchetypeId];
-            var caches    = archetype.world.typedCaches;
-            foreach (var typeId in archetype.typeIds) {
+            var currentArchetype = entity.currentArchetype;
+
+            var caches = currentArchetype.world.typedCaches;
+            foreach (var typeId in currentArchetype.typeIds) {
                 if (caches.TryGetValue(typeId, out var index)) {
                     ComponentsCache.caches.data[index].Clean(entity);
                 }
             }
             
-            archetype.Remove(entity);
+            if (entity.previousArchetypeId >= 0) {
+                entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
+            }
+            else {
+                currentArchetype.Remove(entity);
+            }
 
             entity.world.ApplyRemoveEntity(entity.internalID);
             entity.world.dirtyEntities.Unset(entity.internalID);
