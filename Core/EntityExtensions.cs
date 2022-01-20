@@ -229,6 +229,9 @@ namespace Morpeh {
             if (entity.previousArchetypeId >= 0) {
                 entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
             }
+            else if (entity.currentArchetypeId >= 0) {
+                entity.world.archetypes.data[entity.currentArchetypeId].Remove(entity);
+            }
 
             entity.world.ApplyRemoveEntity(entity.internalID);
             entity.world.dirtyEntities.Unset(entity.internalID);
