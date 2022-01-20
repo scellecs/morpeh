@@ -1,10 +1,20 @@
+//todo remove it
+#if UNITY_EDITOR
+#define MORPEH_DEBUG
+#define MORPEH_DEBUG_VERBOSE
+#endif
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
 namespace Morpeh {
     using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.IL2CPP.CompilerServices;
-    
+    using UnityEngine;
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -103,6 +113,7 @@ namespace Morpeh {
                 if (this.archetypeCount == 1) {
                     if (this.currentEnumerator.MoveNext()) {
                         this.current = this.world.entities[this.currentEnumerator.current];
+                        MDebug.LogVerbose($"ID {this.currentEnumerator.current} | {this.current.internalID}");
                         return true;
                     }
 
