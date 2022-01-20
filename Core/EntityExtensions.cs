@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 #define MORPEH_DEBUG
-#define MORPEH_DEBUG_VERBOSE
 #endif
 #if !MORPEH_DEBUG
 #define MORPEH_DEBUG_DISABLED
@@ -12,8 +11,6 @@ namespace Morpeh {
     using Collections;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
-    //todo replace debug log
-    using UnityEngine;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -205,7 +202,9 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Entity entity) {
             if (entity.isDisposed) {
-                MDebug.LogError("You're trying to dispose disposed entity.");
+#if MORPEH_DEBUG
+                MDebug.LogError($"You're trying to dispose disposed entity with ID {entity.ID}.");
+#endif
                 return;
             }
             

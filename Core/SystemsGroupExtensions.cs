@@ -11,7 +11,6 @@ namespace Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.IL2CPP.CompilerServices;
-    using Debug = UnityEngine.Debug;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -105,8 +104,8 @@ namespace Morpeh {
         [Conditional("MORPEH_DEBUG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SystemThrowException(this SystemsGroup systemsGroup, ISystem system, Exception exception) {
-            Debug.LogError($"[MORPEH] Can not update {system.GetType()}. System will be disabled.");
-            Debug.LogException(exception);
+            MDebug.LogError($"Can not update {system.GetType()}. System will be disabled.");
+            MDebug.LogException(exception);
             systemsGroup.delayedAction += () => systemsGroup.DisableSystem(system);
         }
 
@@ -128,8 +127,8 @@ namespace Morpeh {
                 initializer.OnAwake();
             }
             catch (Exception exception) {
-                Debug.LogError($"[MORPEH] Can not initialize {initializer.GetType()}");
-                Debug.LogException(exception);
+                MDebug.LogError($"Can not initialize {initializer.GetType()}");
+                MDebug.LogException(exception);
             }
         }
 
@@ -140,8 +139,8 @@ namespace Morpeh {
                 disposable.Dispose();
             }
             catch (Exception exception) {
-                Debug.LogError($"[MORPEH] Can not dispose {disposable.GetType()}");
-                Debug.LogException(exception);
+                MDebug.LogError($"Can not dispose {disposable.GetType()}");
+                MDebug.LogException(exception);
             }
         }
 

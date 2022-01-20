@@ -14,6 +14,7 @@ namespace Morpeh {
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
+    
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -104,8 +105,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not dispose system group {systemsGroup.GetType()}");
-                    Debug.LogException(e);
+                    MDebug.LogError($"Can not dispose system group {systemsGroup.GetType()}");
+                    MDebug.LogException(e);
                 }
 #endif
             }
@@ -120,8 +121,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not dispose entity with ID {entity?.ID}");
-                    Debug.LogException(e);
+                    MDebug.LogError($"Can not dispose entity with ID {entity?.ID}");
+                    MDebug.LogException(e);
                 }
 #endif
             }
@@ -142,8 +143,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
             }
             catch (Exception e) {
-                Debug.LogError("[MORPEH] Can not dispose root filter");
-                Debug.LogException(e);
+                MDebug.LogError("Can not dispose root filter");
+                MDebug.LogException(e);
             }
 #endif
             this.Filter = null;
@@ -166,8 +167,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not dispose cache id {cache}");
-                    Debug.LogException(e);
+                    MDebug.LogError($"Can not dispose cache id {cache}");
+                    MDebug.LogException(e);
                 }
 #endif
             }
@@ -185,8 +186,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not dispose archetype id {archetype.id}");
-                    Debug.LogException(e);
+                    MDebug.LogError($"Can not dispose archetype id {archetype.id}");
+                    MDebug.LogException(e);
                 }
 #endif
             }

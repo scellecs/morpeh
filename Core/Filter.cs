@@ -4,7 +4,6 @@ namespace Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

@@ -97,7 +97,7 @@ namespace Morpeh {
                 return ref this.components.data[slotIndex];
             }
 #if MORPEH_DEBUG
-            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
+            MDebug.LogError($"You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
 #endif
             return ref this.components.data[0];
         }
@@ -132,7 +132,7 @@ namespace Morpeh {
             }
 
 #if MORPEH_DEBUG
-            Debug.LogError($"[MORPEH] You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
+            MDebug.LogError($"You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
 #endif
             return false;
         }
@@ -193,10 +193,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override bool Clean(Entity entity) {
-            var result = this.components.Remove(entity.internalID, out _);
-            return this.components.Remove(entity.internalID, out _);
-        }
+        internal override bool Clean(Entity entity) => this.components.Remove(entity.internalID, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
@@ -206,7 +203,7 @@ namespace Morpeh {
             }
 #endif
             
-            return this.components != null && this.components.Has(entity.internalID);
+            return this.components.Has(entity.internalID);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

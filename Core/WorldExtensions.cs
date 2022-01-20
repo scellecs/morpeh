@@ -14,7 +14,6 @@ namespace Morpeh {
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    using Object = UnityEngine.Object;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -80,7 +79,7 @@ namespace Morpeh {
             };
             go.AddComponent<UnityRuntimeHelper>();
             go.hideFlags = HideFlags.HideAndDontSave;
-            Object.DontDestroyOnLoad(go);
+            UnityEngine.Object.DontDestroyOnLoad(go);
 #endif
             //Warm Types
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
@@ -93,7 +92,7 @@ namespace Morpeh {
                                 .Invoke(null, null);
                         }
                         catch {
-                            Debug.LogWarning($"[MORPEH] Attention component type {type.FullName} not used, but exists in build");
+                            MDebug.LogWarning($"Attention component type {type.FullName} not used, but exists in build");
                         }
                     }
                 }

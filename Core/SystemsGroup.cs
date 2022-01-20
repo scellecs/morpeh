@@ -10,7 +10,6 @@ namespace Morpeh {
     using Collections;
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -75,8 +74,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                     }
                     catch (Exception e) {
-                        Debug.LogError($"[MORPEH] Can not dispose system {system.GetType()}");
-                        Debug.LogException(e);
+                        MDebug.LogError($"Can not dispose system {system.GetType()}");
+                        MDebug.LogException(e);
                     }
 #endif
                 }
@@ -111,8 +110,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not dispose new initializer {initializer.GetType()}");
-                    Debug.LogException(e);
+                    MDebug.LogError($"Can not dispose new initializer {initializer.GetType()}");
+                    MDebug.LogException(e);
                 }
 #endif
             }
@@ -129,8 +128,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not dispose initializer {initializer.GetType()}");
-                    Debug.LogException(e);
+                    MDebug.LogError($"Can not dispose initializer {initializer.GetType()}");
+                    MDebug.LogException(e);
                 }
 #endif
             }
@@ -147,8 +146,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    Debug.LogError($"[MORPEH] Can not dispose system group disposable {disposable.GetType()}");
-                    Debug.LogException(e);
+                    MDebug.LogError($"Can not dispose system group disposable {disposable.GetType()}");
+                    MDebug.LogException(e);
                 }
 #endif
             }
