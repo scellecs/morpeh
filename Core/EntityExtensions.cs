@@ -204,34 +204,30 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Entity entity) {
-            MDebug.Log($"Dispose {entity.ID}");
-            
             if (entity.isDisposed) {
                 MDebug.LogError("You're trying to dispose disposed entity.");
                 return;
             }
-            
-            //todo rework clean archetypes
-            // var archetype = entity.currentArchetype;
-            // var caches    = archetype.world.typedCaches;
-            // foreach (var typeId in archetype.typeIds) {
-            //     if (caches.TryGetValue(typeId, out var index)) {
-            //         ComponentsCache.caches.data[index].Clean(entity);
+
+            // foreach (var c in ComponentsCache.caches.data) {
+            //     if (c != null && c.Has(entity)) {
+            //         c.Clean(entity);
             //     }
             // }
-
-            foreach (var c in ComponentsCache.caches.data) {
-                if (c != null && c.Has(entity)) {
-                    c.Clean(entity);
+            
+            if (entity.previousArchetypeId >= 0) {
+                entity.currentArchetypeId = entity.previousArchetypeId;
+            }
+            
+            var archetype = entity.world.archetypes.data[entity.currentArchetypeId];
+            var caches    = archetype.world.typedCaches;
+            foreach (var typeId in archetype.typeIds) {
+                if (caches.TryGetValue(typeId, out var index)) {
+                    ComponentsCache.caches.data[index].Clean(entity);
                 }
             }
             
-            if (entity.previousArchetypeId >= 0) {
-                entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
-            }
-            else if (entity.currentArchetypeId >= 0) {
-                entity.world.archetypes.data[entity.currentArchetypeId].Remove(entity);
-            }
+            archetype.Remove(entity);
 
             entity.world.ApplyRemoveEntity(entity.internalID);
             entity.world.dirtyEntities.Unset(entity.internalID);
