@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 #define MORPEH_DEBUG
-#define MORPEH_DEBUG_VERBOSE
 #endif
 #if !MORPEH_DEBUG
 #define MORPEH_DEBUG_DISABLED
@@ -269,21 +268,17 @@ namespace Morpeh {
         }
 
         public static Entity CreateEntity(this World world) {
-            MDebug.LogVerbose("Create Entity");
             int id;
             if (world.freeEntityIDs.length > 0) {
                 id = world.freeEntityIDs.Get(0);
                 world.freeEntityIDs.RemoveAtSwap(0, out _);
-                MDebug.LogVerbose($"Get Free Entity ID {id}");
             }
             else {
                 id = world.entitiesLength++;
-                MDebug.LogVerbose($"Get Entity ID by increment length {id}");
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
                 var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
-                MDebug.LogVerbose($"Resize Entities Capacity -- Length {world.entitiesLength} | Old Capacity {world.entitiesCapacity} | New Capacity {newCapacity}");
                 Array.Resize(ref world.entities, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
@@ -291,35 +286,27 @@ namespace Morpeh {
             world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
             ++world.entitiesCount;
             
-            MDebug.LogVerbose($"Finish entity creation ID {id} | Entities Count {world.entitiesCount}");
-
             return world.entities[id];
         }
 
         public static Entity CreateEntity(this World world, out int id) {
-            MDebug.LogVerbose("Create Entity");
             
             if (world.freeEntityIDs.length > 0) {
                 id = world.freeEntityIDs.Get(0);
                 world.freeEntityIDs.RemoveAtSwap(0, out _);
-                MDebug.LogVerbose($"Get Free Entity ID {id}");
             }
             else {
                 id = world.entitiesLength++;
-                MDebug.LogVerbose($"Get Entity ID by increment length {id}");
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
                 var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
-                MDebug.LogVerbose($"Resize Entities Capacity -- Length {world.entitiesLength} | Old Capacity {world.entitiesCapacity} | New Capacity {newCapacity}");
                 Array.Resize(ref world.entities, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
 
             world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
             ++world.entitiesCount;
-            
-            MDebug.LogVerbose($"Finish entity creation ID {id} | Entities Count {world.entitiesCount}");
             
             return world.entities[id];
         }
@@ -329,12 +316,12 @@ namespace Morpeh {
         public static Entity GetEntity(this World world, in int id) => world.entities[id];
 
         public static void RemoveEntity(this World world, Entity entity) {
-            var id = entity.ID;
-            if (world.entities[id] == entity) {
+            if (world.entities[entity.internalID] == entity) {
                 entity.Dispose();
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyRemoveEntity(this World world, int id) {
             world.nextFreeEntityIDs.Add(id);
             world.entities[id] = null;

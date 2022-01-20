@@ -187,6 +187,7 @@ namespace Morpeh {
         internal static void ApplyTransfer(this Entity entity) {
             if (entity.currentArchetypeId == 0) {
                 entity.world.RemoveEntity(entity);
+                return;
             }
 
             if (entity.previousArchetypeId != entity.currentArchetypeId) {
@@ -194,12 +195,7 @@ namespace Morpeh {
                     entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
                 }
                 
-                if (entity.isDisposed) {
-                    entity.DisposeInternal();
-                }
-                else {
-                    entity.currentArchetype.Add(entity);
-                }
+                entity.currentArchetype.Add(entity);
                 entity.previousArchetypeId = -1;
             }
 
@@ -212,8 +208,8 @@ namespace Morpeh {
                 MDebug.LogError("You're trying to dispose disposed entity.");
                 return;
             }
-            MDebug.LogVerbose($"Dispose Entity with ID {entity.internalID}");
-            MDebug.LogVerbose($"Remove data from caches");
+            
+            //todo rework clean archetypes
             // var archetype = entity.currentArchetype;
             // var caches    = archetype.world.typedCaches;
             // foreach (var typeId in archetype.typeIds) {
@@ -228,28 +224,12 @@ namespace Morpeh {
                 }
             }
             
-            MDebug.LogVerbose($"End remove data from caches");
-
-            if (entity.previousArchetypeId < 0) {
-                entity.previousArchetypeId = entity.currentArchetypeId;
+            if (entity.previousArchetypeId >= 0) {
+                entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
             }
 
-            entity.currentArchetypeId = -1;
-            
-            if (entity.isDirty == false) {
-                entity.world.dirtyEntities.Set(entity.internalID);
-                entity.isDirty = true;
-                MDebug.LogVerbose($"Set isDirty");
-            }
-            
-            entity.isDisposed = true;
-            MDebug.LogVerbose($"Finish Dispose Entity with ID {entity.internalID}");
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void DisposeInternal(this Entity entity) {
             entity.world.ApplyRemoveEntity(entity.internalID);
-            
+
             entity.DisposeFast();
         }
 

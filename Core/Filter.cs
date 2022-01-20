@@ -1,12 +1,3 @@
-//todo remove it
-#if UNITY_EDITOR
-#define MORPEH_DEBUG
-#define MORPEH_DEBUG_VERBOSE
-#endif
-#if !MORPEH_DEBUG
-#define MORPEH_DEBUG_DISABLED
-#endif
-
 namespace Morpeh {
     using System.Collections;
     using System.Collections.Generic;
@@ -113,7 +104,6 @@ namespace Morpeh {
                 if (this.archetypeCount == 1) {
                     if (this.currentEnumerator.MoveNext()) {
                         this.current = this.world.entities[this.currentEnumerator.current];
-                        MDebug.LogVerbose($"ID {this.currentEnumerator.current} | {this.current.internalID}");
                         return true;
                     }
 
@@ -123,7 +113,6 @@ namespace Morpeh {
                 if (this.archetypeId < this.archetypeCount) {
                     if (this.currentEnumerator.MoveNext()) {
                         this.current = this.world.entities[this.currentEnumerator.current];
-                        MDebug.LogVerbose($"ID {this.currentEnumerator.current} | {this.current.internalID}");
                         return true;
                     }
 
@@ -134,7 +123,6 @@ namespace Morpeh {
                             this.currentEnumerator.MoveNext();
 
                             this.current = this.world.entities[this.currentEnumerator.current];
-                            MDebug.LogVerbose($"ID {this.currentEnumerator.current} | {this.current.internalID}");
                             return true;
                         }
                     }
