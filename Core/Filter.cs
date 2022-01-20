@@ -123,6 +123,7 @@ namespace Morpeh {
                 if (this.archetypeId < this.archetypeCount) {
                     if (this.currentEnumerator.MoveNext()) {
                         this.current = this.world.entities[this.currentEnumerator.current];
+                        MDebug.LogVerbose($"ID {this.currentEnumerator.current} | {this.current.internalID}");
                         return true;
                     }
 
@@ -133,6 +134,7 @@ namespace Morpeh {
                             this.currentEnumerator.MoveNext();
 
                             this.current = this.world.entities[this.currentEnumerator.current];
+                            MDebug.LogVerbose($"ID {this.currentEnumerator.current} | {this.current.internalID}");
                             return true;
                         }
                     }
