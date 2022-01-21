@@ -218,7 +218,9 @@ namespace Morpeh {
 #endif
 
             if (this.isMarker) {
-                this.markers.Set(entity.internalID);
+                if (this.markers.Set(entity.internalID)) {
+                    entity.AddTransfer(this.typeId);
+                }
             }
             else if (this.components.Set(entity.internalID, value, out _)) {
                 entity.AddTransfer(this.typeId);
