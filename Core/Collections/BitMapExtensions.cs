@@ -156,8 +156,7 @@ namespace Morpeh.Collections {
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
                     slot = slotsPtr + i;
                     if (*slot - 1 == dataIndex) {
-                        var data = (uint) *(dataPtr + (i >> 1));
-                        return (data & (1 << bitIndex)) > 0;
+                        return (*(dataPtr + (i >> 1)) & (1 << bitIndex)) != 0;
                     }
                 }
             }
