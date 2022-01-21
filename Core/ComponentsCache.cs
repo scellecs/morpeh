@@ -231,6 +231,7 @@ namespace Morpeh {
                         this.components.Add(to.internalID, component, out _);
                     }
                 }
+                this.components.Remove(from.internalID, out _);
             }
         }
 
