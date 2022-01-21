@@ -23,7 +23,7 @@ namespace Morpeh {
             set => this.world = value;
         }
         
-        private string GetWorldTitle() => this.World.GetFriendlyName();
+        private string GetWorldTitle() => this.World?.GetFriendlyName() ?? "World";
 
         [DisableContextMenu]
         [PropertySpace]
