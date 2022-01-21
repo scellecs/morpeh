@@ -27,8 +27,6 @@ namespace Morpeh {
         internal int typedCacheId;
         [SerializeField]
         internal int typeId;
-        [SerializeField]
-        internal bool isMarker;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract bool RemoveComponent(Entity entity);
@@ -55,11 +53,6 @@ namespace Morpeh {
         [SerializeField]
         internal IntHashMap<T> components;
 
-        [SerializeField]
-        internal BitMap markers;
-
-        internal T defaultComponent;
-
         static ComponentsCache() {
             cleanup += () => typedCaches.Clear();
         }
@@ -79,17 +72,11 @@ namespace Morpeh {
         }
 
         internal ComponentsCache() {
-            var info = TypeIdentifier<T>.info;
-            
-            this.typeId   = info.id;
-            this.isMarker = info.isMarker;
+            this.typeId = TypeIdentifier<T>.info.id;
 
-            if (this.isMarker) {
-                this.markers = new BitMap();
-            }
-            else {
-                this.components = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
-            }
+            this.components = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
+
+            this.components.Add(-1, default, out _);
 
             this.typedCacheId = typedCaches.length;
             typedCaches.Add(this);
@@ -105,20 +92,14 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.isMarker) {
-                if (this.markers.Set(entity.internalID)) {
-                    entity.AddTransfer(this.typeId);
-                    return ref this.defaultComponent;
-                }
-            }
-            else if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+            if (this.components.Add(entity.internalID, default, out var slotIndex)) {
                 entity.AddTransfer(this.typeId);
                 return ref this.components.data[slotIndex];
             }
 #if MORPEH_DEBUG
             MDebug.LogError($"You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
 #endif
-            return ref this.defaultComponent;
+            return ref this.components.data[0];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -128,21 +109,14 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.isMarker) {
-                if (this.markers.Set(entity.internalID)) {
-                    entity.AddTransfer(this.typeId);
-                    exist = false;
-                    return ref this.defaultComponent;
-                }
-            }
-            else if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+            if (this.components.Add(entity.internalID, default, out var slotIndex)) {
                 entity.AddTransfer(this.typeId);
                 exist = false;
                 return ref this.components.data[slotIndex];
             }
 
             exist = true;
-            return ref this.defaultComponent;
+            return ref this.components.data[0];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -152,13 +126,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.isMarker) {
-                if (this.markers.Set(entity.internalID)) {
-                    entity.AddTransfer(this.typeId);
-                    return true;
-                }
-            }
-            else if (this.components.Add(entity.internalID, value, out _)) {
+            if (this.components.Add(entity.internalID, value, out _)) {
                 entity.AddTransfer(this.typeId);
                 return true;
             }
@@ -175,19 +143,8 @@ namespace Morpeh {
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying GetComponent on null or disposed entity {entity.internalID}");
             }
-#endif
             
-            if (this.isMarker) {
-#if MORPEH_DEBUG
-                if (this.markers.Get(entity.internalID) == false) {
-                    throw new Exception($"[MORPEH] You're trying to get on entity {entity.internalID} a component that doesn't exists!");
-                }
-#endif
-                return ref this.defaultComponent;
-            }
-            
-#if MORPEH_DEBUG
-            if (this.components.Has(entity.internalID) == false) {
+            if (!this.components.Has(entity.internalID)) {
                 throw new Exception($"[MORPEH] You're trying to get on entity {entity.internalID} a component that doesn't exists!");
             }
 #endif
@@ -201,11 +158,6 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying TryGetComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.isMarker) {
-                exist = this.markers.Get(entity.internalID);
-                return ref this.defaultComponent;
-            }
-            
             return ref this.components.TryGetValueRefByKey(entity.internalID, out exist);
         }
 
@@ -217,18 +169,13 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.isMarker) {
-                if (this.markers.Set(entity.internalID)) {
-                    entity.AddTransfer(this.typeId);
-                }
-            }
-            else if (this.components.Set(entity.internalID, value, out _)) {
+            if (this.components.Set(entity.internalID, value, out _)) {
                 entity.AddTransfer(this.typeId);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ref T Empty() => ref this.defaultComponent;
+        internal ref T Empty() => ref this.components.data[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool RemoveComponent(Entity entity) {
@@ -238,13 +185,7 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.isMarker) {
-                if (this.markers.Unset(entity.internalID)) {
-                    entity.RemoveTransfer(this.typeId);
-                    return true;
-                }
-            }
-            else if (this.components.Remove(entity.internalID, out _)) {
+            if (this.components.Remove(entity.internalID, out _)) {
                 entity.RemoveTransfer(this.typeId);
                 return true;
             }
@@ -252,12 +193,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override bool Clean(Entity entity) {
-            if (this.isMarker) {
-                return this.markers.Unset(entity.internalID);
-            }
-            return this.components.Remove(entity.internalID, out _);
-        }
+        internal override bool Clean(Entity entity) => this.components.Remove(entity.internalID, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
@@ -266,9 +202,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.isMarker) {
-                return this.markers.Get(entity.internalID);
-            }
+            
             return this.components.Has(entity.internalID);
         }
 
@@ -283,12 +217,7 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.isMarker) {
-                if (this.markers.Get(from.internalID)) {
-                    this.markers.Set(to.internalID);
-                }
-            }
-            else if (this.components.TryGetValue(from.internalID, out var component)) {
+            if (this.components.TryGetValue(from.internalID, out var component)) {
                 if (overwrite) {
                     if (this.components.Has(to.internalID)) {
                         this.components.Set(to.internalID, component, out _);
@@ -307,7 +236,6 @@ namespace Morpeh {
 
         public override void Dispose() {
             this.components = null;
-            this.markers    = null;
 
             typedCaches.RemoveSwap(this, out _);
             caches.RemoveSwap(this, out _);
