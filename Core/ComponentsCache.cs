@@ -8,9 +8,13 @@
 namespace Morpeh {
     using System;
     using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using Collections;
+    using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
+    using Debug = System.Diagnostics.Debug;
 
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -83,6 +87,26 @@ namespace Morpeh {
 
             this.commonCacheId = caches.length;
             caches.Add(this);
+        }
+        
+        public unsafe NativeArray<TNative> AsNative<TNative>() where TNative : unmanaged, IComponent {
+            var data   = this.components.data as TNative[];
+            
+#if MORPEH_DEBUG
+            if (data == null) {
+                throw new Exception($"[MORPEH] Unable to cast components.data {typeof(T)} to unmanaged {typeof(TNative)}");
+            }
+#endif
+            
+            fixed (TNative* ptr = data) {
+                var native = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(ptr, data.Length, Allocator.None);
+                
+#if UNITY_EDITOR
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref native, AtomicSafetyHandle.Create());
+#endif
+                
+                return native;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
