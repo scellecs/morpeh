@@ -78,7 +78,7 @@ namespace Morpeh {
             }
 
             filter.Components0Ids    = array;
-            filter.Components0Values = this.world.GetCache<TNative0>().AsNative<TNative0>();
+            filter.Components0Values = cache.AsNative<TNative0>();
 
             return filter;
         }
