@@ -13,7 +13,7 @@ namespace Morpeh {
         internal World world;
 
         [SerializeField]
-        public int internalID;
+        internal int internalID;
         [SerializeField]
         internal int worldID;
 
