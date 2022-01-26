@@ -244,7 +244,7 @@ namespace Morpeh {
             nativeFilter.Components0Ids    = array0;
             nativeFilter.Components0Values = cache0.AsNative<TNative0>();
 
-            nativeFilter.Components1Ids    = array0;
+            nativeFilter.Components1Ids    = array1;
             nativeFilter.Components1Values = cache1.AsNative<TNative1>();
 
             return nativeFilter;
