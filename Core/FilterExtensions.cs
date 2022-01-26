@@ -3,7 +3,12 @@ namespace Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
+    using morpeh.Core.Collections;
     using Unity.IL2CPP.CompilerServices;
+    
+#if UNITY_2019_1_OR_NEWER
+    using Unity.Collections;
+#endif
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -192,5 +197,94 @@ namespace Morpeh {
 
             return newFilter;
         }
+        
+#if UNITY_2019_1_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeFilter<TNative0> AsNative<TNative0>(this Filter filter)
+            where TNative0 : unmanaged, IComponent {
+            var nativeFilter = new NativeFilter<TNative0>();
+
+            var array = new NativeArray<int>(filter.Length, Allocator.TempJob);
+            var cache = filter.world.GetCache<TNative0>();
+            var index = 0;
+
+            // TODO: iteration performance
+            foreach (var entity in filter) {
+                var id = cache.components.TryGetIndex(entity.internalID);
+                array[index] = id;
+                index++;
+            }
+
+            nativeFilter.Components0Ids    = array;
+            nativeFilter.Components0Values = cache.AsNative<TNative0>();
+
+            return nativeFilter;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeFilter<TNative0, TNative1> AsNative<TNative0, TNative1>(this Filter filter)
+            where TNative0 : unmanaged, IComponent
+            where TNative1 : unmanaged, IComponent {
+            var nativeFilter = new NativeFilter<TNative0, TNative1>();
+
+            var cache0 = filter.world.GetCache<TNative0>();
+            var cache1 = filter.world.GetCache<TNative1>();
+
+            var array0 = new NativeArray<int>(filter.Length, Allocator.TempJob);
+            var array1 = new NativeArray<int>(filter.Length, Allocator.TempJob);
+
+            var index = 0;
+            // TODO: iteration performance
+            foreach (var entity in filter) {
+                array0[index] = cache0.components.TryGetIndex(entity.internalID);
+                array1[index] = cache1.components.TryGetIndex(entity.internalID);
+                index++;
+            }
+
+            nativeFilter.Components0Ids    = array0;
+            nativeFilter.Components0Values = cache0.AsNative<TNative0>();
+
+            nativeFilter.Components1Ids    = array0;
+            nativeFilter.Components1Values = cache1.AsNative<TNative1>();
+
+            return nativeFilter;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeFilter<TNative0, TNative1, TNative2> AsNative<TNative0, TNative1, TNative2>(this Filter filter)
+            where TNative0 : unmanaged, IComponent
+            where TNative1 : unmanaged, IComponent
+            where TNative2 : unmanaged, IComponent {
+            var nativeFilter = new NativeFilter<TNative0, TNative1, TNative2>();
+
+            var cache0 = filter.world.GetCache<TNative0>();
+            var cache1 = filter.world.GetCache<TNative1>();
+            var cache2 = filter.world.GetCache<TNative2>();
+
+            var array0 = new NativeArray<int>(filter.Length, Allocator.TempJob);
+            var array1 = new NativeArray<int>(filter.Length, Allocator.TempJob);
+            var array2 = new NativeArray<int>(filter.Length, Allocator.TempJob);
+
+            var index = 0;
+            // TODO: iteration performance
+            foreach (var entity in filter) {
+                array0[index] = cache0.components.TryGetIndex(entity.internalID);
+                array1[index] = cache1.components.TryGetIndex(entity.internalID);
+                array2[index] = cache2.components.TryGetIndex(entity.internalID);
+                index++;
+            }
+
+            nativeFilter.Components0Ids    = array0;
+            nativeFilter.Components0Values = cache0.AsNative<TNative0>();
+
+            nativeFilter.Components1Ids    = array1;
+            nativeFilter.Components1Values = cache1.AsNative<TNative1>();
+            
+            nativeFilter.Components2Ids    = array2;
+            nativeFilter.Components2Values = cache2.AsNative<TNative2>();
+
+            return nativeFilter;
+        }
+#endif
     }
 }

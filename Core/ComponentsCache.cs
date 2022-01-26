@@ -8,13 +8,14 @@
 namespace Morpeh {
     using System;
     using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
     using Collections;
-    using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    using Debug = System.Diagnostics.Debug;
+    
+#if UNITY_2019_1_OR_NEWER
+    using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
+#endif
 
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -89,6 +90,7 @@ namespace Morpeh {
             caches.Add(this);
         }
         
+#if UNITY_2019_1_OR_NEWER
         public unsafe NativeArray<TNative> AsNative<TNative>() where TNative : unmanaged, IComponent {
             var data   = this.components.data as TNative[];
             
@@ -108,6 +110,7 @@ namespace Morpeh {
                 return native;
             }
         }
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddComponent(Entity entity) {
