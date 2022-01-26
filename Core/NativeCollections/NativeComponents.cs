@@ -4,16 +4,20 @@
     using Unity.Collections;
 
     public struct NativeComponents<TNative> : IDisposable where TNative : unmanaged, IComponent {
-        [ReadOnly] private                            NativeArray<int>     entities;
-        [NativeDisableParallelForRestriction] private NativeArray<TNative> components;
+        [ReadOnly]
+        private NativeArray<int> entities;
+        
+        [NativeDisableParallelForRestriction]
+        private NativeArray<TNative> components;
 
-        public readonly int Length;
+        [ReadOnly]
+        public readonly int length;
 
         public NativeComponents(NativeArray<int> entities, NativeArray<TNative> components) {
             this.entities   = entities;
             this.components = components;
 
-            this.Length = this.entities.Length;
+            this.length = this.entities.Length;
         }
 
         public TNative this[int index] {
