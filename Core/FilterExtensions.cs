@@ -5,11 +5,11 @@ namespace Morpeh {
     using JetBrains.Annotations;
     using morpeh.Core.Collections;
     using Unity.IL2CPP.CompilerServices;
-    
+
 #if UNITY_2019_1_OR_NEWER
     using Unity.Collections;
 #endif
-    
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -133,6 +133,7 @@ namespace Morpeh {
                     throw new IndexOutOfRangeException();
                 }
             }
+
             return enumerator.Current;
         }
 
@@ -197,7 +198,7 @@ namespace Morpeh {
 
             return newFilter;
         }
-        
+
 #if UNITY_2019_1_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeFilter<TNative0> AsNative<TNative0>(this Filter filter)
@@ -249,7 +250,7 @@ namespace Morpeh {
 
             return nativeFilter;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeFilter<TNative0, TNative1, TNative2> AsNative<TNative0, TNative1, TNative2>(this Filter filter)
             where TNative0 : unmanaged, IComponent
@@ -279,7 +280,7 @@ namespace Morpeh {
 
             nativeFilter.Components1Ids    = array1;
             nativeFilter.Components1Values = cache1.AsNative<TNative1>();
-            
+
             nativeFilter.Components2Ids    = array2;
             nativeFilter.Components2Values = cache2.AsNative<TNative2>();
 
