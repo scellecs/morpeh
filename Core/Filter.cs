@@ -29,7 +29,7 @@ namespace Morpeh {
         internal Mode mode;
 
         internal bool isDirty;
-        
+
         internal Filter(World world) {
             this.world = world;
 
