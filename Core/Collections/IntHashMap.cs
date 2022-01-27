@@ -37,15 +37,15 @@ namespace Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe NativeIntHashMap<TNative> AsNative<TNative>() where TNative : unmanaged {
             var nativeIntHashMap = new NativeIntHashMap<TNative>();
-
-            fixed (TNative* dataPtr = this.data as TNative[])
-            fixed (int* bucketsPtr = this.buckets)
-            fixed (Slot* slotsPtr = this.slots)
+            
             fixed (int* lengthPtr = &this.length)
             fixed (int* capacityPtr = &this.capacity)
             fixed (int* capacityMinusOnePtr = &this.capacityMinusOne)
             fixed (int* lastIndexPtr = &this.lastIndex)
-            fixed (int* freeIndexPtr = &this.freeIndex) {
+            fixed (int* freeIndexPtr = &this.freeIndex)
+            fixed (TNative* dataPtr = this.data as TNative[])
+            fixed (int* bucketsPtr = this.buckets)
+            fixed (Slot* slotsPtr = this.slots){
                 nativeIntHashMap.lengthPtr           = lengthPtr;
                 nativeIntHashMap.capacityPtr         = capacityPtr;
                 nativeIntHashMap.capacityMinusOnePtr = capacityMinusOnePtr;
