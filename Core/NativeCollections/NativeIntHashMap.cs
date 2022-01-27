@@ -17,7 +17,7 @@ namespace morpeh.Core.NativeCollections {
         public int* freeIndexPtr;
         
         public NativeArray<int>     buckets;
-        public NativeArray<Slot>    slots;
+        public NativeArray<IntHashMapSlot>    slots;
         public NativeArray<TNative> data;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

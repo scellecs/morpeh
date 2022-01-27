@@ -12,7 +12,7 @@ namespace Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public struct Slot {
+    public struct IntHashMapSlot {
         public int key;
         public int next;
     }
@@ -31,7 +31,7 @@ namespace Morpeh.Collections {
         public int[] buckets;
 
         public T[]    data;
-        public Slot[] slots;
+        public IntHashMapSlot[] slots;
         
 #if UNITY_2019_1_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -45,7 +45,7 @@ namespace Morpeh.Collections {
             fixed (int* freeIndexPtr = &this.freeIndex)
             fixed (TNative* dataPtr = this.data as TNative[])
             fixed (int* bucketsPtr = this.buckets)
-            fixed (Slot* slotsPtr = this.slots){
+            fixed (IntHashMapSlot* slotsPtr = this.slots){
                 nativeIntHashMap.lengthPtr           = lengthPtr;
                 nativeIntHashMap.capacityPtr         = capacityPtr;
                 nativeIntHashMap.capacityMinusOnePtr = capacityMinusOnePtr;
@@ -53,7 +53,7 @@ namespace Morpeh.Collections {
                 nativeIntHashMap.freeIndexPtr        = freeIndexPtr;
                 nativeIntHashMap.data                = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(dataPtr, this.data.Length, Allocator.None);
                 nativeIntHashMap.buckets             = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(bucketsPtr, this.buckets.Length, Allocator.None);
-                nativeIntHashMap.slots               = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Slot>(slotsPtr, this.slots.Length, Allocator.None);
+                nativeIntHashMap.slots               = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<IntHashMapSlot>(slotsPtr, this.slots.Length, Allocator.None);
                 
 #if UNITY_EDITOR
                 NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeIntHashMap.data, AtomicSafetyHandle.Create());
@@ -76,7 +76,7 @@ namespace Morpeh.Collections {
             this.capacity         = this.capacityMinusOne + 1;
 
             this.buckets = new int[this.capacity];
-            this.slots   = new Slot[this.capacity];
+            this.slots   = new IntHashMapSlot[this.capacity];
             this.data    = new T[this.capacity];
         }
 
