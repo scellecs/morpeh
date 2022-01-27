@@ -216,8 +216,8 @@ namespace Morpeh {
                 index++;
             }
 
-            nativeFilter.Length      = filter.Length;
-            nativeFilter.Components0 = new NativeComponents<TNative0>(array, cache.AsNative<TNative0>());
+            nativeFilter.length      = filter.Length;
+            nativeFilter.components0 = new NativeComponents<TNative0>(array, cache.AsNative<TNative0>());
 
             return nativeFilter;
         }
@@ -242,9 +242,9 @@ namespace Morpeh {
                 index++;
             }
 
-            nativeFilter.Length      = filter.Length;
-            nativeFilter.Components0 = new NativeComponents<TNative0>(array0, cache0.AsNative<TNative0>());
-            nativeFilter.Components1 = new NativeComponents<TNative1>(array1, cache1.AsNative<TNative1>());
+            nativeFilter.length      = filter.Length;
+            nativeFilter.components0 = new NativeComponents<TNative0>(array0, cache0.AsNative<TNative0>());
+            nativeFilter.components1 = new NativeComponents<TNative1>(array1, cache1.AsNative<TNative1>());
 
             return nativeFilter;
         }
@@ -273,10 +273,10 @@ namespace Morpeh {
                 index++;
             }
 
-            nativeFilter.Length      = filter.Length;
-            nativeFilter.Components0 = new NativeComponents<TNative0>(array0, cache0.AsNative<TNative0>());
-            nativeFilter.Components1 = new NativeComponents<TNative1>(array1, cache1.AsNative<TNative1>());
-            nativeFilter.Components2 = new NativeComponents<TNative2>(array2, cache2.AsNative<TNative2>());
+            nativeFilter.length      = filter.Length;
+            nativeFilter.components0 = new NativeComponents<TNative0>(array0, cache0.AsNative<TNative0>());
+            nativeFilter.components1 = new NativeComponents<TNative1>(array1, cache1.AsNative<TNative1>());
+            nativeFilter.components2 = new NativeComponents<TNative2>(array2, cache2.AsNative<TNative2>());
 
             return nativeFilter;
         }

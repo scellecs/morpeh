@@ -91,6 +91,7 @@ namespace Morpeh {
         }
         
 #if UNITY_2019_1_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe NativeArray<TNative> AsNative<TNative>() where TNative : unmanaged, IComponent {
             var data   = this.components.data as TNative[];
             
