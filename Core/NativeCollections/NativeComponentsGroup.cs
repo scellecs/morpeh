@@ -2,11 +2,15 @@
 namespace morpeh.Core.Collections {
     using System;
     using Morpeh;
-    using Unity.Collections;
+    using Sirenix.OdinInspector;
+    using Unity.Collections.LowLevel.Unsafe;
 
-    public struct NativeFilter<TNative0> : IDisposable
+    [NativeContainer]
+    public struct NativeComponentsGroup<TNative0> : IDisposable
         where TNative0 : unmanaged, IComponent {
-        public int                        length;
+        [ReadOnly]
+        public int length;
+        
         public NativeComponents<TNative0> components0;
 
         public void Dispose() {
@@ -14,10 +18,13 @@ namespace morpeh.Core.Collections {
         }
     }
 
-    public struct NativeFilter<TNative0, TNative1> : IDisposable
+    [NativeContainer]
+    public struct NativeComponentsGroup<TNative0, TNative1> : IDisposable
         where TNative0 : unmanaged, IComponent
         where TNative1 : unmanaged, IComponent {
-        public int                        length;
+        [ReadOnly]
+        public int length;
+        
         public NativeComponents<TNative0> components0;
         public NativeComponents<TNative1> components1;
 
@@ -27,11 +34,14 @@ namespace morpeh.Core.Collections {
         }
     }
 
-    public struct NativeFilter<TNative0, TNative1, TNative2> : IDisposable
+    [NativeContainer]
+    public struct NativeComponentsGroup<TNative0, TNative1, TNative2> : IDisposable
         where TNative0 : unmanaged, IComponent
         where TNative1 : unmanaged, IComponent
         where TNative2 : unmanaged, IComponent {
-        public int                        length;
+        [ReadOnly]
+        public int length;
+        
         public NativeComponents<TNative0> components0;
         public NativeComponents<TNative1> components1;
         public NativeComponents<TNative2> components2;
