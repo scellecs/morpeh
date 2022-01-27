@@ -3,7 +3,7 @@ namespace Morpeh.Collections {
     using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-    using morpeh.Core.Collections;
+    using morpeh.Core.NativeCollections;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
