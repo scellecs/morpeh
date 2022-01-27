@@ -2,6 +2,7 @@
 namespace morpeh.Core.Collections {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
     using Morpeh.Collections;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
@@ -19,9 +20,19 @@ namespace morpeh.Core.Collections {
         public NativeArray<Slot>    slots;
         public NativeArray<TNative> data;
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Enumerator GetEnumerator() {
+            Enumerator e;
+            e.hashMap = this;
+            e.index   = 0;
+            e.current = default;
+            return e;
+        }
+        
         IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        
 
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
