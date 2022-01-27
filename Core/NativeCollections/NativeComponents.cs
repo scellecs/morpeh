@@ -6,6 +6,7 @@ namespace morpeh.Core.Collections {
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
 
+    [NativeContainer]
     public struct NativeComponents<TNative> : IDisposable where TNative : unmanaged, IComponent {
         [ReadOnly]
         private NativeArray<int> entities;

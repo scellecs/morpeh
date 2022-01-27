@@ -8,6 +8,9 @@ namespace Morpeh {
 
 #if UNITY_2019_1_OR_NEWER
     using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
+    using Unity.Jobs;
+    using UnityEngine.Profiling;
 #endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -201,9 +204,9 @@ namespace Morpeh {
 
 #if UNITY_2019_1_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeFilter<TNative0> AsNative<TNative0>(this Filter filter)
+        public static unsafe NativeComponentsGroup<TNative0> AsNative<TNative0>(this Filter filter)
             where TNative0 : unmanaged, IComponent {
-            var nativeFilter = new NativeFilter<TNative0>();
+            var nativeFilter = new NativeComponentsGroup<TNative0>();
 
             var array = new NativeArray<int>(filter.Length, Allocator.TempJob);
             var cache = filter.world.GetCache<TNative0>();
@@ -223,10 +226,10 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeFilter<TNative0, TNative1> AsNative<TNative0, TNative1>(this Filter filter)
+        public static NativeComponentsGroup<TNative0, TNative1> AsNative<TNative0, TNative1>(this Filter filter)
             where TNative0 : unmanaged, IComponent
             where TNative1 : unmanaged, IComponent {
-            var nativeFilter = new NativeFilter<TNative0, TNative1>();
+            var nativeFilter = new NativeComponentsGroup<TNative0, TNative1>();
 
             var cache0 = filter.world.GetCache<TNative0>();
             var cache1 = filter.world.GetCache<TNative1>();
@@ -250,11 +253,11 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeFilter<TNative0, TNative1, TNative2> AsNative<TNative0, TNative1, TNative2>(this Filter filter)
+        public static NativeComponentsGroup<TNative0, TNative1, TNative2> AsNative<TNative0, TNative1, TNative2>(this Filter filter)
             where TNative0 : unmanaged, IComponent
             where TNative1 : unmanaged, IComponent
             where TNative2 : unmanaged, IComponent {
-            var nativeFilter = new NativeFilter<TNative0, TNative1, TNative2>();
+            var nativeFilter = new NativeComponentsGroup<TNative0, TNative1, TNative2>();
 
             var cache0 = filter.world.GetCache<TNative0>();
             var cache1 = filter.world.GetCache<TNative1>();
