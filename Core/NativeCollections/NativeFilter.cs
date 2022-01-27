@@ -2,7 +2,6 @@
 namespace morpeh.Core.Collections {
     using System;
     using Morpeh;
-    using Unity.Collections;
 
     public struct NativeFilter<TNative0> : IDisposable
         where TNative0 : unmanaged, IComponent {

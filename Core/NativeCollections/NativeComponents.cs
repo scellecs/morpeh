@@ -1,8 +1,8 @@
-﻿namespace morpeh.Core.Collections {
+﻿#if UNITY_2019_1_OR_NEWER
+namespace morpeh.Core.Collections {
     using System;
     using System.Runtime.CompilerServices;
     using Morpeh;
-    using Sirenix.Utilities.Unsafe;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
 
@@ -49,3 +49,4 @@
         }
     }
 }
+#endif
