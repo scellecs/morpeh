@@ -1,12 +1,11 @@
 ﻿#if UNITY_2019_1_OR_NEWER
-namespace morpeh.Core.Collections {
+namespace morpeh.Core.NativeCollections {
     using System;
     using System.Runtime.CompilerServices;
     using Morpeh;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
 
-    [NativeContainer]
     public struct NativeComponents<TNative> : IDisposable where TNative : unmanaged, IComponent {
         [ReadOnly]
         private NativeArray<int> entities;

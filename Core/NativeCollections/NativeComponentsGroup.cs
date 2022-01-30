@@ -1,11 +1,10 @@
 ﻿#if UNITY_2019_1_OR_NEWER
-namespace morpeh.Core.Collections {
+namespace morpeh.Core.NativeCollections {
     using System;
     using Morpeh;
     using Sirenix.OdinInspector;
     using Unity.Collections.LowLevel.Unsafe;
 
-    [NativeContainer]
     public struct NativeComponentsGroup<TNative0> : IDisposable
         where TNative0 : unmanaged, IComponent {
         [ReadOnly]
@@ -18,7 +17,6 @@ namespace morpeh.Core.Collections {
         }
     }
 
-    [NativeContainer]
     public struct NativeComponentsGroup<TNative0, TNative1> : IDisposable
         where TNative0 : unmanaged, IComponent
         where TNative1 : unmanaged, IComponent {
@@ -34,7 +32,6 @@ namespace morpeh.Core.Collections {
         }
     }
 
-    [NativeContainer]
     public struct NativeComponentsGroup<TNative0, TNative1, TNative2> : IDisposable
         where TNative0 : unmanaged, IComponent
         where TNative1 : unmanaged, IComponent
