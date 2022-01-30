@@ -8,7 +8,6 @@ namespace morpeh.Core.NativeCollections {
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
 
-    [NativeContainer]
     public unsafe struct NativeIntHashMap<TNative> : IEnumerable<int> where TNative : unmanaged {
         public int* lengthPtr;
         public int* capacityPtr;
