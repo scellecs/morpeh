@@ -1,9 +1,11 @@
 namespace Morpeh {
     using System;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
+    using UnityEngine;
 
 #if UNITY_2019_1_OR_NEWER
     using morpeh.Core.NativeCollections;
@@ -208,19 +210,21 @@ namespace Morpeh {
             where TNative0 : unmanaged, IComponent {
             var nativeFilter = new NativeComponentsGroup<TNative0>();
 
-            var array = new NativeArray<int>(filter.Length, Allocator.TempJob);
-            var cache = filter.world.GetCache<TNative0>();
+            var cache            = filter.world.GetCache<TNative0>();
+            var nativeComponents = cache.components.AsNative<TNative0>();
+            var entitiesArray    = new NativeArray<int>(filter.Length, Allocator.TempJob);
+            
             var index = 0;
-
-            // TODO: iteration performance
             foreach (var entity in filter) {
-                var id = cache.components.TryGetIndex(entity.internalID);
-                array[index] = id;
+                entitiesArray[index] = entity.internalID;
                 index++;
             }
 
+            var results = nativeComponents.GetAllIndicesAndAssign(entitiesArray);
+            entitiesArray.Dispose();
+
             nativeFilter.length      = filter.Length;
-            nativeFilter.components0 = new NativeComponents<TNative0>(array, cache.AsNative<TNative0>());
+            nativeFilter.components0 = new NativeComponents<TNative0>(results, cache.AsNative<TNative0>());
 
             return nativeFilter;
         }
