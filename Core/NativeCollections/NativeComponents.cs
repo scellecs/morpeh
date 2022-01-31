@@ -17,7 +17,7 @@ namespace morpeh.Core.NativeCollections {
         [ReadOnly]
         public readonly int length;
 
-        public unsafe NativeComponents(NativeFilter entities, NativeArray<TNative> components) {
+        public NativeComponents(NativeFilter entities, NativeArray<TNative> components) {
             this.entities   = entities;
             this.components = components;
 
@@ -31,7 +31,7 @@ namespace morpeh.Core.NativeCollections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasComponent(int index) {
-            if (index < 0 || index >= this.entities.Length) return false;
+            if (index < 0 || index >= this.length) return false;
             return this.entities[index] != -1;
         }
 

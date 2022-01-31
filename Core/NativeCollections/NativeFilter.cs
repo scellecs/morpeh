@@ -10,6 +10,10 @@
         [NativeDisableUnsafePtrRestriction] public unsafe int* LengthPtr;
         public unsafe                                     int  Length => *this.LengthPtr;
 
+        private const int BITS_PER_BYTE        = 8;
+        private const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
+        private const int BITS_PER_FIELD_SHIFT = 5; //6 for long
+
         public unsafe int this[int index] {
             get {
                 var totalArchetypeLength = 0;
@@ -35,11 +39,14 @@
                                 var dataKey          = archetype.entitiesBitMap.data[slotNum];
                                 //Debug.Log($"{index} Chose slot: {slotNum} index {slotIndex} with required bit jumps {requiredBitJumps} and value {dataKey}");
 
+                                if (requiredBitJumps == 0)
+                                    return slotNum << BITS_PER_FIELD_SHIFT;
+                                
                                 var positiveShiftsCount = 0;
-                                for (int shiftsCount = 0, maxShiftsLength = 31; shiftsCount < maxShiftsLength; shiftsCount++) {
+                                for (int shiftsCount = 0; shiftsCount < BITS_PER_FIELD; shiftsCount++) {
                                     //Debug.Log($"{index} Jumping bit {shiftsCount} {positiveShiftsCount} {dataKey}");
                                     if (positiveShiftsCount == requiredBitJumps) {
-                                        var entityId = (slotNum << 5) + shiftsCount;
+                                        var entityId = (slotNum << BITS_PER_FIELD_SHIFT) + shiftsCount;
                                         //Debug.Log($"{index} Entity id found {entityId}");
                                         return entityId;
                                     }
