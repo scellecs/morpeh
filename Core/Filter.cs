@@ -3,6 +3,8 @@ namespace Morpeh {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Collections;
+    using morpeh.Core.NativeCollections;
+    using Unity.Collections;
     using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -29,6 +31,25 @@ namespace Morpeh {
         internal Mode mode;
 
         internal bool isDirty;
+        
+#if UNITY_2019_1_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe NativeFilter AsNative() {
+            var nativeFilter = new NativeFilter {
+                archetypes = new NativeArray<NativeArchetype>(this.archetypes.length, Allocator.TempJob),
+            };
+            
+            fixed (int* lengthPtr = &this.Length) {
+                nativeFilter.LengthPtr = lengthPtr;
+            }
+            
+            for (int i = 0, length = this.archetypes.length; i < length; i++) {
+                nativeFilter.archetypes[i] = this.archetypes.data[i].AsNative();
+            }
+
+            return nativeFilter;
+        }
+#endif
 
         internal Filter(World world) {
             this.world = world;

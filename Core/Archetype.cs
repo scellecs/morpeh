@@ -1,6 +1,10 @@
 namespace Morpeh {
     using System;
+    using System.Runtime.CompilerServices;
     using Collections;
+    using morpeh.Core.NativeCollections;
+    using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
     
@@ -30,6 +34,21 @@ namespace Morpeh {
 
         [NonSerialized]
         internal World world;
+        
+#if UNITY_2019_1_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe NativeArchetype AsNative() {
+            var nativeArchetype = new NativeArchetype {
+                entitiesBitMap = this.entitiesBitMap.AsNative()
+            };
+
+            fixed (int* lengthPtr = &this.length) {
+                nativeArchetype.lengthPtr = lengthPtr;
+            }
+
+            return nativeArchetype;
+        }
+#endif
 
         internal Archetype(int id, int[] typeIds, int worldId) {
             this.id             = id;

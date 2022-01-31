@@ -1,9 +1,11 @@
 namespace Morpeh {
     using System;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
+    using UnityEngine;
 
 #if UNITY_2019_1_OR_NEWER
     using morpeh.Core.NativeCollections;
@@ -206,25 +208,14 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe NativeComponentsGroup<TNative0> AsNative<TNative0>(this Filter filter)
             where TNative0 : unmanaged, IComponent {
-            var nativeFilter = new NativeComponentsGroup<TNative0>();
+            var nativeComponentsGroup = new NativeComponentsGroup<TNative0>();
+            nativeComponentsGroup.length      = filter.Length;
+            nativeComponentsGroup.components0 = new NativeComponents<TNative0>(filter.AsNative(), filter.world.GetCache<TNative0>().AsNative<TNative0>());
 
-            var array = new NativeArray<int>(filter.Length, Allocator.TempJob);
-            var cache = filter.world.GetCache<TNative0>();
-            var index = 0;
-
-            // TODO: iteration performance
-            foreach (var entity in filter) {
-                var id = cache.components.TryGetIndex(entity.internalID);
-                array[index] = id;
-                index++;
-            }
-
-            nativeFilter.length      = filter.Length;
-            nativeFilter.components0 = new NativeComponents<TNative0>(array, cache.AsNative<TNative0>());
-
-            return nativeFilter;
+            return nativeComponentsGroup;
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeComponentsGroup<TNative0, TNative1> AsNative<TNative0, TNative1>(this Filter filter)
             where TNative0 : unmanaged, IComponent
@@ -283,6 +274,7 @@ namespace Morpeh {
 
             return nativeFilter;
         }
+        */
 #endif
     }
 }

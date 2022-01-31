@@ -1,76 +1,53 @@
 ﻿#if UNITY_2019_1_OR_NEWER
 namespace morpeh.Core.NativeCollections {
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Morpeh.Collections;
+    using NativeIntHashMapJobs;
     using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
-    using Unity.IL2CPP.CompilerServices;
+    using Unity.Jobs;
 
-    public unsafe struct NativeIntHashMap<TNative> : IEnumerable<int> where TNative : unmanaged {
-        public int* lengthPtr;
-        public int* capacityPtr;
-        public int* capacityMinusOnePtr;
-        public int* lastIndexPtr;
-        public int* freeIndexPtr;
+    public struct NativeIntHashMap<TNative> where TNative : unmanaged {
+        public unsafe int* lengthPtr;
+        public unsafe int* capacityPtr;
+        public unsafe int* capacityMinusOnePtr;
+        public unsafe int* lastIndexPtr;
+        public unsafe int* freeIndexPtr;
         
         public NativeArray<int>     buckets;
         public NativeArray<IntHashMapSlot>    slots;
         public NativeArray<TNative> data;
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Enumerator GetEnumerator() {
-            Enumerator e;
-            e.hashMap = this;
-            e.index   = 0;
-            e.current = default;
-            return e;
+        public unsafe NativeArray<int> GetAllIndicesAndAssign(in NativeArray<int> keys) {
+            var job = new GetAllIndicesAndAssignJob {
+                inputs           = keys,
+                capacityMinusOne = *this.capacityMinusOnePtr,
+                slots            = this.slots,
+                buckets          = this.buckets,
+                results          = new NativeArray<int>(keys.Length, Allocator.TempJob)
+            };
+
+            var handle = job.Schedule();
+            handle.Complete();
+            return job.results;
         }
-        
-        IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe int TryGetIndex(in int key) {
+            var job = new TryGetIndexJob {
+                input            = key,
+                capacityMinusOne = *this.capacityMinusOnePtr,
+                slots            = this.slots,
+                buckets          = this.buckets,
+                result           = new NativeArray<int>(1, Allocator.TempJob)
+            };
 
-        [Il2CppSetOption(Option.NullChecks, false)]
-        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator : IEnumerator<int> {
-            public NativeIntHashMap<TNative> hashMap;
+            var handle = job.Schedule();
+            handle.Complete();
 
-            public int index;
-            public int current;
-
-            public bool MoveNext() {
-                for (; this.index < *this.hashMap.lastIndexPtr; ++this.index) {
-                    var slot = this.hashMap.slots[this.index];
-                    if (slot.key - 1 < 0) {
-                        continue;
-                    }
-
-                    this.current = this.index;
-                    ++this.index;
-
-                    return true;
-                }
-
-                this.index   = *this.hashMap.lastIndexPtr + 1;
-                this.current = default;
-                return false;
-            }
-
-            public int Current => this.current;
-
-            object IEnumerator.Current => this.current;
-
-            void IEnumerator.Reset() {
-                this.index   = 0;
-                this.current = default;
-            }
-
-            public void Dispose() {
-            }
+            var result = job.result[0];
+            job.result.Dispose();
+            return result;
         }
     }
 }

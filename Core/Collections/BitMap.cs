@@ -3,6 +3,9 @@ namespace Morpeh.Collections {
     using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using morpeh.Core.NativeCollections;
+    using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     
     [Serializable]
@@ -21,9 +24,38 @@ namespace Morpeh.Collections {
         public int freeIndex;
 
         public int[] buckets;
-
         public int[] data;
         public int[] slots;
+        public byte[] density;
+        
+#if UNITY_2019_1_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe NativeBitMap AsNative() {
+            var nativeBitMap = new NativeBitMap();
+            
+            fixed (int* lengthPtr = &this.length)
+            fixed (int* capacityPtr = &this.capacity)
+            fixed (int* capacityMinusOnePtr = &this.capacityMinusOne)
+            fixed (int* lastIndexPtr = &this.lastIndex)
+            fixed (int* freeIndexPtr = &this.freeIndex)
+            fixed (int* bucketsPtr = &this.buckets[0])
+            fixed (int* dataPtr = &this.data[0])
+            fixed (int* slotsPtr = &this.slots[0])
+            fixed (byte* densityPtr = &this.density[0]) {
+                nativeBitMap.lengthPtr           = lengthPtr;
+                nativeBitMap.capacityPtr         = capacityPtr;
+                nativeBitMap.capacityMinusOnePtr = capacityMinusOnePtr;
+                nativeBitMap.lastIndexPtr        = lastIndexPtr;
+                nativeBitMap.freeIndexPtr        = freeIndexPtr;
+                nativeBitMap.data                = dataPtr;
+                nativeBitMap.buckets             = bucketsPtr;
+                nativeBitMap.slots               = slotsPtr;
+                nativeBitMap.density             = densityPtr;
+            }
+
+            return nativeBitMap;
+        }
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BitMap(in int capacity = 0) {
@@ -37,6 +69,7 @@ namespace Morpeh.Collections {
             this.buckets = new int[this.capacity];
             this.slots   = new int[this.capacity << 1];
             this.data    = new int[this.capacity];
+            this.density = new byte[this.capacity];
         }
 
         IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
