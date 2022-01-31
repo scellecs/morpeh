@@ -3,6 +3,9 @@ namespace Morpeh.Collections {
     using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using morpeh.Core.NativeCollections;
+    using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     
     [Serializable]
@@ -21,9 +24,41 @@ namespace Morpeh.Collections {
         public int freeIndex;
 
         public int[] buckets;
-
         public int[] data;
         public int[] slots;
+        
+        #if UNITY_2019_1_OR_NEWER
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe NativeBitMap AsNative() {
+            var nativeBitMap = new NativeBitMap();
+            
+            fixed (int* lengthPtr = &this.length)
+            fixed (int* capacityPtr = &this.capacity)
+            fixed (int* capacityMinusOnePtr = &this.capacityMinusOne)
+            fixed (int* lastIndexPtr = &this.lastIndex)
+            fixed (int* freeIndexPtr = &this.freeIndex)
+            fixed (int* bucketsPtr = this.buckets)
+            fixed (int* dataPtr = this.data)
+            fixed (int* slotsPtr = this.slots){
+                nativeBitMap.lengthPtr           = lengthPtr;
+                nativeBitMap.capacityPtr         = capacityPtr;
+                nativeBitMap.capacityMinusOnePtr = capacityMinusOnePtr;
+                nativeBitMap.lastIndexPtr        = lastIndexPtr;
+                nativeBitMap.freeIndexPtr        = freeIndexPtr;
+                nativeBitMap.data                = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(dataPtr, this.data.Length, Allocator.None);
+                nativeBitMap.buckets             = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(bucketsPtr, this.buckets.Length, Allocator.None);
+                nativeBitMap.slots               = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(slotsPtr, this.slots.Length, Allocator.None);
+                
+#if UNITY_EDITOR
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeBitMap.data, AtomicSafetyHandle.Create());
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeBitMap.buckets, AtomicSafetyHandle.Create());
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeBitMap.slots, AtomicSafetyHandle.Create());
+#endif
+            }
+
+            return nativeBitMap;
+        }
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BitMap(in int capacity = 0) {

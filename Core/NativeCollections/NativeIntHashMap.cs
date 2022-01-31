@@ -1,27 +1,24 @@
 ﻿#if UNITY_2019_1_OR_NEWER
 namespace morpeh.Core.NativeCollections {
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Morpeh.Collections;
     using NativeIntHashMapJobs;
     using Unity.Collections;
-    using Unity.IL2CPP.CompilerServices;
     using Unity.Jobs;
 
-    public unsafe struct NativeIntHashMap<TNative> where TNative : unmanaged {
-        public int* lengthPtr;
-        public int* capacityPtr;
-        public int* capacityMinusOnePtr;
-        public int* lastIndexPtr;
-        public int* freeIndexPtr;
+    public struct NativeIntHashMap<TNative> where TNative : unmanaged {
+        public unsafe int* lengthPtr;
+        public unsafe int* capacityPtr;
+        public unsafe int* capacityMinusOnePtr;
+        public unsafe int* lastIndexPtr;
+        public unsafe int* freeIndexPtr;
         
         public NativeArray<int>     buckets;
         public NativeArray<IntHashMapSlot>    slots;
         public NativeArray<TNative> data;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeArray<int> GetAllIndicesAndAssign(in NativeArray<int> keys) {
+        public unsafe NativeArray<int> GetAllIndicesAndAssign(in NativeArray<int> keys) {
             var job = new GetAllIndicesAndAssignJob {
                 inputs           = keys,
                 capacityMinusOne = *this.capacityMinusOnePtr,
@@ -36,7 +33,7 @@ namespace morpeh.Core.NativeCollections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int TryGetIndex(in int key) {
+        public unsafe int TryGetIndex(in int key) {
             var job = new TryGetIndexJob {
                 input            = key,
                 capacityMinusOne = *this.capacityMinusOnePtr,
