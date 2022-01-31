@@ -27,7 +27,7 @@ namespace Morpeh.Collections {
         public int[] data;
         public int[] slots;
         
-        #if UNITY_2019_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe NativeBitMap AsNative() {
             var nativeBitMap = new NativeBitMap();
