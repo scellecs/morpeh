@@ -208,27 +208,14 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe NativeComponentsGroup<TNative0> AsNative<TNative0>(this Filter filter)
             where TNative0 : unmanaged, IComponent {
-            var nativeFilter = new NativeComponentsGroup<TNative0>();
+            var nativeComponentsGroup = new NativeComponentsGroup<TNative0>();
+            nativeComponentsGroup.length      = filter.Length;
+            nativeComponentsGroup.components0 = new NativeComponents<TNative0>(filter.AsNative(), filter.world.GetCache<TNative0>().AsNative<TNative0>());
 
-            var cache            = filter.world.GetCache<TNative0>();
-            var nativeComponents = cache.components.AsNative<TNative0>();
-            var entitiesArray    = new NativeArray<int>(filter.Length, Allocator.TempJob);
-            
-            var index = 0;
-            foreach (var entity in filter) {
-                entitiesArray[index] = entity.internalID;
-                index++;
-            }
-
-            var results = nativeComponents.GetAllIndicesAndAssign(entitiesArray);
-            entitiesArray.Dispose();
-
-            nativeFilter.length      = filter.Length;
-            nativeFilter.components0 = new NativeComponents<TNative0>(results, cache.AsNative<TNative0>());
-
-            return nativeFilter;
+            return nativeComponentsGroup;
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeComponentsGroup<TNative0, TNative1> AsNative<TNative0, TNative1>(this Filter filter)
             where TNative0 : unmanaged, IComponent
@@ -287,6 +274,7 @@ namespace Morpeh {
 
             return nativeFilter;
         }
+        */
 #endif
     }
 }

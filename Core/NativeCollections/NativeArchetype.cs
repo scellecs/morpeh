@@ -1,6 +1,8 @@
 ﻿namespace morpeh.Core.NativeCollections {
-    public struct NativeArchetype {
-        public        NativeBitMap entitiesBitMap;
-        public unsafe int*         lengthPtr;
+    using Unity.Collections.LowLevel.Unsafe;
+
+    public unsafe struct NativeArchetype {
+        public                                            NativeBitMap entitiesBitMap;
+        [NativeDisableUnsafePtrRestriction] public unsafe int*         lengthPtr;
     }
 }

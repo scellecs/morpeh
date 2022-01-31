@@ -39,12 +39,12 @@ namespace Morpeh {
                 archetypes = new NativeArray<NativeArchetype>(this.archetypes.length, Allocator.TempJob),
             };
             
-            for (int i = 0, length = this.archetypes.length; i < length; i++) {
-                nativeFilter.archetypes[i] = this.archetypes.data[i].AsNative();
-            }
-
             fixed (int* lengthPtr = &this.Length) {
                 nativeFilter.LengthPtr = lengthPtr;
+            }
+            
+            for (int i = 0, length = this.archetypes.length; i < length; i++) {
+                nativeFilter.archetypes[i] = this.archetypes.data[i].AsNative();
             }
 
             return nativeFilter;

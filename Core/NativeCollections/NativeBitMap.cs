@@ -1,19 +1,21 @@
 ﻿namespace morpeh.Core.NativeCollections {
     using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
 
-    public struct NativeBitMap {
+    public unsafe struct NativeBitMap {
         internal const int BITS_PER_BYTE        = 8;
         internal const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
         internal const int BITS_PER_FIELD_SHIFT = 5; //6 for long
         
-        public unsafe int* lengthPtr;
-        public unsafe int* capacityPtr;
-        public unsafe int* capacityMinusOnePtr;
-        public unsafe int* lastIndexPtr;
-        public unsafe int* freeIndexPtr;
+        [NativeDisableUnsafePtrRestriction] public int* lengthPtr;
+        [NativeDisableUnsafePtrRestriction] public int* capacityPtr;
+        [NativeDisableUnsafePtrRestriction] public int* capacityMinusOnePtr;
+        [NativeDisableUnsafePtrRestriction] public int* lastIndexPtr;
+        [NativeDisableUnsafePtrRestriction] public int* freeIndexPtr;
 
-        public NativeArray<int> buckets;
-        public NativeArray<int> data;
-        public NativeArray<int> slots;
+        [NativeDisableUnsafePtrRestriction] public int*  buckets;
+        [NativeDisableUnsafePtrRestriction] public int*  data;
+        [NativeDisableUnsafePtrRestriction] public int*  slots;
+        [NativeDisableUnsafePtrRestriction] public byte* density;
     }
 }

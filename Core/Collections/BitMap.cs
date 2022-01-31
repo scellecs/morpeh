@@ -26,6 +26,7 @@ namespace Morpeh.Collections {
         public int[] buckets;
         public int[] data;
         public int[] slots;
+        public byte[] density;
         
 #if UNITY_2019_1_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -37,23 +38,19 @@ namespace Morpeh.Collections {
             fixed (int* capacityMinusOnePtr = &this.capacityMinusOne)
             fixed (int* lastIndexPtr = &this.lastIndex)
             fixed (int* freeIndexPtr = &this.freeIndex)
-            fixed (int* bucketsPtr = this.buckets)
-            fixed (int* dataPtr = this.data)
-            fixed (int* slotsPtr = this.slots){
+            fixed (int* bucketsPtr = &this.buckets[0])
+            fixed (int* dataPtr = &this.data[0])
+            fixed (int* slotsPtr = &this.slots[0])
+            fixed (byte* densityPtr = &this.density[0]) {
                 nativeBitMap.lengthPtr           = lengthPtr;
                 nativeBitMap.capacityPtr         = capacityPtr;
                 nativeBitMap.capacityMinusOnePtr = capacityMinusOnePtr;
                 nativeBitMap.lastIndexPtr        = lastIndexPtr;
                 nativeBitMap.freeIndexPtr        = freeIndexPtr;
-                nativeBitMap.data                = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(dataPtr, this.data.Length, Allocator.None);
-                nativeBitMap.buckets             = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(bucketsPtr, this.buckets.Length, Allocator.None);
-                nativeBitMap.slots               = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(slotsPtr, this.slots.Length, Allocator.None);
-                
-#if UNITY_EDITOR
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeBitMap.data, AtomicSafetyHandle.Create());
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeBitMap.buckets, AtomicSafetyHandle.Create());
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeBitMap.slots, AtomicSafetyHandle.Create());
-#endif
+                nativeBitMap.data                = dataPtr;
+                nativeBitMap.buckets             = bucketsPtr;
+                nativeBitMap.slots               = slotsPtr;
+                nativeBitMap.density             = densityPtr;
             }
 
             return nativeBitMap;
@@ -72,6 +69,7 @@ namespace Morpeh.Collections {
             this.buckets = new int[this.capacity];
             this.slots   = new int[this.capacity << 1];
             this.data    = new int[this.capacity];
+            this.density = new byte[this.capacity];
         }
 
         IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
