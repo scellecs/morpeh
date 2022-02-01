@@ -26,14 +26,10 @@ namespace Morpeh.Collections {
             
             fixed (int* lengthPtr = &this.length)
             fixed (int* capacityPtr = &this.capacity)
-            fixed (TNative* dataPtr = this.data as TNative[]) {
+            fixed (TNative* dataPtr = &(this.data as TNative[])[0]) {
                 nativeIntHashMap.lengthPtr   = lengthPtr;
                 nativeIntHashMap.capacityPtr = capacityPtr;
-                nativeIntHashMap.data        = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(dataPtr, this.data.Length, Allocator.None);
-                
-#if UNITY_EDITOR
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeIntHashMap.data, AtomicSafetyHandle.Create());
-#endif
+                nativeIntHashMap.data        = dataPtr;
             }
 
             return nativeIntHashMap;
