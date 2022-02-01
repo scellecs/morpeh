@@ -17,6 +17,21 @@
         public unsafe int this[int index] {
             get {
                 var totalArchetypeLength = 0;
+                for (int archetypeNum = 0, archetypesCount = this.archetypes.Length; archetypeNum < archetypesCount; archetypeNum++) {
+                    var archetype       = this.archetypes[archetypeNum];
+                    var archetypeLength = *archetype.lengthPtr;
+
+                    if (index >= totalArchetypeLength && index < totalArchetypeLength + archetypeLength) {
+                        var slotIndex= index - totalArchetypeLength;
+                        return archetype.entitiesBitMap.data[slotIndex];
+                    }
+                    
+                    totalArchetypeLength += *archetype.lengthPtr;
+                }
+
+                return -1;
+                /*
+                var totalArchetypeLength = 0;
 
                 // Find corresponding archetype
                 for (int archetypeNum = 0, archetypesCount = this.archetypes.Length; archetypeNum < archetypesCount; archetypeNum++) {
@@ -68,7 +83,8 @@
                 }
 
                 // Could not find entity id
-                return -1;
+                */
+                //return -1;
             }
         }
 

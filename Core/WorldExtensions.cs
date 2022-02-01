@@ -27,7 +27,7 @@ namespace Morpeh {
             world.Filter         = new Filter(world);
             world.filters        = new FastList<Filter>();
             world.archetypeCache = new IntFastList();
-            world.dirtyEntities  = new BitMap();
+            world.dirtyEntities  = new FastList<int>();
 
             if (world.archetypes != null) {
                 foreach (var archetype in world.archetypes) {

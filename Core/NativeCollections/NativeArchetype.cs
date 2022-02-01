@@ -2,7 +2,7 @@
     using Unity.Collections.LowLevel.Unsafe;
 
     public unsafe struct NativeArchetype {
-        public                                            NativeBitMap entitiesBitMap;
-        [NativeDisableUnsafePtrRestriction] public unsafe int*         lengthPtr;
+        public                                            NativeFastList<int> entitiesBitMap;
+        [NativeDisableUnsafePtrRestriction] public unsafe int*             lengthPtr;
     }
 }
