@@ -86,6 +86,18 @@ namespace Morpeh.Collections {
             swap = default;
             return false;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool RemoveAtSwap<T>(this FastList<T> list, int index, out T newValue) {
+            if (list.length-- > 1) {
+                var oldIndex = list.length;
+                newValue = list.data[index] = list.data[oldIndex];
+                return true;
+            }
+
+            newValue = default;
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Clear<T>(this FastList<T> list) {
