@@ -1,18 +1,12 @@
 namespace Morpeh {
     using System;
-    using System.Linq;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
 
 #if UNITY_2019_1_OR_NEWER
-    using morpeh.Core.NativeCollections;
-    using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
-    using Unity.Jobs;
-    using UnityEngine.Profiling;
+    using Core.NativeCollections;
 #endif
 
     [Il2CppSetOption(Option.NullChecks, false)]

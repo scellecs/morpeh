@@ -13,9 +13,7 @@ namespace Morpeh {
     using UnityEngine;
     
 #if UNITY_2019_1_OR_NEWER
-    using morpeh.Core.NativeCollections;
-    using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
+    using Core.NativeCollections;
 #endif
 
     [Serializable]

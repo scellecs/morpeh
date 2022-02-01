@@ -1,5 +1,5 @@
-﻿namespace morpeh.Core.NativeCollections {
-    using Unity.Collections;
+﻿#if UNITY_2019_1_OR_NEWER
+namespace morpeh.Core.NativeCollections {
     using Unity.Collections.LowLevel.Unsafe;
 
     public unsafe struct NativeBitMap {
@@ -19,3 +19,4 @@
         [NativeDisableUnsafePtrRestriction] public byte* density;
     }
 }
+#endif
