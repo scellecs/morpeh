@@ -392,6 +392,67 @@ public sealed class HealthSystem : UpdateSystem {
 
 ---
 
+# Unity Jobs & Burst
+
+> 💡 Supported only in Unity. Subjected to further improvements and modifications
+
+You can convert `Filter` to `NativeComponentsGroup`
+which allows you to do component-based manipulations inside a Job.
+```c#  
+public sealed class SomeSystem : UpdateSystem {
+    private Filter filter;
+    ...
+    public override void OnUpdate(float deltaTime) {
+        using (var nativeComponentsGroup = this.filter.AsNative<HealthComponent>()) {
+            var parallelJob = new ExampleParallelJob {
+                HealthComponents = nativeComponentsGroup.components0,
+            };
+            var parallelJobHandle = parallelJob.Schedule(nativeComponentsGroup.length, 64);
+            parallelJobHandle.Complete();
+            Profiler.EndSample();
+        }
+    }
+}
+```
+
+Some things to remember when using Jobs:
+* `NativeComponentsGroup` and its contents should never be re-used outside of `using` context
+* `NativeComponentsGroup` cannot be used in-between `UpdateFilters` calls inside Morpeh
+* `filter.AsNative()` supports up to 3 generics, and they are returned as `components0`, `components1`, `components2` respectfully
+You can modify components by its reference:
+```c#
+[BurstCompile]
+public struct TestParallelJobReference : IJobParallelFor {
+    public NativeComponents<HealthComponent> HealthComponents;
+        
+    public void Execute(int index) {
+        ref var component = ref this.HealthComponents.GetComponent(index, out var exists);
+        if (exists) component.Value += 1;
+        
+        // Alternatively, you can avoid checking existance of the component
+        // if the filter includes said component anyway
+        
+        ref var component = ref this.HealthComponents.GetComponent(index);
+        component.Value += 1;
+    }
+}
+```
+
+Or set a new one:
+```c#
+[BurstCompile]
+public struct TestParallelJobValue : IJob {
+    public NativeComponents<HealthComponent> HealthComponents;
+    public void Execute() {
+        for (int i = 0, length = this.HealthComponents.length; i < length; i++) {
+            this.HealthComponents[i] = new HealthComponent {
+                Value = this.HealthComponents[i].Value + 1,
+            };
+        }
+    }
+}
+```
+
 ## 📚 Examples
 
 * [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
