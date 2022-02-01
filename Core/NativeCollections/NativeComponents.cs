@@ -25,8 +25,8 @@ namespace morpeh.Core.NativeCollections {
         }
 
         public TNative this[int index] {
-            get => this.components[this.entities[index]];
-            set => this.components[this.entities[index]] = value;
+            get => this.components[this.entities[index] + 1];
+            set => this.components[this.entities[index] + 1] = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

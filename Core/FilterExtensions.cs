@@ -209,8 +209,10 @@ namespace Morpeh {
         public static unsafe NativeComponentsGroup<TNative0> AsNative<TNative0>(this Filter filter)
             where TNative0 : unmanaged, IComponent {
             var nativeComponentsGroup = new NativeComponentsGroup<TNative0>();
-            nativeComponentsGroup.length      = filter.Length;
-            nativeComponentsGroup.components0 = new NativeComponents<TNative0>(filter.AsNative(), filter.world.GetCache<TNative0>().AsNative<TNative0>());
+            var nativeFilter          = filter.AsNative();
+            var nativeCache           = filter.world.GetCache<TNative0>().AsNative<TNative0>();
+            nativeComponentsGroup.length      = nativeFilter.Length;
+            nativeComponentsGroup.components0 = new NativeComponents<TNative0>(nativeFilter, nativeCache);
 
             return nativeComponentsGroup;
         }
