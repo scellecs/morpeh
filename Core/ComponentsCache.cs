@@ -13,6 +13,7 @@ namespace Morpeh {
     using UnityEngine;
     
 #if UNITY_2019_1_OR_NEWER
+    using morpeh.Core.NativeCollections;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
 #endif
@@ -92,24 +93,11 @@ namespace Morpeh {
         
 #if UNITY_2019_1_OR_NEWER
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe NativeArray<TNative> AsNative<TNative>() where TNative : unmanaged, IComponent {
-            var data   = this.components.data as TNative[];
-            
-#if MORPEH_DEBUG
-            if (data == null) {
-                throw new Exception($"[MORPEH] Unable to cast components.data {typeof(T)} to unmanaged {typeof(TNative)}");
-            }
-#endif
-            
-            fixed (TNative* ptr = data) {
-                var native = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(ptr, data.Length, Allocator.None);
-                
-#if UNITY_EDITOR
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref native, AtomicSafetyHandle.Create());
-#endif
-                
-                return native;
-            }
+        public NativeCache<TNative> AsNative<TNative>() where TNative : unmanaged, IComponent {
+            var nativeCache = new NativeCache<TNative> {
+                components = this.components.AsNative<TNative>(),
+            };
+            return nativeCache;
         }
 #endif
 

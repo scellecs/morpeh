@@ -9,44 +9,56 @@ namespace morpeh.Core.NativeCollections {
 
     public struct NativeComponents<TNative> : IDisposable where TNative : unmanaged, IComponent {
         [ReadOnly]
-        private NativeFilter entities;
+        private NativeFilter filter;
         
         [NativeDisableParallelForRestriction]
-        private NativeArray<TNative> components;
+        private NativeCache<TNative> cache;
 
         [ReadOnly]
         public readonly int length;
 
-        public NativeComponents(NativeFilter entities, NativeArray<TNative> components) {
-            this.entities   = entities;
-            this.components = components;
+        public NativeComponents(NativeFilter filter, NativeCache<TNative> cache) {
+            this.filter   = filter;
+            this.cache = cache;
 
-            this.length = this.entities.Length;
+            this.length = this.filter.Length;
         }
 
         public TNative this[int index] {
-            get => this.components[this.entities[index] + 1];
-            set => this.components[this.entities[index] + 1] = value;
+            get {
+                var entityId          = this.filter[index];
+                var componentPosition = this.cache.components.TryGetIndex(entityId);
+                return this.cache.components.data[componentPosition];
+            }
+            set {
+                var entityId          = this.filter[index];
+                var componentPosition = this.cache.components.TryGetIndex(entityId);
+                this.cache.components.data[componentPosition] = value;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasComponent(int index) {
             if (index < 0 || index >= this.length) return false;
-            return this.entities[index] != -1;
+            var entityId = this.filter[index];
+            return entityId != -1 && this.cache.components.TryGetIndex(entityId) != -1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe ref TNative GetComponent(int index, out bool exists) {
             exists = this.HasComponent(index);
-            return ref UnsafeUtility.ArrayElementAsRef<TNative>(this.components.GetUnsafePtr(), this.entities[index]);
+            var entityId = this.filter[index];
+            return ref this.cache.components.GetValueRefByKey(entityId);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe ref TNative GetComponent(int index) => ref UnsafeUtility.ArrayElementAsRef<TNative>(this.components.GetUnsafePtr(), this.entities[index]);
+        public unsafe ref TNative GetComponent(int index) {
+            var entityId = this.filter[index];
+            return ref this.cache.components.GetValueRefByKey(entityId);
+        }
 
         public void Dispose() {
-            this.entities.Dispose();
-            this.components.Dispose();
+            this.filter.Dispose();
         }
     }
 }

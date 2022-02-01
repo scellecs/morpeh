@@ -4,50 +4,52 @@ namespace morpeh.Core.NativeCollections {
     using Morpeh.Collections;
     using NativeIntHashMapJobs;
     using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
     using Unity.Jobs;
 
     public struct NativeIntHashMap<TNative> where TNative : unmanaged {
-        public unsafe int* lengthPtr;
-        public unsafe int* capacityPtr;
-        public unsafe int* capacityMinusOnePtr;
-        public unsafe int* lastIndexPtr;
-        public unsafe int* freeIndexPtr;
+        [NativeDisableUnsafePtrRestriction] public unsafe int* lengthPtr;
+        [NativeDisableUnsafePtrRestriction] public unsafe int* capacityPtr;
+        [NativeDisableUnsafePtrRestriction] public unsafe int* capacityMinusOnePtr;
+        [NativeDisableUnsafePtrRestriction] public unsafe int* lastIndexPtr;
+        [NativeDisableUnsafePtrRestriction] public unsafe int* freeIndexPtr;
         
-        public NativeArray<int>     buckets;
-        public NativeArray<IntHashMapSlot>    slots;
-        public NativeArray<TNative> data;
-
+        public                                       NativeArray<int>            buckets;
+        public                                       NativeArray<IntHashMapSlot> slots;
+        [NativeDisableParallelForRestriction] public NativeArray<TNative>        data;
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe NativeArray<int> GetAllIndicesAndAssign(in NativeArray<int> keys) {
-            var job = new GetAllIndicesAndAssignJob {
-                inputs           = keys,
-                capacityMinusOne = *this.capacityMinusOnePtr,
-                slots            = this.slots,
-                buckets          = this.buckets,
-                results          = new NativeArray<int>(keys.Length, Allocator.TempJob)
-            };
+        public unsafe ref TNative GetValueRefByKey(int key) {
+            var rem = key & *this.capacityMinusOnePtr;
 
-            var handle = job.Schedule();
-            handle.Complete();
-            return job.results;
+            int next;
+            for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
+                ref var slot = ref UnsafeUtility.ArrayElementAsRef<IntHashMapSlot>(this.slots.GetUnsafePtr(), i);
+                if (slot.key - 1 == key) {
+                    return ref UnsafeUtility.ArrayElementAsRef<TNative>(this.data.GetUnsafePtr(), i);
+                }
+
+                next = slot.next;
+            }
+
+            return ref UnsafeUtility.ArrayElementAsRef<TNative>(this.data.GetUnsafePtr(), 0);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe int TryGetIndex(in int key) {
-            var job = new TryGetIndexJob {
-                input            = key,
-                capacityMinusOne = *this.capacityMinusOnePtr,
-                slots            = this.slots,
-                buckets          = this.buckets,
-                result           = new NativeArray<int>(1, Allocator.TempJob)
-            };
+            var rem = key & *this.capacityMinusOnePtr;
 
-            var handle = job.Schedule();
-            handle.Complete();
+            int next;
+            for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
+                ref var slot = ref UnsafeUtility.ArrayElementAsRef<IntHashMapSlot>(this.slots.GetUnsafePtr(), i);
+                if (slot.key - 1 == key) {
+                    return i;
+                }
 
-            var result = job.result[0];
-            job.result.Dispose();
-            return result;
+                next = slot.next;
+            }
+
+            return -1;
         }
     }
 }
