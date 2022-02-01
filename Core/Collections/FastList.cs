@@ -3,10 +3,11 @@ namespace Morpeh.Collections {
     using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-    using morpeh.Core.NativeCollections;
-    using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
+    
+#if UNITY_2019_1_OR_NEWER
+    using Core.NativeCollections;
+#endif
     
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]

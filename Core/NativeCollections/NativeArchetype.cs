@@ -1,8 +1,10 @@
-﻿namespace morpeh.Core.NativeCollections {
+﻿#if UNITY_2019_1_OR_NEWER
+namespace Morpeh.Core.NativeCollections {
     using Unity.Collections.LowLevel.Unsafe;
 
-    public unsafe struct NativeArchetype {
+    public struct NativeArchetype {
         public                                            NativeFastList<int> entitiesBitMap;
         [NativeDisableUnsafePtrRestriction] public unsafe int*             lengthPtr;
     }
 }
+#endif

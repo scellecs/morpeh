@@ -3,9 +3,12 @@ namespace Morpeh {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Collections;
-    using morpeh.Core.NativeCollections;
-    using Unity.Collections;
     using Unity.IL2CPP.CompilerServices;
+    
+#if UNITY_2019_1_OR_NEWER
+    using Core.NativeCollections;
+    using Unity.Collections;
+#endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

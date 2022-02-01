@@ -1,5 +1,5 @@
 ﻿#if UNITY_2019_1_OR_NEWER
-namespace morpeh.Core.NativeCollections {
+namespace Morpeh.Core.NativeCollections {
     using System;
     using System.Runtime.CompilerServices;
     using Morpeh;

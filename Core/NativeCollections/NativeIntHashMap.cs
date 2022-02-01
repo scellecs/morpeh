@@ -1,11 +1,9 @@
 ﻿#if UNITY_2019_1_OR_NEWER
-namespace morpeh.Core.NativeCollections {
+namespace Morpeh.Core.NativeCollections {
     using System.Runtime.CompilerServices;
-    using Morpeh.Collections;
-    using NativeIntHashMapJobs;
+    using Collections;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
-    using Unity.Jobs;
 
     public struct NativeIntHashMap<TNative> where TNative : unmanaged {
         [NativeDisableUnsafePtrRestriction] public unsafe int* lengthPtr;
