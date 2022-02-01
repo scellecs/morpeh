@@ -419,7 +419,8 @@ Some things to remember when using Jobs:
 * `NativeComponentsGroup` and its contents should never be re-used outside of `using` context
 * `NativeComponentsGroup` cannot be used in-between `UpdateFilters` calls inside Morpeh
 * `filter.AsNative()` supports up to 3 generics, and they are returned as `components0`, `components1`, `components2` respectfully
-You can modify components by its reference:
+
+You can modify components by their references:
 ```c#
 [BurstCompile]
 public struct TestParallelJobReference : IJobParallelFor {
@@ -434,21 +435,6 @@ public struct TestParallelJobReference : IJobParallelFor {
         
         ref var component = ref this.HealthComponents.GetComponent(index);
         component.Value += 1;
-    }
-}
-```
-
-Or set a new one:
-```c#
-[BurstCompile]
-public struct TestParallelJobValue : IJob {
-    public NativeComponents<HealthComponent> HealthComponents;
-    public void Execute() {
-        for (int i = 0, length = this.HealthComponents.length; i < length; i++) {
-            this.HealthComponents[i] = new HealthComponent {
-                Value = this.HealthComponents[i].Value + 1,
-            };
-        }
     }
 }
 ```

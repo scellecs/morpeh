@@ -24,7 +24,7 @@ namespace Morpeh.Core.NativeCollections {
             this.length = this.filter.Length;
         }
 
-        public TNative this[int index] {
+        internal TNative this[int index] {
             get {
                 var entityId          = this.filter[index];
                 var componentPosition = this.cache.components.TryGetIndex(entityId);
