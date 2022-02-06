@@ -4,12 +4,15 @@ namespace Morpeh.Core.NativeCollections {
     using System.Runtime.CompilerServices;
     using Morpeh;
     using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
 
     public struct NativeComponents<TNative> : IDisposable where TNative : unmanaged, IComponent {
         [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
         private NativeFilterWrapper filterWrapper;
         
         [NativeDisableParallelForRestriction]
+        [NativeDisableUnsafePtrRestriction]
         private NativeCacheWrapper<TNative> cacheWrapper;
 
         [ReadOnly]
@@ -21,8 +24,8 @@ namespace Morpeh.Core.NativeCollections {
 
             this.length = this.filterWrapper.Length;
         }
-
-        internal TNative this[int index] {
+        
+        internal unsafe TNative this[int index] {
             get {
                 var entityId          = this.filterWrapper[index];
                 var componentPosition = this.cacheWrapper.components.TryGetIndex(entityId);
