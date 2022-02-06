@@ -5,7 +5,7 @@ namespace Morpeh.Core.NativeCollections {
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
 
-    public struct NativeIntHashMap<TNative> where TNative : unmanaged {
+    public struct NativeIntHashMapWrapper<TNative> where TNative : unmanaged {
         [NativeDisableUnsafePtrRestriction] public unsafe int* lengthPtr;
         [NativeDisableUnsafePtrRestriction] public unsafe int* capacityPtr;
         [NativeDisableUnsafePtrRestriction] public unsafe int* capacityMinusOnePtr;

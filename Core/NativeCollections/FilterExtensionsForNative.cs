@@ -9,7 +9,7 @@ namespace Morpeh.Core.NativeCollections {
         private static unsafe NativeFilterWrapper AsNative(this Filter filter) {
             // TODO: Get rid of archetypes NativeArray allocation (?)
             var nativeFilter = new NativeFilterWrapper {
-                archetypes = new NativeArray<NativeArchetype>(filter.archetypes.length, Allocator.TempJob),
+                archetypes = new NativeArray<NativeArchetypeWrapper>(filter.archetypes.length, Allocator.TempJob),
             };
             
             fixed (int* lengthPtr = &filter.Length) {

@@ -7,8 +7,8 @@ namespace Morpeh.Core.NativeCollections {
 
     public static class IntHashMapExtensionsForNative {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe NativeIntHashMap<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
-            var nativeIntHashMap = new NativeIntHashMap<TNative>();
+        internal static unsafe NativeIntHashMapWrapper<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
+            var nativeIntHashMap = new NativeIntHashMapWrapper<TNative>();
             
             fixed (int* lengthPtr = &hashMap.length)
             fixed (int* capacityPtr = &hashMap.capacity)

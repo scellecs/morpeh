@@ -10,14 +10,14 @@ namespace Morpeh.Core.NativeCollections {
         private NativeFilterWrapper filterWrapper;
         
         [NativeDisableParallelForRestriction]
-        private NativeCache<TNative> cache;
+        private NativeCacheWrapper<TNative> cacheWrapper;
 
         [ReadOnly]
         public readonly int length;
 
-        public NativeComponents(NativeFilterWrapper filterWrapper, NativeCache<TNative> cache) {
+        public NativeComponents(NativeFilterWrapper filterWrapper, NativeCacheWrapper<TNative> cacheWrapper) {
             this.filterWrapper   = filterWrapper;
-            this.cache = cache;
+            this.cacheWrapper = cacheWrapper;
 
             this.length = this.filterWrapper.Length;
         }
@@ -25,13 +25,13 @@ namespace Morpeh.Core.NativeCollections {
         internal TNative this[int index] {
             get {
                 var entityId          = this.filterWrapper[index];
-                var componentPosition = this.cache.components.TryGetIndex(entityId);
-                return this.cache.components.data[componentPosition];
+                var componentPosition = this.cacheWrapper.components.TryGetIndex(entityId);
+                return this.cacheWrapper.components.data[componentPosition];
             }
             set {
                 var entityId          = this.filterWrapper[index];
-                var componentPosition = this.cache.components.TryGetIndex(entityId);
-                this.cache.components.data[componentPosition] = value;
+                var componentPosition = this.cacheWrapper.components.TryGetIndex(entityId);
+                this.cacheWrapper.components.data[componentPosition] = value;
             }
         }
 
@@ -39,20 +39,20 @@ namespace Morpeh.Core.NativeCollections {
         public bool HasComponent(int index) {
             if (index < 0 || index >= this.length) return false;
             var entityId = this.filterWrapper[index];
-            return entityId != -1 && this.cache.components.TryGetIndex(entityId) != -1;
+            return entityId != -1 && this.cacheWrapper.components.TryGetIndex(entityId) != -1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TNative GetComponent(int index, out bool exists) {
             exists = this.HasComponent(index);
             var entityId = this.filterWrapper[index];
-            return ref this.cache.components.GetValueRefByKey(entityId);
+            return ref this.cacheWrapper.components.GetValueRefByKey(entityId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TNative GetComponent(int index) {
             var entityId = this.filterWrapper[index];
-            return ref this.cache.components.GetValueRefByKey(entityId);
+            return ref this.cacheWrapper.components.GetValueRefByKey(entityId);
         }
 
         public void Dispose() {

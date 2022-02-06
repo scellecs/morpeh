@@ -5,8 +5,8 @@ namespace Morpeh.Core.NativeCollections {
 
     internal static class ComponentsCacheExtensionsForNative {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static NativeCache<TNative> AsNative<TNative>(this ComponentsCache<TNative> cache) where TNative : unmanaged, IComponent {
-            var nativeCache = new NativeCache<TNative> {
+        internal static NativeCacheWrapper<TNative> AsNative<TNative>(this ComponentsCache<TNative> cache) where TNative : unmanaged, IComponent {
+            var nativeCache = new NativeCacheWrapper<TNative> {
                 components = cache.components.AsNative(),
             };
             return nativeCache;
