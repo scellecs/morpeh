@@ -5,10 +5,6 @@ namespace Morpeh {
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
 
-#if UNITY_2019_1_OR_NEWER
-    using Core.NativeCollections;
-#endif
-
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
