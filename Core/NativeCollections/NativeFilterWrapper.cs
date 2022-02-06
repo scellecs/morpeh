@@ -5,7 +5,7 @@ namespace Morpeh.Core.NativeCollections {
     using Unity.Collections.LowLevel.Unsafe;
 
     public struct NativeFilterWrapper : IDisposable {
-        public NativeArray<NativeArchetype> archetypes;
+        public NativeArray<NativeArchetypeWrapper> archetypes;
 
         [NativeDisableUnsafePtrRestriction]
         public unsafe int* lengthPtr;

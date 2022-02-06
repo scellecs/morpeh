@@ -5,8 +5,8 @@ namespace Morpeh.Core.NativeCollections {
 
     public static class ArchetypeExtensionsForNative {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe NativeArchetype AsNative(this Archetype archetype) {
-            var nativeArchetype = new NativeArchetype {
+        internal static unsafe NativeArchetypeWrapper AsNative(this Archetype archetype) {
+            var nativeArchetype = new NativeArchetypeWrapper {
                 entitiesBitMap = archetype.entitiesBitMap.AsNative()
             };
 

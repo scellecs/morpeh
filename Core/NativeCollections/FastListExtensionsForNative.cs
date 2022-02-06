@@ -5,8 +5,8 @@ namespace Morpeh.Core.NativeCollections {
 
     public static class FastListExtensionsForNative {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe NativeFastList<TNative> AsNative<TNative>(this FastList<TNative> fastList) where TNative : unmanaged {
-            var nativeIntHashMap = new NativeFastList<TNative>();
+        public static unsafe NativeFastListWrapper<TNative> AsNative<TNative>(this FastList<TNative> fastList) where TNative : unmanaged {
+            var nativeIntHashMap = new NativeFastListWrapper<TNative>();
             
             fixed (int* lengthPtr = &fastList.length)
             fixed (int* capacityPtr = &fastList.capacity)
