@@ -88,16 +88,6 @@ namespace Morpeh {
             this.commonCacheId = caches.length;
             caches.Add(this);
         }
-        
-#if UNITY_2019_1_OR_NEWER
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public NativeCache<TNative> AsNative<TNative>() where TNative : unmanaged, IComponent {
-            var nativeCache = new NativeCache<TNative> {
-                components = this.components.AsNative<TNative>(),
-            };
-            return nativeCache;
-        }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T AddComponent(Entity entity) {

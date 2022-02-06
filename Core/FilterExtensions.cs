@@ -197,41 +197,5 @@ namespace Morpeh {
 
             return newFilter;
         }
-
-#if UNITY_2019_1_OR_NEWER
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe NativeComponentsGroup<TNative0> AsNative<TNative0>(this Filter filter)
-            where TNative0 : unmanaged, IComponent {
-            var nativeComponentsGroup = new NativeComponentsGroup<TNative0>();
-            nativeComponentsGroup.length      = filter.Length;
-            var nativeFilter = filter.AsNative();
-            nativeComponentsGroup.components0 = new NativeComponents<TNative0>(nativeFilter, filter.world.GetCache<TNative0>().AsNative<TNative0>());
-            return nativeComponentsGroup;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeComponentsGroup<TNative0, TNative1> AsNative<TNative0, TNative1>(this Filter filter)
-            where TNative0 : unmanaged, IComponent
-            where TNative1 : unmanaged, IComponent {
-            var nativeComponentsGroup = new NativeComponentsGroup<TNative0, TNative1>();
-            var nativeFilter          = filter.AsNative();
-            nativeComponentsGroup.components0 = new NativeComponents<TNative0>(nativeFilter, filter.world.GetCache<TNative0>().AsNative<TNative0>());
-            nativeComponentsGroup.components1 = new NativeComponents<TNative1>(nativeFilter, filter.world.GetCache<TNative1>().AsNative<TNative1>());
-            return nativeComponentsGroup;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeComponentsGroup<TNative0, TNative1, TNative2> AsNative<TNative0, TNative1, TNative2>(this Filter filter)
-            where TNative0 : unmanaged, IComponent
-            where TNative1 : unmanaged, IComponent
-            where TNative2 : unmanaged, IComponent {
-            var nativeComponentsGroup = new NativeComponentsGroup<TNative0, TNative1, TNative2>();
-            var nativeFilter          = filter.AsNative();
-            nativeComponentsGroup.components0 = new NativeComponents<TNative0>(nativeFilter, filter.world.GetCache<TNative0>().AsNative<TNative0>());
-            nativeComponentsGroup.components1 = new NativeComponents<TNative1>(nativeFilter, filter.world.GetCache<TNative1>().AsNative<TNative1>());
-            nativeComponentsGroup.components2 = new NativeComponents<TNative2>(nativeFilter, filter.world.GetCache<TNative2>().AsNative<TNative2>());
-            return nativeComponentsGroup;
-        }
-#endif
     }
 }

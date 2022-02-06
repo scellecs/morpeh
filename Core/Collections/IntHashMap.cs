@@ -4,13 +4,7 @@ namespace Morpeh.Collections {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
-    
-#if UNITY_2019_1_OR_NEWER
-    using Core.NativeCollections;
-    using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
-#endif
-    
+
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -35,39 +29,6 @@ namespace Morpeh.Collections {
 
         public T[]    data;
         public IntHashMapSlot[] slots;
-        
-#if UNITY_2019_1_OR_NEWER
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe NativeIntHashMap<TNative> AsNative<TNative>() where TNative : unmanaged {
-            var nativeIntHashMap = new NativeIntHashMap<TNative>();
-            
-            fixed (int* lengthPtr = &this.length)
-            fixed (int* capacityPtr = &this.capacity)
-            fixed (int* capacityMinusOnePtr = &this.capacityMinusOne)
-            fixed (int* lastIndexPtr = &this.lastIndex)
-            fixed (int* freeIndexPtr = &this.freeIndex)
-            fixed (TNative* dataPtr = this.data as TNative[])
-            fixed (int* bucketsPtr = this.buckets)
-            fixed (IntHashMapSlot* slotsPtr = this.slots){
-                nativeIntHashMap.lengthPtr           = lengthPtr;
-                nativeIntHashMap.capacityPtr         = capacityPtr;
-                nativeIntHashMap.capacityMinusOnePtr = capacityMinusOnePtr;
-                nativeIntHashMap.lastIndexPtr        = lastIndexPtr;
-                nativeIntHashMap.freeIndexPtr        = freeIndexPtr;
-                nativeIntHashMap.data                = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TNative>(dataPtr, this.data.Length, Allocator.None);
-                nativeIntHashMap.buckets             = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(bucketsPtr, this.buckets.Length, Allocator.None);
-                nativeIntHashMap.slots               = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<IntHashMapSlot>(slotsPtr, this.slots.Length, Allocator.None);
-                
-#if UNITY_EDITOR
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeIntHashMap.data, AtomicSafetyHandle.Create());
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeIntHashMap.buckets, AtomicSafetyHandle.Create());
-                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeIntHashMap.slots, AtomicSafetyHandle.Create());
-#endif
-            }
-
-            return nativeIntHashMap;
-        }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntHashMap(in int capacity = 0) {
