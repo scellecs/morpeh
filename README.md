@@ -396,18 +396,18 @@ public sealed class HealthSystem : UpdateSystem {
 
 > 💡 Supported only in Unity. Subjected to further improvements and modifications
 
-You can convert `Filter` to `NativeComponentsGroup`
+You can convert `Filter` to `NativeFilter`
 which allows you to do component-based manipulations inside a Job.
 ```c#  
 public sealed class SomeSystem : UpdateSystem {
     private Filter filter;
     ...
     public override void OnUpdate(float deltaTime) {
-        using (var nativeComponentsGroup = this.filter.AsNative<HealthComponent>()) {
+        using (var nativeFilter = this.filter.AsNative<HealthComponent>()) {
             var parallelJob = new ExampleParallelJob {
-                HealthComponents = nativeComponentsGroup.components0,
+                HealthComponents = nativeFilter.components0,
             };
-            var parallelJobHandle = parallelJob.Schedule(nativeComponentsGroup.length, 64);
+            var parallelJobHandle = parallelJob.Schedule(nativeFilter.length, 64);
             parallelJobHandle.Complete();
             Profiler.EndSample();
         }
@@ -416,8 +416,9 @@ public sealed class SomeSystem : UpdateSystem {
 ```
 
 Some things to remember when using Jobs:
-* `NativeComponentsGroup` and its contents should never be re-used outside of `using` context
-* `NativeComponentsGroup` cannot be used in-between `UpdateFilters` calls inside Morpeh
+* `NativeFilter` and its contents should never be re-used outside of `using` context
+* `NativeFilter` cannot be used in-between `UpdateFilters` calls inside Morpeh
+* `NativeFilter` should be disposed upon usage completion due to #107
 * `filter.AsNative()` supports up to 3 generics, and they are returned as `components0`, `components1`, `components2` respectfully
 
 You can modify components by their references:
