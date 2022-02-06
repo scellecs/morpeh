@@ -28,9 +28,7 @@ namespace Morpeh.Collections {
 
                         *(dataPtr + (i >> 1)) = data;
 
-                        var changed = data != dataOld;
-                        if (changed) bitmap.density[i >> 1]++;
-                        return changed;
+                        return data != dataOld;
                     }
                 }
             }
@@ -49,7 +47,6 @@ namespace Morpeh.Collections {
 
                     ArrayHelpers.Grow(ref bitmap.slots, newCapacity << 1);
                     ArrayHelpers.Grow(ref bitmap.data, newCapacity);
-                    ArrayHelpers.Grow(ref bitmap.density, newCapacity);
 
                     var newBuckets = new int[newCapacity];
 
@@ -92,7 +89,6 @@ namespace Morpeh.Collections {
                 *bucket = slotIndex + 1;
             }
 
-            ++bitmap.density[slotIndex >> 1];
             ++bitmap.length;
             return true;
         }
@@ -126,7 +122,6 @@ namespace Morpeh.Collections {
                             *slot     = -1;
                             *slotNext = bitmap.freeIndex;
 
-                            --bitmap.density[i >> 1];
                             if (--bitmap.length == 0) {
                                 bitmap.lastIndex = 0;
                                 bitmap.freeIndex = -1;
@@ -179,7 +174,6 @@ namespace Morpeh.Collections {
             Array.Clear(bitMap.slots, 0, bitMap.lastIndex);
             Array.Clear(bitMap.buckets, 0, bitMap.capacity);
             Array.Clear(bitMap.data, 0, bitMap.capacity);
-            Array.Clear(bitMap.density, 0, bitMap.capacity);
 
             bitMap.lastIndex = 0;
             bitMap.length    = 0;

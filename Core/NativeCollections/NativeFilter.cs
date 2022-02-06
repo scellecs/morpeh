@@ -1,39 +1,51 @@
 ﻿#if UNITY_2019_1_OR_NEWER
 namespace Morpeh.Core.NativeCollections {
     using System;
-    using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
+    using Morpeh;
+    using Sirenix.OdinInspector;
 
-    public struct NativeFilter : IDisposable {
-        public NativeArray<NativeArchetype> archetypes;
-        [NativeDisableUnsafePtrRestriction] public unsafe int* LengthPtr;
-        public unsafe                                     int  Length => *this.LengthPtr;
-
-        private const int BITS_PER_BYTE        = 8;
-        private const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
-        private const int BITS_PER_FIELD_SHIFT = 5; //6 for long
-
-        public unsafe int this[int index] {
-            get {
-                var totalArchetypeLength = 0;
-                for (int archetypeNum = 0, archetypesCount = this.archetypes.Length; archetypeNum < archetypesCount; archetypeNum++) {
-                    var archetype       = this.archetypes[archetypeNum];
-                    var archetypeLength = *archetype.lengthPtr;
-
-                    if (index >= totalArchetypeLength && index < totalArchetypeLength + archetypeLength) {
-                        var slotIndex= index - totalArchetypeLength;
-                        return archetype.entitiesBitMap.data[slotIndex];
-                    }
-                    
-                    totalArchetypeLength += *archetype.lengthPtr;
-                }
-
-                return -1;
-            }
-        }
+    public struct NativeFilter<TNative0> : IDisposable
+        where TNative0 : unmanaged, IComponent {
+        [ReadOnly]
+        public int length;
+        
+        public NativeComponents<TNative0> components0;
 
         public void Dispose() {
-            this.archetypes.Dispose();
+            this.components0.Dispose();
+        }
+    }
+
+    public struct NativeFilter<TNative0, TNative1> : IDisposable
+        where TNative0 : unmanaged, IComponent
+        where TNative1 : unmanaged, IComponent {
+        [ReadOnly]
+        public int length;
+        
+        public NativeComponents<TNative0> components0;
+        public NativeComponents<TNative1> components1;
+
+        public void Dispose() {
+            this.components0.Dispose();
+            this.components1.Dispose();
+        }
+    }
+
+    public struct NativeFilter<TNative0, TNative1, TNative2> : IDisposable
+        where TNative0 : unmanaged, IComponent
+        where TNative1 : unmanaged, IComponent
+        where TNative2 : unmanaged, IComponent {
+        [ReadOnly]
+        public int length;
+        
+        public NativeComponents<TNative0> components0;
+        public NativeComponents<TNative1> components1;
+        public NativeComponents<TNative2> components2;
+
+        public void Dispose() {
+            this.components0.Dispose();
+            this.components1.Dispose();
+            this.components2.Dispose();
         }
     }
 }

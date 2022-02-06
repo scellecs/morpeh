@@ -4,11 +4,7 @@ namespace Morpeh.Collections {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
-    
-#if UNITY_2019_1_OR_NEWER
-    using Core.NativeCollections;
-#endif
-    
+
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -19,23 +15,6 @@ namespace Morpeh.Collections {
         public int capacity;
 
         public EqualityComparer<T> comparer;
-        
-#if UNITY_2019_1_OR_NEWER
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe NativeFastList<TNative> AsNative<TNative>() where TNative : unmanaged {
-            var nativeIntHashMap = new NativeFastList<TNative>();
-            
-            fixed (int* lengthPtr = &this.length)
-            fixed (int* capacityPtr = &this.capacity)
-            fixed (TNative* dataPtr = &(this.data as TNative[])[0]) {
-                nativeIntHashMap.lengthPtr   = lengthPtr;
-                nativeIntHashMap.capacityPtr = capacityPtr;
-                nativeIntHashMap.data        = dataPtr;
-            }
-
-            return nativeIntHashMap;
-        }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FastList() {
