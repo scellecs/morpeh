@@ -2,7 +2,7 @@
 namespace Morpeh.Core.NativeCollections {
     using System;
     using Morpeh;
-    using Sirenix.OdinInspector;
+    using Unity.Collections;
 
     public struct NativeFilter<TNative0> : IDisposable
         where TNative0 : unmanaged, IComponent {
