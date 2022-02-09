@@ -2,15 +2,9 @@
 namespace Morpeh.Core.NativeCollections {
     using System;
     using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
 
     public struct NativeFilterWrapper : IDisposable {
         public NativeArray<NativeArchetypeWrapper> archetypes;
-
-        [NativeDisableUnsafePtrRestriction]
-        public unsafe int* lengthPtr;
-
-        public unsafe int Length => *this.lengthPtr;
 
         public unsafe int this[int index] {
             get {
@@ -31,6 +25,7 @@ namespace Morpeh.Core.NativeCollections {
             }
         }
 
+        // Dispose pattern justification: 'archetypes' is an allocated NativeArray
         public void Dispose() {
             this.archetypes.Dispose();
         }

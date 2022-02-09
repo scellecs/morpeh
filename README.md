@@ -396,16 +396,27 @@ public sealed class HealthSystem : UpdateSystem {
 
 > 💡 Supported only in Unity. Subjected to further improvements and modifications
 
-You can convert `Filter` to `NativeFilter`
-which allows you to do component-based manipulations inside a Job.
+You can convert `Filter` to `NativeFilter` which allows you to do component-based manipulations inside a Job.
+
+Conversion of `ComponentsCache<T>` to `NativeCache` allows you to operate on components based on entity ids.
+
+Some things to remember when using Jobs:
+* `NativeFilter` and `NativeCache` and their contents should never be re-used outside of single system tick
+* `NativeFilter` and `NativeCache` cannot be used in-between `UpdateFilters` calls inside Morpeh
+* `NativeFilter` should be disposed upon usage completion due to https://github.com/scellecs/morpeh/issues/107
+
+Example job scheduling:
 ```c#  
 public sealed class SomeSystem : UpdateSystem {
     private Filter filter;
+    private ComponentsCache<HealthComponent> cache;
     ...
     public override void OnUpdate(float deltaTime) {
-        using (var nativeFilter = this.filter.AsNative<HealthComponent>()) {
+        using (var nativeFilter = this.filter.AsNative()) {
             var parallelJob = new ExampleParallelJob {
-                HealthComponents = nativeFilter.components0,
+                entities = nativeFilter,
+                healthComponents = cache.AsNative(),
+                // Add more native caches if needed
             };
             var parallelJobHandle = parallelJob.Schedule(nativeFilter.length, 64);
             parallelJobHandle.Complete();
@@ -415,26 +426,23 @@ public sealed class SomeSystem : UpdateSystem {
 }
 ```
 
-Some things to remember when using Jobs:
-* `NativeFilter` and its contents should never be re-used outside of `using` context
-* `NativeFilter` cannot be used in-between `UpdateFilters` calls inside Morpeh
-* `NativeFilter` should be disposed upon usage completion due to #107
-* `filter.AsNative()` supports up to 3 generics, and they are returned as `components0`, `components1`, `components2` respectfully
-
-You can modify components by their references:
+Example job:
 ```c#
 [BurstCompile]
 public struct TestParallelJobReference : IJobParallelFor {
-    public NativeComponents<HealthComponent> HealthComponents;
+    public NativeFilter entities;
+    public NatviveCache<HealthComponent> healthComponents;
         
     public void Execute(int index) {
-        ref var component = ref this.HealthComponents.GetComponent(index, out var exists);
+        var entityId = this.entities[index];
+        
+        ref var component = ref this.healthComponents.GetComponent(entityId, out var exists);
         if (exists) component.Value += 1;
         
         // Alternatively, you can avoid checking existance of the component
         // if the filter includes said component anyway
         
-        ref var component = ref this.HealthComponents.GetComponent(index);
+        ref var component = ref this.healthComponents.GetComponent(entityId);
         component.Value += 1;
     }
 }
