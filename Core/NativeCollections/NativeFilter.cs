@@ -1,7 +1,6 @@
 ﻿#if UNITY_2019_1_OR_NEWER
 namespace Morpeh.Core.NativeCollections {
     using System;
-    using Morpeh;
     using Unity.Collections;
 
     public struct NativeFilter : IDisposable {
