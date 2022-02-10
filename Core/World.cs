@@ -57,7 +57,7 @@ namespace Morpeh {
         internal int entitiesCapacity;
 
         [NonSerialized]
-        internal FastList<int> dirtyEntities;
+        internal BitMap dirtyEntities;
 
         [SerializeField]
         internal IntFastList freeEntityIDs;
