@@ -10,8 +10,7 @@ namespace Morpeh {
     using System;
     using System.Diagnostics;
     
-    internal static class MDebug
-    {
+    internal static class MDebug {
         [Conditional("MORPEH_DEBUG")]
         public static void Log(object message) => MorpehSettings.Logger.Log($"[MORPEH] {message}");
         

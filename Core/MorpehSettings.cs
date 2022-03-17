@@ -2,8 +2,7 @@
 {
     using Logging;
     
-    public static class MorpehSettings
-    {
+    public static class MorpehSettings {
 #if UNITY_2019_1_OR_NEWER
         internal static IMorpehLogger Logger = new MorpehUnityLogger();
 #else
