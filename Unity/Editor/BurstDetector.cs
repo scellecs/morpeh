@@ -6,10 +6,10 @@ namespace Morpeh.Editor {
     [InitializeOnLoad]
     internal static class BurstDetector {
         private const string DEFINITION_NAME = "MORPEH_BURST";
-        
+
         static BurstDetector() {
-            var hasBurst = CountTypesInNamespace("Unity.Burst", "") > 100;
-            var hasJobs  = CountTypesInNamespace("Unity.Jobs", "") > 20;
+            var hasBurst = CountTypesInNamespace("Unity.Burst") > 100;
+            var hasJobs  = CountTypesInNamespace("Unity.Jobs") > 20;
             if (hasBurst && hasJobs) {
                 SetDefine(DEFINITION_NAME);
             }
@@ -23,20 +23,16 @@ namespace Morpeh.Editor {
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies) {
-                var isAssembly = root == "" || assembly.FullName.StartsWith("Assembly");
-
-                if (isAssembly && assembly != null) {
-                    try {
-                        var types = assembly.GetTypes();
-                        foreach (var type in types) {
-                            if (!string.IsNullOrEmpty(type.Namespace) && type.Namespace.StartsWith(nameSpace)) {
-                                childTypesCount++;
-                            }
+                try {
+                    var types = assembly.GetTypes();
+                    foreach (var type in types) {
+                        if (type.Namespace != null && type.Namespace.StartsWith(nameSpace)) {
+                            childTypesCount++;
                         }
                     }
-                    catch (Exception) {
-                        // Skip
-                    }
+                }
+                catch (Exception) {
+                    // Skip
                 }
             }
 
@@ -54,7 +50,7 @@ namespace Morpeh.Editor {
         private static void RemoveDefine(string def) {
             if (IsDefined(def)) {
                 var currentDefs = GetDefinesString().Split(';');
-                var newDefs = "";
+                var newDefs     = "";
 
                 foreach (var t in currentDefs) {
                     if (t != def) newDefs += t + ";";
