@@ -1,4 +1,4 @@
-﻿#if UNITY_2019_1_OR_NEWER
+﻿#if MORPEH_BURST
 namespace Morpeh.Core.NativeCollections {
     using Unity.Collections.LowLevel.Unsafe;
 
