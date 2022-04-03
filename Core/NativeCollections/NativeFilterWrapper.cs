@@ -4,6 +4,7 @@ namespace Morpeh.Core.NativeCollections {
     using Unity.Collections;
 
     public struct NativeFilterWrapper : IDisposable {
+        [ReadOnly]
         public NativeArray<NativeArchetypeWrapper> archetypes;
 
         public unsafe int this[int index] {
