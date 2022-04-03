@@ -396,14 +396,15 @@ public sealed class HealthSystem : UpdateSystem {
 
 > 💡 Supported only in Unity. Subjected to further improvements and modifications
 
-You can convert `Filter` to `NativeFilter` which allows you to do component-based manipulations inside a Job.
+You can convert `Filter<T>` to `NativeFilter<TNative>` which allows you to do component-based manipulations inside a Job.
 
-Conversion of `ComponentsCache<T>` to `NativeCache` allows you to operate on components based on entity ids.
+Conversion of `ComponentsCache<T>` to `NativeCache<TNative>` allows you to operate on components based on entity ids.
 
-Some things to remember when using Jobs:
+Current limitations:
 * `NativeFilter` and `NativeCache` and their contents should never be re-used outside of single system tick
 * `NativeFilter` and `NativeCache` cannot be used in-between `UpdateFilters` calls inside Morpeh
-* `NativeFilter` should be disposed upon usage completion due to https://github.com/scellecs/morpeh/issues/107
+* `NativeFilter` should be disposed upon usage completion due to https://github.com/scellecs/morpeh/issues/107, which also means `NativeFilter` causes a single `Allocator.TempJob` `NativeArray` allocation
+* Jobs can be chained only within current system execution, `NativeFilter` can be disposed only after execution of all scheduled jobs
 
 Example job scheduling:
 ```c#  
@@ -420,7 +421,6 @@ public sealed class SomeSystem : UpdateSystem {
             };
             var parallelJobHandle = parallelJob.Schedule(nativeFilter.length, 64);
             parallelJobHandle.Complete();
-            Profiler.EndSample();
         }
     }
 }
@@ -430,6 +430,7 @@ Example job:
 ```c#
 [BurstCompile]
 public struct TestParallelJobReference : IJobParallelFor {
+    [ReadOnly]
     public NativeFilter entities;
     public NatviveCache<HealthComponent> healthComponents;
         
@@ -437,7 +438,9 @@ public struct TestParallelJobReference : IJobParallelFor {
         var entityId = this.entities[index];
         
         ref var component = ref this.healthComponents.GetComponent(entityId, out var exists);
-        if (exists) component.Value += 1;
+        if (exists) {
+            component.Value += 1;
+        }
         
         // Alternatively, you can avoid checking existance of the component
         // if the filter includes said component anyway
