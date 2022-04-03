@@ -1,5 +1,5 @@
 ﻿#if MORPEH_BURST
-namespace Morpeh.Core.NativeCollections {
+namespace Morpeh.NativeCollections {
     using Unity.Collections.LowLevel.Unsafe;
 
     public struct NativeFastListWrapper<TNative> where TNative : unmanaged {
