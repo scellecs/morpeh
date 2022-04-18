@@ -13,6 +13,7 @@ namespace Morpeh.Collections {
         public T[] data;
         public int length;
         public int capacity;
+        public int lastSwappedIndex;
 
         public EqualityComparer<T> comparer;
 
@@ -21,6 +22,7 @@ namespace Morpeh.Collections {
             this.capacity = 3;
             this.data     = new T[this.capacity];
             this.length   = 0;
+            this.lastSwappedIndex = -1;
 
             this.comparer = EqualityComparer<T>.Default;
         }
@@ -30,6 +32,7 @@ namespace Morpeh.Collections {
             this.capacity = HashHelpers.GetCapacity(capacity);
             this.data     = new T[this.capacity];
             this.length   = 0;
+            this.lastSwappedIndex = -1;
 
             this.comparer = EqualityComparer<T>.Default;
         }
@@ -39,6 +42,7 @@ namespace Morpeh.Collections {
             this.capacity = other.capacity;
             this.data     = new T[this.capacity];
             this.length   = other.length;
+            this.lastSwappedIndex = -1;
             Array.Copy(other.data, 0, this.data, 0, this.length);
 
             this.comparer = other.comparer;
@@ -50,6 +54,7 @@ namespace Morpeh.Collections {
             e.list    = this;
             e.current = default;
             e.index   = 0;
+            this.lastSwappedIndex = -1;
             return e;
         }
 
@@ -75,17 +80,31 @@ namespace Morpeh.Collections {
             public int index;
 
             public bool MoveNext() {
+                var lastSwappedIndex = this.list.lastSwappedIndex;
+                if (lastSwappedIndex != -1) {
+                    var previousIndex = this.index - 1;
+                    if (lastSwappedIndex == previousIndex) {
+                        this.index--;
+                    }
+                    else if (lastSwappedIndex < previousIndex) {
+                        throw new InvalidOperationException("Earlier collection items have been modified, this is not allowed");
+                    }
+                }
+                
                 if (this.index >= this.list.length) {
                     return false;
                 }
 
                 this.current = this.list.data[this.index++];
+                this.list.lastSwappedIndex = -1;
+
                 return true;
             }
 
             public void Reset() {
                 this.index   = 0;
                 this.current = default;
+                this.list.lastSwappedIndex = -1;
             }
 
             public T           Current => this.current;
