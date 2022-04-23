@@ -249,6 +249,6 @@ namespace Morpeh {
         public static bool IsDisposed([NotNull] this Entity entity) => entity.isDisposed;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsNullOrDisposed([CanBeNull] this Entity entity) => entity == null || entity.isDisposed;
+        public static bool IsNullOrDisposed([CanBeNull] this Entity entity) => entity == null || entity.isDisposed || entity.world == null;
     }
 }
