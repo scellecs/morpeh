@@ -74,8 +74,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                     }
                     catch (Exception e) {
-                        MDebug.LogError($"Can not dispose system {system.GetType()}");
-                        MDebug.LogException(e);
+                        MLogger.LogError($"Can not dispose system {system.GetType()}");
+                        MLogger.LogException(e);
                     }
 #endif
                 }
@@ -110,8 +110,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MDebug.LogError($"Can not dispose new initializer {initializer.GetType()}");
-                    MDebug.LogException(e);
+                    MLogger.LogError($"Can not dispose new initializer {initializer.GetType()}");
+                    MLogger.LogException(e);
                 }
 #endif
             }
@@ -128,8 +128,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MDebug.LogError($"Can not dispose initializer {initializer.GetType()}");
-                    MDebug.LogException(e);
+                    MLogger.LogError($"Can not dispose initializer {initializer.GetType()}");
+                    MLogger.LogException(e);
                 }
 #endif
             }
@@ -146,8 +146,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MDebug.LogError($"Can not dispose system group disposable {disposable.GetType()}");
-                    MDebug.LogException(e);
+                    MLogger.LogError($"Can not dispose system group disposable {disposable.GetType()}");
+                    MLogger.LogException(e);
                 }
 #endif
             }

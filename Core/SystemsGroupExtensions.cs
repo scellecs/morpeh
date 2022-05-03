@@ -104,8 +104,8 @@ namespace Morpeh {
         [Conditional("MORPEH_DEBUG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SystemThrowException(this SystemsGroup systemsGroup, ISystem system, Exception exception) {
-            MDebug.LogError($"Can not update {system.GetType()}. System will be disabled.");
-            MDebug.LogException(exception);
+            MLogger.LogError($"Can not update {system.GetType()}. System will be disabled.");
+            MLogger.LogException(exception);
             systemsGroup.delayedAction += () => systemsGroup.DisableSystem(system);
         }
 
@@ -127,8 +127,8 @@ namespace Morpeh {
                 initializer.OnAwake();
             }
             catch (Exception exception) {
-                MDebug.LogError($"Can not initialize {initializer.GetType()}");
-                MDebug.LogException(exception);
+                MLogger.LogError($"Can not initialize {initializer.GetType()}");
+                MLogger.LogException(exception);
             }
         }
 
@@ -139,8 +139,8 @@ namespace Morpeh {
                 disposable.Dispose();
             }
             catch (Exception exception) {
-                MDebug.LogError($"Can not dispose {disposable.GetType()}");
-                MDebug.LogException(exception);
+                MLogger.LogError($"Can not dispose {disposable.GetType()}");
+                MLogger.LogException(exception);
             }
         }
 
