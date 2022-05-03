@@ -27,6 +27,8 @@ Features:
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
   * [Getting Start](#-getting-start)
   * [Advanced](#-advanced)
+* [Examples](#-examples)
+* [Games](#-games)
 * [License](#-license)
 * [Contacts](#-contacts)
 
@@ -34,6 +36,8 @@ Features:
 ## 📖 How To Install
 
 Minimal Unity Version is 2019.3.*  
+Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
+Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.  
 
 <details>
     <summary>Open Package Manager and add Morpeh URL.  </summary>
@@ -42,9 +46,9 @@ Minimal Unity Version is 2019.3.*
 ![installation_step2.png](Gifs~/installation_step2.png)  
 </details>
   
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/X-Crew/Morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/X-Crew/Morpeh.git#develop  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/X-Crew/Morpeh.git#2020.8.0  
+&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
+&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh#develop  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh#2020.8.1  
 
 <details>
     <summary>You can update Morpeh by Discover Window. Select Help/Morpeh Discover menu.   </summary>
@@ -389,11 +393,25 @@ public sealed class HealthSystem : UpdateSystem {
 
 ---
 
+## 📚 Examples
+
+* [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
+* [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*  
+
+## 🔥 Games
+
+* **Zombie City** by *GreenButtonGames*  
+[Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/kh/app/zombie-city-master/id1543420906)  
+
+
+* **Fish Idle** by *GreenButtonGames*  
+[Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.FishIdle) [iOS](https://apps.apple.com/ru/app/fish-idle-hooked-tycoon/id1534396279)  
+
 ## 📘 License
 
 📄 [MIT License](LICENSE)
 
 ## 💬 Contacts
 
-✉️ Telegram: [benjminmoore](https://t.me/benjminmoore)  
+✉️ Telegram: [olegmrzv](https://t.me/olegmrzv)  
 📧 E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)
