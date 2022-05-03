@@ -42,6 +42,13 @@ namespace Morpeh {
         void OnValidate(GameObject gameObject);
     }
 
+    [AttributeUsage(AttributeTargets.Struct)]
+    public class CacheSizeAttribute : Attribute {
+        internal int size;
+        public CacheSizeAttribute(int size) {
+            this.size = size;
+        }
+    }
 }
 
 namespace Unity.IL2CPP.CompilerServices {

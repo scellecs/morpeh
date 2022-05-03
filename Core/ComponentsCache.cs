@@ -76,9 +76,10 @@ namespace Morpeh {
         }
 
         internal ComponentsCache() {
-            this.typeId = TypeIdentifier<T>.info.id;
-
-            this.components = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
+            var info = TypeIdentifier<T>.info;
+            this.typeId = info.id;
+            
+            this.components = new IntHashMap<T>(info.cacheSize);
 
             this.components.Add(-1, default, out _);
 
