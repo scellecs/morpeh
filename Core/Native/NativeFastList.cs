@@ -2,7 +2,7 @@
 namespace Morpeh.Native {
     using Unity.Collections.LowLevel.Unsafe;
 
-    public struct NativeFastListWrapper<TNative> where TNative : unmanaged {
+    public struct NativeFastList<TNative> where TNative : unmanaged {
         [NativeDisableUnsafePtrRestriction]
         public unsafe TNative* data;
         

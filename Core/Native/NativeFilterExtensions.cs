@@ -4,7 +4,7 @@ namespace Morpeh.Native {
     using Native;
     using Unity.Collections;
 
-    public static class FilterExtensionsForNative {
+    public static class NativeFilterExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeFilter AsNative(this Filter filter) => new NativeFilter(filter.AsNativeWrapper(), filter.Length);
         

@@ -3,7 +3,7 @@ namespace Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Morpeh;
 
-    public static class ArchetypeExtensionsForNative {
+    public static class NativeArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe NativeArchetypeWrapper AsNative(this Archetype archetype) {
             var nativeArchetype = new NativeArchetypeWrapper {

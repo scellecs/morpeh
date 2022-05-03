@@ -6,7 +6,7 @@ namespace Morpeh.Native {
 
     public struct NativeCache<TNative> where TNative : unmanaged, IComponent {
         [NativeDisableUnsafePtrRestriction]
-        public NativeIntHashMapWrapper<TNative> components;
+        public NativeIntHashMap<TNative> components;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasComponent(int entityId) {

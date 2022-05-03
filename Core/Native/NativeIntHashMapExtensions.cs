@@ -3,10 +3,10 @@ namespace Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
 
-    public static class IntHashMapExtensionsForNative {
+    public static class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe NativeIntHashMapWrapper<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
-            var nativeIntHashMap = new NativeIntHashMapWrapper<TNative>();
+        internal static unsafe NativeIntHashMap<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
+            var nativeIntHashMap = new NativeIntHashMap<TNative>();
             
             fixed (int* lengthPtr = &hashMap.length)
             fixed (int* capacityPtr = &hashMap.capacity)

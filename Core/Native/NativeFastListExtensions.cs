@@ -3,10 +3,10 @@ namespace Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
 
-    public static class FastListExtensionsForNative {
+    public static class NativeFastListExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe NativeFastListWrapper<TNative> AsNative<TNative>(this FastList<TNative> fastList) where TNative : unmanaged {
-            var nativeIntHashMap = new NativeFastListWrapper<TNative>();
+        public static unsafe NativeFastList<TNative> AsNative<TNative>(this FastList<TNative> fastList) where TNative : unmanaged {
+            var nativeIntHashMap = new NativeFastList<TNative>();
             
             fixed (int* lengthPtr = &fastList.length)
             fixed (int* capacityPtr = &fastList.capacity)

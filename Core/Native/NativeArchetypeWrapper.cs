@@ -3,7 +3,7 @@ namespace Morpeh.Native {
     using Unity.Collections.LowLevel.Unsafe;
 
     public struct NativeArchetypeWrapper {
-        public                                            NativeFastListWrapper<int> entitiesBitMap;
+        public                                            NativeFastList<int> entitiesBitMap;
         [NativeDisableUnsafePtrRestriction] public unsafe int*             lengthPtr;
     }
 }
