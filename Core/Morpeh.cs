@@ -69,6 +69,7 @@ namespace Unity.IL2CPP.CompilerServices {
 #if !UNITY_2019_1_OR_NEWER
 namespace UnityEngine {
     public sealed class SerializeField : System.Attribute { }
+    public sealed class GameObject : System.Object { }
 }
 
 namespace UnityEngine.Scripting {
