@@ -5,7 +5,7 @@ namespace Morpeh.Native {
 
     public struct NativeFilterWrapper : IDisposable {
         [ReadOnly]
-        public NativeArray<NativeArchetypeWrapper> archetypes;
+        public NativeArray<NativeArchetype> archetypes;
 
         public unsafe int this[int index] {
             get {

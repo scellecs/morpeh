@@ -2,6 +2,7 @@
 namespace Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
+    using Unity.Collections.LowLevel.Unsafe;
 
     public static class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -27,6 +28,41 @@ namespace Morpeh.Native {
             }
 
             return nativeIntHashMap;
+        }
+        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref TNative GetValueRefByKey<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, int key) where TNative : unmanaged {
+            var rem = key & *nativeIntHashMap.capacityMinusOnePtr;
+
+            int next;
+            for (var i = nativeIntHashMap.buckets[rem] - 1; i >= 0; i = next) {
+                ref var slot = ref UnsafeUtility.ArrayElementAsRef<IntHashMapSlot>(nativeIntHashMap.slots, i);
+                if (slot.key - 1 == key) {
+                    return ref UnsafeUtility.ArrayElementAsRef<TNative>(nativeIntHashMap.data, i);
+                }
+
+                next = slot.next;
+            }
+
+            return ref UnsafeUtility.ArrayElementAsRef<TNative>(nativeIntHashMap.data, 0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe int TryGetIndex<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
+            var rem = key & *nativeIntHashMap.capacityMinusOnePtr;
+
+            int next;
+            for (var i = nativeIntHashMap.buckets[rem] - 1; i >= 0; i = next) {
+                ref var slot = ref UnsafeUtility.ArrayElementAsRef<IntHashMapSlot>(nativeIntHashMap.slots, i);
+                if (slot.key - 1 == key) {
+                    return i;
+                }
+
+                next = slot.next;
+            }
+
+            return -1;
         }
     }
 }
