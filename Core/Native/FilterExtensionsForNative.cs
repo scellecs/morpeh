@@ -1,7 +1,7 @@
 ﻿#if MORPEH_BURST
-namespace Morpeh.NativeCollections {
+namespace Morpeh.Native {
     using System.Runtime.CompilerServices;
-    using NativeCollections;
+    using Native;
     using Unity.Collections;
 
     public static class FilterExtensionsForNative {

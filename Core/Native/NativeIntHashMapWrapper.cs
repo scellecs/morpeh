@@ -1,5 +1,5 @@
 ﻿#if MORPEH_BURST
-namespace Morpeh.NativeCollections {
+namespace Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.Collections;
