@@ -1,3 +1,4 @@
+using Morpeh.Logging;
 #if UNITY_EDITOR
 #define MORPEH_DEBUG
 #endif
@@ -11,17 +12,15 @@ namespace Morpeh {
     
     internal static class MDebug {
         [Conditional("MORPEH_DEBUG")]
-        public static void Log(object message) => UnityEngine.Debug.Log($"[MORPEH] {message}");
+        public static void Log(object message) => MorpehSettings.Logger.Log($"[MORPEH] {message}");
         
         [Conditional("MORPEH_DEBUG")]
-        public static void LogWarning(object message) => UnityEngine.Debug.LogWarning($"[MORPEH] {message}");
+        public static void LogWarning(object message) => MorpehSettings.Logger.LogWarning($"[MORPEH] {message}");
         
         [Conditional("MORPEH_DEBUG")]
-        public static void LogError(object message) => UnityEngine.Debug.LogError($"[MORPEH] {message}");
+        public static void LogError(object message) => MorpehSettings.Logger.LogError($"[MORPEH] {message}");
         
         [Conditional("MORPEH_DEBUG")]
-        public static void LogException(Exception e) => UnityEngine.Debug.LogException(e);
-        
-
+        public static void LogException(Exception e) => MorpehSettings.Logger.LogException(e);
     }
 }

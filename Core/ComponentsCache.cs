@@ -11,8 +11,10 @@ namespace Morpeh {
     using Collections;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-
+    
+#if !MORPEH_NON_SERIALIZED
     [Serializable]
+#endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -42,8 +44,10 @@ namespace Morpeh {
 
         public abstract void Dispose();
     }
-
+    
+#if !MORPEH_NON_SERIALIZED
     [Serializable]
+#endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -242,8 +246,10 @@ namespace Morpeh {
             caches.RemoveSwap(this, out _);
         }
     }
-
+    
+#if !MORPEH_NON_SERIALIZED
     [Serializable]
+#endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
