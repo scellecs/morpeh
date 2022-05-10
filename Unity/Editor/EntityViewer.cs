@@ -25,7 +25,7 @@ namespace Morpeh.Editor {
         private List<ComponentView> ComponentsOnEntity {
             get {
                 this.componentViews.Clear();
-                if (this.entity != null) {
+                if (this.entity != null && this.entity.world != null) {
                     var caches = this.entity.world.caches;
                     foreach (var cacheId in caches) {
                         var cache = ComponentsCache.caches.data[caches.GetValueByIndex(cacheId)];

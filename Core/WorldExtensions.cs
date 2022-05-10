@@ -92,7 +92,7 @@ namespace Morpeh {
                                 .Invoke(null, null);
                         }
                         catch {
-                            MDebug.LogWarning($"Attention component type {type.FullName} not used, but exists in build");
+                            MLogger.LogWarning($"Attention component type {type.FullName} not used, but exists in build");
                         }
                     }
                 }

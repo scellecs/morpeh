@@ -32,6 +32,9 @@ namespace Morpeh {
         [NonSerialized]
         internal Archetype currentArchetype;
 
+        [NonSerialized]
+        internal int indexInCurrentArchetype;
+
         [ShowInInspector]
         public int ID => this.internalID;
 

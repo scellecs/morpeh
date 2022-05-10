@@ -4,6 +4,15 @@ namespace Morpeh.Collections {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
+
+    [Serializable]
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    public struct IntHashMapSlot {
+        public int key;
+        public int next;
+    }
     
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -19,7 +28,7 @@ namespace Morpeh.Collections {
         public int[] buckets;
 
         public T[]    data;
-        public Slot[] slots;
+        public IntHashMapSlot[] slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntHashMap(in int capacity = 0) {
@@ -31,7 +40,7 @@ namespace Morpeh.Collections {
             this.capacity         = this.capacityMinusOne + 1;
 
             this.buckets = new int[this.capacity];
-            this.slots   = new Slot[this.capacity];
+            this.slots   = new IntHashMapSlot[this.capacity];
             this.data    = new T[this.capacity];
         }
 
@@ -47,15 +56,6 @@ namespace Morpeh.Collections {
         IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
-        [Serializable]
-        [Il2CppSetOption(Option.NullChecks, false)]
-        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Slot {
-            public int key;
-            public int next;
-        }
 
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

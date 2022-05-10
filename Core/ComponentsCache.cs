@@ -76,9 +76,10 @@ namespace Morpeh {
         }
 
         internal ComponentsCache() {
-            this.typeId = TypeIdentifier<T>.info.id;
-
-            this.components = new IntHashMap<T>(Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY);
+            var info = TypeIdentifier<T>.info;
+            this.typeId = info.id;
+            
+            this.components = new IntHashMap<T>(info.cacheSize);
 
             this.components.Add(-1, default, out _);
 
@@ -101,7 +102,7 @@ namespace Morpeh {
                 return ref this.components.data[slotIndex];
             }
 #if MORPEH_DEBUG
-            MDebug.LogError($"You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
+            MLogger.LogError($"You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
 #endif
             return ref this.components.data[0];
         }
@@ -136,7 +137,7 @@ namespace Morpeh {
             }
 
 #if MORPEH_DEBUG
-            MDebug.LogError($"You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
+            MLogger.LogError($"You're trying to add on entity {entity.internalID} a component that already exists! Use Get or SetComponent instead!");
 #endif
             return false;
         }

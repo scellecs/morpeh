@@ -29,7 +29,7 @@ namespace Morpeh {
         internal Mode mode;
 
         internal bool isDirty;
-        
+
         internal Filter(World world) {
             this.world = world;
 
@@ -77,10 +77,10 @@ namespace Morpeh {
 
             private Entity current;
 
-            private World  world;
-            private BitMap archetypeEntities;
+            private World      world;
+            private FastList<int> archetypeEntities;
 
-            private BitMap.Enumerator currentEnumerator;
+            private FastList<int>.Enumerator currentEnumerator;
 
             internal EntityEnumerator(Filter filter) {
                 this.world      = filter.world;

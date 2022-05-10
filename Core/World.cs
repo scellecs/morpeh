@@ -107,8 +107,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MDebug.LogError($"Can not dispose system group {systemsGroup.GetType()}");
-                    MDebug.LogException(e);
+                    MLogger.LogError($"Can not dispose system group {systemsGroup.GetType()}");
+                    MLogger.LogException(e);
                 }
 #endif
             }
@@ -123,8 +123,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MDebug.LogError($"Can not dispose entity with ID {entity?.ID}");
-                    MDebug.LogException(e);
+                    MLogger.LogError($"Can not dispose entity with ID {entity?.ID}");
+                    MLogger.LogException(e);
                 }
 #endif
             }
@@ -145,8 +145,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
             }
             catch (Exception e) {
-                MDebug.LogError("Can not dispose root filter");
-                MDebug.LogException(e);
+                MLogger.LogError("Can not dispose root filter");
+                MLogger.LogException(e);
             }
 #endif
             this.Filter = null;
@@ -169,8 +169,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MDebug.LogError($"Can not dispose cache id {cache}");
-                    MDebug.LogException(e);
+                    MLogger.LogError($"Can not dispose cache id {cache}");
+                    MLogger.LogException(e);
                 }
 #endif
             }
@@ -188,8 +188,8 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MDebug.LogError($"Can not dispose archetype id {archetype.id}");
-                    MDebug.LogException(e);
+                    MLogger.LogError($"Can not dispose archetype id {archetype.id}");
+                    MLogger.LogException(e);
                 }
 #endif
             }

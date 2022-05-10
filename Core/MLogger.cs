@@ -1,0 +1,36 @@
+﻿#if UNITY_EDITOR
+#define MORPEH_DEBUG
+#endif
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
+namespace Morpeh {
+    using System;
+    using System.Diagnostics;
+    using Logging;
+
+    public static class MLogger {
+#if UNITY_2019_1_OR_NEWER
+        internal static IMorpehLogger Instance = new MorpehUnityLogger();
+#else
+        internal static IMorpehLogger Instance = new MorpehSystemLogger();
+#endif
+        
+        public static void SetInstance(IMorpehLogger logger) {
+            Instance = logger;
+        }
+        
+        [Conditional("MORPEH_DEBUG")]
+        public static void Log(object message) => Instance.Log($"[MORPEH] {message}");
+        
+        [Conditional("MORPEH_DEBUG")]
+        public static void LogWarning(object message) => Instance.LogWarning($"[MORPEH] {message}");
+        
+        [Conditional("MORPEH_DEBUG")]
+        public static void LogError(object message) => Instance.LogError($"[MORPEH] {message}");
+        
+        [Conditional("MORPEH_DEBUG")]
+        public static void LogException(Exception e) => Instance.LogException(e);
+    }
+}

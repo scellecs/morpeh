@@ -21,7 +21,6 @@ namespace Morpeh.Collections {
         public int freeIndex;
 
         public int[] buckets;
-
         public int[] data;
         public int[] slots;
 

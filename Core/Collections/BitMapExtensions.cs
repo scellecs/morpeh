@@ -27,6 +27,7 @@ namespace Morpeh.Collections {
                         data |= 1 << bitIndex;
 
                         *(dataPtr + (i >> 1)) = data;
+
                         return data != dataOld;
                     }
                 }

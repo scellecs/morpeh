@@ -52,7 +52,11 @@ namespace Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Swap<T>(this FastList<T> list, int source, int destination) => list.data[destination] = list.data[source];
+        public static void Swap<T>(this FastList<T> list, int source, int destination)
+        {
+            list.data[destination] = list.data[source];
+            list.lastSwappedIndex = destination;
+        } 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf<T>(this FastList<T> list, T value) => ArrayHelpers.IndexOf(list.data, value, list.comparer);
@@ -80,10 +84,26 @@ namespace Morpeh.Collections {
                 swap.newIndex = index;
 
                 list.data[swap.newIndex] = list.data[swap.oldIndex];
+                list.lastSwappedIndex = index;
                 return true;
             }
 
+            list.lastSwappedIndex = -1;
             swap = default;
+            return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool RemoveAtSwap<T>(this FastList<T> list, int index, out T newValue) {
+            if (list.length-- > 1) {
+                var oldIndex = list.length;
+                newValue = list.data[index] = list.data[oldIndex];
+                list.lastSwappedIndex = index;
+                return true;
+            }
+
+            list.lastSwappedIndex = -1;
+            newValue = default;
             return false;
         }
 
@@ -95,6 +115,7 @@ namespace Morpeh.Collections {
 
             Array.Clear(list.data, 0, list.length);
             list.length = 0;
+            list.lastSwappedIndex = -1;
         }
 
         //todo rework
