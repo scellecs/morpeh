@@ -104,7 +104,9 @@ namespace Morpeh.Collections {
                             *(slotsPtr + num + 1) = *slotNext;
                         }
 
-                        lastValue = *(dataPtr + i / 2);
+                        var currentDataPtr = dataPtr + i / 2;
+                        lastValue       = *currentDataPtr;
+                        *currentDataPtr = default;
 
                         *slot     = -1;
                         *slotNext = hashMap.freeIndex;

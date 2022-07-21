@@ -140,7 +140,8 @@ namespace Morpeh.Collections {
                         hashMap.slots[num].next = slot.next;
                     }
 
-                    lastValue = hashMap.data[i];
+                    lastValue       = hashMap.data[i];
+                    hashMap.data[i] = default;
 
                     slot.key  = -1;
                     slot.next = hashMap.freeIndex;

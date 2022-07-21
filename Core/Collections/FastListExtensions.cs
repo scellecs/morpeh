@@ -84,7 +84,8 @@ namespace Morpeh.Collections {
                 swap.newIndex = index;
 
                 list.data[swap.newIndex] = list.data[swap.oldIndex];
-                list.lastSwappedIndex = index;
+                list.data[swap.oldIndex] = default;
+                list.lastSwappedIndex    = index;
                 return true;
             }
 
