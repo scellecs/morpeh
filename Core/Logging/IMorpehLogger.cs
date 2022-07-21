@@ -1,10 +1,10 @@
-﻿namespace Morpeh.Logging
-{
-    public interface IMorpehLogger
-    {
-        public void Log(string message) { }
-        public void LogWarning(string message) { }
-        public void LogError(string message) { }
-        public void LogException(System.Exception exception) { }
+﻿namespace Morpeh.Logging {
+    public interface IMorpehLogger {
+        void Log(string message);
+        void LogWarning(string message);
+        void LogError(string message);
+        void LogException(System.Exception exception);
+        void BeginSample(string name);
+        void EndSample();
     }
 }

@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 #define MORPEH_DEBUG
+#define MORPEH_PROFILING
 #endif
 #if !MORPEH_DEBUG
 #define MORPEH_DEBUG_DISABLED
@@ -32,5 +33,10 @@ namespace Morpeh {
         
         [Conditional("MORPEH_DEBUG")]
         public static void LogException(Exception e) => Instance.LogException(e);
+        
+        [Conditional("MORPEH_PROFILING")]
+        public static void BeginSample(string name) => Instance.BeginSample(name);
+        [Conditional("MORPEH_PROFILING")]
+        public static void EndSample() => Instance.EndSample();
     }
 }

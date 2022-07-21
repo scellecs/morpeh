@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 #define MORPEH_DEBUG
+#define MORPEH_PROFILING
 #endif
 #if !MORPEH_DEBUG
 #define MORPEH_DEBUG_DISABLED
@@ -328,6 +329,7 @@ namespace Morpeh {
         }
 
         public static void UpdateFilters(this World world) {
+            MLogger.BeginSample("World.UpdateFilters()");
             foreach (var entityId in world.dirtyEntities) {
                 world.entities[entityId]?.ApplyTransfer();
             }
@@ -360,6 +362,7 @@ namespace Morpeh {
                 world.freeEntityIDs.AddListRange(world.nextFreeEntityIDs);
                 world.nextFreeEntityIDs.Clear();
             }
+            MLogger.EndSample();
         }
 
         public static void SetFriendlyName(this World world, string friendlyName) {
