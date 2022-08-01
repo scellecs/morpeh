@@ -137,7 +137,7 @@ You can chain them in any order and quantity.
 ```c#
 var filter = this.World.Filter.With<HealthComponent>()
                               .With<BooComponent>()
-                              .Without<DummyComponent>;
+                              .Without<DummyComponent>();
 
 var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
