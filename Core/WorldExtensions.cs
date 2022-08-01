@@ -15,7 +15,7 @@ namespace Morpeh {
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -342,20 +342,6 @@ namespace Morpeh {
                 }
 
                 world.newArchetypes.Clear();
-            }
-
-            for (var index = 0; index < world.archetypes.length; index++) {
-                var archetype = world.archetypes.data[index];
-                if (archetype.isDirty) {
-                    archetype.Process();
-                }
-            }
-
-            for (int index = 0, length = world.filters.length; index < length; index++) {
-                var filter = world.filters.data[index];
-                if (filter.isDirty) {
-                    filter.UpdateLength();
-                }
             }
 
             if (world.nextFreeEntityIDs.length > 0) {

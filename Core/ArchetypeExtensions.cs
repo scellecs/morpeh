@@ -17,7 +17,6 @@ namespace Morpeh {
         internal static void Dispose(this Archetype archetype) {
             archetype.id      = -1;
             archetype.length  = -1;
-            archetype.isDirty = false;
 
             archetype.typeIds = null;
             archetype.world   = null;
@@ -36,8 +35,6 @@ namespace Morpeh {
         public static void Add(this Archetype archetype, Entity entity) {
             archetype.length++;
             entity.indexInCurrentArchetype = archetype.entitiesBitMap.Add(entity.internalID);
-
-            archetype.isDirty = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -47,28 +44,16 @@ namespace Morpeh {
             if (archetype.entitiesBitMap.RemoveAtSwap(index, out int newValue)) {
                 archetype.world.entities[newValue].indexInCurrentArchetype = index;
             }
-            archetype.isDirty = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddFilter(this Archetype archetype, Filter filter) {
             archetype.filters.Add(filter);
-            archetype.isDirty = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveFilter(this Archetype archetype, Filter filter) {
             archetype.filters.Remove(filter);
-            archetype.isDirty = true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Process(this Archetype archetype) {
-            for (int i = 0, len = archetype.filters.length; i < len; i++) {
-                archetype.filters.data[i].isDirty = true;
-            }
-
-            archetype.isDirty = false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

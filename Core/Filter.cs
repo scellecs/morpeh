@@ -15,8 +15,6 @@ namespace Morpeh {
             Exclude = 2
         }
 
-        public int Length;
-
         internal World world;
 
         internal FastList<Filter>    childs;
@@ -27,8 +25,6 @@ namespace Morpeh {
 
         internal int  typeID;
         internal Mode mode;
-
-        internal bool isDirty;
 
         internal Filter(World world) {
             this.world = world;
@@ -55,8 +51,6 @@ namespace Morpeh {
             this.world.filters.Add(this);
 
             this.FindArchetypes();
-
-            this.UpdateLength();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

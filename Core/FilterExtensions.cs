@@ -31,21 +31,10 @@ namespace Morpeh {
             filter.excludedTypeIds?.Clear();
             filter.excludedTypeIds = null;
 
-            filter.Length = -1;
-
             filter.typeID = -1;
             filter.mode   = Filter.Mode.None;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void UpdateLength(this Filter filter) {
-            filter.isDirty = false;
-            filter.Length  = 0;
-            foreach (var archetype in filter.archetypes) {
-                filter.Length += archetype.length;
-            }
-        }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void FindArchetypes(this Filter filter, IntFastList newArchetypes) {
             var minLength = filter.includedTypeIds.length;
@@ -152,6 +141,25 @@ namespace Morpeh {
             }
 
             return default;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetLengthSlow(this Filter filter) {
+            int accum = 0;
+            foreach (var arch in filter.archetypes) {
+                accum += arch.entitiesBitMap.length;
+            }
+            return accum;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsEmpty(this Filter filter) {
+            foreach (var arch in filter.archetypes) {
+                if (arch.entitiesBitMap.length > 0) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public static Filter With<T>(this Filter filter) where T : struct, IComponent
