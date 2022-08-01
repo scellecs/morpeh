@@ -21,16 +21,22 @@ Features:
 
 ## 📖 Table of Contents
 
+* [Migration](#-migration-to-new-version)
 * [How To Install](#-how-to-install)
 * [Introduction](#-introduction)
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
-  * [Getting Start](#-getting-start)
+  * [Getting Started](#-getting-started)
   * [Advanced](#-advanced)
+    * [Event system](#-event-system-singletons-and-globals-assets)
+    * [Unity Jobs And Burst](#-unity-jobs-and-burst)
 * [Examples](#-examples)
 * [Games](#-games)
 * [License](#-license)
 * [Contacts](#-contacts)
 
+## ✈️ Migration To New Version 
+
+TODO;
 
 ## 📖 How To Install
 
@@ -450,19 +456,18 @@ public sealed class HealthSystem : UpdateSystem {
 
 ---
 
-# 🧨 Unity Jobs & Burst
+####  🧨 Unity Jobs And Burst
 
-> 💡 Supported only in Unity. Subjected to further improvements and modifications
+> 💡 Supported only in Unity. Subjected to further improvements and modifications.
 
-You can convert `Filter<T>` to `NativeFilter<TNative>` which allows you to do component-based manipulations inside a Job.
-
-Conversion of `ComponentsCache<T>` to `NativeCache<TNative>` allows you to operate on components based on entity ids.
+You can convert `Filter<T>` to `NativeFilter<TNative>` which allows you to do component-based manipulations inside a Job.  
+Conversion of `ComponentsCache<T>` to `NativeCache<TNative>` allows you to operate on components based on entity ids.  
 
 Current limitations:
-* `NativeFilter` and `NativeCache` and their contents should never be re-used outside of single system tick
-* `NativeFilter` and `NativeCache` cannot be used in-between `UpdateFilters` calls inside Morpeh
-* `NativeFilter` should be disposed upon usage completion due to https://github.com/scellecs/morpeh/issues/107, which also means `NativeFilter` causes a single `Allocator.TempJob` `NativeArray` allocation
-* Jobs can be chained only within current system execution, `NativeFilter` can be disposed only after execution of all scheduled jobs
+* `NativeFilter` and `NativeCache` and their contents should never be re-used outside of single system tick.
+* `NativeFilter` and `NativeCache` cannot be used in-between `UpdateFilters` calls inside Morpeh.
+* `NativeFilter` should be disposed upon usage completion due to https://github.com/scellecs/morpeh/issues/107, which also means `NativeFilter` causes a single `Allocator.TempJob` `NativeArray` allocation.
+* Jobs can be chained only within current system execution, `NativeFilter` can be disposed only after execution of all scheduled jobs.
 
 Example job scheduling:
 ```c#  
@@ -490,7 +495,7 @@ Example job:
 public struct TestParallelJobReference : IJobParallelFor {
     [ReadOnly]
     public NativeFilter entities;
-    public NatviveCache<HealthComponent> healthComponents;
+    public NativeCache<HealthComponent> healthComponents;
         
     public void Execute(int index) {
         var entityId = this.entities[index];
