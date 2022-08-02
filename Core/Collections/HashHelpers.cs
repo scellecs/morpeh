@@ -64,13 +64,13 @@ namespace Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ExpandCapacity(int oldSize) {
-            var min = oldSize << 1;
+            var min = oldSize - 1 << 1;
             return min > 2_146_435_069U && 2_146_435_069 > oldSize ? 2_146_435_069 : GetCapacity(min);
         }
             
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ExpandCapacitySmall(int oldSize) {
-            var min = oldSize << 1;
+            var min = oldSize - 1 << 1;
             return min > 2_146_435_069U && 2_146_435_069 > oldSize ? 2_146_435_069 : GetCapacitySmall(min);
         }
 
