@@ -78,6 +78,7 @@ namespace Morpeh {
                         MLogger.LogException(e);
                     }
 #endif
+                    this.RemoveInitializer(system);
                 }
 
                 systemsToDispose.Clear();
