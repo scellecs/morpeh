@@ -21,9 +21,13 @@ namespace Morpeh {
         public static void Initialize(this SystemsGroup systemsGroup) {
             MLogger.BeginSample("SystemGroup.Initialize()");
             if (systemsGroup.disposables.length > 0) {
+                systemsGroup.world.UpdateFilters();
+
                 foreach (var disposable in systemsGroup.disposables) {
                     disposable.TryCatchDispose();
                     disposable.ForwardDispose();
+                    
+                    systemsGroup.world.UpdateFilters();
                 }
 
                 systemsGroup.disposables.Clear();
@@ -67,6 +71,8 @@ namespace Morpeh {
         public static void FixedUpdate(this SystemsGroup systemsGroup, float deltaTime) {
             MLogger.BeginSample("SystemGroup.FixedUpdate()");
             systemsGroup.DropDelayedAction();
+            systemsGroup.world.UpdateFilters();
+
             for (int i = 0, length = systemsGroup.fixedSystems.length; i < length; i++) {
                 var system = systemsGroup.fixedSystems.data[i];
 
