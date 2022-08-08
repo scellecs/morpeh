@@ -1,3 +1,5 @@
+#if MORPEH_UTILS
+
 namespace Morpeh.Globals {
     using UnityEngine;
     using Utils;
@@ -18,3 +20,5 @@ namespace Morpeh.Globals {
         }
     }
 }
+
+#endif

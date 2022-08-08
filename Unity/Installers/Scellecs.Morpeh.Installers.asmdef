@@ -1,0 +1,19 @@
+{
+    "name": "Scellecs.Morpeh.Installers",
+    "rootNamespace": "",
+    "references": [
+        "Scellecs.Morpeh",
+        "Scellecs.Morpeh.Systems"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "MORPEH_INSTALLERS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

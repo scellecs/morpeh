@@ -1,4 +1,6 @@
-﻿namespace Morpeh {
+﻿#if MORPEH_GLOBALS
+
+namespace Morpeh {
     using System.Collections.Generic;
     using Globals;
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -54,3 +56,5 @@
         }
     }
 }
+
+#endif

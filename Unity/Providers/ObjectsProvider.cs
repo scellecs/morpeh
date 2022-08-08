@@ -1,4 +1,6 @@
-﻿namespace Morpeh.Providers {
+﻿#if MORPEH_GLOBALS
+
+namespace Morpeh.Providers {
     using System.Collections.Generic;
     using Globals;
     using Unity.IL2CPP.CompilerServices;
@@ -87,3 +89,5 @@
         }
     }
 }
+
+#endif

@@ -5,7 +5,9 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Globals")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Providers")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Workaround")]

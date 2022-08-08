@@ -13,7 +13,6 @@ namespace Morpeh {
     using Globals.ECS;
 #endif
     using Unity.IL2CPP.CompilerServices;
-    using Utils;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

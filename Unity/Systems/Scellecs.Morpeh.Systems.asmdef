@@ -1,0 +1,19 @@
+{
+    "name": "Scellecs.Morpeh.Systems",
+    "rootNamespace": "",
+    "references": [
+        "Scellecs.Morpeh",
+        "Scellecs.Morpeh.Globals"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "MORPEH_SYSTEMS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
