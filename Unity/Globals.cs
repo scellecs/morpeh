@@ -1,3 +1,5 @@
+#if MORPEH_GLOBALS
+
 namespace Morpeh.Globals {
     namespace ECS {
         using System;
@@ -127,3 +129,5 @@ namespace Morpeh {
         }
     }
 }
+
+#endif

@@ -10,7 +10,6 @@ namespace Morpeh {
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
     using System.Reflection;
-    using Globals.ECS;
 #endif
     using Unity.IL2CPP.CompilerServices;
 

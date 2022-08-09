@@ -8,6 +8,8 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Globals")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Providers")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Utils")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Utils.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Workaround")]
