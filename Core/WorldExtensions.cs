@@ -55,6 +55,7 @@ namespace Morpeh {
             world.entitiesLength   = 0;
             world.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             world.entities         = new Entity[world.entitiesCapacity];
+            world.entitiesGens     = new int[world.entitiesCapacity];
 
             world.archetypes         = new FastList<Archetype> { new Archetype(0, Array.Empty<int>(), world.identifier) };
             world.archetypesByLength = new IntHashMap<IntFastList>();
@@ -184,6 +185,8 @@ namespace Morpeh {
                 componentsCache = new ComponentsCache<T>();
             }
 
+            componentsCache.world = world;
+
             world.caches.Add(info.id, componentsCache.commonCacheId, out _);
             world.typedCaches.Add(info.id, componentsCache.typedCacheId, out _);
 
@@ -280,6 +283,7 @@ namespace Morpeh {
             if (world.entitiesLength >= world.entitiesCapacity) {
                 var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
+                Array.Resize(ref world.entitiesGens, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
 
@@ -302,6 +306,7 @@ namespace Morpeh {
             if (world.entitiesLength >= world.entitiesCapacity) {
                 var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
+                Array.Resize(ref world.entitiesGens, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
 
@@ -325,6 +330,7 @@ namespace Morpeh {
         internal static void ApplyRemoveEntity(this World world, int id) {
             world.nextFreeEntityIDs.Add(id);
             world.entities[id] = null;
+            world.entitiesGens[id]++;
             --world.entitiesCount;
         }
 

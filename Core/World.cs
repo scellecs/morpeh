@@ -47,6 +47,9 @@ namespace Morpeh {
 
         [SerializeField]
         internal Entity[] entities;
+
+        [SerializeField]
+        internal int[] entitiesGens;
         
         //real entities count
         [SerializeField]

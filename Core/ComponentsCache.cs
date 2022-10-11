@@ -29,6 +29,8 @@ namespace Morpeh {
         internal int typedCacheId;
         [SerializeField]
         internal int typeId;
+        [SerializeField]
+        internal World world;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract bool RemoveComponent(Entity entity);

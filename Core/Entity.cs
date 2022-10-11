@@ -14,8 +14,8 @@ namespace Morpeh {
         [NonSerialized]
         internal World world;
 
-        [SerializeField]
-        internal int internalID;
+        internal int internalID => entityId.internalId;
+        
         [SerializeField]
         internal int worldID;
 
@@ -37,6 +37,8 @@ namespace Morpeh {
 
         [ShowInInspector]
         public int ID => this.internalID;
+
+        public EntityId entityId;
 
         internal Entity() {
         }

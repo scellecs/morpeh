@@ -6,6 +6,9 @@ namespace Morpeh.Native {
     public struct NativeCache<TNative> where TNative : unmanaged, IComponent {
         [NativeDisableUnsafePtrRestriction]
         public NativeIntHashMap<TNative> components;
+        
+        [NativeDisableUnsafePtrRestriction]
+        public NativeWorld world;
     }
 }
 #endif
