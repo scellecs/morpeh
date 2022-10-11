@@ -155,7 +155,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You're trying to get on entity {entity.internalID} a component that doesn't exists!");
             }
 #endif
-            return ref this.components.GetValueRefByKey(entity.internalID);
+            return ref this.components.GetValueRefByKey(entity.entityId.internalId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,7 +165,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying TryGetComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            return ref this.components.TryGetValueRefByKey(entity.internalID, out exist);
+            return ref this.components.TryGetValueRefByKey(entity.entityId.internalId, out exist);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
