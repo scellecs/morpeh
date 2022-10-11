@@ -15,7 +15,7 @@ namespace Morpeh.Native {
         [ReadOnly]
         private NativeFilterWrapper filterWrapper;
 
-        public int this[int index] => this.filterWrapper[index];
+        public EntityId this[int index] => this.filterWrapper[index];
         
         // Dispose pattern justification: 'archetypes' in 'filterWrapper' is an allocated NativeArray
         public void Dispose() {

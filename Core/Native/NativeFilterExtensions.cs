@@ -13,6 +13,7 @@ namespace Morpeh.Native {
             // TODO: Get rid of archetypes NativeArray allocation (?)
             var nativeFilter = new NativeFilterWrapper {
                 archetypes = new NativeArray<NativeArchetype>(filter.archetypes.length, Allocator.TempJob),
+                world = filter.world.AsNative(),
             };
 
             for (int i = 0, length = filter.archetypes.length; i < length; i++) {
