@@ -9,10 +9,10 @@ namespace Morpeh.Native
         {
             var nativeWorld = new NativeWorld();
             fixed (int* entitiesGensPtr = world.entitiesGens)
-            fixed (int* entitiesCountPtr = &world.entitiesCount)
+            fixed (int* entitiesCapacityPtr = &world.entitiesCapacity)
             {
                 nativeWorld.entitiesGens = entitiesGensPtr;
-                nativeWorld.entitiesCount = entitiesCountPtr;
+                nativeWorld.entitiesCapacity = entitiesCapacityPtr;
             }
             
             return nativeWorld;
@@ -24,7 +24,7 @@ namespace Morpeh.Native
             if (entityId.internalId < 0 || entityId.internalId >= *nativeWorld.entitiesCount)
                 return false;
             
-            return nativeWorld.entitiesGens[entityId.internalId] == entityId.internalGen;
+            return entityId.internalGen == nativeWorld.entitiesGens[entityId.internalId];
         }
     }
 }
