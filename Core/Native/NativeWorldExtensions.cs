@@ -21,7 +21,7 @@ namespace Morpeh.Native
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool Has(this NativeWorld nativeWorld, in EntityId entityId)
         {
-            if (entityId.internalId < 0 || entityId.internalId >= *nativeWorld.entitiesCount)
+            if (entityId.internalId < 0 || entityId.internalId >= *nativeWorld.entitiesCapacity)
                 return false;
             
             return entityId.internalGen == nativeWorld.entitiesGens[entityId.internalId];
