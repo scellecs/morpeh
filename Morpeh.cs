@@ -2111,7 +2111,8 @@ namespace Morpeh {
         internal static CommonCacheTypeIdentifier.TypeInfo info;
 
         static CacheTypeIdentifier() {
-            info = new CommonCacheTypeIdentifier.TypeInfo(UnsafeUtility.SizeOf<T>() == 1, typeof(IDisposable).IsAssignableFrom(typeof(T)));
+            var typeFieldsLength = typeof(T).GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic).Length;
+            info = new CommonCacheTypeIdentifier.TypeInfo(typeFieldsLength == 0, typeof(IDisposable).IsAssignableFrom(typeof(T)));
 #if MORPEH_DEBUG
             var id = CommonCacheTypeIdentifier.GetID<T>();
 #else
