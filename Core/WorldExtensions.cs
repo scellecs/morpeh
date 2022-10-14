@@ -320,6 +320,22 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this World world, in int id) => world.entities[id];
 
+        public static bool TryGetEntity(this World world, in EntityId entityId, out Entity entity)
+        {
+            entity = default;
+            
+            if (entityId.internalId < 0 || entityId.internalId >= world.entitiesCapacity) {
+                return false;
+            }
+            
+            if (world.entitiesGens[entityId.internalId] != entityId.internalGen) {
+                return false;
+            }
+            
+            entity = world.entities[entityId.internalId];
+            return !entity.IsNullOrDisposed();
+        }
+
         public static void RemoveEntity(this World world, Entity entity) {
             if (world.entities[entity.internalID] == entity) {
                 entity.Dispose();
