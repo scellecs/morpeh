@@ -192,7 +192,7 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.components.Remove(entity.entityId.internalId, out _)) {
+            if (this.components.Remove(in entity.entityId.internalId, out _)) {
                 entity.RemoveTransfer(in this.typeId);
                 return true;
             }
@@ -200,7 +200,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override bool Clean(Entity entity) => this.components.Remove(entity.entityId.internalId, out _);
+        internal override bool Clean(Entity entity) => this.components.Remove(in entity.entityId.internalId, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
