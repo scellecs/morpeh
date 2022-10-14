@@ -103,7 +103,7 @@ namespace Morpeh {
 
         //TODO refactor allocations and fast sort(maybe without it?)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Archetype GetArchetype(this World world, int[] typeIds, int newTypeId, bool added, out int archetypeId) {
+        internal static Archetype GetArchetype(this World world, int[] typeIds, in int newTypeId, in bool added, out int archetypeId) {
             Archetype archetype = null;
             archetypeId = -1;
 
