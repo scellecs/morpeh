@@ -1,7 +1,8 @@
-﻿using System.Runtime.CompilerServices;
-
+﻿#if MORPEH_BURST
 namespace Morpeh.Native
 {
+    using System.Runtime.CompilerServices;
+
     public static class NativeWorldExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -28,3 +29,4 @@ namespace Morpeh.Native
         }
     }
 }
+#endif
