@@ -32,7 +32,7 @@ namespace Morpeh
         }
         
         public override string ToString() {
-            return $"EntityId({internalId}, {internalGen})";
+            return $"EntityId(id={internalId}, gen={internalGen})";
         }
         
         public static EntityId Invalid => new EntityId(-1, -1);
