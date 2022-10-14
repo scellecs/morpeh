@@ -99,7 +99,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.components.Add(entity.entityId.internalId, default, out var slotIndex)) {
+            if (this.components.Add(in entity.entityId.internalId, default, out var slotIndex)) {
                 entity.AddTransfer(in this.typeId);
                 return ref this.components.data[slotIndex];
             }
@@ -116,7 +116,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.components.Add(entity.entityId.internalId, default, out var slotIndex)) {
+            if (this.components.Add(in entity.entityId.internalId, default, out var slotIndex)) {
                 entity.AddTransfer(in this.typeId);
                 exist = false;
                 return ref this.components.data[slotIndex];
@@ -133,7 +133,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.components.Add(entity.entityId.internalId, value, out _)) {
+            if (this.components.Add(in entity.entityId.internalId, value, out _)) {
                 entity.AddTransfer(in this.typeId);
                 return true;
             }
@@ -155,7 +155,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You're trying to get on entity {entity.internalID} a component that doesn't exists!");
             }
 #endif
-            return ref this.components.GetValueRefByKey(entity.entityId.internalId);
+            return ref this.components.GetValueRefByKey(in entity.entityId.internalId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,7 +165,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying TryGetComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            return ref this.components.TryGetValueRefByKey(entity.entityId.internalId, out exist);
+            return ref this.components.TryGetValueRefByKey(in entity.entityId.internalId, out exist);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -176,7 +176,7 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.components.Set(entity.entityId.internalId, value, out _)) {
+            if (this.components.Set(in entity.entityId.internalId, value, out _)) {
                 entity.AddTransfer(in this.typeId);
             }
         }
@@ -224,21 +224,21 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.components.TryGetValue(from.entityId.internalId, out var component)) {
+            if (this.components.TryGetValue(in from.entityId.internalId, out var component)) {
                 if (overwrite) {
-                    if (this.components.Has(to.entityId.internalId)) {
-                        this.components.Set(to.entityId.internalId, component, out _);
+                    if (this.components.Has(in to.entityId.internalId)) {
+                        this.components.Set(in to.entityId.internalId, component, out _);
                     }
                     else {
-                        this.components.Add(to.entityId.internalId, component, out _);
+                        this.components.Add(in to.entityId.internalId, component, out _);
                     }
                 }
                 else {
-                    if (this.components.Has(to.entityId.internalId) == false) {
-                        this.components.Add(to.entityId.internalId, component, out _);
+                    if (this.components.Has(in to.entityId.internalId) == false) {
+                        this.components.Add(in to.entityId.internalId, component, out _);
                     }
                 }
-                this.components.Remove(from.entityId.internalId, out _);
+                this.components.Remove(in from.entityId.internalId, out _);
             }
         }
 
