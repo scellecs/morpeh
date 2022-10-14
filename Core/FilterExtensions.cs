@@ -58,7 +58,7 @@ namespace Morpeh {
             if (typeIdsLength >= minLength) {
                 var check = true;
                 for (int i = 0, length = minLength; i < length; i++) {
-                    var includedTypeId = filter.includedTypeIds.Get(i);
+                    var includedTypeId = filter.includedTypeIds.Get(in i);
                     var foundInclude   = false;
                     for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
                         var typeId = archetype.typeIds[j];
@@ -80,7 +80,7 @@ namespace Morpeh {
                 }
 
                 for (int i = 0, length = filter.excludedTypeIds.length; i < length; i++) {
-                    var excludedTypeId = filter.excludedTypeIds.Get(i);
+                    var excludedTypeId = filter.excludedTypeIds.Get(in i);
                     for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
                         var typeId = archetype.typeIds[j];
                         if (typeId > excludedTypeId) {
@@ -190,10 +190,10 @@ namespace Morpeh {
             }
 
             if (mode == Filter.Mode.Include) {
-                newIncludedTypeIds.Add(newTypeId);
+                newIncludedTypeIds.Add(in newTypeId);
             }
             else if (mode == Filter.Mode.Exclude) {
-                newExcludedTypeIds.Add(newTypeId);
+                newExcludedTypeIds.Add(in newTypeId);
             }
 
             var newFilter = new Filter(filter.world, newTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
