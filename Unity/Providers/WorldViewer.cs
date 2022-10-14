@@ -40,7 +40,7 @@ namespace Morpeh {
                         for (int i = 0, length = this.World.entitiesLength; i < length; i++) {
                             var entity = this.World.entities[i];
                             if (entity != null) {
-                                var view = new EntityView {ID = entity.internalID, entityViewer = {getter = () => entity}};
+                                var view = new EntityView {ID = entity.entityId.internalId, entityViewer = {getter = () => entity}};
                                 this.entityViews.Add(view);
                             }
                         }
