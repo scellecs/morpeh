@@ -99,7 +99,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+            if (this.components.Add(entity.entityId.internalId, default, out var slotIndex)) {
                 entity.AddTransfer(this.typeId);
                 return ref this.components.data[slotIndex];
             }
@@ -116,7 +116,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.components.Add(entity.internalID, default, out var slotIndex)) {
+            if (this.components.Add(entity.entityId.internalId, default, out var slotIndex)) {
                 entity.AddTransfer(this.typeId);
                 exist = false;
                 return ref this.components.data[slotIndex];
@@ -133,7 +133,7 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.internalID}");
             }
 #endif
-            if (this.components.Add(entity.internalID, value, out _)) {
+            if (this.components.Add(entity.entityId.internalId, value, out _)) {
                 entity.AddTransfer(this.typeId);
                 return true;
             }
@@ -176,7 +176,7 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.components.Set(entity.internalID, value, out _)) {
+            if (this.components.Set(entity.entityId.internalId, value, out _)) {
                 entity.AddTransfer(this.typeId);
             }
         }
@@ -192,7 +192,7 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.components.Remove(entity.internalID, out _)) {
+            if (this.components.Remove(entity.entityId.internalId, out _)) {
                 entity.RemoveTransfer(this.typeId);
                 return true;
             }
@@ -200,7 +200,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override bool Clean(Entity entity) => this.components.Remove(entity.internalID, out _);
+        internal override bool Clean(Entity entity) => this.components.Remove(entity.entityId.internalId, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
@@ -210,7 +210,7 @@ namespace Morpeh {
             }
 #endif
             
-            return this.components.Has(entity.internalID);
+            return this.components.Has(entity.entityId.internalId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -224,21 +224,21 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.components.TryGetValue(from.internalID, out var component)) {
+            if (this.components.TryGetValue(from.entityId.internalId, out var component)) {
                 if (overwrite) {
-                    if (this.components.Has(to.internalID)) {
-                        this.components.Set(to.internalID, component, out _);
+                    if (this.components.Has(to.entityId.internalId)) {
+                        this.components.Set(to.entityId.internalId, component, out _);
                     }
                     else {
-                        this.components.Add(to.internalID, component, out _);
+                        this.components.Add(to.entityId.internalId, component, out _);
                     }
                 }
                 else {
-                    if (this.components.Has(to.internalID) == false) {
-                        this.components.Add(to.internalID, component, out _);
+                    if (this.components.Has(to.entityId.internalId) == false) {
+                        this.components.Add(to.entityId.internalId, component, out _);
                     }
                 }
-                this.components.Remove(from.internalID, out _);
+                this.components.Remove(from.entityId.internalId, out _);
             }
         }
 
@@ -258,7 +258,7 @@ namespace Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal sealed class ComponentsCacheDisposable<T> : ComponentsCache<T> where T : struct, IComponent, IDisposable {
         public override bool RemoveComponent(Entity entity) {
-            this.components.GetValueRefByKey(entity.internalID).Dispose();
+            this.components.GetValueRefByKey(entity.entityId.internalId).Dispose();
             return base.RemoveComponent(entity);
         }
 

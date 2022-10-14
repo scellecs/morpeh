@@ -337,7 +337,7 @@ namespace Morpeh {
         }
 
         public static void RemoveEntity(this World world, Entity entity) {
-            if (world.entities[entity.internalID] == entity) {
+            if (world.entities[entity.entityId.internalId] == entity) {
                 entity.Dispose();
             }
         }

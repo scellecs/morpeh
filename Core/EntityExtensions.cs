@@ -163,7 +163,7 @@ namespace Morpeh {
                 return;
             }
 
-            entity.world.dirtyEntities.Set(entity.internalID);
+            entity.world.dirtyEntities.Set(entity.entityId.internalId);
             entity.isDirty = true;
         }
 
@@ -178,7 +178,7 @@ namespace Morpeh {
                 return;
             }
 
-            entity.world.dirtyEntities.Set(entity.internalID);
+            entity.world.dirtyEntities.Set(entity.entityId.internalId);
             entity.isDirty = true;
         }
 
@@ -226,8 +226,8 @@ namespace Morpeh {
                 currentArchetype.Remove(entity);
             }
 
-            entity.world.ApplyRemoveEntity(entity.internalID);
-            entity.world.dirtyEntities.Unset(entity.internalID);
+            entity.world.ApplyRemoveEntity(entity.entityId.internalId);
+            entity.world.dirtyEntities.Unset(entity.entityId.internalId);
 
             entity.DisposeFast();
         }
