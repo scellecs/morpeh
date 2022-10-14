@@ -62,7 +62,7 @@ namespace Morpeh {
                 newArchetype = archetype.world.archetypes.data[archetypeId];
             }
             else {
-                newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, true, out archetypeId);
+                newArchetype = archetype.world.GetArchetype(archetype.typeIds, in typeId, true, out archetypeId);
                 archetype.addTransfer.Add(in typeId, archetypeId, out _);
             }
         }
@@ -73,7 +73,7 @@ namespace Morpeh {
                 newArchetype = archetype.world.archetypes.data[archetypeId];
             }
             else {
-                newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, false, out archetypeId);
+                newArchetype = archetype.world.GetArchetype(archetype.typeIds, in typeId, false, out archetypeId);
                 archetype.removeTransfer.Add(in typeId, archetypeId, out _);
             }
         }
