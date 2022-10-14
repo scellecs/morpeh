@@ -7,6 +7,9 @@ namespace Morpeh.Native {
     public static class NativeFilterExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeFilter AsNative(this Filter filter) => new NativeFilter(filter.AsNativeWrapper(), filter.GetLengthSlow());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NativeFilter AsNative(this Filter filter, int length) => new NativeFilter(filter.AsNativeWrapper(), length);
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static NativeFilterWrapper AsNativeWrapper(this Filter filter) {

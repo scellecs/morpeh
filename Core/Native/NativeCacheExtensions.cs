@@ -14,19 +14,19 @@ namespace Morpeh.Native {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasComponent<TNative>(this NativeCache<TNative> nativeCache, EntityId entityId) where TNative : unmanaged, IComponent {
-            return nativeCache.world.Has(in entityId) && nativeCache.components.TryGetIndex(entityId.internalId) != -1;
+        public static bool HasComponent<TNative>(this NativeCache<TNative> nativeCache, in EntityId entityId) where TNative : unmanaged, IComponent {
+            return nativeCache.world.Has(in entityId) && nativeCache.components.TryGetIndex(in entityId.internalId) != -1;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref TNative GetComponent<TNative>(this NativeCache<TNative> nativeCache, EntityId entityId) where TNative : unmanaged, IComponent {
-            return ref nativeCache.components.GetValueRefByKey(entityId.internalId);
+        public static ref TNative GetComponent<TNative>(this NativeCache<TNative> nativeCache, in EntityId entityId) where TNative : unmanaged, IComponent {
+            return ref nativeCache.components.GetValueRefByKey(in entityId.internalId);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref TNative GetComponent<TNative>(this NativeCache<TNative> nativeCache, EntityId entityId, out bool exists) where TNative : unmanaged, IComponent {
-            exists = nativeCache.world.Has(in entityId) && nativeCache.HasComponent(entityId);
-            return ref nativeCache.components.GetValueRefByKey(entityId.internalId);
+        public static ref TNative GetComponent<TNative>(this NativeCache<TNative> nativeCache, in EntityId entityId, out bool exists) where TNative : unmanaged, IComponent {
+            exists = nativeCache.world.Has(in entityId) && nativeCache.HasComponent(in entityId);
+            return ref nativeCache.components.GetValueRefByKey(in entityId.internalId);
         }
     }
 }
