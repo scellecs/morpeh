@@ -217,10 +217,10 @@ namespace Morpeh {
         public override void MigrateComponent(Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying MigrateComponent FROM null or disposed entity {from.internalID}");
+                throw new Exception($"[MORPEH] You are trying MigrateComponent FROM null or disposed entity {from.entityId.internalID}");
             }
             if (to.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying MigrateComponent TO null or disposed entity {to.internalID}");
+                throw new Exception($"[MORPEH] You are trying MigrateComponent TO null or disposed entity {to.entityId.internalID}");
             }
 #endif
 
