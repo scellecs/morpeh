@@ -100,7 +100,7 @@ namespace Morpeh {
             }
 #endif
             if (this.components.Add(entity.entityId.internalId, default, out var slotIndex)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(in this.typeId);
                 return ref this.components.data[slotIndex];
             }
 #if MORPEH_DEBUG
@@ -117,7 +117,7 @@ namespace Morpeh {
             }
 #endif
             if (this.components.Add(entity.entityId.internalId, default, out var slotIndex)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(in this.typeId);
                 exist = false;
                 return ref this.components.data[slotIndex];
             }
@@ -134,7 +134,7 @@ namespace Morpeh {
             }
 #endif
             if (this.components.Add(entity.entityId.internalId, value, out _)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(in this.typeId);
                 return true;
             }
 
@@ -177,7 +177,7 @@ namespace Morpeh {
 #endif
 
             if (this.components.Set(entity.entityId.internalId, value, out _)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(in this.typeId);
             }
         }
 
@@ -193,7 +193,7 @@ namespace Morpeh {
 #endif
 
             if (this.components.Remove(entity.entityId.internalId, out _)) {
-                entity.RemoveTransfer(this.typeId);
+                entity.RemoveTransfer(in this.typeId);
                 return true;
             }
             return false;

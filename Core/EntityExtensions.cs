@@ -153,12 +153,12 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddTransfer(this Entity entity, int typeId) {
+        internal static void AddTransfer(this Entity entity, in int typeId) {
             if (entity.previousArchetypeId == -1) {
                 entity.previousArchetypeId = entity.currentArchetypeId;
             }
 
-            entity.currentArchetype.AddTransfer(typeId, out entity.currentArchetypeId, out entity.currentArchetype);
+            entity.currentArchetype.AddTransfer(in typeId, out entity.currentArchetypeId, out entity.currentArchetype);
             if (entity.isDirty == true) {
                 return;
             }
@@ -168,12 +168,12 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RemoveTransfer(this Entity entity, int typeId) {
+        internal static void RemoveTransfer(this Entity entity, in int typeId) {
             if (entity.previousArchetypeId == -1) {
                 entity.previousArchetypeId = entity.currentArchetypeId;
             }
 
-            entity.currentArchetype.RemoveTransfer(typeId, out entity.currentArchetypeId, out entity.currentArchetype);
+            entity.currentArchetype.RemoveTransfer(in typeId, out entity.currentArchetypeId, out entity.currentArchetype);
             if (entity.isDirty == true) {
                 return;
             }

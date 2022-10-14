@@ -57,24 +57,24 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddTransfer(this Archetype archetype, int typeId, out int archetypeId, out Archetype newArchetype) {
-            if (archetype.addTransfer.TryGetValue(typeId, out archetypeId)) {
+        public static void AddTransfer(this Archetype archetype, in int typeId, out int archetypeId, out Archetype newArchetype) {
+            if (archetype.addTransfer.TryGetValue(in typeId, out archetypeId)) {
                 newArchetype = archetype.world.archetypes.data[archetypeId];
             }
             else {
                 newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, true, out archetypeId);
-                archetype.addTransfer.Add(typeId, archetypeId, out _);
+                archetype.addTransfer.Add(in typeId, archetypeId, out _);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveTransfer(this Archetype archetype, int typeId, out int archetypeId, out Archetype newArchetype) {
-            if (archetype.removeTransfer.TryGetValue(typeId, out archetypeId)) {
+        public static void RemoveTransfer(this Archetype archetype, in int typeId, out int archetypeId, out Archetype newArchetype) {
+            if (archetype.removeTransfer.TryGetValue(in typeId, out archetypeId)) {
                 newArchetype = archetype.world.archetypes.data[archetypeId];
             }
             else {
                 newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, false, out archetypeId);
-                archetype.removeTransfer.Add(typeId, archetypeId, out _);
+                archetype.removeTransfer.Add(in typeId, archetypeId, out _);
             }
         }
     }
