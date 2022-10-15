@@ -33,10 +33,11 @@ namespace Morpeh {
         [NonSerialized]
         internal int indexInCurrentArchetype;
 
+        [SerializeField]
+        internal EntityId entityId;
+        
         [ShowInInspector]
-        public int ID => this.entityId.internalId;
-
-        public EntityId entityId;
+        public EntityId EntityId => entityId;
 
         internal Entity() {
         }
