@@ -324,20 +324,20 @@ namespace Morpeh {
         {
             entity = default;
             
-            if (entityId.internalId < 0 || entityId.internalId >= world.entitiesCapacity) {
+            if (entityId.id < 0 || entityId.id >= world.entitiesCapacity) {
                 return false;
             }
             
-            if (world.entitiesGens[entityId.internalId] != entityId.internalGen) {
+            if (world.entitiesGens[entityId.id] != entityId.gen) {
                 return false;
             }
             
-            entity = world.entities[entityId.internalId];
+            entity = world.entities[entityId.id];
             return !entity.IsNullOrDisposed();
         }
 
         public static void RemoveEntity(this World world, Entity entity) {
-            if (world.entities[entity.entityId.internalId] == entity) {
+            if (world.entities[entity.entityId.id] == entity) {
                 entity.Dispose();
             }
         }

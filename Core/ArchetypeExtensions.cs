@@ -34,7 +34,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Add(this Archetype archetype, Entity entity) {
             archetype.length++;
-            entity.indexInCurrentArchetype = archetype.entitiesBitMap.Add(entity.entityId.internalId);
+            entity.indexInCurrentArchetype = archetype.entitiesBitMap.Add(entity.entityId.id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
