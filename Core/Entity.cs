@@ -37,7 +37,7 @@ namespace Morpeh {
         internal EntityId entityId;
         
         [ShowInInspector]
-        public EntityId EntityId => entityId;
+        public EntityId ID => entityId;
 
         internal Entity() {
         }
