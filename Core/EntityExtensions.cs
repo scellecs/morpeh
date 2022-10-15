@@ -205,7 +205,7 @@ namespace Morpeh {
         public static void Dispose(this Entity entity) {
             if (entity.isDisposed) {
 #if MORPEH_DEBUG
-                MLogger.LogError($"You're trying to dispose disposed entity with ID {entity.ID}.");
+                MLogger.LogError($"You're trying to dispose disposed entity with ID {entity.entityId}.");
 #endif
                 return;
             }

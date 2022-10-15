@@ -126,7 +126,7 @@ namespace Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose entity with ID {entity?.ID}");
+                    MLogger.LogError($"Can not dispose entity with ID {entity?.entityId}");
                     MLogger.LogException(e);
                 }
 #endif
