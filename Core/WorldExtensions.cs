@@ -320,8 +320,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this World world, in int id) => world.entities[id];
 
-        public static bool TryGetEntity(this World world, in EntityId entityId, out Entity entity)
-        {
+        public static bool TryGetEntity(this World world, in EntityId entityId, out Entity entity) {
             entity = default;
             
             if (entityId.id < 0 || entityId.id >= world.entitiesCapacity) {
