@@ -21,7 +21,7 @@ namespace Morpeh.Native {
                 return false;
             }
             
-            return entityId.internalGen == nativeWorld.entitiesGens[entityId.id];
+            return entityId.gen == nativeWorld.entitiesGens[entityId.id];
         }
     }
 }
