@@ -9,7 +9,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public readonly struct EntityId : IEquatable<EntityId> {
+    internal readonly struct EntityId : IEquatable<EntityId> {
         internal readonly int id;
         internal readonly int gen;
         
