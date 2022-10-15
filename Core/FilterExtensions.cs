@@ -190,10 +190,10 @@ namespace Morpeh {
             }
 
             if (mode == Filter.Mode.Include) {
-                newIncludedTypeIds.Add(in newTypeId);
+                newIncludedTypeIds.Add(newTypeId);
             }
             else if (mode == Filter.Mode.Exclude) {
-                newExcludedTypeIds.Add(in newTypeId);
+                newExcludedTypeIds.Add(newTypeId);
             }
 
             var newFilter = new Filter(filter.world, newTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
