@@ -1,7 +1,14 @@
-﻿using System;
-
-namespace Morpeh
+﻿namespace Morpeh
 {
+    using System;
+    using Unity.IL2CPP.CompilerServices;
+    
+#if !MORPEH_NON_SERIALIZED
+    [Serializable]
+#endif
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public readonly struct EntityId : IEquatable<EntityId> {
         public readonly int internalId;
         public readonly int internalGen;
