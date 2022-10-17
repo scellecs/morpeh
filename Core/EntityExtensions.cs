@@ -16,10 +16,12 @@ namespace Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class EntityExtensions {
-        internal static Entity Create(int id, int worldID) {
-            var newEntity = new Entity { internalID = id, worldID = worldID };
+        internal static Entity Create(int id, int worldID)
+        {
+            var world = World.worlds.data[worldID];
+            var newEntity = new Entity { entityId = new EntityId(id, world.entitiesGens[id]), worldID = worldID };
 
-            newEntity.world = World.worlds.data[newEntity.worldID];
+            newEntity.world = world;
 
             newEntity.previousArchetypeId = -1;
             newEntity.currentArchetypeId  = 0;
@@ -161,7 +163,7 @@ namespace Morpeh {
                 return;
             }
 
-            entity.world.dirtyEntities.Set(entity.internalID);
+            entity.world.dirtyEntities.Set(entity.entityId.id);
             entity.isDirty = true;
         }
 
@@ -176,7 +178,7 @@ namespace Morpeh {
                 return;
             }
 
-            entity.world.dirtyEntities.Set(entity.internalID);
+            entity.world.dirtyEntities.Set(entity.entityId.id);
             entity.isDirty = true;
         }
 
@@ -203,7 +205,7 @@ namespace Morpeh {
         public static void Dispose(this Entity entity) {
             if (entity.isDisposed) {
 #if MORPEH_DEBUG
-                MLogger.LogError($"You're trying to dispose disposed entity with ID {entity.ID}.");
+                MLogger.LogError($"You're trying to dispose disposed entity with ID {entity.entityId}.");
 #endif
                 return;
             }
@@ -224,8 +226,8 @@ namespace Morpeh {
                 currentArchetype.Remove(entity);
             }
 
-            entity.world.ApplyRemoveEntity(entity.internalID);
-            entity.world.dirtyEntities.Unset(entity.internalID);
+            entity.world.ApplyRemoveEntity(entity.entityId.id);
+            entity.world.dirtyEntities.Unset(entity.entityId.id);
 
             entity.DisposeFast();
         }
@@ -238,7 +240,7 @@ namespace Morpeh {
             entity.world            = null;
             entity.currentArchetype = null;
 
-            entity.internalID = -1;
+            entity.entityId   = EntityId.Invalid;
             entity.worldID    = -1;
 
             entity.isDirty    = false;
@@ -246,7 +248,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsDisposed([NotNull] this Entity entity) => entity.isDisposed;
+        public static bool IsDisposed([NotNull] this Entity entity) => entity.isDisposed || entity.entityId == EntityId.Invalid;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed([CanBeNull] this Entity entity) => entity == null || entity.isDisposed || entity.world == null;

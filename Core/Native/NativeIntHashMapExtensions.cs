@@ -32,7 +32,7 @@ namespace Morpeh.Native {
         
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref TNative GetValueRefByKey<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, int key) where TNative : unmanaged {
+        public static unsafe ref TNative GetValueRefByKey<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
             var rem = key & *nativeIntHashMap.capacityMinusOnePtr;
 
             int next;

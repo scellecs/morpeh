@@ -6,8 +6,11 @@ namespace Morpeh.Native {
     public struct NativeFilterWrapper : IDisposable {
         [ReadOnly]
         public NativeArray<NativeArchetype> archetypes;
+        
+        [ReadOnly]
+        public NativeWorld world;
 
-        public unsafe int this[int index] {
+        public unsafe EntityId this[int index] {
             get {
                 var totalArchetypeLength = 0;
                 for (int archetypeNum = 0, archetypesCount = this.archetypes.Length; archetypeNum < archetypesCount; archetypeNum++) {
@@ -16,13 +19,15 @@ namespace Morpeh.Native {
 
                     if (index >= totalArchetypeLength && index < totalArchetypeLength + archetypeLength) {
                         var slotIndex = index - totalArchetypeLength;
-                        return archetype.entitiesBitMap.data[slotIndex];
+                        var entityId = archetype.entitiesBitMap.data[slotIndex];
+                        
+                        return new EntityId(entityId, world.entitiesGens[entityId]);
                     }
 
                     totalArchetypeLength += *archetype.lengthPtr;
                 }
 
-                return -1;
+                return EntityId.Invalid;
             }
         }
 

@@ -8,6 +8,7 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Native")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Workaround")]
 
 namespace Morpeh {
