@@ -1,5 +1,4 @@
-﻿namespace Morpeh
-{
+﻿namespace Morpeh {
     using System;
     using Unity.IL2CPP.CompilerServices;
     
