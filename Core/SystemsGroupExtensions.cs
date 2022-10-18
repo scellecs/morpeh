@@ -51,9 +51,13 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this SystemsGroup systemsGroup, float deltaTime) {
             MLogger.BeginSample("SystemGroup.Update()");
+            MLogger.BeginSample("SystemGroup.DropDelayedAction()");
             systemsGroup.DropDelayedAction();
+            MLogger.EndSample();
 
+            MLogger.BeginSample("SystemGroup.Initialize()");
             systemsGroup.Initialize();
+            MLogger.EndSample();
             for (int i = 0, length = systemsGroup.systems.length; i < length; i++) {
                 var system = systemsGroup.systems.data[i];
 
@@ -63,7 +67,9 @@ namespace Morpeh {
                 systemsGroup.world.UpdateFilters();
             }
 
+            MLogger.BeginSample("SystemGroup.InvokeDelayedAction()");
             systemsGroup.InvokeDelayedAction();
+            MLogger.EndSample();
             MLogger.EndSample();
         }
 
