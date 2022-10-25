@@ -44,8 +44,21 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
-            World.worlds.Add(world);
-            world.identifier        = World.worlds.length - 1;
+            var added = false;
+            var id    = -1;
+            
+            for (int i = 0, length = World.worlds.length; i < length; i++) {
+                if (World.worlds.data[i] == null) {
+                    added = true;
+                    id    = i;
+                    World.worlds.data[i] = world;
+                    break;
+                }
+            }
+            if (added == false) {
+                World.worlds.Add(world);
+            }
+            world.identifier        = added ? id : World.worlds.length - 1;
             world.freeEntityIDs     = new IntFastList();
             world.nextFreeEntityIDs = new IntFastList();
             world.caches            = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
