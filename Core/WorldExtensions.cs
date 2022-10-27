@@ -287,7 +287,7 @@ namespace Morpeh {
             int id;
             if (world.freeEntityIDs.length > 0) {
                 id = world.freeEntityIDs.Get(0);
-                world.freeEntityIDs.RemoveAtSwap(0, out _);
+                world.freeEntityIDs.RemoveAtSwap(0, out int _);
             }
             else {
                 id = world.entitiesLength++;
@@ -310,7 +310,7 @@ namespace Morpeh {
             
             if (world.freeEntityIDs.length > 0) {
                 id = world.freeEntityIDs.Get(0);
-                world.freeEntityIDs.RemoveAtSwap(0, out _);
+                world.freeEntityIDs.RemoveAtSwap(0, out int _);
             }
             else {
                 id = world.entitiesLength++;
