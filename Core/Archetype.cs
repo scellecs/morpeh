@@ -14,7 +14,7 @@ namespace Morpeh {
         [SerializeField]
         internal int[] typeIds;
         [SerializeField]
-        internal FastList<int> entitiesBitMap;
+        internal IntFastList entitiesBitMap;
         [NonSerialized]
         internal FastList<Filter> filters;
         [SerializeField]
@@ -35,7 +35,7 @@ namespace Morpeh {
             this.id             = id;
             this.typeIds        = typeIds;
             this.length         = 0;
-            this.entitiesBitMap = new FastList<int>();
+            this.entitiesBitMap = new IntFastList();
             this.addTransfer    = new UnsafeIntHashMap<int>();
             this.removeTransfer = new UnsafeIntHashMap<int>();
 

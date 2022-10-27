@@ -103,6 +103,21 @@ namespace Morpeh.Collections {
             swap = default;
             return false;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool RemoveAtSwap(this IntFastList list, int index, out int newValue) {
+            if (list.length-- > 1) {
+                var oldIndex = list.length;
+                fixed (int* d = &list.data[0]) {
+                    newValue = *(d + index) = *(d + oldIndex);
+                }
+
+                return true;
+            }
+
+            newValue = default;
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Clear(this IntFastList list) {
