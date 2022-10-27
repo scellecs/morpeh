@@ -72,9 +72,9 @@ namespace Morpeh {
             private Entity current;
 
             private World      world;
-            private IntFastList archetypeEntities;
+            private FastList<int> archetypeEntities;
 
-            private IntFastList.Enumerator currentEnumerator;
+            private FastList<int>.Enumerator currentEnumerator;
 
             internal EntityEnumerator(Filter filter) {
                 this.world      = filter.world;
