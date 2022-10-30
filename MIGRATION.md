@@ -7,3 +7,11 @@
 
 ## New API  
 * IValidatable + IValidatableWithGameObject  
+* .AsNative() for:
+  * Archetype (NativeArchetype)
+  * ComponentsCache (NativeCache)
+  * FastList (NativeFastList)
+  * IntFastList (NativeIntFastList)
+  * Filter (NativeFilter)
+  * IntHashMap (NativeIntHashMap)
+  * World (NativeWorld)
