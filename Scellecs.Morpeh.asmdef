@@ -1,7 +1,9 @@
 {
     "name": "Scellecs.Morpeh",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:324caed91501a9c47a04ebfd87b68794"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
