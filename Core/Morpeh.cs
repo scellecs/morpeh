@@ -55,7 +55,11 @@ namespace Morpeh {
 namespace Unity.IL2CPP.CompilerServices {
     using System;
 
+#if !EXTERNAL_IL2CPP_ATTRS
     public enum Option {
+#else
+    internal enum Option {
+#endif
         NullChecks         = 1,
         ArrayBoundsChecks  = 2,
         DivideByZeroChecks = 3
@@ -63,7 +67,11 @@ namespace Unity.IL2CPP.CompilerServices {
     
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
+#if !EXTERNAL_IL2CPP_ATTRS
     public class Il2CppSetOptionAttribute : Attribute {
+#else
+    internal class Il2CppSetOptionAttribute : Attribute {
+#endif
         public Option Option { get; }
         public object Value  { get; }
 
