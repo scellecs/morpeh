@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IMorpehLogger` interface for custom loggers (`Console.WriteLine` for non-Unity environments by default)
 - `MORPEH_PROFILING` define for automatic systems profiling
 - `World.TryGetEntity(EntityId entityId, out Entity entity)` - returns true and entity if it exists, false otherwise
+- `MORPEH_NON_SERIALIZED` define to avoid serialization of Morpeh components
 - Displaying multiple worlds in World Browser
 - Basic TriInspector support
 
@@ -31,7 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Breaking] `Filter.Length` -> `Filter.GetLengthSlow()`
 - [Breaking] Collections now cleanup after removing components (Reading ref components data is not allowed after removing components)
 - `Entity.Dispose()` is now public
-- Fixed extra filter update https://github.com/scellecs/morpeh/pull/129
+
+### Fixed
+- Extra filter update https://github.com/scellecs/morpeh/pull/129
+- Systems disposed twice https://github.com/scellecs/morpeh/pull/128
+- Entity is detected as alive when it's not https://github.com/scellecs/morpeh/pull/123
+- 
 
 ### Removed
 - `ComponentsBag` (replaced by `ComponentsCache`)
