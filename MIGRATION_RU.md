@@ -4,6 +4,7 @@
 * Rename Morpeh/XCrew.Morpeh -> Scellecs.Morpeh  
 * Globals NextFrame -> Publish  
 * int Entity.ID -> EntityID Entity.ID
+* Filter.Length -> Filter.GetLengthSlow()
 
 ## New API  
 * IValidatable + IValidatableWithGameObject  
@@ -15,3 +16,4 @@
   * Filter (NativeFilter)
   * IntHashMap (NativeIntHashMap)
   * World (NativeWorld)
+* Filter.IsEmpty()
