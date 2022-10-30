@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search support in World Browser
 - Basic TriInspector support (Add `TRI_INSPECTOR` define to enable)
 - `MORPEH_BURST` define to determine if Burst is enabled
+- `World.SetFriendlyName(string name)` + integration with World Browser
 
 ### Changed
 - [Breaking] Rename `Morpeh/XCrew.Morpeh` -> `Scellecs.Morpeh`
