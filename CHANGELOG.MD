@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `IntHashMap` (`NativeIntHashMap`)
   - `World` (`NativeWorld`)
 - `Filter.IsEmpty()` to check if filter has no entities
-- `IMorpehLogger` interface for custom loggers (Console.WriteLine for non-Unity environments by default)
+- `IMorpehLogger` interface for custom loggers (`Console.WriteLine` for non-Unity environments by default)
 - `MORPEH_PROFILING` define for automatic systems profiling
 - `World.TryGetEntity(EntityId entityId, out Entity entity)` - returns true and entity if it exists, false otherwise
 - Displaying multiple worlds in World Browser
