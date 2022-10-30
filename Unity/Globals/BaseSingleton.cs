@@ -3,6 +3,8 @@
     using JetBrains.Annotations;
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#elif TRI_INSPECTOR
+    using TriInspector;
 #endif
     using Unity.IL2CPP.CompilerServices;
 #if UNITY_EDITOR
@@ -30,7 +32,12 @@
         [Space]
         private Morpeh.Editor.EntityViewerWithHeader entityViewer = new Morpeh.Editor.EntityViewerWithHeader();
 #elif UNITY_EDITOR && TRI_INSPECTOR
-        // TODO: TRI_INSPECTOR SUPPORT
+        [PropertyOrder(100)]
+        [ShowInInspector]
+        [HideReferencePicker]
+        private Morpeh.Editor.EntityViewerWithHeader entityViewerValue => entityViewer;
+        
+        private Morpeh.Editor.EntityViewerWithHeader entityViewer = new Morpeh.Editor.EntityViewerWithHeader();
 #endif
 
         [CanBeNull]
@@ -64,7 +71,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
             this.entityViewer = new Morpeh.Editor.EntityViewerWithHeader {getter = () => this.internalEntity};
 #elif UNITY_EDITOR && TRI_INSPECTOR
-            // TODO: TRI_INSPECTOR SUPPORT
+            this.entityViewer = new Morpeh.Editor.EntityViewerWithHeader {getter = () => this.internalEntity};
 #endif
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;

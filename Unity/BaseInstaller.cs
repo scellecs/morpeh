@@ -2,7 +2,7 @@ namespace Morpeh {
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #elif UNITY_EDITOR && TRI_INSPECTOR
-    // TODO: TRI_INSPECTOR SUPPORT
+    using TriInspector;
 #endif
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;

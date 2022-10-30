@@ -11,15 +11,7 @@
         [HideInInspector]
         private T serializedData;
         private ComponentsCache<T> cache;
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        private string typeName = typeof(T).Name;
-
-        [PropertySpace]
-        [ShowInInspector]
-        [PropertyOrder(1)]
-        [HideLabel]
-        [InlineProperty]
-#elif UNITY_EDITOR && TRI_INSPECTOR
+#if UNITY_EDITOR && (ODIN_INSPECTOR || TRI_INSPECTOR)
         private string typeName = typeof(T).Name;
 
         [PropertySpace]

@@ -5,7 +5,7 @@ namespace Morpeh {
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #elif UNITY_EDITOR && TRI_INSPECTOR
-    // TODO: TRI_INSPECTOR SUPPORT
+    using TriInspector;
 #endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -17,7 +17,9 @@ namespace Morpeh {
         [ShowInInspector]
         [ReadOnly]
 #elif UNITY_EDITOR && TRI_INSPECTOR
-        // TODO: TRI_INSPECTOR SUPPORT
+        [ShowInInspector]
+        [PropertyOrder(-100)]
+        private int internalId => internalEntityID;
 #endif
         protected int internalEntityID = -1;
 
@@ -55,7 +57,7 @@ namespace Morpeh {
 #if UNITY_EDITOR && ODIN_INSPECTOR
             this.entityViewer.getter = () => this.InternalEntity;
 #elif UNITY_EDITOR && TRI_INSPECTOR
-            // TODO: TRI_INSPECTOR SUPPORT
+            this.entityViewer.getter = () => this.InternalEntity;
 #endif
             if (!Application.isPlaying) {
                 return;
@@ -121,7 +123,21 @@ namespace Morpeh {
         [PropertyOrder(100)]
         private Editor.EntityViewerWithHeader entityViewer = new Editor.EntityViewerWithHeader();
 #elif UNITY_EDITOR && TRI_INSPECTOR
-        // TODO: TRI_INSPECTOR SUPPORT
+        private bool IsNotEntityProvider {
+            get {
+                var type = this.GetType();
+                return type != typeof(EntityProvider) && type != typeof(UniversalProvider);
+            }
+        }
+
+        [HideIf(nameof(IsNotEntityProvider))]
+        [ShowInInspector]
+        [HideReferencePicker]
+        [PropertyOrder(100)]
+        [HideLabel]
+        private Editor.EntityViewerWithHeader entityViewerData => entityViewer;
+        
+        private Editor.EntityViewerWithHeader entityViewer = new Editor.EntityViewerWithHeader();
 #endif
     }
 }

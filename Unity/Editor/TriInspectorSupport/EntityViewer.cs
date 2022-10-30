@@ -16,7 +16,7 @@ namespace Morpeh.Editor {
         private readonly List<ComponentView> componentViews = new List<ComponentView>();
 
         [PropertySpace]
-        [Sirenix.OdinInspector.ShowInInspector]
+        [ShowInInspector]
         [ListDrawerSettings(HideAddButton = true, HideRemoveButton = true)]
         private List<ComponentView> ComponentsOnEntity {
             get {
@@ -48,16 +48,16 @@ namespace Morpeh.Editor {
             internal bool   IsMarker => this.internalTypeDefinition.typeInfo.isMarker;
             internal string FullName => this.internalTypeDefinition.type.FullName;
 
-            [ShowIf(nameof(IsMarker))]
             [HideLabel]
-            [Sirenix.OdinInspector.ShowInInspector]
-            internal string TypeName => this.internalTypeDefinition.type.Name;
+            [ShowInInspector]
+            internal string Component => this.internalTypeDefinition.type.Name;
 
             internal Entity entity;
 
             [HideIf(nameof(IsMarker))]
-            [LabelText(nameof(TypeName))]
-            [Sirenix.OdinInspector.ShowInInspector]
+            [HideLabel]
+            [HideReferencePicker]
+            [ShowInInspector]
             public object Data {
                 get {
                     if (this.internalTypeDefinition.typeInfo.isMarker || Application.isPlaying == false) {
