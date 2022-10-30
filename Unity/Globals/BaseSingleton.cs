@@ -80,8 +80,11 @@
 #endif
         protected virtual bool CheckIsInitialized() {
             if (this.internalEntityID < 0) {
-                this.internalEntity = World.Default.CreateEntity(out this.internalEntityID);
-                this.internalEntity.AddComponent<SingletonMarker>();
+                var world = World.Default;
+                var cache = world.GetCache<SingletonMarker>();
+                
+                this.internalEntity = world.CreateEntity(out this.internalEntityID);
+                cache.AddComponent(this.internalEntity);
                 
                 return true;
             }

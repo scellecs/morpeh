@@ -1,10 +1,10 @@
 {
-  "name": "com.xcrew.morpeh",
-  "author": "Oleg Morozov",
+  "name": "com.scellecs.morpeh",
+  "author": "Scellecs",
   "displayName": "Morpeh",
   "description": "Fast and Simple ECS Framework for Unity Game Engine.",
-  "unity": "2019.3",
-  "version": "2020.9.0",
+  "unity": "2019.4",
+  "version": "2021.1.0",
   "keywords": [
     "morpeh",
     "ecs"
@@ -12,6 +12,6 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/X-Crew/Morpeh"
+    "url": "https://github.com/scellecs/Morpeh"
   }
 }

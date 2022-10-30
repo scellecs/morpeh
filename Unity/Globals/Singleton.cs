@@ -1,5 +1,5 @@
 ﻿namespace Morpeh.Globals {
-    using System.Runtime.CompilerServices;
+    using System;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
@@ -16,7 +16,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideIf(nameof(ShowSerializedComponents))]
 #endif
-        public IComponent[] serializedComponents = new IComponent[0];
+        public IComponent[] serializedComponents = Array.Empty<IComponent>();
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool ShowSerializedComponents => this.internalEntityID > -1;
@@ -38,28 +38,5 @@
             }
             return check;
         }
-
-        public int ID => this.Entity.ID;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddComponent<T>() where T : struct, IComponent => ref this.Entity.AddComponent<T>();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddComponent<T>(out bool exist) where T : struct, IComponent => ref this.Entity.AddComponent<T>(out exist);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent<T>() where T : struct, IComponent => ref this.Entity.GetComponent<T>();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent<T>(out bool exist) where T : struct, IComponent => ref this.Entity.GetComponent<T>(out exist);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent<T>(in T value) where T : struct, IComponent => this.Entity.SetComponent(in value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool RemoveComponent<T>() where T : struct, IComponent => this.Entity.RemoveComponent<T>();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Has<T>() where T : struct, IComponent => this.Entity.Has<T>();
     }
 }

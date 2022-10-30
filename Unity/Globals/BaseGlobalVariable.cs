@@ -184,9 +184,6 @@
 #endif
         }
 
-        #region EDITOR
-
-#if UNITY_EDITOR
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [ShowIf("@" + nameof(HasPlayerPrefsValueAndAutoSave))]
@@ -198,8 +195,5 @@
                 PlayerPrefs.DeleteKey(this.Key);
             }
         }
-#endif
-
-        #endregion
     }
 }

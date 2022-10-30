@@ -1,10 +1,3 @@
-# Git LFS tracking file types
-
-# IronSource
-*.a filter=lfs diff=lfs merge=lfs -text
-IS*Adapter filter=lfs diff=lfs merge=lfs -text
-GoogleMobileAds filter=lfs diff=lfs merge=lfs -text
-
 # Image
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.jpeg filter=lfs diff=lfs merge=lfs -text
@@ -54,4 +47,3 @@ GoogleMobileAds filter=lfs diff=lfs merge=lfs -text
 *.reason filter=lfs diff=lfs merge=lfs -text
 *.lxo filter=lfs diff=lfs merge=lfs -text
 *.bundle* filter=lfs diff=lfs merge=lfs -text
-LightingData.asset filter=lfs diff=lfs merge=lfs -text
