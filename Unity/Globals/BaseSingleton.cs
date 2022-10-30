@@ -20,7 +20,9 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ReadOnly]
 #elif UNITY_EDITOR && TRI_INSPECTOR
-        // TODO: TRI_INSPECTOR SUPPORT
+        [ShowInInspector]
+        [PropertyOrder(-100)]
+        private int internalId => internalEntityID;
 #endif
         protected int internalEntityID = -1;
 
