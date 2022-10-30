@@ -24,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MORPEH_NON_SERIALIZED` define to avoid serialization of Morpeh components
 - Displaying multiple worlds in World Browser
 - Search support in World Browser
-- Basic TriInspector support (Add `TRI_INSPECTOR` define to enable)
 - `MORPEH_BURST` define to determine if Burst is enabled
 - `World.SetFriendlyName(string name)` / `string World.GetFriendlyName()` + integration with World Browser
 - `Entity.MigrateTo(Entity otherEntity)` to migrate components from one entity to another

@@ -23,4 +23,3 @@
 * Added `MORPEH_PROFILING` define. Adding it to Player Settings allows profiling systems without using Deep Profile.
 * `Entity.Dispose()` is now public. It allows destroying entities without accessing the World it's in.
 * Added viewing multiple worlds in World Browser
-* Added basic TriInspector support
