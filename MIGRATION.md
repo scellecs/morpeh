@@ -18,3 +18,4 @@
   * World (NativeWorld)
 * Filter.IsEmpty()
 * IMorpehLogger interface for custom loggers (Console.WriteLine for non-Unity environments by default)
+* MORPEH_PROFILING define for automatic systems profiling
