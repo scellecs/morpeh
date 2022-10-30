@@ -8,7 +8,7 @@
 
 ## New API  
 * Added new component interfaces `IValidatable`, `IValidatableWithGameObject`. It allows calling default Unity method `OnValidate` for components, f.e. to initialize editor fields. Works only for components added via MonoProvider.
-* Added support for native Api (Job/Burst). Details are available in [README](README.md#unity-jobs-and-burst). Most of work is done via `AsNative()` for:
+* Added support for native Api (Job/Burst). Details are available in [README](README.md#unity-jobs-and-burst). Most work is done via `AsNative()` for:
   * Archetype (NativeArchetype)
   * ComponentsCache (NativeCache)
   * FastList (NativeFastList)
