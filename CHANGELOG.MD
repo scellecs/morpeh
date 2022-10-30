@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Basic Jobs/Burst support:
   - Changing components data
+  - Checking if components exists on an entity
   - Accessing entities by `EntityID` struct
 - `.AsNative()` API for Jobs/Burst:
   - `Archetype` (`NativeArchetype`)
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `World.TryGetEntity(EntityId entityId, out Entity entity)` - returns true and entity if it exists, false otherwise
 - `MORPEH_NON_SERIALIZED` define to avoid serialization of Morpeh components
 - Displaying multiple worlds in World Browser
+- Search support in World Browser
 - Basic TriInspector support
 
 ### Changed
