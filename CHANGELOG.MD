@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Breaking] Collections now cleanup after removing components (Reading ref components data is not allowed after removing components)
 - [Breaking] `Filter` iteration is not order-deterministic
 - `Entity.Dispose()` is now public
+- `Installer` can be inherited from
 
 ### Fixed
 - Extra filter update https://github.com/scellecs/morpeh/pull/129
