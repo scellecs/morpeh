@@ -36,8 +36,8 @@ Features:
 
 ## ✈️ Migration To New Version 
 
-[Migration Guide 🇬🇧](MIGRATION.md)  
-[Гайд по миграции 🇷🇺](MIGRATION_RU.md)
+English version: [Migration Guide](MIGRATION.md)  
+Russian version: [Гайд по миграции](MIGRATION_RU.md)
 
 ## 📖 How To Install
 
