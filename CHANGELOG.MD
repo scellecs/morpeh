@@ -41,4 +41,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - World.Default takes 0-th index with null value if initialized outside of UnityRuntimeHelper https://github.com/scellecs/morpeh/pull/138
 
 ### Removed
-- `ComponentsBag` (replaced by `ComponentsCache`)
+- [Breaking] `ComponentsBag` (replaced by `ComponentsCache`)
