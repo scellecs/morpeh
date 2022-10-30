@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Breaking] `FastList` allows removing elements during iteration (current and next elements only)
 - `Entity.Dispose()` is now public
 - `Installer` can be inherited from
+- License ownership changed to `Oleg Morozov, Igor Boyko`
 
 ### Fixed
 - Extra filter update https://github.com/scellecs/morpeh/pull/129
