@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Entity.Dispose()` is now public
 - `Installer` can be inherited from
 - License ownership changed to `Oleg Morozov, Igor Boyko`
+- Internal optimizations and improvements
 
 ### Fixed
 - Extra filter update https://github.com/scellecs/morpeh/pull/129
