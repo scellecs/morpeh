@@ -536,4 +536,5 @@ public struct TestParallelJobReference : IJobParallelFor {
 ## 💬 Contacts
 
 ✉️ Telegram: [olegmrzv](https://t.me/olegmrzv)  
-📧 E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)
+📧 E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)  
+👥 Telegram Community RU: [Morpeh ECS Development](https://t.me/morpeh_development_chat)
