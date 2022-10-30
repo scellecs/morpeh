@@ -49,14 +49,14 @@ namespace Morpeh.Utils.Editor {
             var totalCompilationTimeSeconds = compilationTotalTime / 1000f;
             BuildEvents.AppendFormat("────────────────────────────────────\n" +
                                      " <b>Compilation Total:</b> {0:0.00} seconds\n", totalCompilationTimeSeconds);
-            EditorPrefs.SetString(ASSEMBLY_RELOAD_EVENTS_EDITOR_PREF, DateTime.UtcNow.ToBinary().ToString());
-            EditorPrefs.SetString(ASSEMBLY_COMPILATION_EVENTS_EDITOR_PREF, BuildEvents.ToString());
-            EditorPrefs.SetString(ASSEMBLY_TOTAL_COMPILATION_TIME_EDITOR_PREF, totalCompilationTimeSeconds.ToString(CultureInfo.InvariantCulture));
+            SessionState.SetString(ASSEMBLY_RELOAD_EVENTS_EDITOR_PREF, DateTime.UtcNow.ToBinary().ToString());
+            SessionState.SetString(ASSEMBLY_COMPILATION_EVENTS_EDITOR_PREF, BuildEvents.ToString());
+            SessionState.SetString(ASSEMBLY_TOTAL_COMPILATION_TIME_EDITOR_PREF, totalCompilationTimeSeconds.ToString(CultureInfo.InvariantCulture));
         }
-
+        
         private static void AssemblyReloadEventsOnAfterAssemblyReload() {
-            var binString                   = EditorPrefs.GetString(ASSEMBLY_RELOAD_EVENTS_EDITOR_PREF);
-            var totalCompilationTimeString  = EditorPrefs.GetString(ASSEMBLY_TOTAL_COMPILATION_TIME_EDITOR_PREF);
+            var binString                  = SessionState.GetString(ASSEMBLY_RELOAD_EVENTS_EDITOR_PREF, string.Empty);
+            var totalCompilationTimeString = SessionState.GetString(ASSEMBLY_TOTAL_COMPILATION_TIME_EDITOR_PREF, string.Empty);
             if(float.TryParse(totalCompilationTimeString, NumberStyles.Any, CultureInfo.InvariantCulture, out var totalCompilationTimeSeconds) == false) {
                 return;
             }
@@ -67,7 +67,7 @@ namespace Morpeh.Utils.Editor {
 
             var date             = DateTime.FromBinary(bin);
             var time             = DateTime.UtcNow - date;
-            var compilationTimes = EditorPrefs.GetString(ASSEMBLY_COMPILATION_EVENTS_EDITOR_PREF);
+            var compilationTimes = SessionState.GetString(ASSEMBLY_COMPILATION_EVENTS_EDITOR_PREF, string.Empty);
             var totalTimeSeconds = totalCompilationTimeSeconds + time.TotalSeconds;
             if (!string.IsNullOrEmpty(compilationTimes)) {
                 Debug.Log($"<b>Compilation Report</b>: {totalTimeSeconds:F2} seconds\n" +

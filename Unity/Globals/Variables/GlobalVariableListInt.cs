@@ -16,12 +16,9 @@ namespace Morpeh.Globals {
             set => this.Value = ((ListIntWrapper) value).list;
         }
         
-        protected override List<int> Load(string serializedData)
-            => JsonUtility.FromJson<ListIntWrapper>(serializedData).list;
+        public override List<int> Deserialize(string serializedData) => JsonUtility.FromJson<ListIntWrapper>(serializedData).list;
 
-        protected override string Save() => JsonUtility.ToJson(new ListIntWrapper {list = this.value});
-        
-        public override string LastToString() => string.Join(",", Format(this.BatchedChanges.Peek()));
+        public override string Serialize(List<int> data) => JsonUtility.ToJson(new ListIntWrapper {list = data});
 
         private static IEnumerable<string> Format(IEnumerable<int> list) => list.Select(i => i.ToString(CultureInfo.InvariantCulture));
         

@@ -1,5 +1,6 @@
 {
-    "name": "Morpeh",
+    "name": "Scellecs.Morpeh",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -5,7 +5,6 @@
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
-
 #endif
 
     public abstract class DataWrapper {
@@ -70,15 +69,11 @@
             set => this.SetValue(value);
         }
 
-        private void SetValue(TData newValue) {
+        public void SetValue(TData newValue) {
             this.value = newValue;
             this.OnChange(newValue);
         }
-        
-        private void OnChange() {
-            this.OnChange(this.value);
-        }
-        
+
         private void OnChange(TData newValue) {
             if (Application.isPlaying) {
                 this.CheckIsInitialized();
@@ -86,12 +81,9 @@
             }
         }
 
-        protected abstract TData  Load([NotNull] string serializedData);
-        protected abstract string Save();
-
         public virtual void Reset() {
             if (!string.IsNullOrEmpty(this.defaultSerializedValue)) {
-                this.value = this.Load(this.defaultSerializedValue);
+                this.value = this.Deserialize(this.defaultSerializedValue);
             }
         }
 
@@ -146,37 +138,52 @@
 
         private void LoadData() {
 #if UNITY_EDITOR
-            if (!EditorApplication.isPlayingOrWillChangePlaymode) {
-                return;
+            try {
+#endif
+    #if UNITY_EDITOR
+                if (!EditorApplication.isPlayingOrWillChangePlaymode) {
+                    return;
+                }
+    #endif
+                
+                if (this.isLoaded) {
+                    return;
+                }
+
+                this.defaultSerializedValue = this.Serialize(this.value);
+                this.isLoaded = true;
+                
+                if (!this.AutoSave) {
+                    return;
+                }
+                if (!PlayerPrefs.HasKey(this.Key)) {
+                    return;
+                }
+
+                this.value = this.Deserialize(PlayerPrefs.GetString(this.Key));
+#if UNITY_EDITOR
+            }
+            catch (Exception e) {
+                Debug.LogException(e);
             }
 #endif
-            
-            if (this.isLoaded) {
-                return;
-            }
-
-            this.defaultSerializedValue = this.Save();
-            this.isLoaded = true;
-            
-            if (!this.AutoSave) {
-                return;
-            }
-            if (!PlayerPrefs.HasKey(this.Key)) {
-                return;
-            }
-
-            this.value = this.Load(PlayerPrefs.GetString(this.Key));
         }
 
         internal void SaveData() {
-            if (this.AutoSave) {
-                PlayerPrefs.SetString(this.Key, this.Save());
+#if UNITY_EDITOR
+            try {
+#endif
+                if (this.AutoSave) {
+                    PlayerPrefs.SetString(this.Key, this.Serialize(this.value));
+                }
+#if UNITY_EDITOR
             }
+            catch (Exception e) {
+                Debug.LogException(e);
+            }
+#endif
         }
 
-        #region EDITOR
-
-#if UNITY_EDITOR
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideInInlineEditors]
         [ShowIf("@" + nameof(HasPlayerPrefsValueAndAutoSave))]
@@ -188,8 +195,5 @@
                 PlayerPrefs.DeleteKey(this.Key);
             }
         }
-#endif
-
-        #endregion
     }
 }

@@ -7,6 +7,8 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class FixedUpdateSystem : ScriptableObject, IFixedSystem {
         public World World { get; set; }
+        
+        public Filter Filter => this.World.Filter;
 
         public abstract void OnAwake();
 

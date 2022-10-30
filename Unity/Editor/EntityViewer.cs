@@ -5,6 +5,7 @@ namespace Morpeh.Editor {
     using Collections;
     using Morpeh;
     using Sirenix.OdinInspector;
+    using UnityEngine;
 
     [Serializable]
     [InlineProperty]
@@ -23,17 +24,18 @@ namespace Morpeh.Editor {
         [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
         private List<ComponentView> ComponentsOnEntity {
             get {
-                if (this.entity != null) {
-                    this.componentViews.Clear();
-                    foreach (var slotIndex in this.entity.componentsIds) {
-                        var slot = this.entity.componentsIds.GetKeyByIndex(slotIndex);
-                        var data = this.entity.componentsIds.GetValueByIndex(slotIndex);
-                        var view = new ComponentView {
-                            debugInfo = CommonCacheTypeIdentifier.editorTypeAssociation[slot],
-                            id        = data,
-                            world     = this.entity.world
-                        };
-                        this.componentViews.Add(view);
+                this.componentViews.Clear();
+                if (this.entity != null && this.entity.world != null) {
+                    var caches = this.entity.world.caches;
+                    foreach (var cacheId in caches) {
+                        var cache = ComponentsCache.caches.data[caches.GetValueByIndex(cacheId)];
+                        if (cache.Has(this.entity)) {
+                            var view = new ComponentView {
+                                internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[cache.typeId],
+                                entity                 = this.entity
+                            };
+                            this.componentViews.Add(view);
+                        }
                     }
                 }
 
@@ -46,20 +48,18 @@ namespace Morpeh.Editor {
         [PropertyTooltip("$" + nameof(FullName))]
         [Serializable]
         private struct ComponentView {
-            internal CommonCacheTypeIdentifier.DebugInfo debugInfo;
+            internal CommonTypeIdentifier.InternalTypeDefinition internalTypeDefinition;
 
-            internal World world;
-
-            internal bool   IsMarker => this.debugInfo.typeInfo.isMarker;
-            internal string FullName => this.debugInfo.type.FullName;
+            internal bool   IsMarker => this.internalTypeDefinition.typeInfo.isMarker;
+            internal string FullName => this.internalTypeDefinition.type.FullName;
 
             [ShowIf("$" + nameof(IsMarker))]
             [HideLabel]
             [DisplayAsString(false)]
             [ShowInInspector]
-            internal string TypeName => this.debugInfo.type.Name;
+            internal string TypeName => this.internalTypeDefinition.type.Name;
 
-            internal int id;
+            internal Entity entity;
 
             [DisableContextMenu]
             [HideIf("$" + nameof(IsMarker))]
@@ -68,18 +68,18 @@ namespace Morpeh.Editor {
             [HideReferenceObjectPickerAttribute]
             public object Data {
                 get {
-                    if (this.debugInfo.typeInfo.isMarker) {
+                    if (this.internalTypeDefinition.typeInfo.isMarker || Application.isPlaying == false) {
                         return null;
                     }
 
-                    return this.debugInfo.getBoxed(this.world, this.id);
+                    return this.internalTypeDefinition.entityGetComponentBoxed(this.entity);
                 }
                 set {
-                    if (this.debugInfo.typeInfo.isMarker) {
+                    if (this.internalTypeDefinition.typeInfo.isMarker || Application.isPlaying == false) {
                         return;
                     }
 
-                    this.debugInfo.setBoxed(this.world, this.id, value);
+                    this.internalTypeDefinition.entitySetComponentBoxed(this.entity, value);
                 }
             }
         }

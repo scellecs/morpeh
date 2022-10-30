@@ -16,12 +16,10 @@ namespace Morpeh.Globals {
             set => this.Value = ((ListFloatWrapper) value).list;
         }
 
-        protected override List<float> Load(string serializedData)
+        public override List<float> Deserialize(string serializedData)
             => JsonUtility.FromJson<ListFloatWrapper>(serializedData).list;
 
-        protected override string Save() => JsonUtility.ToJson(new ListFloatWrapper {list = this.value});
-        
-        public override string LastToString() => string.Join(",", Format(this.BatchedChanges.Peek()));
+        public override string Serialize(List<float> data) => JsonUtility.ToJson(new ListFloatWrapper {list = data});
 
         private static IEnumerable<string> Format(IEnumerable<float> list) => list.Select(i => i.ToString(CultureInfo.InvariantCulture));
 

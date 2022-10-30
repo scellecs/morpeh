@@ -17,11 +17,9 @@ namespace Morpeh.Globals {
         
         public override bool CanBeAutoSaved => false;
 
-        protected override List<Object> Load(string serializedData) => JsonUtility.FromJson<ListObjectWrapper>(serializedData).list;
+        public override List<Object> Deserialize(string serializedData) => JsonUtility.FromJson<ListObjectWrapper>(serializedData).list;
 
-        protected override string Save() => JsonUtility.ToJson(new ListObjectWrapper{list = this.value});
-        
-        public override string LastToString() => string.Join(",", this.BatchedChanges.Peek());
+        public override string Serialize(List<Object> data) => JsonUtility.ToJson(new ListObjectWrapper{list = data});
 
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
