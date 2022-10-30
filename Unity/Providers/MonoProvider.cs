@@ -2,6 +2,8 @@
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#elif UNITY_EDITOR && !ODIN_INSPECTOR
+    using TriInspector;
 #endif
 
     public abstract class MonoProvider<T> : EntityProvider where T : struct, IComponent {
@@ -9,7 +11,7 @@
         [HideInInspector]
         private T serializedData;
         private ComponentsCache<T> cache;
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         private string typeName = typeof(T).Name;
 
         [PropertySpace]
