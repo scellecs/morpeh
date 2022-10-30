@@ -1,0 +1,35 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2022.1.0] - 01.11.2022
+### Added
+- Basic Jobs/Burst support:
+  - Changing components data
+  - Accessing entities by `EntityID` struct
+- `.AsNative()` API for Jobs/Burst:
+  - `Archetype` (`NativeArchetype`)
+  - `ComponentsCache` (`NativeCache`)
+  - `FastList` (`NativeFastList`)
+  - `IntFastList` (`NativeIntFastList`)
+  - `Filter` (`NativeFilter`)
+  - `IntHashMap` (`NativeIntHashMap`)
+  - `World` (`NativeWorld`)
+- `Filter.IsEmpty()` to check if filter has no entities
+- `IMorpehLogger` interface for custom loggers (Console.WriteLine for non-Unity environments by default)
+- `MORPEH_PROFILING` define for automatic systems profiling
+- `World.TryGetEntity(EntityId entityId, out Entity entity)` - returns true and entity if it exists, false otherwise
+- Displaying multiple worlds in World Browser
+- Basic TriInspector support
+
+### Changed
+- [Breaking] Rename `Morpeh/XCrew.Morpeh` -> `Scellecs.Morpeh`
+- [Breaking] Globals `NextFrame` -> `Publish`
+- [Breaking] `int Entity.ID` -> `EntityID Entity.ID`
+- [Breaking] `Filter.Length` -> `Filter.GetLengthSlow()`
+- `Entity.Dispose()` is now public
+
+### Removed
+- `ComponentsBag` (replaced by `ComponentsCache`)
