@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Entity is detected as alive when it's not https://github.com/scellecs/morpeh/pull/123
 - World.Default takes 0-th index with null value if initialized outside of UnityRuntimeHelper https://github.com/scellecs/morpeh/pull/138
 - Errors in Pure C# projects
+- Memory leaks in Collections
 
 ### Removed
 - [Breaking] `ComponentsBag` (replaced by `ComponentsCache`)
