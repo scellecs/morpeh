@@ -17,3 +17,4 @@
   * IntHashMap (NativeIntHashMap)
   * World (NativeWorld)
 * Filter.IsEmpty()
+* IMorpehLogger interface for custom loggers (Console.WriteLine for non-Unity environments by default)
