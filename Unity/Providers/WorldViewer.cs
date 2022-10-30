@@ -32,6 +32,7 @@ namespace Morpeh {
         [HideReferenceObjectPickerAttribute]
         [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
         [Title("$GetWorldTitle")]
+        [Searchable]
         private List<EntityView> Entities {
             get {
                 if (Application.isPlaying) {
