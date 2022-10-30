@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2022.1.0] - 01.11.2022
 ### Added
 - Basic Jobs/Burst support:
-  - Changing components data (`ref nativeCache.GetComponent(EntityID entityId)` / `ref nativeCache.GetComponent(EntityID entityId, out bool exists)`)
-  - Checking if components exist on an entity (`nativeCache.HasComponent(EntityID entityId)`)
+  - Changing components data (`ref T nativeCache.GetComponent(EntityID entityId)` / `ref T nativeCache.GetComponent(EntityID entityId, out bool exists)`)
+  - Checking if components exist on an entity (`bool nativeCache.HasComponent(EntityID entityId)`)
 - `.AsNative()` API for Jobs/Burst:
   - `Archetype` (`NativeArchetype`)
   - `ComponentsCache` (`NativeCache`)
