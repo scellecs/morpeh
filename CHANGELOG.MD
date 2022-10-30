@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Breaking] `Filter.Length` -> `Filter.GetLengthSlow()`
 - [Breaking] Collections now cleanup after removing components (Reading ref components data is not allowed after removing components)
 - `Entity.Dispose()` is now public
+- Fixed extra filter update https://github.com/scellecs/morpeh/pull/129
 
 ### Removed
 - `ComponentsBag` (replaced by `ComponentsCache`)
