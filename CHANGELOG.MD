@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Breaking] Globals `NextFrame` -> `Publish`
 - [Breaking] `int Entity.ID` -> `EntityID Entity.ID`
 - [Breaking] `Filter.Length` -> `Filter.GetLengthSlow()`
-- [Breaking] Collections now cleanup after removing components (Reading ref components data is not allowed after removing components)
+- [Breaking] Components caches now cleanup after removing components (Reading ref components data is not allowed after removing components)
 - [Breaking] `Filter` iteration is not order-deterministic
 - [Breaking] `FastList` allows removing elements during iteration (current and next elements only)
 - `Entity.Dispose()` is now public
