@@ -21,3 +21,5 @@
 * MORPEH_PROFILING - define for automatic systems profiling
 * World.TryGetEntity(EntityId entityId, out Entity entity) - returns true and entity if it exists, false otherwise
 * entity.Dispose() - now public
+* Displaying multiple worlds in World Browser
+* Basic TriInspector support

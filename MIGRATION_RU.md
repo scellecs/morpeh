@@ -21,3 +21,5 @@
 * MORPEH_PROFILING - дефайн для автоматического профайлинга всех систем
 * World.TryGetEntity(EntityId entityId, out Entity entity) - возвращает true и энтити если он существует, false и default(Entity) в противном случае
 * entity.Dispose() - теперь публично доступное
+* Отображение нескольких миров в World Browser
+* Базовая поддержка TriInspector
