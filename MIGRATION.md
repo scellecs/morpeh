@@ -7,8 +7,8 @@
 * `Filter.Length` is removed completely. It has been replaced with `Filter.GetLengthSlow()` and `Filter.IsEmpty()`. This change is made because recalculating Filter length was quite costly, and most of the time filters length was not needed for developers, making it a useless overhead. It's important to note that most length comparisons were used to check if filter is empty or not, so such checks using `IsEmpty()` are as fast as they used to be, but with a different API. This allowed us to make Morpeh much faster in projects which have a lot of different filters.
 
 ## New API  
-* IValidatable + IValidatableWithGameObject  
-* .AsNative() for:
+* Added new component interfaces `IValidatable`, `IValidatableWithGameObject`. It allows calling default Unity method `OnValidate` for components, f.e. to initialize editor fields. Works only for components added via MonoProvider.
+* Added support for native Api (Job/Burst). Details are available in [README](README.md#unity-jobs-and-burst). Most of work is done via `AsNative()` for:
   * Archetype (NativeArchetype)
   * ComponentsCache (NativeCache)
   * FastList (NativeFastList)
@@ -16,10 +16,8 @@
   * Filter (NativeFilter)
   * IntHashMap (NativeIntHashMap)
   * World (NativeWorld)
-* IMorpehLogger - interface for custom loggers (Console.WriteLine for non-Unity environments by default)
-* MORPEH_PROFILING - define for automatic systems profiling
-* World.TryGetEntity(EntityId entityId, out Entity entity) - returns true and entity if it exists, false otherwise
-* entity.Dispose() - now public
-* Displaying multiple worlds in World Browser
-* Basic TriInspector support
-* Fast Collections
+* Added `IMorpehLogger` interface and static `MLogger` class. It allows overriding logging behaviour for Morpeh. Console.WriteLine is used for all environments by default, except Unity.
+* Added `MORPEH_PROFILING` define. Adding it to Player Settings allows profiling systems without using Deep Profile.
+* `Entity.Dispose()` is now public. It allows destroying entities without accessing the World it's in.
+* Added viewing multiple worlds in World Browser
+* Added basic TriInspector support
