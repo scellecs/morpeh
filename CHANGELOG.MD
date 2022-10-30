@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic TriInspector support (Add `TRI_INSPECTOR` define to enable)
 - `MORPEH_BURST` define to determine if Burst is enabled
 - `World.SetFriendlyName(string name)` + integration with World Browser
+- `Entity.MigrateTo(Entity otherEntity)` to migrate components from one entity to another
 
 ### Changed
 - [Breaking] Rename `Morpeh/XCrew.Morpeh` -> `Scellecs.Morpeh`
