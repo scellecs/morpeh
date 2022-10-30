@@ -4,7 +4,7 @@
 * Rename Morpeh/XCrew.Morpeh -> Scellecs.Morpeh  
 * Globals NextFrame -> Publish  
 * int Entity.ID -> EntityID Entity.ID
-* Filter.Length -> Filter.GetLengthSlow()
+* Filter.Length -> Filter.GetLengthSlow() + Filter.IsEmpty()
 
 ## New API  
 * IValidatable + IValidatableWithGameObject  
@@ -16,10 +16,10 @@
   * Filter (NativeFilter)
   * IntHashMap (NativeIntHashMap)
   * World (NativeWorld)
-* Filter.IsEmpty() - to check if filter has no entities
 * IMorpehLogger - interface for custom loggers (Console.WriteLine for non-Unity environments by default)
 * MORPEH_PROFILING - define for automatic systems profiling
 * World.TryGetEntity(EntityId entityId, out Entity entity) - returns true and entity if it exists, false otherwise
 * entity.Dispose() - now public
 * Displaying multiple worlds in World Browser
 * Basic TriInspector support
+* Fast Collections
