@@ -5,6 +5,8 @@
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+    // TODO: TRI_INSPECTOR SUPPORT
 #endif
 
     public abstract class DataWrapper {
@@ -24,6 +26,8 @@
         [OnValueChanged(nameof(OnChange))]
         [DelayedProperty]
         [HideLabel]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         protected TData value;
         [HideInInspector]
@@ -34,6 +38,8 @@
         [HideInInlineEditors]
         [PropertyOrder(1)]
         [ShowIf("@" + nameof(AutoSave) + " && " + nameof(CanBeAutoSaved))]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         [SerializeField]
         private string customKey;
@@ -56,6 +62,8 @@
         [HideInInlineEditors]
         [PropertyOrder(0)]
         [ShowIf(nameof(CanBeAutoSaved))]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public bool AutoSave;
         private bool HasPlayerPrefsValue            => PlayerPrefs.HasKey(this.Key);
@@ -117,6 +125,8 @@
         [PropertyOrder(3)]
         [ShowIf("@AutoSave")]
         [HideInInlineEditors]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
 #if UNITY_EDITOR
         private void GenerateCustomKey() {
@@ -189,6 +199,8 @@
         [ShowIf("@" + nameof(HasPlayerPrefsValueAndAutoSave))]
         [PropertyOrder(4)]
         [Button]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         internal void ResetPlayerPrefsValue() {
             if (this.HasPlayerPrefsValue) {

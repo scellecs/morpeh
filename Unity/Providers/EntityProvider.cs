@@ -4,6 +4,8 @@ namespace Morpeh {
     using UnityEngine;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+    // TODO: TRI_INSPECTOR SUPPORT
 #endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -14,6 +16,8 @@ namespace Morpeh {
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
         [ReadOnly]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         protected int internalEntityID = -1;
 
@@ -50,6 +54,8 @@ namespace Morpeh {
         private protected virtual void OnEnable() {
 #if UNITY_EDITOR && ODIN_INSPECTOR
             this.entityViewer.getter = () => this.InternalEntity;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+            // TODO: TRI_INSPECTOR SUPPORT
 #endif
             if (!Application.isPlaying) {
                 return;
@@ -114,6 +120,8 @@ namespace Morpeh {
         [ShowInInspector]
         [PropertyOrder(100)]
         private Editor.EntityViewerWithHeader entityViewer = new Editor.EntityViewerWithHeader();
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
     }
 }

@@ -15,8 +15,10 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class BaseSingleton : ScriptableObject {
         [SerializeField]
-#if ODIN_INSPECTOR
+#if UNITY_EDITOR && ODIN_INSPECTOR
         [ReadOnly]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         protected int internalEntityID = -1;
 
@@ -27,6 +29,8 @@
         [ShowInInspector]
         [Space]
         private Morpeh.Editor.EntityViewerWithHeader entityViewer = new Morpeh.Editor.EntityViewerWithHeader();
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
 
         [CanBeNull]
@@ -59,6 +63,8 @@
             this.internalEntity = null;
 #if UNITY_EDITOR && ODIN_INSPECTOR
             this.entityViewer = new Morpeh.Editor.EntityViewerWithHeader {getter = () => this.internalEntity};
+#elif UNITY_EDITOR && TRI_INSPECTOR
+            // TODO: TRI_INSPECTOR SUPPORT
 #endif
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;

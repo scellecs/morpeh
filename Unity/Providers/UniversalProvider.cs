@@ -14,11 +14,15 @@
         [SerializeReference]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideIf(nameof(ShowSerializedComponents))]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public IComponent[] serializedComponents = new IComponent[0];
         
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool ShowSerializedComponents => this.internalEntityID > -1;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
 
         protected virtual void OnValidate() {

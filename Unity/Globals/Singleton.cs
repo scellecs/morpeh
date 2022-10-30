@@ -2,6 +2,8 @@
     using System;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+    // TODO: TRI_INSPECTOR SUPPORT
 #endif
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
@@ -15,11 +17,15 @@
         [SerializeReference]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [HideIf(nameof(ShowSerializedComponents))]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public IComponent[] serializedComponents = Array.Empty<IComponent>();
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool ShowSerializedComponents => this.internalEntityID > -1;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
 
         protected override bool CheckIsInitialized() {

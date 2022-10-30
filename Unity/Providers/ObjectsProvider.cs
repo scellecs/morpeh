@@ -4,6 +4,8 @@
     using Unity.IL2CPP.CompilerServices;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+    // TODO: TRI_INSPECTOR SUPPORT
 #endif
     using UnityEngine;
     using Object = UnityEngine.Object;
@@ -17,6 +19,8 @@
         [Header("Global Variables")]
         [TableList(AlwaysExpanded = true)]
         [HideLabel]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public List<ObjectPair> table;
         
@@ -25,6 +29,8 @@
         [Header("Global List Variables")]
         [TableList(AlwaysExpanded = true)]
         [HideLabel]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public List<ObjectListPair> tableList;
 
@@ -33,11 +39,15 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HorizontalGroup("Variables")]
             [HideLabel]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+            // TODO: TRI_INSPECTOR SUPPORT
 #endif
             public GlobalVariableListObject variable;
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HorizontalGroup("Objects")]
             [HideLabel]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+            // TODO: TRI_INSPECTOR SUPPORT
 #endif
             public Object obj;
         }
@@ -47,11 +57,15 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HorizontalGroup("Variables")]
             [HideLabel]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+            // TODO: TRI_INSPECTOR SUPPORT
 #endif
             public GlobalVariableObject variable;
 #if UNITY_EDITOR && ODIN_INSPECTOR
             [HorizontalGroup("Objects")]
             [HideLabel]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+            // TODO: TRI_INSPECTOR SUPPORT
 #endif
             public Object obj;
         }

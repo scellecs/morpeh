@@ -7,6 +7,8 @@
     using Utils;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+    // TODO: TRI_INSPECTOR SUPPORT
 #endif
     using Unity.IL2CPP.CompilerServices;
 
@@ -19,6 +21,8 @@
         [Required]
         [InfoBox("Order collision with other installer!", InfoMessageType.Error, nameof(IsCollisionWithOtherInstaller))]
         [PropertyOrder(-5)]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public int order;
         
@@ -27,26 +31,36 @@
             => this.IsPrefab() == false && FindObjectsOfType<Installer>().Where(i => i != this).Any(i => i.order == this.order);
         
         private bool IsPrefab() => this.gameObject.scene.name == null;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         
         [Space]
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-5)]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public Initializer[] initializers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-4)]
         [OnValueChanged(nameof(OnValueChangedUpdate))]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public UpdateSystemPair[] updateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-3)]
         [OnValueChanged(nameof(OnValueChangedFixedUpdate))]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public FixedSystemPair[] fixedUpdateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [PropertyOrder(-2)]
         [OnValueChanged(nameof(OnValueChangedLateUpdate))]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         public LateSystemPair[] lateUpdateSystems;
 
@@ -145,6 +159,8 @@
         using JetBrains.Annotations;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         using Sirenix.OdinInspector;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
         [Serializable]
         public abstract class BasePair<T> where T : class, ISystem {
@@ -155,6 +171,8 @@
             [HorizontalGroup("Pair", 10)]
             [HideLabel]
             [OnValueChanged(nameof(OnChange))]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+            // TODO: TRI_INSPECTOR SUPPORT
 #endif
             private bool enabled;
 
@@ -164,6 +182,8 @@
             [HorizontalGroup("Pair")]
             [HideLabel]
             [Required]
+#elif UNITY_EDITOR && TRI_INSPECTOR
+            // TODO: TRI_INSPECTOR SUPPORT
 #endif
             [CanBeNull]
             private T system;

@@ -11,6 +11,8 @@ namespace Morpeh {
     using Sirenix.Serialization;
     using System.Reflection;
     using Globals.ECS;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+    // TODO: TRI_INSPECTOR SUPPORT
 #endif
     using Unity.IL2CPP.CompilerServices;
     using Utils;
@@ -18,11 +20,7 @@ namespace Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-#if UNITY_EDITOR && ODIN_INSPECTOR
-    internal class UnityRuntimeHelper : SerializedMonoBehaviour {
-#else
     internal class UnityRuntimeHelper : MonoBehaviour {
-#endif
         internal static Action             onApplicationFocusLost = () => { };
         internal static UnityRuntimeHelper instance;
 #if UNITY_EDITOR && ODIN_INSPECTOR
@@ -32,6 +30,8 @@ namespace Morpeh {
         private FastList<string> types = null;
         [OdinSerialize]
         private FastList<ComponentsCache> caches = null;
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
 
 #if UNITY_EDITOR
@@ -160,6 +160,8 @@ namespace Morpeh {
                 }
             }
         }
+#elif UNITY_EDITOR && TRI_INSPECTOR
+        // TODO: TRI_INSPECTOR SUPPORT
 #endif
     }
 }
