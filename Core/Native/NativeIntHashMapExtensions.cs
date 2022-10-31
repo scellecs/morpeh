@@ -2,7 +2,6 @@
 namespace Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
-    using Unity.Collections.LowLevel.Unsafe;
 
     public static class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
