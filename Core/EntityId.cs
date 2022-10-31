@@ -26,9 +26,11 @@
         }
 
         public override int GetHashCode() {
-            return HashCode.Combine(id, gen);
+            unchecked {
+                return (this.id * 397) ^ this.gen;
+            }
         }
-        
+
         public static bool operator ==(EntityId left, EntityId right) {
             return left.Equals(right);
         }

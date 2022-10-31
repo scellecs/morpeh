@@ -129,9 +129,12 @@ namespace Morpeh {
         private static void TryCatchUpdate(this ISystem system, SystemsGroup systemsGroup, float deltaTime) {
             try {
 #if MORPEH_PROFILING
-                using var sampler = new ProfilerSampler(system);
+                using (new ProfilerSampler(system)) {
 #endif
-                system.OnUpdate(deltaTime);
+                    system.OnUpdate(deltaTime);
+#if MORPEH_PROFILING
+                }
+#endif
             }
             catch (Exception exception) {
                 systemsGroup.SystemThrowException(system, exception);
@@ -143,9 +146,12 @@ namespace Morpeh {
         private static void TryCatchAwake(this IInitializer initializer) {
             try {
 #if MORPEH_PROFILING
-                using var sampler = new ProfilerSampler(initializer);
+                using (new ProfilerSampler(initializer)) {
 #endif
-                initializer.OnAwake();
+                    initializer.OnAwake();
+#if MORPEH_PROFILING
+                }
+#endif
             }
             catch (Exception exception) {
                 MLogger.LogError($"Can not initialize {initializer.GetType()}");
@@ -158,9 +164,12 @@ namespace Morpeh {
         private static void TryCatchDispose(this IDisposable disposable) {
             try {
 #if MORPEH_PROFILING
-                using var sampler = new ProfilerSampler(disposable);
+                using (new ProfilerSampler(disposable)) {
 #endif
-                disposable.Dispose();
+                    disposable.Dispose();
+#if MORPEH_PROFILING
+                }
+#endif
             }
             catch (Exception exception) {
                 MLogger.LogError($"Can not dispose {disposable.GetType()}");
@@ -172,27 +181,36 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ForwardDispose(this IDisposable disposable) {
 #if MORPEH_PROFILING
-            using var sampler = new ProfilerSampler(disposable);
+            using (new ProfilerSampler(disposable)) {
 #endif
-            disposable.Dispose();
+                disposable.Dispose();
+#if MORPEH_PROFILING
+            }
+#endif
         }
 
         [Conditional("MORPEH_DEBUG_DISABLED")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ForwardAwake(this IInitializer initializer) {
 #if MORPEH_PROFILING
-            using var sampler = new ProfilerSampler(initializer);
+            using (new ProfilerSampler(initializer)) {
 #endif
-            initializer.OnAwake();
+                initializer.OnAwake();
+#if MORPEH_PROFILING
+            }
+#endif
         }
 
         [Conditional("MORPEH_DEBUG_DISABLED")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ForwardUpdate(this ISystem system, float deltaTime) {
 #if MORPEH_PROFILING
-            using var sampler = new ProfilerSampler(system);
+            using (new ProfilerSampler(system)) {
 #endif
-            system.OnUpdate(deltaTime);
+                system.OnUpdate(deltaTime);
+#if MORPEH_PROFILING
+            }
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
