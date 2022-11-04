@@ -28,7 +28,7 @@ namespace Morpeh.Native {
                         return new EntityId(entityId, world.entitiesGens[entityId]);
                     }
 
-                    totalArchetypeLength += *archetype.lengthPtr;
+                    totalArchetypeLength += archetypeLength;
                 }
 
                 return EntityId.Invalid;
