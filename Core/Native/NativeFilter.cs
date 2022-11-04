@@ -2,24 +2,46 @@
 namespace Morpeh.Native {
     using System;
     using Unity.Collections;
+    using Unity.Jobs;
 
     public struct NativeFilter : IDisposable {
-        internal NativeFilter(NativeFilterWrapper filterWrapper, int length) {
-            this.filterWrapper = filterWrapper;
-            this.length        = length;
+        [ReadOnly]
+        public int length;
+
+        [ReadOnly]
+        internal NativeArray<NativeArchetype> archetypes;
+        
+        [ReadOnly]
+        internal NativeWorld world;
+
+        public unsafe EntityId this[int index] {
+            get {
+                var totalArchetypeLength = 0;
+                for (int archetypeNum = 0, archetypesCount = this.archetypes.Length; archetypeNum < archetypesCount; archetypeNum++) {
+                    var archetype       = this.archetypes[archetypeNum];
+                    var archetypeLength = *archetype.lengthPtr;
+
+                    if (index >= totalArchetypeLength && index < totalArchetypeLength + archetypeLength) {
+                        var slotIndex = index - totalArchetypeLength;
+                        var entityId = archetype.entitiesBitMap.data[slotIndex];
+                        
+                        return new EntityId(entityId, world.entitiesGens[entityId]);
+                    }
+
+                    totalArchetypeLength += *archetype.lengthPtr;
+                }
+
+                return EntityId.Invalid;
+            }
+        }
+
+        // Dispose pattern justification: 'archetypes' is an allocated NativeArray
+        public void Dispose() {
+            this.archetypes.Dispose();
         }
         
-        [ReadOnly]
-        public readonly int length;
-
-        [ReadOnly]
-        private NativeFilterWrapper filterWrapper;
-
-        public EntityId this[int index] => this.filterWrapper[index];
-        
-        // Dispose pattern justification: 'archetypes' in 'filterWrapper' is an allocated NativeArray
-        public void Dispose() {
-            this.filterWrapper.Dispose();
+        public JobHandle Dispose(JobHandle inputDeps) {
+            return this.archetypes.Dispose(inputDeps);
         }
     }
 }
