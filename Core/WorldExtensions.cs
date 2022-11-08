@@ -195,11 +195,11 @@ namespace Morpeh {
             ComponentsCache componentsCache;
             if (definition.typeInfo.isDisposable) {
                 var constructedType = typeof(ComponentsCacheDisposable<>).MakeGenericType(type);
-                componentsCache = (ComponentsCache) Activator.CreateInstance(constructedType);
+                componentsCache = (ComponentsCache) Activator.CreateInstance(constructedType, true);
             }
             else {
                 var constructedType = typeof(ComponentsCache<>).MakeGenericType(type);
-                componentsCache = (ComponentsCache) Activator.CreateInstance(constructedType);
+                componentsCache = (ComponentsCache) Activator.CreateInstance(constructedType, true);
             }
 
             componentsCache.world = world;
@@ -219,7 +219,7 @@ namespace Morpeh {
             ComponentsCache<T> componentsCache;
             if (info.isDisposable) {
                 var constructedType = typeof(ComponentsCacheDisposable<>).MakeGenericType(typeof(T));
-                componentsCache = (ComponentsCache<T>)Activator.CreateInstance(constructedType);
+                componentsCache = (ComponentsCache<T>)Activator.CreateInstance(constructedType, true);
             }
             else {
                 componentsCache = new ComponentsCache<T>();
