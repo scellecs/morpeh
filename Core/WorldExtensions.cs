@@ -173,6 +173,7 @@ namespace Morpeh {
             return archetype;
         }
 
+        
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ComponentsCache GetCache(this World world, int typeId) {
@@ -183,7 +184,6 @@ namespace Morpeh {
             return null;
         }
         
-        [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ComponentsCache GetReflectionCache(this World world, Type type) {
             if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
@@ -192,7 +192,22 @@ namespace Morpeh {
                 }
             }
             
-            return null;
+            ComponentsCache componentsCache;
+            if (definition.typeInfo.isDisposable) {
+                var constructedType = typeof(ComponentsCacheDisposable<>).MakeGenericType(type);
+                componentsCache = (ComponentsCache) Activator.CreateInstance(constructedType);
+            }
+            else {
+                var constructedType = typeof(ComponentsCache<>).MakeGenericType(type);
+                componentsCache = (ComponentsCache) Activator.CreateInstance(constructedType);
+            }
+
+            componentsCache.world = world;
+
+            world.caches.Add(definition.id, componentsCache.commonCacheId, out _);
+            world.typedCaches.Add(definition.id, componentsCache.typedCacheId, out _);
+            
+            return componentsCache;
         }
 
         public static ComponentsCache<T> GetCache<T>(this World world) where T : struct, IComponent {
@@ -217,6 +232,8 @@ namespace Morpeh {
 
             return componentsCache;
         }
+        
+        
 
         public static void GlobalUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
