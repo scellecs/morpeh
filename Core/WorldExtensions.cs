@@ -182,6 +182,18 @@ namespace Morpeh {
 
             return null;
         }
+        
+        [CanBeNull]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ComponentsCache GetReflectionCache(this World world, Type type) {
+            if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
+                if (world.caches.TryGetValue(definition.id, out var index)) {
+                    return ComponentsCache.caches.data[index];
+                }
+            }
+            
+            return null;
+        }
 
         public static ComponentsCache<T> GetCache<T>(this World world) where T : struct, IComponent {
             var info = TypeIdentifier<T>.info;
