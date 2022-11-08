@@ -59,10 +59,12 @@ namespace Morpeh {
         [SerializeField]
         internal IntHashMap<T> components;
 
+        [UnityEngine.Scripting.Preserve]
         static ComponentsCache() {
             cleanup += () => typedCaches.Clear();
         }
 
+        [UnityEngine.Scripting.Preserve]
         static void Refill() {
             var id = TypeIdentifier<T>.info.id;
             if (typedCaches == null) {
@@ -77,6 +79,7 @@ namespace Morpeh {
             }
         }
 
+        [UnityEngine.Scripting.Preserve]
         internal ComponentsCache() {
             var info = TypeIdentifier<T>.info;
             this.typeId = info.id;
