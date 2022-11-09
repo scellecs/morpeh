@@ -11,29 +11,29 @@ namespace Morpeh {
     using Collections;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public abstract class ComponentsCache : IDisposable {
-        internal static FastList<ComponentsCache> caches = new FastList<ComponentsCache>();
+    public abstract class Stash : IDisposable {
+        internal static FastList<Stash> stashes = new FastList<Stash>();
 
-        internal static Action cleanup = () => caches.Clear();
+        internal static Action cleanup = () => stashes.Clear();
 
         [SerializeField]
-        internal int commonCacheId;
+        internal int commonStashId;
         [SerializeField]
-        internal int typedCacheId;
+        internal int typedStashId;
         [SerializeField]
         internal int typeId;
         [SerializeField]
         internal World world;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract bool RemoveComponent(Entity entity);
+        public abstract bool Remove(Entity entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal abstract bool Clean(Entity entity);
@@ -42,61 +42,61 @@ namespace Morpeh {
         public abstract bool Has(Entity entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract void MigrateComponent(Entity from, Entity to, bool overwrite = true);
+        public abstract void Migrate(Entity from, Entity to, bool overwrite = true);
 
         public abstract void Dispose();
     }
-    
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public class ComponentsCache<T> : ComponentsCache where T : struct, IComponent {
-        internal static FastList<ComponentsCache<T>> typedCaches = new FastList<ComponentsCache<T>>();
+    public class Stash<T> : Stash where T : struct, IComponent {
+        internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
 
         [SerializeField]
         internal IntHashMap<T> components;
 
         [UnityEngine.Scripting.Preserve]
-        static ComponentsCache() {
-            cleanup += () => typedCaches.Clear();
+        static Stash() {
+            cleanup += () => typedStashes.Clear();
         }
 
         [UnityEngine.Scripting.Preserve]
         static void Refill() {
             var id = TypeIdentifier<T>.info.id;
-            if (typedCaches == null) {
-                typedCaches = new FastList<ComponentsCache<T>>();
+            if (typedStashes == null) {
+                typedStashes = new FastList<Stash<T>>();
             }
-            typedCaches.Clear();
+            typedStashes.Clear();
 
-            foreach (var cache in caches) {
-                if (cache.typeId == id) {
-                    typedCaches.Add((ComponentsCache<T>)cache);
+            foreach (var stash in stashes) {
+                if (stash.typeId == id) {
+                    typedStashes.Add((Stash<T>)stash);
                 }
             }
         }
 
         [UnityEngine.Scripting.Preserve]
-        internal ComponentsCache() {
+        internal Stash() {
             var info = TypeIdentifier<T>.info;
-            this.typeId = info.id;
-            
-            this.components = new IntHashMap<T>(info.cacheSize);
+            this.typeId           = info.id;
+
+            this.components = new IntHashMap<T>(info.stashSize);
 
             this.components.Add(-1, default, out _);
 
-            this.typedCacheId = typedCaches.length;
-            typedCaches.Add(this);
+            this.typedStashId = typedStashes.length;
+            typedStashes.Add(this);
 
-            this.commonCacheId = caches.length;
-            caches.Add(this);
+            this.commonStashId = stashes.length;
+            stashes.Add(this);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddComponent(Entity entity) {
+        public ref T Add(Entity entity) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.entityId.id}");
@@ -113,7 +113,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T AddComponent(Entity entity, out bool exist) {
+        public ref T Add(Entity entity, out bool exist) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.entityId.id}");
@@ -130,7 +130,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AddComponent(Entity entity, in T value) {
+        public bool Add(Entity entity, in T value) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.entityId.id}");
@@ -148,12 +148,12 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T GetComponent(Entity entity) {
+        public ref T Get(Entity entity) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying GetComponent on null or disposed entity {entity.entityId.id}");
             }
-            
+
             if (!this.components.Has(entity.entityId.id)) {
                 throw new Exception($"[MORPEH] You're trying to get on entity {entity.entityId.id} a component that doesn't exists!");
             }
@@ -162,7 +162,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T TryGetComponent(Entity entity, out bool exist) {
+        public ref T TryGet(Entity entity, out bool exist) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying TryGetComponent on null or disposed entity {entity.entityId.id}");
@@ -172,7 +172,7 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetComponent(Entity entity, in T value = default) {
+        public void Set(Entity entity, in T value = default) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying SetComponent on null or disposed entity {entity.entityId.id}");
@@ -188,7 +188,7 @@ namespace Morpeh {
         internal ref T Empty() => ref this.components.data[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool RemoveComponent(Entity entity) {
+        public override bool Remove(Entity entity) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying RemoveComponent on null or disposed entity {entity.entityId.id}");
@@ -212,12 +212,12 @@ namespace Morpeh {
                 throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity.entityId.id}");
             }
 #endif
-            
+
             return this.components.Has(entity.entityId.id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override void MigrateComponent(Entity from, Entity to, bool overwrite = true) {
+        public override void Migrate(Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying MigrateComponent FROM null or disposed entity {from.entityId.id}");
@@ -245,32 +245,12 @@ namespace Morpeh {
             }
         }
 
+
         public override void Dispose() {
             this.components = null;
 
-            typedCaches.RemoveSwap(this, out _);
-            caches.RemoveSwap(this, out _);
-        }
-    }
-    
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
-#endif
-    [Il2CppSetOption(Option.NullChecks, false)]
-    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    internal sealed class ComponentsCacheDisposable<T> : ComponentsCache<T> where T : struct, IComponent, IDisposable {
-        public override bool RemoveComponent(Entity entity) {
-            this.components.GetValueRefByKey(entity.entityId.id).Dispose();
-            return base.RemoveComponent(entity);
-        }
-
-        public override void Dispose() {
-            for (int i = 0, length = this.components.length; i < length; i++) {
-                this.components.data[i].Dispose();
-            }
-
-            base.Dispose();
+            typedStashes.RemoveSwap(this, out _);
+            stashes.RemoveSwap(this, out _);
         }
     }
 }

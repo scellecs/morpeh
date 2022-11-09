@@ -26,9 +26,9 @@ namespace Morpeh.Editor {
             get {
                 this.componentViews.Clear();
                 if (this.entity != null && this.entity.world != null) {
-                    var caches = this.entity.world.caches;
+                    var caches = this.entity.world.stashes;
                     foreach (var cacheId in caches) {
-                        var cache = ComponentsCache.caches.data[caches.GetValueByIndex(cacheId)];
+                        var cache = Stash.stashes.data[caches.GetValueByIndex(cacheId)];
                         if (cache.Has(this.entity)) {
                             var view = new ComponentView {
                                 internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[cache.typeId],

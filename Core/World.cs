@@ -70,9 +70,9 @@ namespace Morpeh {
         internal IntFastList nextFreeEntityIDs;
 
         [SerializeField]
-        internal UnsafeIntHashMap<int> caches;
+        internal UnsafeIntHashMap<int> stashes;
         [SerializeField]
-        internal UnsafeIntHashMap<int> typedCaches;
+        internal UnsafeIntHashMap<int> typedStashes;
 
         [SerializeField]
         internal FastList<Archetype> archetypes;
@@ -157,31 +157,31 @@ namespace Morpeh {
             this.filters.Clear();
             this.filters = null;
 
-            var tempCaches = new FastList<ComponentsCache>();
+            var tempStashes = new FastList<Stash>();
 
-            foreach (var cacheId in this.caches) {
-                var cache = ComponentsCache.caches.data[this.caches.GetValueByIndex(cacheId)];
-                tempCaches.Add(cache);
+            foreach (var stashId in this.stashes) {
+                var stash = Stash.stashes.data[this.stashes.GetValueByIndex(stashId)];
+                tempStashes.Add(stash);
             }
 
-            foreach (var cache in tempCaches) {
+            foreach (var stash in tempStashes) {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    cache.Dispose();
+                    stash.Dispose();
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose cache id {cache}");
+                    MLogger.LogError($"Can not dispose stash id {stash}");
                     MLogger.LogException(e);
                 }
 #endif
             }
 
-            this.caches.Clear();
-            this.caches = null;
-            this.typedCaches.Clear();
-            this.typedCaches = null;
+            this.stashes.Clear();
+            this.stashes = null;
+            this.typedStashes.Clear();
+            this.typedStashes = null;
 
             foreach (var archetype in this.archetypes) {
 #if MORPEH_DEBUG

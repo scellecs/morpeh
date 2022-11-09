@@ -8,7 +8,7 @@
         [SerializeField]
         [HideInInspector]
         private T serializedData;
-        private ComponentsCache<T> cache;
+        private Stash<T> cache;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private string typeName = typeof(T).Name;
 
@@ -21,14 +21,14 @@
         private T Data {
             get {
                 if (this.Entity != null) {
-                    return this.Cache.GetComponent(this.Entity);
+                    return this.Cache.Get(this.Entity);
                 }
 
                 return this.serializedData;
             }
             set {
                 if (this.Entity != null) {
-                    this.Cache.SetComponent(this.Entity, value);
+                    this.Cache.Set(this.Entity, value);
                 }
                 else {
                     this.serializedData = value;
@@ -36,10 +36,10 @@
             }
         }
 
-        public ComponentsCache<T> Cache {
+        public Stash<T> Cache {
             get {
                 if (this.cache == null) {
-                    this.cache = World.Default.GetCache<T>();
+                    this.cache = World.Default.GetStash<T>();
                 }
                 return this.cache;
             }
@@ -50,7 +50,7 @@
         public ref T GetData() {
             if (this.Entity != null) {
                 if (this.Cache.Has(this.Entity)) {
-                    return ref this.Cache.GetComponent(this.Entity);
+                    return ref this.Cache.Get(this.Entity);
                 }
             }
 
@@ -59,7 +59,7 @@
 
         public ref T GetData(out bool existOnEntity) {
             if (this.Entity != null) {
-                return ref this.Cache.TryGetComponent(this.Entity, out existOnEntity);
+                return ref this.Cache.TryGet(this.Entity, out existOnEntity);
             }
 
             existOnEntity = false;
@@ -80,14 +80,14 @@
         protected sealed override void PreInitialize() {
             var ent = this.Entity;
             if (ent.IsNullOrDisposed() == false) {
-                this.Cache.SetComponent(ent, this.serializedData);
+                this.Cache.Set(ent, this.serializedData);
             }
         }
 
         protected override void OnDisable() {
             var ent = this.Entity;
             if (ent.IsNullOrDisposed() == false) {
-                this.Cache.RemoveComponent(ent);
+                this.Cache.Remove(ent);
             }
             base.OnDisable();
         }

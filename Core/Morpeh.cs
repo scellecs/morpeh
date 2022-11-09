@@ -44,9 +44,9 @@ namespace Morpeh {
     }
 
     [AttributeUsage(AttributeTargets.Struct)]
-    public class CacheSizeAttribute : Attribute {
+    public class StashSizeAttribute : Attribute {
         internal int size;
-        public CacheSizeAttribute(int size) {
+        public StashSizeAttribute(int size) {
             this.size = size;
         }
     }

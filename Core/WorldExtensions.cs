@@ -61,8 +61,8 @@ namespace Morpeh {
             world.identifier        = added ? id : World.worlds.length - 1;
             world.freeEntityIDs     = new IntFastList();
             world.nextFreeEntityIDs = new IntFastList();
-            world.caches            = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
-            world.typedCaches       = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.stashes            = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.typedStashes       = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
             world.entitiesCount    = 0;
             world.entitiesLength   = 0;
@@ -82,7 +82,7 @@ namespace Morpeh {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif
         public static void InitializationDefaultWorld() {
-            ComponentsCache.cleanup();
+            Stash.cleanup();
 
             World.worlds.Clear();
             var defaultWorld = World.Create("Default World");
@@ -176,61 +176,46 @@ namespace Morpeh {
         
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static ComponentsCache GetCache(this World world, int typeId) {
-            if (world.caches.TryGetValue(typeId, out var index)) {
-                return ComponentsCache.caches.data[index];
+        internal static Stash GetStash(this World world, int typeId) {
+            if (world.stashes.TryGetValue(typeId, out var index)) {
+                return Stash.stashes.data[index];
             }
 
             return null;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ComponentsCache GetReflectionCache(this World world, Type type) {
+        public static Stash GetReflectionStash(this World world, Type type) {
             if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                if (world.caches.TryGetValue(definition.id, out var index)) {
-                    return ComponentsCache.caches.data[index];
+                if (world.stashes.TryGetValue(definition.id, out var index)) {
+                    return Stash.stashes.data[index];
                 }
             }
             
-            ComponentsCache componentsCache;
-            if (definition.typeInfo.isDisposable) {
-                var constructedType = typeof(ComponentsCacheDisposable<>).MakeGenericType(type);
-                componentsCache = (ComponentsCache) Activator.CreateInstance(constructedType, true);
-            }
-            else {
-                var constructedType = typeof(ComponentsCache<>).MakeGenericType(type);
-                componentsCache = (ComponentsCache) Activator.CreateInstance(constructedType, true);
-            }
+            var constructedType = typeof(Stash<>).MakeGenericType(type);
+            var stash = (Stash) Activator.CreateInstance(constructedType, true);
 
-            componentsCache.world = world;
+            stash.world = world;
 
-            world.caches.Add(definition.id, componentsCache.commonCacheId, out _);
-            world.typedCaches.Add(definition.id, componentsCache.typedCacheId, out _);
+            world.stashes.Add(definition.id, stash.commonStashId, out _);
+            world.typedStashes.Add(definition.id, stash.typedStashId, out _);
             
-            return componentsCache;
+            return stash;
         }
 
-        public static ComponentsCache<T> GetCache<T>(this World world) where T : struct, IComponent {
+        public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
             var info = TypeIdentifier<T>.info;
-            if (world.typedCaches.TryGetValue(info.id, out var typedIndex)) {
-                return ComponentsCache<T>.typedCaches.data[typedIndex];
+            if (world.typedStashes.TryGetValue(info.id, out var typedIndex)) {
+                return Stash<T>.typedStashes.data[typedIndex];
             }
 
-            ComponentsCache<T> componentsCache;
-            if (info.isDisposable) {
-                var constructedType = typeof(ComponentsCacheDisposable<>).MakeGenericType(typeof(T));
-                componentsCache = (ComponentsCache<T>)Activator.CreateInstance(constructedType, true);
-            }
-            else {
-                componentsCache = new ComponentsCache<T>();
-            }
+            var stash = new Stash<T>();
+            stash.world = world;
 
-            componentsCache.world = world;
+            world.stashes.Add(info.id, stash.commonStashId, out _);
+            world.typedStashes.Add(info.id, stash.typedStashId, out _);
 
-            world.caches.Add(info.id, componentsCache.commonCacheId, out _);
-            world.typedCaches.Add(info.id, componentsCache.typedCacheId, out _);
-
-            return componentsCache;
+            return stash;
         }
         
         

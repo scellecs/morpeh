@@ -16,8 +16,8 @@ namespace Morpeh.Globals {
         public override Type GetValueType() => typeof(TData);
 #endif
 
-        private ComponentsCache<GlobalEventComponent<TData>> dataCache;
-        private ComponentsCache<GlobalEventNextFrame>        nextFrameCache;
+        private Stash<GlobalEventComponent<TData>> dataCache;
+        private Stash<GlobalEventNextFrame>        nextFrameCache;
 
         public Stack<TData> BatchedChanges {
             get {
@@ -27,7 +27,7 @@ namespace Morpeh.Globals {
                 }
 #endif
                 this.CheckIsInitialized();
-                ref var component = ref this.dataCache.GetComponent(this.InternalEntity);
+                ref var component = ref this.dataCache.Get(this.InternalEntity);
                 return component.Data;
             }
         }
@@ -42,22 +42,22 @@ namespace Morpeh.Globals {
             var check = base.CheckIsInitialized();
 
             if (check) {
-                var markerCache = world.GetCache<GlobalEventMarker>();
-                markerCache.AddComponent(this.internalEntity);
+                var markerCache = world.GetStash<GlobalEventMarker>();
+                markerCache.Add(this.internalEntity);
                 
-                this.dataCache = world.GetCache<GlobalEventComponent<TData>>();
-                this.dataCache.SetComponent(this.internalEntity, new GlobalEventComponent<TData> {
+                this.dataCache = world.GetStash<GlobalEventComponent<TData>>();
+                this.dataCache.Set(this.internalEntity, new GlobalEventComponent<TData> {
                     Action  = null,
                     Data    = new Stack<TData>(),
                     NewData = new Queue<TData>()
                 });
                 
-                var lastStringCache = world.GetCache<GlobalEventLastToString>();
-                lastStringCache.SetComponent(this.internalEntity, new GlobalEventLastToString {
+                var lastStringCache = world.GetStash<GlobalEventLastToString>();
+                lastStringCache.Set(this.internalEntity, new GlobalEventLastToString {
                     LastToString = this.LastToString
                 });
 
-                this.nextFrameCache = world.GetCache<GlobalEventNextFrame>();
+                this.nextFrameCache = world.GetStash<GlobalEventNextFrame>();
             }
 
             if (GlobalEventComponentUpdater<TData>.initialized.Get(world.identifier) == false) {
@@ -76,9 +76,9 @@ namespace Morpeh.Globals {
 
         public virtual void Publish(TData data) {
             this.CheckIsInitialized();
-            ref var component = ref this.dataCache.GetComponent(this.InternalEntity);
+            ref var component = ref this.dataCache.Get(this.InternalEntity);
             component.NewData.Enqueue(data);
-            this.nextFrameCache.SetComponent(this.InternalEntity);
+            this.nextFrameCache.Set(this.InternalEntity);
         }
         
         [Obsolete("Use Publish Instead")]
@@ -88,7 +88,7 @@ namespace Morpeh.Globals {
 
         public IDisposable Subscribe(Action<IEnumerable<TData>> callback) {
             this.CheckIsInitialized();
-            ref var component = ref this.dataCache.GetComponent(this.InternalEntity);
+            ref var component = ref this.dataCache.Get(this.InternalEntity);
             component.Action = (Action<IEnumerable<TData>>) Delegate.Combine(component.Action, callback);
 
             var ent = this.InternalEntity;
@@ -97,7 +97,7 @@ namespace Morpeh.Globals {
                     return;
                 }
 
-                ref var comp = ref this.dataCache.GetComponent(ent);
+                ref var comp = ref this.dataCache.Get(ent);
                 comp.Action = (Action<IEnumerable<TData>>) Delegate.Remove(comp.Action, callback);
             });
         }
