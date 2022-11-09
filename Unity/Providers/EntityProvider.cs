@@ -56,23 +56,16 @@ namespace Morpeh {
             }
 
             if (this.internalEntityID < 0) {
-                var others = this.GetComponents<EntityProvider>();
-                foreach (var entityProvider in others) {
-                    if (entityProvider.internalEntityID >= 0) {
-                        this.internalEntityID = entityProvider.internalEntityID;
-                        this.cachedEntity     = entityProvider.cachedEntity;
-                        break;
-                    }
+                var firstProvider = this.GetComponent<EntityProvider>();
+                if (firstProvider.internalEntityID >= 0) {
+                    this.internalEntityID = firstProvider.internalEntityID;
+                    this.cachedEntity     = firstProvider.cachedEntity;
                 }
-            }
-
-            if (this.InternalEntity == null || this.internalEntityID < 0) {
-                var others = this.GetComponents<EntityProvider>();
-                this.cachedEntity = World.Default.CreateEntity(out this.internalEntityID);
-                foreach (var entityProvider in others) {
-                    if (entityProvider.enabled) {
-                        entityProvider.internalEntityID = this.internalEntityID;
-                        entityProvider.cachedEntity     = this.cachedEntity;
+                else {
+                    this.cachedEntity = World.Default.CreateEntity(out this.internalEntityID);
+                    if (firstProvider.enabled) {
+                        firstProvider.internalEntityID = this.internalEntityID;
+                        firstProvider.cachedEntity     = this.cachedEntity;
                     }
                 }
             }
