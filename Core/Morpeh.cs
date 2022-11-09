@@ -12,7 +12,6 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Workaround")]
 
 namespace Morpeh {
-    //System
     using System;
     using UnityEngine;
 
