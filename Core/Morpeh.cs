@@ -66,7 +66,7 @@ namespace Unity.IL2CPP.CompilerServices {
     
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-#if !EXTERNAL_IL2CPP_ATTRS
+#if !MORPEH_EXTERNAL_IL2CPP_ATTRS
     public class Il2CppSetOptionAttribute : Attribute {
 #else
     internal class Il2CppSetOptionAttribute : Attribute {
