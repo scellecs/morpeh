@@ -99,7 +99,7 @@ namespace Morpeh {
         public ref T Add(Entity entity) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
             }
 #endif
             if (this.components.Add(entity.entityId.id, default, out var slotIndex)) {
@@ -107,7 +107,7 @@ namespace Morpeh {
                 return ref this.components.data[slotIndex];
             }
 #if MORPEH_DEBUG
-            MLogger.LogError($"You're trying to add on entity {entity.entityId.id} a component that already exists! Use Get or SetComponent instead!");
+            MLogger.LogError($"You're trying to add on entity {entity.entityId.id} a component that already exists! Use Get or Set instead!");
 #endif
             return ref this.components.data[0];
         }
@@ -116,7 +116,7 @@ namespace Morpeh {
         public ref T Add(Entity entity, out bool exist) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
             }
 #endif
             if (this.components.Add(entity.entityId.id, default, out var slotIndex)) {
@@ -133,7 +133,7 @@ namespace Morpeh {
         public bool Add(Entity entity, in T value) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
             }
 #endif
             if (this.components.Add(entity.entityId.id, value, out _)) {
@@ -142,7 +142,7 @@ namespace Morpeh {
             }
 
 #if MORPEH_DEBUG
-            MLogger.LogError($"You're trying to add on entity {entity.entityId.id} a component that already exists! Use Get or SetComponent instead!");
+            MLogger.LogError($"You're trying to add on entity {entity.entityId.id} a component that already exists! Use Get or Set instead!");
 #endif
             return false;
         }
@@ -151,7 +151,7 @@ namespace Morpeh {
         public ref T Get(Entity entity) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying GetComponent on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity.entityId.id}");
             }
 
             if (!this.components.Has(entity.entityId.id)) {
@@ -162,10 +162,10 @@ namespace Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T TryGet(Entity entity, out bool exist) {
+        public ref T Get(Entity entity, out bool exist) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying TryGetComponent on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity.entityId.id}");
             }
 #endif
             return ref this.components.TryGetValueRefByKey(entity.entityId.id, out exist);
@@ -175,7 +175,7 @@ namespace Morpeh {
         public void Set(Entity entity, in T value = default) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying SetComponent on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity.entityId.id}");
             }
 #endif
 
@@ -191,7 +191,7 @@ namespace Morpeh {
         public override bool Remove(Entity entity) {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying RemoveComponent on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Remove on null or disposed entity {entity.entityId.id}");
             }
 #endif
 
@@ -220,10 +220,10 @@ namespace Morpeh {
         public override void Migrate(Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying MigrateComponent FROM null or disposed entity {from.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity {from.entityId.id}");
             }
             if (to.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying MigrateComponent TO null or disposed entity {to.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity {to.entityId.id}");
             }
 #endif
 

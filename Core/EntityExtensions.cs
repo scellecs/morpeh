@@ -76,7 +76,7 @@ namespace Morpeh {
         }
 
 #if MORPEH_LEGACY
-        [Obsolete("[MORPEH] Use Stash.TryGet() instead.")]
+        [Obsolete("[MORPEH] Use Stash.Get() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
@@ -87,7 +87,7 @@ namespace Morpeh {
 #endif
             var cache = entity.world.GetStash<T>();
 
-            return ref cache.TryGet(entity, out exist);
+            return ref cache.Get(entity, out exist);
         }
 
 #if MORPEH_LEGACY
