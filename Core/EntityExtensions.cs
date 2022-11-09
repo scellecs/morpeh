@@ -32,7 +32,7 @@ namespace Morpeh {
         }
 #if !MORPEH_STRICT_MODE
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Add() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
@@ -47,7 +47,7 @@ namespace Morpeh {
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Add() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
@@ -62,7 +62,7 @@ namespace Morpeh {
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Get() instead.")]
 #endif
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -76,7 +76,7 @@ namespace Morpeh {
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.TryGet() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
@@ -91,7 +91,7 @@ namespace Morpeh {
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Set() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
@@ -106,7 +106,7 @@ namespace Morpeh {
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Remove() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
@@ -121,7 +121,7 @@ namespace Morpeh {
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Has() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has<T>(this Entity entity) where T : struct, IComponent {
@@ -136,7 +136,7 @@ namespace Morpeh {
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
 #endif
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
