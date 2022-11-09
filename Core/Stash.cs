@@ -53,7 +53,7 @@ namespace Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public class Stash<T> : Stash where T : struct, IComponent {
+    public sealed class Stash<T> : Stash where T : struct, IComponent {
         internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
 
         [SerializeField]
