@@ -31,9 +31,9 @@ namespace Morpeh {
             var info = new InternalTypeDefinition {
                 id                      = id,
                 type                    = type,
-                entityGetComponentBoxed = (entity) => entity.GetComponent<T>(),
-                entitySetComponentBoxed = (entity, component) => entity.SetComponent((T)component),
-                entityRemoveComponent   = (entity) => entity.RemoveComponent<T>(),
+                entityGetComponentBoxed = (entity) => entity.world.GetStash<T>().Get(entity),
+                entitySetComponentBoxed = (entity, component) => entity.world.GetStash<T>().Set(entity, (T)component),
+                entityRemoveComponent   = (entity) => entity.world.GetStash<T>().Remove(entity),
                 typeInfo                = TypeIdentifier<T>.info
             };
             intTypeAssociation.Add(id, info);
