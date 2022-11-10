@@ -84,7 +84,7 @@ namespace Morpeh {
             }
         }
 
-        private bool IsPrefab() => this.gameObject.scene.name == null;
+        private bool IsPrefab() => this.gameObject.scene.rootCount == 0;
 
         protected virtual void PreInitialize() {
         }
