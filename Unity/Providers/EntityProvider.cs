@@ -75,10 +75,7 @@ namespace Morpeh {
         }
 
         protected virtual void OnDisable() {
-            var others = this.GetComponents<EntityProvider>();
-            foreach (var entityProvider in others) {
-                entityProvider.CheckEntityIsAlive();
-            }
+            this.CheckEntityIsAlive();
         }
 
         private void CheckEntityIsAlive() {
