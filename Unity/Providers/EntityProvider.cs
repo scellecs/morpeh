@@ -79,7 +79,7 @@ namespace Morpeh {
         }
 
         private void CheckEntityIsAlive() {
-            if (this.InternalEntity == null || this.InternalEntity.isDisposed) {
+            if (this.InternalEntity.IsNullOrDisposed()) {
                 this.internalEntityID = -1;
             }
         }
