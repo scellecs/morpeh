@@ -22,7 +22,7 @@ namespace Morpeh {
         [ShowInInspector]
         [ReadOnly]
 #endif
-        private int EntityID => this.cachedEntity != null ? this.cachedEntity.ID.id : -1;
+        private int EntityID => this.cachedEntity.IsNullOrDisposed() == false ? this.cachedEntity.ID.id : -1;
 
         private Entity cachedEntity;
 
