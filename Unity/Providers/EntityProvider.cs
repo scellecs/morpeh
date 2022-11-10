@@ -1,4 +1,5 @@
 namespace Morpeh {
+    using Collections;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
@@ -11,14 +12,22 @@ namespace Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [AddComponentMenu("ECS/" + nameof(EntityProvider))]
     public class EntityProvider : MonoBehaviour {
+        private static IntHashMap<MapItem> map = new IntHashMap<MapItem>();
+        private struct MapItem {
+            public Entity entity;
+            public int    refCounter;
+        }
+
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
         [ReadOnly]
 #endif
-        protected int internalEntityID = -1;
+        private int EntityID => this.Entity != null ? this.cachedEntity.ID.id : -1;
+
+        private Entity cachedEntity;
 
         [CanBeNull]
-        private Entity InternalEntity {
+        public Entity Entity {
             get {
                 if (this.IsPrefab()) {
                     return default;
@@ -28,65 +37,58 @@ namespace Morpeh {
                     return default;
                 }
 
-                if (this.cachedEntity is null) {
-                    if (World.Default != null && this.internalEntityID >= 0 && World.Default.entitiesLength > this.internalEntityID) {
-                        this.cachedEntity = World.Default.entities[this.internalEntityID];
-                    }
-                }
-                else if (this.cachedEntity.isDisposed) {
-                    this.cachedEntity     = null;
-                    this.internalEntityID = -1;
+                if (this.cachedEntity.IsNullOrDisposed()) {
+                    this.cachedEntity = null;
                 }
 
                 return this.cachedEntity;
             }
         }
 
-        private Entity cachedEntity;
-
-        [CanBeNull]
-        public Entity Entity => this.InternalEntity;
-
         private protected virtual void OnEnable() {
 #if UNITY_EDITOR && ODIN_INSPECTOR
-            this.entityViewer.getter = () => this.InternalEntity;
+            this.entityViewer.getter = () => this.Entity;
 #endif
             if (!Application.isPlaying) {
                 return;
             }
 
-            if (this.internalEntityID < 0) {
-                var firstProvider = this.GetComponent<EntityProvider>();
-                if (firstProvider.internalEntityID >= 0) {
-                    this.internalEntityID = firstProvider.internalEntityID;
-                    this.cachedEntity     = firstProvider.cachedEntity;
+            if (this.cachedEntity.IsNullOrDisposed()) {
+                var instanceId = this.gameObject.GetInstanceID();
+                if (map.TryGetValue(instanceId, out var item)) {
+                    if (item.entity.IsNullOrDisposed()) {
+                        this.cachedEntity = item.entity = World.Default.CreateEntity();
+                        item.refCounter   = 1;
+                    }
+                    else {
+                        this.cachedEntity = item.entity;
+                        item.refCounter++;
+                    }
+                    map.Set(instanceId, item, out _);
                 }
                 else {
-                    this.cachedEntity = World.Default.CreateEntity(out this.internalEntityID);
-                    if (firstProvider.enabled) {
-                        firstProvider.internalEntityID = this.internalEntityID;
-                        firstProvider.cachedEntity     = this.cachedEntity;
-                    }
+                    this.cachedEntity = item.entity = World.Default.CreateEntity();
+                    item.refCounter   = 1;
+                    map.Add(instanceId, item, out _);
                 }
             }
 
-            this.PreInitialize();
+            this.PreInitialize(this.cachedEntity);
             this.Initialize();
         }
 
         protected virtual void OnDisable() {
-            this.CheckEntityIsAlive();
-        }
-
-        private void CheckEntityIsAlive() {
-            if (this.InternalEntity.IsNullOrDisposed()) {
-                this.internalEntityID = -1;
+            var instanceId = this.gameObject.GetInstanceID();
+            if (map.TryGetValue(instanceId, out var item)) {
+                if (--item.refCounter <= 0) {
+                    map.Remove(instanceId, out _);
+                }
             }
         }
 
         private bool IsPrefab() => this.gameObject.scene.rootCount == 0;
 
-        protected virtual void PreInitialize() {
+        protected virtual void PreInitialize(Entity entity) {
         }
 
         protected virtual void Initialize() {

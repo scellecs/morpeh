@@ -20,14 +20,14 @@
 #endif
         private T Data {
             get {
-                if (this.Entity != null) {
+                if (this.Entity.IsNullOrDisposed() == false) {
                     return this.Stash.Get(this.Entity);
                 }
 
                 return this.serializedData;
             }
             set {
-                if (this.Entity != null) {
+                if (this.Entity.IsNullOrDisposed() == false) {
                     this.Stash.Set(this.Entity, value);
                 }
                 else {
@@ -48,7 +48,7 @@
         public ref T GetSerializedData() => ref this.serializedData;
 
         public ref T GetData() {
-            if (this.Entity != null) {
+            if (this.Entity.IsNullOrDisposed() == false) {
                 if (this.Stash.Has(this.Entity)) {
                     return ref this.Stash.Get(this.Entity);
                 }
@@ -58,7 +58,7 @@
         }
 
         public ref T GetData(out bool existOnEntity) {
-            if (this.Entity != null) {
+            if (this.Entity.IsNullOrDisposed() == false) {
                 return ref this.Stash.Get(this.Entity, out existOnEntity);
             }
 
@@ -77,11 +77,8 @@
             }
         }
 
-        protected sealed override void PreInitialize() {
-            var ent = this.Entity;
-            if (ent.IsNullOrDisposed() == false) {
-                this.Stash.Set(ent, this.serializedData);
-            }
+        protected sealed override void PreInitialize(Entity entity) {
+            this.Stash.Set(entity, this.serializedData);
         }
 
         protected override void OnDisable() {

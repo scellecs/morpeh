@@ -18,7 +18,7 @@
         public IComponent[] serializedComponents = new IComponent[0];
         
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        private bool ShowSerializedComponents => this.internalEntityID > -1;
+        private bool ShowSerializedComponents => this.Entity.IsNullOrDisposed() == false;
 #endif
 
         protected virtual void OnValidate() {
@@ -37,13 +37,12 @@
 
             this.serializedComponents = this.serializedComponents.Distinct(comparer).ToArray();
         }
-        protected sealed override void PreInitialize() {
-            var ent = this.Entity;
-            if (ent != null && !ent.isDisposed) {
+        protected sealed override void PreInitialize(Entity entity) {
+            if (entity.IsNullOrDisposed() == false) {
                 foreach (var component in this.serializedComponents) {
                     var type = component.GetType();
                     if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                        definition.entitySetComponentBoxed(ent, component);
+                        definition.entitySetComponentBoxed(entity, component);
                     }
                     else {
                         Debug.LogError(
