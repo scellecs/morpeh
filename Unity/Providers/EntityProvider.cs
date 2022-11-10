@@ -38,7 +38,22 @@ namespace Morpeh {
                 }
 
                 if (this.cachedEntity.IsNullOrDisposed()) {
-                    this.cachedEntity = null;
+                    var instanceId = this.gameObject.GetInstanceID();
+                    if (map.TryGetValue(instanceId, out var item)) {
+                        if (item.entity.IsNullOrDisposed()) {
+                            this.cachedEntity = item.entity = World.Default.CreateEntity();
+                        }
+                        else {
+                            this.cachedEntity = item.entity;
+                        }
+                        item.refCounter++;
+                        map.Set(instanceId, item, out _);
+                    }
+                    else {
+                        this.cachedEntity = item.entity = World.Default.CreateEntity();
+                        item.refCounter   = 1;
+                        map.Add(instanceId, item, out _);
+                    }
                 }
 
                 return this.cachedEntity;
@@ -53,27 +68,7 @@ namespace Morpeh {
                 return;
             }
 
-            if (this.cachedEntity.IsNullOrDisposed()) {
-                var instanceId = this.gameObject.GetInstanceID();
-                if (map.TryGetValue(instanceId, out var item)) {
-                    if (item.entity.IsNullOrDisposed()) {
-                        this.cachedEntity = item.entity = World.Default.CreateEntity();
-                        item.refCounter   = 1;
-                    }
-                    else {
-                        this.cachedEntity = item.entity;
-                        item.refCounter++;
-                    }
-                    map.Set(instanceId, item, out _);
-                }
-                else {
-                    this.cachedEntity = item.entity = World.Default.CreateEntity();
-                    item.refCounter   = 1;
-                    map.Add(instanceId, item, out _);
-                }
-            }
-
-            this.PreInitialize(this.cachedEntity);
+            this.PreInitialize();
             this.Initialize();
         }
 
@@ -88,7 +83,7 @@ namespace Morpeh {
 
         private bool IsPrefab() => this.gameObject.scene.rootCount == 0;
 
-        protected virtual void PreInitialize(Entity entity) {
+        protected virtual void PreInitialize() {
         }
 
         protected virtual void Initialize() {

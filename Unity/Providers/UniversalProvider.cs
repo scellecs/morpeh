@@ -37,7 +37,8 @@
 
             this.serializedComponents = this.serializedComponents.Distinct(comparer).ToArray();
         }
-        protected sealed override void PreInitialize(Entity entity) {
+        protected sealed override void PreInitialize() {
+            var entity = this.Entity;
             if (entity.IsNullOrDisposed() == false) {
                 foreach (var component in this.serializedComponents) {
                     var type = component.GetType();
