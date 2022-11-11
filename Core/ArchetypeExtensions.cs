@@ -21,8 +21,8 @@ namespace Morpeh {
             archetype.typeIds = null;
             archetype.world   = null;
 
-            archetype.entitiesBitMap.Clear();
-            archetype.entitiesBitMap = null;
+            archetype.entities.Clear();
+            archetype.entities = null;
 
             archetype.addTransfer.Clear();
             archetype.addTransfer = null;
@@ -34,15 +34,27 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Add(this Archetype archetype, Entity entity) {
             archetype.length++;
-            entity.indexInCurrentArchetype = archetype.entitiesBitMap.Add(entity.entityId.id);
+            
+            if (archetype.usedInNative) {
+                entity.indexInCurrentArchetype = archetype.entitiesNative.Add(entity.entityId.id);
+            }
+            else {
+                archetype.entities.Set(entity.entityId.id);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove(this Archetype archetype, Entity entity) {
             archetype.length--;
-            var index = entity.indexInCurrentArchetype;
-            if (archetype.entitiesBitMap.RemoveAtSwap(index, out int newValue)) {
-                archetype.world.entities[newValue].indexInCurrentArchetype = index;
+
+            if (archetype.usedInNative) {
+                var index = entity.indexInCurrentArchetype;
+                if (archetype.entitiesNative.RemoveAtSwap(index, out int newValue)) {
+                    archetype.world.entities[newValue].indexInCurrentArchetype = index;
+                }
+            }
+            else {
+                archetype.entities.Unset(entity.entityId.id);
             }
         }
 

@@ -71,10 +71,14 @@ namespace Morpeh {
 
             private Entity current;
 
-            private World      world;
-            private FastList<int> archetypeEntities;
+            private World world;
 
-            private FastList<int>.Enumerator currentEnumerator;
+            private BitMap archetypeEntities;
+            private FastList<int> archetypeEntitiesNative;
+
+            private bool                     currentArchetypeIsNative;
+            private FastList<int>.Enumerator currentEnumeratorNative;
+            private BitMap.Enumerator        currentEnumerator;
 
             internal EntityEnumerator(Filter filter) {
                 this.world      = filter.world;
@@ -84,10 +88,30 @@ namespace Morpeh {
                 this.archetypeId    = 0;
                 this.archetypeCount = this.archetypes.length;
                 if (this.archetypeCount != 0) {
-                    this.archetypeEntities = this.archetypes.data[0].entitiesBitMap;
-                    this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                    var currentArchetype = this.archetypes.data[0];
+                    
+                    this.currentArchetypeIsNative = currentArchetype.usedInNative;
+                    if (this.currentArchetypeIsNative) {
+                        this.archetypeEntitiesNative = currentArchetype.entitiesNative;
+                        this.currentEnumeratorNative = this.archetypeEntitiesNative.GetEnumerator();
+                        
+                        this.archetypeEntities = default;
+                        this.currentEnumerator = default;
+                    }
+                    else {
+                        this.archetypeEntities = currentArchetype.entities;
+                        this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                        
+                        this.archetypeEntitiesNative = default;
+                        this.currentEnumeratorNative = default;
+                    }
                 }
                 else {
+                    this.currentArchetypeIsNative = false;
+                    
+                    this.archetypeEntitiesNative = default;
+                    this.currentEnumeratorNative = default;
+                    
                     this.archetypeEntities = default;
                     this.currentEnumerator = default;
                 }
@@ -95,29 +119,62 @@ namespace Morpeh {
 
             public bool MoveNext() {
                 if (this.archetypeCount == 1) {
-                    if (this.currentEnumerator.MoveNext()) {
-                        this.current = this.world.entities[this.currentEnumerator.current];
-                        return true;
+                    if (this.currentArchetypeIsNative) {
+                        if (this.currentEnumeratorNative.MoveNext()) {
+                            this.current = this.world.entities[this.currentEnumeratorNative.current];
+                            return true;
+                        }
                     }
+                    else {
+                        if (this.currentEnumerator.MoveNext()) {
+                            this.current = this.world.entities[this.currentEnumerator.current];
+                            return true;
+                        }
+                    }
+                    
 
                     return false;
                 }
 
                 if (this.archetypeId < this.archetypeCount) {
-                    if (this.currentEnumerator.MoveNext()) {
-                        this.current = this.world.entities[this.currentEnumerator.current];
-                        return true;
+                    if (this.currentArchetypeIsNative) {
+                        if (this.currentEnumeratorNative.MoveNext()) {
+                            this.current = this.world.entities[this.currentEnumeratorNative.current];
+                            return true;
+                        }
                     }
-
-                    while (++this.archetypeId < this.archetypeCount) {
-                        this.archetypeEntities = this.archetypes.data[this.archetypeId].entitiesBitMap;
-                        if (this.archetypeEntities.length > 0) {
-                            this.currentEnumerator = this.archetypeEntities.GetEnumerator();
-                            this.currentEnumerator.MoveNext();
-
+                    else {
+                        if (this.currentEnumerator.MoveNext()) {
                             this.current = this.world.entities[this.currentEnumerator.current];
                             return true;
                         }
+                    }
+
+                    while (++this.archetypeId < this.archetypeCount) {
+                        var currentArchetype = this.archetypes.data[this.archetypeId];
+                        this.currentArchetypeIsNative = currentArchetype.usedInNative;
+
+                        if (this.currentArchetypeIsNative) {
+                            this.archetypeEntitiesNative = this.archetypes.data[this.archetypeId].entitiesNative;
+                            if (this.archetypeEntitiesNative.length > 0) {
+                                this.currentEnumeratorNative = this.archetypeEntitiesNative.GetEnumerator();
+                                this.currentEnumeratorNative.MoveNext();
+
+                                this.current = this.world.entities[this.currentEnumeratorNative.current];
+                                return true;
+                            }
+                        }
+                        else {
+                            this.archetypeEntities = this.archetypes.data[this.archetypeId].entities;
+                            if (this.archetypeEntities.length > 0) {
+                                this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                                this.currentEnumerator.MoveNext();
+
+                                this.current = this.world.entities[this.currentEnumerator.current];
+                                return true;
+                            }
+                        }
+                        
                     }
                 }
 
@@ -128,10 +185,31 @@ namespace Morpeh {
                 this.current     = null;
                 this.archetypeId = 0;
                 if (this.archetypeCount != 0) {
-                    this.archetypeEntities = this.archetypes.data[0].entitiesBitMap;
-                    this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                    var currentArchetype = this.archetypes.data[0];
+                    
+                    this.currentArchetypeIsNative = currentArchetype.usedInNative;
+                    
+                    if (currentArchetype.usedInNative) {
+                        this.archetypeEntitiesNative = currentArchetype.entitiesNative;
+                        this.currentEnumeratorNative = this.archetypeEntitiesNative.GetEnumerator();
+                        
+                        this.archetypeEntities = default;
+                        this.currentEnumerator = default;
+                    }
+                    else {
+                        this.archetypeEntities = currentArchetype.entities;
+                        this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                        
+                        this.archetypeEntitiesNative = default;
+                        this.currentEnumeratorNative = default;
+                    }
                 }
                 else {
+                    this.currentArchetypeIsNative = false;
+                    
+                    this.archetypeEntitiesNative = default;
+                    this.currentEnumeratorNative = default;
+                    
                     this.archetypeEntities = default;
                     this.currentEnumerator = default;
                 }

@@ -23,7 +23,7 @@ namespace Morpeh.Native {
 
                     if (index >= totalArchetypeLength && index < totalArchetypeLength + archetypeLength) {
                         var slotIndex = index - totalArchetypeLength;
-                        var entityId = archetype.entitiesBitMap.data[slotIndex];
+                        var entityId = archetype.entities.data[slotIndex];
                         
                         return new EntityId(entityId, world.entitiesGens[entityId]);
                     }

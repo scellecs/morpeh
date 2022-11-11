@@ -147,7 +147,7 @@ namespace Morpeh {
         public static int GetLengthSlow(this Filter filter) {
             int accum = 0;
             foreach (var arch in filter.archetypes) {
-                accum += arch.entitiesBitMap.length;
+                accum += arch.entities.length;
             }
             return accum;
         }
@@ -155,7 +155,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEmpty(this Filter filter) {
             foreach (var arch in filter.archetypes) {
-                if (arch.entitiesBitMap.length > 0) {
+                if (arch.entities.length > 0) {
                     return false;
                 }
             }
