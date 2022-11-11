@@ -15,14 +15,19 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Archetype archetype) {
+            archetype.usedInNative = false;
+            
             archetype.id      = -1;
             archetype.length  = -1;
 
             archetype.typeIds = null;
             archetype.world   = null;
 
-            archetype.entities.Clear();
+            archetype.entities?.Clear();
             archetype.entities = null;
+            
+            archetype.entitiesNative?.Clear();
+            archetype.entitiesNative = null;
 
             archetype.addTransfer.Clear();
             archetype.addTransfer = null;
