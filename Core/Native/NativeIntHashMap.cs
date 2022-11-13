@@ -6,29 +6,29 @@ namespace Morpeh.Native {
 
     public struct NativeIntHashMap<TNative> where TNative : unmanaged {
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* lengthPtr;
+        internal unsafe int* lengthPtr;
         
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* capacityPtr;
+        internal unsafe int* capacityPtr;
         
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* capacityMinusOnePtr;
+        internal unsafe int* capacityMinusOnePtr;
         
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* lastIndexPtr;
+        internal unsafe int* lastIndexPtr;
         
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* freeIndexPtr;
+        internal unsafe int* freeIndexPtr;
 
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* buckets;
+        internal unsafe int* buckets;
         
         [NativeDisableUnsafePtrRestriction]
-        public unsafe IntHashMapSlot* slots;
+        internal unsafe IntHashMapSlot* slots;
         
         [NativeDisableParallelForRestriction]
         [NativeDisableUnsafePtrRestriction]
-        public unsafe TNative* data;
+        internal unsafe TNative* data;
     }
 }
 #endif

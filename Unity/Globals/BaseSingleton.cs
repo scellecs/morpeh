@@ -81,10 +81,10 @@
         protected virtual bool CheckIsInitialized() {
             if (this.internalEntityID < 0) {
                 var world = World.Default;
-                var cache = world.GetCache<SingletonMarker>();
+                var cache = world.GetStash<SingletonMarker>();
                 
                 this.internalEntity = world.CreateEntity(out this.internalEntityID);
-                cache.AddComponent(this.internalEntity);
+                cache.Add(this.internalEntity);
                 
                 return true;
             }

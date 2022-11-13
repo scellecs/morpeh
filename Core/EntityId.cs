@@ -1,7 +1,7 @@
 ﻿namespace Morpeh {
     using System;
     using Unity.IL2CPP.CompilerServices;
-    
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
@@ -9,11 +9,13 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public readonly struct EntityId : IEquatable<EntityId> {
+        internal static readonly EntityId Default = new EntityId(-1, -1);
+
         internal readonly int id;
         internal readonly int gen;
-        
+
         public EntityId(int id, int gen) {
-            this.id = id;
+            this.id  = id;
             this.gen = gen;
         }
 
@@ -38,11 +40,11 @@
         public static bool operator !=(EntityId left, EntityId right) {
             return !(left == right);
         }
-        
+
         public override string ToString() {
             return $"EntityId(id={id}, gen={gen})";
         }
-        
+
         public static EntityId Invalid => new EntityId(-1, -1);
     }
 }

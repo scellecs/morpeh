@@ -15,7 +15,7 @@ namespace Morpeh.Globals {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class BaseGlobal : BaseSingleton, IDisposable {
-        private ComponentsCache<GlobalEventPublished> publishedCache;
+        private Stash<GlobalEventPublished> publishedCache;
 
         public bool IsPublished {
             get {
@@ -38,7 +38,7 @@ namespace Morpeh.Globals {
 
         protected override bool CheckIsInitialized() {
             if (base.CheckIsInitialized()) {
-                this.publishedCache = this.internalEntity.world.GetCache<GlobalEventPublished>();
+                this.publishedCache = this.internalEntity.world.GetStash<GlobalEventPublished>();
                 
                 return true;
             }

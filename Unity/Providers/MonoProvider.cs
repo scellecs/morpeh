@@ -8,7 +8,7 @@
         [SerializeField]
         [HideInInspector]
         private T serializedData;
-        private ComponentsCache<T> cache;
+        private Stash<T> stash;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private string typeName = typeof(T).Name;
 
@@ -20,15 +20,15 @@
 #endif
         private T Data {
             get {
-                if (this.Entity != null) {
-                    return this.Cache.GetComponent(this.Entity);
+                if (this.Entity.IsNullOrDisposed() == false) {
+                    return this.Stash.Get(this.Entity);
                 }
 
                 return this.serializedData;
             }
             set {
-                if (this.Entity != null) {
-                    this.Cache.SetComponent(this.Entity, value);
+                if (this.Entity.IsNullOrDisposed() == false) {
+                    this.Stash.Set(this.Entity, value);
                 }
                 else {
                     this.serializedData = value;
@@ -36,21 +36,21 @@
             }
         }
 
-        public ComponentsCache<T> Cache {
+        public Stash<T> Stash {
             get {
-                if (this.cache == null) {
-                    this.cache = World.Default.GetCache<T>();
+                if (this.stash == null) {
+                    this.stash = World.Default.GetStash<T>();
                 }
-                return this.cache;
+                return this.stash;
             }
         }
 
         public ref T GetSerializedData() => ref this.serializedData;
 
         public ref T GetData() {
-            if (this.Entity != null) {
-                if (this.Cache.Has(this.Entity)) {
-                    return ref this.Cache.GetComponent(this.Entity);
+            if (this.Entity.IsNullOrDisposed() == false) {
+                if (this.Stash.Has(this.Entity)) {
+                    return ref this.Stash.Get(this.Entity);
                 }
             }
 
@@ -58,8 +58,8 @@
         }
 
         public ref T GetData(out bool existOnEntity) {
-            if (this.Entity != null) {
-                return ref this.Cache.TryGetComponent(this.Entity, out existOnEntity);
+            if (this.Entity.IsNullOrDisposed() == false) {
+                return ref this.Stash.Get(this.Entity, out existOnEntity);
             }
 
             existOnEntity = false;
@@ -78,16 +78,13 @@
         }
 
         protected sealed override void PreInitialize() {
-            var ent = this.Entity;
-            if (ent.IsNullOrDisposed() == false) {
-                this.Cache.SetComponent(ent, this.serializedData);
-            }
+            this.Stash.Set(this.Entity, this.serializedData);
         }
 
         protected override void OnDisable() {
             var ent = this.Entity;
             if (ent.IsNullOrDisposed() == false) {
-                this.Cache.RemoveComponent(ent);
+                this.Stash.Remove(ent);
             }
             base.OnDisable();
         }

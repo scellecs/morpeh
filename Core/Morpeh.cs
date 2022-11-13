@@ -12,7 +12,6 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Workaround")]
 
 namespace Morpeh {
-    //System
     using System;
     using UnityEngine;
 
@@ -44,9 +43,9 @@ namespace Morpeh {
     }
 
     [AttributeUsage(AttributeTargets.Struct)]
-    public class CacheSizeAttribute : Attribute {
+    public class StashSizeAttribute : Attribute {
         internal int size;
-        public CacheSizeAttribute(int size) {
+        public StashSizeAttribute(int size) {
             this.size = size;
         }
     }
@@ -67,7 +66,7 @@ namespace Unity.IL2CPP.CompilerServices {
     
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-#if !EXTERNAL_IL2CPP_ATTRS
+#if !MORPEH_EXTERNAL_IL2CPP_ATTRS
     public class Il2CppSetOptionAttribute : Attribute {
 #else
     internal class Il2CppSetOptionAttribute : Attribute {

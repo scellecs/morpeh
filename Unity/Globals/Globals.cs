@@ -28,9 +28,9 @@ namespace Morpeh.Globals {
 
             private int worldId;
             
-            private ComponentsCache<GlobalEventComponent<T>> eventsCache;
-            private ComponentsCache<GlobalEventPublished>    publishedCache;
-            private ComponentsCache<GlobalEventNextFrame>    nextFrameCache;
+            private Stash<GlobalEventComponent<T>> eventsCache;
+            private Stash<GlobalEventPublished>    publishedCache;
+            private Stash<GlobalEventNextFrame>    nextFrameCache;
             
             internal override void Awake(World world) {
                 this.worldId = world.identifier;
@@ -41,24 +41,24 @@ namespace Morpeh.Globals {
                 this.filterPublished = common.With<GlobalEventPublished>().Without<GlobalEventNextFrame>();
                 this.filterNextFrame = common.With<GlobalEventNextFrame>();
 
-                this.eventsCache    = world.GetCache<GlobalEventComponent<T>>();
-                this.publishedCache = world.GetCache<GlobalEventPublished>();
-                this.nextFrameCache = world.GetCache<GlobalEventNextFrame>();
+                this.eventsCache    = world.GetStash<GlobalEventComponent<T>>();
+                this.publishedCache = world.GetStash<GlobalEventPublished>();
+                this.nextFrameCache = world.GetStash<GlobalEventNextFrame>();
             }
 
             internal override void Update() {
                 foreach (var entity in this.filterPublished) {
-                    ref var evnt = ref this.eventsCache.GetComponent(entity);
+                    ref var evnt = ref this.eventsCache.Get(entity);
                     evnt.Action?.Invoke(evnt.Data);
                     evnt.Data.Clear();
-                    this.publishedCache.RemoveComponent(entity);
+                    this.publishedCache.Remove(entity);
                 }
                 
                 foreach (var entity in this.filterNextFrame) {
-                    this.publishedCache.SetComponent(entity);
-                    this.nextFrameCache.RemoveComponent(entity);
+                    this.publishedCache.Set(entity);
+                    this.nextFrameCache.Remove(entity);
                     
-                    ref var evnt = ref this.eventsCache.GetComponent(entity);
+                    ref var evnt = ref this.eventsCache.Get(entity);
                     while (evnt.NewData.Count > 0) {
                         evnt.Data.Push(evnt.NewData.Dequeue());
                     }

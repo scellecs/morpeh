@@ -31,7 +31,7 @@ namespace Morpeh {
         [OdinSerialize]
         private FastList<string> types = null;
         [OdinSerialize]
-        private FastList<ComponentsCache> caches = null;
+        private FastList<Stash> caches = null;
 #endif
 
 #if UNITY_EDITOR
@@ -108,13 +108,13 @@ namespace Morpeh {
                 this.types.Add(info.type.AssemblyQualifiedName);
             }
 
-            this.caches = ComponentsCache.caches;
+            this.caches = Stash.stashes;
         }
 
 
         protected override void OnAfterDeserialize() {
             if (this.worldsSerialized != null) {
-                ComponentsCache.caches = this.caches;
+                Stash.stashes = this.caches;
                 
                 foreach (var t in this.types) {
                     var genType = Type.GetType(t);
@@ -126,7 +126,7 @@ namespace Morpeh {
                             infoFI.GetValue(null);
                         }
                         {
-                            var openGeneric   = typeof(ComponentsCache<>);
+                            var openGeneric   = typeof(Stash<>);
                             var closedGeneric = openGeneric.MakeGenericType(genType);
                             var infoFI        = closedGeneric.GetMethod("Refill", BindingFlags.Static | BindingFlags.NonPublic);
                             infoFI.Invoke(null, null);

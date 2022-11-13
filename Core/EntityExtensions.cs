@@ -30,9 +30,9 @@ namespace Morpeh {
 
             return newEntity;
         }
-
+#if !MORPEH_STRICT_MODE
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Add() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
@@ -41,13 +41,13 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetCache<T>();
+            var cache = entity.world.GetStash<T>();
 
-            return ref cache.AddComponent(entity);
+            return ref cache.Add(entity);
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Add() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
@@ -56,13 +56,13 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetCache<T>();
+            var cache = entity.world.GetStash<T>();
 
-            return ref cache.AddComponent(entity, out exist);
+            return ref cache.Add(entity, out exist);
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Get() instead.")]
 #endif
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -70,13 +70,13 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetCache<T>();
+            var cache = entity.world.GetStash<T>();
 
-            return ref cache.GetComponent(entity);
+            return ref cache.Get(entity);
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Get() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
@@ -85,13 +85,13 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetCache<T>();
+            var cache = entity.world.GetStash<T>();
 
-            return ref cache.TryGetComponent(entity, out exist);
+            return ref cache.Get(entity, out exist);
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Set() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
@@ -100,13 +100,13 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying SetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetCache<T>();
+            var cache = entity.world.GetStash<T>();
 
-            cache.SetComponent(entity, value);
+            cache.Set(entity, value);
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Remove() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
@@ -115,13 +115,13 @@ namespace Morpeh {
                 throw new Exception("[MORPEH] You are trying RemoveComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetCache<T>();
+            var cache = entity.world.GetStash<T>();
 
-            return cache.RemoveComponent(entity);
+            return cache.Remove(entity);
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Has() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has<T>(this Entity entity) where T : struct, IComponent {
@@ -131,12 +131,12 @@ namespace Morpeh {
             }
 #endif
 
-            var cache = entity.world.GetCache<T>();
+            var cache = entity.world.GetStash<T>();
             return cache.Has(entity);
         }
 
 #if MORPEH_LEGACY
-        [Obsolete]
+        [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
 #endif
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
@@ -146,11 +146,13 @@ namespace Morpeh {
 #endif
 
             var world = from.world;
-            foreach (var cacheId in world.caches) {
-                var cache = ComponentsCache.caches.data[world.caches.GetValueByIndex(cacheId)];
-                cache.MigrateComponent(from, to, overwrite);
+            foreach (var cacheId in world.stashes) {
+                var cache = Stash.stashes.data[world.stashes.GetValueByIndex(cacheId)];
+                cache.Migrate(from, to, overwrite);
             }
         }
+        
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddTransfer(this Entity entity, int typeId) {
@@ -212,10 +214,10 @@ namespace Morpeh {
             
             var currentArchetype = entity.currentArchetype;
 
-            var caches = currentArchetype.world.caches;
+            var caches = currentArchetype.world.stashes;
             foreach (var typeId in currentArchetype.typeIds) {
                 if (caches.TryGetValue(typeId, out var index)) {
-                    ComponentsCache.caches.data[index].Clean(entity);
+                    Stash.stashes.data[index].Clean(entity);
                 }
             }
             
