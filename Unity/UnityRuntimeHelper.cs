@@ -1,12 +1,12 @@
 namespace Scellecs.Morpeh {
 #if UNITY_EDITOR
-#endif
-    using System;
-    using System.Reflection;
-    using Scellecs.Morpeh.Collections;
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
     using UnityEditor;
+#endif
+    using System;
+    using System.Reflection;
+    using Collections;
     using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
