@@ -186,7 +186,7 @@ Let's create our first component and open it.
 
 After it, you will see something like this.
 ```c#  
-using Morpeh;
+using Scellecs.Morpeh;
 using UnityEngine;
 using Unity.IL2CPP.CompilerServices;
 
@@ -222,7 +222,7 @@ Now let's create first system.
 
 System looks like this.
 ```c#  
-using Morpeh;
+using Scellecs.Morpeh.Systems;
 using UnityEngine;
 using Unity.IL2CPP.CompilerServices;
 
@@ -357,7 +357,7 @@ Create a new provider.
 </details>
 
 ```c#  
-using Morpeh;
+using Scellecs.Morpeh.Providers;
 using Unity.IL2CPP.CompilerServices;
 
 [Il2CppSetOption(Option.NullChecks, false)]
