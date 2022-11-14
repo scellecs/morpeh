@@ -190,8 +190,14 @@ namespace Scellecs.Morpeh {
             this.filters.Clear();
             this.filters = null;
 
+            var tempStashes = new FastList<Stash>();
+
             foreach (var stashId in this.stashes) {
                 var stash = Stash.stashes.data[this.stashes.GetValueByIndex(stashId)];
+                tempStashes.Add(stash);
+            }
+
+            foreach (var stash in tempStashes) {
 #if MORPEH_DEBUG
                 try {
 #endif
@@ -199,7 +205,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose stash id {stash}");
+                    MLogger.LogError($"Can not dispose stash with id {stash.commonStashId}");
                     MLogger.LogException(e);
                 }
 #endif

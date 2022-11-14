@@ -29,6 +29,9 @@ namespace Scellecs.Morpeh {
             world.systemsGroups    = new SortedList<int, SystemsGroup>();
             world.newSystemsGroups = new SortedList<int, SystemsGroup>();
 
+            world.internalSystemsGroups    = new SortedList<int, SystemsGroup>();
+            world.newInternalSystemsGroups = new SortedList<int, SystemsGroup>();
+
             world.Filter         = new Filter(world);
             world.filters        = new FastList<Filter>();
             world.archetypeCache = new IntFastList();
@@ -39,7 +42,7 @@ namespace Scellecs.Morpeh {
                     archetype.Ctor();
                 }
             }
-            
+
             Warmup();
 
             foreach (var worldPlugin in plugins) {
@@ -51,11 +54,11 @@ namespace Scellecs.Morpeh {
         internal static World Initialize(this World world) {
             var added = false;
             var id    = -1;
-            
+
             for (int i = 0, length = World.worlds.length; i < length; i++) {
                 if (World.worlds.data[i] == null) {
-                    added = true;
-                    id    = i;
+                    added                = true;
+                    id                   = i;
                     World.worlds.data[i] = world;
                     break;
                 }
@@ -66,8 +69,8 @@ namespace Scellecs.Morpeh {
             world.identifier        = added ? id : World.worlds.length - 1;
             world.freeEntityIDs     = new IntFastList();
             world.nextFreeEntityIDs = new IntFastList();
-            world.stashes            = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
-            world.typedStashes       = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.stashes           = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.typedStashes      = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
             world.entitiesCount    = 0;
             world.entitiesLength   = 0;
@@ -112,8 +115,8 @@ namespace Scellecs.Morpeh {
 
             plugins = new FastList<IWorldPlugin>();
             var componentType = typeof(IComponent);
-            var pluginType = typeof(IWorldPlugin);
-            
+            var pluginType    = typeof(IWorldPlugin);
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
                 foreach (var type in assembly.GetTypes()) {
                     if (componentType.IsAssignableFrom(type) && type.IsValueType && !type.ContainsGenericParameters) {
@@ -128,7 +131,7 @@ namespace Scellecs.Morpeh {
                         }
                     }
                     else if (pluginType.IsAssignableFrom(type) && !type.IsValueType && !type.ContainsGenericParameters) {
-                        var instance = (IWorldPlugin) Activator.CreateInstance(type, true);
+                        var instance = (IWorldPlugin)Activator.CreateInstance(type);
                         plugins.Add(instance);
                     }
                 }
@@ -194,7 +197,7 @@ namespace Scellecs.Morpeh {
             return archetype;
         }
 
-        
+
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Stash GetStash(this World world, int typeId) {
@@ -204,7 +207,7 @@ namespace Scellecs.Morpeh {
 
             return null;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Stash GetReflectionStash(this World world, Type type) {
             if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
@@ -212,15 +215,15 @@ namespace Scellecs.Morpeh {
                     return Stash.stashes.data[index];
                 }
             }
-            
+
             var constructedType = typeof(Stash<>).MakeGenericType(type);
-            var stash = (Stash) Activator.CreateInstance(constructedType, true);
+            var stash           = (Stash)Activator.CreateInstance(constructedType, true);
 
             stash.world = world;
 
             world.stashes.Add(definition.id, stash.commonStashId, out _);
             world.typedStashes.Add(definition.id, stash.typedStashId, out _);
-            
+
             return stash;
         }
 
@@ -238,8 +241,8 @@ namespace Scellecs.Morpeh {
 
             return stash;
         }
-        
-        
+
+
 
         public static void GlobalUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
@@ -252,7 +255,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this World world, float deltaTime) {
             var newSysGroup = world.newSystemsGroups;
-            
+
             for (var i = 0; i < newSysGroup.Count; i++) {
                 var key          = newSysGroup.Keys[i];
                 var systemsGroup = newSysGroup.Values[i];
@@ -264,7 +267,7 @@ namespace Scellecs.Morpeh {
             newSysGroup.Clear();
 
             newSysGroup = world.newInternalSystemsGroups;
-            
+
             for (var i = 0; i < newSysGroup.Count; i++) {
                 var key          = newSysGroup.Keys[i];
                 var systemsGroup = newSysGroup.Values[i];
@@ -325,7 +328,7 @@ namespace Scellecs.Morpeh {
                 systemsGroup.LateUpdate(deltaTime);
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CleanupUpdate(this World world, float deltaTime) {
             for (var i = 0; i < world.systemsGroups.Count; i++) {
@@ -345,7 +348,7 @@ namespace Scellecs.Morpeh {
         public static void AddSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
             world.newSystemsGroups.Add(order, systemsGroup);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddInternalSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
             world.newInternalSystemsGroups.Add(order, systemsGroup);
@@ -381,12 +384,12 @@ namespace Scellecs.Morpeh {
 
             world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
             ++world.entitiesCount;
-            
+
             return world.entities[id];
         }
 
         public static Entity CreateEntity(this World world, out int id) {
-            
+
             if (world.freeEntityIDs.length > 0) {
                 id = world.freeEntityIDs.Get(0);
                 world.freeEntityIDs.RemoveAtSwap(0, out _);
@@ -404,7 +407,7 @@ namespace Scellecs.Morpeh {
 
             world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
             ++world.entitiesCount;
-            
+
             return world.entities[id];
         }
 
@@ -414,15 +417,15 @@ namespace Scellecs.Morpeh {
 
         public static bool TryGetEntity(this World world, in EntityId entityId, out Entity entity) {
             entity = default;
-            
+
             if (entityId.id < 0 || entityId.id >= world.entitiesCapacity) {
                 return false;
             }
-            
+
             if (world.entitiesGens[entityId.id] != entityId.gen) {
                 return false;
             }
-            
+
             entity = world.entities[entityId.id];
             return !entity.IsNullOrDisposed();
         }
