@@ -16,34 +16,34 @@ namespace Scellecs.Morpeh {
     using UnityEngine;
     public interface IComponent {
     }
-    
+
     public interface IInitializer : IDisposable {
         World World { get; set; }
 
         void OnAwake();
     }
-    
+
     public interface ISystem : IInitializer {
         void OnUpdate(float deltaTime);
     }
-    
+
     public interface IFixedSystem : ISystem {
     }
-    
+
     public interface ILateSystem : ISystem {
     }
-    
+
     public interface ICleanupSystem : ISystem {
     }
 
     public interface IWorldPlugin {
         void Initialize(World world);
     }
-    
+
     public interface IValidatable {
         void OnValidate();
     }
-    
+
     public interface IValidatableWithGameObject {
         void OnValidate(GameObject gameObject);
     }
@@ -55,23 +55,27 @@ namespace Scellecs.Morpeh {
             this.size = size;
         }
     }
+}
+
+namespace Unity.IL2CPP.CompilerServices {
+    using System;
 
 #if !EXTERNAL_IL2CPP_ATTRS
     public enum Option {
 #else
-    internal enum Option {
+internal enum Option {
 #endif
         NullChecks         = 1,
         ArrayBoundsChecks  = 2,
         DivideByZeroChecks = 3
     }
-    
+
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
 #if !MORPEH_EXTERNAL_IL2CPP_ATTRS
     public class Il2CppSetOptionAttribute : Attribute {
 #else
-    internal class Il2CppSetOptionAttribute : Attribute {
+internal class Il2CppSetOptionAttribute : Attribute {
 #endif
         public Option Option { get; }
         public object Value  { get; }
@@ -81,6 +85,7 @@ namespace Scellecs.Morpeh {
             this.Value  = value;
         }
     }
+}
 
 #if !UNITY_2019_1_OR_NEWER
 namespace UnityEngine {
@@ -108,4 +113,3 @@ namespace Sirenix.OdinInspector {
     public class ShowInInspectorAttribute : Attribute { }
 }
 #endif
-}

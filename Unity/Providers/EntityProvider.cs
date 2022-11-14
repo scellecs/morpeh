@@ -1,7 +1,8 @@
 namespace Scellecs.Morpeh.Providers {
     using JetBrains.Annotations;
-    using Scellecs.Morpeh.Collections;
+    using Collections;
     using Sirenix.OdinInspector;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]

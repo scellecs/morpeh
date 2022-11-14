@@ -1,6 +1,7 @@
 namespace Scellecs.Morpeh {
 
     using Providers;
+    using Unity.IL2CPP.CompilerServices;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using UnityEditor;
     using Sirenix.OdinInspector;

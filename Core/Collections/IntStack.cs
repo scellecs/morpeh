@@ -1,6 +1,7 @@
 namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Runtime.CompilerServices;
+    using Unity.IL2CPP.CompilerServices;
 
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]

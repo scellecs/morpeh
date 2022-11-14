@@ -14,6 +14,7 @@ namespace Scellecs.Morpeh {
     using Collections;
     using JetBrains.Annotations;
     using Morpeh;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]

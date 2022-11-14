@@ -9,6 +9,7 @@ namespace Scellecs.Morpeh {
     using System;
     using System.Runtime.CompilerServices;
     using Collections;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
 #if !MORPEH_NON_SERIALIZED

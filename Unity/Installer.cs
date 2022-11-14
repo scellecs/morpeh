@@ -3,6 +3,7 @@
     using System.Linq;
     using JetBrains.Annotations;
     using Systems;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
     using Utils;
     

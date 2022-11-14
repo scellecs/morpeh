@@ -11,6 +11,7 @@ namespace Scellecs.Morpeh {
     using System.Linq;
     using System.Reflection;
     using System.Threading;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]

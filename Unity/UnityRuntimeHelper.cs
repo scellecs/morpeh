@@ -7,6 +7,7 @@ namespace Scellecs.Morpeh {
     using System;
     using System.Reflection;
     using Collections;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
