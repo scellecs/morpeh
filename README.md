@@ -59,7 +59,7 @@ Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/u
 
 ### .Net Platform
 
-Clone repository and build **Scellecs.Morpeh.csproj**
+Clone repository and reference to **Scellecs.Morpeh.csproj**
 
 ## 📖 Introduction
 ### 📘 Base concept of ECS pattern
