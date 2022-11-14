@@ -1,4 +1,4 @@
-﻿namespace Morpeh.Logging {
+﻿namespace Scellecs.Morpeh.Logging {
     public interface IMorpehLogger {
         void Log(string message);
         void LogWarning(string message);

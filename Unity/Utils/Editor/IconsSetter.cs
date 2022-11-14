@@ -3,6 +3,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Scellecs.Morpeh;
+    using Scellecs.Morpeh.Providers;
+    using Scellecs.Morpeh.Systems;
     using UnityEditor;
     using UnityEngine;
     using Object = UnityEngine.Object;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
 namespace Morpeh.Unity.Utils.Editor {
+    using Scellecs.Morpeh;
+    using Scellecs.Morpeh.Providers;
     using Sirenix.Utilities.Editor;
     using UnityEditor;
     using UnityEngine;

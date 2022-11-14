@@ -1,9 +1,8 @@
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using Sirenix.OdinInspector;
-    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
@@ -37,7 +36,7 @@ namespace Morpeh {
         internal EntityId entityId;
         
         [ShowInInspector]
-        public EntityId ID => entityId;
+        public EntityId ID => this.entityId;
 
         internal Entity() {
         }

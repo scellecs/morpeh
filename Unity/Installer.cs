@@ -1,14 +1,15 @@
-﻿namespace Morpeh {
-#if UNITY_EDITOR
-    using UnityEditor;
-#endif
+﻿namespace Scellecs.Morpeh {
+    using System;
     using System.Linq;
+    using JetBrains.Annotations;
+    using Systems;
     using UnityEngine;
     using Utils;
+    
 #if UNITY_EDITOR && ODIN_INSPECTOR
+    using UnityEditor;
     using Sirenix.OdinInspector;
 #endif
-    using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -155,11 +156,8 @@
     }
 
     namespace Utils {
-        using System;
-        using JetBrains.Annotations;
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        using Sirenix.OdinInspector;
-#endif
+        using Systems;
+        
         [Serializable]
         public abstract class BasePair<T> where T : class, ISystem {
             internal SystemsGroup group;

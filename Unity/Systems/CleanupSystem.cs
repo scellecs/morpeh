@@ -1,5 +1,4 @@
-﻿namespace Morpeh {
-    using Unity.IL2CPP.CompilerServices;
+﻿namespace Scellecs.Morpeh.Systems {
     using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]

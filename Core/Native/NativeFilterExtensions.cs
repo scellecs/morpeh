@@ -1,9 +1,7 @@
 ﻿#if MORPEH_BURST
-namespace Morpeh.Native {
+namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
-    using Native;
     using Unity.Collections;
-    using Unity.Jobs;
 
     public static class NativeFilterExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

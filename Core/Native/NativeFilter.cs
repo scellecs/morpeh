@@ -1,5 +1,5 @@
 ﻿#if MORPEH_BURST
-namespace Morpeh.Native {
+namespace Scellecs.Morpeh.Native {
     using System;
     using Unity.Collections;
     using Unity.Jobs;
@@ -25,7 +25,7 @@ namespace Morpeh.Native {
                         var slotIndex = index - totalArchetypeLength;
                         var entityId = archetype.entities.data[slotIndex];
                         
-                        return new EntityId(entityId, world.entitiesGens[entityId]);
+                        return new EntityId(entityId, this.world.entitiesGens[entityId]);
                     }
 
                     totalArchetypeLength += archetypeLength;

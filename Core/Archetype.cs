@@ -1,7 +1,6 @@
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using Collections;
-    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
 #if !MORPEH_NON_SERIALIZED

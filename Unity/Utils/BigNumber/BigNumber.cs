@@ -1,11 +1,11 @@
-namespace Morpeh.BigNumber {
+namespace Scellecs.Morpeh.Utils.BigNumber {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Numerics;
     using System.Text.RegularExpressions;
     using UnityEngine;
-    
+
     public static class BigNumberSymbol {
         public const string EMPTY = "";
         public const string K = "K";

@@ -11,11 +11,9 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Globals")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Native")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Workaround")]
-
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using UnityEngine;
-
     public interface IComponent {
     }
     
@@ -57,10 +55,6 @@ namespace Morpeh {
             this.size = size;
         }
     }
-}
-
-namespace Unity.IL2CPP.CompilerServices {
-    using System;
 
 #if !EXTERNAL_IL2CPP_ATTRS
     public enum Option {
@@ -87,7 +81,6 @@ namespace Unity.IL2CPP.CompilerServices {
             this.Value  = value;
         }
     }
-}
 
 #if !UNITY_2019_1_OR_NEWER
 namespace UnityEngine {
@@ -115,3 +108,4 @@ namespace Sirenix.OdinInspector {
     public class ShowInInspectorAttribute : Attribute { }
 }
 #endif
+}

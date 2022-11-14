@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 namespace Morpeh.Utils.Editor {
+    using Scellecs.Morpeh;
     using UnityEditor;
     using UnityEditor.Callbacks;
     using UnityEngine;

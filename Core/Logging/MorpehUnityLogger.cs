@@ -1,5 +1,5 @@
 ﻿#if UNITY_2019_1_OR_NEWER
-namespace Morpeh.Logging {
+namespace Scellecs.Morpeh.Logging {
     internal class MorpehUnityLogger : IMorpehLogger {
         void IMorpehLogger.Log(string message)                      => UnityEngine.Debug.Log(message);
         void IMorpehLogger.LogWarning(string message)               => UnityEngine.Debug.LogWarning(message);

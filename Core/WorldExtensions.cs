@@ -6,15 +6,17 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using Collections;
+    using global::Morpeh;
     using JetBrains.Annotations;
-    using Unity.IL2CPP.CompilerServices;
+    using Morpeh;
     using UnityEngine;
+    using Utils;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

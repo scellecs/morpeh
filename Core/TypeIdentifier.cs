@@ -5,13 +5,12 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Reflection;
-    using Unity.IL2CPP.CompilerServices;
+    using System.Threading;
     using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]

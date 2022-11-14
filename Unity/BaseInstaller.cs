@@ -1,12 +1,11 @@
-namespace Morpeh {
+namespace Scellecs.Morpeh {
+
+    using Providers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
+    using UnityEditor;
     using Sirenix.OdinInspector;
 #endif
-    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-#if UNITY_EDITOR
-    using UnityEditor;
-#endif
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
     [HideMonoScript]

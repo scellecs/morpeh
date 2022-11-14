@@ -1,11 +1,8 @@
-namespace Morpeh {
-    using Collections;
+namespace Scellecs.Morpeh.Providers {
     using JetBrains.Annotations;
-    using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
-#if UNITY_EDITOR && ODIN_INSPECTOR
+    using Scellecs.Morpeh.Collections;
     using Sirenix.OdinInspector;
-#endif
+    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

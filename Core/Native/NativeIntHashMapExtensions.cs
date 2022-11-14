@@ -1,7 +1,8 @@
 ﻿#if MORPEH_BURST
-namespace Morpeh.Native {
+namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
+    using global::Morpeh;
 
     public static class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

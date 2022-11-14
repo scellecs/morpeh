@@ -5,16 +5,15 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
     using Sirenix.OdinInspector;
-    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif

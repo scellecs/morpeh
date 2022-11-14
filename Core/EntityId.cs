@@ -1,6 +1,5 @@
-﻿namespace Morpeh {
+﻿namespace Scellecs.Morpeh {
     using System;
-    using Unity.IL2CPP.CompilerServices;
 
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
@@ -20,11 +19,11 @@
         }
 
         public bool Equals(EntityId other) {
-            return id == other.id && gen == other.gen;
+            return this.id == other.id && this.gen == other.gen;
         }
 
         public override bool Equals(object obj) {
-            return obj is EntityId other && Equals(other);
+            return obj is EntityId other && this.Equals(other);
         }
 
         public override int GetHashCode() {
@@ -42,7 +41,7 @@
         }
 
         public override string ToString() {
-            return $"EntityId(id={id}, gen={gen})";
+            return $"EntityId(id={this.id}, gen={this.gen})";
         }
 
         public static EntityId Invalid => new EntityId(-1, -1);

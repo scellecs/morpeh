@@ -1,4 +1,4 @@
-﻿namespace Morpeh {
+﻿namespace Scellecs.Morpeh.Providers {
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif

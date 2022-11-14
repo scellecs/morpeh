@@ -1,8 +1,6 @@
-﻿namespace Morpeh {
-    using UnityEngine;
-#if UNITY_EDITOR && ODIN_INSPECTOR
+﻿namespace Scellecs.Morpeh.Providers {
     using Sirenix.OdinInspector;
-#endif
+    using UnityEngine;
 
     public abstract class MonoProvider<T> : EntityProvider where T : struct, IComponent {
         [SerializeField]

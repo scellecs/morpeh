@@ -1,16 +1,13 @@
-namespace Morpeh {
-    using System;
-    using Collections;
-    using UnityEngine;
+namespace Scellecs.Morpeh.Utils {
 #if UNITY_EDITOR
-    using UnityEditor;
 #endif
-#if UNITY_EDITOR && ODIN_INSPECTOR
+    using System;
+    using System.Reflection;
+    using Scellecs.Morpeh.Collections;
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
-    using System.Reflection;
-#endif
-    using Unity.IL2CPP.CompilerServices;
+    using UnityEditor;
+    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
