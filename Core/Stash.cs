@@ -233,15 +233,22 @@ namespace Morpeh {
                         this.components.Set(to.entityId.id, component, out _);
                     }
                     else {
-                        this.components.Add(to.entityId.id, component, out _);
+                        if (this.components.Add(to.entityId.id, component, out _)) {
+                            to.AddTransfer(this.typeId);
+                        }
                     }
                 }
                 else {
                     if (this.components.Has(to.entityId.id) == false) {
-                        this.components.Add(to.entityId.id, component, out _);
+                        if (this.components.Add(to.entityId.id, component, out _)) {
+                            to.AddTransfer(this.typeId);
+                        }
                     }
                 }
-                this.components.Remove(from.entityId.id, out _);
+
+                if (this.components.Remove(from.entityId.id, out _)) {
+                    from.RemoveTransfer(this.typeId);
+                }
             }
         }
 
