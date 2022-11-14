@@ -167,7 +167,7 @@ bool hasHealthComponent = healthStash.Has(entity);
 
 ### 📘 Getting Started
 > 💡 **IMPORTANT**  
-> For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.  
+> For a better user experience, we strongly recommend having Odin Inspector in the project.  
 > All GIFs are hidden under spoilers.
 
 <details>
