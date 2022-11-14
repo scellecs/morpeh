@@ -1,13 +1,13 @@
 ﻿#if UNITY_EDITOR
-namespace Morpeh.Unity.Utils.Editor {
+namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using UnityEditor;
+    using UnityEngine;
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
-    using UnityEditor;
-    using UnityEngine;
 
     [CreateAssetMenu(menuName = "ECS/Utils/Define")]
     public class DefineAsset : ScriptableObject {

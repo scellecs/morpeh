@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-
-#if UNITY_EDITOR && ODIN_INSPECTOR
-namespace Morpeh.Unity.Utils.Editor {
+﻿#if UNITY_EDITOR && ODIN_INSPECTOR
+namespace Scellecs.Morpeh.Utils.Editor {
+    using System;
+    using System.Collections.Generic;
     using Scellecs.Morpeh;
     using Scellecs.Morpeh.Providers;
     using Sirenix.Utilities.Editor;
     using UnityEditor;
     using UnityEngine;
+    using Object = UnityEngine.Object;
 
     internal class EditorReference : IDisposable {
         private GameObject gameObject;

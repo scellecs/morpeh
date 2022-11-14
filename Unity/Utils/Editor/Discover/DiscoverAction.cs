@@ -1,4 +1,4 @@
-﻿namespace Morpeh.Utils.Editor {
+﻿namespace Scellecs.Morpeh.Utils.Editor.Discover {
     using UnityEngine;
 
     public abstract class DiscoverAction : ScriptableObject {

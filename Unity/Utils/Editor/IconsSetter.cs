@@ -1,4 +1,4 @@
-﻿namespace Morpeh.Unity.Utils.Editor {
+﻿namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using System.Linq;

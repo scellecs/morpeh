@@ -1,4 +1,4 @@
-﻿namespace Morpeh.Utils.Editor.Actions {
+﻿namespace Scellecs.Morpeh.Utils.Editor.Discover.Actions {
     using UnityEngine;
 
     [CreateAssetMenu(menuName = "ECS/Utils/Discover Actions/" + "Open URL")]

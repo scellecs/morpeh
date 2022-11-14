@@ -1,4 +1,4 @@
-﻿namespace Morpeh.Utils.Editor.Actions {
+﻿namespace Scellecs.Morpeh.Utils.Editor.Discover.Actions {
     using UnityEditor;
     using UnityEngine;
 

@@ -8,17 +8,17 @@
 
 #if UNITY_EDITOR
 
-namespace Morpeh.Utils.Editor {
+namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
     using UnityEditor;
+    using UnityEditor.Compilation;
     using UnityEditor.PackageManager;
     using UnityEngine;
     using PackageInfo = UnityEditor.PackageManager.PackageInfo;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using UnityEditor.Compilation;
 
     [InitializeOnLoad]
     public class DependencyResolver : MonoBehaviour {

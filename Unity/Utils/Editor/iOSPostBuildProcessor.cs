@@ -1,11 +1,9 @@
 ﻿#if UNITY_EDITOR
-namespace Morpeh.Apple {
+namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
-    using System.IO;
-    using System.Linq;
 #if UNITY_IOS
     using UnityEditor.iOS.Xcode;
 #endif

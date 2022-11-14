@@ -1,4 +1,4 @@
-namespace Morpeh.Utils.Editor {
+namespace Scellecs.Morpeh.Utils.Editor.Discover {
     using System;
     using UnityEngine;
     using Object = UnityEngine.Object;
