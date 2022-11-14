@@ -92,6 +92,10 @@
                             SelectIcon(script, iconL);
                             SaveIcon(script);
                         }
+                        else if (InheritsFrom(type, typeof(ICleanupSystem))) {
+                            SelectIcon(script, iconC);
+                            SaveIcon(script);
+                        }
                         else if (InheritsFrom(type, typeof(ISystem))) {
                             SelectIcon(script, iconU);
                             SaveIcon(script);
