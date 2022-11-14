@@ -3,7 +3,7 @@
 </p>
 
 # Morpeh
-🎲 **ECS Framework for Unity Game Engine and .Net platform.**  
+🎲 **ECS Framework for Unity Game Engine and .Net Platform**  
    
 Adapted for the rapid development mobile games like:  
 &nbsp;&nbsp;&nbsp;&nbsp;📕 Hyper Casual  
