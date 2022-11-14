@@ -39,11 +39,21 @@ namespace Morpeh {
         [ShowInInspector]
         [NonSerialized]
         internal SortedList<int, SystemsGroup> systemsGroups;
+        
+        //todo custom collection
+        [ShowInInspector]
+        [NonSerialized]
+        internal SortedList<int, SystemsGroup> internalSystemsGroups;
 
         //todo custom collection
         [ShowInInspector]
         [NonSerialized]
         internal SortedList<int, SystemsGroup> newSystemsGroups;
+        
+        //todo custom collection
+        [ShowInInspector]
+        [NonSerialized]
+        internal SortedList<int, SystemsGroup> newInternalSystemsGroups;
 
         [SerializeField]
         internal Entity[] entities;
@@ -116,7 +126,31 @@ namespace Morpeh {
 #endif
             }
 
+            this.newSystemsGroups.Clear();
+            this.newSystemsGroups = null;
+            
+            this.systemsGroups.Clear();
             this.systemsGroups = null;
+            
+            foreach (var systemsGroup in this.internalSystemsGroups.Values) {
+#if MORPEH_DEBUG
+                try {
+#endif
+                    systemsGroup.Dispose();
+#if MORPEH_DEBUG
+                }
+                catch (Exception e) {
+                    MLogger.LogError($"Can not dispose internal system group {systemsGroup.GetType()}");
+                    MLogger.LogException(e);
+                }
+#endif
+            }
+
+            this.newInternalSystemsGroups.Clear();
+            this.newInternalSystemsGroups = null;
+            
+            this.internalSystemsGroups.Clear();
+            this.internalSystemsGroups = null;
 
             foreach (var entity in this.entities) {
 #if MORPEH_DEBUG
@@ -157,14 +191,8 @@ namespace Morpeh {
             this.filters.Clear();
             this.filters = null;
 
-            var tempStashes = new FastList<Stash>();
-
             foreach (var stashId in this.stashes) {
                 var stash = Stash.stashes.data[this.stashes.GetValueByIndex(stashId)];
-                tempStashes.Add(stash);
-            }
-
-            foreach (var stash in tempStashes) {
 #if MORPEH_DEBUG
                 try {
 #endif

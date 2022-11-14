@@ -19,7 +19,9 @@ namespace Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public static partial class WorldExtensions {
+    public static class WorldExtensions {
+        internal static FastList<IWorldPlugin> plugins;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Ctor(this World world) {
             world.systemsGroups    = new SortedList<int, SystemsGroup>();
@@ -35,12 +37,13 @@ namespace Morpeh {
                     archetype.Ctor();
                 }
             }
+            
+            Warmup();
 
-            world.InitializeGlobals();
+            foreach (var worldPlugin in plugins) {
+                worldPlugin.Initialize(world);
+            }
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static partial void InitializeGlobals(this World world);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
@@ -96,10 +99,22 @@ namespace Morpeh {
             go.hideFlags = HideFlags.HideAndDontSave;
             UnityEngine.Object.DontDestroyOnLoad(go);
 #endif
-            //Warm Types
+            Warmup();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Warmup() {
+            if (plugins != null) {
+                return;
+            }
+
+            plugins = new FastList<IWorldPlugin>();
+            var componentType = typeof(IComponent);
+            var pluginType = typeof(IWorldPlugin);
+            
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
                 foreach (var type in assembly.GetTypes()) {
-                    if (typeof(IComponent).IsAssignableFrom(type) && type.IsValueType && !type.ContainsGenericParameters) {
+                    if (componentType.IsAssignableFrom(type) && type.IsValueType && !type.ContainsGenericParameters) {
                         try {
                             typeof(TypeIdentifier<>)
                                 .MakeGenericType(type)
@@ -109,6 +124,10 @@ namespace Morpeh {
                         catch {
                             MLogger.LogWarning($"Attention component type {type.FullName} not used, but exists in build");
                         }
+                    }
+                    else if (pluginType.IsAssignableFrom(type) && !type.IsValueType && !type.ContainsGenericParameters) {
+                        var instance = (IWorldPlugin) Activator.CreateInstance(type, true);
+                        plugins.Add(instance);
                     }
                 }
             }
@@ -230,18 +249,36 @@ namespace Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this World world, float deltaTime) {
-            for (var i = 0; i < world.newSystemsGroups.Count; i++) {
-                var key          = world.newSystemsGroups.Keys[i];
-                var systemsGroup = world.newSystemsGroups.Values[i];
+            var newSysGroup = world.newSystemsGroups;
+            
+            for (var i = 0; i < newSysGroup.Count; i++) {
+                var key          = newSysGroup.Keys[i];
+                var systemsGroup = newSysGroup.Values[i];
 
                 systemsGroup.Initialize();
                 world.systemsGroups.Add(key, systemsGroup);
             }
 
-            world.newSystemsGroups.Clear();
+            newSysGroup.Clear();
+
+            newSysGroup = world.newInternalSystemsGroups;
+            
+            for (var i = 0; i < newSysGroup.Count; i++) {
+                var key          = newSysGroup.Keys[i];
+                var systemsGroup = newSysGroup.Values[i];
+
+                systemsGroup.Initialize();
+                world.internalSystemsGroups.Add(key, systemsGroup);
+            }
+
+            newSysGroup.Clear();
 
             for (var i = 0; i < world.systemsGroups.Count; i++) {
                 var systemsGroup = world.systemsGroups.Values[i];
+                systemsGroup.Update(deltaTime);
+            }
+            for (var i = 0; i < world.internalSystemsGroups.Count; i++) {
+                var systemsGroup = world.internalSystemsGroups.Values[i];
                 systemsGroup.Update(deltaTime);
             }
         }
@@ -260,12 +297,17 @@ namespace Morpeh {
                 var systemsGroup = world.systemsGroups.Values[i];
                 systemsGroup.FixedUpdate(deltaTime);
             }
+            for (var i = 0; i < world.internalSystemsGroups.Count; i++) {
+                var systemsGroup = world.internalSystemsGroups.Values[i];
+                systemsGroup.FixedUpdate(deltaTime);
+            }
         }
 
         public static void GlobalLateUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
                     world.LateUpdate(deltaTime);
+                    world.CleanupUpdate(deltaTime);
                 }
             }
         }
@@ -276,6 +318,22 @@ namespace Morpeh {
                 var systemsGroup = world.systemsGroups.Values[i];
                 systemsGroup.LateUpdate(deltaTime);
             }
+            for (var i = 0; i < world.internalSystemsGroups.Count; i++) {
+                var systemsGroup = world.internalSystemsGroups.Values[i];
+                systemsGroup.LateUpdate(deltaTime);
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CleanupUpdate(this World world, float deltaTime) {
+            for (var i = 0; i < world.systemsGroups.Count; i++) {
+                var systemsGroup = world.systemsGroups.Values[i];
+                systemsGroup.CleanupUpdate(deltaTime);
+            }
+            for (var i = 0; i < world.internalSystemsGroups.Count; i++) {
+                var systemsGroup = world.internalSystemsGroups.Values[i];
+                systemsGroup.CleanupUpdate(deltaTime);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -284,6 +342,11 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
             world.newSystemsGroups.Add(order, systemsGroup);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddInternalSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
+            world.newInternalSystemsGroups.Add(order, systemsGroup);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

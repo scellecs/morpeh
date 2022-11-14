@@ -10,7 +10,7 @@ namespace Morpeh {
     using Collections;
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
-    
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -21,6 +21,8 @@ namespace Morpeh {
         internal FastList<ISystem> fixedSystems;
         [ShowInInspector]
         internal FastList<ISystem> lateSystems;
+        [ShowInInspector]
+        internal FastList<ISystem> cleanupSystems;
 
         [ShowInInspector]
         internal FastList<ISystem> disabledSystems;
@@ -28,6 +30,8 @@ namespace Morpeh {
         internal FastList<ISystem> disabledFixedSystems;
         [ShowInInspector]
         internal FastList<ISystem> disabledLateSystems;
+        [ShowInInspector]
+        internal FastList<ISystem> disabledCleanupSystems;
 
         [ShowInInspector]
         internal FastList<IInitializer> newInitializers;
@@ -46,13 +50,15 @@ namespace Morpeh {
             this.world         = world;
             this.delayedAction = null;
 
-            this.systems      = new FastList<ISystem>();
-            this.fixedSystems = new FastList<ISystem>();
-            this.lateSystems  = new FastList<ISystem>();
+            this.systems         = new FastList<ISystem>();
+            this.fixedSystems    = new FastList<ISystem>();
+            this.lateSystems     = new FastList<ISystem>();
+            this.cleanupSystems  = new FastList<ISystem>();
 
-            this.disabledSystems      = new FastList<ISystem>();
-            this.disabledFixedSystems = new FastList<ISystem>();
-            this.disabledLateSystems  = new FastList<ISystem>();
+            this.disabledSystems         = new FastList<ISystem>();
+            this.disabledFixedSystems    = new FastList<ISystem>();
+            this.disabledLateSystems     = new FastList<ISystem>();
+            this.disabledCleanupSystems  = new FastList<ISystem>();
 
             this.newInitializers = new FastList<IInitializer>();
             this.initializers    = new FastList<IInitializer>();
@@ -93,6 +99,9 @@ namespace Morpeh {
             DisposeSystems(this.lateSystems);
             this.lateSystems = null;
 
+            DisposeSystems(this.cleanupSystems);
+            this.cleanupSystems = null;
+
             DisposeSystems(this.disabledSystems);
             this.disabledSystems = null;
 
@@ -101,6 +110,9 @@ namespace Morpeh {
 
             DisposeSystems(this.disabledLateSystems);
             this.disabledLateSystems = null;
+
+            DisposeSystems(this.disabledCleanupSystems);
+            this.disabledCleanupSystems = null;
 
             foreach (var initializer in this.newInitializers) {
 #if MORPEH_DEBUG

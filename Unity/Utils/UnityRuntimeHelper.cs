@@ -6,14 +6,11 @@ namespace Morpeh {
     using UnityEditor;
 #endif
 #if UNITY_EDITOR && ODIN_INSPECTOR
-    using System.Collections.Generic;
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
     using System.Reflection;
-    using Globals.ECS;
 #endif
     using Unity.IL2CPP.CompilerServices;
-    using Utils;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -31,7 +28,7 @@ namespace Morpeh {
         [OdinSerialize]
         private FastList<string> types = null;
         [OdinSerialize]
-        private FastList<Stash> caches = null;
+        private FastList<Stash> stashes = null;
 #endif
 
 #if UNITY_EDITOR
@@ -108,13 +105,13 @@ namespace Morpeh {
                 this.types.Add(info.type.AssemblyQualifiedName);
             }
 
-            this.caches = Stash.stashes;
+            this.stashes = Stash.stashes;
         }
 
 
         protected override void OnAfterDeserialize() {
             if (this.worldsSerialized != null) {
-                Stash.stashes = this.caches;
+                Stash.stashes = this.stashes;
                 
                 foreach (var t in this.types) {
                     var genType = Type.GetType(t);

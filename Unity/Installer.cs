@@ -18,7 +18,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Required]
         [InfoBox("Order collision with other installer!", InfoMessageType.Error, nameof(IsCollisionWithOtherInstaller))]
-        [PropertyOrder(-5)]
+        [PropertyOrder(-7)]
 #endif
         public int order;
         
@@ -31,24 +31,30 @@
         
         [Space]
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-5)]
+        [PropertyOrder(-6)]
 #endif
         public Initializer[] initializers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-4)]
+        [PropertyOrder(-5)]
         [OnValueChanged(nameof(OnValueChangedUpdate))]
 #endif
         public UpdateSystemPair[] updateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-3)]
+        [PropertyOrder(-4)]
         [OnValueChanged(nameof(OnValueChangedFixedUpdate))]
 #endif
         public FixedSystemPair[] fixedUpdateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-2)]
+        [PropertyOrder(-3)]
         [OnValueChanged(nameof(OnValueChangedLateUpdate))]
 #endif
         public LateSystemPair[] lateUpdateSystems;
+        
+        #if UNITY_EDITOR && ODIN_INSPECTOR
+        [PropertyOrder(-2)]
+        [OnValueChanged(nameof(OnValueChangedCleanup))]
+#endif
+        public CleanupSystemPair[] cleanupSystems;
 
         private SystemsGroup group;
 
@@ -73,6 +79,12 @@
             }
         }
         
+        private void OnValueChangedCleanup() {
+            if (Application.isPlaying) {
+                this.RemoveSystems(this.cleanupSystems);
+                this.AddSystems(this.cleanupSystems);
+            }
+        }
 
         protected override void OnEnable() {
             this.group = World.Default.CreateSystemsGroup();
@@ -85,6 +97,7 @@
             this.AddSystems(this.updateSystems);
             this.AddSystems(this.fixedUpdateSystems);
             this.AddSystems(this.lateUpdateSystems);
+            this.AddSystems(this.cleanupSystems);
             
             World.Default.AddSystemsGroup(this.order, this.group);
         }
@@ -93,6 +106,7 @@
             this.RemoveSystems(this.updateSystems);
             this.RemoveSystems(this.fixedUpdateSystems);
             this.RemoveSystems(this.lateUpdateSystems);
+            this.RemoveSystems(this.cleanupSystems);
             
             World.Default.RemoveSystemsGroup(this.group);
         }
@@ -204,6 +218,10 @@
 
         [Serializable]
         public class LateSystemPair : BasePair<LateUpdateSystem> {
+        }
+        
+        [Serializable]
+        public class CleanupSystemPair : BasePair<CleanupSystem> {
         }
     }
 }

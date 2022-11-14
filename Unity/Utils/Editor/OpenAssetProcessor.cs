@@ -9,7 +9,7 @@ namespace Morpeh.Utils.Editor {
         public static bool OnOpenAsset(int instanceID, int line) {
             var obj = EditorUtility.InstanceIDToObject(instanceID);
             if (obj is ScriptableObject so) {
-                if (so is IInitializer && so is Configurator == false) {
+                if (so is IInitializer) {
                     var monoScript = MonoScript.FromScriptableObject(so);
                     AssetDatabase.OpenAsset(monoScript);
                     return true;

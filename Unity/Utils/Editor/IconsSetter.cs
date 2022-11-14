@@ -3,7 +3,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Globals;
     using UnityEditor;
     using UnityEngine;
     using Object = UnityEngine.Object;
@@ -94,14 +93,14 @@
                             SelectIcon(script, iconU);
                             SaveIcon(script);
                         }
-                        else if (InheritsFrom(type, typeof(BaseGlobalVariable<>))) {
-                            SelectIcon(script, iconV);
-                            SaveIcon(script);
-                        }
-                        else if (InheritsFrom(type, typeof(BaseGlobalEvent<>))) {
-                            SelectIcon(script, iconE);
-                            SaveIcon(script);
-                        }
+                        // else if (InheritsFrom(type, typeof(BaseGlobalVariable<>))) {
+                        //     SelectIcon(script, iconV);
+                        //     SaveIcon(script);
+                        // }
+                        // else if (InheritsFrom(type, typeof(BaseGlobalEvent<>))) {
+                        //     SelectIcon(script, iconE);
+                        //     SaveIcon(script);
+                        // }
                     }
                 }
 

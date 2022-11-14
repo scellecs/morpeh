@@ -5,11 +5,12 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Editor")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite.Editor")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Native")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Workaround")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.TestSuite")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.TestSuite.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Globals")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Native")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Workaround")]
 
 namespace Morpeh {
     using System;
@@ -32,6 +33,13 @@ namespace Morpeh {
     }
     
     public interface ILateSystem : ISystem {
+    }
+    
+    public interface ICleanupSystem : ISystem {
+    }
+
+    public interface IWorldPlugin {
+        void Initialize(World world);
     }
     
     public interface IValidatable {
