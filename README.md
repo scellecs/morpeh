@@ -54,7 +54,7 @@ Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/u
 
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
 &nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh.git#develop  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2022.1.0
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2022.1.1
 
 <details>
     <summary>You can update Morpeh by Discover Window. Select Help/Morpeh Discover menu.   </summary>
