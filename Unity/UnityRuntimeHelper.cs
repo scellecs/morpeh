@@ -1,4 +1,4 @@
-namespace Scellecs.Morpeh.Utils {
+namespace Scellecs.Morpeh {
 #if UNITY_EDITOR
 #endif
     using System;

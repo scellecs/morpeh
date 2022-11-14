@@ -64,6 +64,20 @@
       <None Remove="Core\Collections\IntStackExtensions.cs.meta" />
       <None Remove="Core\Collections\UnsafeIntHashMap.cs.meta" />
       <None Remove="Core\Collections\UnsafeIntHashMapExtensions.cs.meta" />
+      <None Remove="Core\Logging\IMorpehLogger.cs.meta" />
+      <None Remove="Core\Logging\MorpehSystemLogger.cs.meta" />
+      <None Remove="Core\Logging\MorpehUnityLogger.cs.meta" />
+      <None Remove="Core\EntityId.cs.meta" />
+      <None Remove="Core\Logging.meta" />
+      <None Remove="Core\MLogger.cs.meta" />
+      <None Remove="Core\Native.meta" />
+      <None Remove="Core\Stash.cs.meta" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Scellecs.Morpeh.Unsafe">
+        <HintPath>Core\Native\Scellecs.Morpeh.Unsafe.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

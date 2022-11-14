@@ -12,11 +12,9 @@ namespace Scellecs.Morpeh {
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using Collections;
-    using global::Morpeh;
     using JetBrains.Annotations;
     using Morpeh;
     using UnityEngine;
-    using Utils;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -130,7 +128,7 @@ namespace Scellecs.Morpeh {
                             MLogger.LogWarning($"Attention component type {type.FullName} not used, but exists in build");
                         }
                     }
-                    else if (pluginType.IsAssignableFrom(type) && !type.IsValueType && !type.ContainsGenericParameters) {
+                    else if (pluginType.IsAssignableFrom(type) && !type.IsValueType && !type.ContainsGenericParameters && pluginType != type) {
                         var instance = (IWorldPlugin)Activator.CreateInstance(type);
                         plugins.Add(instance);
                     }
