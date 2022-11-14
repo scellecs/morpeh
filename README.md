@@ -145,21 +145,21 @@ int filterLengthCalculatedOnCall = filter.GetFilterLength();
 
 ```
 
-#### 🔖 Cache
+#### 🔖 Stash
 A type that contains components.  
-You can get components and do other operations directly from the cache, because entity methods look up the cache each time.  
+You can get components and do other operations directly from the stash, because entity methods look up the stash each time.  
 However, such code is harder to read.
 ```c#
-var healthCache = this.World.GetCache<HealthComponent>();
+var healthStash = this.World.GetStash<HealthComponent>();
 var entity = this.World.CreateEntity();
 
-ref var addedHealthComponent  = ref healthCache.AddComponent(entity);
-ref var gottenHealthComponent = ref healthCache.GetComponent(entity);
+ref var addedHealthComponent  = ref healthStash.Add(entity);
+ref var gottenHealthComponent = ref healthStash.Get(entity);
 
-bool removed = healthCache.RemoveComponent(entity);
-healthCache.SetComponent(entity, new HealthComponent {healthPoints = 100});
+bool removed = healthStash.Remove(entity);
+healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
-bool hasHealthComponent = healthCache.Has(entity);
+bool hasHealthComponent = healthStash.Has(entity);
 
 ```
 
@@ -297,23 +297,23 @@ public sealed class HealthSystem : UpdateSystem {
 > 💡 Don't forget about `ref` operator.  
 > Components are struct and if you want to change them directly, then you must use reference operator.
 
-For high performance, you can use cache directly.  
-No need to do GetComponent from entity every time, which trying to find suitable cache.  
+For high performance, you can use stash directly.  
+No need to do GetComponent from entity every time, which trying to find suitable stash.  
 However, we use such code only in very hot areas, because it is quite difficult to read it.
 
 ```c#  
 public sealed class HealthSystem : UpdateSystem {
     private Filter filter;
-    private ComponentsCache<HealthComponent> healthCache;
+    private Stash<HealthComponent> healthStash;
     
     public override void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>();
-        this.healthCache = this.World.GetCache<HealthComponent>();
+        this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
     public override void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
-            ref var healthComponent = ref healthCache.GetComponent(entity);
+            ref var healthComponent = ref healthStash.Get(entity);
             Debug.Log(healthComponent.healthPoints);
         }
     }
@@ -401,13 +401,13 @@ Example job scheduling:
 ```c#  
 public sealed class SomeSystem : UpdateSystem {
     private Filter filter;
-    private ComponentsCache<HealthComponent> cache;
+    private Stash<HealthComponent> stash;
     ...
     public override void OnUpdate(float deltaTime) {
         using (var nativeFilter = this.filter.AsNative()) {
             var parallelJob = new ExampleParallelJob {
                 entities = nativeFilter,
-                healthComponents = cache.AsNative(),
+                healthComponents = stash.AsNative(),
                 // Add more native caches if needed
             };
             var parallelJobHandle = parallelJob.Schedule(nativeFilter.length, 64);
