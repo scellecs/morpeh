@@ -389,11 +389,11 @@ Nice!
 > 💡 Supported only in Unity. Subjected to further improvements and modifications.
 
 You can convert `Filter<T>` to `NativeFilter<TNative>` which allows you to do component-based manipulations inside a Job.  
-Conversion of `ComponentsCache<T>` to `NativeCache<TNative>` allows you to operate on components based on entity ids.  
+Conversion of `Stash<T>` to `NativeStash<TNative>` allows you to operate on components based on entity ids.  
 
 Current limitations:
-* `NativeFilter` and `NativeCache` and their contents should never be re-used outside of single system tick.
-* `NativeFilter` and `NativeCache` cannot be used in-between `UpdateFilters` calls inside Morpeh.
+* `NativeFilter` and `NativeStash` and their contents should never be re-used outside of single system tick.
+* `NativeFilter` and `NativeStash` cannot be used in-between `UpdateFilters` calls inside Morpeh.
 * `NativeFilter` should be disposed upon usage completion due to https://github.com/scellecs/morpeh/issues/107, which also means `NativeFilter` causes a single `Allocator.TempJob` `NativeArray` allocation.
 * Jobs can be chained only within current system execution, `NativeFilter` can be disposed only after execution of all scheduled jobs.
 
