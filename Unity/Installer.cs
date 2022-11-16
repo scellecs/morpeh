@@ -142,9 +142,6 @@
         }
         
 #if UNITY_EDITOR
-        [MenuItem("GameObject/ECS/", true, 10)]
-        private static bool OrderECS() => true;
-
         [MenuItem("GameObject/ECS/Installer", false, 1)]
         private static void CreateInstaller(MenuCommand menuCommand) {
             var go = new GameObject("[Installer]");
