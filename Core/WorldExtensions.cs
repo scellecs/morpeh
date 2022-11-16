@@ -443,8 +443,8 @@ namespace Scellecs.Morpeh {
             --world.entitiesCount;
         }
 
-        public static void UpdateFilters(this World world) {
-            MLogger.BeginSample("World.UpdateFilters()");
+        public static void Commit(this World world) {
+            MLogger.BeginSample("World.Commit()");
             foreach (var entityId in world.dirtyEntities) {
                 world.entities[entityId]?.ApplyTransfer();
             }

@@ -21,25 +21,25 @@ namespace Scellecs.Morpeh {
         public static void Initialize(this SystemsGroup systemsGroup) {
             MLogger.BeginSample("SystemGroup.Initialize()");
             if (systemsGroup.disposables.length > 0) {
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
 
                 foreach (var disposable in systemsGroup.disposables) {
                     disposable.TryCatchDispose();
                     disposable.ForwardDispose();
 
-                    systemsGroup.world.UpdateFilters();
+                    systemsGroup.world.Commit();
                 }
 
                 systemsGroup.disposables.Clear();
             }
 
-            systemsGroup.world.UpdateFilters();
+            systemsGroup.world.Commit();
             if (systemsGroup.newInitializers.length > 0) {
                 foreach (var initializer in systemsGroup.newInitializers) {
                     initializer.TryCatchAwake();
                     initializer.ForwardAwake();
 
-                    systemsGroup.world.UpdateFilters();
+                    systemsGroup.world.Commit();
                     systemsGroup.initializers.Add(initializer);
                 }
 
@@ -60,7 +60,7 @@ namespace Scellecs.Morpeh {
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
 
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
             }
 
             systemsGroup.InvokeDelayedAction();
@@ -71,7 +71,7 @@ namespace Scellecs.Morpeh {
         public static void FixedUpdate(this SystemsGroup systemsGroup, float deltaTime) {
             MLogger.BeginSample("SystemGroup.FixedUpdate()");
             systemsGroup.DropDelayedAction();
-            systemsGroup.world.UpdateFilters();
+            systemsGroup.world.Commit();
 
             for (int i = 0, length = systemsGroup.fixedSystems.length; i < length; i++) {
                 var system = systemsGroup.fixedSystems.data[i];
@@ -79,7 +79,7 @@ namespace Scellecs.Morpeh {
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
 
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
             }
 
             systemsGroup.InvokeDelayedAction();
@@ -90,14 +90,14 @@ namespace Scellecs.Morpeh {
         public static void LateUpdate(this SystemsGroup systemsGroup, float deltaTime) {
             MLogger.BeginSample("SystemGroup.LateUpdate()");
             systemsGroup.DropDelayedAction();
-            systemsGroup.world.UpdateFilters();
+            systemsGroup.world.Commit();
 
             for (int i = 0, length = systemsGroup.lateSystems.length; i < length; i++) {
                 var system = systemsGroup.lateSystems.data[i];
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
 
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
             }
 
             systemsGroup.InvokeDelayedAction();
@@ -108,14 +108,14 @@ namespace Scellecs.Morpeh {
         public static void CleanupUpdate(this SystemsGroup systemsGroup, float deltaTime) {
             MLogger.BeginSample("SystemGroup.CleanupUpdate()");
             systemsGroup.DropDelayedAction();
-            systemsGroup.world.UpdateFilters();
+            systemsGroup.world.Commit();
 
             for (int i = 0, length = systemsGroup.cleanupSystems.length; i < length; i++) {
                 var system = systemsGroup.cleanupSystems.data[i];
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
 
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
             }
 
             systemsGroup.InvokeDelayedAction();

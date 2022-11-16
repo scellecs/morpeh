@@ -92,7 +92,7 @@ namespace Scellecs.Morpeh {
         protected override void OnBeforeSerialize() {
             this.worldsSerialized = World.worlds;
             foreach (var world in this.worldsSerialized) {
-                world.UpdateFilters();
+                world.Commit();
             }
             if (this.types == null) {
                 this.types = new FastList<string>();

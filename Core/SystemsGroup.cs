@@ -75,7 +75,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                     try {
 #endif
-                        this.world.UpdateFilters();
+                        this.world.Commit();
                         system.Dispose();
 #if MORPEH_DEBUG
                     }
@@ -118,7 +118,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    this.world.UpdateFilters();
+                    this.world.Commit();
                     initializer.Dispose();
 #if MORPEH_DEBUG
                 }
@@ -136,7 +136,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    this.world.UpdateFilters();
+                    this.world.Commit();
                     initializer.Dispose();
 #if MORPEH_DEBUG
                 }
@@ -154,7 +154,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    this.world.UpdateFilters();
+                    this.world.Commit();
                     disposable.Dispose();
 #if MORPEH_DEBUG
                 }
