@@ -192,14 +192,18 @@ namespace Scellecs.Morpeh {
             var currentTypeId = TypeIdentifier<T>.info.id;
 
 #if MORPEH_DEBUG
-            foreach (var typeId in filter.includedTypeIds) {
-                if (typeId == currentTypeId) {
-                    throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
+            if (filter.includedTypeIds != null) {
+                foreach (var typeId in filter.includedTypeIds) {
+                    if (typeId == currentTypeId) {
+                        throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
+                    }
                 }
             }
-            foreach (var typeId in filter.excludedTypeIds) {
-                if (typeId == currentTypeId) {
-                    throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
+            if (filter.excludedTypeIds != null) {
+                foreach (var typeId in filter.excludedTypeIds) {
+                    if (typeId == currentTypeId) {
+                        throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
+                    }
                 }
             }
 #endif
