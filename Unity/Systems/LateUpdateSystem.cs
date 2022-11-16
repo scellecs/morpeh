@@ -7,7 +7,6 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class LateUpdateSystem : ScriptableObject, ILateSystem {
         public World  World  { get; set; }
-        public Filter Filter => this.World.Filter;
 
         public abstract void OnAwake();
 
