@@ -27,6 +27,10 @@ namespace Scellecs.Morpeh.Providers {
         [CanBeNull]
         public Entity Entity {
             get {
+                if (World.Default == null) {
+                    return default;
+                }
+                
                 if (this.IsPrefab()) {
                     return default;
                 }

@@ -18,7 +18,7 @@ namespace Scellecs.Morpeh {
 #else
     internal class UnityRuntimeHelper : MonoBehaviour {
 #endif
-        internal static Action             onApplicationFocusLost = () => { };
+        internal static Action             onApplicationFocusLost = () => {};
         internal static UnityRuntimeHelper instance;
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [OdinSerialize]
@@ -32,7 +32,8 @@ namespace Scellecs.Morpeh {
 #if UNITY_EDITOR
         private void OnEnable() {
             if (instance == null) {
-                instance                               =  this;
+                instance = this;
+
                 EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
             }
             else {
@@ -47,7 +48,7 @@ namespace Scellecs.Morpeh {
         }
 
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
-            if (state == PlayModeStateChange.EnteredEditMode) {
+            if (state == PlayModeStateChange.ExitingPlayMode) {
                 for (var i = World.worlds.length - 1; i >= 0; i--) {
                     var world = World.worlds.data[i];
                     world?.Dispose();
@@ -69,13 +70,13 @@ namespace Scellecs.Morpeh {
 
         private void FixedUpdate() => WorldExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
         private void LateUpdate()  => WorldExtensions.GlobalLateUpdate(Time.deltaTime);
-        
+
         internal void OnApplicationPause(bool pauseStatus) {
             if (pauseStatus) {
                 onApplicationFocusLost.Invoke();
                 GC.Collect();
             }
-        }   
+        }
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {
@@ -110,7 +111,7 @@ namespace Scellecs.Morpeh {
         protected override void OnAfterDeserialize() {
             if (this.worldsSerialized != null) {
                 Stash.stashes = this.stashes;
-                
+
                 foreach (var t in this.types) {
                     var genType = Type.GetType(t);
                     if (genType != null) {
@@ -132,7 +133,7 @@ namespace Scellecs.Morpeh {
                     //     CommonCacheTypeIdentifier.GetID();
                     // }
                 }
-                
+
                 World.worlds = this.worldsSerialized;
                 foreach (var world in this.worldsSerialized) {
                     if (world != null && world.entities != null) {
@@ -158,4 +159,3 @@ namespace Scellecs.Morpeh {
 #endif
     }
 }
-

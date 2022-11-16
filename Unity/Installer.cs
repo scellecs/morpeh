@@ -89,28 +89,33 @@
         }
 
         protected override void OnEnable() {
-            this.group = World.Default.CreateSystemsGroup();
-            
-            for (int i = 0, length = this.initializers.Length; i < length; i++) {
-                var initializer = this.initializers[i];
-                this.group.AddInitializer(initializer);
-            }
+            if (World.Default != null) {
+                this.group = World.Default.CreateSystemsGroup();
 
-            this.AddSystems(this.updateSystems);
-            this.AddSystems(this.fixedUpdateSystems);
-            this.AddSystems(this.lateUpdateSystems);
-            this.AddSystems(this.cleanupSystems);
-            
-            World.Default.AddSystemsGroup(this.order, this.group);
+                for (int i = 0, length = this.initializers.Length; i < length; i++) {
+                    var initializer = this.initializers[i];
+                    this.group.AddInitializer(initializer);
+                }
+
+                this.AddSystems(this.updateSystems);
+                this.AddSystems(this.fixedUpdateSystems);
+                this.AddSystems(this.lateUpdateSystems);
+                this.AddSystems(this.cleanupSystems);
+
+                World.Default.AddSystemsGroup(this.order, this.group);
+            }
         }
 
         protected override void OnDisable() {
-            this.RemoveSystems(this.updateSystems);
-            this.RemoveSystems(this.fixedUpdateSystems);
-            this.RemoveSystems(this.lateUpdateSystems);
-            this.RemoveSystems(this.cleanupSystems);
-            
-            World.Default.RemoveSystemsGroup(this.group);
+            if (World.Default != null) {
+                this.RemoveSystems(this.updateSystems);
+                this.RemoveSystems(this.fixedUpdateSystems);
+                this.RemoveSystems(this.lateUpdateSystems);
+                this.RemoveSystems(this.cleanupSystems);
+
+                World.Default.RemoveSystemsGroup(this.group);
+            }
+            this.group = null;
         }
 
         private void AddSystems<T>(BasePair<T>[] pairs) where T : class, ISystem {
