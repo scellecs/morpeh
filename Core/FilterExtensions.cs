@@ -159,7 +159,9 @@ namespace Scellecs.Morpeh {
                     accum += arch.entitiesNative.length;
                 }
                 else {
-                    accum += arch.entities.length;
+                    foreach (var _ in arch.entities) {
+                        accum++;
+                    }
                 }
             }
             return accum;
