@@ -7,7 +7,7 @@ namespace Scellecs.Morpeh.Native {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe NativeArchetype AsNative(this Archetype archetype) {
             if (archetype.usedInNative == false) {
-                var list = archetype.entitiesNative = new FastList<int>(archetype.entities.length);
+                var list = archetype.entitiesNative = new FastList<int>(archetype.entities.count);
                 
                 foreach (var entityId in archetype.entities) {
                     archetype.world.entities[entityId].indexInCurrentArchetype = list.Add(entityId);

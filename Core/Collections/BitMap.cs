@@ -14,7 +14,8 @@ namespace Scellecs.Morpeh.Collections {
         internal const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
         internal const int BITS_PER_FIELD_SHIFT = 5; //6 for long
 
-        public int length;
+        public int count; //count of set bits
+        public int length; //count of ints
         public int capacity;
         public int capacityMinusOne;
         public int lastIndex;
@@ -27,6 +28,7 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BitMap(in int capacity = 0) {
             this.lastIndex = 0;
+            this.count     = 0;
             this.length    = 0;
             this.freeIndex = -1;
 
