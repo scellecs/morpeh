@@ -166,7 +166,7 @@ namespace Morpeh {
                         }
                         else {
                             this.archetypeEntities = this.archetypes.data[this.archetypeId].entities;
-                            if (this.archetypeEntities.length > 0) {
+                            if (this.archetypeEntities.count > 0) {
                                 this.currentEnumerator = this.archetypeEntities.GetEnumerator();
                                 this.currentEnumerator.MoveNext();
 
