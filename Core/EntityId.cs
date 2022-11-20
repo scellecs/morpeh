@@ -20,7 +20,7 @@
         }
 
         public bool Equals(EntityId other) {
-            return id == other.id && gen == other.gen;
+            return this.id == other.id && this.gen == other.gen;
         }
 
         public override bool Equals(object obj) {
@@ -43,6 +43,10 @@
 
         public override string ToString() {
             return $"EntityId(id={id}, gen={gen})";
+        }
+        
+        public int CompareTo(EntityId other) {
+            return this.id.CompareTo(other.id);
         }
 
         public static EntityId Invalid => new EntityId(-1, -1);
