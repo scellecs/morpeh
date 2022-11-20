@@ -1,7 +1,7 @@
 namespace Morpeh.Collections {
     using System;
     
-    internal struct UnsafeArray<T> where T : unmanaged {
+    internal struct UnsafeStorage {
         internal IntPtr Ptr;
         internal int Length;
         internal bool IsCreated;

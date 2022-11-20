@@ -5,15 +5,15 @@ namespace Morpeh.Collections {
     using System.Collections.Generic;
     
     public unsafe struct UnmanagedArray<T> :IEnumerable<T> where T : unmanaged {
-        private UnsafeArray<T>* ptr;
+        private UnsafeStorage* ptr;
         
         private bool IsUnsafeArrayAllocated => this.ptr != null;
         public int Length => this.IsCreated ? ptr->Length : -1;
         public bool IsCreated => IsUnsafeArrayAllocated && ptr->IsCreated;
 
         public UnmanagedArray(int length) {
-            var size = Marshal.SizeOf<UnsafeArray<T>>();
-            this.ptr = (UnsafeArray<T>*) Marshal.AllocHGlobal(size).ToPointer();
+            var size = Marshal.SizeOf<UnsafeStorage>();
+            this.ptr = (UnsafeStorage*) Marshal.AllocHGlobal(size).ToPointer();
             AllocateUnsafeArray(this.ptr, length);
         }
         
@@ -49,7 +49,7 @@ namespace Morpeh.Collections {
             return ref ((T*) this.ptr->Ptr.ToPointer())[index];
         }
         
-        private void AllocateUnsafeArray(UnsafeArray<T>* unsafeArray, int length) {
+        private void AllocateUnsafeArray(UnsafeStorage* unsafeArray, int length) {
             var align = Marshal.SizeOf<T>();
             var size = length * align;
             
@@ -58,7 +58,7 @@ namespace Morpeh.Collections {
             unsafeArray->IsCreated = true;
         }
         
-        private void DeallocateUnsafeArray(UnsafeArray<T>* unsafeArray) {
+        private void DeallocateUnsafeArray(UnsafeStorage* unsafeArray) {
             if (unsafeArray == null || !unsafeArray->IsCreated) {
                 return;
             }
@@ -80,7 +80,7 @@ namespace Morpeh.Collections {
             ResizeInternal(this.ptr, length);
         }
 
-        private void ResizeInternal(UnsafeArray<T>* unsafeArray, int length) {
+        private void ResizeInternal(UnsafeStorage* unsafeArray, int length) {
             var align = Marshal.SizeOf<T>();
             var size = length * align;
             var newPtr = Marshal.AllocHGlobal(size);
