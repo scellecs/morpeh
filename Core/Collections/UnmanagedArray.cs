@@ -4,9 +4,11 @@ namespace Morpeh.Collections {
     
     public unsafe struct UnmanagedArray<T> where T : unmanaged {
         private UnsafeArray<T>* ptr;
-        public int Length => this.IsCreated ? ptr->Length : -1;
-        public bool IsCreated => this.ptr != null && ptr->IsCreated;
         
+        private bool IsUnsafeArrayAllocated => this.ptr != null;
+        public int Length => this.IsCreated ? ptr->Length : -1;
+        public bool IsCreated => IsUnsafeArrayAllocated && ptr->IsCreated;
+
         public UnmanagedArray(int length) {
             var size = Marshal.SizeOf<UnsafeArray<T>>();
             this.ptr = (UnsafeArray<T>*) Marshal.AllocHGlobal(size).ToPointer();
@@ -95,7 +97,7 @@ namespace Morpeh.Collections {
         }
 
         public void Dispose() {
-            if (!this.IsCreated) {
+            if (!this.IsUnsafeArrayAllocated) {
                 return;
             }
             
