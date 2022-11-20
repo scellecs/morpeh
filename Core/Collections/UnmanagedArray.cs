@@ -11,13 +11,17 @@ namespace Morpeh.Collections {
         public int Length => this.IsCreated ? ptr->Length : -1;
         public bool IsCreated => IsUnsafeArrayAllocated && ptr->IsCreated;
 
-        public UnmanagedArray(int length) {
+        public static UnmanagedArray<T> Create(int length) {
+            var array = new UnmanagedArray<T>();
+            
             var size = Marshal.SizeOf<UnsafeStorage<T>>();
-            this.ptr = (UnsafeStorage<T>*) Marshal.AllocHGlobal(size).ToPointer();
-            UnsafeStorageUtils.AllocateUnsafeArray(this.ptr, length);
-            this.ptr->Length = length;
+            array.ptr = (UnsafeStorage<T>*) Marshal.AllocHGlobal(size).ToPointer();
+            UnsafeStorageUtils.AllocateUnsafeArray(array.ptr, length);
+            array.ptr->Length = length;
+
+            return array;
         }
-        
+
         public T this[int index] {
             get {
                 if (!this.IsCreated) {
