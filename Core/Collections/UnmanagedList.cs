@@ -18,8 +18,7 @@ namespace Morpeh.Collections {
         {
             var list = new UnmanagedList<T>();
             
-            var size = Marshal.SizeOf<UnsafeStorage<T>>();
-            list.ptr = (UnsafeStorage<T>*) Marshal.AllocHGlobal(size).ToPointer();
+            list.ptr = (UnsafeStorage<T>*) UnsafeUtils.Malloc<T>(1);
             UnsafeStorageUtils.AllocateUnsafeArray(list.ptr, capacity);
             list.ptr->Length = 0;
 
@@ -99,8 +98,7 @@ namespace Morpeh.Collections {
             }
             
             UnsafeStorageUtils.DeallocateUnsafeArray(this.ptr);
-            
-            Marshal.FreeHGlobal((IntPtr) this.ptr);
+            UnsafeUtils.Free<T>((IntPtr) this.ptr);
             this.ptr = null;
         }
 

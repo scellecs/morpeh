@@ -3,10 +3,7 @@ namespace Morpeh.Collections {
     using System.Runtime.InteropServices;
     public static class UnsafeStorageUtils {
         internal static unsafe void AllocateUnsafeArray<T>(UnsafeStorage<T>* unsafeArray, int capacity) where T : unmanaged {
-            var align = Marshal.SizeOf<T>();
-            var size = capacity * align;
-            
-            unsafeArray->Ptr = Marshal.AllocHGlobal(size);
+            unsafeArray->Ptr = UnsafeUtils.Malloc<T>(capacity);
             unsafeArray->Capacity = capacity;
             unsafeArray->Length = 0;
             unsafeArray->IsCreated = true;
@@ -18,25 +15,23 @@ namespace Morpeh.Collections {
             }
 
             unsafeArray->IsCreated = false;
+            UnsafeUtils.Free<T>(unsafeArray->Ptr);
             unsafeArray->Capacity = 0;
             unsafeArray->Length = 0;
-            Marshal.FreeHGlobal(unsafeArray->Ptr);
         }
         
         internal static unsafe void ResizeUnsafeArray<T>(UnsafeStorage<T>* unsafeArray, int capacity) where T : unmanaged {
-            var align = Marshal.SizeOf<T>();
-            var size = capacity * align;
-            var newPtr = Marshal.AllocHGlobal(size);
+            var newPtr = UnsafeUtils.Malloc<T>(capacity);
             
             if (capacity > unsafeArray->Capacity) {
-                var oldSize = unsafeArray->Capacity * align;
-                Buffer.MemoryCopy(unsafeArray->Ptr.ToPointer(), newPtr.ToPointer(), size, oldSize);
+                var oldSize = unsafeArray->Capacity;
+                UnsafeUtils.MemCpy<T>(newPtr, unsafeArray->Ptr, oldSize);
             }
             else {
-                Buffer.MemoryCopy(unsafeArray->Ptr.ToPointer(), newPtr.ToPointer(), size, size);
+                UnsafeUtils.MemCpy<T>(newPtr, unsafeArray->Ptr, capacity);
             }
             
-            Marshal.FreeHGlobal(unsafeArray->Ptr);
+            UnsafeUtils.Free<T>(unsafeArray->Ptr);
             unsafeArray->Ptr = newPtr;
             unsafeArray->Capacity = capacity;
             unsafeArray->Length = Math.Min(unsafeArray->Length, capacity);
