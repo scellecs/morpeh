@@ -11,7 +11,7 @@ namespace Morpeh.Collections {
         public static unsafe System.IntPtr Malloc<T>(int length) where T : unmanaged {
 #if UNITY_2019_3_OR_NEWER && MORPEH_BURST
             var alignment = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<T>();
-            return (IntPtr) Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Malloc(length * SizeOf<T>(), alignment, Unity.Collections.Allocator.Persistent);
+            return (System.IntPtr) Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Malloc(length * SizeOf<T>(), alignment, Unity.Collections.Allocator.Persistent);
 #else
             return System.Runtime.InteropServices.Marshal.AllocHGlobal(length * SizeOf<T>());
 #endif
