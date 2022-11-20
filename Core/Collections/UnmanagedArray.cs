@@ -1,8 +1,11 @@
+using System.Collections;
+using System.Collections.Generic;
+
 namespace Morpeh.Collections {
     using System;
     using System.Runtime.InteropServices;
     
-    public unsafe struct UnmanagedArray<T> where T : unmanaged {
+    public unsafe struct UnmanagedArray<T> :IEnumerable<T> where T : unmanaged {
         private UnsafeArray<T>* ptr;
         
         private bool IsUnsafeArrayAllocated => this.ptr != null;
@@ -18,7 +21,7 @@ namespace Morpeh.Collections {
         public T this[int index] {
             get {
                 if (!this.IsCreated) {
-                    throw new Exception("NativeArray is not created");
+                    throw new Exception("UnmanagedArray is not created");
                 }
                 if (index < 0 || index >= this.Length) {
                     throw new IndexOutOfRangeException();
@@ -28,7 +31,7 @@ namespace Morpeh.Collections {
             
             set {
                 if (!this.IsCreated) {
-                    throw new Exception("NativeArray is not created");
+                    throw new Exception("UnmanagedArray is not created");
                 }
                 if (index < 0 || index >= this.Length) {
                     throw new IndexOutOfRangeException();
@@ -39,7 +42,7 @@ namespace Morpeh.Collections {
         
         public ref T GetElementAsRef(int index) {
             if (!this.IsCreated) {
-                throw new Exception("NativeArray is not created");
+                throw new Exception("UnmanagedArray is not created");
             }
             if (index < 0 || index >= this.Length) {
                 throw new IndexOutOfRangeException();
@@ -68,7 +71,7 @@ namespace Morpeh.Collections {
         
         public void Resize(int length) {
             if (!this.IsCreated) {
-                throw new Exception("NativeArray is not created");
+                throw new Exception("UnmanagedArray is not created");
             }
             
             if (length == this.Length) {
@@ -105,6 +108,23 @@ namespace Morpeh.Collections {
             
             Marshal.FreeHGlobal((IntPtr) this.ptr);
             this.ptr = null;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            if (!this.IsCreated) {
+                throw new Exception("UnmanagedArray is not created");
+            }
+            
+            for (int i = 0, length = this.Length; i < length; i++)
+            {
+                yield return this[i];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
