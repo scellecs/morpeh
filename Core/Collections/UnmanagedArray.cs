@@ -109,20 +109,17 @@ namespace Morpeh.Collections {
             this.ptr = null;
         }
 
-        public IEnumerator<T> GetEnumerator()
-        {
+        public IEnumerator<T> GetEnumerator() {
             if (!this.IsCreated) {
                 throw new Exception("UnmanagedArray is not created");
             }
             
-            for (int i = 0, length = this.Length; i < length; i++)
-            {
+            for (int i = 0, length = this.Length; i < length; i++) {
                 yield return this[i];
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
+        IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
     }
