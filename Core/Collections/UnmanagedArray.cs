@@ -5,16 +5,16 @@ namespace Morpeh.Collections {
     using System.Collections.Generic;
     
     public unsafe struct UnmanagedArray<T> :IEnumerable<T> where T : unmanaged {
-        private UnsafeStorage* ptr;
-        
+        private UnsafeStorage<T>* ptr;
         private bool IsUnsafeArrayAllocated => this.ptr != null;
+        
         public int Length => this.IsCreated ? ptr->Length : -1;
         public bool IsCreated => IsUnsafeArrayAllocated && ptr->IsCreated;
 
         public UnmanagedArray(int length) {
-            var size = Marshal.SizeOf<UnsafeStorage>();
-            this.ptr = (UnsafeStorage*) Marshal.AllocHGlobal(size).ToPointer();
-            AllocateUnsafeArray(this.ptr, length);
+            var size = Marshal.SizeOf<UnsafeStorage<T>>();
+            this.ptr = (UnsafeStorage<T>*) Marshal.AllocHGlobal(size).ToPointer();
+            UnsafeStorageUtils.AllocateUnsafeArray(this.ptr, length);
         }
         
         public T this[int index] {
@@ -48,26 +48,7 @@ namespace Morpeh.Collections {
             }
             return ref ((T*) this.ptr->Ptr.ToPointer())[index];
         }
-        
-        private void AllocateUnsafeArray(UnsafeStorage* unsafeArray, int length) {
-            var align = Marshal.SizeOf<T>();
-            var size = length * align;
-            
-            unsafeArray->Ptr = Marshal.AllocHGlobal(size);
-            unsafeArray->Length = length;
-            unsafeArray->IsCreated = true;
-        }
-        
-        private void DeallocateUnsafeArray(UnsafeStorage* unsafeArray) {
-            if (unsafeArray == null || !unsafeArray->IsCreated) {
-                return;
-            }
 
-            unsafeArray->IsCreated = false;
-            unsafeArray->Length = 0;
-            Marshal.FreeHGlobal(unsafeArray->Ptr);
-        }
-        
         public void Resize(int length) {
             if (!this.IsCreated) {
                 throw new Exception("UnmanagedArray is not created");
@@ -80,7 +61,7 @@ namespace Morpeh.Collections {
             ResizeInternal(this.ptr, length);
         }
 
-        private void ResizeInternal(UnsafeStorage* unsafeArray, int length) {
+        private void ResizeInternal(UnsafeStorage<T>* unsafeArray, int length) {
             var align = Marshal.SizeOf<T>();
             var size = length * align;
             var newPtr = Marshal.AllocHGlobal(size);
@@ -95,6 +76,7 @@ namespace Morpeh.Collections {
             
             Marshal.FreeHGlobal(unsafeArray->Ptr);
             unsafeArray->Ptr = newPtr;
+            unsafeArray->Capacity = length;
             unsafeArray->Length = length;
         }
 
@@ -103,7 +85,7 @@ namespace Morpeh.Collections {
                 return;
             }
             
-            DeallocateUnsafeArray(this.ptr);
+            UnsafeStorageUtils.DeallocateUnsafeArray(this.ptr);
             
             Marshal.FreeHGlobal((IntPtr) this.ptr);
             this.ptr = null;
