@@ -1,13 +1,14 @@
 namespace Morpeh.Collections {
+    using System;
     using System.Runtime.InteropServices;
     public static class UnsafeStorageUtils {
-        internal static unsafe void AllocateUnsafeArray<T>(UnsafeStorage<T>* unsafeArray, int length) where T : unmanaged {
+        internal static unsafe void AllocateUnsafeArray<T>(UnsafeStorage<T>* unsafeArray, int capacity) where T : unmanaged {
             var align = Marshal.SizeOf<T>();
-            var size = length * align;
+            var size = capacity * align;
             
             unsafeArray->Ptr = Marshal.AllocHGlobal(size);
-            unsafeArray->Length = length;
-            unsafeArray->Capacity = length;
+            unsafeArray->Capacity = capacity;
+            unsafeArray->Length = 0;
             unsafeArray->IsCreated = true;
         }
         
@@ -20,6 +21,25 @@ namespace Morpeh.Collections {
             unsafeArray->Capacity = 0;
             unsafeArray->Length = 0;
             Marshal.FreeHGlobal(unsafeArray->Ptr);
+        }
+        
+        internal static unsafe void ResizeUnsafeArray<T>(UnsafeStorage<T>* unsafeArray, int capacity) where T : unmanaged {
+            var align = Marshal.SizeOf<T>();
+            var size = capacity * align;
+            var newPtr = Marshal.AllocHGlobal(size);
+            
+            if (capacity > unsafeArray->Capacity) {
+                var oldSize = unsafeArray->Capacity * align;
+                Buffer.MemoryCopy(unsafeArray->Ptr.ToPointer(), newPtr.ToPointer(), size, oldSize);
+            }
+            else {
+                Buffer.MemoryCopy(unsafeArray->Ptr.ToPointer(), newPtr.ToPointer(), size, size);
+            }
+            
+            Marshal.FreeHGlobal(unsafeArray->Ptr);
+            unsafeArray->Ptr = newPtr;
+            unsafeArray->Capacity = capacity;
+            unsafeArray->Length = Math.Min(unsafeArray->Length, capacity);
         }
     }
 }

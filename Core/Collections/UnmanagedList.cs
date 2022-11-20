@@ -1,27 +1,30 @@
+using UnityEngine;
+
 namespace Morpeh.Collections {
     using System;
-    using System.Runtime.InteropServices;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Runtime.InteropServices;
     
-    public unsafe struct UnmanagedArray<T> : IEnumerable<T>, IDisposable where T : unmanaged {
+    public unsafe struct UnmanagedList<T> : IEnumerable<T>, IDisposable  where T : unmanaged {
         private UnsafeStorage<T>* ptr;
         private bool IsUnsafeArrayAllocated => this.ptr != null;
         
         public int Length => this.IsCreated ? ptr->Length : -1;
+        public int Capacity => this.IsCreated ? ptr->Capacity : -1;
         public bool IsCreated => IsUnsafeArrayAllocated && ptr->IsCreated;
-
-        public UnmanagedArray(int length) {
+        
+        public UnmanagedList(int capacity = 2) {
             var size = Marshal.SizeOf<UnsafeStorage<T>>();
             this.ptr = (UnsafeStorage<T>*) Marshal.AllocHGlobal(size).ToPointer();
-            UnsafeStorageUtils.AllocateUnsafeArray(this.ptr, length);
-            this.ptr->Length = length;
+            UnsafeStorageUtils.AllocateUnsafeArray(this.ptr, capacity);
+            this.ptr->Length = 0;
         }
         
         public T this[int index] {
             get {
                 if (!this.IsCreated) {
-                    throw new Exception("UnmanagedArray is not created");
+                    throw new Exception("UnmanagedList is not created");
                 }
                 if (index < 0 || index >= this.Length) {
                     throw new IndexOutOfRangeException();
@@ -31,7 +34,7 @@ namespace Morpeh.Collections {
             
             set {
                 if (!this.IsCreated) {
-                    throw new Exception("UnmanagedArray is not created");
+                    throw new Exception("UnmanagedList is not created");
                 }
                 if (index < 0 || index >= this.Length) {
                     throw new IndexOutOfRangeException();
@@ -42,7 +45,7 @@ namespace Morpeh.Collections {
         
         public ref T GetElementAsRef(int index) {
             if (!this.IsCreated) {
-                throw new Exception("UnmanagedArray is not created");
+                throw new Exception("UnmanagedList is not created");
             }
             if (index < 0 || index >= this.Length) {
                 throw new IndexOutOfRangeException();
@@ -50,19 +53,41 @@ namespace Morpeh.Collections {
             return ref ((T*) this.ptr->Ptr.ToPointer())[index];
         }
 
-        public void Resize(int length) {
+        public void Add(T element)
+        {
             if (!this.IsCreated) {
-                throw new Exception("UnmanagedArray is not created");
+                throw new Exception("UnmanagedList is not created");
             }
             
-            if (length == this.Length) {
-                return;
+            if (this.Length == this.Capacity) {
+                UnsafeStorageUtils.ResizeUnsafeArray(this.ptr, this.Capacity * 2);
             }
             
-            UnsafeStorageUtils.ResizeUnsafeArray(this.ptr, length);
-            this.ptr->Length = length;
+            var length = this.Length;
+            
+            this.ptr->Length++;
+            this[length] = element;
         }
-
+        
+        public void RemoveAtSwapBack(int index) {
+            if (!this.IsCreated) {
+                throw new Exception("UnmanagedList is not created");
+            }
+            if (index < 0 || index >= this.Length) {
+                throw new IndexOutOfRangeException();
+            }
+            this[index] = this[this.Length - 1];
+            this[this.Length - 1] = default;
+            this.ptr->Length--;
+        }
+        
+        public void Clear() {
+            if (!this.IsCreated) {
+                throw new Exception("UnmanagedList is not created");
+            }
+            this.ptr->Length = 0;
+        }
+        
         public void Dispose() {
             if (!this.IsUnsafeArrayAllocated) {
                 return;
@@ -76,7 +101,7 @@ namespace Morpeh.Collections {
 
         public IEnumerator<T> GetEnumerator() {
             if (!this.IsCreated) {
-                throw new Exception("UnmanagedArray is not created");
+                throw new Exception("UnmanagedList is not created");
             }
             
             for (int i = 0, length = this.Length; i < length; i++) {
