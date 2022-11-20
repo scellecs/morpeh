@@ -1,6 +1,4 @@
 namespace Morpeh.Collections {
-    using System;
-    
     public static class UnsafeUtils {
         public static int SizeOf<T>() where T : unmanaged {
 #if UNITY_2019_3_OR_NEWER && MORPEH_BURST
@@ -10,7 +8,7 @@ namespace Morpeh.Collections {
 #endif
         }
 
-        public static unsafe IntPtr Malloc<T>(int length) where T : unmanaged {
+        public static unsafe System.IntPtr Malloc<T>(int length) where T : unmanaged {
 #if UNITY_2019_3_OR_NEWER && MORPEH_BURST
             var alignment = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<T>();
             return (IntPtr) Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Malloc(length * SizeOf<T>(), alignment, Unity.Collections.Allocator.Persistent);
@@ -19,7 +17,7 @@ namespace Morpeh.Collections {
 #endif
         }
 
-        public static unsafe void Free<T>(IntPtr ptr) where T : unmanaged {
+        public static unsafe void Free<T>(System.IntPtr ptr) where T : unmanaged {
 #if UNITY_2019_3_OR_NEWER && MORPEH_BURST
             Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free((void*) ptr, Unity.Collections.Allocator.Persistent);
 #else
@@ -27,7 +25,7 @@ namespace Morpeh.Collections {
 #endif
         }
         
-        public static unsafe void MemCpy<T>(IntPtr dst, IntPtr src, int length) where T : unmanaged {
+        public static unsafe void MemCpy<T>(System.IntPtr dst, System.IntPtr src, int length) where T : unmanaged {
 #if UNITY_2019_3_OR_NEWER && MORPEH_BURST
             Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpy((void*) dst, (void*) src, length * SizeOf<T>());
 #else
