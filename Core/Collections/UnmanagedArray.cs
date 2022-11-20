@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-
 namespace Morpeh.Collections {
     using System;
     using System.Runtime.InteropServices;
+    using System.Collections;
+    using System.Collections.Generic;
     
     public unsafe struct UnmanagedArray<T> :IEnumerable<T> where T : unmanaged {
         private UnsafeArray<T>* ptr;
