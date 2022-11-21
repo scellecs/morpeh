@@ -255,15 +255,17 @@ namespace Morpeh {
             }
         }
 
-        public void WithComponentDispose<TDisposable>(Stash<TDisposable> stash) where TDisposable : struct, IComponent, IDisposable {
-            stash.ComponentDispose ??= component => component.Dispose();
-        }
-
         public override void Dispose() {
             this.components = null;
 
             typedStashes.RemoveSwap(this, out _);
             stashes.RemoveSwap(this, out _);
+        }
+    }
+
+    public static class StashExtensions {
+        public static void WithComponentDispose<TDisposable>(this Stash<TDisposable> stash) where TDisposable : struct, IComponent, IDisposable {
+            stash.ComponentDispose ??= component => component.Dispose();
         }
     }
 }
