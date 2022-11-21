@@ -56,7 +56,7 @@ namespace Morpeh {
     public sealed class Stash<T> : Stash where T : struct, IComponent {
         internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
 
-        public event Action<T> ComponentDispose;
+        internal Action<T> ComponentDispose;
 
         [SerializeField]
         internal IntHashMap<T> components;
@@ -255,6 +255,9 @@ namespace Morpeh {
             }
         }
 
+        public void WithComponentDispose<TDisposable>(Stash<TDisposable> stash) where TDisposable : struct, IComponent, IDisposable {
+            stash.ComponentDispose ??= component => component.Dispose();
+        }
 
         public override void Dispose() {
             this.components = null;
