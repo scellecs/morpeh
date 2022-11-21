@@ -56,6 +56,8 @@ namespace Morpeh {
     public sealed class Stash<T> : Stash where T : struct, IComponent {
         internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
 
+        public static Action<T> componentDispose;
+
         [SerializeField]
         internal IntHashMap<T> components;
 
@@ -195,15 +197,23 @@ namespace Morpeh {
             }
 #endif
 
-            if (this.components.Remove(entity.entityId.id, out _)) {
+            if (this.components.Remove(entity.entityId.id, out var lastValue)) {
                 entity.RemoveTransfer(this.typeId);
+                componentDispose?.Invoke(lastValue);
                 return true;
             }
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override bool Clean(Entity entity) => this.components.Remove(entity.entityId.id, out _);
+        internal override bool Clean(Entity entity)
+        {
+            if (this.components.Remove(entity.entityId.id, out var lastValue)) {
+                componentDispose?.Invoke(lastValue);
+                return true;
+            }
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
