@@ -56,7 +56,7 @@ namespace Morpeh {
     public sealed class Stash<T> : Stash where T : struct, IComponent {
         internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
 
-        public static Action<T> componentDispose;
+        public event Action<T> ComponentDispose;
 
         [SerializeField]
         internal IntHashMap<T> components;
@@ -199,7 +199,7 @@ namespace Morpeh {
 
             if (this.components.Remove(entity.entityId.id, out var lastValue)) {
                 entity.RemoveTransfer(this.typeId);
-                componentDispose?.Invoke(lastValue);
+                ComponentDispose?.Invoke(lastValue);
                 return true;
             }
             return false;
@@ -209,7 +209,7 @@ namespace Morpeh {
         internal override bool Clean(Entity entity)
         {
             if (this.components.Remove(entity.entityId.id, out var lastValue)) {
-                componentDispose?.Invoke(lastValue);
+                ComponentDispose?.Invoke(lastValue);
                 return true;
             }
             return false;
