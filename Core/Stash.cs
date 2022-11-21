@@ -264,6 +264,7 @@ namespace Morpeh {
     }
 
     public static class StashExtensions {
+        [UnityEngine.Scripting.Preserve]
         public static void WithComponentDispose<TDisposable>(this Stash<TDisposable> stash) where TDisposable : struct, IComponent, IDisposable {
             stash.ComponentDispose ??= component => component.Dispose();
         }
