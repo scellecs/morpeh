@@ -59,6 +59,8 @@ namespace Scellecs.Morpeh {
         [SerializeField]
         internal IntHashMap<T> components;
 
+        public IHandler handler;
+
         [UnityEngine.Scripting.Preserve]
         static Stash() {
             cleanup += () => typedStashes.Clear();
@@ -195,8 +197,9 @@ namespace Scellecs.Morpeh {
             }
 #endif
 
-            if (this.components.Remove(entity.entityId.id, out _)) {
+            if (this.components.Remove(entity.entityId.id, out var lastValue)) {
                 entity.RemoveTransfer(this.typeId);
+                this.handler?.OnRemove(ref lastValue);
                 return true;
             }
             return false;
@@ -254,10 +257,21 @@ namespace Scellecs.Morpeh {
 
 
         public override void Dispose() {
+            if (this.handler != null) {
+                foreach (var componentId in this.components) {
+                    this.handler.OnRemove(ref this.components.data[componentId]);
+                }
+            }
+
+            this.components.Clear();
             this.components = null;
 
             typedStashes.RemoveSwap(this, out _);
             stashes.RemoveSwap(this, out _);
+        }
+        
+        public interface IHandler {
+            public void OnRemove(ref T component);
         }
     }
 }
