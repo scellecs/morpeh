@@ -206,7 +206,13 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override bool Clean(Entity entity) => this.components.Remove(entity.entityId.id, out _);
+        internal override bool Clean(Entity entity) {
+            if (this.components.Remove(entity.entityId.id, out var lastValue)) {
+                this.handler?.OnRemove(ref lastValue);
+                return true;
+            }
+            return false;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
