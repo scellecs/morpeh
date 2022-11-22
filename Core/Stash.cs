@@ -277,7 +277,7 @@ namespace Scellecs.Morpeh {
         }
         
         public interface IHandler {
-            public void OnRemove(ref T component);
+            void OnRemove(ref T component);
         }
     }
 }
