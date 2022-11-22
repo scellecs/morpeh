@@ -281,22 +281,4 @@ namespace Scellecs.Morpeh {
         }
     }
 
-    public static class StashExtensions {
-        public static Stash<T> AsDisposable<T>(this Stash<T> stash) where T : struct, IComponent, IDisposable {
-#if MORPEH_DEBUG
-            if (stash == null || stash.components == null) {
-                throw new Exception($"[MORPEH] You are trying mark AsDisposable null or disposed stash");
-            }
-#endif
-            
-            if (stash.componentDispose != null) {
-                return stash;
-            }
-            
-            void ComponentDispose(ref T c) => c.Dispose();
-            stash.componentDispose = ComponentDispose;
-
-            return stash;
-        }
-    }
 }
