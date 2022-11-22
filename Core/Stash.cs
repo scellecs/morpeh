@@ -5,7 +5,7 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using System.Runtime.CompilerServices;
     using Collections;
@@ -56,10 +56,10 @@ namespace Morpeh {
     public sealed class Stash<T> : Stash where T : struct, IComponent {
         internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
 
-        internal Action<T> ComponentDispose;
-
         [SerializeField]
         internal IntHashMap<T> components;
+
+        public IHandler handler;
 
         [UnityEngine.Scripting.Preserve]
         static Stash() {
@@ -199,21 +199,14 @@ namespace Morpeh {
 
             if (this.components.Remove(entity.entityId.id, out var lastValue)) {
                 entity.RemoveTransfer(this.typeId);
-                ComponentDispose?.Invoke(lastValue);
+                this.handler?.OnRemove(ref lastValue);
                 return true;
             }
             return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override bool Clean(Entity entity)
-        {
-            if (this.components.Remove(entity.entityId.id, out var lastValue)) {
-                ComponentDispose?.Invoke(lastValue);
-                return true;
-            }
-            return false;
-        }
+        internal override bool Clean(Entity entity) => this.components.Remove(entity.entityId.id, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
@@ -243,30 +236,42 @@ namespace Morpeh {
                         this.components.Set(to.entityId.id, component, out _);
                     }
                     else {
-                        this.components.Add(to.entityId.id, component, out _);
+                        if (this.components.Add(to.entityId.id, component, out _)) {
+                            to.AddTransfer(this.typeId);
+                        }
                     }
                 }
                 else {
                     if (this.components.Has(to.entityId.id) == false) {
-                        this.components.Add(to.entityId.id, component, out _);
+                        if (this.components.Add(to.entityId.id, component, out _)) {
+                            to.AddTransfer(this.typeId);
+                        }
                     }
                 }
-                this.components.Remove(from.entityId.id, out _);
+
+                if (this.components.Remove(from.entityId.id, out _)) {
+                    from.RemoveTransfer(this.typeId);
+                }
             }
         }
 
+
         public override void Dispose() {
+            if (this.handler != null) {
+                foreach (var componentId in this.components) {
+                    this.handler.OnRemove(ref this.components.data[componentId]);
+                }
+            }
+
+            this.components.Clear();
             this.components = null;
 
             typedStashes.RemoveSwap(this, out _);
             stashes.RemoveSwap(this, out _);
         }
-    }
-
-    public static class StashExtensions {
-        [UnityEngine.Scripting.Preserve]
-        public static void WithComponentDispose<TDisposable>(this Stash<TDisposable> stash) where TDisposable : struct, IComponent, IDisposable {
-            stash.ComponentDispose ??= component => component.Dispose();
+        
+        public interface IHandler {
+            public void OnRemove(ref T component);
         }
     }
 }
