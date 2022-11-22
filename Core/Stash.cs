@@ -56,10 +56,12 @@ namespace Morpeh {
     public sealed class Stash<T> : Stash where T : struct, IComponent {
         internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
 
+        internal delegate void ComponentDispose(ref T component);
+
         [SerializeField]
         internal IntHashMap<T> components;
 
-        public IHandler handler;
+        internal ComponentDispose componentDispose;
 
         [UnityEngine.Scripting.Preserve]
         static Stash() {
@@ -199,7 +201,7 @@ namespace Morpeh {
 
             if (this.components.Remove(entity.entityId.id, out var lastValue)) {
                 entity.RemoveTransfer(this.typeId);
-                this.handler?.OnRemove(ref lastValue);
+                this.componentDispose?.Invoke(ref lastValue);
                 return true;
             }
             return false;
@@ -208,7 +210,7 @@ namespace Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal override bool Clean(Entity entity) {
             if (this.components.Remove(entity.entityId.id, out var lastValue)) {
-                this.handler?.OnRemove(ref lastValue);
+                this.componentDispose?.Invoke(ref lastValue);
                 return true;
             }
 
@@ -264,9 +266,9 @@ namespace Morpeh {
 
 
         public override void Dispose() {
-            if (this.handler != null) {
+            if (this.componentDispose != null) {
                 foreach (var componentId in this.components) {
-                    this.handler.OnRemove(ref this.components.data[componentId]);
+                    this.componentDispose.Invoke(ref this.components.data[componentId]);
                 }
             }
 
@@ -275,10 +277,19 @@ namespace Morpeh {
 
             typedStashes.RemoveSwap(this, out _);
             stashes.RemoveSwap(this, out _);
+
+            this.componentDispose = null;
         }
-        
-        public interface IHandler {
-            void OnRemove(ref T component);
+    }
+
+    public static class StashExtensions {
+        public static void AsDisposable<T>(this Stash<T> stash) where T : struct, IComponent, IDisposable {
+            if (stash == null || stash.componentDispose != null) {
+                return;
+            }
+            
+            void ComponentDispose(ref T c) => c.Dispose();
+            stash.componentDispose = ComponentDispose;
         }
     }
 }
