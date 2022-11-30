@@ -44,6 +44,10 @@
         public override string ToString() {
             return $"EntityId(id={this.id}, gen={this.gen})";
         }
+        
+        public int CompareTo(EntityId other) {
+            return this.id.CompareTo(other.id);
+        }
 
         public static EntityId Invalid => new EntityId(-1, -1);
     }
