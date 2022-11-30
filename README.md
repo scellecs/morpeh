@@ -40,7 +40,7 @@ Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for
 Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.
 
 <details>
-    <summary>Open Package Manager and add Morpeh URL.  </summary>
+    <summary>Open Unity Package Manager and add Morpeh URL.  </summary>
 
 ![installation_step1.png](Gifs~/installation_step1.png)  
 ![installation_step2.png](Gifs~/installation_step2.png)
