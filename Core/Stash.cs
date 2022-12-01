@@ -265,6 +265,13 @@ namespace Scellecs.Morpeh {
 
 
         public override void Dispose() {
+            if (this.componentDispose != null) {
+                foreach (var componentId in this.components) {
+                    this.componentDispose.Invoke(ref this.components.data[componentId]);
+                }
+            }
+
+            this.components.Clear();
             this.components = null;
 
             typedStashes.RemoveSwap(this, out _);
