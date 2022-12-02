@@ -1,6 +1,6 @@
-namespace Morpeh.Collections {
+namespace Scellecs.Morpeh.Collections {
     using System;
-    using System.Runtime.InteropServices;
+    using Unity.Collections.LowLevel.Unsafe;
     public static class UnsafeStorageUtils {
         internal static unsafe void AllocateUnsafeArray<T>(UnsafeStorage<T>* unsafeArray, int capacity) where T : unmanaged {
             unsafeArray->Ptr = UnsafeUtils.Malloc<T>(capacity);

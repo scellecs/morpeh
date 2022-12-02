@@ -1,15 +1,14 @@
-namespace Morpeh.Collections {
+namespace Scellecs.Morpeh.Collections {
     using System;
-    using System.Runtime.InteropServices;
     using System.Collections;
     using System.Collections.Generic;
-    
+
     public unsafe struct UnmanagedArray<T> : IEnumerable<T>, IDisposable where T : unmanaged {
         private UnsafeStorage<T>* ptr;
         private bool IsUnsafeArrayAllocated => this.ptr != null;
         
-        public int Length => this.IsCreated ? ptr->Length : -1;
-        public bool IsCreated => IsUnsafeArrayAllocated && ptr->IsCreated;
+        public int  Length    => this.IsCreated ? this.ptr->Length : -1;
+        public bool IsCreated => this.IsUnsafeArrayAllocated && this.ptr->IsCreated;
 
         public static UnmanagedArray<T> Create(int length) {
             var array = new UnmanagedArray<T>();
@@ -88,7 +87,7 @@ namespace Morpeh.Collections {
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
     }
 }

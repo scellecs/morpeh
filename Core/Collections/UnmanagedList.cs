@@ -1,18 +1,15 @@
-using UnityEngine;
-
-namespace Morpeh.Collections {
+namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Runtime.InteropServices;
-    
+
     public unsafe struct UnmanagedList<T> : IEnumerable<T>, IDisposable  where T : unmanaged {
         private UnsafeStorage<T>* ptr;
         private bool IsUnsafeArrayAllocated => this.ptr != null;
         
-        public int Length => this.IsCreated ? ptr->Length : -1;
-        public int Capacity => this.IsCreated ? ptr->Capacity : -1;
-        public bool IsCreated => IsUnsafeArrayAllocated && ptr->IsCreated;
+        public int  Length    => this.IsCreated ? this.ptr->Length : -1;
+        public int  Capacity  => this.IsCreated ? this.ptr->Capacity : -1;
+        public bool IsCreated => this.IsUnsafeArrayAllocated && this.ptr->IsCreated;
 
         public static UnmanagedList<T> Create(int capacity = 2)
         {
@@ -113,7 +110,7 @@ namespace Morpeh.Collections {
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
     }
 }
