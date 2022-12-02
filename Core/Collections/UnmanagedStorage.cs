@@ -1,7 +1,7 @@
 namespace Scellecs.Morpeh.Collections {
     using System;
 
-    internal struct UnsafeStorage<T> where T : unmanaged {
+    internal struct UnmanagedStorage<T> where T : unmanaged {
         internal IntPtr Ptr;
         internal int Length;
         internal int Capacity;

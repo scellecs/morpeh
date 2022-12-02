@@ -4,7 +4,7 @@ namespace Scellecs.Morpeh.Collections {
     using System.Collections.Generic;
 
     public unsafe struct UnmanagedList<T> : IEnumerable<T>, IDisposable  where T : unmanaged {
-        private UnsafeStorage<T>* ptr;
+        private UnmanagedStorage<T>* ptr;
         private bool IsUnsafeArrayAllocated => this.ptr != null;
         
         public int  Length    => this.IsCreated ? this.ptr->Length : -1;
@@ -15,8 +15,8 @@ namespace Scellecs.Morpeh.Collections {
         {
             var list = new UnmanagedList<T>();
             
-            list.ptr = (UnsafeStorage<T>*) UnsafeUtils.Malloc<T>(1);
-            UnsafeStorageUtils.AllocateUnsafeArray(list.ptr, capacity);
+            list.ptr = (UnmanagedStorage<T>*) UnsafeUtils.Malloc<T>(1);
+            UnmanagedStorageUtils.AllocateUnsafeArray(list.ptr, capacity);
             list.ptr->Length = 0;
 
             return list;
@@ -61,7 +61,7 @@ namespace Scellecs.Morpeh.Collections {
             }
             
             if (this.Length == this.Capacity) {
-                UnsafeStorageUtils.ResizeUnsafeArray(this.ptr, this.Capacity * 2);
+                UnmanagedStorageUtils.ResizeUnsafeArray(this.ptr, this.Capacity * 2);
             }
             
             var length = this.Length;
@@ -94,7 +94,7 @@ namespace Scellecs.Morpeh.Collections {
                 return;
             }
             
-            UnsafeStorageUtils.DeallocateUnsafeArray(this.ptr);
+            UnmanagedStorageUtils.DeallocateUnsafeArray(this.ptr);
             UnsafeUtils.Free<T>((IntPtr) this.ptr);
             this.ptr = null;
         }
