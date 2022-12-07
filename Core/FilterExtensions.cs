@@ -153,6 +153,7 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetLengthSlow(this Filter filter) {
+            filter.world.ThreadSafetyCheck();
             int accum = 0;
             foreach (var arch in filter.archetypes) {
                 if (arch.usedInNative) {
@@ -167,6 +168,8 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEmpty(this Filter filter) {
+            filter.world.ThreadSafetyCheck();
+            
             foreach (var arch in filter.archetypes) {
                 if (arch.usedInNative) {
                     if (arch.entitiesNative.length > 0) {
@@ -182,11 +185,15 @@ namespace Scellecs.Morpeh {
             return true;
         }
 
-        public static Filter With<T>(this Filter filter) where T : struct, IComponent
-            => filter.CreateFilter<T>(Filter.Mode.Include);
+        public static Filter With<T>(this Filter filter) where T : struct, IComponent {
+            filter.world.ThreadSafetyCheck();
+            return filter.CreateFilter<T>(Filter.Mode.Include);
+        }
 
-        public static Filter Without<T>(this Filter filter) where T : struct, IComponent
-            => filter.CreateFilter<T>(Filter.Mode.Exclude);
+        public static Filter Without<T>(this Filter filter) where T : struct, IComponent {
+            filter.world.ThreadSafetyCheck();
+            return filter.CreateFilter<T>(Filter.Mode.Exclude);
+        }
 
         private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
             var currentTypeId = TypeIdentifier<T>.info.id;

@@ -99,6 +99,8 @@ namespace Scellecs.Morpeh {
         [SerializeField]
         internal string friendlyName;
 
+        internal int threadIdLock;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
 

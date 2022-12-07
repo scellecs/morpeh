@@ -54,7 +54,10 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EntityEnumerator GetEnumerator() => new EntityEnumerator(this);
+        public EntityEnumerator GetEnumerator() {
+            this.world.ThreadSafetyCheck();
+            return new EntityEnumerator(this);
+        }
 
         IEnumerator<Entity> IEnumerable<Entity>.GetEnumerator() => this.GetEnumerator();
 

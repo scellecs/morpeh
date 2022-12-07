@@ -101,6 +101,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Add(Entity entity) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
@@ -118,6 +120,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Add(Entity entity, out bool exist) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
@@ -135,6 +139,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Add(Entity entity, in T value) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
@@ -153,6 +159,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Get(Entity entity) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity.entityId.id}");
@@ -167,6 +175,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Get(Entity entity, out bool exist) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity.entityId.id}");
@@ -177,6 +187,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(Entity entity, in T value = default) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity.entityId.id}");
@@ -193,6 +205,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Remove(Entity entity) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Remove on null or disposed entity {entity.entityId.id}");
@@ -218,6 +232,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Has(Entity entity) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity.entityId.id}");
@@ -229,6 +245,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void Migrate(Entity from, Entity to, bool overwrite = true) {
+            world.ThreadSafetyCheck();
+            
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity {from.entityId.id}");
@@ -265,6 +283,8 @@ namespace Scellecs.Morpeh {
 
 
         public override void Dispose() {
+            world.ThreadSafetyCheck();
+            
             if (this.componentDispose != null) {
                 foreach (var componentId in this.components) {
                     this.componentDispose.Invoke(ref this.components.data[componentId]);

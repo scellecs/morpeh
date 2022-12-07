@@ -212,6 +212,8 @@ namespace Scellecs.Morpeh {
                 return;
             }
             
+            entity.world.ThreadSafetyCheck();
+            
             var currentArchetype = entity.currentArchetype;
 
             var caches = currentArchetype.world.stashes;
@@ -253,6 +255,18 @@ namespace Scellecs.Morpeh {
         public static bool IsDisposed([NotNull] this Entity entity) => entity.isDisposed || entity.entityId == EntityId.Invalid;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsNullOrDisposed([CanBeNull] this Entity entity) => entity == null || entity.isDisposed || entity.world == null;
+        public static bool IsNullOrDisposed([CanBeNull] this Entity entity) {
+            if (entity != null) {
+                if (entity.world != null) {
+                    entity.world.ThreadSafetyCheck();
+                    if (entity.isDisposed) {
+                        return true;
+                    }
+                    return false;
+                }
+                return true;
+            }
+            return true;
+        }
     }
 }
