@@ -1,7 +1,9 @@
+#if UNITY_2020_1_OR_NEWER
 namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
 
     public unsafe struct UnmanagedArray<T> : IEnumerable<T>, IDisposable where T : unmanaged {
         private UnmanagedStorage<T>* ptr;
@@ -13,8 +15,8 @@ namespace Scellecs.Morpeh.Collections {
         public static UnmanagedArray<T> Create(int length) {
             var array = new UnmanagedArray<T>();
             
-            array.ptr = (UnmanagedStorage<T>*) UnsafeUtils.Malloc<T>(1);
-            UnmanagedStorageUtils.AllocateUnsafeArray(array.ptr, length);
+            array.ptr = (UnmanagedStorage<T>*) UnmanagedUtils.Malloc<T>(1);
+            UnmanagedStorageUtils.AllocateUnsafeArray<T>(array.ptr, length);
             array.ptr->Length = length;
 
             return array;
@@ -61,7 +63,7 @@ namespace Scellecs.Morpeh.Collections {
                 return;
             }
             
-            UnmanagedStorageUtils.ResizeUnsafeArray(this.ptr, length);
+            UnmanagedStorageUtils.ResizeUnsafeArray<T>(this.ptr, length);
             this.ptr->Length = length;
         }
 
@@ -70,24 +72,47 @@ namespace Scellecs.Morpeh.Collections {
                 return;
             }
             
-            UnmanagedStorageUtils.DeallocateUnsafeArray(this.ptr);
+            UnmanagedStorageUtils.DeallocateUnsafeArray<T>(this.ptr);
             
-            UnsafeUtils.Free<T>((IntPtr) this.ptr);
+            UnmanagedUtils.Free<T>((IntPtr) this.ptr);
             this.ptr = null;
         }
 
-        public IEnumerator<T> GetEnumerator() {
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Enumerator GetEnumerator() {
             if (!this.IsCreated) {
                 throw new Exception("UnmanagedArray is not created");
             }
-            
-            for (int i = 0, length = this.Length; i < length; i++) {
-                yield return this[i];
-            }
+
+            Enumerator e;
+            e.array    = this;
+            e.current = -1;
+            e.length  = this.Length;
+
+            return e;
         }
 
-        IEnumerator IEnumerable.GetEnumerator() {
-            return this.GetEnumerator();
+        public struct Enumerator : IEnumerator<T> {
+            public UnmanagedArray<T> array;
+
+            public int current;
+            public int length;
+            
+            public bool MoveNext() => ++this.current < this.length;
+            public void Reset()    => this.current = -1;
+
+            public T Current => ((T*)this.array.ptr->Ptr.ToPointer())[this.current];
+
+            object IEnumerator.Current => this.Current;
+
+            public void Dispose() {
+            }
         }
     }
 }
+#endif

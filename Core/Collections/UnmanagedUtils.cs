@@ -1,5 +1,5 @@
 namespace Scellecs.Morpeh.Collections {
-    public static class UnsafeUtils {
+    public static class UnmanagedUtils {
         public static int SizeOf<T>() where T : unmanaged {
 #if UNITY_2019_3_OR_NEWER && MORPEH_BURST
             return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
