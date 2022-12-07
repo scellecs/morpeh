@@ -1,7 +1,7 @@
 {
     "name": "Scellecs.Morpeh.Editor",
+    "rootNamespace": "",
     "references": [
-        "GUID:f7978edb48e1118488f73a6f5762c198",
         "GUID:3377deebfb0acde45876d12c6e3d27cc"
     ],
     "includePlatforms": [
@@ -12,7 +12,9 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "UNITY_2020_1_OR_NEWER"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }
