@@ -4,7 +4,7 @@
   "displayName": "Morpeh",
   "description": "Fast and Simple ECS Framework for Unity Game Engine.",
   "unity": "2019.4",
-  "version": "2022.1.2",
+  "version": "2022.1.3",
   "keywords": [
     "morpeh",
     "ecs"
@@ -12,6 +12,6 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/scellecs/Morpeh"
+    "url": "https://github.com/scellecs/morpeh"
   }
 }
