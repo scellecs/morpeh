@@ -7,8 +7,10 @@
     using UnityEngine;
     using Utils;
     
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
     using UnityEditor;
+#endif
+#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
 
