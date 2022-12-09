@@ -1,42 +1,31 @@
 ﻿#if UNITY_EDITOR && UNITY_2019_1_OR_NEWER
 namespace Morpeh.Editor {
-    using System;
+    using System.Threading.Tasks;
     using UnityEditor;
+    using UnityEditor.PackageManager;
 
     [InitializeOnLoad]
     internal static class BurstDetector {
         private const string DEFINITION_NAME = "MORPEH_BURST";
 
         static BurstDetector() {
-            var hasBurst = CountTypesInNamespace("Unity.Burst") > 100;
-            var hasJobs  = CountTypesInNamespace("Unity.Jobs") > 20;
-            if (hasBurst && hasJobs) {
-                SetDefine(DEFINITION_NAME);
-            }
-            else {
-                RemoveDefine(DEFINITION_NAME);
-            }
+            ResolveDependencies();
         }
-
-        private static int CountTypesInNamespace(string nameSpace, string root = "Assembly") {
-            var childTypesCount = 0;
-
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies) {
-                try {
-                    var types = assembly.GetTypes();
-                    foreach (var type in types) {
-                        if (type.Namespace != null && type.Namespace.StartsWith(nameSpace)) {
-                            childTypesCount++;
-                        }
-                    }
-                }
-                catch (Exception) {
-                    // Skip
-                }
+        private static async void ResolveDependencies() {
+            var packages      = Client.List(true, true);
+            while (packages.Status == StatusCode.InProgress) {
+                await Task.Yield();
             }
 
-            return childTypesCount;
+            if (packages.Status != StatusCode.Success) return;
+
+            foreach (var package in packages.Result) {
+                if (package.name == "com.unity.burst") {
+                    SetDefine(DEFINITION_NAME);
+                    return;
+                }
+            }
+            RemoveDefine(DEFINITION_NAME);
         }
 
         private static string GetDefinesString() => PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
