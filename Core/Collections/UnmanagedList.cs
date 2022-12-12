@@ -68,6 +68,16 @@ namespace Scellecs.Morpeh.Collections {
             this.ptr->Length++;
             this[length] = element;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveAt(int index) {
+            --this.ptr->Length;
+            if (index < this.ptr->Length) {
+                UnmanagedUtils.MemCpy<T>((IntPtr)this.ptr+index, (IntPtr)this.ptr+index+1, this.ptr->Length - index);
+            }
+
+            *(T*)this.ptr->Ptr.ToPointer() = default;
+        }
 
         public void RemoveAtSwapBack(int index) {
             if (!this.IsCreated) {
