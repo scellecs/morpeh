@@ -531,7 +531,7 @@ public struct TestParallelJobReference : IJobParallelFor {
 
 ## 📘 License
 
-📄 [MIT License](LICENSE)
+📄 [MIT License](LICENSE.md)
 
 ## 💬 Contacts
 
