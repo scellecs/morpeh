@@ -31,6 +31,9 @@ namespace Scellecs.Morpeh {
         internal int typeId;
         [SerializeField]
         internal World world;
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract void Set(Entity entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract bool Remove(Entity entity);
@@ -86,7 +89,8 @@ namespace Scellecs.Morpeh {
         [UnityEngine.Scripting.Preserve]
         internal Stash() {
             var info = TypeIdentifier<T>.info;
-            this.typeId           = info.id;
+            
+            this.typeId = info.id;
 
             this.components = new IntHashMap<T>(info.stashSize);
 
@@ -98,7 +102,7 @@ namespace Scellecs.Morpeh {
             this.commonStashId = stashes.length;
             stashes.Add(this);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Add(Entity entity) {
             world.ThreadSafetyCheck();
@@ -183,6 +187,21 @@ namespace Scellecs.Morpeh {
             }
 #endif
             return ref this.components.TryGetValueRefByKey(entity.entityId.id, out exist);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override void Set(Entity entity) {
+            world.ThreadSafetyCheck();
+            
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity.entityId.id}");
+            }
+#endif
+
+            if (this.components.Set(entity.entityId.id, default, out _)) {
+                entity.AddTransfer(this.typeId);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
