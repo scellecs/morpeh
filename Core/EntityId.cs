@@ -2,6 +2,10 @@
     using System;
     using Unity.IL2CPP.CompilerServices;
 
+#if UNITY_EDITOR && ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
@@ -10,9 +14,18 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public readonly struct EntityId : IEquatable<EntityId> {
         internal static readonly EntityId Default = new EntityId(-1, -1);
-
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+        private int Id => this.id;
+#endif
         internal readonly int id;
+
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+        private int Gen => this.gen;
+#endif
         internal readonly int gen;
+
 
         public EntityId(int id, int gen) {
             this.id  = id;
