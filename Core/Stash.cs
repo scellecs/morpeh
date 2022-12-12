@@ -205,7 +205,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(Entity entity, in T value = default) {
+        public void Set(Entity entity, in T value) {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
