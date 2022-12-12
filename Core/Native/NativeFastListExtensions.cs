@@ -3,9 +3,9 @@ namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
 
-    public static class NativeFastListExtensions {
+    public static unsafe class NativeFastListExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe NativeFastList<TNative> AsNative<TNative>(this FastList<TNative> fastList) where TNative : unmanaged {
+        public static NativeFastList<TNative> AsNative<TNative>(this FastList<TNative> fastList) where TNative : unmanaged {
             var nativeIntHashMap = new NativeFastList<TNative>();
             
             fixed (int* lengthPtr = &fastList.length)
@@ -18,6 +18,8 @@ namespace Scellecs.Morpeh.Native {
 
             return nativeIntHashMap;
         }
+
+        public static ref TNative GetRef<TNative>(this NativeFastList<TNative> fastList, in int index) where TNative : unmanaged => ref *(fastList.data + index);
     }
 }
 #endif

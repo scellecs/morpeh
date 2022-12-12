@@ -4,9 +4,9 @@ namespace Scellecs.Morpeh.Native {
     using Collections;
     using global::Morpeh;
 
-    public static class NativeIntHashMapExtensions {
+    public static unsafe class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe NativeIntHashMap<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
+        internal static NativeIntHashMap<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
             var nativeIntHashMap = new NativeIntHashMap<TNative>();
             
             fixed (int* lengthPtr = &hashMap.length)
@@ -32,7 +32,7 @@ namespace Scellecs.Morpeh.Native {
         
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref TNative GetValueRefByKey<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
+        public static ref TNative GetValueRefByKey<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
             var rem = key & *nativeIntHashMap.capacityMinusOnePtr;
 
             int next;
@@ -47,9 +47,15 @@ namespace Scellecs.Morpeh.Native {
 
             return ref UnsafeUtility.ArrayElementAsRef<TNative>(nativeIntHashMap.data, 0);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TNative GetValueByIndex<TNative>(this NativeIntHashMap<TNative> hashMap, in int index) where TNative : unmanaged => *(hashMap.data + index);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref TNative GetValueRefByIndex<TNative>(this NativeIntHashMap<TNative> hashMap, in int index) where TNative : unmanaged => ref *(hashMap.data + index);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe int TryGetIndex<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
+        public static int TryGetIndex<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
             var rem = key & *nativeIntHashMap.capacityMinusOnePtr;
 
             int next;

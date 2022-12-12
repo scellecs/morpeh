@@ -257,6 +257,9 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T GetValueByIndex<T>(this IntHashMap<T> hashMap, in int index) => hashMap.data[index];
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T GetValueRefByIndex<T>(this IntHashMap<T> hashMap, in int index) => ref hashMap.data[index];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetKeyByIndex<T>(this IntHashMap<T> hashMap, in int index) => hashMap.slots[index].key - 1;
