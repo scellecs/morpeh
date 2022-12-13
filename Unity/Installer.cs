@@ -192,7 +192,10 @@
             }
 
             [CanBeNull]
-            public T System => this.system;
+            public T System {
+                get => this.system;
+                set => this.system = value;
+            }
 
             public BasePair() => this.enabled = true;
 
