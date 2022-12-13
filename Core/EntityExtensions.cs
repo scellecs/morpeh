@@ -270,7 +270,7 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Aspect<T>(this Entity entity) where T : struct, IAspect {
+        public static T As<T>(this Entity entity) where T : struct, IAspect {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying Aspect on null or disposed entity");
