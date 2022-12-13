@@ -14,6 +14,7 @@
 namespace Scellecs.Morpeh {
     using System;
     using UnityEngine;
+    
     public interface IComponent {
     }
 
@@ -46,6 +47,10 @@ namespace Scellecs.Morpeh {
 
     public interface IValidatableWithGameObject {
         void OnValidate(GameObject gameObject);
+    }
+
+    public interface IAspect {
+        Entity Entity { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Struct)]

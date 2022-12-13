@@ -229,6 +229,7 @@ namespace Scellecs.Morpeh {
             return stash;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
             world.ThreadSafetyCheck();
             
@@ -443,6 +444,7 @@ namespace Scellecs.Morpeh {
             return world.entities[id];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGetEntity(this World world, in EntityId entityId, out Entity entity) {
             world.ThreadSafetyCheck();
             
@@ -460,6 +462,7 @@ namespace Scellecs.Morpeh {
             return !entity.IsNullOrDisposed();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveEntity(this World world, Entity entity) {
             world.ThreadSafetyCheck();
             
