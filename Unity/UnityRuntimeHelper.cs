@@ -1,7 +1,9 @@
 namespace Scellecs.Morpeh {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
+#endif
+#if UNITY_EDITOR
     using UnityEditor;
 #endif
     using System;

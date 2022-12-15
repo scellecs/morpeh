@@ -273,7 +273,7 @@ namespace Scellecs.Morpeh {
         public static T As<T>(this Entity entity) where T : struct, IAspect {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying Aspect on null or disposed entity");
+                throw new Exception("[MORPEH] You are trying As<T> on null or disposed entity");
             }
 #endif
             var aspect = default(T);
