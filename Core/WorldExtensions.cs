@@ -30,8 +30,8 @@ namespace Scellecs.Morpeh {
             world.systemsGroups    = new SortedList<int, SystemsGroup>();
             world.newSystemsGroups = new SortedList<int, SystemsGroup>();
 
-            world.internalSystemsGroups    = new SortedList<int, SystemsGroup>();
-            world.newInternalSystemsGroups = new SortedList<int, SystemsGroup>();
+            world.pluginSystemsGroups    = new FastList<SystemsGroup>();
+            world.newPluginSystemsGroups = new FastList<SystemsGroup>();
 
             world.Filter         = new Filter(world);
             world.filters        = new FastList<Filter>();
@@ -273,24 +273,19 @@ namespace Scellecs.Morpeh {
 
             newSysGroup.Clear();
 
-            newSysGroup = world.newInternalSystemsGroups;
-
-            for (var i = 0; i < newSysGroup.Count; i++) {
-                var key          = newSysGroup.Keys[i];
-                var systemsGroup = newSysGroup.Values[i];
+            for (var i = 0; i < world.newPluginSystemsGroups.length; i++) {
+                var systemsGroup = world.newPluginSystemsGroups.data[i];
 
                 systemsGroup.Initialize();
-                world.internalSystemsGroups.Add(key, systemsGroup);
+                world.pluginSystemsGroups.Add(systemsGroup);
             }
-
-            newSysGroup.Clear();
 
             for (var i = 0; i < world.systemsGroups.Count; i++) {
                 var systemsGroup = world.systemsGroups.Values[i];
                 systemsGroup.Update(deltaTime);
             }
-            for (var i = 0; i < world.internalSystemsGroups.Count; i++) {
-                var systemsGroup = world.internalSystemsGroups.Values[i];
+            for (var i = 0; i < world.pluginSystemsGroups.length; i++) {
+                var systemsGroup = world.pluginSystemsGroups.data[i];
                 systemsGroup.Update(deltaTime);
             }
         }
@@ -311,8 +306,8 @@ namespace Scellecs.Morpeh {
                 var systemsGroup = world.systemsGroups.Values[i];
                 systemsGroup.FixedUpdate(deltaTime);
             }
-            for (var i = 0; i < world.internalSystemsGroups.Count; i++) {
-                var systemsGroup = world.internalSystemsGroups.Values[i];
+            for (var i = 0; i < world.pluginSystemsGroups.length; i++) {
+                var systemsGroup = world.pluginSystemsGroups.data[i];
                 systemsGroup.FixedUpdate(deltaTime);
             }
         }
@@ -334,8 +329,8 @@ namespace Scellecs.Morpeh {
                 var systemsGroup = world.systemsGroups.Values[i];
                 systemsGroup.LateUpdate(deltaTime);
             }
-            for (var i = 0; i < world.internalSystemsGroups.Count; i++) {
-                var systemsGroup = world.internalSystemsGroups.Values[i];
+            for (var i = 0; i < world.pluginSystemsGroups.length; i++) {
+                var systemsGroup = world.pluginSystemsGroups.data[i];
                 systemsGroup.LateUpdate(deltaTime);
             }
         }
@@ -348,8 +343,8 @@ namespace Scellecs.Morpeh {
                 var systemsGroup = world.systemsGroups.Values[i];
                 systemsGroup.CleanupUpdate(deltaTime);
             }
-            for (var i = 0; i < world.internalSystemsGroups.Count; i++) {
-                var systemsGroup = world.internalSystemsGroups.Values[i];
+            for (var i = 0; i < world.pluginSystemsGroups.length; i++) {
+                var systemsGroup = world.pluginSystemsGroups.data[i];
                 systemsGroup.CleanupUpdate(deltaTime);
             }
         }
@@ -368,10 +363,10 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddInternalSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
+        public static void AddPluginSystemsGroup(this World world, SystemsGroup systemsGroup) {
             world.ThreadSafetyCheck();
             
-            world.newInternalSystemsGroups.Add(order, systemsGroup);
+            world.newPluginSystemsGroups.Add(systemsGroup);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

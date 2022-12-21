@@ -43,7 +43,7 @@ namespace Scellecs.Morpeh {
         //todo custom collection
         [ShowInInspector]
         [NonSerialized]
-        internal SortedList<int, SystemsGroup> internalSystemsGroups;
+        internal FastList<SystemsGroup> pluginSystemsGroups;
 
         //todo custom collection
         [ShowInInspector]
@@ -53,7 +53,7 @@ namespace Scellecs.Morpeh {
         //todo custom collection
         [ShowInInspector]
         [NonSerialized]
-        internal SortedList<int, SystemsGroup> newInternalSystemsGroups;
+        internal FastList<SystemsGroup> newPluginSystemsGroups;
 
         [SerializeField]
         internal Entity[] entities;
@@ -134,7 +134,7 @@ namespace Scellecs.Morpeh {
             this.systemsGroups.Clear();
             this.systemsGroups = null;
             
-            foreach (var systemsGroup in this.internalSystemsGroups.Values) {
+            foreach (var systemsGroup in this.pluginSystemsGroups) {
 #if MORPEH_DEBUG
                 try {
 #endif
@@ -142,17 +142,17 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose internal system group {systemsGroup.GetType()}");
+                    MLogger.LogError($"Can not dispose plugin system group {systemsGroup.GetType()}");
                     MLogger.LogException(e);
                 }
 #endif
             }
 
-            this.newInternalSystemsGroups.Clear();
-            this.newInternalSystemsGroups = null;
+            this.newPluginSystemsGroups.Clear();
+            this.newPluginSystemsGroups = null;
             
-            this.internalSystemsGroups.Clear();
-            this.internalSystemsGroups = null;
+            this.pluginSystemsGroups.Clear();
+            this.pluginSystemsGroups = null;
 
             foreach (var entity in this.entities) {
 #if MORPEH_DEBUG
