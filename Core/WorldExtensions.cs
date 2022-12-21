@@ -279,6 +279,8 @@ namespace Scellecs.Morpeh {
                 systemsGroup.Initialize();
                 world.pluginSystemsGroups.Add(systemsGroup);
             }
+            
+            world.newPluginSystemsGroups.Clear();
 
             for (var i = 0; i < world.systemsGroups.Count; i++) {
                 var systemsGroup = world.systemsGroups.Values[i];
