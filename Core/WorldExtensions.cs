@@ -223,6 +223,7 @@ namespace Scellecs.Morpeh {
 
             stash.world = world;
 
+            CommonTypeIdentifier.typeAssociation.TryGetValue(type, out definition);
             world.stashes.Add(definition.id, stash.commonStashId, out _);
             world.typedStashes.Add(definition.id, stash.typedStashId, out _);
 
