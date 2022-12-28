@@ -564,11 +564,19 @@ public struct TestParallelJobReference : IJobParallelFor {
 ## 🔥 Games
 
 * **Zombie City** by *GreenButtonGames*  
-  [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/kh/app/zombie-city-master/id1543420906)
+  [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/us/app/zombie-city-master/id1543420906)
 
 
 * **Fish Idle** by *GreenButtonGames*  
-  [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.FishIdle) [iOS](https://apps.apple.com/ru/app/fish-idle-hooked-tycoon/id1534396279)
+  [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.FishIdle) [iOS](https://apps.apple.com/us/app/fish-idle-hooked-tycoon/id1534396279)
+
+
+* **Stickman of Wars: RPG Shooters** by *Multicast Games*  
+  [Android](https://play.google.com/store/apps/details?id=com.multicastgames.sow3) [iOS](https://apps.apple.com/us/app/stickman-of-wars-rpg-shooters/id1620422798)
+
+
+* **One State RP - Life Simulator** by *Chillbase*
+  [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
 
 ## 📘 License
 
