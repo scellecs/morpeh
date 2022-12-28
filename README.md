@@ -575,7 +575,7 @@ public struct TestParallelJobReference : IJobParallelFor {
   [Android](https://play.google.com/store/apps/details?id=com.multicastgames.sow3) [iOS](https://apps.apple.com/us/app/stickman-of-wars-rpg-shooters/id1620422798)
 
 
-* **One State RP - Life Simulator** by *Chillbase*
+* **One State RP - Life Simulator** by *Chillbase*  
   [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
 
 ## 📘 License
