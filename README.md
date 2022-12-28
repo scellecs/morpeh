@@ -70,10 +70,15 @@ var entity = this.World.CreateEntity();
 ref var addedHealthComponent  = ref entity.AddComponent<HealthComponent>();
 ref var gottenHealthComponent = ref entity.GetComponent<HealthComponent>();
 
+//if you remove last component on entity it will be destroyd on next world.Commit()
 bool removed = entity.RemoveComponent<HealthComponent>();
 entity.SetComponent(new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = entity.Has<HealthComponent>();
+
+var newEntity = this.World.CreateEntity();
+//after migration entity has no components, so it will be destroyd on next world.Commit()
+entity.MigrateTo(newEntity);
 ```
 
 
@@ -90,6 +95,9 @@ public struct HealthComponent : IComponent {
 
 Types that process entities with a specific set of components.  
 Entities are selected using a filter.
+
+All systems are represented by interfaces, but for convenience, there are ScriptableObject classes that make it easier to work with the inspector and `Installer`.  
+Such classes are the default tool, but you can write pure classes that implement the interface, but then you need to use the `SystemsGroup` API instead of the `Installer`.
 
 ```c#
 public class HealthSystem : ISystem {
@@ -113,10 +121,47 @@ public class HealthSystem : ISystem {
 }
 ```
 
+All systems types:  
+* `IInitializer` & `Initializer` - have only OnAwake and Dispose methods, convenient for executing startup logic
+* `ISystem` & `UpdateSystem`
+* `IFixedSystem` & `FixedUpdateSystem`
+* `ILateSystem` & `LateUpdateSystem`
+* `ICleanupSystem` & `CleanupSystem`
+
+#### 🔖 SystemsGroup
+
+The type that contains the systems.  
+There is an `Installer` wrapper to work in the inspector, but if you want to control everything from code, you can use the systems group directly.  
+
+```c#
+var newWorld = World.Create();
+
+var newSystem = new HealthSystem();
+var newInitializer = new HealthInitializer();
+
+var systemsGroup = newWorld.CreateSystemsGroup();
+systemsGroup.AddSystem(newSystem);
+systemsGroup.AddInitializer(newInitializer);
+
+//it is bad practice to turn systems off and on, but sometimes it is very necessary for debugging
+systemsGroup.DisableSystem(newSystem);
+systemsGroup.EnableSystem(newSystem);
+
+systemsGroup.RemoveSystem(newSystem);
+systemsGroup.RemoveInitializer(newInitializer);
+
+newWorld.AddSystemsGroup(order: 0, systemsGroup);
+newWorld.RemoveSystemsGroup(systemsGroup);
+```
+
 #### 🔖 World
 A type that contains entities, components stashes, systems and root filter.
 ```c#
 var newWorld = World.Create();
+//a variable that specifies whether the world should be updated automatically by the game engine.
+//if set to false, then you can update the world manually.
+//and can also be used for game pauses by changing the value of this variable.
+newWorld.UpdateByUnity = true;
 
 var newEntity = newWorld.CreateEntity();
 newWorld.RemoveEntity(newEntity);
@@ -130,6 +175,17 @@ newWorld.RemoveSystemsGroup(systemsGroup);
 var filter = newWorld.Filter.With<HealthComponent>();
 
 var healthCache = newWorld.GetStash<HealthComponent>();
+var reflectionHealthCache = newWorld.GetReflectionStash(typeof(HealthComponent));
+
+//manually world updates
+newWorld.Update(Time.deltaTime);
+newWorld.FixedUpdate(Time.fixedDeltaTime);
+newWorld.LateUpdate(Time.deltaTime);
+newWorld.CleanupUpdate(Time.deltaTime);
+
+//apply all entity changes, filters will be updated.
+//automatically invoked between systems
+newWorld.Commit();
 ```
 
 #### 🔖 Filter
@@ -160,10 +216,24 @@ ref var addedHealthComponent  = ref healthStash.Add(entity);
 ref var gottenHealthComponent = ref healthStash.Get(entity);
 
 bool removed = healthStash.Remove(entity);
+
 healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
 
+var newEntity = this.World.CreateEntity();
+//transfers a component from one entity to another
+healthStash.Migrate(from: entity, to: newEntity);
+
+//not a generic variation of stash, so we can only do a limited set of operations
+var reflectionHealthCache = newWorld.GetReflectionStash(typeof(HealthComponent));
+
+//set default(HealthComponent) to entity
+reflectionHealthCache.Set(entity);
+
+bool removed = reflectionHealthCache.Remove(entity);
+
+bool hasHealthComponent = reflectionHealthCache.Has(entity);
 ```
 
 ---
