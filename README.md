@@ -20,6 +20,7 @@
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
   * [Getting Started](#-getting-started)
   * [Advanced](#-advanced)
+    * [Component Disposing](#-component-disposing)
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
 * [Examples](#-examples)
 * [Games](#-games)
@@ -35,7 +36,7 @@ Russian version: [Гайд по миграции](MIGRATION_RU.md)
 
 ### Unity Engine 
 
-Minimal Unity Version is 2019.4.*  
+Minimal Unity Version is 2020.1.*  
 Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
 Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.
 
@@ -52,14 +53,16 @@ Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/u
 
 ### .Net Platform
 
-Clone repository and reference to **Scellecs.Morpeh.csproj**
+Currently clone repository and reference to **Scellecs.Morpeh.csproj**  
+NuGet package will be created soon.
 
 ## 📖 Introduction
 ### 📘 Base concept of ECS pattern
 
 #### 🔖 Entity
 Container of components.  
-Has a set of methods for add, get, set, remove components.
+Has a set of methods for add, get, set, remove components.  
+It is reference type. Each entity is unique and not pooled. Only entity IDs are reused.  
 
 ```c#
 var entity = this.World.CreateEntity();
@@ -111,7 +114,7 @@ public class HealthSystem : ISystem {
 ```
 
 #### 🔖 World
-A type that contains entities, components caches, systems and root filter.
+A type that contains entities, components stashes, systems and root filter.
 ```c#
 var newWorld = World.Create();
 
@@ -126,7 +129,7 @@ newWorld.RemoveSystemsGroup(systemsGroup);
 
 var filter = newWorld.Filter.With<HealthComponent>();
 
-var healthCache = newWorld.GetCache<HealthComponent>();
+var healthCache = newWorld.GetStash<HealthComponent>();
 ```
 
 #### 🔖 Filter
@@ -141,13 +144,13 @@ var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
 
 bool filterIsEmpty = filter.IsEmpty();
-int filterLengthCalculatedOnCall = filter.GetFilterLength();
+int filterLengthCalculatedOnCall = filter.GetLengthSlow();
 
 ```
 
 #### 🔖 Stash
 A type that contains components.  
-You can get components and do other operations directly from the stash, because entity methods look up the stash each time.  
+You can get components and do other operations directly from the stash, because entity methods look up the stash each time on call.  
 However, such code is harder to read.
 ```c#
 var healthStash = this.World.GetStash<HealthComponent>();
@@ -217,8 +220,8 @@ Now let's create first system.
 ![create_system.gif](Gifs~/create_system.gif)
 </details>
 
-> 💡 Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem.  
-> They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate.
+> 💡 Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem, CleanupSystem.  
+> They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate. CleanupSystem called the most recent in LateUpdate.
 
 System looks like this.
 ```c#  
@@ -384,6 +387,47 @@ Nice!
 
 ### 📖 Advanced
 
+#### 🧹 Component Disposing
+
+Sometimes it becomes necessary to clear component values.
+For this, it is enough that the component implements `IDisposable`. For example:
+
+```c#  
+public struct PlayerView : IComponent, IDisposable {
+    public GameObject value;
+    
+    public void Dispose() {
+        Object.Destroy(value);
+    }
+}
+```
+
+The initializer or system now needs to mark the stash as disposable. For example:
+
+```c# 
+public class PlayerViewDisposeInitializer : Initializer {
+    public override void OnAwake() {
+        this.World.GetStash<PlayerView>().AsDisposable();
+    }
+}
+```
+
+or
+
+```c# 
+public class PlayerViewSystem : UpdateSystem {
+    public override void OnAwake() {
+        this.World.GetStash<PlayerView>().AsDisposable();
+    }
+    
+    public override void OnUpdate(float deltaTime) {
+        ...
+    }
+}
+```
+
+Now, when the component is removed from the entity, the `Dispose()` method will be called on the `PlayerView` component.  
+
 ####  🧨 Unity Jobs And Burst
 
 > 💡 Supported only in Unity. Subjected to further improvements and modifications.
@@ -423,12 +467,12 @@ Example job:
 public struct TestParallelJobReference : IJobParallelFor {
     [ReadOnly]
     public NativeFilter entities;
-    public NativeCache<HealthComponent> healthComponents;
+    public NativeStash<HealthComponent> healthComponents;
         
     public void Execute(int index) {
         var entityId = this.entities[index];
         
-        ref var component = ref this.healthComponents.GetComponent(entityId, out var exists);
+        ref var component = ref this.healthComponents.Get(entityId, out var exists);
         if (exists) {
             component.Value += 1;
         }
@@ -436,7 +480,7 @@ public struct TestParallelJobReference : IJobParallelFor {
         // Alternatively, you can avoid checking existance of the component
         // if the filter includes said component anyway
         
-        ref var component = ref this.healthComponents.GetComponent(entityId);
+        ref var component = ref this.healthComponents.Get(entityId);
         component.Value += 1;
     }
 }
