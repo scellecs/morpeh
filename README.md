@@ -36,7 +36,7 @@ Russian version: [Гайд по миграции](MIGRATION_RU.md)
 
 ### Unity Engine 
 
-Minimal Unity Version is 2020.1.*  
+Minimal Unity Version is 2020.3.*  
 Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
 Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.
 
@@ -402,7 +402,7 @@ public struct PlayerView : IComponent, IDisposable {
 }
 ```
 
-The initializer or system now needs to mark the stash as disposable. For example:
+The initializer or system needs to mark the stash as disposable. For example:
 
 ```c# 
 public class PlayerViewDisposeInitializer : Initializer {

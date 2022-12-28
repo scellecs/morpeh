@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unmanaged Collections for Jobs & Burst.
 
 ### Changed
-- **[Breaking]** Minimal Unity version up to 2020.1.*
+- **[Breaking]** Minimal Unity version up to 2020.3.*
 - **[Breaking]** Rename namespaces `Morpeh/XCrew.Morpeh` -> `Scellecs.Morpeh`
 - **[Breaking]** Globals placed in a separate package via the link https://github.com/scellecs/morpeh.globals
 - **[Breaking]** Method `World.UpdateFilters()` renamed to `World.Commit()`.

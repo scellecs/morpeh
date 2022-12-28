@@ -3,7 +3,7 @@
   "author": "Scellecs",
   "displayName": "Morpeh",
   "description": "Fast and Simple ECS Framework for Unity Game Engine.",
-  "unity": "2020.1",
+  "unity": "2020.3",
   "version": "2022.2.0",
   "keywords": [
     "morpeh",

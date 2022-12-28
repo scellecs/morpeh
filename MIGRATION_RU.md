@@ -2,7 +2,7 @@
 ## Переход с версии 2022.1 на 2022.2
 
 ### Breaking changes
-* Минимальная версия Unity поднята до 2020.1.*
+* Минимальная версия Unity поднята до 2020.3.*
 * Неймспейсы изменены с `Morpeh` на `Scellecs.Morpeh`, `Scellecs.Morpeh.Systems`, `Scellecs.Morpeh.Providers`.
 * Глобалы выделены в отдельный пакет по ссылке https://github.com/scellecs/morpeh.globals.
 * Метод `World.UpdateFilters()` переименован в `World.Commit()`.
