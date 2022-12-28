@@ -268,17 +268,23 @@ namespace Scellecs.Morpeh {
             }
             return true;
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T As<T>(this Entity entity) where T : struct, IAspect {
+    }
+    namespace Experimental {
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        public static class EntityExtensionsExperimental {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static T As<T>(this Entity entity) where T : struct, IAspect {
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception("[MORPEH] You are trying As<T> on null or disposed entity");
-            }
+                if (entity.IsNullOrDisposed()) {
+                    throw new Exception("[MORPEH] You are trying As<T> on null or disposed entity");
+                }
 #endif
-            var aspect = default(T);
-            aspect.Entity = entity;
-            return aspect;
+                var aspect = default(T);
+                aspect.Entity = entity;
+                return aspect;
+            }
         }
     }
 }
