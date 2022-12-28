@@ -45,10 +45,6 @@ namespace Scellecs.Morpeh {
             }
 
             Warmup();
-
-            foreach (var worldPlugin in plugins) {
-                worldPlugin.Initialize(world);
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,6 +79,10 @@ namespace Scellecs.Morpeh {
             world.archetypesByLength = new IntHashMap<IntFastList>();
             world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
             world.newArchetypes = new IntFastList();
+            
+            foreach (var worldPlugin in plugins) {
+                worldPlugin.Initialize(world);
+            }
 
             return world;
         }
