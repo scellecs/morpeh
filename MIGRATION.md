@@ -19,7 +19,7 @@
 
 ## Migration from version 2020.* to 2022.1
 
-## Breaking changes  
+### Breaking changes  
 * Assembly definition and all links have been replaced from `XCrew.Morpeh` to `Scellecs.Morpeh`. Namespace is the same.
 * All Globals have lost method `NextFrame`. Use `Publish`, which works exactly as `NextFrame` used to. Current-frame Global events are not supported anymore, they are always deferred. The reason for this change is that most projects used both `Publish` + `NextFrame`, or `NextFrame` only.
 * `Entity.ID` is not `int` anymore, but `EntityID` which contains `id` and `gen`. This is a mandatory change for Jobs/Burst support. `World.TryGetEntity(EntityId entityId, out Entity entity)` has been added, which allows checking if entity exists without storing direct reference to it.
