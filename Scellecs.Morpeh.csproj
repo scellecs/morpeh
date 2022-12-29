@@ -74,10 +74,4 @@
       <None Remove="Core\Stash.cs.meta" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Reference Include="Scellecs.Morpeh.Unsafe">
-        <HintPath>Core\Native\Scellecs.Morpeh.Unsafe.dll</HintPath>
-      </Reference>
-    </ItemGroup>
-
 </Project>
