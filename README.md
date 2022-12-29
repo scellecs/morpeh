@@ -2,7 +2,7 @@
     <img src="Unity/Utils/Editor/Resources/logo.png" width="260" height="260" alt="Morpeh">
 </p>
 
-# Morpeh
+# Morpeh [![License](https://img.shields.io/github/license/scellecs/morpeh?color=blue&style=flat-square)](#) [![Unity](https://img.shields.io/badge/Unity-2020.3+-2296F3.svg?style=flat-square)](#) [![Version](https://img.shields.io/github/package-json/v/scellecs/morpeh?style=flat-square)](#)
 🎲 **ECS Framework for Unity Game Engine and .Net Platform**  
 
 * Simple Syntax.  
