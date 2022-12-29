@@ -2,7 +2,7 @@
 namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
-
+    using Unity.Collections.LowLevel.Unsafe;
 
     public static unsafe class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
