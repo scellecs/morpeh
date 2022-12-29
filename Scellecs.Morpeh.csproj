@@ -3,22 +3,67 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>2022.2.0</Version>
+        <Title>Scellecs.Morpeh</Title>
+        <Authors>Oleg Morozov, Igor Boyko</Authors>
+        <Description>ECS Framework for Unity Game Engine and .Net Platform</Description>
+        <Copyright>Copyright (c) 2022 Oleg Morozov, Igor Boyko</Copyright>
+        <PackageLicenseUrl>https://github.com/scellecs/morpeh/blob/master/LICENSE.md</PackageLicenseUrl>
+        <PackageIcon>logo.png</PackageIcon>
+        <PackageReadmeFile>README_NUGET.md</PackageReadmeFile>
+        <RepositoryUrl>https://github.com/scellecs/morpeh</RepositoryUrl>
+        <PackageTags>ecs, unity, gamedev</PackageTags>
+        <Company>Scellecs</Company>
+        <Product>Morpeh</Product>
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Unity\**" />
       <Compile Remove="Packages\**" />
       <Compile Remove="Gifs~\**" />
+      <Compile Remove="Unity\BaseInstaller.cs" />
+      <Compile Remove="Unity\Installer.cs" />
+      <Compile Remove="Unity\UnityRuntimeHelper.cs" />
+      <Compile Remove="Unity\Editor\**" />
+      <Compile Remove="Unity\Providers\**" />
+      <Compile Remove="Unity\Systems\**" />
+      <Compile Remove="Unity\Utils\Discover\**" />
+      <Compile Remove="Unity\Utils\Editor\Discover\**" />
+      <Compile Remove="Unity\Utils\Editor\Resources\Discover\**" />
+      <Compile Remove="Unity\Utils\Editor\Resources\MaterialIcons\**" />
+      <Compile Remove="Unity\Utils\Editor\Resources\Fonts\**" />
+      <Compile Remove="Unity\Utils\Editor\Resources\MorpehIcons\**" />
+      <Compile Remove="Unity\Utils\Editor\CompilationTime.cs" />
+      <Compile Remove="Unity\Utils\Editor\DefineAsset.cs" />
+      <Compile Remove="Unity\Utils\Editor\DependencyResolver.cs" />
+      <Compile Remove="Unity\Utils\Editor\EditorSceneSetup.cs" />
+      <Compile Remove="Unity\Utils\Editor\IconsSetter.cs" />
+      <Compile Remove="Unity\Utils\Editor\OpenAssetProcessor.cs" />
+      <Compile Remove="Unity\Utils\Editor\WorldBrowser.cs" />
+      <Compile Remove="Unity\Utils\SceneReference.cs" />
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Remove="Unity\**" />
       <EmbeddedResource Remove="Packages\**" />
       <EmbeddedResource Remove="Gifs~\**" />
+      <EmbeddedResource Remove="Unity\Editor\**" />
+      <EmbeddedResource Remove="Unity\Providers\**" />
+      <EmbeddedResource Remove="Unity\Systems\**" />
+      <EmbeddedResource Remove="Unity\Utils\Discover\**" />
+      <EmbeddedResource Remove="Unity\Utils\Editor\Discover\**" />
+      <EmbeddedResource Remove="Unity\Utils\Editor\Resources\Discover\**" />
+      <EmbeddedResource Remove="Unity\Utils\Editor\Resources\MaterialIcons\**" />
+      <EmbeddedResource Remove="Unity\Utils\Editor\Resources\Fonts\**" />
+      <EmbeddedResource Remove="Unity\Utils\Editor\Resources\MorpehIcons\**" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Unity\**" />
+      <None Include="Unity\Utils\Editor\Resources\logo.png" Pack="true" PackagePath="" />
+      <None Include="README_NUGET.md" Pack="true" PackagePath="" />
+      <None Include="MIGRATION.md" Pack="true" PackagePath="" />
+      <None Include="MIGRATION_RU.md" Pack="true" PackagePath="" />
+      <None Include="LICENSE.md" Pack="true" PackagePath="" />
+      <None Include="CHANGELOG.md" Pack="true" PackagePath="" />
       <None Remove="Packages\**" />
       <None Remove="Gifs~\**" />
       <None Remove=".gitattributes" />
@@ -72,6 +117,67 @@
       <None Remove="Core\MLogger.cs.meta" />
       <None Remove="Core\Native.meta" />
       <None Remove="Core\Stash.cs.meta" />
+      <None Remove="Unity\BaseInstaller.cs.meta" />
+      <None Remove="Unity\Editor.meta" />
+      <None Remove="Unity\Installer.cs.meta" />
+      <None Remove="Unity\Providers.meta" />
+      <None Remove="Unity\Systems.meta" />
+      <None Remove="Unity\UnityRuntimeHelper.cs.meta" />
+      <None Remove="Unity\Utils.meta" />
+      <None Remove="Unity\Editor\**" />
+      <None Remove="Unity\Providers\**" />
+      <None Remove="Unity\Systems\**" />
+      <None Remove="Unity\Utils\Discover\**" />
+      <None Remove="Unity\Utils\Editor\Discover\**" />
+      <None Remove="Unity\Utils\Editor\Resources\Discover\**" />
+      <None Remove="Unity\Utils\Editor\Resources\MaterialIcons\**" />
+      <None Remove="Unity\Utils\Editor\Resources\MaterialIcons.meta" />
+      <None Remove="Unity\Utils\Editor\Resources\Fonts\**" />
+      <None Remove="Unity\Utils\Editor\Resources\Fonts.meta" />
+      <None Remove="Unity\Utils\Editor\Resources\MorpehIcons\**" />
+      <None Remove="Unity\Utils\Editor\Resources\Discover.meta" />
+      <None Remove="Unity\Utils\Editor\Resources\MorpehIcons.meta" />
+      <None Remove="Unity\Utils\Editor\CompilationTime.cs.meta" />
+      <None Remove="Unity\Utils\Editor\DefineAsset.cs.meta" />
+      <None Remove="Unity\Utils\Editor\DependencyResolver.cs.meta" />
+      <None Remove="Unity\Utils\Editor\Discover.meta" />
+      <None Remove="Unity\Utils\Editor\EditorSceneSetup.cs.meta" />
+      <None Remove="Unity\Utils\Editor\IconsSetter.cs.meta" />
+      <None Remove="Unity\Utils\Editor\OpenAssetProcessor.cs.meta" />
+      <None Remove="Unity\Utils\Editor\Scellecs.Morpeh.Editor.asmdef" />
+      <None Remove="Unity\Utils\Editor\Scellecs.Morpeh.Editor.asmdef.meta" />
+      <None Remove="Unity\Utils\Editor\WorldBrowser.cs.meta" />
+      <None Remove="Unity\Utils\Discover.meta" />
+      <None Remove="Unity\Utils\MorpehDefines.asset" />
+      <None Remove="Unity\Utils\MorpehDefines.asset.meta" />
+      <None Remove="Unity\Utils\SceneReference.cs.meta" />
+      <None Remove="obj.meta" />
+      <None Remove="bin.meta" />
+      <None Remove="Unity\Utils\Editor.meta" />
+      <None Remove="Unity\Utils\Editor\Resources.meta" />
+      <None Remove="Unity\Utils\Editor\Resources\logo.png.meta" />
+      <None Remove="Core\StashExtensions.cs.meta" />
+      <None Remove="Core\Native\NativeArchetype.cs.meta" />
+      <None Remove="Core\Native\NativeArchetypeExtensions.cs.meta" />
+      <None Remove="Core\Native\NativeFastList.cs.meta" />
+      <None Remove="Core\Native\NativeFastListExtensions.cs.meta" />
+      <None Remove="Core\Native\NativeFilter.cs.meta" />
+      <None Remove="Core\Native\NativeFilterExtensions.cs.meta" />
+      <None Remove="Core\Native\NativeIntHashMap.cs.meta" />
+      <None Remove="Core\Native\NativeIntHashMapExtensions.cs.meta" />
+      <None Remove="Core\Native\NativeStash.cs.meta" />
+      <None Remove="Core\Native\NativeStashExtensions.cs.meta" />
+      <None Remove="Core\Native\NativeWorld.cs.meta" />
+      <None Remove="Core\Native\NativeWorldExtensions.cs.meta" />
+      <None Remove="Core\Collections\UnmanagedArray.cs.meta" />
+      <None Remove="Core\Collections\UnmanagedList.cs.meta" />
+      <None Remove="Core\Collections\UnmanagedStorage.cs.meta" />
+      <None Remove="Core\Collections\UnmanagedStorageUtils.cs.meta" />
+      <None Remove="Core\Collections\UnmanagedUtils.cs.meta" />
+      <None Remove="Scellecs.Morpeh.sln.meta" />
+      <None Remove="CHANGELOG.MD.meta" />
+      <None Remove="MIGRATION.md.meta" />
+      <None Remove="MIGRATION_RU.md.meta" />
     </ItemGroup>
 
 </Project>
