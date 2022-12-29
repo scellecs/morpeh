@@ -28,7 +28,7 @@
 * Iterating `Filter` does not guarantee any order now. If your logic depended on filters returning entities exactly in specific order, it has to be fixed before upgrading.
 * `ComponentsBag` has been completely removed. It has been replaced with `ComponentsCache` which also provides full public access to raw components.
 
-## New API  
+### New API  
 * Added new component interfaces `IValidatable`, `IValidatableWithGameObject`. It allows calling default Unity method `OnValidate` for components, f.e. to initialize editor fields. Works only for components added via MonoProvider.
 * Added support for native Api (Job/Burst). Details are available in [README](README.md#unity-jobs-and-burst). Most work is done via `AsNative()` for:
   * Archetype (NativeArchetype)
