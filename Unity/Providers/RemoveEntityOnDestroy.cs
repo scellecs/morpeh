@@ -1,4 +1,4 @@
-﻿namespace Morpeh {
+﻿namespace Scellecs.Morpeh.Providers {
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -8,7 +8,7 @@
     [AddComponentMenu("ECS/" + nameof(RemoveEntityOnDestroy))]
     public sealed class RemoveEntityOnDestroy : EntityProvider {
         private void OnDestroy() {
-            if (this.Entity != null && !this.Entity.isDisposed) {
+            if (this.Entity.IsNullOrDisposed() == false) {
                 World.Default?.RemoveEntity(this.Entity);
             }
         }

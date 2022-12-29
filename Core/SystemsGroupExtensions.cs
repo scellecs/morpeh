@@ -6,13 +6,13 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.IL2CPP.CompilerServices;
-    
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -21,25 +21,25 @@ namespace Morpeh {
         public static void Initialize(this SystemsGroup systemsGroup) {
             MLogger.BeginSample("SystemGroup.Initialize()");
             if (systemsGroup.disposables.length > 0) {
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
 
                 foreach (var disposable in systemsGroup.disposables) {
                     disposable.TryCatchDispose();
                     disposable.ForwardDispose();
-                    
-                    systemsGroup.world.UpdateFilters();
+
+                    systemsGroup.world.Commit();
                 }
 
                 systemsGroup.disposables.Clear();
             }
 
-            systemsGroup.world.UpdateFilters();
+            systemsGroup.world.Commit();
             if (systemsGroup.newInitializers.length > 0) {
                 foreach (var initializer in systemsGroup.newInitializers) {
                     initializer.TryCatchAwake();
                     initializer.ForwardAwake();
 
-                    systemsGroup.world.UpdateFilters();
+                    systemsGroup.world.Commit();
                     systemsGroup.initializers.Add(initializer);
                 }
 
@@ -60,7 +60,7 @@ namespace Morpeh {
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
 
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
             }
 
             systemsGroup.InvokeDelayedAction();
@@ -71,7 +71,7 @@ namespace Morpeh {
         public static void FixedUpdate(this SystemsGroup systemsGroup, float deltaTime) {
             MLogger.BeginSample("SystemGroup.FixedUpdate()");
             systemsGroup.DropDelayedAction();
-            systemsGroup.world.UpdateFilters();
+            systemsGroup.world.Commit();
 
             for (int i = 0, length = systemsGroup.fixedSystems.length; i < length; i++) {
                 var system = systemsGroup.fixedSystems.data[i];
@@ -79,7 +79,7 @@ namespace Morpeh {
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
 
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
             }
 
             systemsGroup.InvokeDelayedAction();
@@ -90,14 +90,32 @@ namespace Morpeh {
         public static void LateUpdate(this SystemsGroup systemsGroup, float deltaTime) {
             MLogger.BeginSample("SystemGroup.LateUpdate()");
             systemsGroup.DropDelayedAction();
-            systemsGroup.world.UpdateFilters();
+            systemsGroup.world.Commit();
 
             for (int i = 0, length = systemsGroup.lateSystems.length; i < length; i++) {
                 var system = systemsGroup.lateSystems.data[i];
                 system.TryCatchUpdate(systemsGroup, deltaTime);
                 system.ForwardUpdate(deltaTime);
 
-                systemsGroup.world.UpdateFilters();
+                systemsGroup.world.Commit();
+            }
+
+            systemsGroup.InvokeDelayedAction();
+            MLogger.EndSample();
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CleanupUpdate(this SystemsGroup systemsGroup, float deltaTime) {
+            MLogger.BeginSample("SystemGroup.CleanupUpdate()");
+            systemsGroup.DropDelayedAction();
+            systemsGroup.world.Commit();
+
+            for (int i = 0, length = systemsGroup.cleanupSystems.length; i < length; i++) {
+                var system = systemsGroup.cleanupSystems.data[i];
+                system.TryCatchUpdate(systemsGroup, deltaTime);
+                system.ForwardUpdate(deltaTime);
+
+                systemsGroup.world.Commit();
             }
 
             systemsGroup.InvokeDelayedAction();
@@ -245,6 +263,10 @@ namespace Morpeh {
                 collection         = systemsGroup.lateSystems;
                 disabledCollection = systemsGroup.disabledLateSystems;
             }
+            else if (system is ICleanupSystem) {
+                collection         = systemsGroup.cleanupSystems;
+                disabledCollection = systemsGroup.disabledCleanupSystems;
+            }
 
             if (enabled && collection.IndexOf(system) < 0) {
                 collection.Add(system);
@@ -273,6 +295,10 @@ namespace Morpeh {
                 collection         = systemsGroup.lateSystems;
                 disabledCollection = systemsGroup.disabledLateSystems;
             }
+            else if (system is ICleanupSystem) {
+                collection         = systemsGroup.cleanupSystems;
+                disabledCollection = systemsGroup.disabledCleanupSystems;
+            }
 
             var index = disabledCollection.IndexOf(system);
             if (index >= 0) {
@@ -295,6 +321,10 @@ namespace Morpeh {
             else if (system is ILateSystem) {
                 collection         = systemsGroup.lateSystems;
                 disabledCollection = systemsGroup.disabledLateSystems;
+            }
+            else if (system is ICleanupSystem) {
+                collection         = systemsGroup.cleanupSystems;
+                disabledCollection = systemsGroup.disabledCleanupSystems;
             }
 
             var index = collection.IndexOf(system);
@@ -319,6 +349,10 @@ namespace Morpeh {
                 collection         = systemsGroup.lateSystems;
                 disabledCollection = systemsGroup.disabledLateSystems;
             }
+            else if (system is ICleanupSystem) {
+                collection         = systemsGroup.cleanupSystems;
+                disabledCollection = systemsGroup.disabledCleanupSystems;
+            }
 
             var index = collection.IndexOf(system);
             if (index >= 0) {
@@ -338,6 +372,7 @@ namespace Morpeh {
 
             return false;
         }
+
 #if MORPEH_PROFILING
         private struct ProfilerSampler : IDisposable {
 

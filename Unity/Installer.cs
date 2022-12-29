@@ -1,14 +1,18 @@
-﻿namespace Morpeh {
+﻿namespace Scellecs.Morpeh {
+    using System;
+    using System.Linq;
+    using JetBrains.Annotations;
+    using Systems;
+    using Unity.IL2CPP.CompilerServices;
+    using UnityEngine;
+    using Utils;
+    
 #if UNITY_EDITOR
     using UnityEditor;
 #endif
-    using System.Linq;
-    using UnityEngine;
-    using Utils;
 #if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
-    using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -18,7 +22,7 @@
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [Required]
         [InfoBox("Order collision with other installer!", InfoMessageType.Error, nameof(IsCollisionWithOtherInstaller))]
-        [PropertyOrder(-5)]
+        [PropertyOrder(-7)]
 #endif
         public int order;
         
@@ -31,24 +35,30 @@
         
         [Space]
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-5)]
+        [PropertyOrder(-6)]
 #endif
         public Initializer[] initializers;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-4)]
+        [PropertyOrder(-5)]
         [OnValueChanged(nameof(OnValueChangedUpdate))]
 #endif
         public UpdateSystemPair[] updateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-3)]
+        [PropertyOrder(-4)]
         [OnValueChanged(nameof(OnValueChangedFixedUpdate))]
 #endif
         public FixedSystemPair[] fixedUpdateSystems;
 #if UNITY_EDITOR && ODIN_INSPECTOR
-        [PropertyOrder(-2)]
+        [PropertyOrder(-3)]
         [OnValueChanged(nameof(OnValueChangedLateUpdate))]
 #endif
         public LateSystemPair[] lateUpdateSystems;
+        
+        #if UNITY_EDITOR && ODIN_INSPECTOR
+        [PropertyOrder(-2)]
+        [OnValueChanged(nameof(OnValueChangedCleanup))]
+#endif
+        public CleanupSystemPair[] cleanupSystems;
 
         private SystemsGroup group;
 
@@ -73,28 +83,41 @@
             }
         }
         
+        private void OnValueChangedCleanup() {
+            if (Application.isPlaying) {
+                this.RemoveSystems(this.cleanupSystems);
+                this.AddSystems(this.cleanupSystems);
+            }
+        }
 
         protected override void OnEnable() {
-            this.group = World.Default.CreateSystemsGroup();
-            
-            for (int i = 0, length = this.initializers.Length; i < length; i++) {
-                var initializer = this.initializers[i];
-                this.group.AddInitializer(initializer);
-            }
+            if (World.Default != null) {
+                this.group = World.Default.CreateSystemsGroup();
 
-            this.AddSystems(this.updateSystems);
-            this.AddSystems(this.fixedUpdateSystems);
-            this.AddSystems(this.lateUpdateSystems);
-            
-            World.Default.AddSystemsGroup(this.order, this.group);
+                for (int i = 0, length = this.initializers.Length; i < length; i++) {
+                    var initializer = this.initializers[i];
+                    this.group.AddInitializer(initializer);
+                }
+
+                this.AddSystems(this.updateSystems);
+                this.AddSystems(this.fixedUpdateSystems);
+                this.AddSystems(this.lateUpdateSystems);
+                this.AddSystems(this.cleanupSystems);
+
+                World.Default.AddSystemsGroup(this.order, this.group);
+            }
         }
 
         protected override void OnDisable() {
-            this.RemoveSystems(this.updateSystems);
-            this.RemoveSystems(this.fixedUpdateSystems);
-            this.RemoveSystems(this.lateUpdateSystems);
-            
-            World.Default.RemoveSystemsGroup(this.group);
+            if (World.Default != null) {
+                this.RemoveSystems(this.updateSystems);
+                this.RemoveSystems(this.fixedUpdateSystems);
+                this.RemoveSystems(this.lateUpdateSystems);
+                this.RemoveSystems(this.cleanupSystems);
+
+                World.Default.RemoveSystemsGroup(this.group);
+            }
+            this.group = null;
         }
 
         private void AddSystems<T>(BasePair<T>[] pairs) where T : class, ISystem {
@@ -126,9 +149,6 @@
         }
         
 #if UNITY_EDITOR
-        [MenuItem("GameObject/ECS/", true, 10)]
-        private static bool OrderECS() => true;
-
         [MenuItem("GameObject/ECS/Installer", false, 1)]
         private static void CreateInstaller(MenuCommand menuCommand) {
             var go = new GameObject("[Installer]");
@@ -141,11 +161,8 @@
     }
 
     namespace Utils {
-        using System;
-        using JetBrains.Annotations;
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        using Sirenix.OdinInspector;
-#endif
+        using Systems;
+        
         [Serializable]
         public abstract class BasePair<T> where T : class, ISystem {
             internal SystemsGroup group;
@@ -175,7 +192,10 @@
             }
 
             [CanBeNull]
-            public T System => this.system;
+            public T System {
+                get => this.system;
+                set => this.system = value;
+            }
 
             public BasePair() => this.enabled = true;
 
@@ -204,6 +224,10 @@
 
         [Serializable]
         public class LateSystemPair : BasePair<LateUpdateSystem> {
+        }
+        
+        [Serializable]
+        public class CleanupSystemPair : BasePair<CleanupSystem> {
         }
     }
 }

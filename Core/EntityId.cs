@@ -1,7 +1,11 @@
-﻿namespace Morpeh {
+﻿namespace Scellecs.Morpeh {
     using System;
     using Unity.IL2CPP.CompilerServices;
-    
+
+#if UNITY_EDITOR && ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
@@ -9,20 +13,31 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public readonly struct EntityId : IEquatable<EntityId> {
+        internal static readonly EntityId Default = new EntityId(-1, -1);
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+        private int Id => this.id;
+#endif
         internal readonly int id;
+
+#if UNITY_EDITOR && ODIN_INSPECTOR
+        [ShowInInspector]
+        private int Gen => this.gen;
+#endif
         internal readonly int gen;
-        
+
+
         public EntityId(int id, int gen) {
-            this.id = id;
+            this.id  = id;
             this.gen = gen;
         }
 
         public bool Equals(EntityId other) {
-            return id == other.id && gen == other.gen;
+            return this.id == other.id && this.gen == other.gen;
         }
 
         public override bool Equals(object obj) {
-            return obj is EntityId other && Equals(other);
+            return obj is EntityId other && this.Equals(other);
         }
 
         public override int GetHashCode() {
@@ -38,11 +53,15 @@
         public static bool operator !=(EntityId left, EntityId right) {
             return !(left == right);
         }
-        
+
         public override string ToString() {
-            return $"EntityId(id={id}, gen={gen})";
+            return $"EntityId(id={this.id}, gen={this.gen})";
         }
         
+        public int CompareTo(EntityId other) {
+            return this.id.CompareTo(other.id);
+        }
+
         public static EntityId Invalid => new EntityId(-1, -1);
     }
 }

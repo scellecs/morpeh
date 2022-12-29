@@ -1,4 +1,12 @@
-namespace Morpeh {
+#if UNITY_EDITOR
+#define MORPEH_DEBUG
+#define MORPEH_PROFILING
+#endif
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
+namespace Scellecs.Morpeh {
     using System;
     using System.Runtime.CompilerServices;
     using Collections;
@@ -145,38 +153,75 @@ namespace Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetLengthSlow(this Filter filter) {
+            filter.world.ThreadSafetyCheck();
             int accum = 0;
             foreach (var arch in filter.archetypes) {
-                accum += arch.entitiesBitMap.length;
+                if (arch.usedInNative) {
+                    accum += arch.entitiesNative.length;
+                }
+                else {
+                    accum += arch.entities.count;
+                }
             }
             return accum;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEmpty(this Filter filter) {
+            filter.world.ThreadSafetyCheck();
+            
             foreach (var arch in filter.archetypes) {
-                if (arch.entitiesBitMap.length > 0) {
-                    return false;
+                if (arch.usedInNative) {
+                    if (arch.entitiesNative.length > 0) {
+                        return false;
+                    }
+                }
+                else {
+                    if (arch.entities.count > 0) {
+                        return false;
+                    }
                 }
             }
             return true;
         }
 
-        public static Filter With<T>(this Filter filter) where T : struct, IComponent
-            => filter.CreateFilter<T>(Filter.Mode.Include);
+        public static Filter With<T>(this Filter filter) where T : struct, IComponent {
+            filter.world.ThreadSafetyCheck();
+            return filter.CreateFilter<T>(Filter.Mode.Include);
+        }
 
-        public static Filter Without<T>(this Filter filter) where T : struct, IComponent
-            => filter.CreateFilter<T>(Filter.Mode.Exclude);
+        public static Filter Without<T>(this Filter filter) where T : struct, IComponent {
+            filter.world.ThreadSafetyCheck();
+            return filter.CreateFilter<T>(Filter.Mode.Exclude);
+        }
 
         private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
+            var currentTypeId = TypeIdentifier<T>.info.id;
+
+#if MORPEH_DEBUG
+            if (filter.includedTypeIds != null) {
+                foreach (var typeId in filter.includedTypeIds) {
+                    if (typeId == currentTypeId) {
+                        throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
+                    }
+                }
+            }
+            if (filter.excludedTypeIds != null) {
+                foreach (var typeId in filter.excludedTypeIds) {
+                    if (typeId == currentTypeId) {
+                        throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
+                    }
+                }
+            }
+#endif
+            
             for (int i = 0, length = filter.childs.length; i < length; i++) {
                 var child = filter.childs.data[i];
-                if (child.mode == mode && child.typeID == TypeIdentifier<T>.info.id) {
+                if (child.mode == mode && child.typeID == currentTypeId) {
                     return child;
                 }
             }
 
-            var newTypeId = TypeIdentifier<T>.info.id;
 
             IntFastList newIncludedTypeIds;
             IntFastList newExcludedTypeIds;
@@ -190,13 +235,13 @@ namespace Morpeh {
             }
 
             if (mode == Filter.Mode.Include) {
-                newIncludedTypeIds.Add(newTypeId);
+                newIncludedTypeIds.Add(currentTypeId);
             }
             else if (mode == Filter.Mode.Exclude) {
-                newExcludedTypeIds.Add(newTypeId);
+                newExcludedTypeIds.Add(currentTypeId);
             }
 
-            var newFilter = new Filter(filter.world, newTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
+            var newFilter = new Filter(filter.world, currentTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
             filter.childs.Add(newFilter);
 
             return newFilter;

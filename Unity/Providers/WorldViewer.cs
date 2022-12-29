@@ -1,11 +1,8 @@
-namespace Morpeh {
+namespace Scellecs.Morpeh.Providers {
     using System;
     using System.Collections.Generic;
-    using UnityEngine;
-#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
-    using Sirenix.OdinInspector.Editor;
-#endif
+    using UnityEngine;
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
     [HideMonoScript]
@@ -29,7 +26,7 @@ namespace Morpeh {
         [PropertySpace]
         [ShowInInspector]
         [PropertyOrder(-1)]
-        [HideReferenceObjectPickerAttribute]
+        [HideReferenceObjectPicker]
         [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
         [Title("$GetWorldTitle")]
         [Searchable]

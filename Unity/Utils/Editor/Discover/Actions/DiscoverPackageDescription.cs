@@ -1,10 +1,10 @@
-﻿namespace Morpeh.Utils.Editor.Actions {
+﻿namespace Scellecs.Morpeh.Utils.Editor.Discover.Actions {
     using System;
     using System.Linq;
-    using UnityEngine;
     using UnityEditor;
-    using UnityEditor.PackageManager.Requests;
     using UnityEditor.PackageManager;
+    using UnityEditor.PackageManager.Requests;
+    using UnityEngine;
 
     [CreateAssetMenu(menuName = "ECS/Utils/Discover Actions/" + "Package")]
     public sealed class DiscoverPackageDescription : DiscoverAction {
@@ -32,7 +32,7 @@
         }
 
         public override void DoAction() {
-            switch (state) {
+            switch (this.state) {
                 case State.None:
                     break;
                 case State.Exist:

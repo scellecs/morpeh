@@ -1,9 +1,9 @@
-namespace Morpeh.Utils.Editor {
-	using UnityEngine;
-	using UnityEditor.ProjectWindowCallback;
+namespace Scellecs.Morpeh.Utils.Editor.Discover {
 	using System;
 	using System.IO;
 	using UnityEditor;
+	using UnityEditor.ProjectWindowCallback;
+	using UnityEngine;
 
 	public class AssetFactory {
 		public static void CreateAssetInProjectWindow<T>(string iconName, string fileName) where T : ScriptableObject {
@@ -25,7 +25,7 @@ namespace Morpeh.Utils.Editor {
 			public Type type;
 
 			public override void Action(int instanceId, string pathName, string resourceFile) {
-				ScriptableObject asset = CreateAssetAtPath(pathName, type);
+				ScriptableObject asset = CreateAssetAtPath(pathName, this.type);
 				ProjectWindowUtil.ShowCreatedAsset(asset);
 			}
 		}

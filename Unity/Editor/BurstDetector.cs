@@ -1,5 +1,5 @@
 ﻿#if UNITY_EDITOR && UNITY_2019_1_OR_NEWER
-namespace Morpeh.Editor {
+namespace Scellecs.Morpeh.Editor {
     using System.Threading.Tasks;
     using UnityEditor;
     using UnityEditor.PackageManager;

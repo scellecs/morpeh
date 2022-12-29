@@ -1,16 +1,17 @@
-﻿namespace Morpeh.Unity.Utils.Editor {
+﻿namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Globals;
+    using Scellecs.Morpeh;
+    using Scellecs.Morpeh.Providers;
+    using Scellecs.Morpeh.Systems;
     using UnityEditor;
     using UnityEngine;
     using Object = UnityEngine.Object;
 
     internal class IconsSetter : AssetPostprocessor {
-        private static Action<Object, Texture2D> SelectIcon;
-        private static Action<MonoScript>        SaveIcon;
+        private static Action<MonoImporter, Texture2D> SelectAndSaveIcon;
 
         //TODO refactor to dictionary
         private static Texture2D iconC;
@@ -29,10 +30,23 @@
 
         [InitializeOnLoadMethod]
         private static void Initialize() {
+#if UNITY_2021_3_OR_NEWER
+            SelectAndSaveIcon = (importer, icon) => {
+                importer.SetIcon(icon);
+                importer.SaveAndReimport();
+            };
+#else
             var method  = typeof(EditorGUIUtility).GetMethod("SetIconForObject", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
             var method2 = typeof(MonoImporter).GetMethod("CopyMonoScriptIconToImporters", BindingFlags.Static | BindingFlags.NonPublic);
-            SelectIcon = (Action<Object, Texture2D>) Delegate.CreateDelegate(typeof(Action<Object, Texture2D>), method);
-            SaveIcon   = (Action<MonoScript>) Delegate.CreateDelegate(typeof(Action<MonoScript>), method2);
+            var selectIcon = (Action<Object, Texture2D>) Delegate.CreateDelegate(typeof(Action<Object, Texture2D>), method);
+            var saveIcon   = (Action<MonoScript>) Delegate.CreateDelegate(typeof(Action<MonoScript>), method2);
+            
+            SelectAndSaveIcon = (importer, icon) => {
+                var script = importer.GetScript();
+                selectIcon(script, icon);
+                saveIcon(script);
+            };
+#endif
 
             iconC = Resources.Load<Texture2D>("MorpehIcons/64x64_C");
             iconE = Resources.Load<Texture2D>("MorpehIcons/64x64_E");
@@ -71,37 +85,32 @@
                         }
                         
                         if (InheritsFrom(type, typeof(Initializer))) {
-                            SelectIcon(script, iconI);
-                            SaveIcon(script);
+                            SelectAndSaveIcon(monoImporter, iconI);
                         }
                         else if (InheritsFrom(type, typeof(MonoProvider<>))) {
-                            SelectIcon(script, iconP);
-                            SaveIcon(script);
+                            SelectAndSaveIcon(monoImporter, iconP);
                         }
                         else if (InheritsFrom(type, typeof(IComponent))) {
-                            SelectIcon(script, iconC);
-                            SaveIcon(script);
+                            SelectAndSaveIcon(monoImporter, iconC);
                         }
                         else if (InheritsFrom(type, typeof(IFixedSystem))) {
-                            SelectIcon(script, iconF);
-                            SaveIcon(script);
+                            SelectAndSaveIcon(monoImporter, iconF);
                         }
                         else if (InheritsFrom(type, typeof(ILateSystem))) {
-                            SelectIcon(script, iconL);
-                            SaveIcon(script);
+                            SelectAndSaveIcon(monoImporter, iconL);
+                        }
+                        else if (InheritsFrom(type, typeof(ICleanupSystem))) {
+                            SelectAndSaveIcon(monoImporter, iconC);
                         }
                         else if (InheritsFrom(type, typeof(ISystem))) {
-                            SelectIcon(script, iconU);
-                            SaveIcon(script);
+                            SelectAndSaveIcon(monoImporter, iconU);
                         }
-                        else if (InheritsFrom(type, typeof(BaseGlobalVariable<>))) {
-                            SelectIcon(script, iconV);
-                            SaveIcon(script);
-                        }
-                        else if (InheritsFrom(type, typeof(BaseGlobalEvent<>))) {
-                            SelectIcon(script, iconE);
-                            SaveIcon(script);
-                        }
+                        // else if (InheritsFrom(type, typeof(BaseGlobalVariable<>))) {
+                        //     SelectAndSaveIcon(monoImporter, iconV);
+                        // }
+                        // else if (InheritsFrom(type, typeof(BaseGlobalEvent<>))) {
+                        //     SelectAndSaveIcon(monoImporter, iconE);
+                        // }
                     }
                 }
 

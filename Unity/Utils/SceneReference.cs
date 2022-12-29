@@ -1,12 +1,10 @@
-﻿namespace Morpeh.Utils {
+﻿namespace Scellecs.Morpeh.Utils {
     using System.Collections.Generic;
     using System.Linq;
-    using UnityEngine;
-#if UNITY_EDITOR
     using UnityEditor;
-#endif
-    
-//https://gist.github.com/JohannesMP/ec7d3f0bcf167dab3d0d3bb480e0e07b
+    using UnityEngine;
+
+    //https://gist.github.com/JohannesMP/ec7d3f0bcf167dab3d0d3bb480e0e07b
 // Author: JohannesMP (2018-08-12)
 //
 // A wrapper that provides the means to safely serialize Scene Asset References.
@@ -36,9 +34,9 @@
         [SerializeField] private Object sceneAsset = null;
         bool IsValidSceneAsset {
             get {
-                if (sceneAsset == null)
+                if (this.sceneAsset == null)
                     return false;
-                return sceneAsset.GetType().Equals(typeof(SceneAsset));
+                return this.sceneAsset.GetType().Equals(typeof(SceneAsset));
             }
         }
 #endif
@@ -55,13 +53,13 @@
 //#else
             // At runtime we rely on the stored path value which we assume was serialized correctly at build time.
             // See OnBeforeSerialize and OnAfterDeserialize
-            return scenePath;
+            return this.scenePath;
 //#endif
             }
             set {
-                scenePath = value;
+                this.scenePath = value;
 #if UNITY_EDITOR
-                sceneAsset = GetSceneAssetFromPath();
+                this.sceneAsset = this.GetSceneAssetFromPath();
 #endif
             }
         }
@@ -73,7 +71,7 @@
         // Called to prepare this data for serialization. Stubbed out when not in editor.
         public void OnBeforeSerialize() {
 #if UNITY_EDITOR
-            HandleBeforeSerialize();
+            this.HandleBeforeSerialize();
 #endif
         }
 
@@ -81,51 +79,51 @@
         public void OnAfterDeserialize() {
 #if UNITY_EDITOR
             // We sadly cannot touch assetdatabase during serialization, so defer by a bit.
-            EditorApplication.update += HandleAfterDeserialize;
+            EditorApplication.update += this.HandleAfterDeserialize;
 #endif
         }
 
 
 #if UNITY_EDITOR
         private SceneAsset GetSceneAssetFromPath() {
-            if (string.IsNullOrEmpty(scenePath))
+            if (string.IsNullOrEmpty(this.scenePath))
                 return null;
-            return AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
+            return AssetDatabase.LoadAssetAtPath<SceneAsset>(this.scenePath);
         }
 
         private string GetScenePathFromAsset() {
-            if (sceneAsset == null)
+            if (this.sceneAsset == null)
                 return string.Empty;
-            return AssetDatabase.GetAssetPath(sceneAsset);
+            return AssetDatabase.GetAssetPath(this.sceneAsset);
         }
 
         private void HandleBeforeSerialize() {
             // Asset is invalid but have Path to try and recover from
-            if (IsValidSceneAsset == false && string.IsNullOrEmpty(scenePath) == false) {
-                sceneAsset = GetSceneAssetFromPath();
-                if (sceneAsset == null)
-                    scenePath = string.Empty;
+            if (this.IsValidSceneAsset == false && string.IsNullOrEmpty(this.scenePath) == false) {
+                this.sceneAsset = this.GetSceneAssetFromPath();
+                if (this.sceneAsset == null)
+                    this.scenePath = string.Empty;
 
                 UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
             }
             // Asset takes precendence and overwrites Path
             else {
-                scenePath = GetScenePathFromAsset();
+                this.scenePath = this.GetScenePathFromAsset();
             }
         }
 
         private void HandleAfterDeserialize() {
-            EditorApplication.update -= HandleAfterDeserialize;
+            EditorApplication.update -= this.HandleAfterDeserialize;
             // Asset is valid, don't do anything - Path will always be set based on it when it matters
-            if (IsValidSceneAsset)
+            if (this.IsValidSceneAsset)
                 return;
 
             // Asset is invalid but have path to try and recover from
-            if (string.IsNullOrEmpty(scenePath) == false) {
-                sceneAsset = GetSceneAssetFromPath();
+            if (string.IsNullOrEmpty(this.scenePath) == false) {
+                this.sceneAsset = this.GetSceneAssetFromPath();
                 // No asset found, path was invalid. Make sure we don't carry over the old invalid path
-                if (sceneAsset == null)
-                    scenePath = string.Empty;
+                if (this.sceneAsset == null)
+                    this.scenePath = string.Empty;
 
                 if (Application.isPlaying == false)
                     UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
@@ -186,7 +184,7 @@
 
             if (buildScene.assetGUID.Empty() == false) {
                 // Draw the Build Settings Info of the selected Scene
-                DrawSceneInfoGUI(position, buildScene, sceneControlID + 1);
+                this.DrawSceneInfoGUI(position, buildScene, sceneControlID + 1);
             }
 
             EditorGUI.EndProperty();

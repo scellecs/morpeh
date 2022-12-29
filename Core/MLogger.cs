@@ -6,7 +6,7 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using System.Diagnostics;
     using Logging;

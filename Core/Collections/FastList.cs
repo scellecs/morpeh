@@ -1,4 +1,4 @@
-namespace Morpeh.Collections {
+namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Collections;
     using System.Collections.Generic;

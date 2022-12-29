@@ -1,9 +1,8 @@
 ﻿#if UNITY_EDITOR && ODIN_INSPECTOR
-namespace Morpeh.Editor {
+namespace Scellecs.Morpeh.Editor {
     using System;
     using System.Collections.Generic;
-    using Collections;
-    using Morpeh;
+    using Scellecs.Morpeh.Collections;
     using Sirenix.OdinInspector;
     using UnityEngine;
 
@@ -20,15 +19,15 @@ namespace Morpeh.Editor {
         [DisableContextMenu]
         [PropertySpace]
         [ShowInInspector]
-        [HideReferenceObjectPickerAttribute]
+        [HideReferenceObjectPicker]
         [ListDrawerSettings(DraggableItems = false, HideAddButton = true, HideRemoveButton = true)]
         private List<ComponentView> ComponentsOnEntity {
             get {
                 this.componentViews.Clear();
                 if (this.entity != null && this.entity.world != null) {
-                    var caches = this.entity.world.caches;
+                    var caches = this.entity.world.stashes;
                     foreach (var cacheId in caches) {
-                        var cache = ComponentsCache.caches.data[caches.GetValueByIndex(cacheId)];
+                        var cache = Stash.stashes.data[caches.GetValueByIndex(cacheId)];
                         if (cache.Has(this.entity)) {
                             var view = new ComponentView {
                                 internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[cache.typeId],
@@ -65,7 +64,7 @@ namespace Morpeh.Editor {
             [HideIf("$" + nameof(IsMarker))]
             [LabelText("$" + nameof(TypeName))]
             [ShowInInspector]
-            [HideReferenceObjectPickerAttribute]
+            [HideReferenceObjectPicker]
             public object Data {
                 get {
                     if (this.internalTypeDefinition.typeInfo.isMarker || Application.isPlaying == false) {

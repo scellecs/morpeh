@@ -1,10 +1,10 @@
-namespace Morpeh.Collections {
+namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
-    
+
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -14,7 +14,8 @@ namespace Morpeh.Collections {
         internal const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
         internal const int BITS_PER_FIELD_SHIFT = 5; //6 for long
 
-        public int length;
+        public int count; //count of set bits
+        public int length; //count of ints
         public int capacity;
         public int capacityMinusOne;
         public int lastIndex;
@@ -27,6 +28,7 @@ namespace Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BitMap(in int capacity = 0) {
             this.lastIndex = 0;
+            this.count     = 0;
             this.length    = 0;
             this.freeIndex = -1;
 

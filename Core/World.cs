@@ -5,7 +5,7 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
@@ -14,7 +14,7 @@ namespace Morpeh {
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
@@ -39,11 +39,21 @@ namespace Morpeh {
         [ShowInInspector]
         [NonSerialized]
         internal SortedList<int, SystemsGroup> systemsGroups;
+        
+        //todo custom collection
+        [ShowInInspector]
+        [NonSerialized]
+        internal FastList<SystemsGroup> pluginSystemsGroups;
 
         //todo custom collection
         [ShowInInspector]
         [NonSerialized]
         internal SortedList<int, SystemsGroup> newSystemsGroups;
+        
+        //todo custom collection
+        [ShowInInspector]
+        [NonSerialized]
+        internal FastList<SystemsGroup> newPluginSystemsGroups;
 
         [SerializeField]
         internal Entity[] entities;
@@ -70,9 +80,9 @@ namespace Morpeh {
         internal IntFastList nextFreeEntityIDs;
 
         [SerializeField]
-        internal UnsafeIntHashMap<int> caches;
+        internal UnsafeIntHashMap<int> stashes;
         [SerializeField]
-        internal UnsafeIntHashMap<int> typedCaches;
+        internal UnsafeIntHashMap<int> typedStashes;
 
         [SerializeField]
         internal FastList<Archetype> archetypes;
@@ -88,6 +98,8 @@ namespace Morpeh {
 
         [SerializeField]
         internal string friendlyName;
+
+        internal int threadIdLock;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
@@ -116,7 +128,31 @@ namespace Morpeh {
 #endif
             }
 
+            this.newSystemsGroups.Clear();
+            this.newSystemsGroups = null;
+            
+            this.systemsGroups.Clear();
             this.systemsGroups = null;
+            
+            foreach (var systemsGroup in this.pluginSystemsGroups) {
+#if MORPEH_DEBUG
+                try {
+#endif
+                    systemsGroup.Dispose();
+#if MORPEH_DEBUG
+                }
+                catch (Exception e) {
+                    MLogger.LogError($"Can not dispose plugin system group {systemsGroup.GetType()}");
+                    MLogger.LogException(e);
+                }
+#endif
+            }
+
+            this.newPluginSystemsGroups.Clear();
+            this.newPluginSystemsGroups = null;
+            
+            this.pluginSystemsGroups.Clear();
+            this.pluginSystemsGroups = null;
 
             foreach (var entity in this.entities) {
 #if MORPEH_DEBUG
@@ -157,31 +193,31 @@ namespace Morpeh {
             this.filters.Clear();
             this.filters = null;
 
-            var tempCaches = new FastList<ComponentsCache>();
+            var tempStashes = new FastList<Stash>();
 
-            foreach (var cacheId in this.caches) {
-                var cache = ComponentsCache.caches.data[this.caches.GetValueByIndex(cacheId)];
-                tempCaches.Add(cache);
+            foreach (var stashId in this.stashes) {
+                var stash = Stash.stashes.data[this.stashes.GetValueByIndex(stashId)];
+                tempStashes.Add(stash);
             }
 
-            foreach (var cache in tempCaches) {
+            foreach (var stash in tempStashes) {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    cache.Dispose();
+                    stash.Dispose();
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose cache id {cache}");
+                    MLogger.LogError($"Can not dispose stash with id {stash.commonStashId}");
                     MLogger.LogException(e);
                 }
 #endif
             }
 
-            this.caches.Clear();
-            this.caches = null;
-            this.typedCaches.Clear();
-            this.typedCaches = null;
+            this.stashes.Clear();
+            this.stashes = null;
+            this.typedStashes.Clear();
+            this.typedStashes = null;
 
             foreach (var archetype in this.archetypes) {
 #if MORPEH_DEBUG

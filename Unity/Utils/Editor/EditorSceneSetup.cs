@@ -1,8 +1,9 @@
-namespace Morpeh.Utils.Editor {
-	using UnityEngine;
+namespace Scellecs.Morpeh.Utils.Editor {
+	using Discover;
 	using UnityEditor;
-	using UnityEditor.SceneManagement;
 	using UnityEditor.Callbacks;
+	using UnityEditor.SceneManagement;
+	using UnityEngine;
 
 	public class EditorSceneSetup : ScriptableObject {
 		[MenuItem("File/Save Scene Setup As... #%&S", priority = 171)]

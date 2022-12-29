@@ -1,4 +1,4 @@
-﻿namespace Morpeh {
+﻿namespace Scellecs.Morpeh.Systems {
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 

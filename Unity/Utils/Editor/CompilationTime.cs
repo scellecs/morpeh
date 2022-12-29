@@ -1,5 +1,5 @@
 ﻿#if UNITY_EDITOR
-namespace Morpeh.Utils.Editor {
+namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using System.Globalization;

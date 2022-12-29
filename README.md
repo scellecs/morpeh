@@ -3,31 +3,24 @@
 </p>
 
 # Morpeh
-🎲 **ECS Framework for Unity Game Engine.**  
-   
-Adapted for the rapid development mobile games like:  
-&nbsp;&nbsp;&nbsp;&nbsp;📕 Hyper Casual  
-&nbsp;&nbsp;&nbsp;&nbsp;📗 Idlers  
-&nbsp;&nbsp;&nbsp;&nbsp;📘 Arcades  
-&nbsp;&nbsp;&nbsp;&nbsp;📚 Other genres  
-  
-Features:  
+🎲 **ECS Framework for Unity Game Engine and .Net Platform**  
+
 * Simple Syntax.  
 * Plug & Play Installation.  
 * No code generation.  
 * Structure-Based and Cache-Friendly.  
-* Built-in Events and Reactive Variables.  
-* Single-threaded.  
 
 ## 📖 Table of Contents
 
 * [Migration](#-migration-to-new-version)
 * [How To Install](#-how-to-install)
+  * [Unity Engine](#unity-engine)
+  * [.Net Platform](#net-platform)
 * [Introduction](#-introduction)
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
   * [Getting Started](#-getting-started)
   * [Advanced](#-advanced)
-    * [Event system](#-event-system-singletons-and-globals-assets)
+    * [Component Disposing](#-component-disposing)
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
 * [Examples](#-examples)
 * [Games](#-games)
@@ -39,14 +32,16 @@ Features:
 English version: [Migration Guide](MIGRATION.md)  
 Russian version: [Гайд по миграции](MIGRATION_RU.md)
 
-## 📖 How To Install
+## 📖 How To Install 
 
-Minimal Unity Version is 2019.4.*  
+### Unity Engine 
+
+Minimal Unity Version is 2020.3.*  
 Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
 Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.
 
 <details>
-    <summary>Open Package Manager and add Morpeh URL.  </summary>
+    <summary>Open Unity Package Manager and add Morpeh URL.  </summary>
 
 ![installation_step1.png](Gifs~/installation_step1.png)  
 ![installation_step2.png](Gifs~/installation_step2.png)
@@ -54,21 +49,20 @@ Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/u
 
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
 &nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh.git#develop  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2022.1.2  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2022.2.0  
 
-<details>
-    <summary>You can update Morpeh by Discover Window. Select Help/Morpeh Discover menu.   </summary>
+### .Net Platform
 
-![update_morpeh.png](Gifs~/update_morpeh.png)
-</details>
-
+Currently clone repository and reference to **Scellecs.Morpeh.csproj**  
+NuGet package will be created soon.
 
 ## 📖 Introduction
 ### 📘 Base concept of ECS pattern
 
 #### 🔖 Entity
 Container of components.  
-Has a set of methods for add, get, set, remove components.
+Has a set of methods for add, get, set, remove components.  
+It is reference type. Each entity is unique and not pooled. Only entity IDs are reused.  
 
 ```c#
 var entity = this.World.CreateEntity();
@@ -76,10 +70,15 @@ var entity = this.World.CreateEntity();
 ref var addedHealthComponent  = ref entity.AddComponent<HealthComponent>();
 ref var gottenHealthComponent = ref entity.GetComponent<HealthComponent>();
 
+//if you remove last component on entity it will be destroyd on next world.Commit()
 bool removed = entity.RemoveComponent<HealthComponent>();
 entity.SetComponent(new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = entity.Has<HealthComponent>();
+
+var newEntity = this.World.CreateEntity();
+//after migration entity has no components, so it will be destroyd on next world.Commit()
+entity.MigrateTo(newEntity);
 ```
 
 
@@ -96,6 +95,9 @@ public struct HealthComponent : IComponent {
 
 Types that process entities with a specific set of components.  
 Entities are selected using a filter.
+
+All systems are represented by interfaces, but for convenience, there are ScriptableObject classes that make it easier to work with the inspector and `Installer`.  
+Such classes are the default tool, but you can write pure classes that implement the interface, but then you need to use the `SystemsGroup` API instead of the `Installer`.
 
 ```c#
 public class HealthSystem : ISystem {
@@ -119,10 +121,47 @@ public class HealthSystem : ISystem {
 }
 ```
 
-#### 🔖 World
-A type that contains entities, components caches, systems and root filter.
+All systems types:  
+* `IInitializer` & `Initializer` - have only OnAwake and Dispose methods, convenient for executing startup logic
+* `ISystem` & `UpdateSystem`
+* `IFixedSystem` & `FixedUpdateSystem`
+* `ILateSystem` & `LateUpdateSystem`
+* `ICleanupSystem` & `CleanupSystem`
+
+#### 🔖 SystemsGroup
+
+The type that contains the systems.  
+There is an `Installer` wrapper to work in the inspector, but if you want to control everything from code, you can use the systems group directly.  
+
 ```c#
 var newWorld = World.Create();
+
+var newSystem = new HealthSystem();
+var newInitializer = new HealthInitializer();
+
+var systemsGroup = newWorld.CreateSystemsGroup();
+systemsGroup.AddSystem(newSystem);
+systemsGroup.AddInitializer(newInitializer);
+
+//it is bad practice to turn systems off and on, but sometimes it is very necessary for debugging
+systemsGroup.DisableSystem(newSystem);
+systemsGroup.EnableSystem(newSystem);
+
+systemsGroup.RemoveSystem(newSystem);
+systemsGroup.RemoveInitializer(newInitializer);
+
+newWorld.AddSystemsGroup(order: 0, systemsGroup);
+newWorld.RemoveSystemsGroup(systemsGroup);
+```
+
+#### 🔖 World
+A type that contains entities, components stashes, systems and root filter.
+```c#
+var newWorld = World.Create();
+//a variable that specifies whether the world should be updated automatically by the game engine.
+//if set to false, then you can update the world manually.
+//and can also be used for game pauses by changing the value of this variable.
+newWorld.UpdateByUnity = true;
 
 var newEntity = newWorld.CreateEntity();
 newWorld.RemoveEntity(newEntity);
@@ -135,7 +174,18 @@ newWorld.RemoveSystemsGroup(systemsGroup);
 
 var filter = newWorld.Filter.With<HealthComponent>();
 
-var healthCache = newWorld.GetCache<HealthComponent>();
+var healthCache = newWorld.GetStash<HealthComponent>();
+var reflectionHealthCache = newWorld.GetReflectionStash(typeof(HealthComponent));
+
+//manually world updates
+newWorld.Update(Time.deltaTime);
+newWorld.FixedUpdate(Time.fixedDeltaTime);
+newWorld.LateUpdate(Time.deltaTime);
+newWorld.CleanupUpdate(Time.deltaTime);
+
+//apply all entity changes, filters will be updated.
+//automatically invoked between systems
+newWorld.Commit();
 ```
 
 #### 🔖 Filter
@@ -150,33 +200,47 @@ var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
 
 bool filterIsEmpty = filter.IsEmpty();
-int filterLengthCalculatedOnCall = filter.GetFilterLength();
+int filterLengthCalculatedOnCall = filter.GetLengthSlow();
 
 ```
 
-#### 🔖 Cache
+#### 🔖 Stash
 A type that contains components.  
-You can get components and do other operations directly from the cache, because entity methods look up the cache each time.  
+You can get components and do other operations directly from the stash, because entity methods look up the stash each time on call.  
 However, such code is harder to read.
 ```c#
-var healthCache = this.World.GetCache<HealthComponent>();
+var healthStash = this.World.GetStash<HealthComponent>();
 var entity = this.World.CreateEntity();
 
-ref var addedHealthComponent  = ref healthCache.AddComponent(entity);
-ref var gottenHealthComponent = ref healthCache.GetComponent(entity);
+ref var addedHealthComponent  = ref healthStash.Add(entity);
+ref var gottenHealthComponent = ref healthStash.Get(entity);
 
-bool removed = healthCache.RemoveComponent(entity);
-healthCache.SetComponent(entity, new HealthComponent {healthPoints = 100});
+bool removed = healthStash.Remove(entity);
 
-bool hasHealthComponent = healthCache.Has(entity);
+healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
+bool hasHealthComponent = healthStash.Has(entity);
+
+var newEntity = this.World.CreateEntity();
+//transfers a component from one entity to another
+healthStash.Migrate(from: entity, to: newEntity);
+
+//not a generic variation of stash, so we can only do a limited set of operations
+var reflectionHealthCache = newWorld.GetReflectionStash(typeof(HealthComponent));
+
+//set default(HealthComponent) to entity
+reflectionHealthCache.Set(entity);
+
+bool removed = reflectionHealthCache.Remove(entity);
+
+bool hasHealthComponent = reflectionHealthCache.Has(entity);
 ```
 
 ---
 
 ### 📘 Getting Started
 > 💡 **IMPORTANT**  
-> For a better user experience, we strongly recommend having Odin Inspector and FindReferences2 in the project.  
+> For a better user experience, we strongly recommend having Odin Inspector in the project.  
 > All GIFs are hidden under spoilers.
 
 <details>
@@ -195,7 +259,7 @@ Let's create our first component and open it.
 
 After it, you will see something like this.
 ```c#  
-using Morpeh;
+using Scellecs.Morpeh;
 using UnityEngine;
 using Unity.IL2CPP.CompilerServices;
 
@@ -226,12 +290,12 @@ Now let's create first system.
 ![create_system.gif](Gifs~/create_system.gif)
 </details>
 
-> 💡 Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem.  
-> They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate.
+> 💡 Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem, CleanupSystem.  
+> They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate. CleanupSystem called the most recent in LateUpdate.
 
 System looks like this.
 ```c#  
-using Morpeh;
+using Scellecs.Morpeh.Systems;
 using UnityEngine;
 using Unity.IL2CPP.CompilerServices;
 
@@ -306,23 +370,23 @@ public sealed class HealthSystem : UpdateSystem {
 > 💡 Don't forget about `ref` operator.  
 > Components are struct and if you want to change them directly, then you must use reference operator.
 
-For high performance, you can use cache directly.  
-No need to do GetComponent from entity every time, which trying to find suitable cache.  
+For high performance, you can use stash directly.  
+No need to do GetComponent from entity every time, which trying to find suitable stash.  
 However, we use such code only in very hot areas, because it is quite difficult to read it.
 
 ```c#  
 public sealed class HealthSystem : UpdateSystem {
     private Filter filter;
-    private ComponentsCache<HealthComponent> healthCache;
+    private Stash<HealthComponent> healthStash;
     
     public override void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>();
-        this.healthCache = this.World.GetCache<HealthComponent>();
+        this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
     public override void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
-            ref var healthComponent = ref healthCache.GetComponent(entity);
+            ref var healthComponent = ref healthStash.Get(entity);
             Debug.Log(healthComponent.healthPoints);
         }
     }
@@ -366,7 +430,7 @@ Create a new provider.
 </details>
 
 ```c#  
-using Morpeh;
+using Scellecs.Morpeh.Providers;
 using Unity.IL2CPP.CompilerServices;
 
 [Il2CppSetOption(Option.NullChecks, false)]
@@ -393,80 +457,57 @@ Nice!
 
 ### 📖 Advanced
 
-#### 📘 Event system. Singletons and Globals Assets.
-There is an execution order in the ECS pattern, so we cannot use standard delegates or events, they will break it.
+#### 🧹 Component Disposing
 
-ECS uses the concept of a deferred call, or the events are data.  
-In the simplest cases, events are used as entities with empty components called tags or markers.  
-That is, in order to notify someone about the event, you need to create an entity and add an empty component to it.  
-Another system creates a filter for this component, and if there are entities, we believe that the event is published.
+Sometimes it becomes necessary to clear component values.
+For this, it is enough that the component implements `IDisposable`. For example:
 
-In general, this is a working approach, but there are several problems.  
-Firstly, these tags overwhelm the project with their types, if you wrote a message bus, then you understand what I mean.  
-Each event in the game has its own unique type and there is not enough imagination to give everyone a name.  
-Secondly, it’s uncomfortable working with these events from MonoBehaviours, UI, Visual Scripting Frameworks (Playmaker, Bolt, etc.)
-
-As a solution to this problem, global assets were created.
-
-🔖 **Singleton** is a simple ScriptableObject that is associated with one specific entity.  
-It is usually used to add dynamic components to one entity without using filters.
-
-🔖 **GlobalEvent** is a Singleton, which has the functionality of publishing events to the world by adding a tag to its entity.  
-It has 4 main methods for working with it:
-1) Publish (arg) - publish in the next frame, all systems will see this.
-2) IsPublished - did anyone publish this event
-3) BatchedChanges - a data stack where publication arguments are added.
-
-🔖 **GlobalVariable** is a GlobalEvent that stores the start value and the last value after the changes.  
-It also has the functionality of saving and loading data from PlayerPrefs.
-
-You can create globals by context menu `Create/ECS/Globals/` in Project Window.  
-You can declare globals in any systems, components and scripts and set it by Inspector Window, for example:
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
-    public GlobalEvent myEvent;
-    ...
-}
-```
-
-And check their publication with:
-```c#  
-public sealed class HealthSystem : UpdateSystem {
-    public GlobalEvent myEvent;
-    ...
-    public override void OnUpdate(float deltaTime) {
-        if (myEvent.IsPublished) {
-            Debug.Log("Event is published");
-        }
+public struct PlayerView : IComponent, IDisposable {
+    public GameObject value;
+    
+    public void Dispose() {
+        Object.Destroy(value);
     }
 }
 ```
 
-And there is also a variation with checking for null:
-```c#  
-public sealed class HealthSystem : UpdateSystem {
-    public GlobalEvent myEvent;
-    ...
-    public override void OnUpdate(float deltaTime) {
-        if (myEvent) {
-            Debug.Log("Event is not null and is published");
-        }
+The initializer or system needs to mark the stash as disposable. For example:
+
+```c# 
+public class PlayerViewDisposeInitializer : Initializer {
+    public override void OnAwake() {
+        this.World.GetStash<PlayerView>().AsDisposable();
     }
 }
 ```
 
----
+or
+
+```c# 
+public class PlayerViewSystem : UpdateSystem {
+    public override void OnAwake() {
+        this.World.GetStash<PlayerView>().AsDisposable();
+    }
+    
+    public override void OnUpdate(float deltaTime) {
+        ...
+    }
+}
+```
+
+Now, when the component is removed from the entity, the `Dispose()` method will be called on the `PlayerView` component.  
 
 ####  🧨 Unity Jobs And Burst
 
 > 💡 Supported only in Unity. Subjected to further improvements and modifications.
 
 You can convert `Filter<T>` to `NativeFilter<TNative>` which allows you to do component-based manipulations inside a Job.  
-Conversion of `ComponentsCache<T>` to `NativeCache<TNative>` allows you to operate on components based on entity ids.  
+Conversion of `Stash<T>` to `NativeStash<TNative>` allows you to operate on components based on entity ids.  
 
 Current limitations:
-* `NativeFilter` and `NativeCache` and their contents should never be re-used outside of single system tick.
-* `NativeFilter` and `NativeCache` cannot be used in-between `UpdateFilters` calls inside Morpeh.
+* `NativeFilter` and `NativeStash` and their contents should never be re-used outside of single system tick.
+* `NativeFilter` and `NativeStash` cannot be used in-between `World.Commit()` calls inside Morpeh.
 * `NativeFilter` should be disposed upon usage completion due to https://github.com/scellecs/morpeh/issues/107, which also means `NativeFilter` causes a single `Allocator.TempJob` `NativeArray` allocation.
 * Jobs can be chained only within current system execution, `NativeFilter` can be disposed only after execution of all scheduled jobs.
 
@@ -474,14 +515,14 @@ Example job scheduling:
 ```c#  
 public sealed class SomeSystem : UpdateSystem {
     private Filter filter;
-    private ComponentsCache<HealthComponent> cache;
+    private Stash<HealthComponent> stash;
     ...
     public override void OnUpdate(float deltaTime) {
         using (var nativeFilter = this.filter.AsNative()) {
             var parallelJob = new ExampleParallelJob {
                 entities = nativeFilter,
-                healthComponents = cache.AsNative(),
-                // Add more native caches if needed
+                healthComponents = stash.AsNative(),
+                // Add more native stashes if needed
             };
             var parallelJobHandle = parallelJob.Schedule(nativeFilter.length, 64);
             parallelJobHandle.Complete();
@@ -496,12 +537,12 @@ Example job:
 public struct TestParallelJobReference : IJobParallelFor {
     [ReadOnly]
     public NativeFilter entities;
-    public NativeCache<HealthComponent> healthComponents;
+    public NativeStash<HealthComponent> healthComponents;
         
     public void Execute(int index) {
         var entityId = this.entities[index];
         
-        ref var component = ref this.healthComponents.GetComponent(entityId, out var exists);
+        ref var component = ref this.healthComponents.Get(entityId, out var exists);
         if (exists) {
             component.Value += 1;
         }
@@ -509,7 +550,7 @@ public struct TestParallelJobReference : IJobParallelFor {
         // Alternatively, you can avoid checking existance of the component
         // if the filter includes said component anyway
         
-        ref var component = ref this.healthComponents.GetComponent(entityId);
+        ref var component = ref this.healthComponents.Get(entityId);
         component.Value += 1;
     }
 }
@@ -523,11 +564,19 @@ public struct TestParallelJobReference : IJobParallelFor {
 ## 🔥 Games
 
 * **Zombie City** by *GreenButtonGames*  
-  [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/kh/app/zombie-city-master/id1543420906)
+  [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/us/app/zombie-city-master/id1543420906)
 
 
 * **Fish Idle** by *GreenButtonGames*  
-  [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.FishIdle) [iOS](https://apps.apple.com/ru/app/fish-idle-hooked-tycoon/id1534396279)
+  [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.FishIdle) [iOS](https://apps.apple.com/us/app/fish-idle-hooked-tycoon/id1534396279)
+
+
+* **Stickman of Wars: RPG Shooters** by *Multicast Games*  
+  [Android](https://play.google.com/store/apps/details?id=com.multicastgames.sow3) [iOS](https://apps.apple.com/us/app/stickman-of-wars-rpg-shooters/id1620422798)
+
+
+* **One State RP - Life Simulator** by *Chillbase*  
+  [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
 
 ## 📘 License
 

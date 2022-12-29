@@ -5,12 +5,12 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Reflection;
+    using System.Threading;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -31,9 +31,9 @@ namespace Morpeh {
             var info = new InternalTypeDefinition {
                 id                      = id,
                 type                    = type,
-                entityGetComponentBoxed = (entity) => entity.GetComponent<T>(),
-                entitySetComponentBoxed = (entity, component) => entity.SetComponent((T)component),
-                entityRemoveComponent   = (entity) => entity.RemoveComponent<T>(),
+                entityGetComponentBoxed = (entity) => entity.world.GetStash<T>().Get(entity),
+                entitySetComponentBoxed = (entity, component) => entity.world.GetStash<T>().Set(entity, (T)component),
+                entityRemoveComponent   = (entity) => entity.world.GetStash<T>().Remove(entity),
                 typeInfo                = TypeIdentifier<T>.info
             };
             intTypeAssociation.Add(id, info);
@@ -58,14 +58,11 @@ namespace Morpeh {
             [SerializeField]
             internal bool isMarker;
             [SerializeField]
-            internal bool isDisposable;
-            [SerializeField]
-            internal int cacheSize;
+            internal int stashSize;
 
-            public TypeInfo(bool isMarker, bool isDisposable, int cacheSize) {
-                this.isMarker     = isMarker;
-                this.isDisposable = isDisposable;
-                this.cacheSize    = cacheSize;
+            public TypeInfo(bool isMarker, int stashSize) {
+                this.isMarker  = isMarker;
+                this.stashSize = stashSize;
             }
 
             public void SetID(int id) {
@@ -80,7 +77,7 @@ namespace Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class TypeIdentifier<T> where T : struct, IComponent {
         internal static CommonTypeIdentifier.TypeInfo info;
-
+        
         static TypeIdentifier() {
             Warmup();
         }
@@ -92,15 +89,15 @@ namespace Morpeh {
 
             var type = typeof(T);
 
-            var cacheSize  = Constants.DEFAULT_CACHE_COMPONENTS_CAPACITY;
-            var attributes = type.GetCustomAttributes(typeof(CacheSizeAttribute)).ToArray();
+            var stashSize  = Constants.DEFAULT_STASH_COMPONENTS_CAPACITY;
+            var attributes = type.GetCustomAttributes(typeof(StashSizeAttribute)).ToArray();
             if (attributes.Length > 0) {
-                var att = (CacheSizeAttribute)attributes[0];
-                cacheSize = att.size;
+                var att = (StashSizeAttribute)attributes[0];
+                stashSize = att.size;
             }
 
             var typeFieldsLength = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length;
-            info = new CommonTypeIdentifier.TypeInfo(typeFieldsLength == 0, typeof(IDisposable).IsAssignableFrom(typeof(T)), cacheSize);
+            info = new CommonTypeIdentifier.TypeInfo(typeFieldsLength == 0, stashSize);
             var id = CommonTypeIdentifier.GetID<T>();
             info.SetID(id);
         }

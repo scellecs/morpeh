@@ -1,11 +1,12 @@
 ﻿#if MORPEH_BURST
-namespace Morpeh.Native {
+namespace Scellecs.Morpeh.Native {
     using Unity.Collections.LowLevel.Unsafe;
 
     public struct NativeArchetype {
-        public NativeFastList<int> entitiesBitMap;
+        internal NativeFastList<int> entities;
 
-        [NativeDisableUnsafePtrRestriction] public unsafe int* lengthPtr;
+        [NativeDisableUnsafePtrRestriction]
+        internal unsafe int* lengthPtr;
     }
 }
 #endif

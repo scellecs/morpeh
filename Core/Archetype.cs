@@ -1,9 +1,9 @@
-namespace Morpeh {
+namespace Scellecs.Morpeh {
     using System;
     using Collections;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-    
+
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
@@ -14,7 +14,9 @@ namespace Morpeh {
         [SerializeField]
         internal int[] typeIds;
         [SerializeField]
-        internal FastList<int> entitiesBitMap;
+        internal BitMap entities;
+        [SerializeField]
+        internal FastList<int> entitiesNative;
         [NonSerialized]
         internal FastList<Filter> filters;
         [SerializeField]
@@ -27,6 +29,8 @@ namespace Morpeh {
         internal int worldId;
         [SerializeField]
         internal int id;
+        [SerializeField]
+        internal bool usedInNative;
 
         [NonSerialized]
         internal World world;
@@ -35,9 +39,10 @@ namespace Morpeh {
             this.id             = id;
             this.typeIds        = typeIds;
             this.length         = 0;
-            this.entitiesBitMap = new FastList<int>();
+            this.entities       = new BitMap();
             this.addTransfer    = new UnsafeIntHashMap<int>();
             this.removeTransfer = new UnsafeIntHashMap<int>();
+            this.usedInNative   = false;
 
             this.worldId = worldId;
 

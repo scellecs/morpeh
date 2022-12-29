@@ -1,9 +1,9 @@
-namespace Morpeh.Collections {
+namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
-    
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -257,6 +257,9 @@ namespace Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T GetValueByIndex<T>(this IntHashMap<T> hashMap, in int index) => hashMap.data[index];
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T GetValueRefByIndex<T>(this IntHashMap<T> hashMap, in int index) => ref hashMap.data[index];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetKeyByIndex<T>(this IntHashMap<T> hashMap, in int index) => hashMap.slots[index].key - 1;

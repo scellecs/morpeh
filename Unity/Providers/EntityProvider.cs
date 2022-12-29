@@ -1,25 +1,36 @@
-namespace Morpeh {
+namespace Scellecs.Morpeh.Providers {
     using JetBrains.Annotations;
+    using Collections;
+    using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-#if UNITY_EDITOR && ODIN_INSPECTOR
-    using Sirenix.OdinInspector;
-#endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [AddComponentMenu("ECS/" + nameof(EntityProvider))]
     public class EntityProvider : MonoBehaviour {
+        private static IntHashMap<MapItem> map = new IntHashMap<MapItem>();
+        private struct MapItem {
+            public Entity entity;
+            public int    refCounter;
+        }
+
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
         [ReadOnly]
 #endif
-        protected int internalEntityID = -1;
+        private int EntityID => this.cachedEntity.IsNullOrDisposed() == false ? this.cachedEntity.ID.id : -1;
+
+        private Entity cachedEntity;
 
         [CanBeNull]
-        private Entity InternalEntity {
+        public Entity Entity {
             get {
+                if (World.Default == null) {
+                    return default;
+                }
+                
                 if (this.IsPrefab()) {
                     return default;
                 }
@@ -28,53 +39,35 @@ namespace Morpeh {
                     return default;
                 }
 
-                if (this.cachedEntity is null) {
-                    if (World.Default != null && this.internalEntityID >= 0 && World.Default.entitiesLength > this.internalEntityID) {
-                        this.cachedEntity = World.Default.entities[this.internalEntityID];
+                if (this.cachedEntity.IsNullOrDisposed()) {
+                    var instanceId = this.gameObject.GetInstanceID();
+                    if (map.TryGetValue(instanceId, out var item)) {
+                        if (item.entity.IsNullOrDisposed()) {
+                            this.cachedEntity = item.entity = World.Default.CreateEntity();
+                        }
+                        else {
+                            this.cachedEntity = item.entity;
+                        }
+                        item.refCounter++;
+                        map.Set(instanceId, item, out _);
                     }
-                }
-                else if (this.cachedEntity.isDisposed) {
-                    this.cachedEntity     = null;
-                    this.internalEntityID = -1;
+                    else {
+                        this.cachedEntity = item.entity = World.Default.CreateEntity();
+                        item.refCounter   = 1;
+                        map.Add(instanceId, item, out _);
+                    }
                 }
 
                 return this.cachedEntity;
             }
         }
 
-        private Entity cachedEntity;
-
-        [CanBeNull]
-        public Entity Entity => this.InternalEntity;
-
         private protected virtual void OnEnable() {
 #if UNITY_EDITOR && ODIN_INSPECTOR
-            this.entityViewer.getter = () => this.InternalEntity;
+            this.entityViewer.getter = () => this.Entity;
 #endif
             if (!Application.isPlaying) {
                 return;
-            }
-
-            if (this.internalEntityID < 0) {
-                var others = this.GetComponents<EntityProvider>();
-                foreach (var entityProvider in others) {
-                    if (entityProvider.internalEntityID >= 0) {
-                        this.internalEntityID = entityProvider.internalEntityID;
-                        this.cachedEntity     = entityProvider.cachedEntity;
-                        break;
-                    }
-                }
-            }
-
-            if (this.InternalEntity == null || this.internalEntityID < 0) {
-                var others = this.GetComponents<EntityProvider>();
-                this.cachedEntity = World.Default.CreateEntity(out this.internalEntityID);
-                foreach (var entityProvider in others) {
-                    if (entityProvider.enabled) {
-                        entityProvider.internalEntityID = this.internalEntityID;
-                        entityProvider.cachedEntity     = this.cachedEntity;
-                    }
-                }
             }
 
             this.PreInitialize();
@@ -82,19 +75,15 @@ namespace Morpeh {
         }
 
         protected virtual void OnDisable() {
-            var others = this.GetComponents<EntityProvider>();
-            foreach (var entityProvider in others) {
-                entityProvider.CheckEntityIsAlive();
+            var instanceId = this.gameObject.GetInstanceID();
+            if (map.TryGetValue(instanceId, out var item)) {
+                if (--item.refCounter <= 0) {
+                    map.Remove(instanceId, out _);
+                }
             }
         }
 
-        private void CheckEntityIsAlive() {
-            if (this.InternalEntity == null || this.InternalEntity.isDisposed) {
-                this.internalEntityID = -1;
-            }
-        }
-
-        private bool IsPrefab() => this.gameObject.scene.name == null;
+        private bool IsPrefab() => this.gameObject.scene.rootCount == 0;
 
         protected virtual void PreInitialize() {
         }

@@ -1,8 +1,8 @@
-namespace Morpeh.Collections {
+namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
-    
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -28,7 +28,12 @@ namespace Morpeh.Collections {
 
                         *(dataPtr + (i >> 1)) = data;
 
-                        return data != dataOld;
+                        var check = data != dataOld;
+                        if (check) {
+                            ++bitmap.count;
+                        }
+                        
+                        return check;
                     }
                 }
             }
@@ -90,6 +95,7 @@ namespace Morpeh.Collections {
             }
 
             ++bitmap.length;
+            ++bitmap.count;
             return true;
         }
 
@@ -110,7 +116,8 @@ namespace Morpeh.Collections {
                     var slotNext = slot + 1;
 
                     if (*slot - 1 == dataIndex) {
-                        var data = *(dataPtr + (i >> 1));
+                        var data    = *(dataPtr + (i >> 1));
+                        var dataOld = data;
                         data &= ~(1 << bitIndex);
                         if (data == 0) {
                             if (num < 0) {
@@ -132,7 +139,13 @@ namespace Morpeh.Collections {
 
                         }
                         *(dataPtr + (i >> 1)) = data;
-                        return true;
+
+                        var check = dataOld != data;
+                        if (check) {
+                            --bitmap.count;
+                        }
+                        
+                        return check;
                     }
 
                     next = *slotNext;
@@ -176,6 +189,7 @@ namespace Morpeh.Collections {
             Array.Clear(bitMap.data, 0, bitMap.capacity);
 
             bitMap.lastIndex = 0;
+            bitMap.count     = 0;
             bitMap.length    = 0;
             bitMap.freeIndex = -1;
         }

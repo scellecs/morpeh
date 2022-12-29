@@ -1,13 +1,13 @@
 ﻿#if MORPEH_BURST
-namespace Morpeh.Native {
+namespace Scellecs.Morpeh.Native {
     using Unity.Collections.LowLevel.Unsafe;
-    
+
     public struct NativeWorld {
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* entitiesGens;
+        internal unsafe int* entitiesGens;
 
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* entitiesCapacity;
+        internal unsafe int* entitiesCapacity;
     }
 }
 #endif

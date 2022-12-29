@@ -5,48 +5,58 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Editor")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.TestSuite.Editor")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Native")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Morpeh.Workaround")]
-
-namespace Morpeh {
-    //System
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.TestSuite")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.TestSuite.Editor")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Globals")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Native")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Workaround")]
+namespace Scellecs.Morpeh {
     using System;
     using UnityEngine;
-
+    
     public interface IComponent {
     }
-    
+
     public interface IInitializer : IDisposable {
         World World { get; set; }
 
         void OnAwake();
     }
-    
+
     public interface ISystem : IInitializer {
         void OnUpdate(float deltaTime);
     }
-    
+
     public interface IFixedSystem : ISystem {
     }
-    
+
     public interface ILateSystem : ISystem {
     }
-    
+
+    public interface ICleanupSystem : ISystem {
+    }
+
+    public interface IWorldPlugin {
+        void Initialize(World world);
+    }
+
     public interface IValidatable {
         void OnValidate();
     }
-    
+
     public interface IValidatableWithGameObject {
         void OnValidate(GameObject gameObject);
     }
 
+    public interface IAspect {
+        Entity Entity { get; set; }
+    }
+
     [AttributeUsage(AttributeTargets.Struct)]
-    public class CacheSizeAttribute : Attribute {
+    public class StashSizeAttribute : Attribute {
         internal int size;
-        public CacheSizeAttribute(int size) {
+        public StashSizeAttribute(int size) {
             this.size = size;
         }
     }
@@ -58,19 +68,19 @@ namespace Unity.IL2CPP.CompilerServices {
 #if !EXTERNAL_IL2CPP_ATTRS
     public enum Option {
 #else
-    internal enum Option {
+internal enum Option {
 #endif
         NullChecks         = 1,
         ArrayBoundsChecks  = 2,
         DivideByZeroChecks = 3
     }
-    
+
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-#if !EXTERNAL_IL2CPP_ATTRS
+#if !MORPEH_EXTERNAL_IL2CPP_ATTRS
     public class Il2CppSetOptionAttribute : Attribute {
 #else
-    internal class Il2CppSetOptionAttribute : Attribute {
+internal class Il2CppSetOptionAttribute : Attribute {
 #endif
         public Option Option { get; }
         public object Value  { get; }
