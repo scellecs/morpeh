@@ -53,8 +53,7 @@ Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/u
 
 ### .Net Platform
 
-Currently clone repository and reference to **Scellecs.Morpeh.csproj**  
-NuGet package will be created soon.
+NuGet package URL: https://www.nuget.org/packages/Scellecs.Morpeh
 
 ## 📖 Introduction
 ### 📘 Base concept of ECS pattern
