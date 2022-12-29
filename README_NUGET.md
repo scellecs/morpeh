@@ -7,8 +7,6 @@
 * Structure-Based and Cache-Friendly.  
 
 ## 📖 Table of Contents
-
-* [Migration](#-migration-to-new-version)
 * [Introduction](#-introduction)
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
   * [Advanced](#-advanced)
@@ -17,11 +15,6 @@
 * [Games](#-games)
 * [License](#-license)
 * [Contacts](#-contacts)
-
-## ✈️ Migration To New Version 
-
-English version: [Migration Guide](MIGRATION.md)  
-Russian version: [Гайд по миграции](MIGRATION_RU.md)
 
 ## 📖 Introduction
 ### 📘 Base concept of ECS pattern
