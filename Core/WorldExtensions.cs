@@ -6,6 +6,10 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
+#if ENABLE_MONO || ENABLE_IL2CPP
+#define MORPEH_UNITY
+#endif
+
 namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
@@ -87,7 +91,7 @@ namespace Scellecs.Morpeh {
             return world;
         }
 
-#if UNITY_2019_1_OR_NEWER && !MORPEH_DISABLE_AUTOINITIALIZATION
+#if MORPEH_UNITY && !MORPEH_DISABLE_AUTOINITIALIZATION
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif
         public static void InitializationDefaultWorld() {
@@ -96,7 +100,7 @@ namespace Scellecs.Morpeh {
             World.worlds.Clear();
             var defaultWorld = World.Create("Default World");
             defaultWorld.UpdateByUnity = true;
-#if UNITY_2019_1_OR_NEWER
+#if MORPEH_UNITY
             var go = new GameObject {
                 name      = "MORPEH_UNITY_RUNTIME_HELPER",
                 hideFlags = HideFlags.DontSaveInEditor

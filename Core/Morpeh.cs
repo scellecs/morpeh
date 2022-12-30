@@ -5,6 +5,10 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
+#if ENABLE_MONO || ENABLE_IL2CPP
+#define MORPEH_UNITY
+#endif
+
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Editor")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.TestSuite")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.TestSuite.Editor")]
@@ -92,29 +96,35 @@ internal class Il2CppSetOptionAttribute : Attribute {
     }
 }
 
-#if !UNITY_2019_1_OR_NEWER
+
 namespace UnityEngine {
+#if !MORPEH_UNITY
     public sealed class SerializeField : System.Attribute { }
     public sealed class GameObject : System.Object { }
+#endif
 }
 
 namespace UnityEngine.Scripting {
+#if !MORPEH_UNITY
     public sealed class Preserve : System.Attribute { }
+#endif
 }
 
 namespace JetBrains.Annotations {
+#if !MORPEH_UNITY
     using System;
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Delegate)]
     public sealed class NotNullAttribute : Attribute { }
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Delegate)]
     public sealed class CanBeNullAttribute : Attribute { }
-}
 #endif
+}
 
-#if !ODIN_INSPECTOR
+
 namespace Sirenix.OdinInspector {
+#if !ODIN_INSPECTOR
     using System;
     [AttributeUsage(AttributeTargets.All, Inherited = false)]
     public class ShowInInspectorAttribute : Attribute { }
-}
 #endif
+}
