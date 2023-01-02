@@ -20,6 +20,8 @@
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
   * [Getting Started](#-getting-started)
   * [Advanced](#-advanced)
+    * [Filter Extensions](#-filter-extensions)
+    * [Aspects](#-aspects)
     * [Component Disposing](#-component-disposing)
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
 * [Examples](#-examples)
