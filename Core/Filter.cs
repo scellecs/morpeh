@@ -24,6 +24,7 @@ namespace Scellecs.Morpeh {
         internal IntFastList excludedTypeIds;
 
         internal int  typeID;
+        internal int  gen;
         internal Mode mode;
 
         internal Filter(World world) {
@@ -33,6 +34,8 @@ namespace Scellecs.Morpeh {
             this.archetypes = world.archetypes;
 
             this.typeID = -1;
+            this.gen = 0;
+
             this.mode   = Mode.Include;
         }
 
@@ -46,6 +49,7 @@ namespace Scellecs.Morpeh {
             this.includedTypeIds = includedTypeIds;
             this.excludedTypeIds = excludedTypeIds;
 
+            this.gen = 0;
             this.mode = mode;
 
             this.world.filters.Add(this);

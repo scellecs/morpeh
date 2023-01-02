@@ -198,11 +198,11 @@ namespace Scellecs.Morpeh {
         public static Filter Extend<T>(this Filter filter) where T : struct, IFilterExtension {
             filter.world.ThreadSafetyCheck();
 #if MORPEH_DEBUG 
-            var check = filter.childs.length;
+            var check = filter.gen;
 #endif
             var newFilter = default(T).Extend(filter);
 #if MORPEH_DEBUG 
-            if (check == filter.childs.length) {
+            if (check == filter.gen) {
                 MLogger.LogError("[MORPEH] You didn't extend the filter in any way, perhaps you mistyped the IFilterExtension?");
             }
 #endif
@@ -228,7 +228,7 @@ namespace Scellecs.Morpeh {
                 }
             }
 #endif
-            
+            filter.gen++;
             for (int i = 0, length = filter.childs.length; i < length; i++) {
                 var child = filter.childs.data[i];
                 if (child.mode == mode && child.typeID == currentTypeId) {
