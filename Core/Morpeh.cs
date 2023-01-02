@@ -55,8 +55,14 @@ namespace Scellecs.Morpeh {
 
     public interface IAspect {
         Entity Entity { get; set; }
+        
+        void OnGetAspect(World world);
     }
 
+    public interface IFilterExtension {
+        Filter Extend(Filter rootFilter);
+    }
+    
     [AttributeUsage(AttributeTargets.Struct)]
     public class StashSizeAttribute : Attribute {
         internal int size;

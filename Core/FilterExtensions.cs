@@ -195,6 +195,20 @@ namespace Scellecs.Morpeh {
             return filter.CreateFilter<T>(Filter.Mode.Exclude);
         }
 
+        public static Filter Extend<T>(this Filter filter) where T : struct, IFilterExtension {
+            filter.world.ThreadSafetyCheck();
+#if MORPEH_DEBUG 
+            var check = filter.childs.length;
+#endif
+            var newFilter = default(T).Extend(filter);
+#if MORPEH_DEBUG 
+            if (check == filter.childs.length) {
+                MLogger.LogError("[MORPEH] You didn't extend the filter in any way, perhaps you mistyped the IFilterExtension?");
+            }
+#endif
+            return newFilter;
+        }
+        
         private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
             var currentTypeId = TypeIdentifier<T>.info.id;
 

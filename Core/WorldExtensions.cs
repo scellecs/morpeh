@@ -541,5 +541,11 @@ namespace Scellecs.Morpeh {
                 throw new Exception($"[MORPEH] Thread safety check failed. You are trying touch the world from a thread {currentThread}, but the world associated with the thread {world.threadIdLock}");
             }
         }
+        
+        public static Aspect<T> GetAspect<T>(this World world) where T : struct, IAspect {
+            var aspectDefinition = default(Aspect<T>);
+            aspectDefinition.value.OnGetAspect(world);
+            return aspectDefinition;
+        }
     }
 }
