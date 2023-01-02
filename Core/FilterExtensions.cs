@@ -212,23 +212,22 @@ namespace Scellecs.Morpeh {
         private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
             var currentTypeId = TypeIdentifier<T>.info.id;
 
-#if MORPEH_DEBUG
+            filter.gen++;
             if (filter.includedTypeIds != null) {
                 foreach (var typeId in filter.includedTypeIds) {
                     if (typeId == currentTypeId) {
-                        throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
+                        return filter;
                     }
                 }
             }
             if (filter.excludedTypeIds != null) {
                 foreach (var typeId in filter.excludedTypeIds) {
                     if (typeId == currentTypeId) {
-                        throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
+                        return filter;
                     }
                 }
             }
-#endif
-            filter.gen++;
+
             for (int i = 0, length = filter.childs.length; i < length; i++) {
                 var child = filter.childs.data[i];
                 if (child.mode == mode && child.typeID == currentTypeId) {

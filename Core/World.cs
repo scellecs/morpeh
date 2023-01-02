@@ -99,6 +99,7 @@ namespace Scellecs.Morpeh {
         [SerializeField]
         internal string friendlyName;
 
+        [SerializeField]
         internal int threadIdLock;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
