@@ -523,7 +523,7 @@ public struct Transform : IAspect {
     public ref Rotation Rotation => ref this.Entity.GetComponent<Rotation>();
     public ref Scale Scale => ref this.Entity.GetComponent<Scale>();
 
-    //Called once on world.GetStash<T>
+    //Called once on world.GetAspect<T>
     public void OnGetAspect(World world) {
     }
 }
