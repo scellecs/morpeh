@@ -523,10 +523,12 @@ namespace Scellecs.Morpeh {
         }
 
         public static void SetThreadId(this World world, int threadId) {
+            world.ThreadSafetyCheck();
             world.threadIdLock = threadId;
         }
         
         public static int GetThreadId(this World world) {
+            world.ThreadSafetyCheck();
             return world.threadIdLock;
         }
 
@@ -543,6 +545,7 @@ namespace Scellecs.Morpeh {
         }
         
         public static Aspect<T> GetAspect<T>(this World world) where T : struct, IAspect {
+            world.ThreadSafetyCheck();
             var aspectDefinition = default(Aspect<T>);
             aspectDefinition.value.OnGetAspect(world);
             return aspectDefinition;
