@@ -516,7 +516,7 @@ Simple entity version:
 
 ```c#  
 public struct Transform : IAspect {
-    //Set on each call of factory Aspect.Set(Entity entity)
+    //Set on each call of AspectFactory.Get(Entity entity)
     public Entity Entity { get; set;}
     
     public ref Translation Translation => ref this.Entity.GetComponent<Translation>();
@@ -581,12 +581,12 @@ public class TransformAspectSystem : ISystem {
     public World World { get; set; }
 
     private Filter filter;
-    private Aspect<Transform> transform;
+    private AspectFactory<Transform> transform;
     
     public void OnAwake() {
         //Extend filter with ready query from Transform
         this.filter = this.World.Filter.Extend<Transform>();
-        //Getting aspect factory Aspect<Transform>
+        //Getting aspect factory AspectFactory<Transform>
         this.transform = this.World.GetAspect<Transform>();
 
         for (int i = 0, length = 100; i < length; i++) {
@@ -598,9 +598,9 @@ public class TransformAspectSystem : ISystem {
         }
     }
     public void OnUpdate(float deltaTime) {
-        foreach (var e in this.filter) {
+        foreach (var entity in this.filter) {
             //Getting aspect copy for current entity
-            var trs = this.transform.Set(e);
+            var trs = this.transform.Get(entity);
 
             ref var trans = ref trs.Translation;
             trans.x += 1;

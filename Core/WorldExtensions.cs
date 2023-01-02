@@ -544,9 +544,9 @@ namespace Scellecs.Morpeh {
             }
         }
         
-        public static Aspect<T> GetAspect<T>(this World world) where T : struct, IAspect {
+        public static AspectFactory<T> GetAspect<T>(this World world) where T : struct, IAspect {
             world.ThreadSafetyCheck();
-            var aspectDefinition = default(Aspect<T>);
+            var aspectDefinition = default(AspectFactory<T>);
             aspectDefinition.value.OnGetAspect(world);
             return aspectDefinition;
         }

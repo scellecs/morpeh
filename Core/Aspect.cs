@@ -1,5 +1,5 @@
 namespace Scellecs.Morpeh {
-    public struct Aspect<T> where T : struct, IAspect {
+    public struct AspectFactory<T> where T : struct, IAspect {
         internal T value;
     }
 }
