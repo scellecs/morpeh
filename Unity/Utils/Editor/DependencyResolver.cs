@@ -31,7 +31,9 @@ namespace Scellecs.Morpeh.Utils.Editor {
             //todo
             //UnityEditor.PackageManager.Events.registeredPackages replace for unity 2020+
             //we still support 2019.4 so we use assemblyReload event
+ #pragma warning disable CS0618
             CompilationPipeline.assemblyCompilationStarted += CompilationPipelineOnAssemblyCompilationStarted;
+ #pragma warning restore CS0618
             AssemblyReloadEvents.afterAssemblyReload       += AssemblyReloadEventsOnAfterAssemblyReload;
         }
 
@@ -41,7 +43,9 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         private static void CompilationPipelineOnAssemblyCompilationStarted(string obj) {
+ #pragma warning disable CS0618
             CompilationPipeline.assemblyCompilationStarted -= CompilationPipelineOnAssemblyCompilationStarted;
+ #pragma warning restore CS0618
             ResolveDependencies();
            
         }
