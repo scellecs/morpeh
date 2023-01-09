@@ -523,8 +523,8 @@ public struct Transform : IAspect {
     public ref Rotation Rotation => ref this.Entity.GetComponent<Rotation>();
     public ref Scale Scale => ref this.Entity.GetComponent<Scale>();
 
-    //Called once on world.GetAspect<T>
-    public void OnGetAspect(World world) {
+    //Called once on world.GetAspectFactory<T>
+    public void OnGetAspectFactory(World world) {
     }
 }
 ```
@@ -544,7 +544,7 @@ public struct Transform : IAspect {
     private Stash<Rotation> rotation;
     private Stash<Scale> scale;
 
-    public void OnGetAspect(World world) {
+    public void OnGetAspectFactory(World world) {
         this.translation = world.GetStash<Translation>();
         this.rotation = world.GetStash<Rotation>();
         this.scale = world.GetStash<Scale>();
@@ -565,7 +565,7 @@ public struct Transform : IAspect, IFilterExtension {
     private Stash<Rotation> rotation;
     private Stash<Scale> scale;
 
-    public void OnGetAspect(World world) {
+    public void OnGetAspectFactory(World world) {
         this.translation = world.GetStash<Translation>();
         this.rotation = world.GetStash<Rotation>();
         this.scale = world.GetStash<Scale>();
@@ -587,7 +587,7 @@ public class TransformAspectSystem : ISystem {
         //Extend filter with ready query from Transform
         this.filter = this.World.Filter.Extend<Transform>();
         //Getting aspect factory AspectFactory<Transform>
-        this.transform = this.World.GetAspect<Transform>();
+        this.transform = this.World.GetAspectFactory<Transform>();
 
         for (int i = 0, length = 100; i < length; i++) {
             var entity = this.World.CreateEntity();

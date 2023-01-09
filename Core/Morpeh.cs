@@ -52,13 +52,7 @@ namespace Scellecs.Morpeh {
     public interface IValidatableWithGameObject {
         void OnValidate(GameObject gameObject);
     }
-
-    public interface IAspect {
-        Entity Entity { get; set; }
-        
-        void OnGetAspect(World world);
-    }
-
+    
     public interface IFilterExtension {
         Filter Extend(Filter rootFilter);
     }

@@ -544,11 +544,11 @@ namespace Scellecs.Morpeh {
             }
         }
         
-        public static AspectFactory<T> GetAspect<T>(this World world) where T : struct, IAspect {
+        public static AspectFactory<T> GetAspectFactory<T>(this World world) where T : struct, IAspect {
             world.ThreadSafetyCheck();
-            var aspectDefinition = default(AspectFactory<T>);
-            aspectDefinition.value.OnGetAspect(world);
-            return aspectDefinition;
+            var aspectFactory = default(AspectFactory<T>);
+            aspectFactory.value.OnGetAspectFactory(world);
+            return aspectFactory;
         }
     }
 }
