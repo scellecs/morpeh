@@ -12,7 +12,7 @@ namespace Scellecs.Morpeh.Collections {
     public sealed class BitMap : IEnumerable<int> {
         internal const int BITS_PER_BYTE        = 8;
         internal const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
-        internal const int BITS_PER_FIELD_SHIFT = 5; //6 for long
+        internal const int BITS_PER_FIELD_SHIFT = 5; //5 for int, 6 for long
 
         public int count; //count of set bits
         public int length; //count of ints
@@ -21,9 +21,9 @@ namespace Scellecs.Morpeh.Collections {
         public int lastIndex;
         public int freeIndex;
 
-        public int[] buckets;
-        public int[] data;
-        public int[] slots;
+        public PinnedArray<int> buckets;
+        public PinnedArray<int> data;
+        public PinnedArray<int> slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BitMap(in int capacity = 0) {
@@ -35,9 +35,15 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
             this.capacity         = this.capacityMinusOne + 1;
 
-            this.buckets = new int[this.capacity];
-            this.slots   = new int[this.capacity << 1];
-            this.data    = new int[this.capacity];
+            this.buckets = new PinnedArray<int>(this.capacity);
+            this.slots   = new PinnedArray<int>(this.capacity << 1);
+            this.data    = new PinnedArray<int>(this.capacity);
+        }
+
+        ~BitMap() {
+            this.buckets.Dispose();
+            this.data.Dispose();
+            this.slots.Dispose();
         }
 
         IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
@@ -73,8 +79,9 @@ namespace Scellecs.Morpeh.Collections {
                     return true;
                 }
 
-                fixed (int* slotsPtr = &this.bitMap.slots[0])
-                fixed (int* dataPtr = &this.bitMap.data[0]) {
+                {
+                    var slotsPtr = this.bitMap.slots.ptr;
+                    var dataPtr = this.bitMap.data.ptr;
                     for (; this.index < this.bitMap.lastIndex; this.index += 2) {
                         var dataIndex = *(slotsPtr + this.index) - 1;
                         if (dataIndex < 0) {
