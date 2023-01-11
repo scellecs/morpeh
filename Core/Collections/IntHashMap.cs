@@ -25,10 +25,10 @@ namespace Scellecs.Morpeh.Collections {
         public int lastIndex;
         public int freeIndex;
 
-        public int[] buckets;
+        public PinnedArray<int> buckets;
 
         public T[]    data;
-        public IntHashMapSlot[] slots;
+        public PinnedArray<IntHashMapSlot> slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntHashMap(in int capacity = 0) {
@@ -39,9 +39,14 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
             this.capacity         = this.capacityMinusOne + 1;
 
-            this.buckets = new int[this.capacity];
-            this.slots   = new IntHashMapSlot[this.capacity];
+            this.buckets = new PinnedArray<int>(this.capacity);
+            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
             this.data    = new T[this.capacity];
+        }
+
+        ~IntHashMap() {
+            this.buckets.Dispose();
+            this.slots.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -60,7 +65,7 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator : IEnumerator<int> {
+        public unsafe struct Enumerator : IEnumerator<int> {
             public IntHashMap<T> hashMap;
 
             public int index;
@@ -68,7 +73,7 @@ namespace Scellecs.Morpeh.Collections {
 
             public bool MoveNext() {
                 for (; this.index < this.hashMap.lastIndex; ++this.index) {
-                    ref var slot = ref this.hashMap.slots[this.index];
+                    ref var slot = ref this.hashMap.slots.ptr[this.index];
                     if (slot.key - 1 < 0) {
                         continue;
                     }
