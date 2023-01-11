@@ -8,29 +8,29 @@ namespace Scellecs.Morpeh.Native {
 
     public struct NativeIntHashMap<TNative> where TNative : unmanaged {
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* lengthPtr;
+        public unsafe int* lengthPtr;
         
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* capacityPtr;
+        public unsafe int* capacityPtr;
         
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* capacityMinusOnePtr;
+        public unsafe int* capacityMinusOnePtr;
         
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* lastIndexPtr;
+        public unsafe int* lastIndexPtr;
         
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* freeIndexPtr;
+        public unsafe int* freeIndexPtr;
 
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* buckets;
+        public unsafe int* buckets;
         
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe IntHashMapSlot* slots;
+        public unsafe IntHashMapSlot* slots;
         
         [NativeDisableParallelForRestriction]
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe TNative* data;
+        public unsafe TNative* data;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {

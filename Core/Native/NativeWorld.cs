@@ -4,10 +4,10 @@ namespace Scellecs.Morpeh.Native {
 
     public struct NativeWorld {
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* entitiesGens;
+        public unsafe int* entitiesGens;
 
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* entitiesCapacity;
+        public unsafe int* entitiesCapacity;
     }
 }
 #endif
