@@ -9,10 +9,10 @@ namespace Scellecs.Morpeh.Native {
         public int length;
 
         [ReadOnly]
-        internal NativeArray<NativeArchetype> archetypes;
+        public NativeArray<NativeArchetype> archetypes;
         
         [ReadOnly]
-        internal NativeWorld world;
+        public NativeWorld world;
 
         public unsafe EntityId this[int index] {
             get {

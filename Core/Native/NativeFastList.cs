@@ -4,13 +4,13 @@ namespace Scellecs.Morpeh.Native {
 
     public struct NativeFastList<TNative> where TNative : unmanaged {
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe TNative* data;
+        public unsafe TNative* data;
         
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* lengthPtr;
+        public unsafe int* lengthPtr;
         
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* capacityPtr;
+        public unsafe int* capacityPtr;
     }
 }
 #endif

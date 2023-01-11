@@ -3,10 +3,10 @@ namespace Scellecs.Morpeh.Native {
     using Unity.Collections.LowLevel.Unsafe;
 
     public struct NativeArchetype {
-        internal NativeFastList<int> entities;
+        public NativeFastList<int> entities;
 
         [NativeDisableUnsafePtrRestriction]
-        internal unsafe int* lengthPtr;
+        public unsafe int* lengthPtr;
     }
 }
 #endif
