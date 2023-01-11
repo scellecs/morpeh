@@ -39,7 +39,7 @@ namespace Scellecs.Morpeh.Collections {
         public static bool Add<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {
             var rem = key & hashMap.capacityMinusOne;
 
-            for (var i = *hashMap.buckets.ptr - 1; i >= 0; i = hashMap.slots.ptr[i].next) {
+            for (var i = hashMap.buckets.ptr[rem] - 1; i >= 0; i = hashMap.slots.ptr[i].next) {
                 if (hashMap.slots.ptr[i].key - 1 == key) {
                     slotIndex = -1;
                     return false;
