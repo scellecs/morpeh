@@ -7,12 +7,46 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static unsafe class UnsafeIntHashMapExtensions {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void Resize<T>(this UnsafeIntHashMap<T> hashMap, out int rem, int key) where T : unmanaged {
+            var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
+            var newCapacity         = newCapacityMinusOne + 1;
+
+            hashMap.slots.Resize(newCapacity * 2);
+            hashMap.data.Resize(newCapacity);
+
+            var newBuckets = new PinnedArray<int>(newCapacity);
+
+            {
+                var slotsPtr = hashMap.slots.ptr;
+                var bucketsPtr = newBuckets.ptr;
+                for (int i = 0, len = hashMap.lastIndex; i < len; i += 2) {
+                    var slotPtr = slotsPtr + i;
+
+                    var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                    var newCurrentBucket = bucketsPtr + newResizeIndex;
+
+                    *(slotPtr + 1) = *newCurrentBucket - 1;
+
+                    *newCurrentBucket = i + 1;
+                }
+            }
+
+            hashMap.buckets.Dispose();
+            hashMap.buckets          = newBuckets;
+            hashMap.capacity         = newCapacity;
+            hashMap.capacityMinusOne = newCapacityMinusOne;
+
+            rem = key & hashMap.capacityMinusOne;
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Add<T>(this UnsafeIntHashMap<T> hashMap, in int key, in T value, out int slotIndex) where T : unmanaged {
             var rem = key & hashMap.capacityMinusOne;
 
-            fixed (int* slotsPtr = &hashMap.slots[0])
-            fixed (int* bucketsPtr = &hashMap.buckets[0]) {
+            {
+                var slotsPtr = hashMap.slots.ptr;
+                var bucketsPtr = hashMap.buckets.ptr;
                 int* slot;
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
                     slot = slotsPtr + i;
@@ -25,48 +59,21 @@ namespace Scellecs.Morpeh.Collections {
 
             if (hashMap.freeIndex >= 0) {
                 slotIndex = hashMap.freeIndex;
-                fixed (int* s = &hashMap.slots[0]) {
-                    hashMap.freeIndex = *(s + slotIndex + 1);
-                }
+                hashMap.freeIndex = *(hashMap.slots.ptr + slotIndex + 1);
             }
             else {
                 if (hashMap.lastIndex == hashMap.capacity * 2) {
-                    var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
-                    var newCapacity         = newCapacityMinusOne + 1;
-
-                    ArrayHelpers.Grow(ref hashMap.slots, newCapacity * 2);
-                    ArrayHelpers.Grow(ref hashMap.data, newCapacity);
-
-                    var newBuckets = new int[newCapacity];
-
-                    fixed (int* slotsPtr = &hashMap.slots[0])
-                    fixed (int* bucketsPtr = &newBuckets[0]) {
-                        for (int i = 0, len = hashMap.lastIndex; i < len; i += 2) {
-                            var slotPtr = slotsPtr + i;
-
-                            var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
-                            var newCurrentBucket = bucketsPtr + newResizeIndex;
-
-                            *(slotPtr + 1) = *newCurrentBucket - 1;
-
-                            *newCurrentBucket = i + 1;
-                        }
-                    }
-
-                    hashMap.buckets          = newBuckets;
-                    hashMap.capacity         = newCapacity;
-                    hashMap.capacityMinusOne = newCapacityMinusOne;
-
-                    rem = key & hashMap.capacityMinusOne;
+                    hashMap.Resize(out rem, key);
                 }
 
                 slotIndex         =  hashMap.lastIndex;
                 hashMap.lastIndex += 2;
             }
 
-            fixed (int* slotsPtr = &hashMap.slots[0])
-            fixed (int* bucketsPtr = &hashMap.buckets[0])
-            fixed (T* dataPtr = &hashMap.data[0]) {
+            {
+                var slotsPtr = hashMap.slots.ptr;
+                var bucketsPtr = hashMap.buckets.ptr;
+                var dataPtr = hashMap.data.ptr;
                 var bucket = bucketsPtr + rem;
                 var slot   = slotsPtr + slotIndex;
 
@@ -84,9 +91,10 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Remove<T>(this UnsafeIntHashMap<T> hashMap, in int key, out T lastValue) where T : unmanaged {
-            fixed (int* slotsPtr = &hashMap.slots[0])
-            fixed (int* bucketsPtr = &hashMap.buckets[0])
-            fixed (T* dataPtr = &hashMap.data[0]) {
+            {
+                var slotsPtr = hashMap.slots.ptr;
+                var bucketsPtr = hashMap.buckets.ptr;
+                var dataPtr = hashMap.data.ptr;
                 var rem = key & hashMap.capacityMinusOne;
 
                 int next;
@@ -135,9 +143,10 @@ namespace Scellecs.Morpeh.Collections {
         public static bool TryGetValue<T>(this UnsafeIntHashMap<T> hashMap, in int key, out T value) where T : unmanaged {
             var rem = key & hashMap.capacityMinusOne;
 
-            fixed (int* slotsPtr = &hashMap.slots[0])
-            fixed (int* bucketsPtr = &hashMap.buckets[0])
-            fixed (T* dataPtr = &hashMap.data[0]) {
+            {
+                var slotsPtr = hashMap.slots.ptr;
+                var bucketsPtr = hashMap.buckets.ptr;
+                var dataPtr = hashMap.data.ptr;
                 int* slot;
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
                     slot = slotsPtr + i;
@@ -156,9 +165,10 @@ namespace Scellecs.Morpeh.Collections {
         public static T GetValueByKey<T>(this UnsafeIntHashMap<T> hashMap, in int key) where T : unmanaged {
             var rem = key & hashMap.capacityMinusOne;
 
-            fixed (int* slotsPtr = &hashMap.slots[0])
-            fixed (int* bucketsPtr = &hashMap.buckets[0])
-            fixed (T* dataPtr = &hashMap.data[0]) {
+            {
+                var slotsPtr = hashMap.slots.ptr;
+                var bucketsPtr = hashMap.buckets.ptr;
+                var dataPtr = hashMap.data.ptr;
                 int next;
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
                     if (*(slotsPtr + i) - 1 == key) {
@@ -173,25 +183,18 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetValueByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged {
-            fixed (T* d = &hashMap.data[0]) {
-                return *(d + index / 2);
-            }
-        }
+        public static T GetValueByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => hashMap.data.ptr[index / 2];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetKeyByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged {
-            fixed (int* d = &hashMap.slots[0]) {
-                return *(d + index) - 1;
-            }
-        }
+        public static int GetKeyByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => hashMap.slots.ptr[index] - 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int TryGetIndex<T>(this UnsafeIntHashMap<T> hashMap, in int key) where T : unmanaged {
             var rem = key & hashMap.capacityMinusOne;
 
-            fixed (int* slotsPtr = &hashMap.slots[0])
-            fixed (int* bucketsPtr = &hashMap.buckets[0]) {
+            {
+                var slotsPtr = hashMap.slots.ptr;
+                var bucketsPtr = hashMap.buckets.ptr;
                 int* slot;
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
                     slot = slotsPtr + i;
@@ -210,9 +213,9 @@ namespace Scellecs.Morpeh.Collections {
                 return;
             }
 
-            Array.Clear(hashMap.slots, 0, hashMap.lastIndex);
-            Array.Clear(hashMap.buckets, 0, hashMap.capacity);
-            Array.Clear(hashMap.data, 0, hashMap.capacity);
+            hashMap.slots.Clear();
+            hashMap.buckets.Clear();
+            hashMap.data.Clear();
 
             hashMap.lastIndex = 0;
             hashMap.length    = 0;
