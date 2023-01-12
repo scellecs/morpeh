@@ -4,12 +4,12 @@ namespace Scellecs.Morpeh.Collections {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
-
+    
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class UnsafeIntHashMap<T> : IEnumerable<int> where T : unmanaged {
+    public struct UnsafeStructIntHashMap<T> : IEnumerable<int>, IDisposable where T : unmanaged {
         public int length;
         public int capacity;
         public int capacityMinusOne;
@@ -22,7 +22,7 @@ namespace Scellecs.Morpeh.Collections {
         public PinnedArray<IntHashMapSlot> slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UnsafeIntHashMap(in int capacity = 0) {
+        public UnsafeStructIntHashMap(in int capacity = 0) {
             this.lastIndex = 0;
             this.length    = 0;
             this.freeIndex = -1;
@@ -33,12 +33,6 @@ namespace Scellecs.Morpeh.Collections {
             this.buckets = new PinnedArray<int>(this.capacity);
             this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
             this.data    = new PinnedArray<T>(this.capacity);
-        }
-
-        ~UnsafeIntHashMap() {
-            this.buckets.Dispose();
-            this.data.Dispose();
-            this.slots.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -58,7 +52,7 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public unsafe struct Enumerator : IEnumerator<int> {
-            public UnsafeIntHashMap<T> hashMap;
+            public UnsafeStructIntHashMap<T> hashMap;
 
             public int index;
             public int current;
@@ -94,6 +88,11 @@ namespace Scellecs.Morpeh.Collections {
 
             public void Dispose() {
             }
+        }
+        public void Dispose() {
+            this.buckets.Dispose();
+            this.data.Dispose();
+            this.slots.Dispose();
         }
     }
 }
