@@ -19,7 +19,7 @@ namespace Scellecs.Morpeh.Collections {
         public PinnedArray<int> buckets;
 
         public PinnedArray<T>   data;
-        public PinnedArray<int> slots;
+        public PinnedArray<IntHashMapSlot> slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UnsafeIntHashMap(in int capacity = 0) {
@@ -31,7 +31,7 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity         = this.capacityMinusOne + 1;
 
             this.buckets = new PinnedArray<int>(this.capacity);
-            this.slots   = new PinnedArray<int>(this.capacity * 2);
+            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
             this.data    = new PinnedArray<T>(this.capacity);
         }
 
@@ -61,7 +61,7 @@ namespace Scellecs.Morpeh.Collections {
                 {
                     var slotsPtr = this.hashMap.slots.ptr;
                     for (; this.index < this.hashMap.lastIndex; this.index += 2) {
-                        if (*(slotsPtr + this.index) - 1 < 0) {
+                        if (slotsPtr[this.index].key - 1 < 0) {
                             continue;
                         }
 

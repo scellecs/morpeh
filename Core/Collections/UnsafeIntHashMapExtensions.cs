@@ -12,7 +12,7 @@ namespace Scellecs.Morpeh.Collections {
             var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
             var newCapacity         = newCapacityMinusOne + 1;
 
-            hashMap.slots.Resize(newCapacity * 2);
+            hashMap.slots.Resize(newCapacity);
             hashMap.data.Resize(newCapacity);
 
             var newBuckets = new PinnedArray<int>(newCapacity);
@@ -20,13 +20,13 @@ namespace Scellecs.Morpeh.Collections {
             {
                 var slotsPtr = hashMap.slots.ptr;
                 var bucketsPtr = newBuckets.ptr;
-                for (int i = 0, len = hashMap.lastIndex; i < len; i += 2) {
-                    var slotPtr = slotsPtr + i;
+                for (int i = 0, len = hashMap.lastIndex; i < len; i++) {
+                    var slot = slotsPtr + i;
 
-                    var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                    var newResizeIndex   = (slot->key - 1) & newCapacityMinusOne;
                     var newCurrentBucket = bucketsPtr + newResizeIndex;
 
-                    *(slotPtr + 1) = *newCurrentBucket - 1;
+                    slot->next = *newCurrentBucket - 1;
 
                     *newCurrentBucket = i + 1;
                 }
@@ -47,10 +47,10 @@ namespace Scellecs.Morpeh.Collections {
             {
                 var slotsPtr = hashMap.slots.ptr;
                 var bucketsPtr = hashMap.buckets.ptr;
-                int* slot;
-                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                IntHashMapSlot* slot;
+                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = slot->next) {
                     slot = slotsPtr + i;
-                    if (*slot - 1 == key) {
+                    if (slot->key - 1 == key) {
                         slotIndex = -1;
                         return false;
                     }
@@ -59,15 +59,15 @@ namespace Scellecs.Morpeh.Collections {
 
             if (hashMap.freeIndex >= 0) {
                 slotIndex = hashMap.freeIndex;
-                hashMap.freeIndex = *(hashMap.slots.ptr + slotIndex + 1);
+                hashMap.freeIndex = hashMap.slots.ptr[slotIndex].next;
             }
             else {
-                if (hashMap.lastIndex == hashMap.capacity * 2) {
+                if (hashMap.lastIndex == hashMap.capacity) {
                     hashMap.Resize(out rem, key);
                 }
 
-                slotIndex         =  hashMap.lastIndex;
-                hashMap.lastIndex += 2;
+                slotIndex = hashMap.lastIndex;
+                hashMap.lastIndex++;
             }
 
             {
@@ -77,10 +77,10 @@ namespace Scellecs.Morpeh.Collections {
                 var bucket = bucketsPtr + rem;
                 var slot   = slotsPtr + slotIndex;
 
-                *slot       = key + 1;
-                *(slot + 1) = *bucket - 1;
+                slot->key  = key + 1;
+                slot->next = *bucket - 1;
 
-                *(dataPtr + slotIndex / 2) = value;
+                dataPtr[slotIndex] = value;
 
                 *bucket = slotIndex + 1;
             }
@@ -101,23 +101,22 @@ namespace Scellecs.Morpeh.Collections {
                 var num = -1;
 
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
-                    var slot     = slotsPtr + i;
-                    var slotNext = slot + 1;
+                    var slot = slotsPtr + i;
 
-                    if (*slot - 1 == key) {
+                    if (slot->key - 1 == key) {
                         if (num < 0) {
-                            *(bucketsPtr + rem) = *slotNext + 1;
+                            *(bucketsPtr + rem) = slot->next + 1;
                         }
                         else {
-                            *(slotsPtr + num + 1) = *slotNext;
+                            (slotsPtr + num)->next = slot->next;
                         }
 
                         var currentDataPtr = dataPtr + i / 2;
                         lastValue       = *currentDataPtr;
                         *currentDataPtr = default;
 
-                        *slot     = -1;
-                        *slotNext = hashMap.freeIndex;
+                        slot->key     = -1;
+                        slot->next = hashMap.freeIndex;
 
                         if (--hashMap.length == 0) {
                             hashMap.lastIndex = 0;
@@ -130,7 +129,7 @@ namespace Scellecs.Morpeh.Collections {
                         return true;
                     }
 
-                    next = *slotNext;
+                    next = slot->next;
                     num  = i;
                 }
 
@@ -147,10 +146,10 @@ namespace Scellecs.Morpeh.Collections {
                 var slotsPtr = hashMap.slots.ptr;
                 var bucketsPtr = hashMap.buckets.ptr;
                 var dataPtr = hashMap.data.ptr;
-                int* slot;
-                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                IntHashMapSlot* slot;
+                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = slot->next) {
                     slot = slotsPtr + i;
-                    if (*slot - 1 == key) {
+                    if (slot->key - 1 == key) {
                         value = *(dataPtr + i / 2);
                         return true;
                     }
@@ -169,13 +168,12 @@ namespace Scellecs.Morpeh.Collections {
                 var slotsPtr = hashMap.slots.ptr;
                 var bucketsPtr = hashMap.buckets.ptr;
                 var dataPtr = hashMap.data.ptr;
-                int next;
-                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
-                    if (*(slotsPtr + i) - 1 == key) {
+                IntHashMapSlot* slot;
+                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = slot->next) {
+                    slot = slotsPtr + i;
+                    if (slot->key - 1 == key) {
                         return *(dataPtr + i / 2);
                     }
-
-                    next = *(slotsPtr + i + 1);
                 }
             }
 
@@ -186,7 +184,7 @@ namespace Scellecs.Morpeh.Collections {
         public static T GetValueByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => hashMap.data.ptr[index / 2];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetKeyByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => hashMap.slots.ptr[index] - 1;
+        public static int GetKeyByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => (hashMap.slots.ptr + index)->key - 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int TryGetIndex<T>(this UnsafeIntHashMap<T> hashMap, in int key) where T : unmanaged {
@@ -195,10 +193,10 @@ namespace Scellecs.Morpeh.Collections {
             {
                 var slotsPtr = hashMap.slots.ptr;
                 var bucketsPtr = hashMap.buckets.ptr;
-                int* slot;
-                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                IntHashMapSlot* slot;
+                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = slot->next) {
                     slot = slotsPtr + i;
-                    if (*slot - 1 == key) {
+                    if (slot->key - 1 == key) {
                         return i;
                     }
                 }
