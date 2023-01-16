@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2022.2.1] - 16.01.2023
+### Changed
+- Change visibility of `EntityProvider.map` from private to public.
+
+### Fixed
+- Disable warnings for Unity 2021+
+
 ## [2022.2.0] - 28.12.2022
 ### Added
 - Added `ICleanupSystem` suitable for cleanup logic. Called by the most recent in LateUpdate by default.

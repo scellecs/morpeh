@@ -27,7 +27,9 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
         
         static CompilationTime() {
+ #pragma warning disable CS0618
             CompilationPipeline.assemblyCompilationStarted  += CompilationPipelineOnAssemblyCompilationStarted;
+ #pragma warning restore CS0618
             CompilationPipeline.assemblyCompilationFinished += CompilationPipelineOnAssemblyCompilationFinished;
             AssemblyReloadEvents.beforeAssemblyReload       += AssemblyReloadEventsOnBeforeAssemblyReload;
             AssemblyReloadEvents.afterAssemblyReload        += AssemblyReloadEventsOnAfterAssemblyReload;
