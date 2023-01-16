@@ -39,6 +39,9 @@ namespace Scellecs.Morpeh {
         public abstract bool Remove(Entity entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract void RemoveAll();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal abstract bool Clean(Entity entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -238,6 +241,27 @@ namespace Scellecs.Morpeh {
                 return true;
             }
             return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override void RemoveAll() {
+            world.ThreadSafetyCheck();
+
+            if (this.componentDispose != null) {
+                foreach (var index in this.components) {
+                    this.componentDispose.Invoke(ref this.components.data[index]);
+
+                    var entityId = this.components.GetKeyByIndex(index);
+                    this.world.GetEntity(entityId).RemoveTransfer(this.typeId);
+                }
+            } else {
+                foreach (var index in this.components) {
+                    var entityId = this.components.GetKeyByIndex(index);
+                    this.world.GetEntity(entityId).RemoveTransfer(this.typeId);
+                }
+            }
+
+            this.components.Clear();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
