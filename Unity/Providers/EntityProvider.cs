@@ -10,8 +10,8 @@ namespace Scellecs.Morpeh.Providers {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [AddComponentMenu("ECS/" + nameof(EntityProvider))]
     public class EntityProvider : MonoBehaviour {
-        private static IntHashMap<MapItem> map = new IntHashMap<MapItem>();
-        private struct MapItem {
+        public static IntHashMap<MapItem> map = new IntHashMap<MapItem>();
+        public struct MapItem {
             public Entity entity;
             public int    refCounter;
         }
