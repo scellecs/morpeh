@@ -94,6 +94,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_UNITY && !MORPEH_DISABLE_AUTOINITIALIZATION
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif
+        [PublicAPI]
         public static void InitializationDefaultWorld() {
             Stash.cleanup();
 
@@ -213,6 +214,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
         public static Stash GetReflectionStash(this World world, Type type) {
             world.ThreadSafetyCheck();
             
@@ -235,6 +237,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
         public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
             world.ThreadSafetyCheck();
             
@@ -252,8 +255,6 @@ namespace Scellecs.Morpeh {
             return stash;
         }
 
-
-
         public static void GlobalUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -263,6 +264,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
         public static void Update(this World world, float deltaTime) {
             world.ThreadSafetyCheck();
             
@@ -297,6 +299,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         public static void GlobalFixedUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -305,6 +308,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FixedUpdate(this World world, float deltaTime) {
             world.ThreadSafetyCheck();
@@ -319,6 +323,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         public static void GlobalLateUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -328,6 +333,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LateUpdate(this World world, float deltaTime) {
             world.ThreadSafetyCheck();
@@ -342,6 +348,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CleanupUpdate(this World world, float deltaTime) {
             world.ThreadSafetyCheck();
@@ -354,14 +361,19 @@ namespace Scellecs.Morpeh {
                 var systemsGroup = world.pluginSystemsGroups.data[i];
                 systemsGroup.CleanupUpdate(deltaTime);
             }
+#if MORPEH_BURST
+            world.JobHandle.Complete();
+#endif
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SystemsGroup CreateSystemsGroup(this World world) {
             world.ThreadSafetyCheck();
             return new SystemsGroup(world);
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
             world.ThreadSafetyCheck();
@@ -369,6 +381,7 @@ namespace Scellecs.Morpeh {
             world.newSystemsGroups.Add(order, systemsGroup);
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddPluginSystemsGroup(this World world, SystemsGroup systemsGroup) {
             world.ThreadSafetyCheck();
@@ -376,6 +389,7 @@ namespace Scellecs.Morpeh {
             world.newPluginSystemsGroups.Add(systemsGroup);
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveSystemsGroup(this World world, SystemsGroup systemsGroup) {
             world.ThreadSafetyCheck();
@@ -389,6 +403,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         public static Entity CreateEntity(this World world) {
             world.ThreadSafetyCheck();
             
@@ -414,6 +429,7 @@ namespace Scellecs.Morpeh {
             return world.entities[id];
         }
 
+        [PublicAPI]
         public static Entity CreateEntity(this World world, out int id) {
             world.ThreadSafetyCheck();
 
@@ -439,6 +455,7 @@ namespace Scellecs.Morpeh {
         }
 
         [CanBeNull]
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this World world, in int id) {
             world.ThreadSafetyCheck();
@@ -464,6 +481,7 @@ namespace Scellecs.Morpeh {
             return !entity.IsNullOrDisposed();
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveEntity(this World world, Entity entity) {
             world.ThreadSafetyCheck();
@@ -481,6 +499,7 @@ namespace Scellecs.Morpeh {
             --world.entitiesCount;
         }
 
+        [PublicAPI]
         public static void Commit(this World world) {
             world.ThreadSafetyCheck();
             
@@ -506,12 +525,14 @@ namespace Scellecs.Morpeh {
             MLogger.EndSample();
         }
 
+        [PublicAPI]
         public static void SetFriendlyName(this World world, string friendlyName) {
             world.ThreadSafetyCheck();
             
             world.friendlyName = friendlyName;
         }
 
+        [PublicAPI]
         public static string GetFriendlyName(this World world) {
             world.ThreadSafetyCheck();
             
@@ -522,13 +543,14 @@ namespace Scellecs.Morpeh {
             return world.friendlyName;
         }
 
+        [PublicAPI]
         public static void SetThreadId(this World world, int threadId) {
             world.ThreadSafetyCheck();
             world.threadIdLock = threadId;
         }
         
+        [PublicAPI]
         public static int GetThreadId(this World world) {
-            world.ThreadSafetyCheck();
             return world.threadIdLock;
         }
 
@@ -544,6 +566,7 @@ namespace Scellecs.Morpeh {
             }
         }
         
+        [PublicAPI]
         public static AspectFactory<T> GetAspectFactory<T>(this World world) where T : struct, IAspect {
             world.ThreadSafetyCheck();
             var aspectFactory = default(AspectFactory<T>);

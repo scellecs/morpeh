@@ -16,7 +16,6 @@ namespace Scellecs.Morpeh {
 #if MORPEH_BURST
     using Unity.Jobs;
 #endif
-    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -100,7 +99,6 @@ namespace Scellecs.Morpeh {
 
         [ShowInInspector]
         internal int threadIdLock;
-        
 
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
