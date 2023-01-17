@@ -511,6 +511,13 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
             MLogger.BeginSample("World.Commit()");
+#if MORPEH_DEBUG && MORPEH_BURST
+            if (world.dirtyEntities.count > 0 && (world.JobHandle.IsCompleted == false)) {
+                MLogger.LogError("[MORPEH] You have changed entities before all scheduled jobs are completed. This may lead to unexpected behavior or crash. Jobs will be forced.");
+                world.JobsComplete();
+            }
+#endif
+            
             foreach (var entityId in world.dirtyEntities) {
                 world.entities[entityId]?.ApplyTransfer();
             }
