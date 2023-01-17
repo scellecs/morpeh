@@ -1,14 +1,13 @@
 namespace Scellecs.Morpeh.Collections {
-    using System;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public static unsafe class UnsafeIntHashMapExtensions {
+    public static unsafe class UnsafeStructIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void Resize<T>(this UnsafeIntHashMap<T> hashMap, out int rem, int key) where T : unmanaged {
+        private static void Resize<T>(this UnsafeStructIntHashMap<T> hashMap, out int rem, int key) where T : unmanaged {
             var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
             var newCapacity         = newCapacityMinusOne + 1;
 
@@ -41,7 +40,7 @@ namespace Scellecs.Morpeh.Collections {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Add<T>(this UnsafeIntHashMap<T> hashMap, in int key, in T value, out int slotIndex) where T : unmanaged {
+        public static bool Add<T>(this UnsafeStructIntHashMap<T> hashMap, in int key, in T value, out int slotIndex) where T : unmanaged {
             var rem = key & hashMap.capacityMinusOne;
 
             {
@@ -90,7 +89,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Remove<T>(this UnsafeIntHashMap<T> hashMap, in int key, out T lastValue) where T : unmanaged {
+        public static bool Remove<T>(this UnsafeStructIntHashMap<T> hashMap, in int key, out T lastValue) where T : unmanaged {
             {
                 var slotsPtr = hashMap.slots.ptr;
                 var bucketsPtr = hashMap.buckets.ptr;
@@ -139,7 +138,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryGetValue<T>(this UnsafeIntHashMap<T> hashMap, in int key, out T value) where T : unmanaged {
+        public static bool TryGetValue<T>(this UnsafeStructIntHashMap<T> hashMap, in int key, out T value) where T : unmanaged {
             var rem = key & hashMap.capacityMinusOne;
 
             {
@@ -161,7 +160,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetValueByKey<T>(this UnsafeIntHashMap<T> hashMap, in int key) where T : unmanaged {
+        public static T GetValueByKey<T>(this UnsafeStructIntHashMap<T> hashMap, in int key) where T : unmanaged {
             var rem = key & hashMap.capacityMinusOne;
 
             {
@@ -181,13 +180,13 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetValueByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => hashMap.data.ptr[index / 2];
+        public static T GetValueByIndex<T>(this UnsafeStructIntHashMap<T> hashMap, in int index) where T : unmanaged => hashMap.data.ptr[index / 2];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetKeyByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => (hashMap.slots.ptr + index)->key - 1;
+        public static int GetKeyByIndex<T>(this UnsafeStructIntHashMap<T> hashMap, in int index) where T : unmanaged => (hashMap.slots.ptr + index)->key - 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TryGetIndex<T>(this UnsafeIntHashMap<T> hashMap, in int key) where T : unmanaged {
+        public static int TryGetIndex<T>(this UnsafeStructIntHashMap<T> hashMap, in int key) where T : unmanaged {
             var rem = key & hashMap.capacityMinusOne;
 
             {
@@ -206,7 +205,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Clear<T>(this UnsafeIntHashMap<T> hashMap) where T : unmanaged {
+        public static void Clear<T>(this UnsafeStructIntHashMap<T> hashMap) where T : unmanaged {
             if (hashMap.lastIndex <= 0) {
                 return;
             }

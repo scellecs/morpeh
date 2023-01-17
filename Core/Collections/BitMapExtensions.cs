@@ -1,6 +1,7 @@
 namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -14,9 +15,10 @@ namespace Scellecs.Morpeh.Collections {
 
             var rem = dataIndex & bitmap.capacityMinusOne;
 
-            fixed (int* slotsPtr = &bitmap.slots[0])
-            fixed (int* bucketsPtr = &bitmap.buckets[0])
-            fixed (int* dataPtr = &bitmap.data[0]) {
+            {
+                var slotsPtr = bitmap.slots.ptr;
+                var bucketsPtr = bitmap.buckets.ptr;
+                var dataPtr = bitmap.data.ptr;
                 int* slot;
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
                     slot = slotsPtr + i;
@@ -41,48 +43,25 @@ namespace Scellecs.Morpeh.Collections {
             int slotIndex;
             if (bitmap.freeIndex >= 0) {
                 slotIndex = bitmap.freeIndex;
-                fixed (int* slotsPtr = &bitmap.slots[0]) {
+                {
+                    var slotsPtr = bitmap.slots.ptr;
                     bitmap.freeIndex = *(slotsPtr + slotIndex + 1);
                 }
             }
             else {
                 if (bitmap.lastIndex == bitmap.capacity << 1) {
-                    var newCapacityMinusOne = HashHelpers.ExpandCapacitySmall(bitmap.length);
-                    var newCapacity         = newCapacityMinusOne + 1;
-
-                    ArrayHelpers.Grow(ref bitmap.slots, newCapacity << 1);
-                    ArrayHelpers.Grow(ref bitmap.data, newCapacity);
-
-                    var newBuckets = new int[newCapacity];
-
-                    fixed (int* slotsPtr = &bitmap.slots[0])
-                    fixed (int* newBucketsPtr = &newBuckets[0]) {
-                        for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
-                            var slotPtr = slotsPtr + i;
-
-                            var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
-                            var newCurrentBucket = newBucketsPtr + newResizeIndex;
-
-                            *(slotPtr + 1) = *newCurrentBucket - 1;
-
-                            *newCurrentBucket = i + 1;
-                        }
-                    }
-
-                    bitmap.buckets          = newBuckets;
-                    bitmap.capacity         = newCapacity;
-                    bitmap.capacityMinusOne = newCapacityMinusOne;
-
-                    rem = dataIndex & bitmap.capacityMinusOne;
+                    bitmap.Resize(out rem, dataIndex);
                 }
 
                 slotIndex        =  bitmap.lastIndex;
                 bitmap.lastIndex += 2;
             }
 
-            fixed (int* slotsPtr = &bitmap.slots[0])
-            fixed (int* bucketsPtr = &bitmap.buckets[0])
-            fixed (int* dataPtr = &bitmap.data[0]) {
+            {
+                var slotsPtr = bitmap.slots.ptr;
+                var bucketsPtr = bitmap.buckets.ptr;
+                var dataPtr = bitmap.data.ptr;
+                
                 var bucket = bucketsPtr + rem;
                 var slot   = slotsPtr + slotIndex;
 
@@ -98,6 +77,40 @@ namespace Scellecs.Morpeh.Collections {
             ++bitmap.count;
             return true;
         }
+        
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void Resize(this BitMap bitmap, out int rem, int dataIndex) {
+            var newCapacityMinusOne = HashHelpers.ExpandCapacitySmall(bitmap.length);
+            var newCapacity         = newCapacityMinusOne + 1;
+
+            bitmap.slots.Resize(newCapacity << 1);
+            bitmap.data.Resize(newCapacity);
+
+            var newBuckets = new PinnedArray<int>(newCapacity);
+
+            {
+                var slotsPtr = bitmap.slots.ptr;
+                var newBucketsPtr = newBuckets.ptr;
+                for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
+                    var slotPtr = slotsPtr + i;
+
+                    var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                    var newCurrentBucket = newBucketsPtr + newResizeIndex;
+
+                    *(slotPtr + 1) = *newCurrentBucket - 1;
+
+                    *newCurrentBucket = i + 1;
+                }
+            }
+
+            bitmap.buckets.Dispose();
+            bitmap.buckets          = newBuckets;
+            bitmap.capacity         = newCapacity;
+            bitmap.capacityMinusOne = newCapacityMinusOne;
+
+            rem = dataIndex & bitmap.capacityMinusOne;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Unset(this BitMap bitmap, in int key) {
@@ -105,9 +118,10 @@ namespace Scellecs.Morpeh.Collections {
             var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
             var rem       = dataIndex & bitmap.capacityMinusOne;
 
-            fixed (int* slotsPtr = &bitmap.slots[0])
-            fixed (int* bucketsPtr = &bitmap.buckets[0])
-            fixed (int* dataPtr = &bitmap.data[0]) {
+            {
+                var slotsPtr = bitmap.slots.ptr;
+                var bucketsPtr = bitmap.buckets.ptr;
+                var dataPtr = bitmap.data.ptr;
                 int next;
                 var num = -1;
 
@@ -163,9 +177,10 @@ namespace Scellecs.Morpeh.Collections {
 
             var rem = dataIndex & bitmap.capacityMinusOne;
 
-            fixed (int* slotsPtr = &bitmap.slots[0])
-            fixed (int* bucketsPtr = &bitmap.buckets[0])
-            fixed (int* dataPtr = &bitmap.data[0]) {
+            {
+                var slotsPtr = bitmap.slots.ptr;
+                var bucketsPtr = bitmap.buckets.ptr;
+                var dataPtr = bitmap.data.ptr;
                 int* slot;
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
                     slot = slotsPtr + i;
@@ -184,9 +199,9 @@ namespace Scellecs.Morpeh.Collections {
                 return;
             }
 
-            Array.Clear(bitMap.slots, 0, bitMap.lastIndex);
-            Array.Clear(bitMap.buckets, 0, bitMap.capacity);
-            Array.Clear(bitMap.data, 0, bitMap.capacity);
+            bitMap.slots.Clear();
+            bitMap.buckets.Clear();
+            bitMap.data.Clear();
 
             bitMap.lastIndex = 0;
             bitMap.count     = 0;

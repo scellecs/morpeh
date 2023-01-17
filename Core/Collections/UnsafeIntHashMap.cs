@@ -16,10 +16,10 @@ namespace Scellecs.Morpeh.Collections {
         public int lastIndex;
         public int freeIndex;
 
-        public int[] buckets;
+        public PinnedArray<int> buckets;
 
-        public T[]   data;
-        public int[] slots;
+        public PinnedArray<T>   data;
+        public PinnedArray<IntHashMapSlot> slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UnsafeIntHashMap(in int capacity = 0) {
@@ -30,9 +30,15 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
             this.capacity         = this.capacityMinusOne + 1;
 
-            this.buckets = new int[this.capacity];
-            this.slots   = new int[this.capacity * 2];
-            this.data    = new T[this.capacity];
+            this.buckets = new PinnedArray<int>(this.capacity);
+            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
+            this.data    = new PinnedArray<T>(this.capacity);
+        }
+
+        ~UnsafeIntHashMap() {
+            this.buckets.Dispose();
+            this.data.Dispose();
+            this.slots.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -58,9 +64,10 @@ namespace Scellecs.Morpeh.Collections {
             public int current;
 
             public bool MoveNext() {
-                fixed (int* slotsPtr = &this.hashMap.slots[0]) {
+                {
+                    var slotsPtr = this.hashMap.slots.ptr;
                     for (; this.index < this.hashMap.lastIndex; this.index += 2) {
-                        if (*(slotsPtr + this.index) - 1 < 0) {
+                        if (slotsPtr[this.index].key - 1 < 0) {
                             continue;
                         }
 
