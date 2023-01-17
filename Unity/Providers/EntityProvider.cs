@@ -74,7 +74,10 @@ namespace Scellecs.Morpeh.Providers {
             this.Initialize();
         }
 
-        protected virtual void OnDisable() {
+        private protected virtual void OnDisable() {
+            this.PreDeinitialize();
+            this.Deinitialize();
+            
             var instanceId = this.gameObject.GetInstanceID();
             if (map.TryGetValue(instanceId, out var item)) {
                 if (--item.refCounter <= 0) {
@@ -89,6 +92,12 @@ namespace Scellecs.Morpeh.Providers {
         }
 
         protected virtual void Initialize() {
+        }
+        
+        protected virtual void PreDeinitialize() {
+        }
+
+        protected virtual void Deinitialize() {
         }
 
 #if UNITY_EDITOR && ODIN_INSPECTOR

@@ -53,7 +53,7 @@
             }
         }
 
-        protected override void OnDisable() {
+        protected override void PreDeinitialize() {
             var ent = this.Entity;
             if (ent.IsNullOrDisposed() == false) {
                 foreach (var component in this.serializedComponents) {
@@ -67,7 +67,6 @@
                     }
                 }
             }
-            base.OnDisable();
         }
         
         private class TypeComponentEqualityComparer : IEqualityComparer<IComponent> {

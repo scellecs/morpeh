@@ -79,12 +79,11 @@
             this.Stash.Set(this.Entity, this.serializedData);
         }
 
-        protected override void OnDisable() {
+        protected sealed override void PreDeinitialize() {
             var ent = this.Entity;
             if (ent.IsNullOrDisposed() == false) {
                 this.Stash.Remove(ent);
             }
-            base.OnDisable();
         }
     }
 }
