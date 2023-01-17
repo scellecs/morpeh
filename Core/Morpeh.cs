@@ -117,6 +117,8 @@ namespace JetBrains.Annotations {
     public sealed class NotNullAttribute : Attribute { }
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Delegate)]
     public sealed class CanBeNullAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Delegate)]
+    public sealed class PublicAPIAttribute : Attribute { }
 #endif
 }
 

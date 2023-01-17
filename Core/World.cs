@@ -13,98 +13,100 @@ namespace Scellecs.Morpeh {
     using JetBrains.Annotations;
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
+#if MORPEH_BURST
+    using Unity.Jobs;
+#endif
     using UnityEngine;
 
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
-#endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class World : IDisposable {
         [CanBeNull]
+        [PublicAPI]
         public static World Default => worlds.data[0];
         [NotNull]
+        [PublicAPI]
         internal static FastList<World> worlds = new FastList<World> { null };
 
-        [NonSerialized]
+        [PublicAPI]
+        [NotNull]
         public Filter Filter;
-        [SerializeField]
+        [PublicAPI]
         public bool UpdateByUnity;
-
-        [NonSerialized]
+#if MORPEH_BURST
+        [PublicAPI]
+        public JobHandle JobHandle;
+#endif
         internal FastList<Filter> filters;
 
         //todo custom collection
         [ShowInInspector]
-        [NonSerialized]
         internal SortedList<int, SystemsGroup> systemsGroups;
         
         //todo custom collection
         [ShowInInspector]
-        [NonSerialized]
         internal FastList<SystemsGroup> pluginSystemsGroups;
 
         //todo custom collection
         [ShowInInspector]
-        [NonSerialized]
         internal SortedList<int, SystemsGroup> newSystemsGroups;
         
         //todo custom collection
         [ShowInInspector]
-        [NonSerialized]
         internal FastList<SystemsGroup> newPluginSystemsGroups;
 
-        [SerializeField]
+        [ShowInInspector]
         internal Entity[] entities;
 
-        [SerializeField]
+        [ShowInInspector]
         internal int[] entitiesGens;
         
         //real entities count
-        [SerializeField]
+        [ShowInInspector]
         internal int entitiesCount;
         //count + unused slots
-        [SerializeField]
+        [ShowInInspector]
         internal int entitiesLength;
         //all possible slots
-        [SerializeField]
+        [ShowInInspector]
         internal int entitiesCapacity;
 
-        [NonSerialized]
         internal BitMap dirtyEntities;
 
-        [SerializeField]
+        [ShowInInspector]
         internal IntFastList freeEntityIDs;
-        [SerializeField]
+        [ShowInInspector]
         internal IntFastList nextFreeEntityIDs;
 
-        [SerializeField]
+        [ShowInInspector]
         internal UnsafeIntHashMap<int> stashes;
-        [SerializeField]
+        [ShowInInspector]
         internal UnsafeIntHashMap<int> typedStashes;
 
-        [SerializeField]
+        [ShowInInspector]
         internal FastList<Archetype> archetypes;
-        [SerializeField]
+        [ShowInInspector]
         internal IntHashMap<IntFastList> archetypesByLength;
-        [SerializeField]
+        [ShowInInspector]
         internal IntFastList newArchetypes;
-        [NonSerialized]
         internal IntFastList archetypeCache;
 
-        [SerializeField]
+        [ShowInInspector]
         internal int identifier;
 
-        [SerializeField]
+        [ShowInInspector]
         internal string friendlyName;
 
-        [SerializeField]
+        [ShowInInspector]
         internal int threadIdLock;
+        
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
 
+        [PublicAPI]
         public static World Create(string friendlyName) {
             var world = Create();
             world.SetFriendlyName(friendlyName);
@@ -114,6 +116,7 @@ namespace Scellecs.Morpeh {
         private World() => this.Ctor();
 
         //todo rework defines to conditionals
+        [PublicAPI]
         public void Dispose() {
             foreach (var systemsGroup in this.systemsGroups.Values) {
 #if MORPEH_DEBUG
