@@ -43,12 +43,4 @@ namespace Scellecs.Morpeh {
         internal Entity() {
         }
     }
-    
-    [Serializable]
-    [Il2CppSetOption(Option.NullChecks, false)]
-    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public struct EntityData {
-        public UnsafeStructIntHashMap<int> components;
-    }
 }

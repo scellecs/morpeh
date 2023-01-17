@@ -329,6 +329,7 @@ namespace Scellecs.Morpeh {
                 if (world.UpdateByUnity) {
                     world.LateUpdate(deltaTime);
                     world.CleanupUpdate(deltaTime);
+                    world.JobsComplete();
                 }
             }
         }
@@ -361,6 +362,12 @@ namespace Scellecs.Morpeh {
                 var systemsGroup = world.pluginSystemsGroups.data[i];
                 systemsGroup.CleanupUpdate(deltaTime);
             }
+        }
+
+        [PublicAPI]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void JobsComplete(this World world) {
+            world.ThreadSafetyCheck();
 #if MORPEH_BURST
             world.JobHandle.Complete();
 #endif
