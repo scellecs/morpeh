@@ -3,6 +3,7 @@ namespace Scellecs.Morpeh {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Collections;
+    using JetBrains.Annotations;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
 
@@ -234,6 +235,7 @@ namespace Scellecs.Morpeh {
                 }
             }
 
+            [NotNull]
             public Entity Current => this.current;
 
             object IEnumerator.Current => this.current;

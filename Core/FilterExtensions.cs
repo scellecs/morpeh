@@ -125,9 +125,10 @@ namespace Scellecs.Morpeh {
             }
         }
 
-        [CanBeNull]
+        [NotNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this Filter filter, in int id) {
+            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             for (int i = 0, length = id + 1; i < length; i++) {
                 if (enumerator.MoveNext() == false) {
@@ -138,9 +139,10 @@ namespace Scellecs.Morpeh {
             return enumerator.Current;
         }
 
-        [CanBeNull]
+        [NotNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity First(this Filter filter) {
+            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             if (enumerator.MoveNext()) {
                 return enumerator.Current;
@@ -152,6 +154,7 @@ namespace Scellecs.Morpeh {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
+            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             if (enumerator.MoveNext()) {
                 return enumerator.Current;
