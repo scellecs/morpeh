@@ -45,6 +45,7 @@ namespace Scellecs.Morpeh {
 
                 systemsGroup.newInitializers.Clear();
             }
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 
@@ -64,6 +65,7 @@ namespace Scellecs.Morpeh {
             }
 
             systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 
@@ -83,6 +85,7 @@ namespace Scellecs.Morpeh {
             }
 
             systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 
@@ -101,6 +104,7 @@ namespace Scellecs.Morpeh {
             }
 
             systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
         
@@ -119,6 +123,7 @@ namespace Scellecs.Morpeh {
             }
 
             systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 

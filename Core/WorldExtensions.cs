@@ -329,7 +329,6 @@ namespace Scellecs.Morpeh {
                 if (world.UpdateByUnity) {
                     world.LateUpdate(deltaTime);
                     world.CleanupUpdate(deltaTime);
-                    world.JobsComplete();
                 }
             }
         }
