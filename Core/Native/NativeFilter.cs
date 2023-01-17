@@ -1,47 +1,39 @@
 ﻿#if MORPEH_BURST
 namespace Scellecs.Morpeh.Native {
-    using System;
     using Unity.Collections;
-    using Unity.Jobs;
 
-    public struct NativeFilter : IDisposable {
+    public unsafe struct NativeFilter {
         [ReadOnly]
         public int length;
 
         [ReadOnly]
-        public NativeArray<NativeArchetype> archetypes;
+        public NativeFastList<Filter.Chunk> chunks;
+        
+        [ReadOnly]
+        public int archetypesLength;
         
         [ReadOnly]
         public NativeWorld world;
 
-        public unsafe EntityId this[int index] {
+        public EntityId this[int index] {
             get {
-                var totalArchetypeLength = 0;
-                for (int archetypeNum = 0, archetypesCount = this.archetypes.Length; archetypeNum < archetypesCount; archetypeNum++) {
-                    var archetype       = this.archetypes[archetypeNum];
-                    var archetypeLength = *archetype.lengthPtr;
+                var totalChunkLength = 0;
+                for (int archetypeNum = 0, archetypesCount = this.archetypesLength; archetypeNum < archetypesCount; archetypeNum++) {
+                    var chunk       = this.chunks.data[archetypeNum];
+                    var chunkLength = chunk.entitiesLength;
 
-                    if (index >= totalArchetypeLength && index < totalArchetypeLength + archetypeLength) {
-                        var slotIndex = index - totalArchetypeLength;
-                        var entityId = archetype.entities.data[slotIndex];
+                    if (index >= totalChunkLength && index < totalChunkLength + chunkLength) {
+                        var slotIndex = index - totalChunkLength;
+                        var entityId = chunk.entities[slotIndex];
                         
                         return new EntityId(entityId, this.world.entitiesGens[entityId]);
                     }
 
-                    totalArchetypeLength += archetypeLength;
+                    totalChunkLength += chunkLength;
                 }
 
                 return EntityId.Invalid;
             }
-        }
-
-        // Dispose pattern justification: 'archetypes' is an allocated NativeArray
-        public void Dispose() {
-            this.archetypes.Dispose();
-        }
-        
-        public JobHandle Dispose(JobHandle inputDeps) {
-            return this.archetypes.Dispose(inputDeps);
         }
     }
 }

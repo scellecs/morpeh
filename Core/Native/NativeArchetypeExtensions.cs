@@ -5,27 +5,25 @@ namespace Scellecs.Morpeh.Native {
 
     public static class NativeArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe NativeArchetype AsNative(this Archetype archetype) {
+        internal static unsafe Filter.Chunk AsChunk(this Archetype archetype) {
             if (archetype.usedInNative == false) {
-                var list = archetype.entitiesNative = new FastList<int>(archetype.entities.count);
-                
+                var data = archetype.entitiesNative;
+                data.Resize(archetype.entities.count);
+
                 foreach (var entityId in archetype.entities) {
-                    archetype.world.entities[entityId].indexInCurrentArchetype = list.Add(entityId);
+                    archetype.world.entities[entityId].indexInCurrentArchetype = data.Add(entityId);
                 }
 
                 archetype.entities     = null;
                 archetype.usedInNative = true;
             }
             
-            var nativeArchetype = new NativeArchetype {
-                entities = archetype.entitiesNative.AsNative()
+            var chunk = new Filter.Chunk {
+                entities = archetype.entitiesNative.data.ptr,
+                entitiesLength = archetype.entitiesNative.length
             };
-
-            fixed (int* lengthPtr = &archetype.length) {
-                nativeArchetype.lengthPtr = lengthPtr;
-            }
-
-            return nativeArchetype;
+            
+            return chunk;
         }
     }
 }

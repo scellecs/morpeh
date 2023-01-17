@@ -33,6 +33,9 @@ namespace Scellecs.Morpeh {
                 filter.archetypes.Clear();
                 filter.archetypes = null;
             }
+            
+            filter.chunks.Clear();
+            filter.chunks = null;
 
             filter.includedTypeIds?.Clear();
             filter.includedTypeIds = null;
@@ -50,6 +53,9 @@ namespace Scellecs.Morpeh {
                 var arch = filter.world.archetypes.data[archId];
                 filter.CheckArchetype(arch, minLength);
             }
+            if (filter.chunks.capacity < filter.archetypes.length) {
+                filter.chunks.Resize(filter.archetypes.capacity);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -57,6 +63,9 @@ namespace Scellecs.Morpeh {
             var minLength = filter.includedTypeIds.length;
             foreach (var arch in filter.world.archetypes) {
                 filter.CheckArchetype(arch, minLength);
+            }
+            if (filter.chunks.capacity < filter.archetypes.length) {
+                filter.chunks.Resize(filter.archetypes.capacity);
             }
         }
 

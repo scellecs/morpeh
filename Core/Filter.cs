@@ -3,12 +3,22 @@ namespace Scellecs.Morpeh {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Collections;
+    using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class Filter : IEnumerable<Entity> {
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        public unsafe struct Chunk {
+            [NativeDisableUnsafePtrRestriction]
+            public int* entities;
+            public int entitiesLength;
+        }
+        
         internal enum Mode {
             None    = 0,
             Include = 1,
@@ -19,6 +29,7 @@ namespace Scellecs.Morpeh {
 
         internal FastList<Filter>    childs;
         internal FastList<Archetype> archetypes;
+        internal FastList<Chunk> chunks;
 
         internal IntFastList includedTypeIds;
         internal IntFastList excludedTypeIds;
@@ -44,6 +55,7 @@ namespace Scellecs.Morpeh {
 
             this.childs     = new FastList<Filter>();
             this.archetypes = new FastList<Archetype>();
+            this.chunks     = new FastList<Chunk>();
 
             this.typeID          = typeID;
             this.includedTypeIds = includedTypeIds;
@@ -81,11 +93,11 @@ namespace Scellecs.Morpeh {
             private World world;
 
             private BitMap archetypeEntities;
-            private FastList<int> archetypeEntitiesNative;
+            private UnsafeFastList<int> archetypeEntitiesNative;
 
-            private bool                     currentArchetypeIsNative;
-            private FastList<int>.Enumerator currentEnumeratorNative;
-            private BitMap.Enumerator        currentEnumerator;
+            private bool                        currentArchetypeIsNative;
+            private UnsafeFastList<int>.Enumerator currentEnumeratorNative;
+            private BitMap.Enumerator           currentEnumerator;
 
             internal EntityEnumerator(Filter filter) {
                 this.world      = filter.world;

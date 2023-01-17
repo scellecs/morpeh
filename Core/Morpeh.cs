@@ -96,6 +96,13 @@ internal class Il2CppSetOptionAttribute : Attribute {
     }
 }
 
+namespace Unity.Collections.LowLevel.Unsafe {
+    #if !MORPEH_UNITY
+    using System;
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class NativeDisableUnsafePtrRestrictionAttributeAttribute : Attribute { }
+#endif
+}
 
 namespace UnityEngine {
 #if !MORPEH_UNITY

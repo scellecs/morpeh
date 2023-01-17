@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh {
         [SerializeField]
         internal BitMap entities;
         [SerializeField]
-        internal FastList<int> entitiesNative;
+        internal UnsafeFastList<int> entitiesNative;
         [NonSerialized]
         internal FastList<Filter> filters;
         [SerializeField]
@@ -40,6 +40,7 @@ namespace Scellecs.Morpeh {
             this.typeIds        = typeIds;
             this.length         = 0;
             this.entities       = new BitMap();
+            this.entitiesNative = new UnsafeFastList<int>(0);
             this.addTransfer    = new UnsafeIntHashMap<int>();
             this.removeTransfer = new UnsafeIntHashMap<int>();
             this.usedInNative   = false;

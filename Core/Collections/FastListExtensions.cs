@@ -8,10 +8,20 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class FastListExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Expand<T>(this FastList<T> list) where T : unmanaged {
+            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Resize<T>(this FastList<T> list, int newCapacity) where T : unmanaged {
+            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacitySmall(newCapacity - 1) + 1);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Add<T>(this FastList<T> list) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity <<= 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
             }
 
             return index;
@@ -21,7 +31,7 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add<T>(this FastList<T> list, T value) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity <<= 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
             }
 
             list.data[index] = value;
@@ -32,12 +42,9 @@ namespace Scellecs.Morpeh.Collections {
         public static void AddListRange<T>(this FastList<T> list, FastList<T> other) {
             if (other.length > 0) {
                 var newSize = list.length + other.length;
+                
                 if (newSize > list.capacity) {
-                    while (newSize > list.capacity) {
-                        list.capacity <<= 1;
-                    }
-
-                    ArrayHelpers.Grow(ref list.data, list.capacity);
+                    ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacitySmall(newSize - 1) + 1);
                 }
 
                 if (list == other) {

@@ -9,8 +9,8 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class FastList<T> : IEnumerable<T> {
-        public T[] data;
+    public sealed unsafe class UnsafeFastList<T> : IEnumerable<T> where T : unmanaged {
+        public PinnedArray<T> data;
         public int length;
         public int capacity;
         public int lastSwappedIndex;
@@ -18,9 +18,9 @@ namespace Scellecs.Morpeh.Collections {
         public EqualityComparer<T> comparer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FastList() {
-            this.capacity = 4;
-            this.data     = new T[this.capacity];
+        public UnsafeFastList() {
+            this.capacity = 3;
+            this.data     = new PinnedArray<T>(this.capacity);
             this.length   = 0;
             this.lastSwappedIndex = -1;
 
@@ -28,9 +28,9 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FastList(int capacity) {
-            this.capacity = HashHelpers.GetCapacity(capacity) + 1;
-            this.data     = new T[this.capacity];
+        public UnsafeFastList(int capacity) {
+            this.capacity = HashHelpers.GetCapacity(capacity);
+            this.data     = new PinnedArray<T>(this.capacity);
             this.length   = 0;
             this.lastSwappedIndex = -1;
 
@@ -38,12 +38,12 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public FastList(FastList<T> other) {
+        public UnsafeFastList(UnsafeFastList<T> other) {
             this.capacity = other.capacity;
-            this.data     = new T[this.capacity];
+            this.data     = new PinnedArray<T>(this.capacity);
             this.length   = other.length;
             this.lastSwappedIndex = -1;
-            Array.Copy(other.data, 0, this.data, 0, this.length);
+            Array.Copy(other.data.data, 0, this.data.data, 0, this.length);
 
             this.comparer = other.comparer;
         }
@@ -75,7 +75,7 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator : IEnumerator<T> {
-            public FastList<T> list;
+            public UnsafeFastList<T> list;
 
             public int length;
             public T   current;
@@ -97,7 +97,7 @@ namespace Scellecs.Morpeh.Collections {
                     return false;
                 }
 
-                this.current = this.list.data[this.index++];
+                this.current = this.list.data.ptr[this.index++];
                 this.list.lastSwappedIndex = -1;
 
                 return true;
