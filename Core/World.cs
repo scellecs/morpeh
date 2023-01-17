@@ -74,9 +74,9 @@ namespace Scellecs.Morpeh {
         internal BitMap dirtyEntities;
 
         [ShowInInspector]
-        internal IntFastList freeEntityIDs;
+        internal IntStack freeEntityIDs;
         [ShowInInspector]
-        internal IntFastList nextFreeEntityIDs;
+        internal IntStack nextFreeEntityIDs;
 
         [ShowInInspector]
         internal UnsafeIntHashMap<int> stashes;

@@ -27,18 +27,15 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe int IndexOfUnsafeInt(int[] array, int value) {
-            fixed (int* arr = &array[0]) {
-                var i = 0;
-                for (int* current = arr, length = arr + array.Length; current < length; ++current) {
-                    if (*current == value) {
-                        return i;
-                    }
-
-                    ++i;
+        public static unsafe int IndexOfUnsafeInt(int* array, int length, int value) {
+            var i = 0;
+            for (int* current = array, len = array + length; current < len; ++current) {
+                if (*current == value) {
+                    return i;
                 }
-            }
 
+                ++i;
+            }
 
             return -1;
         }

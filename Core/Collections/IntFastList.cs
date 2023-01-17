@@ -13,28 +13,28 @@ namespace Scellecs.Morpeh.Collections {
         public int length;
         public int capacity;
 
-        public int[] data;
+        public PinnedArray<int> data;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList() {
             this.capacity = 3;
-            this.data     = new int[this.capacity];
+            this.data     = new PinnedArray<int>(this.capacity);
             this.length   = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList(int capacity) {
             this.capacity = HashHelpers.GetCapacity(capacity);
-            this.data     = new int[this.capacity];
+            this.data     = new PinnedArray<int>(this.capacity);
             this.length   = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList(IntFastList other) {
             this.capacity = other.capacity;
-            this.data     = new int[this.capacity];
+            this.data     = new PinnedArray<int>(this.capacity);
             this.length   = other.length;
-            Array.Copy(other.data, 0, this.data, 0, this.length);
+            Array.Copy(other.data.data, 0, this.data.data, 0, this.length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -72,9 +72,7 @@ namespace Scellecs.Morpeh.Collections {
                     return false;
                 }
 
-                fixed (int* d = &this.intFastList.data[0]) {
-                    this.current = *(d + this.index++);
-                }
+                this.current = this.intFastList.data.ptr[this.index++];
 
                 return true;
             }

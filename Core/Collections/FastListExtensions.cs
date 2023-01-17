@@ -9,19 +9,19 @@ namespace Scellecs.Morpeh.Collections {
     public static class FastListExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Expand<T>(this FastList<T> list) where T : unmanaged {
-            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
+            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacity(list.capacity) + 1);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Resize<T>(this FastList<T> list, int newCapacity) where T : unmanaged {
-            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacitySmall(newCapacity - 1) + 1);
+            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(newCapacity - 1) + 1);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Add<T>(this FastList<T> list) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacity(list.capacity) + 1);
             }
 
             return index;
@@ -31,7 +31,7 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add<T>(this FastList<T> list, T value) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacity(list.capacity) + 1);
             }
 
             list.data[index] = value;
@@ -44,15 +44,10 @@ namespace Scellecs.Morpeh.Collections {
                 var newSize = list.length + other.length;
                 
                 if (newSize > list.capacity) {
-                    ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacitySmall(newSize - 1) + 1);
+                    ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(newSize - 1) + 1);
                 }
-
-                if (list == other) {
-                    Array.Copy(list.data, 0, list.data, list.length, list.length);
-                }
-                else {
-                    Array.Copy(other.data, 0, list.data, list.length, other.length);
-                }
+                
+                Array.Copy(other.data, 0, list.data, list.length, other.length);
 
                 list.length += other.length;
             }

@@ -68,8 +68,8 @@ namespace Scellecs.Morpeh {
                 World.worlds.Add(world);
             }
             world.identifier        = added ? id : World.worlds.length - 1;
-            world.freeEntityIDs     = new IntFastList();
-            world.nextFreeEntityIDs = new IntFastList();
+            world.freeEntityIDs     = new IntStack();
+            world.nextFreeEntityIDs = new IntStack();
             world.stashes           = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
             world.typedStashes      = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
@@ -415,8 +415,7 @@ namespace Scellecs.Morpeh {
             
             int id;
             if (world.freeEntityIDs.length > 0) {
-                id = world.freeEntityIDs.Get(0);
-                world.freeEntityIDs.RemoveAtSwap(0, out _);
+                id = world.freeEntityIDs.Pop();
             }
             else {
                 id = world.entitiesLength++;
@@ -440,8 +439,7 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
 
             if (world.freeEntityIDs.length > 0) {
-                id = world.freeEntityIDs.Get(0);
-                world.freeEntityIDs.RemoveAtSwap(0, out _);
+                id = world.freeEntityIDs.Pop();
             }
             else {
                 id = world.entitiesLength++;
@@ -499,7 +497,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyRemoveEntity(this World world, int id) {
-            world.nextFreeEntityIDs.Add(id);
+            world.nextFreeEntityIDs.Push(id);
             world.entities[id] = null;
             world.entitiesGens[id]++;
             --world.entitiesCount;
@@ -532,7 +530,7 @@ namespace Scellecs.Morpeh {
             }
 
             if (world.nextFreeEntityIDs.length > 0) {
-                world.freeEntityIDs.AddListRange(world.nextFreeEntityIDs);
+                world.freeEntityIDs.PushRange(world.nextFreeEntityIDs);
                 world.nextFreeEntityIDs.Clear();
             }
             MLogger.EndSample();
