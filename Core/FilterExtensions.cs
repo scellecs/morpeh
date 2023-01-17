@@ -32,11 +32,11 @@ namespace Scellecs.Morpeh {
 
                 filter.archetypes.Clear();
                 filter.archetypes = null;
+                
+                filter.chunks.Clear();
+                filter.chunks = null;
             }
             
-            filter.chunks.Clear();
-            filter.chunks = null;
-
             filter.includedTypeIds?.Clear();
             filter.includedTypeIds = null;
             filter.excludedTypeIds?.Clear();

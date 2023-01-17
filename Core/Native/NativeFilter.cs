@@ -10,15 +10,12 @@ namespace Scellecs.Morpeh.Native {
         public NativeFastList<Filter.Chunk> chunks;
         
         [ReadOnly]
-        public int archetypesLength;
-        
-        [ReadOnly]
         public NativeWorld world;
 
         public EntityId this[int index] {
             get {
                 var totalChunkLength = 0;
-                for (int archetypeNum = 0, archetypesCount = this.archetypesLength; archetypeNum < archetypesCount; archetypeNum++) {
+                for (int archetypeNum = 0, archetypesCount = *this.chunks.lengthPtr; archetypeNum < archetypesCount; archetypeNum++) {
                     var chunk       = this.chunks.data[archetypeNum];
                     var chunkLength = chunk.entitiesLength;
 
