@@ -150,7 +150,7 @@ namespace Scellecs.Morpeh.Collections {
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = slot->next) {
                     slot = slotsPtr + i;
                     if (slot->key - 1 == key) {
-                        value = *(dataPtr + i / 2);
+                        value = dataPtr[i];
                         return true;
                     }
                 }
@@ -172,7 +172,7 @@ namespace Scellecs.Morpeh.Collections {
                 for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = slot->next) {
                     slot = slotsPtr + i;
                     if (slot->key - 1 == key) {
-                        return *(dataPtr + i / 2);
+                        return dataPtr[i];
                     }
                 }
             }
@@ -181,7 +181,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetValueByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => hashMap.data.ptr[index / 2];
+        public static T GetValueByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => hashMap.data.ptr[index];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetKeyByIndex<T>(this UnsafeIntHashMap<T> hashMap, in int index) where T : unmanaged => (hashMap.slots.ptr + index)->key - 1;
