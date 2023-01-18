@@ -8,9 +8,9 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static unsafe class IntHashMapExtensions {
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void Resize<T>(this IntHashMap<T> hashMap, out int rem, int key) {
-            var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Resize<T>(this IntHashMap<T> hashMap, int capacity) {
+            var newCapacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
             var newCapacity         = newCapacityMinusOne + 1;
 
             hashMap.slots.Resize(newCapacity);
@@ -31,8 +31,31 @@ namespace Scellecs.Morpeh.Collections {
             hashMap.buckets          = newBuckets;
             hashMap.capacity         = newCapacity;
             hashMap.capacityMinusOne = newCapacityMinusOne;
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void Expand<T>(this IntHashMap<T> hashMap) {
+            var newCapacityMinusOne = HashHelpers.GetCapacity(hashMap.length);
+            var newCapacity         = newCapacityMinusOne + 1;
 
-            rem = key & hashMap.capacityMinusOne;
+            hashMap.slots.Resize(newCapacity);
+            ArrayHelpers.Grow(ref hashMap.data, newCapacity);
+
+            var newBuckets = new PinnedArray<int>(newCapacity);
+
+            for (int i = 0, len = hashMap.lastIndex; i < len; ++i) {
+                ref var slot = ref hashMap.slots.ptr[i];
+
+                var newResizeIndex = (slot.key - 1) & newCapacityMinusOne;
+                slot.next = newBuckets.ptr[newResizeIndex] - 1;
+
+                newBuckets.ptr[newResizeIndex] = i + 1;
+            }
+
+            hashMap.buckets.Dispose();
+            hashMap.buckets          = newBuckets;
+            hashMap.capacity         = newCapacity;
+            hashMap.capacityMinusOne = newCapacityMinusOne;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,7 +75,8 @@ namespace Scellecs.Morpeh.Collections {
             }
             else {
                 if (hashMap.lastIndex == hashMap.capacity) {
-                    hashMap.Resize(out rem, key);
+                    hashMap.Expand();
+                    rem = key & hashMap.capacityMinusOne;
                 }
 
                 slotIndex = hashMap.lastIndex;
@@ -90,7 +114,8 @@ namespace Scellecs.Morpeh.Collections {
             }
             else {
                 if (hashMap.lastIndex == hashMap.capacity) {
-                    hashMap.Resize(out rem, key);
+                    hashMap.Expand();
+                    rem = key & hashMap.capacityMinusOne;
                 }
 
                 slotIndex = hashMap.lastIndex;

@@ -1,3 +1,10 @@
+#if UNITY_EDITOR
+#define MORPEH_DEBUG
+#endif
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
 namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Collections;
@@ -17,7 +24,7 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList() {
-            this.capacity = 3;
+            this.capacity = 4;
             this.data     = new PinnedArray<int>(this.capacity);
             this.length   = 0;
         }

@@ -9,7 +9,7 @@ namespace Scellecs.Morpeh.Collections {
     public static class FastListExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Expand<T>(this FastList<T> list) where T : unmanaged {
-            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacity(list.capacity) + 1);
+            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -21,7 +21,7 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add<T>(this FastList<T> list) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacity(list.capacity) + 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
             }
 
             return index;
@@ -31,7 +31,7 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add<T>(this FastList<T> list, T value) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.ExpandCapacity(list.capacity) + 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
             }
 
             list.data[index] = value;

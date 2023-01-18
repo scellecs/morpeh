@@ -9,19 +9,19 @@ namespace Scellecs.Morpeh.Collections {
     public static unsafe class UnsafeFastListExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Expand<T>(this UnsafeFastList<T> list) where T : unmanaged {
-            list.data.Resize(list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
+            list.data.Resize(list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Resize<T>(this UnsafeFastList<T> list, int newCapacity) where T : unmanaged {
-            list.data.Resize(list.capacity = HashHelpers.GetCapacitySmall(newCapacity - 1) + 1);
+            list.data.Resize(list.capacity = HashHelpers.GetCapacity(newCapacity) + 1);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Add<T>(this UnsafeFastList<T> list) where T : unmanaged {
             var index = list.length;
             if (++list.length == list.capacity) {
-                list.data.Resize(list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
+                list.data.Resize(list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
             }
 
             return index;
@@ -31,7 +31,7 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add<T>(this UnsafeFastList<T> list, T value) where T : unmanaged  {
             var index = list.length;
             if (++list.length == list.capacity) {
-                list.data.Resize(list.capacity = HashHelpers.ExpandCapacitySmall(list.capacity) + 1);
+                list.data.Resize(list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
             }
 
             list.data.ptr[index] = value;
@@ -43,7 +43,7 @@ namespace Scellecs.Morpeh.Collections {
             if (other.length > 0) {
                 var newSize = list.length + other.length;
                 if (newSize > list.capacity) {
-                    list.data.Resize(list.capacity = HashHelpers.GetCapacitySmall(newSize - 1) + 1);
+                    list.data.Resize(list.capacity = HashHelpers.GetCapacity(newSize) + 1);
                 }
 
                 if (list == other) {

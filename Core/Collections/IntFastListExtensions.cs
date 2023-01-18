@@ -2,6 +2,7 @@ namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
+    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -11,7 +12,7 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add(this IntFastList list) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                list.data.Resize(HashHelpers.ExpandCapacity(list.capacity) + 1);
+                list.data.Resize(list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
             }
 
             return index;
@@ -29,7 +30,7 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add(this IntFastList list, in int value) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                list.data.Resize(HashHelpers.ExpandCapacity(list.capacity) + 1);
+                list.data.Resize(list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
             }
 
             list.data.ptr[index] = value;
@@ -42,7 +43,7 @@ namespace Scellecs.Morpeh.Collections {
             if (other.length > 0) {
                 var newSize = list.length + other.length;
                 if (newSize > list.capacity) {
-                    list.data.Resize(HashHelpers.GetCapacity(newSize - 1) + 1);
+                    list.data.Resize(list.capacity = HashHelpers.GetCapacity(newSize - 1) + 1);
                 }
 
                 Array.Copy(other.data.data, 0, list.data.data, list.length, other.length);

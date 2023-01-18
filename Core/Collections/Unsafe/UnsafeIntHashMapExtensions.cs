@@ -9,7 +9,7 @@ namespace Scellecs.Morpeh.Collections {
     public static unsafe class UnsafeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Resize<T>(this UnsafeIntHashMap<T> hashMap, out int rem, int key) where T : unmanaged {
-            var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashMap.length);
+            var newCapacityMinusOne = HashHelpers.GetCapacity(hashMap.length);
             var newCapacity         = newCapacityMinusOne + 1;
 
             hashMap.slots.Resize(newCapacity);

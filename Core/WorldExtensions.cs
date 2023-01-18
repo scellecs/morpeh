@@ -422,7 +422,7 @@ namespace Scellecs.Morpeh {
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
+                var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
                 Array.Resize(ref world.entitiesGens, newCapacity);
                 world.entitiesCapacity = newCapacity;
@@ -446,7 +446,7 @@ namespace Scellecs.Morpeh {
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
+                var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
                 Array.Resize(ref world.entitiesGens, newCapacity);
                 world.entitiesCapacity = newCapacity;

@@ -30,7 +30,7 @@ namespace Scellecs.Morpeh.Collections {
             }
             else {
                 if (hashSet.lastIndex == hashSet.capacity * 2) {
-                    var newCapacityMinusOne = HashHelpers.ExpandCapacity(hashSet.length);
+                    var newCapacityMinusOne = HashHelpers.GetCapacity(hashSet.length);
                     var newCapacity         = newCapacityMinusOne + 1;
 
                     hashSet.slots.Resize(newCapacity * 2);

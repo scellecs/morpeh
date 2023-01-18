@@ -36,7 +36,7 @@ namespace Scellecs.Morpeh.Collections {
             this.length    = 0;
             this.freeIndex = -1;
 
-            this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
+            this.capacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
             this.capacity         = this.capacityMinusOne + 1;
 
             this.buckets = new PinnedArray<int>(this.capacity);

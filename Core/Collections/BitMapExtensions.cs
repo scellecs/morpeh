@@ -81,7 +81,7 @@ namespace Scellecs.Morpeh.Collections {
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Resize(this BitMap bitmap, out int rem, int dataIndex) {
-            var newCapacityMinusOne = HashHelpers.ExpandCapacitySmall(bitmap.length);
+            var newCapacityMinusOne = HashHelpers.GetCapacity(bitmap.length);
             var newCapacity         = newCapacityMinusOne + 1;
 
             bitmap.slots.Resize(newCapacity << 1);
