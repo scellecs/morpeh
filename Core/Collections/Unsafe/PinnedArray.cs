@@ -26,7 +26,8 @@ namespace Scellecs.Morpeh.Collections {
         public void Resize(int newSize) {
             this.handle.Free();
             var newArray = new T[newSize];
-            Array.Copy(this.data, 0, newArray, 0, this.data.Length);
+            var len = this.data.Length;
+            Array.Copy(this.data, 0, newArray, 0, newSize >= len ? len : newSize);
             this.data = newArray;
             this.handle = GCHandle.Alloc(newArray, GCHandleType.Pinned);
             this.ptr = (T*)this.handle.AddrOfPinnedObject();
