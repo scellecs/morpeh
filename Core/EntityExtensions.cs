@@ -16,15 +16,15 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class EntityExtensions {
-        internal static Entity Create(int id, int worldID)
-        {
-            var world = World.worlds.data[worldID];
-            var newEntity = new Entity { entityId = new EntityId(id, world.entitiesGens[id]), worldID = worldID };
-
-            newEntity.world = world;
-
-            newEntity.previousArchetypeId = -1;
-            newEntity.currentArchetypeId  = 0;
+        internal static Entity Create(int id, int worldId) {
+            var world = World.worlds.data[worldId];
+            var newEntity = new Entity { 
+                entityId = new EntityId(id, world.entitiesGens[id]), 
+                worldID = worldId,
+                world = world,
+                previousArchetypeId = -1,
+                currentArchetypeId = 0
+            };
 
             newEntity.currentArchetype = newEntity.world.archetypes.data[0];
 

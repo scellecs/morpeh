@@ -112,7 +112,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
 #endif
             if (this.components.Add(entity.entityId.id, default, out var slotIndex)) {
@@ -131,7 +131,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
 #endif
             if (this.components.Add(entity.entityId.id, default, out var slotIndex)) {
@@ -150,7 +150,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
 #endif
             if (this.components.Add(entity.entityId.id, value, out _)) {
@@ -170,7 +170,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
             }
 
             if (!this.components.Has(entity.entityId.id)) {
@@ -186,7 +186,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
             }
 #endif
             return ref this.components.TryGetValueRefByKey(entity.entityId.id, out exist);
@@ -198,7 +198,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity");
             }
 #endif
 
@@ -213,7 +213,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity");
             }
 #endif
 
@@ -231,7 +231,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Remove on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Remove on null or disposed entity");
             }
 #endif
 
@@ -254,7 +254,8 @@ namespace Scellecs.Morpeh {
                     var entityId = this.components.GetKeyByIndex(index);
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId);
                 }
-            } else {
+            } 
+            else {
                 foreach (var index in this.components) {
                     var entityId = this.components.GetKeyByIndex(index);
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId);
@@ -279,7 +280,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
 
@@ -292,10 +293,10 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity {from.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity");
             }
             if (to.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity {to.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity");
             }
 #endif
 
