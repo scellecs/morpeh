@@ -41,9 +41,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return ref cache.Add(entity);
+            return ref stash.Add(entity);
         }
 
 #if MORPEH_LEGACY
@@ -56,9 +56,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return ref cache.Add(entity, out exist);
+            return ref stash.Add(entity, out exist);
         }
 
 #if MORPEH_LEGACY
@@ -70,9 +70,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return ref cache.Get(entity);
+            return ref stash.Get(entity);
         }
 
 #if MORPEH_LEGACY
@@ -85,9 +85,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return ref cache.Get(entity, out exist);
+            return ref stash.Get(entity, out exist);
         }
 
 #if MORPEH_LEGACY
@@ -100,9 +100,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying SetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            cache.Set(entity, value);
+            stash.Set(entity, value);
         }
 
 #if MORPEH_LEGACY
@@ -115,9 +115,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying RemoveComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return cache.Remove(entity);
+            return stash.Remove(entity);
         }
 
 #if MORPEH_LEGACY
@@ -131,8 +131,8 @@ namespace Scellecs.Morpeh {
             }
 #endif
 
-            var cache = entity.world.GetStash<T>();
-            return cache.Has(entity);
+            var stash = entity.world.GetStash<T>();
+            return stash.Has(entity);
         }
 
 #if MORPEH_LEGACY
@@ -146,9 +146,9 @@ namespace Scellecs.Morpeh {
 #endif
 
             var world = from.world;
-            foreach (var cacheId in world.stashes) {
-                var cache = Stash.stashes.data[world.stashes.GetValueByIndex(cacheId)];
-                cache.Migrate(from, to, overwrite);
+            foreach (var stashId in world.stashes) {
+                var stash = Stash.stashes.data[world.stashes.GetValueByIndex(stashId)];
+                stash.Migrate(from, to, overwrite);
             }
         }
         
@@ -216,9 +216,9 @@ namespace Scellecs.Morpeh {
             
             var currentArchetype = entity.currentArchetype;
 
-            var caches = currentArchetype.world.stashes;
+            var stashes = currentArchetype.world.stashes;
             foreach (var typeId in currentArchetype.typeIds) {
-                if (caches.TryGetValue(typeId, out var index)) {
+                if (stashes.TryGetValue(typeId, out var index)) {
                     Stash.stashes.data[index].Clean(entity);
                 }
             }
