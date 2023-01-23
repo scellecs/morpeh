@@ -24,6 +24,8 @@ namespace Scellecs.Morpeh {
             }
             
             MLogger.BeginSample("SystemGroup.Initialize()");
+            systemsGroup.DropDelayedAction();
+            
             if (systemsGroup.disposables.length > 0) {
                 systemsGroup.world.Commit();
 
@@ -49,13 +51,13 @@ namespace Scellecs.Morpeh {
 
                 systemsGroup.newInitializers.Clear();
             }
+            systemsGroup.InvokeDelayedAction();
             systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this SystemsGroup systemsGroup, float deltaTime) {
-            systemsGroup.DropDelayedAction();
             systemsGroup.Initialize();
 
             if (systemsGroup.systems.length == 0) {
@@ -63,6 +65,8 @@ namespace Scellecs.Morpeh {
             }
             
             MLogger.BeginSample("SystemGroup.Update()");
+            systemsGroup.DropDelayedAction();
+            
             for (int i = 0, length = systemsGroup.systems.length; i < length; i++) {
                 var system = systemsGroup.systems.data[i];
 
