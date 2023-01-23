@@ -19,6 +19,10 @@ namespace Scellecs.Morpeh {
     public static class SystemsGroupExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Initialize(this SystemsGroup systemsGroup) {
+            if (systemsGroup.disposables.length == 0 && systemsGroup.newInitializers.length == 0) {
+                return;
+            }
+            
             MLogger.BeginSample("SystemGroup.Initialize()");
             if (systemsGroup.disposables.length > 0) {
                 systemsGroup.world.Commit();
@@ -51,10 +55,14 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this SystemsGroup systemsGroup, float deltaTime) {
-            MLogger.BeginSample("SystemGroup.Update()");
             systemsGroup.DropDelayedAction();
-
             systemsGroup.Initialize();
+
+            if (systemsGroup.systems.length == 0) {
+                return;
+            }
+            
+            MLogger.BeginSample("SystemGroup.Update()");
             for (int i = 0, length = systemsGroup.systems.length; i < length; i++) {
                 var system = systemsGroup.systems.data[i];
 
@@ -71,6 +79,9 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FixedUpdate(this SystemsGroup systemsGroup, float deltaTime) {
+            if (systemsGroup.fixedSystems.length == 0) {
+                return;
+            }
             MLogger.BeginSample("SystemGroup.FixedUpdate()");
             systemsGroup.DropDelayedAction();
             systemsGroup.world.Commit();
@@ -91,6 +102,10 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LateUpdate(this SystemsGroup systemsGroup, float deltaTime) {
+            if (systemsGroup.lateSystems.length == 0) {
+                return;
+            }
+            
             MLogger.BeginSample("SystemGroup.LateUpdate()");
             systemsGroup.DropDelayedAction();
             systemsGroup.world.Commit();
@@ -110,6 +125,10 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CleanupUpdate(this SystemsGroup systemsGroup, float deltaTime) {
+            if (systemsGroup.cleanupSystems.length == 0) {
+                return;
+            }
+            
             MLogger.BeginSample("SystemGroup.CleanupUpdate()");
             systemsGroup.DropDelayedAction();
             systemsGroup.world.Commit();
