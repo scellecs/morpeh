@@ -66,6 +66,7 @@ namespace Scellecs.Morpeh {
             
             MLogger.BeginSample("SystemGroup.Update()");
             systemsGroup.DropDelayedAction();
+            systemsGroup.world.Commit();
             
             for (int i = 0, length = systemsGroup.systems.length; i < length; i++) {
                 var system = systemsGroup.systems.data[i];
