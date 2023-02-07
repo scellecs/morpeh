@@ -27,6 +27,9 @@ namespace Scellecs.Morpeh {
         [NotNull]
         [PublicAPI]
         internal static FastList<World> worlds = new FastList<World> { null };
+        
+        [CanBeNull]
+        internal static FastList<IWorldPlugin> plugins;
 
         [PublicAPI]
         [NotNull]
@@ -116,6 +119,22 @@ namespace Scellecs.Morpeh {
         //todo rework defines to conditionals
         [PublicAPI]
         public void Dispose() {
+            if (plugins != null) {
+                foreach (var plugin in plugins) {
+#if MORPEH_DEBUG
+                    try {
+#endif
+                        plugin.Deinitialize(this);
+#if MORPEH_DEBUG
+                    }
+                    catch (Exception e) {
+                        MLogger.LogError($"Can not deinitialize world plugin {plugin.GetType()}");
+                        MLogger.LogException(e);
+                    }
+#endif
+                }
+            }
+            
             foreach (var systemsGroup in this.systemsGroups.Values) {
 #if MORPEH_DEBUG
                 try {

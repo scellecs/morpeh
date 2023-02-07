@@ -5,7 +5,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
-    using Debug = UnityEngine.Debug;
 
     public class UniversalProvider : EntityProvider {
         private static TypeComponentEqualityComparer comparer = new TypeComponentEqualityComparer();
@@ -42,13 +41,8 @@
             if (entity.IsNullOrDisposed() == false) {
                 foreach (var component in this.serializedComponents) {
                     var type = component.GetType();
-                    if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                        definition.entitySetComponentBoxed(entity, component);
-                    }
-                    else {
-                        Debug.LogError(
-                            $"[MORPEH] For using {type.Name} in a UniversalProvider you must warmup it or IL2CPP will strip it from the build.\nCall <b>TypeIdentifier<{type.Name}>.Warmup();</b> before access this UniversalProvider.");
-                    }
+                    var definition = CommonTypeIdentifier.Get(type);
+                    definition.entitySetComponentBoxed(entity, component);
                 }
             }
         }
@@ -58,13 +52,8 @@
             if (ent.IsNullOrDisposed() == false) {
                 foreach (var component in this.serializedComponents) {
                     var type = component.GetType();
-                    if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                        definition.entityRemoveComponent(ent);
-                    }
-                    else {
-                        Debug.LogError(
-                            $"[MORPEH] For using {type.Name} in a UniversalProvider you must warmup it or IL2CPP will strip it from the build.\nCall <b>TypeIdentifier<{type.Name}>.Warmup();</b> before access this UniversalProvider.");
-                    }
+                    var definition = CommonTypeIdentifier.Get(type);
+                    definition.entityRemoveComponent(ent);
                 }
             }
         }

@@ -25,8 +25,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class WorldExtensions {
-        internal static FastList<IWorldPlugin> plugins;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Ctor(this World world) {
             world.threadIdLock = System.Threading.Thread.CurrentThread.ManagedThreadId;
@@ -47,8 +45,6 @@ namespace Scellecs.Morpeh {
                     archetype.Ctor();
                 }
             }
-
-            Warmup();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,16 +79,28 @@ namespace Scellecs.Morpeh {
             world.archetypesByLength = new IntHashMap<IntFastList>();
             world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
             world.newArchetypes = new IntFastList();
-            
-            foreach (var worldPlugin in plugins) {
-                worldPlugin.Initialize(world);
+
+            if (World.plugins != null) {
+                foreach (var plugin in World.plugins) {
+#if MORPEH_DEBUG
+                    try {
+#endif
+                        plugin.Initialize(world);
+#if MORPEH_DEBUG
+                    }
+                    catch (Exception e) {
+                        MLogger.LogError($"Can not initialize world plugin {plugin.GetType()}");
+                        MLogger.LogException(e);
+                    }
+#endif
+                }
             }
 
             return world;
         }
 
 #if MORPEH_UNITY && !MORPEH_DISABLE_AUTOINITIALIZATION
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 #endif
         [PublicAPI]
         public static void InitializationDefaultWorld() {
@@ -110,38 +118,14 @@ namespace Scellecs.Morpeh {
             go.hideFlags = HideFlags.HideAndDontSave;
             UnityEngine.Object.DontDestroyOnLoad(go);
 #endif
-            Warmup();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Warmup() {
-            if (plugins != null) {
-                return;
+        public static void AddWorldPlugin<T>(T plugin) where T : class, IWorldPlugin {
+            if (World.plugins == null) {
+                World.plugins = new FastList<IWorldPlugin>();
             }
-
-            plugins = new FastList<IWorldPlugin>();
-            var componentType = typeof(IComponent);
-            var pluginType    = typeof(IWorldPlugin);
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
-                foreach (var type in assembly.GetTypes()) {
-                    if (componentType.IsAssignableFrom(type) && type.IsValueType && !type.ContainsGenericParameters) {
-                        try {
-                            typeof(TypeIdentifier<>)
-                                .MakeGenericType(type)
-                                .GetMethod("Warmup", BindingFlags.Static | BindingFlags.Public)
-                                .Invoke(null, null);
-                        }
-                        catch {
-                            MLogger.LogWarning($"Attention component type {type.FullName} not used, but exists in build");
-                        }
-                    }
-                    else if (pluginType.IsAssignableFrom(type) && !type.IsValueType && !type.ContainsGenericParameters && pluginType != type) {
-                        var instance = (IWorldPlugin)Activator.CreateInstance(type);
-                        plugins.Add(instance);
-                    }
-                }
-            }
+            World.plugins.Add(plugin);
         }
 
         //TODO refactor allocations and fast sort(maybe without it?)

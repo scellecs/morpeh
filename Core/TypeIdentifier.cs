@@ -23,6 +23,26 @@ namespace Scellecs.Morpeh {
         internal static Dictionary<int, InternalTypeDefinition>  intTypeAssociation = new Dictionary<int, InternalTypeDefinition>();
         internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
 
+        internal static InternalTypeDefinition Get(Type type) {
+            if (typeAssociation.TryGetValue(type, out var definition) == false) {
+                Warmup(type);
+                definition = typeAssociation[type];
+            }
+            return definition;
+        }
+
+        private static void Warmup(Type type) {
+            try {
+                var typeId = typeof(TypeIdentifier<>).MakeGenericType(type);
+                var warm = typeId.GetMethod("Warmup", BindingFlags.Static | BindingFlags.Public);
+                warm.Invoke(null, null);
+            }
+            catch {
+                Debug.LogError($"[MORPEH] For using {type.Name} you must warmup it or IL2CPP will strip it from the build.\nCall <b>TypeIdentifier<{type.Name}>.Warmup();</b> before access this UniversalProvider.");
+            }
+        }
+
+        
         #pragma warning disable 0612
         internal static int GetID<T>() where T : struct, IComponent {
             var id   = Interlocked.Increment(ref counter);
