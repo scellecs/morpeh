@@ -36,6 +36,8 @@ namespace Scellecs.Morpeh {
         public Filter Filter;
         [PublicAPI]
         public bool UpdateByUnity;
+        [PublicAPI]
+        public bool DoNotDisableSystemOnException;
 #if MORPEH_BURST
         [PublicAPI]
         public JobHandle JobHandle;

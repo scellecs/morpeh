@@ -166,9 +166,15 @@ namespace Scellecs.Morpeh {
         [Conditional("MORPEH_DEBUG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SystemThrowException(this SystemsGroup systemsGroup, ISystem system, Exception exception) {
-            MLogger.LogError($"Can not update {system.GetType()}. System will be disabled.");
-            MLogger.LogException(exception);
-            systemsGroup.delayedAction += () => systemsGroup.DisableSystem(system);
+            if (systemsGroup.world.DoNotDisableSystemOnException) {
+                MLogger.LogError($"Can not update {system.GetType()}.");
+                MLogger.LogException(exception);
+            }
+            else {
+                MLogger.LogError($"Can not update {system.GetType()}. System will be disabled.");
+                MLogger.LogException(exception);
+                systemsGroup.delayedAction += () => systemsGroup.DisableSystem(system);
+            }
         }
 
         [Conditional("MORPEH_DEBUG")]
