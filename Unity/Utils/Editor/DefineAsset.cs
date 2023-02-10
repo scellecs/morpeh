@@ -83,6 +83,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             var summaryDefines = addedDefines.Concat(existsDefines).ToList();
 
+            // we have to find at least MORPEH define
+            if (summaryDefines.Count == 0) {
+                Debug.LogError("DefineAsset postprocess failed");
+                return;
+            }
+
             cachedDefines.RemoveAll(summaryDefines.Contains);
             foreach (var cachedDefine in cachedDefines) {
                 if (string.IsNullOrEmpty(cachedDefine)) {
