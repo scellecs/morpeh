@@ -61,6 +61,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 savedDefines += ";";
             }
 
+            var savedDefinesChanged = false;
+
             var guids = AssetDatabase.FindAssets("t:DefineAsset");
             foreach (var guid in guids) {
                 if (string.IsNullOrEmpty(guid)) {
@@ -73,6 +75,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
                         if (!savedDefines.Contains($";{define};") && !savedDefines.StartsWith($"{define};")) {
                             savedDefines += $"{define};";
                             addedDefines.Add(define.define);
+
+                            savedDefinesChanged = true;
                         }
                         else {
                             existsDefines.Add(define.define);
@@ -96,9 +100,14 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 }
 
                 savedDefines = savedDefines.Replace($"{cachedDefine};", string.Empty);
+
+                savedDefinesChanged = true;
             }
 
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, savedDefines);
+            if (savedDefinesChanged) {
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, savedDefines);
+            }
+
             EditorPrefs.SetString(PREFS_KEY, string.Join(",", summaryDefines));
         }
     }
