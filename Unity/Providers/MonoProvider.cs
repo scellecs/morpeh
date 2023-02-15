@@ -77,7 +77,7 @@
         }
 
         protected sealed override void PreInitialize() {
-            this.Stash.Set(this.Entity, this.serializedData);
+            this.Stash.Set(this.cachedEntity, this.serializedData);
         }
 
         protected sealed override void PreDeinitialize() {
