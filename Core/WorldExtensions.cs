@@ -345,6 +345,21 @@ namespace Scellecs.Morpeh {
                 var systemsGroup = world.pluginSystemsGroups.data[i];
                 systemsGroup.CleanupUpdate(deltaTime);
             }
+
+            ref var m = ref world.newMetrics;
+            m.entities = world.entitiesLength;
+            m.archetypes = world.archetypes.length;
+            m.filters = world.filters.length;
+            foreach (var systemsGroup in world.systemsGroups.Values) {
+                m.systems += systemsGroup.systems.length;
+                m.systems += systemsGroup.fixedSystems.length;
+                m.systems += systemsGroup.lateSystems.length;
+                m.systems += systemsGroup.cleanupSystems.length;
+            }
+            world.metrics = m;
+            m = default;
+            
+            
         }
 
         [PublicAPI]
@@ -491,6 +506,7 @@ namespace Scellecs.Morpeh {
         public static void Commit(this World world) {
             world.ThreadSafetyCheck();
             
+            world.newMetrics.commits++;
             MLogger.BeginSample("World.Commit()");
 #if MORPEH_DEBUG && MORPEH_BURST
             if (world.dirtyEntities.count > 0 && (world.JobHandle.IsCompleted == false)) {
@@ -498,6 +514,7 @@ namespace Scellecs.Morpeh {
                 world.JobsComplete();
             }
 #endif
+            world.newMetrics.migrations += world.dirtyEntities.count;
             
             foreach (var entityId in world.dirtyEntities) {
                 world.entities[entityId]?.ApplyTransfer();

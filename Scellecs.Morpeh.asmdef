@@ -1,7 +1,9 @@
 {
     "name": "Scellecs.Morpeh",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:b46779583a009f04ba9f5f31d0e7e6ac"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
@@ -11,6 +13,12 @@
     "defineConstraints": [
         "UNITY_2020_1_OR_NEWER"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.profiling.core",
+            "expression": "",
+            "define": "MORPEH_METRICS"
+        }
+    ],
     "noEngineReferences": false
 }

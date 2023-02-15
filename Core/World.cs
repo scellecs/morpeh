@@ -105,6 +105,10 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         internal int threadIdLock;
 
+        [ShowInInspector]
+        public Metrics metrics;
+        internal Metrics newMetrics;
+
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
@@ -270,6 +274,15 @@ namespace Scellecs.Morpeh {
             this.newArchetypes = null;
 
             worlds.Remove(this);
+        }
+
+        public struct Metrics {
+            public int entities;
+            public int archetypes;
+            public int filters;
+            public int systems;
+            public int commits;
+            public int migrations;
         }
     }
 }
