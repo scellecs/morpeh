@@ -347,7 +347,7 @@ namespace Scellecs.Morpeh {
             }
 
             ref var m = ref world.newMetrics;
-            m.entities = world.entitiesLength;
+            m.entities = world.entitiesCount;
             m.archetypes = world.archetypes.length;
             m.filters = world.filters.length;
             foreach (var systemsGroup in world.systemsGroups.Values) {
