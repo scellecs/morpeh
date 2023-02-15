@@ -66,13 +66,13 @@ namespace Scellecs.Morpeh.Collections {
             public bool MoveNext() {
                 {
                     var slotsPtr = this.hashMap.slots.ptr;
-                    for (; this.index < this.hashMap.lastIndex; this.index += 2) {
+                    for (; this.index < this.hashMap.lastIndex; this.index++) {
                         if (slotsPtr[this.index].key - 1 < 0) {
                             continue;
                         }
 
                         this.current =  this.index;
-                        this.index   += 2;
+                        this.index++;
 
                         return true;
                     }
