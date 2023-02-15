@@ -41,12 +41,10 @@ namespace Scellecs.Morpeh.Providers {
             if (World.Default == null) {
                 return true;
             }
-                
-            if (this.IsPrefab()) {
+            if (Application.isPlaying == false) {
                 return true;
             }
-
-            if (!Application.isPlaying) {
+            if (this.IsPrefab() == true) {
                 return true;
             }
             
