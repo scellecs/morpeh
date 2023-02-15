@@ -8,8 +8,8 @@
     [AddComponentMenu("ECS/" + nameof(RemoveEntityOnDestroy))]
     public sealed class RemoveEntityOnDestroy : EntityProvider {
         private void OnDestroy() {
-            if (this.Entity.IsNullOrDisposed() == false) {
-                World.Default?.RemoveEntity(this.Entity);
+            if (this.cachedEntity.IsNullOrDisposed() == false) {
+                this.cachedEntity.world.RemoveEntity(this.cachedEntity);
             }
         }
     }

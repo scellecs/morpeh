@@ -63,6 +63,8 @@ namespace Scellecs.Morpeh.Providers {
         }
 
         protected virtual void OnEnable() {
+            var _ = this.Entity;
+            
 #if UNITY_EDITOR && ODIN_INSPECTOR
             this.entityViewer.getter = () => this.Entity;
 #endif
