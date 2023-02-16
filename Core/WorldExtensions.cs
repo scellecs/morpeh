@@ -510,7 +510,7 @@ namespace Scellecs.Morpeh {
             MLogger.BeginSample("World.Commit()");
 #if MORPEH_DEBUG && MORPEH_BURST
             if (world.dirtyEntities.count > 0 && (world.JobHandle.IsCompleted == false)) {
-                MLogger.LogError("[MORPEH] You have changed entities before all scheduled jobs are completed. This may lead to unexpected behavior or crash. Jobs will be forced.");
+                MLogger.LogError("You have changed entities before all scheduled jobs are completed. This may lead to unexpected behavior or crash. Jobs will be forced.");
                 world.JobsComplete();
             }
 #endif
