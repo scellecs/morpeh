@@ -42,5 +42,9 @@ namespace Scellecs.Morpeh {
 
         internal Entity() {
         }
+
+        public override string ToString() {
+            return $"Entity:{ID.ToString()}";
+        }
     }
 }

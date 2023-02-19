@@ -55,7 +55,7 @@
         }
 
         public override string ToString() {
-            return $"EntityId(id={this.id}, gen={this.gen})";
+            return $"EntityId(id={this.id.ToString()}, gen={this.gen.ToString()})";
         }
         
         public int CompareTo(EntityId other) {
