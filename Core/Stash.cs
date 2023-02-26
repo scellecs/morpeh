@@ -20,8 +20,35 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class Stash : IDisposable {
         internal static FastList<Stash> stashes = new FastList<Stash>();
+        internal static IntStack stashesFreeIds = new IntStack();
 
-        internal static Action cleanup = () => stashes.Clear();
+        internal static Action cleanup = () => {
+            stashes.Clear();
+            stashesFreeIds.Clear();
+        };
+        
+        internal static void RegisterStash(Stash stash) {
+            int id;
+            
+            if (stashesFreeIds.length > 0) {
+                id = stashesFreeIds.Pop();
+                stashes.data[id] = stash;
+                stash.commonStashId = id;
+                return;
+            }
+            
+            id = stashes.length;
+            stashes.Add(stash);
+            stash.commonStashId = id;
+        }
+
+        internal static void UnregisterStash(Stash stash) {
+            var id = stash.commonStashId;
+            
+            stashes.data[id] = null;
+            stashesFreeIds.Push(id);
+            stash.commonStashId = -1;
+        }
 
         [SerializeField]
         internal int commonStashId;
@@ -58,6 +85,8 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class Stash<T> : Stash where T : struct, IComponent {
         internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
+        // ReSharper disable once StaticMemberInGenericType
+        internal static IntStack typedStashesFreeIds = new IntStack();
 
         internal delegate void ComponentDispose(ref T component);
 
@@ -68,22 +97,33 @@ namespace Scellecs.Morpeh {
 
         [UnityEngine.Scripting.Preserve]
         static Stash() {
-            cleanup += () => typedStashes.Clear();
+            cleanup += () => {
+                typedStashes.Clear();
+                typedStashesFreeIds.Clear();
+            };
         }
 
-        [UnityEngine.Scripting.Preserve]
-        static void Refill() {
-            var id = TypeIdentifier<T>.info.id;
-            if (typedStashes == null) {
-                typedStashes = new FastList<Stash<T>>();
+        internal static void RegisterTypedStash(Stash<T> stash) {
+            int id;
+            
+            if (typedStashesFreeIds.length > 0) {
+                id = typedStashesFreeIds.Pop();
+                typedStashes.data[id] = stash;
+                stash.typedStashId = id;
+                return;
             }
-            typedStashes.Clear();
+            
+            id = typedStashes.length;
+            typedStashes.Add(stash);
+            stash.typedStashId = id;
+        }
 
-            foreach (var stash in stashes) {
-                if (stash.typeId == id) {
-                    typedStashes.Add((Stash<T>)stash);
-                }
-            }
+        internal static void UnregisterTypedStash(Stash<T> stash) {
+            var id = stash.typedStashId;
+            
+            typedStashes.data[id] = null;
+            typedStashesFreeIds.Push(id);
+            stash.typedStashId = -1;
         }
 
         [UnityEngine.Scripting.Preserve]
@@ -96,11 +136,8 @@ namespace Scellecs.Morpeh {
 
             this.components.Add(-1, default, out _);
 
-            this.typedStashId = typedStashes.length;
-            typedStashes.Add(this);
-
-            this.commonStashId = stashes.length;
-            stashes.Add(this);
+            RegisterStash(this);
+            RegisterTypedStash(this);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -313,8 +350,8 @@ namespace Scellecs.Morpeh {
             this.components.Clear();
             this.components = null;
 
-            typedStashes.RemoveSwap(this, out _);
-            stashes.RemoveSwap(this, out _);
+            UnregisterTypedStash(this);
+            UnregisterStash(this);
 
             this.componentDispose = null;
         }
