@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>2022.2.1</Version>
+        <Version>2022.2.2</Version>
         <Title>Scellecs.Morpeh</Title>
         <Authors>Oleg Morozov, Igor Boyko</Authors>
         <Description>ECS Framework for Unity Game Engine and .Net Platform</Description>
@@ -182,6 +182,7 @@
       <None Remove="CHANGELOG.MD.meta" />
       <None Remove="MIGRATION.md.meta" />
       <None Remove="MIGRATION_RU.md.meta" />
+      <None Remove="README_NUGET.md.meta" />
     </ItemGroup>
 
 </Project>
