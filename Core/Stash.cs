@@ -19,13 +19,18 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class Stash : IDisposable {
-        internal static FastList<Stash> stashes = new FastList<Stash>();
-        internal static IntStack stashesFreeIds = new IntStack();
+        internal static FastList<Stash> stashes;
+        internal static IntStack stashesFreeIds;
 
         internal static Action cleanup = () => {
             stashes.Clear();
             stashesFreeIds.Clear();
         };
+
+        static Stash() {
+            stashes = new FastList<Stash>();
+            stashesFreeIds = new IntStack();
+        }
         
         internal static void RegisterStash(Stash stash) {
             int id;
@@ -84,9 +89,9 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class Stash<T> : Stash where T : struct, IComponent {
-        internal static FastList<Stash<T>> typedStashes = new FastList<Stash<T>>();
+        internal static FastList<Stash<T>> typedStashes;
         // ReSharper disable once StaticMemberInGenericType
-        internal static IntStack typedStashesFreeIds = new IntStack();
+        internal static IntStack typedStashesFreeIds;
 
         internal delegate void ComponentDispose(ref T component);
 
@@ -101,6 +106,9 @@ namespace Scellecs.Morpeh {
                 typedStashes.Clear();
                 typedStashesFreeIds.Clear();
             };
+            typedStashes = new FastList<Stash<T>>();
+            typedStashesFreeIds = new IntStack();
+            
         }
 
         internal static void RegisterTypedStash(Stash<T> stash) {
