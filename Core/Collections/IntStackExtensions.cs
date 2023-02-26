@@ -26,8 +26,8 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Clear(this IntStack stack) {
-            stack.data   = null;
-            stack.length = stack.capacity = 0;
+            System.Array.Clear(stack.data, 0, stack.length);
+            stack.length = 0;
         }
     }
 }
