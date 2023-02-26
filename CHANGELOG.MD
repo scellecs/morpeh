@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2022.2.2] - 26.02.2023
+### Fixed
+- Stashes were cleaned incorrectly. https://github.com/scellecs/morpeh/issues/170
+
 ## [2022.2.1] - 16.01.2023
 ### Changed
 - Change visibility of `EntityProvider.map` from private to public.
