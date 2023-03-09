@@ -183,6 +183,20 @@
       <None Remove="MIGRATION.md.meta" />
       <None Remove="MIGRATION_RU.md.meta" />
       <None Remove="README_NUGET.md.meta" />
+      <None Remove="Core\Aspect.cs.meta" />
+      <None Remove="Core\AspectExtensions.cs.meta" />
+      <None Remove="Core\Collections\Raw.meta" />
+      <None Remove="Core\Collections\Unsafe.meta" />
+      <None Remove="Core\Collections\Unsafe\PinnedArray.cs.meta" />
+      <None Remove="Core\Collections\Unsafe\UnsafeFastList.cs.meta" />
+      <None Remove="Core\Collections\Unsafe\UnsafeFastListExtensions.cs.meta" />
+      <None Remove="Core\Collections\Unsafe\UnsafeIntHashMap.cs.meta" />
+      <None Remove="Core\Collections\Unsafe\UnsafeIntHashMapExtensions.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedArray.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedList.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedStorage.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedStorageUtils.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedUtils.cs.meta" />
     </ItemGroup>
 
 </Project>

@@ -118,6 +118,12 @@ namespace UnityEngine.Scripting {
 #endif
 }
 
+namespace Unity.Collections.LowLevel.Unsafe {
+    #if !MORPEH_UNITY
+    public sealed class NativeDisableUnsafePtrRestrictionAttribute : System.Attribute { }
+    #endif
+}
+
 namespace JetBrains.Annotations {
 #if !MORPEH_UNITY
     using System;

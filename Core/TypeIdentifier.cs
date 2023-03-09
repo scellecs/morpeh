@@ -38,7 +38,7 @@ namespace Scellecs.Morpeh {
                 warm.Invoke(null, null);
             }
             catch {
-                Debug.LogError($"[MORPEH] For using {type.Name} you must warmup it or IL2CPP will strip it from the build.\nCall <b>TypeIdentifier<{type.Name}>.Warmup();</b> before access this UniversalProvider.");
+                MLogger.LogError($"[MORPEH] For using {type.Name} you must warmup it or IL2CPP will strip it from the build.\nCall <b>TypeIdentifier<{type.Name}>.Warmup();</b> before access this UniversalProvider.");
             }
         }
 
