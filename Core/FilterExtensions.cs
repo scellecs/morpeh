@@ -8,6 +8,7 @@
 
 namespace Scellecs.Morpeh {
     using System;
+    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
@@ -197,33 +198,50 @@ namespace Scellecs.Morpeh {
             return true;
         }
 
-        public static Filter With<T>(this Filter filter) where T : struct, IComponent {
-            filter.world.ThreadSafetyCheck();
-            return filter.CreateFilter<T>(Filter.Mode.Include);
-        }
+        public static FilterBuilder With<T>(this FilterBuilder builder) where T : struct, IComponent 
+            => new FilterBuilder {
+                parent = builder,
+                world = builder.world,
+                typeId = TypeIdentifier<T>.info.id
+            };
 
-        public static Filter Without<T>(this Filter filter) where T : struct, IComponent {
-            filter.world.ThreadSafetyCheck();
-            return filter.CreateFilter<T>(Filter.Mode.Exclude);
-        }
+        public static FilterBuilder Without<T>(this FilterBuilder builder) where T : struct, IComponent
+            => new FilterBuilder {
+                parent = builder,
+                world = builder.world,
+                typeId = -TypeIdentifier<T>.info.id
+            };
 
-        public static Filter Extend<T>(this Filter filter) where T : struct, IFilterExtension {
-            filter.world.ThreadSafetyCheck();
-#if MORPEH_DEBUG 
-            var check = filter.gen;
-#endif
-            var newFilter = default(T).Extend(filter);
-#if MORPEH_DEBUG 
-            if (check == filter.gen) {
-                MLogger.LogError("[MORPEH] You didn't extend the filter in any way, perhaps you mistyped the IFilterExtension?");
-            }
-#endif
+        public static FilterBuilder Extend<T>(this FilterBuilder builder) where T : struct, IFilterExtension {
+// #if MORPEH_DEBUG 
+//             var check = filter.gen;
+// #endif
+            var newFilter = default(T).Extend(builder);
+// #if MORPEH_DEBUG 
+//             if (check == filter.gen) {
+//                 MLogger.LogError("[MORPEH] You didn't extend the filter in any way, perhaps you mistyped the IFilterExtension?");
+//             }
+// #endif
             return newFilter;
         }
-        
-        private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
-            var currentTypeId = TypeIdentifier<T>.info.id;
 
+        public static Filter Build(this FilterBuilder builder) {
+            //todo: legacy fallback
+            var current = builder;
+            var stack = new Stack<FilterBuilder>();
+            while (current.parent != null) {
+                stack.Push(current);
+                current = current.parent;
+            }
+            var filter = builder.world.LegacyRootFilter;
+            while (stack.Count > 0) {
+                current = stack.Pop();
+                filter = filter.CreateFilter(System.Math.Abs(current.typeId), current.typeId < 0 ? Filter.Mode.Exclude : Filter.Mode.Include);
+            }
+            return filter;
+        }
+        
+        private static Filter CreateFilter(this Filter filter, int currentTypeId, Filter.Mode mode) {
             filter.gen++;
             if (filter.includedTypeIds != null) {
                 foreach (var typeId in filter.includedTypeIds) {

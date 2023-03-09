@@ -33,7 +33,8 @@ namespace Scellecs.Morpeh {
 
         [PublicAPI]
         [NotNull]
-        public Filter Filter;
+        public FilterBuilder Filter;
+        internal Filter LegacyRootFilter;
         [PublicAPI]
         public bool UpdateByUnity;
         [PublicAPI]
@@ -207,7 +208,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
             try {
 #endif
-                this.Filter.Dispose();
+                this.LegacyRootFilter.Dispose();
 #if MORPEH_DEBUG
             }
             catch (Exception e) {
@@ -215,6 +216,7 @@ namespace Scellecs.Morpeh {
                 MLogger.LogException(e);
             }
 #endif
+            this.LegacyRootFilter = null;
             this.Filter = null;
 
             this.filters.Clear();
