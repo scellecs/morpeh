@@ -19,6 +19,7 @@ namespace Scellecs.Morpeh.Providers {
 
 #if UNITY_EDITOR
         [ShowInInspector]
+        [PropertyOrder(-1)]
         [ReadOnly]
 #endif
         private int EntityID => this.cachedEntity.IsNullOrDisposed() == false ? this.cachedEntity.ID.id : -1;
