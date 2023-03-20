@@ -135,12 +135,3 @@ namespace JetBrains.Annotations {
     public sealed class PublicAPIAttribute : Attribute { }
 #endif
 }
-
-
-namespace Sirenix.OdinInspector {
-#if !ODIN_INSPECTOR
-    using System;
-    [AttributeUsage(AttributeTargets.All, Inherited = false)]
-    public class ShowInInspectorAttribute : Attribute { }
-#endif
-}

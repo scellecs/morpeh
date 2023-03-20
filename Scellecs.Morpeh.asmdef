@@ -2,7 +2,8 @@
     "name": "Scellecs.Morpeh",
     "rootNamespace": "",
     "references": [
-        "GUID:b46779583a009f04ba9f5f31d0e7e6ac"
+        "GUID:b46779583a009f04ba9f5f31d0e7e6ac",
+        "GUID:324caed91501a9c47a04ebfd87b68794"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,6 +19,11 @@
             "name": "com.unity.profiling.core",
             "expression": "",
             "define": "MORPEH_METRICS"
+        },
+        {
+            "name": "com.codewriter.triinspector",
+            "expression": "1.10.0",
+            "define": "TRI_INSPECTOR"
         }
     ],
     "noEngineReferences": false
