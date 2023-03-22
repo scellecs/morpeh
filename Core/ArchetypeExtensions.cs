@@ -90,7 +90,6 @@ namespace Scellecs.Morpeh {
                     lastNode.map.Add(typeId, currentNode, out _);
                 }
             }
-            // Debug.LogError($"ADD {currentNode.typeId}");
             return currentNode;
         }
         
@@ -98,24 +97,12 @@ namespace Scellecs.Morpeh {
             Span<int> ids = stackalloc int[node.level];
             var counter = 0;
             var currentNode = node;
-            // Debug.LogError($"BEGIN REM DEEP {currentNode.typeId} {removeTypeId}");
             while (currentNode.typeId > removeTypeId) {
-                // Debug.LogError($"REM DEEP {currentNode.typeId} {removeTypeId}");
                 ids[counter++] = currentNode.typeId;
                 currentNode = currentNode.parent;
             }
-            
-            if (currentNode.typeId != removeTypeId) {
-                Debug.LogError($"REM {currentNode.typeId} {removeTypeId}");
-                // var t = node;
-                // while (t.level != 0) {
-                //     Debug.LogError(t.typeId);
-                //     t = node.parent;
-                // }
-            }
             currentNode = currentNode.parent;
 
-            // Debug.LogError($"REM COPY {currentNode.typeId} {removeTypeId} :: {counter}");
             for (int i = counter - 1; i >= 0; i--) {
                 var typeId = ids[i];
                 var lastNode = currentNode;
@@ -130,7 +117,6 @@ namespace Scellecs.Morpeh {
                     lastNode.map.Add(typeId, currentNode, out _);
                 }
             }
-            // Debug.LogError($"REM RETURN {currentNode.typeId}");
             return currentNode;
         }
     }

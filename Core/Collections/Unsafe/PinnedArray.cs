@@ -13,7 +13,6 @@ namespace Scellecs.Morpeh.Collections {
     using System.Runtime.InteropServices;
 #endif
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine.Serialization;
 
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -34,7 +33,7 @@ namespace Scellecs.Morpeh.Collections {
 #if MORPEH_UNITY
             this.ptr = (T*) UnsafeUtility.PinGCArrayAndGetDataAddress(this.value, out this.handle);
 #else
-            this.handle = GCHandle.Alloc(this.data, GCHandleType.Pinned);
+            this.handle = GCHandle.Alloc(this.value, GCHandleType.Pinned);
             this.ptr = (T*)this.handle.AddrOfPinnedObject();
 #endif
         }
@@ -73,7 +72,7 @@ namespace Scellecs.Morpeh.Collections {
             if (this.handle.IsAllocated) {
                 this.handle.Free();
                 this.ptr = (T*)IntPtr.Zero;
-                this.data = null;
+                this.value = null;
             }
 #endif
         }

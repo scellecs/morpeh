@@ -197,6 +197,8 @@
       <None Remove="Core\Collections\Raw\UnmanagedStorage.cs.meta" />
       <None Remove="Core\Collections\Raw\UnmanagedStorageUtils.cs.meta" />
       <None Remove="Core\Collections\Raw\UnmanagedUtils.cs.meta" />
+      <None Remove="Core\Inspector\NoInspector.cs.meta" />
+      <None Remove="Core\Inspector\TriInspector.cs.meta" />
     </ItemGroup>
 
 </Project>
