@@ -10,10 +10,12 @@ public class CreatureBatchesProfilerModule : ProfilerModule
         counters = { 
             new("Entities", ProfilerCategory.Scripts), 
             new("Archetypes", ProfilerCategory.Scripts), 
+            new("Virtual Archetypes", ProfilerCategory.Scripts), 
             new("Filters", ProfilerCategory.Scripts), 
             new("Systems", ProfilerCategory.Scripts), 
             new("Commits", ProfilerCategory.Scripts), 
             new("Migrations", ProfilerCategory.Scripts), 
+            new("Component Types", ProfilerCategory.Scripts), 
         }; 
 
     public CreatureBatchesProfilerModule() : base(counters) { }

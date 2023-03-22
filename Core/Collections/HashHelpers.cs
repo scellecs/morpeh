@@ -8,6 +8,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class HashHelpers {
         internal static readonly int[] capacitySizes = {
+            1,
             3,
             15,
             63,

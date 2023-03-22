@@ -39,5 +39,27 @@ namespace Scellecs.Morpeh.Collections {
 
             return -1;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void InsertionSort(this int[] a, int l, int size)
+        {
+            var r = l + size;
+            for (var i = l + 1; i < r; i++)
+            {
+                ref var ie = ref a[i];
+                ref var im1e = ref a[i - 1];
+                if (ie < im1e)
+                {
+                    var currentElement = ie;
+                    ie = im1e;
+                    var j = i - 1;
+                    for (; j > l && (currentElement < a[j - 1]); j--)
+                    {
+                        a[j] = a[j - 1];
+                    }
+                    a[j] = currentElement;
+                }
+            }
+        }
     }
 }

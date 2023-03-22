@@ -43,7 +43,7 @@ namespace Scellecs.Morpeh.Collections {
             this.data     = new PinnedArray<T>(this.capacity);
             this.length   = other.length;
             this.lastSwappedIndex = -1;
-            Array.Copy(other.data.data, 0, this.data.data, 0, this.length);
+            Array.Copy(other.data.value, 0, this.data.value, 0, this.length);
 
             this.comparer = other.comparer;
         }

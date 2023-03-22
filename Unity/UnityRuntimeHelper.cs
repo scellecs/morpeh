@@ -19,10 +19,12 @@ namespace Scellecs.Morpeh {
 #if MORPEH_METRICS
         private static readonly ProfilerCounterValue<int> entitiesCounter = new(ProfilerCategory.Scripts, "Entities", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> archetypesCounter = new(ProfilerCategory.Scripts, "Archetypes", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
+        private static readonly ProfilerCounterValue<int> virtualArchetypesCounter = new(ProfilerCategory.Scripts, "Virtual Archetypes", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> filtersCounter = new(ProfilerCategory.Scripts, "Filters", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> systemsCounter = new(ProfilerCategory.Scripts, "Systems", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> commitsCounter = new(ProfilerCategory.Scripts, "Commits", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> migrationsCounter = new(ProfilerCategory.Scripts, "Migrations", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
+        private static readonly ProfilerCounterValue<int> componentsCounter = new(ProfilerCategory.Scripts, "Component Types", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
 #endif
         
 #if UNITY_EDITOR
@@ -73,13 +75,14 @@ namespace Scellecs.Morpeh {
 #if MORPEH_METRICS
             var w = World.Default;
             if (w != null) {
-                var m = w.metrics;
                 entitiesCounter.Value = w.metrics.entities;
                 archetypesCounter.Value = w.metrics.archetypes;
+                virtualArchetypesCounter.Value = w.metrics.virtuals;
                 filtersCounter.Value = w.metrics.filters;
                 systemsCounter.Value = w.metrics.systems;
                 commitsCounter.Value = w.metrics.commits;
                 migrationsCounter.Value = w.metrics.migrations;
+                componentsCounter.Value = w.metrics.components;
             }
 #endif
         }

@@ -92,10 +92,12 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         internal FastList<Archetype> archetypes;
         [ShowInInspector]
-        internal IntHashMap<IntFastList> archetypesByLength;
+        [NotNull]
+        internal VirtualArchetype archetypesRoot;
+        [ShowInInspector]
+        internal int virtualArchetypesCount;
         [ShowInInspector]
         internal IntFastList newArchetypes;
-        internal IntFastList archetypeCache;
 
         [ShowInInspector]
         internal int identifier;
@@ -264,13 +266,8 @@ namespace Scellecs.Morpeh {
 
             this.archetypes.Clear();
             this.archetypes = null;
-
-            foreach (var index in this.archetypesByLength) {
-                this.archetypesByLength.GetValueByIndex(index).Clear();
-            }
-
-            this.archetypesByLength.Clear();
-            this.archetypesByLength = null;
+            
+            this.archetypesRoot = null;
 
             this.newArchetypes.Clear();
             this.newArchetypes = null;
@@ -281,10 +278,12 @@ namespace Scellecs.Morpeh {
         public struct Metrics {
             public int entities;
             public int archetypes;
+            public int virtuals;
             public int filters;
             public int systems;
             public int commits;
             public int migrations;
+            public int components;
         }
     }
 }

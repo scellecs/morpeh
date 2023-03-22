@@ -24,7 +24,7 @@ namespace Scellecs.Morpeh.Collections {
                     stack.data.Resize(stack.capacity = HashHelpers.GetCapacity(newSize) + 1);
                 }
                 
-                Array.Copy(other.data.data, 0, stack.data.data, stack.length, other.length);
+                Array.Copy(other.data.value, 0, stack.data.value, stack.length, other.length);
 
                 stack.length += other.length;
             }

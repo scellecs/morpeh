@@ -3,6 +3,7 @@ namespace Scellecs.Morpeh.Collections {
     using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
+    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

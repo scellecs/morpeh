@@ -1,53 +1,49 @@
 namespace Scellecs.Morpeh {
     using System;
     using Collections;
+    using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
+    
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    internal sealed class VirtualArchetype {
+        public int level;
+        public int typeId;
+        public VirtualArchetype parent;
+        public Archetype realArchetype;
+        public IntHashMap<VirtualArchetype> map;
+    }
 
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
-#endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal sealed class Archetype {
-        [SerializeField]
+        [ShowInInspector]
         internal int[] typeIds;
-        [SerializeField]
+        [ShowInInspector]
         internal BitMap entities;
-        [SerializeField]
+        [ShowInInspector]
         internal UnsafeFastList<int> entitiesNative;
-        [NonSerialized]
-        internal FastList<Filter> filters;
-        [SerializeField]
-        internal UnsafeIntHashMap<int> removeTransfer;
-        [SerializeField]
-        internal UnsafeIntHashMap<int> addTransfer;
-        [SerializeField]
+        [ShowInInspector]
         internal int length;
-        [SerializeField]
-        internal int worldId;
-        [SerializeField]
+        [ShowInInspector]
         internal int id;
-        [SerializeField]
+        [ShowInInspector]
         internal bool usedInNative;
 
         [NonSerialized]
         internal World world;
 
-        internal Archetype(int id, int[] typeIds, int worldId) {
+        internal Archetype(int id, int[] typeIds, World world) {
             this.id             = id;
             this.typeIds        = typeIds;
             this.length         = 0;
             this.entities       = new BitMap();
             this.entitiesNative = new UnsafeFastList<int>(0);
-            this.addTransfer    = new UnsafeIntHashMap<int>();
-            this.removeTransfer = new UnsafeIntHashMap<int>();
             this.usedInNative   = false;
 
-            this.worldId = worldId;
-
-            this.Ctor();
+            this.world = world;
         }
     }
 }

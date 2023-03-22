@@ -13,7 +13,6 @@
 namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
@@ -38,14 +37,7 @@ namespace Scellecs.Morpeh {
             world.Filter           = new FilterBuilder{ world = world };
             world.LegacyRootFilter = new Filter(world);
             world.filters          = new FastList<Filter>();
-            world.archetypeCache   = new IntFastList();
             world.dirtyEntities    = new BitMap();
-
-            if (world.archetypes != null) {
-                foreach (var archetype in world.archetypes) {
-                    archetype.Ctor();
-                }
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,9 +68,15 @@ namespace Scellecs.Morpeh {
             world.entities         = new Entity[world.entitiesCapacity];
             world.entitiesGens     = new int[world.entitiesCapacity];
 
-            world.archetypes         = new FastList<Archetype> { new Archetype(0, Array.Empty<int>(), world.identifier) };
-            world.archetypesByLength = new IntHashMap<IntFastList>();
-            world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
+            world.archetypes         = new FastList<Archetype>();
+            world.archetypesRoot = new VirtualArchetype {
+                level = 0,
+                typeId = -1,
+                map = new IntHashMap<VirtualArchetype>(),
+                realArchetype = null
+            };
+            //world.archetypesRoot.parent = world.archetypesRoot;
+            world.virtualArchetypesCount = 1;
             world.newArchetypes = new IntFastList();
 
             if (World.plugins != null) {
@@ -127,65 +125,6 @@ namespace Scellecs.Morpeh {
                 World.plugins = new FastList<IWorldPlugin>();
             }
             World.plugins.Add(plugin);
-        }
-
-        //TODO refactor allocations and fast sort(maybe without it?)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Archetype GetArchetype(this World world, int[] typeIds, int newTypeId, bool added, out int archetypeId) {
-            Archetype archetype = null;
-            archetypeId = -1;
-
-            world.archetypeCache.Clear();
-            for (int i = 0, length = typeIds.Length; i < length; i++) {
-                var typeId = typeIds[i];
-                if (typeId >= 0) {
-                    world.archetypeCache.Add(typeIds[i]);
-                }
-            }
-
-            if (added) {
-                world.archetypeCache.Add(newTypeId);
-            }
-            else {
-                world.archetypeCache.Remove(newTypeId);
-            }
-
-            world.archetypeCache.Sort();
-            var typesLength = world.archetypeCache.length;
-
-            if (world.archetypesByLength.TryGetValue(typesLength, out var archetypesList)) {
-                for (var index = 0; index < archetypesList.length; index++) {
-                    archetypeId = archetypesList.Get(index);
-                    archetype   = world.archetypes.data[archetypeId];
-                    var check = true;
-                    for (int i = 0, length = typesLength; i < length; i++) {
-                        if (archetype.typeIds[i] != world.archetypeCache.Get(i)) {
-                            check = false;
-                            break;
-                        }
-                    }
-
-                    if (check) {
-                        return archetype;
-                    }
-                }
-            }
-
-            archetypeId = world.archetypes.length;
-            var newArchetype = new Archetype(archetypeId, world.archetypeCache.ToArray(), world.identifier);
-            world.archetypes.Add(newArchetype);
-            if (world.archetypesByLength.TryGetValue(typesLength, out archetypesList)) {
-                archetypesList.Add(archetypeId);
-            }
-            else {
-                world.archetypesByLength.Add(typesLength, new IntFastList { archetypeId }, out _);
-            }
-
-            world.newArchetypes.Add(archetypeId);
-
-            archetype = newArchetype;
-
-            return archetype;
         }
 
         [CanBeNull]
@@ -350,7 +289,9 @@ namespace Scellecs.Morpeh {
             ref var m = ref world.newMetrics;
             m.entities = world.entitiesCount;
             m.archetypes = world.archetypes.length;
+            m.virtuals = world.virtualArchetypesCount;
             m.filters = world.filters.length;
+            m.components = CommonTypeIdentifier.counter;
             foreach (var systemsGroup in world.systemsGroups.Values) {
                 m.systems += systemsGroup.systems.length;
                 m.systems += systemsGroup.fixedSystems.length;

@@ -47,10 +47,10 @@ namespace Scellecs.Morpeh.Collections {
                 }
 
                 if (list == other) {
-                    Array.Copy(list.data.data, 0, list.data.data, list.length, list.length);
+                    Array.Copy(list.data.value, 0, list.data.value, list.length, list.length);
                 }
                 else {
-                    Array.Copy(other.data.data, 0, list.data.data, list.length, other.length);
+                    Array.Copy(other.data.value, 0, list.data.value, list.length, other.length);
                 }
 
                 list.length += other.length;
@@ -65,7 +65,7 @@ namespace Scellecs.Morpeh.Collections {
         } 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T>(this UnsafeFastList<T> list, T value) where T : unmanaged  => ArrayHelpers.IndexOf(list.data.data, value, list.comparer);
+        public static int IndexOf<T>(this UnsafeFastList<T> list, T value) where T : unmanaged  => ArrayHelpers.IndexOf(list.data.value, value, list.comparer);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove<T>(this UnsafeFastList<T> list, T value) where T : unmanaged  => list.RemoveAt(list.IndexOf(value));
@@ -77,7 +77,7 @@ namespace Scellecs.Morpeh.Collections {
         public static void RemoveAt<T>(this UnsafeFastList<T> list, int index) where T : unmanaged  {
             --list.length;
             if (index < list.length) {
-                Array.Copy(list.data.data, index + 1, list.data.data, index, list.length - index);
+                Array.Copy(list.data.value, index + 1, list.data.value, index, list.length - index);
             }
 
             list.data.ptr[list.length] = default;
@@ -120,23 +120,23 @@ namespace Scellecs.Morpeh.Collections {
                 return;
             }
 
-            Array.Clear(list.data.data, 0, list.length);
+            Array.Clear(list.data.value, 0, list.length);
             list.length = 0;
             list.lastSwappedIndex = -1;
         }
 
         //todo rework
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T>(this UnsafeFastList<T> list) where T : unmanaged  => Array.Sort(list.data.data, 0, list.length, null);
+        public static void Sort<T>(this UnsafeFastList<T> list) where T : unmanaged  => Array.Sort(list.data.value, 0, list.length, null);
 
         //todo rework
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T>(this UnsafeFastList<T> list, int index, int len) where T : unmanaged  => Array.Sort(list.data.data, index, len, null);
+        public static void Sort<T>(this UnsafeFastList<T> list, int index, int len) where T : unmanaged  => Array.Sort(list.data.value, index, len, null);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T[] ToArray<T>(this UnsafeFastList<T> list) where T : unmanaged  {
             var newArray = new T[list.length];
-            Array.Copy(list.data.data, 0, newArray, 0, list.length);
+            Array.Copy(list.data.value, 0, newArray, 0, list.length);
             return newArray;
         }
     }

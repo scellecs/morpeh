@@ -20,14 +20,10 @@ namespace Scellecs.Morpeh {
             var world = World.worlds.data[worldId];
             var newEntity = new Entity { 
                 entityId = new EntityId(id, world.entitiesGens[id]), 
-                worldID = worldId,
                 world = world,
-                previousArchetypeId = -1,
-                currentArchetypeId = 0
+                virtualArchetype = world.archetypesRoot
             };
-
-            newEntity.currentArchetype = newEntity.world.archetypes.data[0];
-
+            
             return newEntity;
         }
 #if !MORPEH_STRICT_MODE
@@ -156,11 +152,11 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddTransfer(this Entity entity, int typeId) {
-            if (entity.previousArchetypeId == -1) {
-                entity.previousArchetypeId = entity.currentArchetypeId;
+            if (entity.previousVirtualArchetype == null) {
+                entity.previousVirtualArchetype = entity.virtualArchetype;
             }
 
-            entity.currentArchetype.AddTransfer(typeId, out entity.currentArchetypeId, out entity.currentArchetype);
+            entity.virtualArchetype = entity.virtualArchetype.AddTransfer(typeId, entity.world);
             if (entity.isDirty == true) {
                 return;
             }
@@ -171,11 +167,11 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveTransfer(this Entity entity, int typeId) {
-            if (entity.previousArchetypeId == -1) {
-                entity.previousArchetypeId = entity.currentArchetypeId;
+            if (entity.previousVirtualArchetype == null) {
+                entity.previousVirtualArchetype = entity.virtualArchetype;
             }
 
-            entity.currentArchetype.RemoveTransfer(typeId, out entity.currentArchetypeId, out entity.currentArchetype);
+            entity.virtualArchetype = entity.virtualArchetype.RemoveTransfer(typeId, entity.world);
             if (entity.isDirty == true) {
                 return;
             }
@@ -186,21 +182,40 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransfer(this Entity entity) {
-            if (entity.currentArchetypeId == 0) {
-                entity.world.RemoveEntity(entity);
-                return;
-            }
+            // if (entity.virtualArchetype.level == 0) {
+            //     entity.world.RemoveEntity(entity);
+            //     return;
+            // }
 
-            if (entity.previousArchetypeId != entity.currentArchetypeId) {
-                if (entity.previousArchetypeId >= 0) {
-                    entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
+            if (entity.previousVirtualArchetype != entity.virtualArchetype) {
+                if (entity.previousVirtualArchetype.level > 0) {
+                    entity.previousVirtualArchetype.realArchetype?.Remove(entity);
                 }
                 
-                entity.currentArchetype.Add(entity);
-                entity.previousArchetypeId = -1;
+                if (entity.virtualArchetype.realArchetype == null) {
+                    entity.virtualArchetype.CreateArchetype(entity.world);
+                }
+                entity.virtualArchetype.realArchetype.Add(entity);
+
+                entity.previousVirtualArchetype = null;
             }
 
             entity.isDirty = false;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void CreateArchetype(this VirtualArchetype node, World world) {
+            var typeIds = new int[node.level];
+            var currentNode = node;
+            for (int i = node.level - 1; i >= 0; i--) {
+                typeIds[i] = currentNode.typeId;
+                currentNode = currentNode.parent;
+            }
+
+            var archetypeId = world.archetypes.length;
+            node.realArchetype = new Archetype(archetypeId, typeIds, world);
+            world.archetypes.Add(node.realArchetype);
+            world.newArchetypes.Add(archetypeId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -214,20 +229,22 @@ namespace Scellecs.Morpeh {
             
             entity.world.ThreadSafetyCheck();
             
-            var currentArchetype = entity.currentArchetype;
+            var currentArchetype = entity.virtualArchetype.realArchetype;
 
-            var stashes = currentArchetype.world.stashes;
-            foreach (var typeId in currentArchetype.typeIds) {
-                if (stashes.TryGetValue(typeId, out var index)) {
-                    Stash.stashes.data[index].Clean(entity);
+            if (currentArchetype != null) {
+                var stashes = currentArchetype.world.stashes;
+                foreach (var typeId in currentArchetype.typeIds) {
+                    if (stashes.TryGetValue(typeId, out var index)) {
+                        Stash.stashes.data[index].Clean(entity);
+                    }
                 }
             }
-            
-            if (entity.previousArchetypeId >= 0) {
-                entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
+
+            if (entity.previousVirtualArchetype != null) {
+                entity.previousVirtualArchetype.realArchetype?.Remove(entity);
             }
             else {
-                currentArchetype.Remove(entity);
+                currentArchetype?.Remove(entity);
             }
 
             entity.world.ApplyRemoveEntity(entity.entityId.id);
@@ -238,14 +255,12 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeFast(this Entity entity) {
-            entity.previousArchetypeId = -1;
-            entity.currentArchetypeId  = -1;
+            entity.previousVirtualArchetype = null;
 
             entity.world            = null;
-            entity.currentArchetype = null;
+            entity.virtualArchetype = null;
 
             entity.entityId   = EntityId.Invalid;
-            entity.worldID    = -1;
 
             entity.isDirty    = false;
             entity.isDisposed = true;

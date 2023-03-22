@@ -46,14 +46,14 @@ namespace Scellecs.Morpeh.Collections {
                     list.data.Resize(list.capacity = HashHelpers.GetCapacity(newSize - 1) + 1);
                 }
 
-                Array.Copy(other.data.data, 0, list.data.data, list.length, other.length);
+                Array.Copy(other.data.value, 0, list.data.value, list.length, other.length);
 
                 list.length += other.length;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf(this IntFastList list, int value) => ArrayHelpers.IndexOfUnsafeInt(list.data.ptr, list.data.data.Length, value);
+        public static int IndexOf(this IntFastList list, int value) => ArrayHelpers.IndexOfUnsafeInt(list.data.ptr, list.data.value.Length, value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove(this IntFastList list, int value) => list.RemoveAt(list.IndexOf(value));
@@ -65,7 +65,7 @@ namespace Scellecs.Morpeh.Collections {
         public static void RemoveAt(this IntFastList list, int index) {
             --list.length;
             if (index < list.length) {
-                Array.Copy(list.data.data, index + 1, list.data.data, index, list.length - index);
+                Array.Copy(list.data.value, index + 1, list.data.value, index, list.length - index);
             }
         }
 
@@ -89,20 +89,23 @@ namespace Scellecs.Morpeh.Collections {
                 return;
             }
 
-            Array.Clear(list.data.data, 0, list.length);
+            Array.Clear(list.data.value, 0, list.length);
             list.length = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort(this IntFastList list) => Array.Sort(list.data.data, 0, list.length, null);
+        public static void Sort(this IntFastList list) => Array.Sort(list.data.value, 0, list.length, null);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void InsertionSort(this IntFastList list) => list.data.value.InsertionSort(0, list.length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort(this IntFastList list, int index, int len) => Array.Sort(list.data.data, index, len, null);
+        public static void Sort(this IntFastList list, int index, int len) => Array.Sort(list.data.value, index, len, null);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int[] ToArray(this IntFastList list) {
             var newArray = new int[list.length];
-            Array.Copy(list.data.data, 0, newArray, 0, list.length);
+            Array.Copy(list.data.value, 0, newArray, 0, list.length);
             return newArray;
         }
     }

@@ -41,7 +41,7 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity = other.capacity;
             this.data     = new PinnedArray<int>(this.capacity);
             this.length   = other.length;
-            Array.Copy(other.data.data, 0, this.data.data, 0, this.length);
+            Array.Copy(other.data.value, 0, this.data.value, 0, this.length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

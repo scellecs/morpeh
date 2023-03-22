@@ -13,13 +13,14 @@ namespace Scellecs.Morpeh.Collections {
     using System.Runtime.InteropServices;
 #endif
     using Unity.IL2CPP.CompilerServices;
+    using UnityEngine.Serialization;
 
     [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public unsafe struct PinnedArray<T> : IDisposable, IEnumerable<T> where T : unmanaged {
-        public T[] data;
+        public T[] value;
         public T* ptr;
 #if MORPEH_UNITY
         public ulong handle;
@@ -29,9 +30,9 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public PinnedArray(int size) {
-            this.data = new T[size];
+            this.value = new T[size];
 #if MORPEH_UNITY
-            this.ptr = (T*) UnsafeUtility.PinGCArrayAndGetDataAddress(this.data, out this.handle);
+            this.ptr = (T*) UnsafeUtility.PinGCArrayAndGetDataAddress(this.value, out this.handle);
 #else
             this.handle = GCHandle.Alloc(this.data, GCHandleType.Pinned);
             this.ptr = (T*)this.handle.AddrOfPinnedObject();
@@ -46,11 +47,11 @@ namespace Scellecs.Morpeh.Collections {
             this.handle.Free();
 #endif
             var newArray = new T[newSize];
-            var len = this.data.Length;
-            Array.Copy(this.data, 0, newArray, 0, newSize >= len ? len : newSize);
-            this.data = newArray;
+            var len = this.value.Length;
+            Array.Copy(this.value, 0, newArray, 0, newSize >= len ? len : newSize);
+            this.value = newArray;
 #if MORPEH_UNITY
-            this.ptr = (T*) UnsafeUtility.PinGCArrayAndGetDataAddress(this.data, out this.handle);
+            this.ptr = (T*) UnsafeUtility.PinGCArrayAndGetDataAddress(this.value, out this.handle);
 #else
             this.handle = GCHandle.Alloc(newArray, GCHandleType.Pinned);
             this.ptr = (T*)this.handle.AddrOfPinnedObject();
@@ -59,7 +60,7 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear() {
-            Array.Clear(this.data, 0, this.data.Length);
+            Array.Clear(this.value, 0, this.value.Length);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -67,7 +68,7 @@ namespace Scellecs.Morpeh.Collections {
 #if MORPEH_UNITY
             UnsafeUtility.ReleaseGCObject(this.handle);
             this.ptr = (T*)IntPtr.Zero;
-            this.data = null;
+            this.value = null;
 #else
             if (this.handle.IsAllocated) {
                 this.handle.Free();
@@ -79,7 +80,7 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             Enumerator e;
-            e.length = this.data.Length;
+            e.length = this.value.Length;
             e.ptr    = this.ptr;
             e.current = default;
             e.index   = 0;

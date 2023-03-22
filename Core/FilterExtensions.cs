@@ -27,10 +27,6 @@ namespace Scellecs.Morpeh {
             filter.childs = null;
 
             if (filter.archetypes != null) {
-                foreach (var archetype in filter.archetypes) {
-                    archetype.RemoveFilter(filter);
-                }
-
                 filter.archetypes.Clear();
                 filter.archetypes = null;
                 
@@ -121,7 +117,6 @@ namespace Scellecs.Morpeh {
                     }
 
                     filter.archetypes.Add(archetype);
-                    archetype.AddFilter(filter);
                 }
             }
         }
