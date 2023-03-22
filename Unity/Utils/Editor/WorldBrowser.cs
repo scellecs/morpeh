@@ -63,6 +63,10 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         private void Flush() {
+            if (this.references == null) {
+                return;
+            }
+            
             foreach (var reference in this.references) {
                 reference.Dispose();
             }

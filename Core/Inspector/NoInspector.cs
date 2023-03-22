@@ -1,4 +1,4 @@
-#if UNITY_EDITOR && !ODIN_INSPECTOR && !TRI_INSPECTOR
+#if !ODIN_INSPECTOR && !TRI_INSPECTOR
 namespace Sirenix.OdinInspector {
     using System;
 
