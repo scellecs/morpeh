@@ -9,8 +9,6 @@
     
 #if UNITY_EDITOR
     using UnityEditor;
-#endif
-#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
 
@@ -19,14 +17,15 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [AddComponentMenu("ECS/" + nameof(Installer))]
     public class Installer : BaseInstaller {
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        [Required]
+#if UNITY_EDITOR
+        // TODO check is Required attribute really required
+        // [Required]
         [InfoBox("Order collision with other installer!", InfoMessageType.Error, nameof(IsCollisionWithOtherInstaller))]
         [PropertyOrder(-7)]
 #endif
         public int order;
         
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         private bool IsCollisionWithOtherInstaller 
             => this.IsPrefab() == false && FindObjectsOfType<Installer>().Where(i => i != this).Any(i => i.order == this.order);
         
@@ -34,27 +33,28 @@
 #endif
         
         [Space]
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         [PropertyOrder(-6)]
+        [Required]
 #endif
         public Initializer[] initializers;
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         [PropertyOrder(-5)]
         [OnValueChanged(nameof(OnValueChangedUpdate))]
 #endif
         public UpdateSystemPair[] updateSystems;
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         [PropertyOrder(-4)]
         [OnValueChanged(nameof(OnValueChangedFixedUpdate))]
 #endif
         public FixedSystemPair[] fixedUpdateSystems;
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         [PropertyOrder(-3)]
         [OnValueChanged(nameof(OnValueChangedLateUpdate))]
 #endif
         public LateSystemPair[] lateUpdateSystems;
         
-        #if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         [PropertyOrder(-2)]
         [OnValueChanged(nameof(OnValueChangedCleanup))]
 #endif
@@ -164,12 +164,15 @@
         using Systems;
         
         [Serializable]
+#if TRI_INSPECTOR
+        [TriInspector.DeclareHorizontalGroup("Pair", Sizes = new[] { 15f })]
+#endif
         public abstract class BasePair<T> where T : class, ISystem {
             internal SystemsGroup group;
             
             [SerializeField]
-#if UNITY_EDITOR && ODIN_INSPECTOR
-            [HorizontalGroup("Pair", 10)]
+#if UNITY_EDITOR
+            [HorizontalGroup("Pair", 15)]
             [HideLabel]
             [OnValueChanged(nameof(OnChange))]
 #endif
@@ -177,7 +180,7 @@
 
 #pragma warning disable CS0649
             [SerializeField]
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
             [HorizontalGroup("Pair")]
             [HideLabel]
             [Required]

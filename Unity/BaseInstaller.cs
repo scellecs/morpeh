@@ -5,13 +5,11 @@ namespace Scellecs.Morpeh {
 
 #if UNITY_EDITOR
     using UnityEditor;
-#endif
-#if UNITY_EDITOR && ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
     using UnityEngine;
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
     [HideMonoScript]
 #endif
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -22,7 +20,8 @@ namespace Scellecs.Morpeh {
 
         protected abstract void OnDisable();
         
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
+        // TODO refactor this
         [OnInspectorGUI]
         private void OnEditorGUI() {
             this.gameObject.transform.hideFlags = HideFlags.HideInInspector;

@@ -1,5 +1,5 @@
 ﻿namespace Scellecs.Morpeh.Providers {
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
     using Sirenix.OdinInspector;
 #endif
     using System.Collections.Generic;
@@ -11,12 +11,12 @@
         
         [Space]
         [SerializeReference]
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         [HideIf(nameof(ShowSerializedComponents))]
 #endif
         public IComponent[] serializedComponents = new IComponent[0];
         
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         private bool ShowSerializedComponents => this.Entity.IsNullOrDisposed() == false;
 #endif
 

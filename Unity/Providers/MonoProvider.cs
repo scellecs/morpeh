@@ -7,7 +7,7 @@
         [HideInInspector]
         private T serializedData;
         private Stash<T> stash;
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         private string typeName = typeof(T).Name;
 
         [PropertySpace]
