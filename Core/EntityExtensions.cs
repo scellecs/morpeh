@@ -182,10 +182,10 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransfer(this Entity entity) {
-            // if (entity.virtualArchetype.level == 0) {
-            //     entity.world.RemoveEntity(entity);
-            //     return;
-            // }
+            if (entity.virtualArchetype.level == 0) {
+                entity.world.RemoveEntity(entity);
+                return;
+            }
 
             if (entity.previousVirtualArchetype != entity.virtualArchetype) {
                 if (entity.previousVirtualArchetype.level > 0) {
