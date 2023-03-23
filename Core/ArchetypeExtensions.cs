@@ -119,5 +119,14 @@ namespace Scellecs.Morpeh {
             }
             return currentNode;
         }
+        
+        internal static unsafe void GetTypeIds(this VirtualArchetype node, Span<int> ids) {
+            var counter = 0;
+            var currentNode = node;
+            while (currentNode.level > 0) {
+                ids[counter++] = currentNode.typeId;
+                currentNode = currentNode.parent;
+            }
+        }
     }
 }

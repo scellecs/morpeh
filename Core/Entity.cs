@@ -1,9 +1,7 @@
 namespace Scellecs.Morpeh {
-    using System;
-    using Collections;
+    using JetBrains.Annotations;
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -14,6 +12,7 @@ namespace Scellecs.Morpeh {
         internal bool isDisposed;
         
         internal VirtualArchetype previousVirtualArchetype;
+        [NotNull]
         internal VirtualArchetype virtualArchetype;
         internal int indexInCurrentArchetype;
 
@@ -22,11 +21,8 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         public EntityId ID => this.entityId;
 
-        internal Entity() {
-        }
+        internal Entity() { }
 
-        public override string ToString() {
-            return $"Entity:{ID.ToString()}";
-        }
+        public override string ToString() => $"Entity:{this.ID.ToString()}";
     }
 }

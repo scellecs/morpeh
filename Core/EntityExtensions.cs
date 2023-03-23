@@ -219,7 +219,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Dispose(this Entity entity) {
+        public static unsafe void Dispose(this Entity entity) {
             if (entity.isDisposed) {
 #if MORPEH_DEBUG
                 MLogger.LogError($"You're trying to dispose disposed entity with ID {entity.entityId}.");
@@ -229,14 +229,14 @@ namespace Scellecs.Morpeh {
             
             entity.world.ThreadSafetyCheck();
             
-            var currentArchetype = entity.virtualArchetype.realArchetype;
+            var currentArchetype = entity.virtualArchetype;
 
-            if (currentArchetype != null) {
-                var stashes = currentArchetype.world.stashes;
-                foreach (var typeId in currentArchetype.typeIds) {
-                    if (stashes.TryGetValue(typeId, out var index)) {
-                        Stash.stashes.data[index].Clean(entity);
-                    }
+            var stashes = entity.world.stashes;
+            Span<int> typeIds = stackalloc int[currentArchetype.level];
+            currentArchetype.GetTypeIds(typeIds);
+            foreach (var typeId in typeIds) {
+                if (stashes.TryGetValue(typeId, out var index)) {
+                    Stash.stashes.data[index].Clean(entity);
                 }
             }
 
@@ -244,7 +244,7 @@ namespace Scellecs.Morpeh {
                 entity.previousVirtualArchetype.realArchetype?.Remove(entity);
             }
             else {
-                currentArchetype?.Remove(entity);
+                currentArchetype.realArchetype?.Remove(entity);
             }
 
             entity.world.ApplyRemoveEntity(entity.entityId.id);
