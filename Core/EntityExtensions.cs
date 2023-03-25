@@ -20,8 +20,7 @@ namespace Scellecs.Morpeh {
             var world = World.worlds.data[worldId];
             var newEntity = new Entity { 
                 entityId = new EntityId(id, world.entitiesGens[id]), 
-                world = world,
-                currentArchetype = 0
+                world = world
             };
             
             return newEntity;
@@ -152,11 +151,13 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddTransfer(this Entity entity, long typeId) {
-            if (entity.previousArchetype == 0) {
+            if (entity.previousArchetypeLength == 0) {
                 entity.previousArchetype = entity.currentArchetype;
+                entity.previousArchetypeLength = entity.currentArchetypeLength;
             }
 
-            entity.currentArchetype ^= typeId; 
+            entity.currentArchetype ^= typeId;
+            entity.currentArchetypeLength++;
             if (entity.isDirty == true) {
                 return;
             }
@@ -167,11 +168,13 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveTransfer(this Entity entity, long typeId) {
-            if (entity.previousArchetype == 0) {
+            if (entity.previousArchetypeLength == 0) {
                 entity.previousArchetype = entity.currentArchetype;
+                entity.previousArchetypeLength = entity.currentArchetypeLength;
             }
 
             entity.currentArchetype ^= typeId;
+            entity.currentArchetypeLength--;
             if (entity.isDirty == true) {
                 return;
             }
@@ -182,17 +185,18 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransfer(this Entity entity) {
-            if (entity.currentArchetype == 0) {
+            if (entity.currentArchetypeLength == 0) {
                 entity.world.RemoveEntity(entity);
                 return;
             }
 
-            if (entity.previousArchetype != entity.currentArchetype) {
-                if (entity.previousArchetype > 0) {
+            if (entity.previousArchetype != entity.currentArchetype || entity.previousArchetypeLength != entity.currentArchetypeLength) {
+                if (entity.previousArchetypeLength > 0) {
                     if (entity.world.archetypes.TryGetValue(entity.previousArchetype, out var prev)) {
                         prev.Remove(entity);
                     }
                     entity.previousArchetype = 0;
+                    entity.previousArchetypeLength = 0;
                 }
                 
                 if (entity.world.archetypes.TryGetValue(entity.currentArchetype, out var current)) {
@@ -242,6 +246,8 @@ namespace Scellecs.Morpeh {
             entity.world            = null;
             entity.previousArchetype = 0;
             entity.currentArchetype = 0;
+            entity.previousArchetypeLength = 0;
+            entity.currentArchetypeLength = 0;
 
             entity.entityId   = EntityId.Invalid;
 

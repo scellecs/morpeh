@@ -13,6 +13,8 @@ namespace Scellecs.Morpeh {
         
         internal long previousArchetype;
         internal long currentArchetype;
+        internal int previousArchetypeLength;
+        internal int currentArchetypeLength;
         internal int indexInCurrentArchetype;
 
         internal EntityId entityId;
