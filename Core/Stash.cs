@@ -10,11 +10,7 @@ namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
 
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
-#endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -55,13 +51,9 @@ namespace Scellecs.Morpeh {
             stash.commonStashId = -1;
         }
 
-        [SerializeField]
         internal int commonStashId;
-        [SerializeField]
         internal int typedStashId;
-        [SerializeField]
-        internal int typeId;
-        [SerializeField]
+        internal long typeId;
         internal World world;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,9 +77,6 @@ namespace Scellecs.Morpeh {
         public abstract void Dispose();
     }
 
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
-#endif
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -98,7 +87,6 @@ namespace Scellecs.Morpeh {
 
         internal delegate void ComponentDispose(ref T component);
 
-        [SerializeField]
         internal IntHashMap<T> components;
 
         internal ComponentDispose componentDispose;

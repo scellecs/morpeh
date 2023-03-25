@@ -85,19 +85,16 @@ namespace Scellecs.Morpeh {
         internal IntStack nextFreeEntityIDs;
 
         [ShowInInspector]
-        internal UnsafeIntHashMap<int> stashes;
+        internal LongHashMap<int> stashes;
         [ShowInInspector]
-        internal UnsafeIntHashMap<int> typedStashes;
+        internal LongHashMap<int> typedStashes;
 
         [ShowInInspector]
-        internal FastList<Archetype> archetypes;
+        internal LongHashMap<Archetype> archetypes;
         [ShowInInspector]
-        [NotNull]
-        internal VirtualArchetype archetypesRoot;
+        internal int archetypesCount;
         [ShowInInspector]
-        internal int virtualArchetypesCount;
-        [ShowInInspector]
-        internal IntFastList newArchetypes;
+        internal FastList<long> newArchetypes;
 
         [ShowInInspector]
         internal int identifier;
@@ -254,11 +251,11 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    archetype.Dispose();
+                    this.archetypes.GetValueByIndex(archetype).Dispose();
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose archetype id {archetype.id}");
+                    MLogger.LogError($"Can not dispose archetype id {archetype}");
                     MLogger.LogException(e);
                 }
 #endif
@@ -266,8 +263,6 @@ namespace Scellecs.Morpeh {
 
             this.archetypes.Clear();
             this.archetypes = null;
-            
-            this.archetypesRoot = null;
 
             this.newArchetypes.Clear();
             this.newArchetypes = null;
@@ -278,12 +273,11 @@ namespace Scellecs.Morpeh {
         public struct Metrics {
             public int entities;
             public int archetypes;
-            public int virtuals;
             public int filters;
             public int systems;
             public int commits;
             public int migrations;
-            public int components;
+            public long components;
         }
     }
 }

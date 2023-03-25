@@ -59,8 +59,8 @@ namespace Scellecs.Morpeh {
             world.identifier        = added ? id : World.worlds.length - 1;
             world.freeEntityIDs     = new IntStack();
             world.nextFreeEntityIDs = new IntStack();
-            world.stashes           = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
-            world.typedStashes      = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.stashes           = new LongHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.typedStashes      = new LongHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
             world.entitiesCount    = 0;
             world.entitiesLength   = 0;
@@ -68,16 +68,9 @@ namespace Scellecs.Morpeh {
             world.entities         = new Entity[world.entitiesCapacity];
             world.entitiesGens     = new int[world.entitiesCapacity];
 
-            world.archetypes         = new FastList<Archetype>();
-            world.archetypesRoot = new VirtualArchetype {
-                level = 0,
-                typeId = -1,
-                map = new IntHashMap<VirtualArchetype>(),
-                realArchetype = null
-            };
-            //world.archetypesRoot.parent = world.archetypesRoot;
-            world.virtualArchetypesCount = 1;
-            world.newArchetypes = new IntFastList();
+            world.archetypes         = new LongHashMap<Archetype>();
+            world.archetypesCount = 1;
+            world.newArchetypes = new FastList<long>();
 
             if (World.plugins != null) {
                 foreach (var plugin in World.plugins) {
@@ -129,7 +122,7 @@ namespace Scellecs.Morpeh {
 
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Stash GetStash(this World world, int typeId) {
+        internal static Stash GetStash(this World world, long typeId) {
             if (world.stashes.TryGetValue(typeId, out var index)) {
                 return Stash.stashes.data[index];
             }
@@ -288,8 +281,7 @@ namespace Scellecs.Morpeh {
 
             ref var m = ref world.newMetrics;
             m.entities = world.entitiesCount;
-            m.archetypes = world.archetypes.length;
-            m.virtuals = world.virtualArchetypesCount;
+            m.archetypes = world.archetypesCount;
             m.filters = world.filters.length;
             m.components = CommonTypeIdentifier.counter;
             foreach (var systemsGroup in world.systemsGroups.Values) {

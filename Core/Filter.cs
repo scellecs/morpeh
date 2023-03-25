@@ -13,7 +13,7 @@ namespace Scellecs.Morpeh {
     public sealed class FilterBuilder {
         internal World world;
         internal FilterBuilder parent;
-        internal int typeId;
+        internal long typeId;
     }
     
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -41,10 +41,10 @@ namespace Scellecs.Morpeh {
         internal FastList<Archetype> archetypes;
         internal FastList<Chunk> chunks;
 
-        internal IntFastList includedTypeIds;
-        internal IntFastList excludedTypeIds;
+        internal FastList<long> includedTypeIds;
+        internal FastList<long> excludedTypeIds;
 
-        internal int  typeID;
+        internal long  typeID;
         internal int  gen;
         internal Mode mode;
 
@@ -52,7 +52,7 @@ namespace Scellecs.Morpeh {
             this.world = world;
 
             this.childs     = new FastList<Filter>();
-            this.archetypes = world.archetypes;
+            this.archetypes = null;
 
             this.typeID = -1;
             this.gen = 0;
@@ -60,7 +60,7 @@ namespace Scellecs.Morpeh {
             this.mode   = Mode.Include;
         }
 
-        internal Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, Mode mode) {
+        internal Filter(World world, long typeID, FastList<long> includedTypeIds, FastList<long> excludedTypeIds, Mode mode) {
             this.world = world;
 
             this.childs     = new FastList<Filter>();

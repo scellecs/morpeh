@@ -11,9 +11,8 @@ namespace Scellecs.Morpeh {
         internal bool isDirty;
         internal bool isDisposed;
         
-        internal VirtualArchetype previousVirtualArchetype;
-        [NotNull]
-        internal VirtualArchetype virtualArchetype;
+        internal long previousArchetype;
+        internal long currentArchetype;
         internal int indexInCurrentArchetype;
 
         internal EntityId entityId;

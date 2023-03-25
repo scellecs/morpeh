@@ -1,9 +1,7 @@
 namespace Scellecs.Morpeh {
-    using System;
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -16,7 +14,6 @@ namespace Scellecs.Morpeh {
             archetype.id      = -1;
             archetype.length  = -1;
 
-            archetype.typeIds = null;
             archetype.world   = null;
 
             archetype.entities?.Clear();
@@ -50,82 +47,6 @@ namespace Scellecs.Morpeh {
             }
             else {
                 archetype.entities.Unset(entity.entityId.id);
-            }
-        }
-        
-        
-        internal static unsafe VirtualArchetype AddTransfer(this VirtualArchetype node, int addTypeId, World world) {
-            Span<int> ids = stackalloc int[node.level];
-            var counter = 0;
-            var currentNode = node;
-            
-            while (currentNode.typeId > addTypeId) {
-                ids[counter++] = currentNode.typeId;
-                currentNode = currentNode.parent;
-            }
-            
-            var lastNode = currentNode;
-            if (!currentNode.map.TryGetValue(addTypeId, out currentNode)) {
-                currentNode = new VirtualArchetype {
-                    level = lastNode.level + 1,
-                    map = new IntHashMap<VirtualArchetype>(),
-                    parent = lastNode,
-                    typeId = addTypeId
-                };
-                world.virtualArchetypesCount++;
-                lastNode.map.Add(addTypeId, currentNode, out _);
-            }
-            
-            for (int i = counter - 1; i >= 0; i--) {
-                var typeId = ids[i];
-                lastNode = currentNode;
-                if (!lastNode.map.TryGetValue(typeId, out currentNode)) {
-                    currentNode = new VirtualArchetype {
-                        level = lastNode.level + 1,
-                        map = new IntHashMap<VirtualArchetype>(),
-                        parent = lastNode,
-                        typeId = typeId
-                    };
-                    world.virtualArchetypesCount++;
-                    lastNode.map.Add(typeId, currentNode, out _);
-                }
-            }
-            return currentNode;
-        }
-        
-        internal static unsafe VirtualArchetype RemoveTransfer(this VirtualArchetype node, int removeTypeId, World world) {
-            Span<int> ids = stackalloc int[node.level];
-            var counter = 0;
-            var currentNode = node;
-            while (currentNode.typeId > removeTypeId) {
-                ids[counter++] = currentNode.typeId;
-                currentNode = currentNode.parent;
-            }
-            currentNode = currentNode.parent;
-
-            for (int i = counter - 1; i >= 0; i--) {
-                var typeId = ids[i];
-                var lastNode = currentNode;
-                if (!lastNode.map.TryGetValue(typeId, out currentNode)) {
-                    currentNode = new VirtualArchetype {
-                        level = lastNode.level + 1,
-                        map = new IntHashMap<VirtualArchetype>(),
-                        parent = lastNode,
-                        typeId = typeId
-                    };
-                    world.virtualArchetypesCount++;
-                    lastNode.map.Add(typeId, currentNode, out _);
-                }
-            }
-            return currentNode;
-        }
-        
-        internal static unsafe void GetTypeIds(this VirtualArchetype node, Span<int> ids) {
-            var counter = 0;
-            var currentNode = node;
-            while (currentNode.level > 0) {
-                ids[counter++] = currentNode.typeId;
-                currentNode = currentNode.parent;
             }
         }
     }

@@ -3,14 +3,13 @@ namespace Scellecs.Morpeh.Collections {
     using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
-
+    
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public static unsafe class IntHashMapExtensions {
+    public static unsafe class LongHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Resize<T>(this IntHashMap<T> hashMap, int capacity) {
+        public static void Resize<T>(this LongHashMap<T> hashMap, int capacity) {
             var newCapacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
             var newCapacity         = newCapacityMinusOne + 1;
 
@@ -35,7 +34,7 @@ namespace Scellecs.Morpeh.Collections {
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void Expand<T>(this IntHashMap<T> hashMap) {
+        private static void Expand<T>(this LongHashMap<T> hashMap) {
             var newCapacityMinusOne = HashHelpers.GetCapacity(hashMap.length);
             var newCapacity         = newCapacityMinusOne + 1;
 
@@ -60,7 +59,7 @@ namespace Scellecs.Morpeh.Collections {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Add<T>(this IntHashMap<T> hashMap, int key, in T value, out int slotIndex) {
+        public static bool Add<T>(this LongHashMap<T> hashMap, long key, in T value, out int slotIndex) {
             var rem = key & hashMap.capacityMinusOne;
 
             for (var i = hashMap.buckets.ptr[rem] - 1; i >= 0; i = hashMap.slots.ptr[i].next) {
@@ -98,7 +97,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Set<T>(this IntHashMap<T> hashMap, int key, in T value, out int slotIndex) {
+        public static bool Set<T>(this LongHashMap<T> hashMap, long key, in T value, out int slotIndex) {
             var rem = key & hashMap.capacityMinusOne;
 
             for (var i = hashMap.buckets.ptr[rem] - 1; i >= 0; i = hashMap.slots.ptr[i].next) {
@@ -137,7 +136,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Remove<T>(this IntHashMap<T> hashMap, int key, [CanBeNull] out T lastValue) {
+        public static bool Remove<T>(this LongHashMap<T> hashMap, long key, [CanBeNull] out T lastValue) {
             var rem = key & hashMap.capacityMinusOne;
 
             int next;
@@ -179,7 +178,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has<T>(this IntHashMap<T> hashMap, int key) {
+        public static bool Has<T>(this LongHashMap<T> hashMap, long key) {
             var rem = key & hashMap.capacityMinusOne;
 
             int next;
@@ -196,7 +195,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryGetValue<T>(this IntHashMap<T> hashMap, int key, [CanBeNull] out T value) {
+        public static bool TryGetValue<T>(this LongHashMap<T> hashMap, long key, [CanBeNull] out T value) {
             var rem = key & hashMap.capacityMinusOne;
 
             int next;
@@ -215,7 +214,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetValueByKey<T>(this IntHashMap<T> hashMap, int key) {
+        public static T GetValueByKey<T>(this LongHashMap<T> hashMap, long key) {
             var rem = key & hashMap.capacityMinusOne;
 
             int next;
@@ -232,7 +231,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T TryGetValueRefByKey<T>(this IntHashMap<T> hashMap, int key, out bool exist) {
+        public static ref T TryGetValueRefByKey<T>(this LongHashMap<T> hashMap, long key, out bool exist) {
             var rem = key & hashMap.capacityMinusOne;
 
             int next;
@@ -251,7 +250,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T GetValueRefByKey<T>(this IntHashMap<T> hashMap, int key) {
+        public static ref T GetValueRefByKey<T>(this LongHashMap<T> hashMap, long key) {
             var rem = key & hashMap.capacityMinusOne;
 
             int next;
@@ -268,16 +267,16 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetValueByIndex<T>(this IntHashMap<T> hashMap, int index) => hashMap.data[index];
+        public static T GetValueByIndex<T>(this LongHashMap<T> hashMap, int index) => hashMap.data[index];
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T GetValueRefByIndex<T>(this IntHashMap<T> hashMap, int index) => ref hashMap.data[index];
+        public static ref T GetValueRefByIndex<T>(this LongHashMap<T> hashMap, int index) => ref hashMap.data[index];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetKeyByIndex<T>(this IntHashMap<T> hashMap, int index) => hashMap.slots.ptr[index].key - 1;
+        public static long GetKeyByIndex<T>(this LongHashMap<T> hashMap, int index) => hashMap.slots.ptr[index].key - 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int TryGetIndex<T>(this IntHashMap<T> hashMap, int key) {
+        public static int TryGetIndex<T>(this LongHashMap<T> hashMap, long key) {
             var rem = key & hashMap.capacityMinusOne;
 
             int next;
@@ -294,7 +293,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this IntHashMap<T> hashMap, T[] array) {
+        public static void CopyTo<T>(this LongHashMap<T> hashMap, T[] array) {
             int num = 0;
             for (int i = 0, li = hashMap.lastIndex; i < li && num < hashMap.length; ++i) {
                 if (hashMap.slots.ptr[i].key - 1 < 0) {
@@ -307,7 +306,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Clear<T>(this IntHashMap<T> hashMap) {
+        public static void Clear<T>(this LongHashMap<T> hashMap) {
             if (hashMap.lastIndex <= 0) {
                 return;
             }
