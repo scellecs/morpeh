@@ -230,9 +230,11 @@ namespace Scellecs.Morpeh {
             
             entity.world.ThreadSafetyCheck();
 
-            foreach (var id in entity.world.stashes) {
-                var stash = Stash.stashes.data[entity.world.stashes.GetValueByIndex(id)];
-                stash.Clean(entity);
+            if (entity.currentArchetypeLength > 0) {
+                foreach (var id in entity.world.stashes) {
+                    var stash = Stash.stashes.data[entity.world.stashes.GetValueByIndex(id)];
+                    stash.Clean(entity);
+                }
             }
 
             entity.world.ApplyRemoveEntity(entity.entityId.id);
