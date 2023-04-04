@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed unsafe class IntFastList : IEnumerable<int> {
+    public sealed unsafe class IntFastList {
         public int length;
         public int capacity;
 
@@ -53,10 +53,6 @@ namespace Scellecs.Morpeh.Collections {
             return e;
         }
 
-        IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -68,7 +64,7 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator : IEnumerator<int> {
+        public struct Enumerator {
             public IntFastList intFastList;
 
             public int current;
@@ -90,10 +86,6 @@ namespace Scellecs.Morpeh.Collections {
             }
 
             public int         Current => this.current;
-            object IEnumerator.Current => this.current;
-
-            public void Dispose() {
-            }
         }
     }
 }
