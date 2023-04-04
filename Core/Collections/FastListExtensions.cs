@@ -37,6 +37,12 @@ namespace Scellecs.Morpeh.Collections {
             list.data[index] = value;
             return index;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FastList<T> AddAndReturnThis<T>(this FastList<T> list, T value) {
+            list.Add(value);
+            return list;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddListRange<T>(this FastList<T> list, FastList<T> other) {

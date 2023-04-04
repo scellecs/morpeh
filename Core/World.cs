@@ -26,7 +26,7 @@ namespace Scellecs.Morpeh {
         public static World Default => worlds.data[0];
         [NotNull]
         [PublicAPI]
-        internal static FastList<World> worlds = new FastList<World> { null };
+        internal static FastList<World> worlds = new FastList<World>().AddAndReturnThis(null);
         
         [CanBeNull]
         internal static FastList<IWorldPlugin> plugins;
