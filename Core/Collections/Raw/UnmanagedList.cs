@@ -4,7 +4,7 @@ namespace Scellecs.Morpeh.Collections {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
 
-    public unsafe struct UnmanagedList<T> : IEnumerable<T>, IDisposable where T : unmanaged {
+    public unsafe struct UnmanagedList<T> : IDisposable where T : unmanaged {
         private UnmanagedStorage<T>* ptr;
         private bool                 IsUnsafeArrayAllocated => this.ptr != null;
 
@@ -108,10 +108,6 @@ namespace Scellecs.Morpeh.Collections {
             this.ptr = null;
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             if (!this.IsCreated) {
@@ -126,7 +122,7 @@ namespace Scellecs.Morpeh.Collections {
             return e;
         }
 
-        public struct Enumerator : IEnumerator<T> {
+        public struct Enumerator {
             public UnmanagedList<T> list;
 
             public int  current;
@@ -136,11 +132,6 @@ namespace Scellecs.Morpeh.Collections {
             public void Reset()    => this.current = -1;
 
             public T Current => ((T*)this.list.ptr->Ptr.ToPointer())[this.current];
-
-            object IEnumerator.Current => this.Current;
-
-            public void Dispose() {
-            }
         }
     }
 }
