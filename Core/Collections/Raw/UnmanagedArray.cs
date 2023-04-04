@@ -98,7 +98,6 @@ namespace Scellecs.Morpeh.Collections {
             public int length;
             
             public bool MoveNext() => ++this.current < this.length;
-            public void Reset()    => this.current = -1;
 
             public T Current => ((T*)this.array.ptr->Ptr.ToPointer())[this.current];
         }
