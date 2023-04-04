@@ -9,7 +9,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class BitMap : IEnumerable<int> {
+    public sealed class BitMap {
         internal const int BITS_PER_BYTE        = 8;
         internal const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
         internal const int BITS_PER_FIELD_SHIFT = 5; //5 for int, 6 for long
@@ -46,10 +46,6 @@ namespace Scellecs.Morpeh.Collections {
             this.slots.Dispose();
         }
 
-        IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             Enumerator e;
@@ -64,7 +60,7 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public unsafe struct Enumerator : IEnumerator<int> {
+        public unsafe struct Enumerator {
             public BitMap bitMap;
 
             public int index;
@@ -105,18 +101,6 @@ namespace Scellecs.Morpeh.Collections {
             }
 
             public int Current => this.current;
-
-            object IEnumerator.Current => this.current;
-
-            void IEnumerator.Reset() {
-                this.index            = default;
-                this.current          = default;
-                this.currentData      = default;
-                this.currentDataIndex = default;
-            }
-
-            public void Dispose() {
-            }
         }
     }
 }
