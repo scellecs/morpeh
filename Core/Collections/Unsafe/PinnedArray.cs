@@ -107,11 +107,6 @@ namespace Scellecs.Morpeh.Collections {
                 return true;
             }
 
-            public void Reset() {
-                this.index   = 0;
-                this.current = default;
-            }
-
             public T           Current => this.current;
         }
     }
