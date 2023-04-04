@@ -19,7 +19,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class Filter : IEnumerable<Entity> {
+    public sealed class Filter {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -85,14 +85,10 @@ namespace Scellecs.Morpeh {
             return new EntityEnumerator(this);
         }
 
-        IEnumerator<Entity> IEnumerable<Entity>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct EntityEnumerator : IEnumerator<Entity> {
+        public struct EntityEnumerator {
             private readonly FastList<Archetype> archetypes;
             private readonly int                 archetypeCount;
 
@@ -210,47 +206,8 @@ namespace Scellecs.Morpeh {
                 return false;
             }
 
-            public void Reset() {
-                this.current     = null;
-                this.archetypeId = 0;
-                if (this.archetypeCount != 0) {
-                    var currentArchetype = this.archetypes.data[0];
-                    
-                    this.currentArchetypeIsNative = currentArchetype.usedInNative;
-                    
-                    if (currentArchetype.usedInNative) {
-                        this.archetypeEntitiesNative = currentArchetype.entitiesNative;
-                        this.currentEnumeratorNative = this.archetypeEntitiesNative.GetEnumerator();
-                        
-                        this.archetypeEntities = default;
-                        this.currentEnumerator = default;
-                    }
-                    else {
-                        this.archetypeEntities = currentArchetype.entities;
-                        this.currentEnumerator = this.archetypeEntities.GetEnumerator();
-                        
-                        this.archetypeEntitiesNative = default;
-                        this.currentEnumeratorNative = default;
-                    }
-                }
-                else {
-                    this.currentArchetypeIsNative = false;
-                    
-                    this.archetypeEntitiesNative = default;
-                    this.currentEnumeratorNative = default;
-                    
-                    this.archetypeEntities = default;
-                    this.currentEnumerator = default;
-                }
-            }
-
             [NotNull]
             public Entity Current => this.current;
-
-            object IEnumerator.Current => this.current;
-
-            public void Dispose() {
-            }
         }
     }
 }
