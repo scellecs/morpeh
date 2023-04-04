@@ -99,12 +99,6 @@ namespace Scellecs.Morpeh.Collections {
                 return true;
             }
 
-            public void Reset() {
-                this.index   = 0;
-                this.current = default;
-                this.list.lastSwappedIndex = -1;
-            }
-
             public T           Current => this.current;
         }
     }
