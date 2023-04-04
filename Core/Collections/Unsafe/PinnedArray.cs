@@ -18,7 +18,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public unsafe struct PinnedArray<T> : IDisposable, IEnumerable<T> where T : unmanaged {
+    public unsafe struct PinnedArray<T> : IDisposable where T : unmanaged {
         public T[] value;
         public T* ptr;
 #if MORPEH_UNITY
@@ -85,16 +85,11 @@ namespace Scellecs.Morpeh.Collections {
             e.index   = 0;
             return e;
         }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-        
         
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator : IEnumerator<T> {
+        public struct Enumerator {
             public T* ptr;
 
             public int length;
@@ -118,10 +113,6 @@ namespace Scellecs.Morpeh.Collections {
             }
 
             public T           Current => this.current;
-            object IEnumerator.Current => this.current;
-
-            public void Dispose() {
-            }
         }
     }
 }
