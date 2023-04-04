@@ -247,5 +247,24 @@ namespace Scellecs.Morpeh.Collections {
             }
             return 0;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int First(this BitMap bitmap) {
+            if (bitmap.length == 0) {
+                return -1;
+            }
+
+            var slotsPtr = bitmap.slots.ptr;
+            var dataPtr = bitmap.data.ptr;
+            for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
+                var slotPtr = slotsPtr + i;
+                var data    = *(dataPtr + (i >> 1));
+                if (data != 0) {
+                    return (*slotPtr - 1 << BitMap.BITS_PER_FIELD_SHIFT) + NumberOfTrailingZeros(data);
+                }
+            }
+
+            return -1;
+        }
     }
 }
