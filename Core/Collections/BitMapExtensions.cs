@@ -260,7 +260,7 @@ namespace Scellecs.Morpeh.Collections {
                 var slotPtr = slotsPtr + i;
                 var data    = *(dataPtr + (i >> 1));
                 if (data != 0) {
-                    return (*slotPtr - 1 << BitMap.BITS_PER_FIELD_SHIFT) + NumberOfTrailingZeros(data);
+                    return (*slotPtr << i * BitMap.BITS_PER_FIELD) + NumberOfTrailingZeros(data);
                 }
             }
 
