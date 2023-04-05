@@ -46,9 +46,8 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FindArchetypes(this Filter filter, FastList<long> newArchetypes) {
-            foreach (var archId in newArchetypes) {
-                var arch = filter.world.archetypes.GetValueByKey(archId);
+        internal static void AddArchetypes(this Filter filter, FastList<Archetype> newArchetypes) {
+            foreach (var arch in newArchetypes) {
                 filter.CheckArchetype(arch);
             }
             if (filter.chunks.capacity < filter.archetypes.length) {
@@ -57,12 +56,19 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FindArchetypes(this Filter filter) {
+        internal static void AddArchetypes(this Filter filter) {
             foreach (var arch in filter.world.archetypes) {
                 filter.CheckArchetype(filter.world.archetypes.GetValueByIndex(arch));
             }
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void RemoveArchetypes(this Filter filter, FastList<Archetype> removedArchetypes) {
+            foreach (var arch in removedArchetypes) {
+                filter.archetypes.Remove(arch.id, out _);
             }
         }
 
@@ -91,7 +97,7 @@ namespace Scellecs.Morpeh {
                 }
             }
 
-            filter.archetypes.Add(archetype);
+            filter.archetypes.Add(archetype.id, archetype, out _);
         }
 
         [NotNull]
@@ -136,7 +142,8 @@ namespace Scellecs.Morpeh {
         public static int GetLengthSlow(this Filter filter) {
             filter.world.ThreadSafetyCheck();
             int accum = 0;
-            foreach (var arch in filter.archetypes) {
+            foreach (var archId in filter.archetypes) {
+                var arch = filter.archetypes.GetValueByIndex(archId);
                 if (arch.usedInNative) {
                     accum += arch.entitiesNative.length;
                 }
@@ -151,7 +158,8 @@ namespace Scellecs.Morpeh {
         public static bool IsEmpty(this Filter filter) {
             filter.world.ThreadSafetyCheck();
             
-            foreach (var arch in filter.archetypes) {
+            foreach (var archId in filter.archetypes) {
+                var arch = filter.archetypes.GetValueByIndex(archId);
                 if (arch.usedInNative) {
                     if (arch.entitiesNative.length > 0) {
                         return false;

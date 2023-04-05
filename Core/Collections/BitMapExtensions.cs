@@ -254,17 +254,9 @@ namespace Scellecs.Morpeh.Collections {
                 return -1;
             }
 
-            var slotsPtr = bitmap.slots.ptr;
-            var dataPtr = bitmap.data.ptr;
-            for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
-                var slotPtr = slotsPtr + i;
-                var data    = *(dataPtr + (i >> 1));
-                if (data != 0) {
-                    return (*slotPtr * BitMap.BITS_PER_FIELD) + NumberOfTrailingZeros(data);
-                }
-            }
-
-            return -1;
+            var e = bitmap.GetEnumerator();
+            e.MoveNext();
+            return e.Current;
         }
     }
 }

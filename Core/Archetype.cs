@@ -8,7 +8,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal sealed class Archetype {
-
         [ShowInInspector]
         internal BitMap entities;
         [ShowInInspector]
@@ -27,7 +26,6 @@ namespace Scellecs.Morpeh {
             this.id             = id;
             this.length         = 0;
             this.entities       = new BitMap();
-            this.entitiesNative = new UnsafeFastList<int>(0);
             this.usedInNative   = false;
 
             this.world = world;

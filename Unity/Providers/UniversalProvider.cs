@@ -4,6 +4,7 @@
 #endif
     using System.Collections.Generic;
     using System.Linq;
+    using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
     public class UniversalProvider : EntityProvider {

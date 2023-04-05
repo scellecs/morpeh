@@ -6,6 +6,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    //[Il2CppEagerStaticClassConstruction]
     internal static class HashHelpers {
         internal static readonly int[] capacitySizes = {
             1,

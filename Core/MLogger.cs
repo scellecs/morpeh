@@ -14,7 +14,9 @@ namespace Scellecs.Morpeh {
     using System;
     using System.Diagnostics;
     using Logging;
+    using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppEagerStaticClassConstruction]
     public static class MLogger {
 #if MORPEH_UNITY
         internal static IMorpehLogger Instance = new MorpehUnityLogger();

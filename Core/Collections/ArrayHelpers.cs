@@ -7,6 +7,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Il2CppEagerStaticClassConstruction]
     internal static class ArrayHelpers {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Grow<T>(ref T[] array, int newSize) {

@@ -38,7 +38,7 @@ namespace Scellecs.Morpeh {
         internal World world;
 
         internal FastList<Filter>    childs;
-        internal FastList<Archetype> archetypes;
+        internal LongHashMap<Archetype> archetypes;
         internal FastList<Chunk> chunks;
 
         internal FastList<long> includedTypeIds;
@@ -64,7 +64,7 @@ namespace Scellecs.Morpeh {
             this.world = world;
 
             this.childs     = new FastList<Filter>();
-            this.archetypes = new FastList<Archetype>();
+            this.archetypes = new LongHashMap<Archetype>();
             this.chunks     = new FastList<Chunk>();
 
             this.typeID          = typeID;
@@ -76,7 +76,7 @@ namespace Scellecs.Morpeh {
 
             this.world.filters.Add(this);
 
-            this.FindArchetypes();
+            this.AddArchetypes();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -89,7 +89,7 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct EntityEnumerator {
-            private readonly FastList<Archetype> archetypes;
+            private readonly LongHashMap<Archetype> archetypes;
             private readonly int                 archetypeCount;
 
             private int archetypeId;

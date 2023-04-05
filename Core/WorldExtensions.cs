@@ -69,8 +69,11 @@ namespace Scellecs.Morpeh {
             world.entitiesGens     = new int[world.entitiesCapacity];
 
             world.archetypes         = new LongHashMap<Archetype>();
-            world.archetypesCount = 1;
-            world.newArchetypes = new FastList<long>();
+            world.archetypesCount    = 1;
+            
+            world.newArchetypes     = new FastList<Archetype>();
+            world.removedArchetypes = new FastList<Archetype>();
+            world.emptyArchetypes   = new FastList<Archetype>();
 
             if (World.plugins != null) {
                 foreach (var plugin in World.plugins) {
@@ -367,39 +370,15 @@ namespace Scellecs.Morpeh {
             return world.entities[id];
         }
 
-        [PublicAPI]
-        public static Entity CreateEntity(this World world, out int id) {
-            world.ThreadSafetyCheck();
-
-            if (world.freeEntityIDs.length > 0) {
-                id = world.freeEntityIDs.Pop();
-            }
-            else {
-                id = world.entitiesLength++;
-            }
-
-            if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
-                Array.Resize(ref world.entities, newCapacity);
-                Array.Resize(ref world.entitiesGens, newCapacity);
-                world.entitiesCapacity = newCapacity;
-            }
-
-            world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
-            ++world.entitiesCount;
-
-            return world.entities[id];
-        }
-
         [CanBeNull]
-        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Entity GetEntity(this World world, in int id) {
+        internal static Entity GetEntity(this World world, in int id) {
             world.ThreadSafetyCheck();
             
             return world.entities[id];
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGetEntity(this World world, in EntityId entityId, out Entity entity) {
             world.ThreadSafetyCheck();
@@ -458,10 +437,18 @@ namespace Scellecs.Morpeh {
 
             if (world.newArchetypes.length > 0) {
                 for (var index = 0; index < world.filters.length; index++) {
-                    world.filters.data[index].FindArchetypes(world.newArchetypes);
+                    world.filters.data[index].AddArchetypes(world.newArchetypes);
                 }
 
                 world.newArchetypes.Clear();
+            }
+
+            if (world.removedArchetypes.length > 0) {
+                for (var index = 0; index < world.filters.length; index++) {
+                    world.filters.data[index].RemoveArchetypes(world.removedArchetypes);
+                }
+
+                world.removedArchetypes.Clear();
             }
 
             if (world.nextFreeEntityIDs.length > 0) {

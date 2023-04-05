@@ -20,6 +20,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Il2CppEagerStaticClassConstruction]
     public sealed class World : IDisposable {
         [CanBeNull]
         [PublicAPI]
@@ -94,7 +95,11 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         internal int archetypesCount;
         [ShowInInspector]
-        internal FastList<long> newArchetypes;
+        internal FastList<Archetype> newArchetypes;
+        [ShowInInspector]
+        internal FastList<Archetype> removedArchetypes;
+        [ShowInInspector]
+        internal FastList<Archetype> emptyArchetypes;
 
         [ShowInInspector]
         internal int identifier;
@@ -266,6 +271,9 @@ namespace Scellecs.Morpeh {
 
             this.newArchetypes.Clear();
             this.newArchetypes = null;
+            
+            this.emptyArchetypes.Clear();
+            this.emptyArchetypes = null;
 
             worlds.Remove(this);
         }

@@ -212,9 +212,18 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static Archetype CreateArchetype(this long key, World world) {
-            var arch = new Archetype(key, world);
+            Archetype arch;
+            if (world.emptyArchetypes.length > 0) {
+                var id = world.emptyArchetypes.length - 1;
+                arch = world.emptyArchetypes.data[id];
+                world.emptyArchetypes.RemoveAt(id);
+                arch.id = key;
+            }
+            else {
+                arch = new Archetype(key, world);
+            }
             world.archetypes.Add(key, arch, out _);
-            world.newArchetypes.Add(key);
+            world.newArchetypes.Add(arch);
             world.archetypesCount++;
             return arch;
         }
