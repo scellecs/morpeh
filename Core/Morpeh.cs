@@ -85,7 +85,7 @@ internal enum Option {
 #if !MORPEH_EXTERNAL_IL2CPP_ATTRS
     public class Il2CppSetOptionAttribute : Attribute {
 #else
-internal class Il2CppSetOptionAttribute : Attribute {
+    internal class Il2CppSetOptionAttribute : Attribute {
 #endif
         public Option Option { get; }
         public object Value  { get; }
@@ -95,10 +95,22 @@ internal class Il2CppSetOptionAttribute : Attribute {
             this.Value  = value;
         }
     }
+    
+    /// <summary>
+    /// This is used to indicate to IL2CPP that the static constructors should be executed eagerly at startup
+    /// rather than lazily at runtime.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
+#if !MORPEH_EXTERNAL_IL2CPP_ATTRS
+    public class Il2CppEagerStaticClassConstructionAttribute : Attribute {
+#else
+    internal class Il2CppEagerStaticClassConstructionAttribute : Attribute {
+#endif
+    }
 }
 
 namespace Unity.Collections.LowLevel.Unsafe {
-    #if !MORPEH_UNITY
+#if !MORPEH_UNITY
     using System;
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class NativeDisableUnsafePtrRestrictionAttributeAttribute : Attribute { }
@@ -119,7 +131,7 @@ namespace UnityEngine.Scripting {
 }
 
 namespace Unity.Collections.LowLevel.Unsafe {
-    #if !MORPEH_UNITY
+#if !MORPEH_UNITY
     public sealed class NativeDisableUnsafePtrRestrictionAttribute : System.Attribute { }
     #endif
 }
