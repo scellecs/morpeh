@@ -96,7 +96,7 @@ namespace Scellecs.Morpeh {
                     return;
                 }
             }
-
+            
             filter.archetypes.Add(archetype.id, archetype, out _);
         }
 
@@ -178,6 +178,7 @@ namespace Scellecs.Morpeh {
             => new FilterBuilder {
                 parent = builder,
                 world = builder.world,
+                mode = Filter.Mode.Include,
                 typeId = TypeIdentifier<T>.info.id
             };
 
@@ -185,7 +186,8 @@ namespace Scellecs.Morpeh {
             => new FilterBuilder {
                 parent = builder,
                 world = builder.world,
-                typeId = -TypeIdentifier<T>.info.id
+                mode = Filter.Mode.Exclude,
+                typeId = TypeIdentifier<T>.info.id
             };
 
         public static FilterBuilder Extend<T>(this FilterBuilder builder) where T : struct, IFilterExtension {
@@ -212,7 +214,7 @@ namespace Scellecs.Morpeh {
             var filter = builder.world.LegacyRootFilter;
             while (stack.Count > 0) {
                 current = stack.Pop();
-                filter = filter.CreateFilter(System.Math.Abs(current.typeId), current.typeId < 0 ? Filter.Mode.Exclude : Filter.Mode.Include);
+                filter = filter.CreateFilter(current.typeId, current.mode);
             }
             return filter;
         }

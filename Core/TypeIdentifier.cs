@@ -49,7 +49,7 @@ namespace Scellecs.Morpeh {
         
         #pragma warning disable 0612
         internal static long GetID<T>() where T : struct, IComponent {
-            var id   = 7_777_777_777_777_777_773L * Interlocked.Increment(ref counter);
+            var id   = Math.Abs(7_777_777_777_777_777_773L * Interlocked.Increment(ref counter));
             var type = typeof(T);
 
             var info = new InternalTypeDefinition {

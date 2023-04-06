@@ -14,6 +14,7 @@ namespace Scellecs.Morpeh {
         internal World world;
         internal FilterBuilder parent;
         internal long typeId;
+        internal Filter.Mode mode;
     }
     
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -113,7 +114,7 @@ namespace Scellecs.Morpeh {
                 this.archetypeId    = 0;
                 this.archetypeCount = this.archetypes.length;
                 if (this.archetypeCount != 0) {
-                    var currentArchetype = this.archetypes.data[0];
+                    var currentArchetype = this.archetypes.GetValueByIndex(0);
                     
                     this.currentArchetypeIsNative = currentArchetype.usedInNative;
                     if (this.currentArchetypeIsNative) {
@@ -176,11 +177,11 @@ namespace Scellecs.Morpeh {
                     }
 
                     while (++this.archetypeId < this.archetypeCount) {
-                        var currentArchetype = this.archetypes.data[this.archetypeId];
+                        var currentArchetype = this.archetypes.GetValueByIndex(this.archetypeId);
                         this.currentArchetypeIsNative = currentArchetype.usedInNative;
 
                         if (this.currentArchetypeIsNative) {
-                            this.archetypeEntitiesNative = this.archetypes.data[this.archetypeId].entitiesNative;
+                            this.archetypeEntitiesNative = this.archetypes.GetValueByIndex(this.archetypeId).entitiesNative;
                             if (this.archetypeEntitiesNative.length > 0) {
                                 this.currentEnumeratorNative = this.archetypeEntitiesNative.GetEnumerator();
                                 this.currentEnumeratorNative.MoveNext();
@@ -190,7 +191,7 @@ namespace Scellecs.Morpeh {
                             }
                         }
                         else {
-                            this.archetypeEntities = this.archetypes.data[this.archetypeId].entities;
+                            this.archetypeEntities = this.archetypes.GetValueByIndex(this.archetypeId).entities;
                             if (this.archetypeEntities.count > 0) {
                                 this.currentEnumerator = this.archetypeEntities.GetEnumerator();
                                 this.currentEnumerator.MoveNext();

@@ -435,20 +435,21 @@ namespace Scellecs.Morpeh {
 
             world.dirtyEntities.Clear();
 
+            if (world.removedArchetypes.length > 0) {
+                for (var index = 0; index < world.filters.length; index++) {
+                    world.filters.data[index].RemoveArchetypes(world.removedArchetypes);
+                }
+
+                world.emptyArchetypes.AddListRange(world.removedArchetypes);
+                world.removedArchetypes.Clear();
+            }
+            
             if (world.newArchetypes.length > 0) {
                 for (var index = 0; index < world.filters.length; index++) {
                     world.filters.data[index].AddArchetypes(world.newArchetypes);
                 }
 
                 world.newArchetypes.Clear();
-            }
-
-            if (world.removedArchetypes.length > 0) {
-                for (var index = 0; index < world.filters.length; index++) {
-                    world.filters.data[index].RemoveArchetypes(world.removedArchetypes);
-                }
-
-                world.removedArchetypes.Clear();
             }
 
             if (world.nextFreeEntityIDs.length > 0) {

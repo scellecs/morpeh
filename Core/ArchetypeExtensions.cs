@@ -50,7 +50,6 @@ namespace Scellecs.Morpeh {
             }
             if (archetype.length == 0) {
                 archetype.world.archetypes.Remove(archetype.id, out _);
-                archetype.world.emptyArchetypes.Add(archetype);
                 archetype.world.removedArchetypes.Add(archetype);
                 archetype.world.archetypesCount--;
                 archetype.usedInNative = false;
