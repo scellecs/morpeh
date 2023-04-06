@@ -76,6 +76,9 @@ namespace Scellecs.Morpeh {
         private static void CheckArchetype(this Filter filter, Archetype archetype) {
             var e = archetype.entities.First();
             var ent = filter.world.GetEntity(e);
+            if (ent.IsNullOrDisposed()) {
+                return;
+            }
 
             foreach (var includedTypeId in filter.includedTypeIds) {
                 var stash = filter.world.GetStash(includedTypeId);
