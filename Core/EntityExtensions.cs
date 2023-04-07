@@ -245,6 +245,13 @@ namespace Scellecs.Morpeh {
                     stash.Clean(entity);
                 }
             }
+            
+            if (entity.previousArchetypeLength > 0) {
+                entity.world.archetypes.GetValueByKey(entity.previousArchetype).Remove(entity);
+            }
+            else {
+                entity.world.archetypes.GetValueByKey(entity.currentArchetype).Remove(entity);
+            }
 
             entity.world.ApplyRemoveEntity(entity.entityId.id);
             entity.world.dirtyEntities.Unset(entity.entityId.id);
