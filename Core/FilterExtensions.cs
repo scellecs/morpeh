@@ -20,14 +20,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class FilterExtensions {
-        internal static void Dispose(this Filter filter) {
-            foreach (var child in filter.childs) {
-                child.Dispose();
-            }
-
-            filter.childs.Clear();
-            filter.childs = null;
-
+        public static void Dispose(this Filter filter) {
             if (filter.archetypes != null) {
                 filter.archetypes.Clear();
                 filter.archetypes = null;
@@ -40,9 +33,6 @@ namespace Scellecs.Morpeh {
             filter.includedTypeIds = null;
             filter.excludedTypeIds?.Clear();
             filter.excludedTypeIds = null;
-
-            filter.typeID = -1;
-            filter.mode   = Filter.Mode.None;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,6 +66,7 @@ namespace Scellecs.Morpeh {
         private static void CheckArchetype(this Filter filter, Archetype archetype) {
             var e = archetype.entities.First();
             var ent = filter.world.GetEntity(e);
+            //todo remove it
             if (ent.IsNullOrDisposed()) {
                 return;
             }
@@ -182,7 +173,8 @@ namespace Scellecs.Morpeh {
                 parent = builder,
                 world = builder.world,
                 mode = Filter.Mode.Include,
-                typeId = TypeIdentifier<T>.info.id
+                typeId = TypeIdentifier<T>.info.id,
+                level = builder.level + 1
             };
 
         public static FilterBuilder Without<T>(this FilterBuilder builder) where T : struct, IComponent
@@ -190,85 +182,41 @@ namespace Scellecs.Morpeh {
                 parent = builder,
                 world = builder.world,
                 mode = Filter.Mode.Exclude,
-                typeId = TypeIdentifier<T>.info.id
+                typeId = TypeIdentifier<T>.info.id,
+                level = builder.level + 1
             };
 
         public static FilterBuilder Extend<T>(this FilterBuilder builder) where T : struct, IFilterExtension {
-// #if MORPEH_DEBUG 
-//             var check = filter.gen;
-// #endif
             var newFilter = default(T).Extend(builder);
-// #if MORPEH_DEBUG 
-//             if (check == filter.gen) {
-//                 MLogger.LogError("[MORPEH] You didn't extend the filter in any way, perhaps you mistyped the IFilterExtension?");
-//             }
-// #endif
             return newFilter;
         }
 
         public static Filter Build(this FilterBuilder builder) {
-            //todo: legacy fallback
             var current = builder;
             var stack = new Stack<FilterBuilder>();
             while (current.parent != null) {
                 stack.Push(current);
                 current = current.parent;
             }
-            var filter = builder.world.LegacyRootFilter;
-            while (stack.Count > 0) {
-                current = stack.Pop();
-                filter = filter.CreateFilter(current.typeId, current.mode);
-            }
-            return filter;
+            
+            return CreateFilter(stack, builder.world);
         }
-        
-        private static Filter CreateFilter(this Filter filter, long currentTypeId, Filter.Mode mode) {
-            filter.gen++;
-            if (filter.includedTypeIds != null) {
-                foreach (var typeId in filter.includedTypeIds) {
-                    if (typeId == currentTypeId) {
-                        return filter;
-                    }
+
+        private static Filter CreateFilter(Stack<FilterBuilder> builders, World world) {
+            var includedTypeIds = new FastList<long>();
+            var excludedTypeIds = new FastList<long>();
+
+            for (int i = 0, length = builders.Count; i < length; i++) {
+                var builder = builders.Pop();
+                if (builder.mode == Filter.Mode.Include) {
+                    includedTypeIds.Add(builder.typeId);
+                }
+                else if (builder.mode == Filter.Mode.Exclude) {
+                    excludedTypeIds.Add(builder.typeId);
                 }
             }
-            if (filter.excludedTypeIds != null) {
-                foreach (var typeId in filter.excludedTypeIds) {
-                    if (typeId == currentTypeId) {
-                        return filter;
-                    }
-                }
-            }
-
-            for (int i = 0, length = filter.childs.length; i < length; i++) {
-                var child = filter.childs.data[i];
-                if (child.mode == mode && child.typeID == currentTypeId) {
-                    return child;
-                }
-            }
-
-
-            FastList<long> newIncludedTypeIds;
-            FastList<long> newExcludedTypeIds;
-            if (filter.typeID == -1) {
-                newIncludedTypeIds = new FastList<long>();
-                newExcludedTypeIds = new FastList<long>();
-            }
-            else {
-                newIncludedTypeIds = new FastList<long>(filter.includedTypeIds);
-                newExcludedTypeIds = new FastList<long>(filter.excludedTypeIds);
-            }
-
-            if (mode == Filter.Mode.Include) {
-                newIncludedTypeIds.Add(currentTypeId);
-            }
-            else if (mode == Filter.Mode.Exclude) {
-                newExcludedTypeIds.Add(currentTypeId);
-            }
-
-            var newFilter = new Filter(filter.world, currentTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
-            filter.childs.Add(newFilter);
-
-            return newFilter;
+            
+            return new Filter(world, includedTypeIds, excludedTypeIds);
         }
     }
 }

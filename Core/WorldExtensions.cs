@@ -35,7 +35,6 @@ namespace Scellecs.Morpeh {
             world.newPluginSystemsGroups = new FastList<SystemsGroup>();
 
             world.Filter           = new FilterBuilder{ world = world };
-            world.LegacyRootFilter = new Filter(world);
             world.filters          = new FastList<Filter>();
             world.dirtyEntities    = new BitMap();
         }
