@@ -18,10 +18,14 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class CommonTypeIdentifier {
-        private static int counter;
+        internal static long counter;
 
-        internal static Dictionary<int, InternalTypeDefinition>  intTypeAssociation = new Dictionary<int, InternalTypeDefinition>();
+        internal static Dictionary<long, InternalTypeDefinition>  longTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
         internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
+        
+        static CommonTypeIdentifier() {
+            counter = 1;
+        }
 
         internal static InternalTypeDefinition Get(Type type) {
             if (typeAssociation.TryGetValue(type, out var definition) == false) {
@@ -44,8 +48,8 @@ namespace Scellecs.Morpeh {
 
         
         #pragma warning disable 0612
-        internal static int GetID<T>() where T : struct, IComponent {
-            var id   = Interlocked.Increment(ref counter);
+        internal static long GetID<T>() where T : struct, IComponent {
+            var id   = Math.Abs(7_777_777_777_777_777_773L * Interlocked.Increment(ref counter));
             var type = typeof(T);
 
             var info = new InternalTypeDefinition {
@@ -56,14 +60,14 @@ namespace Scellecs.Morpeh {
                 entityRemoveComponent   = (entity) => entity.world.GetStash<T>().Remove(entity),
                 typeInfo                = TypeIdentifier<T>.info
             };
-            intTypeAssociation.Add(id, info);
+            longTypeAssociation.Add(id, info);
             typeAssociation.Add(type, info);
             return id;
         }
         #pragma warning restore 0612
 
         internal struct InternalTypeDefinition {
-            public int                    id;
+            public long                    id;
             public Type                   type;
             public Func<Entity, object>   entityGetComponentBoxed;
             public Action<Entity, object> entitySetComponentBoxed;
@@ -71,13 +75,9 @@ namespace Scellecs.Morpeh {
             public TypeInfo               typeInfo;
         }
 
-        [Serializable]
         internal class TypeInfo {
-            [SerializeField]
-            internal int id;
-            [SerializeField]
+            internal long id;
             internal bool isMarker;
-            [SerializeField]
             internal int stashSize;
 
             public TypeInfo(bool isMarker, int stashSize) {
@@ -85,7 +85,7 @@ namespace Scellecs.Morpeh {
                 this.stashSize = stashSize;
             }
 
-            public void SetID(int id) {
+            public void SetID(long id) {
                 this.id = id;
             }
         }

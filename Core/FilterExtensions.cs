@@ -42,9 +42,6 @@ namespace Scellecs.Morpeh {
             filter.includedTypeIds = null;
             filter.excludedTypeIds?.Clear();
             filter.excludedTypeIds = null;
-
-            filter.typeID = -1;
-            filter.mode = Filter.Mode.None;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -258,8 +255,8 @@ namespace Scellecs.Morpeh {
         }
 
         public static Filter Build(this FilterBuilder builder) {
-            var includedTypeIds = new FastList<int>();
-            var excludedTypeIds = new FastList<int>();
+            var includedTypeIds = new FastList<long>();
+            var excludedTypeIds = new FastList<long>();
             var current = builder;
 
             while (current.parent != null) {

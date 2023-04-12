@@ -84,9 +84,9 @@ namespace Scellecs.Morpeh {
         internal IntStack nextFreeEntityIDs;
 
         [ShowInInspector]
-        internal UnsafeIntHashMap<int> stashes;
+        internal LongHashMap<int> stashes;
         [ShowInInspector]
-        internal UnsafeIntHashMap<int> typedStashes;
+        internal LongHashMap<int> typedStashes;
 
         [ShowInInspector]
         internal FastList<Archetype> archetypes;
@@ -94,7 +94,7 @@ namespace Scellecs.Morpeh {
         internal IntHashMap<IntFastList> archetypesByLength;
         [ShowInInspector]
         internal IntFastList newArchetypes;
-        internal IntFastList archetypeCache;
+        internal FastList<long> archetypeCache;
 
         [ShowInInspector]
         internal int identifier;

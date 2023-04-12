@@ -74,7 +74,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddTransfer(this Archetype archetype, int typeId, out int archetypeId, out Archetype newArchetype) {
+        public static void AddTransfer(this Archetype archetype, long typeId, out int archetypeId, out Archetype newArchetype) {
             if (archetype.addTransfer.TryGetValue(typeId, out archetypeId)) {
                 newArchetype = archetype.world.archetypes.data[archetypeId];
             }
@@ -85,7 +85,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveTransfer(this Archetype archetype, int typeId, out int archetypeId, out Archetype newArchetype) {
+        public static void RemoveTransfer(this Archetype archetype, long typeId, out int archetypeId, out Archetype newArchetype) {
             if (archetype.removeTransfer.TryGetValue(typeId, out archetypeId)) {
                 newArchetype = archetype.world.archetypes.data[archetypeId];
             }

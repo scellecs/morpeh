@@ -39,7 +39,7 @@ namespace Scellecs.Morpeh {
                 world = world
             };
             world.filters        = new FastList<Filter>();
-            world.archetypeCache = new IntFastList();
+            world.archetypeCache = new FastList<long>();
             world.dirtyEntities  = new BitMap();
 
             if (world.archetypes != null) {
@@ -68,8 +68,8 @@ namespace Scellecs.Morpeh {
             world.identifier        = added ? id : World.worlds.length - 1;
             world.freeEntityIDs     = new IntStack();
             world.nextFreeEntityIDs = new IntStack();
-            world.stashes           = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
-            world.typedStashes      = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.stashes           = new LongHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.typedStashes      = new LongHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
             world.entitiesCount    = 0;
             world.entitiesLength   = 0;
@@ -77,7 +77,7 @@ namespace Scellecs.Morpeh {
             world.entities         = new Entity[world.entitiesCapacity];
             world.entitiesGens     = new int[world.entitiesCapacity];
 
-            world.archetypes         = new FastList<Archetype> { new Archetype(0, Array.Empty<int>(), world.identifier) };
+            world.archetypes         = new FastList<Archetype> { new Archetype(0, Array.Empty<long>(), world.identifier) };
             world.archetypesByLength = new IntHashMap<IntFastList>();
             world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
             world.newArchetypes = new IntFastList();
@@ -132,7 +132,7 @@ namespace Scellecs.Morpeh {
 
         //TODO refactor allocations and fast sort(maybe without it?)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Archetype GetArchetype(this World world, int[] typeIds, int newTypeId, bool added, out int archetypeId) {
+        internal static Archetype GetArchetype(this World world, long[] typeIds, long newTypeId, bool added, out int archetypeId) {
             Archetype archetype = null;
             archetypeId = -1;
 
@@ -160,7 +160,7 @@ namespace Scellecs.Morpeh {
                     archetype   = world.archetypes.data[archetypeId];
                     var check = true;
                     for (int i = 0, length = typesLength; i < length; i++) {
-                        if (archetype.typeIds[i] != world.archetypeCache.Get(i)) {
+                        if (archetype.typeIds[i] != world.archetypeCache.data[i]) {
                             check = false;
                             break;
                         }
@@ -191,7 +191,7 @@ namespace Scellecs.Morpeh {
 
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Stash GetStash(this World world, int typeId) {
+        internal static Stash GetStash(this World world, long typeId) {
             if (world.stashes.TryGetValue(typeId, out var index)) {
                 return Stash.stashes.data[index];
             }

@@ -27,7 +27,7 @@ namespace Scellecs.Morpeh.Editor {
                         var cache = Stash.stashes.data[caches.GetValueByIndex(cacheId)];
                         if (cache.Has(this.entity)) {
                             var view = new ComponentView {
-                                internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[cache.typeId],
+                                internalTypeDefinition = CommonTypeIdentifier.longTypeAssociation[cache.typeId],
                                 entity                 = this.entity
                             };
                             this.componentViews.Add(view);
