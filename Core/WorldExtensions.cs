@@ -35,18 +35,9 @@ namespace Scellecs.Morpeh {
             world.pluginSystemsGroups    = new FastList<SystemsGroup>();
             world.newPluginSystemsGroups = new FastList<SystemsGroup>();
 
-            world.Filter         = new FilterBuilder {
-                world = world
-            };
-            world.filters        = new FastList<Filter>();
-            world.archetypeCache = new FastList<long>();
-            world.dirtyEntities  = new BitMap();
-
-            if (world.archetypes != null) {
-                foreach (var archetype in world.archetypes) {
-                    archetype.Ctor();
-                }
-            }
+            world.Filter           = new FilterBuilder{ world = world };
+            world.filters          = new FastList<Filter>();
+            world.dirtyEntities    = new BitMap();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,10 +68,12 @@ namespace Scellecs.Morpeh {
             world.entities         = new Entity[world.entitiesCapacity];
             world.entitiesGens     = new int[world.entitiesCapacity];
 
-            world.archetypes         = new FastList<Archetype> { new Archetype(0, Array.Empty<long>(), world.identifier) };
-            world.archetypesByLength = new IntHashMap<IntFastList>();
-            world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
-            world.newArchetypes = new IntFastList();
+            world.archetypes         = new LongHashMap<Archetype>();
+            world.archetypesCount    = 1;
+
+            world.newArchetypes     = new FastList<Archetype>();
+            world.removedArchetypes = new FastList<Archetype>();
+            world.emptyArchetypes   = new FastList<Archetype>();
 
             if (World.plugins != null) {
                 foreach (var plugin in World.plugins) {
@@ -128,65 +121,6 @@ namespace Scellecs.Morpeh {
                 World.plugins = new FastList<IWorldPlugin>();
             }
             World.plugins.Add(plugin);
-        }
-
-        //TODO refactor allocations and fast sort(maybe without it?)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Archetype GetArchetype(this World world, long[] typeIds, long newTypeId, bool added, out int archetypeId) {
-            Archetype archetype = null;
-            archetypeId = -1;
-
-            world.archetypeCache.Clear();
-            for (int i = 0, length = typeIds.Length; i < length; i++) {
-                var typeId = typeIds[i];
-                if (typeId >= 0) {
-                    world.archetypeCache.Add(typeIds[i]);
-                }
-            }
-
-            if (added) {
-                world.archetypeCache.Add(newTypeId);
-            }
-            else {
-                world.archetypeCache.Remove(newTypeId);
-            }
-
-            world.archetypeCache.Sort();
-            var typesLength = world.archetypeCache.length;
-
-            if (world.archetypesByLength.TryGetValue(typesLength, out var archetypesList)) {
-                for (var index = 0; index < archetypesList.length; index++) {
-                    archetypeId = archetypesList.Get(index);
-                    archetype   = world.archetypes.data[archetypeId];
-                    var check = true;
-                    for (int i = 0, length = typesLength; i < length; i++) {
-                        if (archetype.typeIds[i] != world.archetypeCache.data[i]) {
-                            check = false;
-                            break;
-                        }
-                    }
-
-                    if (check) {
-                        return archetype;
-                    }
-                }
-            }
-
-            archetypeId = world.archetypes.length;
-            var newArchetype = new Archetype(archetypeId, world.archetypeCache.ToArray(), world.identifier);
-            world.archetypes.Add(newArchetype);
-            if (world.archetypesByLength.TryGetValue(typesLength, out archetypesList)) {
-                archetypesList.Add(archetypeId);
-            }
-            else {
-                world.archetypesByLength.Add(typesLength, new IntFastList { archetypeId }, out _);
-            }
-
-            world.newArchetypes.Add(archetypeId);
-
-            archetype = newArchetype;
-
-            return archetype;
         }
 
         [CanBeNull]
@@ -523,6 +457,14 @@ namespace Scellecs.Morpeh {
             }
 
             world.dirtyEntities.Clear();
+            if (world.removedArchetypes.length > 0) {
+                for (var index = 0; index < world.filters.length; index++) {
+                    world.filters.data[index].RemoveArchetypes(world.removedArchetypes);
+                }
+
+                world.emptyArchetypes.AddListRange(world.removedArchetypes);
+                world.removedArchetypes.Clear();
+            }
 
             if (world.newArchetypes.length > 0) {
                 for (var index = 0; index < world.filters.length; index++) {

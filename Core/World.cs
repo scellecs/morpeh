@@ -89,11 +89,17 @@ namespace Scellecs.Morpeh {
         internal LongHashMap<int> typedStashes;
 
         [ShowInInspector]
-        internal FastList<Archetype> archetypes;
+        internal LongHashMap<Archetype> archetypes;
         [ShowInInspector]
-        internal IntHashMap<IntFastList> archetypesByLength;
+        internal int archetypesCount;
+        
         [ShowInInspector]
-        internal IntFastList newArchetypes;
+        internal FastList<Archetype> newArchetypes;
+        [ShowInInspector]
+        internal FastList<Archetype> removedArchetypes;
+        [ShowInInspector]
+        internal FastList<Archetype> emptyArchetypes;
+        
         internal FastList<long> archetypeCache;
 
         [ShowInInspector]
@@ -240,11 +246,11 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    archetype.Dispose();
+                    this.archetypes.GetValueByIndex(archetype).Dispose();
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose archetype id {archetype.id}");
+                    MLogger.LogError($"Can not dispose archetype id {archetype}");
                     MLogger.LogException(e);
                 }
 #endif
@@ -253,15 +259,14 @@ namespace Scellecs.Morpeh {
             this.archetypes.Clear();
             this.archetypes = null;
 
-            foreach (var index in this.archetypesByLength) {
-                this.archetypesByLength.GetValueByIndex(index).Clear();
-            }
-
-            this.archetypesByLength.Clear();
-            this.archetypesByLength = null;
-
             this.newArchetypes.Clear();
             this.newArchetypes = null;
+            
+            this.emptyArchetypes.Clear();
+            this.emptyArchetypes = null;
+            
+            this.removedArchetypes.Clear();
+            this.removedArchetypes = null;
 
             worlds.Remove(this);
         }

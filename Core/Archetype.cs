@@ -12,28 +12,21 @@ namespace Scellecs.Morpeh {
         internal BitMap entities;
         internal UnsafeFastList<int> entitiesNative;
         internal FastList<Filter> filters;
-        internal LongHashMap<int> removeTransfer;
-        internal LongHashMap<int> addTransfer;
         internal int length;
         internal int worldId;
-        internal int id;
+        internal long id;
         internal bool usedInNative;
 
         internal World world;
 
-        internal Archetype(int id, long[] typeIds, int worldId) {
+       
+        internal Archetype(long id, World world) {
             this.id             = id;
-            this.typeIds        = typeIds;
             this.length         = 0;
             this.entities       = new BitMap();
-            this.entitiesNative = new UnsafeFastList<int>(0);
-            this.addTransfer    = new LongHashMap<int>();
-            this.removeTransfer = new LongHashMap<int>();
             this.usedInNative   = false;
 
-            this.worldId = worldId;
-
-            this.Ctor();
+            this.world = world;
         }
     }
 }

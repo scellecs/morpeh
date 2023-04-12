@@ -24,12 +24,13 @@ namespace Scellecs.Morpeh {
         internal bool isDisposed;
 
         [SerializeField]
-        internal int previousArchetypeId;
+        internal long previousArchetype;
         [SerializeField]
-        internal int currentArchetypeId;
-
-        [NonSerialized]
-        internal Archetype currentArchetype;
+        internal long currentArchetype;
+        [SerializeField]
+        internal int previousArchetypeLength;
+        [SerializeField]
+        internal int currentArchetypeLength;
 
         [NonSerialized]
         internal int indexInCurrentArchetype;

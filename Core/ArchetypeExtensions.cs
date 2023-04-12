@@ -28,12 +28,6 @@ namespace Scellecs.Morpeh {
             
             archetype.entitiesNative?.Clear();
             archetype.entitiesNative = null;
-
-            archetype.addTransfer.Clear();
-            archetype.addTransfer = null;
-
-            archetype.removeTransfer.Clear();
-            archetype.removeTransfer = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,28 +65,6 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveFilter(this Archetype archetype, Filter filter) {
             archetype.filters.Remove(filter);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddTransfer(this Archetype archetype, long typeId, out int archetypeId, out Archetype newArchetype) {
-            if (archetype.addTransfer.TryGetValue(typeId, out archetypeId)) {
-                newArchetype = archetype.world.archetypes.data[archetypeId];
-            }
-            else {
-                newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, true, out archetypeId);
-                archetype.addTransfer.Add(typeId, archetypeId, out _);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveTransfer(this Archetype archetype, long typeId, out int archetypeId, out Archetype newArchetype) {
-            if (archetype.removeTransfer.TryGetValue(typeId, out archetypeId)) {
-                newArchetype = archetype.world.archetypes.data[archetypeId];
-            }
-            else {
-                newArchetype = archetype.world.GetArchetype(archetype.typeIds, typeId, false, out archetypeId);
-                archetype.removeTransfer.Add(typeId, archetypeId, out _);
-            }
         }
     }
 }
