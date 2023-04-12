@@ -73,12 +73,23 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void CheckArchetype(this Filter filter, Archetype archetype) {
-            if (archetype.entities.length == 0) {
-                return;
-            }
+            int entityId;
             
-            var e = archetype.entities.First();
-            var ent = filter.world.GetEntity(e);
+            //todo fix it
+            if (archetype.usedInNative) {
+                if (archetype.entitiesNative.length == 0) {
+                    return;
+                }
+                entityId = archetype.entitiesNative.First();
+            }
+            else {
+                if (archetype.entities.length == 0) {
+                    return;
+                }
+                entityId = archetype.entities.First();
+            }
+           
+            var ent = filter.world.GetEntity(entityId);
             //todo remove it
             if (ent.IsNullOrDisposed()) {
                 return;
