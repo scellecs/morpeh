@@ -60,12 +60,7 @@ namespace Scellecs.Morpeh {
                 archetype.world.removedArchetypes.Add(archetype);
                 archetype.world.archetypesCount--;
                 archetype.usedInNative = false;
-                if (archetype.entities != null) {
-                    archetype.entities.Clear();
-                }
-                else {
-                    archetype.entities = new BitMap();
-                }
+                archetype.entities.Clear();
                 archetype.entitiesNative = null;
             }
         }

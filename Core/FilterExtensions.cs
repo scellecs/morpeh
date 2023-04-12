@@ -19,13 +19,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class FilterExtensions {
         internal static void Dispose(this Filter filter) {
-            foreach (var child in filter.childs) {
-                child.Dispose();
-            }
-
-            filter.childs.Clear();
-            filter.childs = null;
-
             if (filter.archetypes != null) {
                 foreach (var archetype in filter.archetypes) {
                     archetype.RemoveFilter(filter);

@@ -36,7 +36,6 @@ namespace Scellecs.Morpeh {
 
         internal World world;
 
-        internal FastList<Filter>    childs;
         internal FastList<Archetype> archetypes;
         internal FastList<Chunk> chunks;
 
@@ -46,8 +45,6 @@ namespace Scellecs.Morpeh {
         internal Filter(World world, FastList<long> includedTypeIds, FastList<long> excludedTypeIds) {
             this.world = world;
 
-            this.childs     = new FastList<Filter>();
-            this.archetypes = new FastList<Archetype>();
             this.archetypes = new FastList<Archetype>();
             this.chunks     = new FastList<Chunk>();
 

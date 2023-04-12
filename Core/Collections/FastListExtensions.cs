@@ -61,7 +61,14 @@ namespace Scellecs.Morpeh.Collections {
         } 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T>(this FastList<T> list, T value) => ArrayHelpers.IndexOf(list.data, value, list.comparer);
+        public static int IndexOf<T>(this FastList<T> list, T value) {
+            for (int i = 0, length = list.length; i < length; i++) {
+                if (list.comparer.Equals(value, list.data[i])) {
+                    return i;
+                }
+            }
+            return -1;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove<T>(this FastList<T> list, T value) => list.RemoveAt(list.IndexOf(value));

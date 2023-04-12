@@ -13,7 +13,7 @@ namespace Scellecs.Morpeh.Native {
                     archetype.world.entities[entityId].indexInCurrentArchetype = data.Add(entityId);
                 }
 
-                archetype.entities     = null;
+                archetype.entities.Clear();
                 archetype.usedInNative = true;
             }
             
