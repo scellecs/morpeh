@@ -7,8 +7,7 @@ namespace Scellecs.Morpeh.Native {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe Filter.Chunk AsChunk(this Archetype archetype) {
             if (archetype.usedInNative == false) {
-                var data = archetype.entitiesNative;
-                data.Resize(archetype.entities.count);
+                var data = archetype.entitiesNative = new UnsafeFastList<int>(archetype.entities.count);
 
                 foreach (var entityId in archetype.entities) {
                     archetype.world.entities[entityId].indexInCurrentArchetype = data.Add(entityId);
