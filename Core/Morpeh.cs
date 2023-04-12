@@ -55,7 +55,7 @@ namespace Scellecs.Morpeh {
     }
     
     public interface IFilterExtension {
-        Filter Extend(Filter rootFilter);
+        FilterBuilder Extend(FilterBuilder rootFilter);
     }
     
     [AttributeUsage(AttributeTargets.Struct)]

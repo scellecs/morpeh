@@ -6,6 +6,14 @@ namespace Scellecs.Morpeh {
     using JetBrains.Annotations;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
+    
+    public sealed class FilterBuilder {
+        internal World world;
+        internal FilterBuilder parent;
+        internal int typeId;
+        internal Filter.Mode mode;
+        internal int level;
+    }
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -32,8 +40,8 @@ namespace Scellecs.Morpeh {
         internal FastList<Archetype> archetypes;
         internal FastList<Chunk> chunks;
 
-        internal IntFastList includedTypeIds;
-        internal IntFastList excludedTypeIds;
+        internal FastList<int> includedTypeIds;
+        internal FastList<int> excludedTypeIds;
 
         internal int  typeID;
         internal int  gen;
@@ -51,23 +59,21 @@ namespace Scellecs.Morpeh {
             this.mode   = Mode.Include;
         }
 
-        internal Filter(World world, int typeID, IntFastList includedTypeIds, IntFastList excludedTypeIds, Mode mode) {
+        internal Filter(World world, FastList<int> includedTypeIds, FastList<int> excludedTypeIds) {
             this.world = world;
 
             this.childs     = new FastList<Filter>();
             this.archetypes = new FastList<Archetype>();
+            this.archetypes = new FastList<Archetype>();
             this.chunks     = new FastList<Chunk>();
 
-            this.typeID          = typeID;
             this.includedTypeIds = includedTypeIds;
             this.excludedTypeIds = excludedTypeIds;
 
             this.gen = 0;
-            this.mode = mode;
 
             this.world.filters.Add(this);
-
-            this.FindArchetypes();
+            this.AddArchetypes();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

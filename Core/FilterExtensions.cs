@@ -8,6 +8,7 @@
 
 namespace Scellecs.Morpeh {
     using System;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
@@ -32,26 +33,25 @@ namespace Scellecs.Morpeh {
 
                 filter.archetypes.Clear();
                 filter.archetypes = null;
-                
+
                 filter.chunks.Clear();
                 filter.chunks = null;
             }
-            
+
             filter.includedTypeIds?.Clear();
             filter.includedTypeIds = null;
             filter.excludedTypeIds?.Clear();
             filter.excludedTypeIds = null;
 
             filter.typeID = -1;
-            filter.mode   = Filter.Mode.None;
+            filter.mode = Filter.Mode.None;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FindArchetypes(this Filter filter, IntFastList newArchetypes) {
-            var minLength = filter.includedTypeIds.length;
+        internal static void AddArchetypes(this Filter filter, IntFastList newArchetypes) {
             foreach (var archId in newArchetypes) {
                 var arch = filter.world.archetypes.data[archId];
-                filter.CheckArchetype(arch, minLength);
+                filter.CheckArchetype(arch);
             }
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
@@ -59,10 +59,9 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FindArchetypes(this Filter filter) {
-            var minLength = filter.includedTypeIds.length;
+        internal static void AddArchetypes(this Filter filter) {
             foreach (var arch in filter.world.archetypes) {
-                filter.CheckArchetype(arch, minLength);
+                filter.CheckArchetype(arch);
             }
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
@@ -70,59 +69,39 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CheckArchetype(this Filter filter, Archetype archetype, int minLength) {
-            var typeIdsLength = archetype.typeIds.Length;
-            if (typeIdsLength >= minLength) {
-                var check = true;
-                for (int i = 0, length = minLength; i < length; i++) {
-                    var includedTypeId = filter.includedTypeIds.Get(i);
-                    var foundInclude   = false;
-                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
-                        var typeId = archetype.typeIds[j];
-                        if (typeId > includedTypeId) {
-                            check = false;
-                            goto BREAK;
-                        }
+        private static void CheckArchetype(this Filter filter, Archetype archetype) {
+            if (archetype.entities.length == 0) {
+                return;
+            }
+            
+            var e = archetype.entities.First();
+            var ent = filter.world.GetEntity(e);
+            //todo remove it
+            if (ent.IsNullOrDisposed()) {
+                return;
+            }
 
-                        if (typeId == includedTypeId) {
-                            foundInclude = true;
-                            break;
-                        }
-                    }
-
-                    if (foundInclude == false) {
-                        check = false;
-                        goto BREAK;
-                    }
+            foreach (var includedTypeId in filter.includedTypeIds) {
+                var stash = filter.world.GetStash(includedTypeId);
+                if (stash == null) {
+                    return;
                 }
-
-                for (int i = 0, length = filter.excludedTypeIds.length; i < length; i++) {
-                    var excludedTypeId = filter.excludedTypeIds.Get(i);
-                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
-                        var typeId = archetype.typeIds[j];
-                        if (typeId > excludedTypeId) {
-                            break;
-                        }
-
-                        if (typeId == excludedTypeId) {
-                            check = false;
-                            goto BREAK;
-                        }
-                    }
-                }
-
-                BREAK:
-                if (check) {
-                    for (int i = 0, length = filter.archetypes.length; i < length; i++) {
-                        if (filter.archetypes.data[i] == archetype) {
-                            return;
-                        }
-                    }
-
-                    filter.archetypes.Add(archetype);
-                    archetype.AddFilter(filter);
+                if (!stash.Has(ent)) {
+                    return;
                 }
             }
+
+            foreach (var excludedTypeId in filter.excludedTypeIds) {
+                var stash = filter.world.GetStash(excludedTypeId);
+                if (stash == null) {
+                    continue;
+                }
+                if (stash.Has(ent)) {
+                    return;
+                }
+            }
+
+            filter.archetypes.Add(archetype);
         }
 
         [NotNull]
@@ -162,7 +141,7 @@ namespace Scellecs.Morpeh {
 
             return default;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetLengthSlow(this Filter filter) {
             filter.world.ThreadSafetyCheck();
@@ -177,11 +156,11 @@ namespace Scellecs.Morpeh {
             }
             return accum;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEmpty(this Filter filter) {
             filter.world.ThreadSafetyCheck();
-            
+
             foreach (var arch in filter.archetypes) {
                 if (arch.usedInNative) {
                     if (arch.entitiesNative.length > 0) {
@@ -197,79 +176,44 @@ namespace Scellecs.Morpeh {
             return true;
         }
 
-        public static Filter With<T>(this Filter filter) where T : struct, IComponent {
-            filter.world.ThreadSafetyCheck();
-            return filter.CreateFilter<T>(Filter.Mode.Include);
-        }
+        public static FilterBuilder With<T>(this FilterBuilder builder) where T : struct, IComponent
+            => new FilterBuilder {
+                parent = builder,
+                world = builder.world,
+                mode = Filter.Mode.Include,
+                typeId = TypeIdentifier<T>.info.id,
+                level = builder.level + 1
+            };
 
-        public static Filter Without<T>(this Filter filter) where T : struct, IComponent {
-            filter.world.ThreadSafetyCheck();
-            return filter.CreateFilter<T>(Filter.Mode.Exclude);
-        }
+        public static FilterBuilder Without<T>(this FilterBuilder builder) where T : struct, IComponent
+            => new FilterBuilder {
+                parent = builder,
+                world = builder.world,
+                mode = Filter.Mode.Exclude,
+                typeId = TypeIdentifier<T>.info.id,
+                level = builder.level + 1
+            };
 
-        public static Filter Extend<T>(this Filter filter) where T : struct, IFilterExtension {
-            filter.world.ThreadSafetyCheck();
-#if MORPEH_DEBUG 
-            var check = filter.gen;
-#endif
-            var newFilter = default(T).Extend(filter);
-#if MORPEH_DEBUG 
-            if (check == filter.gen) {
-                MLogger.LogError("[MORPEH] You didn't extend the filter in any way, perhaps you mistyped the IFilterExtension?");
-            }
-#endif
+        public static FilterBuilder Extend<T>(this FilterBuilder builder) where T : struct, IFilterExtension {
+            var newFilter = default(T).Extend(builder);
             return newFilter;
         }
-        
-        private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
-            var currentTypeId = TypeIdentifier<T>.info.id;
 
-            filter.gen++;
-            if (filter.includedTypeIds != null) {
-                foreach (var typeId in filter.includedTypeIds) {
-                    if (typeId == currentTypeId) {
-                        return filter;
-                    }
+        public static Filter Build(this FilterBuilder builder) {
+            var includedTypeIds = new FastList<int>();
+            var excludedTypeIds = new FastList<int>();
+            var current = builder;
+
+            while (current.parent != null) {
+                if (current.mode == Filter.Mode.Include) {
+                    includedTypeIds.Add(current.typeId);
                 }
-            }
-            if (filter.excludedTypeIds != null) {
-                foreach (var typeId in filter.excludedTypeIds) {
-                    if (typeId == currentTypeId) {
-                        return filter;
-                    }
+                else if (current.mode == Filter.Mode.Exclude) {
+                    excludedTypeIds.Add(current.typeId);
                 }
+                current = current.parent;
             }
-
-            for (int i = 0, length = filter.childs.length; i < length; i++) {
-                var child = filter.childs.data[i];
-                if (child.mode == mode && child.typeID == currentTypeId) {
-                    return child;
-                }
-            }
-
-
-            IntFastList newIncludedTypeIds;
-            IntFastList newExcludedTypeIds;
-            if (filter.typeID == -1) {
-                newIncludedTypeIds = new IntFastList();
-                newExcludedTypeIds = new IntFastList();
-            }
-            else {
-                newIncludedTypeIds = new IntFastList(filter.includedTypeIds);
-                newExcludedTypeIds = new IntFastList(filter.excludedTypeIds);
-            }
-
-            if (mode == Filter.Mode.Include) {
-                newIncludedTypeIds.Add(currentTypeId);
-            }
-            else if (mode == Filter.Mode.Exclude) {
-                newExcludedTypeIds.Add(currentTypeId);
-            }
-
-            var newFilter = new Filter(filter.world, currentTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
-            filter.childs.Add(newFilter);
-
-            return newFilter;
+            return new Filter(builder.world, includedTypeIds, excludedTypeIds);
         }
     }
 }

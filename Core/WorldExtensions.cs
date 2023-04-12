@@ -35,7 +35,9 @@ namespace Scellecs.Morpeh {
             world.pluginSystemsGroups    = new FastList<SystemsGroup>();
             world.newPluginSystemsGroups = new FastList<SystemsGroup>();
 
-            world.Filter         = new Filter(world);
+            world.Filter         = new FilterBuilder {
+                world = world
+            };
             world.filters        = new FastList<Filter>();
             world.archetypeCache = new IntFastList();
             world.dirtyEntities  = new BitMap();
@@ -524,7 +526,7 @@ namespace Scellecs.Morpeh {
 
             if (world.newArchetypes.length > 0) {
                 for (var index = 0; index < world.filters.length; index++) {
-                    world.filters.data[index].FindArchetypes(world.newArchetypes);
+                    world.filters.data[index].AddArchetypes(world.newArchetypes);
                 }
 
                 world.newArchetypes.Clear();

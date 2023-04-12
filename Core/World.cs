@@ -33,7 +33,7 @@ namespace Scellecs.Morpeh {
 
         [PublicAPI]
         [NotNull]
-        public Filter Filter;
+        public FilterBuilder Filter;
         [PublicAPI]
         public bool UpdateByUnity;
         [PublicAPI]
@@ -204,17 +204,7 @@ namespace Scellecs.Morpeh {
             this.freeEntityIDs = null;
             this.nextFreeEntityIDs.Clear();
             this.nextFreeEntityIDs = null;
-#if MORPEH_DEBUG
-            try {
-#endif
-                this.Filter.Dispose();
-#if MORPEH_DEBUG
-            }
-            catch (Exception e) {
-                MLogger.LogError("Can not dispose root filter");
-                MLogger.LogException(e);
-            }
-#endif
+            
             this.Filter = null;
 
             this.filters.Clear();
