@@ -55,6 +55,7 @@ namespace Scellecs.Morpeh {
             else {
                 archetype.entities.Unset(entity.entityId.id);
             }
+            return;
             if (archetype.length == 0) {
                 archetype.world.archetypes.Remove(archetype.id, out _);
                 archetype.world.removedArchetypes.Add(archetype);
