@@ -250,10 +250,10 @@ namespace Scellecs.Morpeh {
             }
 
             if (entity.previousArchetypeLength > 0) {
-                entity.world.archetypes.GetValueByKey(entity.previousArchetype).Remove(entity);
+                entity.world.archetypes.GetValueByKey(entity.previousArchetype)?.Remove(entity);
             }
             else {
-                entity.world.archetypes.GetValueByKey(entity.currentArchetype).Remove(entity);
+                entity.world.archetypes.GetValueByKey(entity.currentArchetype)?.Remove(entity);
             }
 
             entity.world.ApplyRemoveEntity(entity.entityId.id);
