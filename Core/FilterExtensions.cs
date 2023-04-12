@@ -49,9 +49,10 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetypes(this Filter filter, IntFastList newArchetypes) {
+            var minLength = filter.includedTypeIds.length;
             foreach (var archId in newArchetypes) {
                 var arch = filter.world.archetypes.data[archId];
-                filter.CheckArchetype(arch);
+                filter.CheckArchetypeLegacy(arch, minLength);
             }
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
@@ -60,11 +61,68 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetypes(this Filter filter) {
+            var minLength = filter.includedTypeIds.length;
             foreach (var arch in filter.world.archetypes) {
-                filter.CheckArchetype(arch);
+                filter.CheckArchetypeLegacy(arch, minLength);
             }
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void CheckArchetypeLegacy(this Filter filter, Archetype archetype, int minLength) {
+            var typeIdsLength = archetype.typeIds.Length;
+            if (typeIdsLength >= minLength) {
+                var check = true;
+                for (int i = 0, length = minLength; i < length; i++) {
+                    var includedTypeId = filter.includedTypeIds.data[i];
+                    var foundInclude   = false;
+                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
+                        var typeId = archetype.typeIds[j];
+                        if (typeId > includedTypeId) {
+                            check = false;
+                            goto BREAK;
+                        }
+
+                        if (typeId == includedTypeId) {
+                            foundInclude = true;
+                            break;
+                        }
+                    }
+
+                    if (foundInclude == false) {
+                        check = false;
+                        goto BREAK;
+                    } 
+                }
+
+                for (int i = 0, length = filter.excludedTypeIds.length; i < length; i++) {
+                    var excludedTypeId = filter.excludedTypeIds.data[i];
+                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
+                        var typeId = archetype.typeIds[j];
+                        if (typeId > excludedTypeId) {
+                            break;
+                        }
+
+                        if (typeId == excludedTypeId) {
+                            check = false;
+                            goto BREAK;
+                        }
+                    }
+                }
+
+                BREAK:
+                if (check) {
+                    for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+                        if (filter.archetypes.data[i] == archetype) {
+                            return;
+                        }
+                    }
+
+                    filter.archetypes.Add(archetype);
+                    archetype.AddFilter(filter);
+                }
             }
         }
 
