@@ -65,9 +65,30 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove<T>(this FastList<T> list, T value) => list.RemoveAt(list.IndexOf(value));
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void RemoveSave<T>(this FastList<T> list, T value) {
+            var index = list.IndexOf(value);
+            if (index < 0) {
+                return;
+            }
+            list.RemoveAt(index);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveSwap<T>(this FastList<T> list, T value, out FastList<T>.ResultSwap swap) => list.RemoveAtSwap(list.IndexOf(value), out swap);
+        public static void RemoveSwap<T>(this FastList<T> list, T value, out FastList<T>.ResultSwap swap) {
+            list.RemoveAtSwap(list.IndexOf(value), out swap);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void RemoveSwapSave<T>(this FastList<T> list, T value, out FastList<T>.ResultSwap swap) {
+            var index = list.IndexOf(value);
+            if (index < 0) {
+                swap = default;
+                return;
+            }
+            list.RemoveAtSwap(index, out swap);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveAt<T>(this FastList<T> list, int index) {

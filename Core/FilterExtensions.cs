@@ -67,7 +67,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveArchetypes(this Filter filter, FastList<Archetype> removedArchetypes) {
             foreach (var arch in removedArchetypes) {
-                filter.archetypes.Remove(arch);
+                filter.archetypes.RemoveSwapSave(arch, out _);
             }
         }
         

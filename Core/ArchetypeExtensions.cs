@@ -55,6 +55,14 @@ namespace Scellecs.Morpeh {
             else {
                 archetype.entities.Unset(entity.entityId.id);
             }
+            if (archetype.length == 0) {
+                archetype.world.archetypes.Remove(archetype.id, out _);
+                archetype.world.removedArchetypes.Add(archetype);
+                archetype.world.archetypesCount--;
+                archetype.usedInNative = false;
+                archetype.entities.Clear();
+                archetype.entitiesNative = null;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
