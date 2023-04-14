@@ -311,7 +311,7 @@ namespace Scellecs.Morpeh {
                     }
                     if (t.TryGetValue(h.offset, out var node)) {
                         foreach (var filter in node.filters) {
-                            filter.AddArchetype(arch);
+                            filter.AddArchetype(arch, entity);
                         }
                         t = node.nodes;
                     }
