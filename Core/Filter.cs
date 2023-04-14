@@ -54,8 +54,6 @@ namespace Scellecs.Morpeh {
         internal FastList<long> includedTypeIds;
         internal FastList<long> excludedTypeIds;
 
-        internal int tempId;
-
         internal Filter(World world, FastList<long> includedTypeIds, FastList<long> excludedTypeIds, FastList<long> includedOffsets) {
             this.world = world;
 
@@ -64,8 +62,6 @@ namespace Scellecs.Morpeh {
 
             this.includedTypeIds = includedTypeIds;
             this.excludedTypeIds = excludedTypeIds;
-
-            this.tempId = this.world.filters.length;
             this.world.filters.Add(this);
             
             var node = default(FilterNode);

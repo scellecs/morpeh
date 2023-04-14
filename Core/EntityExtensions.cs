@@ -279,7 +279,8 @@ namespace Scellecs.Morpeh {
                     current.Add(entity);
                 }
                 else {
-                    CreateArchetype(entity.currentArchetype, entity.world, entity.head, entity.currentArchetypeLength).Add(entity);
+                    //todo refactor
+                    CreateArchetype(entity.currentArchetype, entity.world, entity, entity.head, entity.currentArchetypeLength);
                 }
             }
 
@@ -287,7 +288,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static Archetype CreateArchetype(this long key, World world, ComponentNode head, int len) {
+        internal static Archetype CreateArchetype(this long key, World world, Entity entity, ComponentNode head, int len) {
             Archetype arch;
             if (world.emptyArchetypes.length > 0) {
                 var id = world.emptyArchetypes.length - 1;
@@ -300,11 +301,8 @@ namespace Scellecs.Morpeh {
             }
             world.archetypes.Add(key, arch, out _);
             world.archetypesCount++;
-
-            var t = head;
-            for (int i = 0, length = len; i < length; i++) {
-                t = t.next;
-            }
+            
+            arch.Add(entity);
             
             void TreeLanding(ComponentNode h, LongHashMap<FilterNode> t, int l) {
                 for (int i = 0, length = l; i < length; i++) {

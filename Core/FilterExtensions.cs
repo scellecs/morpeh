@@ -49,6 +49,19 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetype(this Filter filter, Archetype archetype) {
+            var entityId = archetype.usedInNative ? archetype.entitiesNative.First() : archetype.entities.First();
+            var ent = filter.world.GetEntity(entityId);
+            
+            foreach (var excludedTypeId in filter.excludedTypeIds) {
+                var stash = filter.world.GetStash(excludedTypeId);
+                if (stash == null) {
+                    continue;
+                }
+                if (stash.Has(ent)) {
+                    return;
+                }
+            }
+            
             filter.archetypes.Add(archetype);
             archetype.AddFilter(filter);
             if (filter.chunks.capacity < filter.archetypes.length) {
