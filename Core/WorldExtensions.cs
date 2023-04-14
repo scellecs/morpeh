@@ -37,7 +37,9 @@ namespace Scellecs.Morpeh {
 
             world.Filter           = new FilterBuilder{ world = world };
             world.filters          = new FastList<Filter>();
+            world.filtersTree      = new LongHashMap<FilterNode>();
             world.dirtyEntities    = new BitMap();
+            world.componentNodes   = new FastList<ComponentNode>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,8 +73,6 @@ namespace Scellecs.Morpeh {
             world.archetypes         = new LongHashMap<Archetype>();
             world.archetypesCount    = 1;
 
-            world.newArchetypes     = new FastList<Archetype>();
-            world.removedArchetypes = new FastList<Archetype>();
             world.emptyArchetypes   = new FastList<Archetype>();
 
             if (World.plugins != null) {
@@ -457,22 +457,6 @@ namespace Scellecs.Morpeh {
             }
 
             world.dirtyEntities.Clear();
-            if (world.removedArchetypes.length > 0) {
-                for (var index = 0; index < world.filters.length; index++) {
-                    world.filters.data[index].RemoveArchetypes(world.removedArchetypes);
-                }
-
-                world.emptyArchetypes.AddListRange(world.removedArchetypes);
-                world.removedArchetypes.Clear();
-            }
-
-            if (world.newArchetypes.length > 0) {
-                for (var index = 0; index < world.filters.length; index++) {
-                    world.filters.data[index].AddArchetypes(world.newArchetypes);
-                }
-
-                world.newArchetypes.Clear();
-            }
 
             if (world.nextFreeEntityIDs.length > 0) {
                 world.freeEntityIDs.PushRange(world.nextFreeEntityIDs);

@@ -43,6 +43,7 @@ namespace Scellecs.Morpeh {
         public JobHandle JobHandle;
 #endif
         internal FastList<Filter> filters;
+        internal LongHashMap<FilterNode> filtersTree;
 
         //todo custom collection
         [ShowInInspector]
@@ -78,6 +79,8 @@ namespace Scellecs.Morpeh {
 
         internal BitMap dirtyEntities;
 
+        internal FastList<ComponentNode> componentNodes;
+
         [ShowInInspector]
         internal IntStack freeEntityIDs;
         [ShowInInspector]
@@ -93,10 +96,6 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         internal int archetypesCount;
         
-        [ShowInInspector]
-        internal FastList<Archetype> newArchetypes;
-        [ShowInInspector]
-        internal FastList<Archetype> removedArchetypes;
         [ShowInInspector]
         internal FastList<Archetype> emptyArchetypes;
         
@@ -215,6 +214,9 @@ namespace Scellecs.Morpeh {
 
             this.filters.Clear();
             this.filters = null;
+            
+            this.filtersTree.Clear();
+            this.filtersTree = null;
 
             var tempStashes = new FastList<Stash>();
 
@@ -258,15 +260,9 @@ namespace Scellecs.Morpeh {
 
             this.archetypes.Clear();
             this.archetypes = null;
-
-            this.newArchetypes.Clear();
-            this.newArchetypes = null;
             
             this.emptyArchetypes.Clear();
             this.emptyArchetypes = null;
-            
-            this.removedArchetypes.Clear();
-            this.removedArchetypes = null;
 
             worlds.Remove(this);
         }

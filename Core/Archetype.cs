@@ -25,6 +25,7 @@ namespace Scellecs.Morpeh {
             this.length         = 0;
             this.entities       = new BitMap();
             this.usedInNative   = false;
+            this.filters        = new FastList<Filter>();
 
             this.world = world;
         }

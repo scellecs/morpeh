@@ -46,6 +46,15 @@ namespace Scellecs.Morpeh {
                 filter.chunks.Resize(filter.archetypes.capacity);
             }
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddArchetype(this Filter filter, Archetype archetype) {
+            filter.archetypes.Add(archetype);
+            archetype.AddFilter(filter);
+            if (filter.chunks.capacity < filter.archetypes.length) {
+                filter.chunks.Resize(filter.archetypes.capacity);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetypes(this Filter filter) {
@@ -55,6 +64,11 @@ namespace Scellecs.Morpeh {
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
             }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
+            filter.archetypes.RemoveSwapSave(archetype, out _);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -189,6 +203,7 @@ namespace Scellecs.Morpeh {
                 world = builder.world,
                 mode = Filter.Mode.Include,
                 typeId = TypeIdentifier<T>.info.id,
+                offset = TypeIdentifier<T>.info.offset,
                 level = builder.level + 1
             };
 
@@ -208,19 +223,23 @@ namespace Scellecs.Morpeh {
 
         public static Filter Build(this FilterBuilder builder) {
             var includedTypeIds = new FastList<long>();
+            var includedOffsets = new FastList<long>();
             var excludedTypeIds = new FastList<long>();
             var current = builder;
 
             while (current.parent != null) {
                 if (current.mode == Filter.Mode.Include) {
                     includedTypeIds.Add(current.typeId);
+                    includedOffsets.Add(current.offset);
                 }
                 else if (current.mode == Filter.Mode.Exclude) {
                     excludedTypeIds.Add(current.typeId);
                 }
                 current = current.parent;
             }
-            return new Filter(builder.world, includedTypeIds, excludedTypeIds);
+            
+            includedOffsets.data.InsertionSort(0, includedOffsets.length);
+            return new Filter(builder.world, includedTypeIds, excludedTypeIds, includedOffsets);
         }
     }
 }

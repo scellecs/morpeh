@@ -5,6 +5,15 @@ namespace Scellecs.Morpeh {
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    internal sealed class ComponentNode {
+        public ComponentNode next;
+        public ComponentNode previous;
+        public long offset;
+    }
+    
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
@@ -35,17 +44,16 @@ namespace Scellecs.Morpeh {
         [NonSerialized]
         internal int indexInCurrentArchetype;
 
+        internal ComponentNode head;
+
         [SerializeField]
         internal EntityId entityId;
         
         [ShowInInspector]
         public EntityId ID => this.entityId;
 
-        internal Entity() {
-        }
+        internal Entity() { }
 
-        public override string ToString() {
-            return $"Entity:{ID.ToString()}";
-        }
+        public override string ToString() => $"Entity:{ID.ToString()}";
     }
 }

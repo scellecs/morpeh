@@ -11,6 +11,7 @@ namespace Scellecs.Morpeh {
     using Collections;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
+    using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -152,12 +153,49 @@ namespace Scellecs.Morpeh {
 #endif
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddTransfer(this Entity entity, long typeId) {
+        internal static void AddTransfer(this Entity entity, long typeId, long offset) {
             if (entity.previousArchetypeLength == 0) {
                 entity.previousArchetype = entity.currentArchetype;
                 entity.previousArchetypeLength = entity.currentArchetypeLength;
             }
 
+            var nodes = entity.world.componentNodes;
+            var node = nodes.length > 0 ? nodes.data[--nodes.length] : new ComponentNode();
+
+            if (entity.head == null) {
+                node.offset = offset;
+                node.previous = node;
+                node.next = node;
+
+                entity.head = node;
+            }
+            else {
+                var head = entity.head;
+                var tail = entity.head.previous;
+                for (int i = 0, length = entity.currentArchetypeLength * 2; i < length; i++) {
+                    if (offset > tail.offset) {
+                        node.offset = tail.offset;
+                        node.previous = tail.previous;
+                        node.next = tail;
+                        tail.offset = offset;
+                        tail.previous.next = node;
+                        tail.previous = node;
+                        break;
+                    }
+                    if (offset < head.offset) {
+                        node.offset = head.offset;
+                        node.previous = head;
+                        node.next = head.next;
+                        head.offset = offset;
+                        head.next.previous = node;
+                        head.next = node;
+                        break;
+                    }
+                    tail = tail.previous;
+                    head = head.next;
+                }
+            }
+            
             entity.currentArchetype ^= typeId;
             entity.currentArchetypeLength++;
             
@@ -170,14 +208,47 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RemoveTransfer(this Entity entity, long typeId) {
+        internal static void RemoveTransfer(this Entity entity, long typeId, long offset) {
             if (entity.previousArchetypeLength == 0) {
                 entity.previousArchetype = entity.currentArchetype;
                 entity.previousArchetypeLength = entity.currentArchetypeLength;
             }
 
+            var nodes = entity.world.componentNodes;
+            
+            var head = entity.head;
+            if (head.offset == offset) {
+                entity.head = head.next;
+                head.previous.next = head.next;
+                head.next.previous = head.previous;
+                        
+                nodes.Add(head);
+            }
+            else {
+                var tail = entity.head.previous;
+                for (int i = 0, length = entity.currentArchetypeLength * 2; i < length; i++) {
+                    if (tail.offset == offset) {
+                        tail.previous.next = tail.next;
+                        tail.next.previous = tail.previous;
+                        
+                        nodes.Add(tail);
+                        break;
+                    }
+                    if (head.offset == offset) {
+                        head.previous.next = head.next;
+                        head.next.previous = head.previous;
+                        
+                        nodes.Add(head);
+                        break;
+                    }
+                    tail = tail.previous;
+                    head = head.next;
+                }
+            }
+
             entity.currentArchetype ^= typeId;
             entity.currentArchetypeLength--;
+            
             if (entity.isDirty == true) {
                 return;
             }
@@ -206,7 +277,7 @@ namespace Scellecs.Morpeh {
                     current.Add(entity);
                 }
                 else {
-                    CreateArchetype(entity.currentArchetype, entity.world).Add(entity);
+                    CreateArchetype(entity.currentArchetype, entity.world, entity.head).Add(entity);
                 }
             }
 
@@ -214,7 +285,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static Archetype CreateArchetype(this long key, World world) {
+        internal static Archetype CreateArchetype(this long key, World world, ComponentNode head) {
             Archetype arch;
             if (world.emptyArchetypes.length > 0) {
                 var id = world.emptyArchetypes.length - 1;
@@ -226,8 +297,26 @@ namespace Scellecs.Morpeh {
                 arch = new Archetype(key, world);
             }
             world.archetypes.Add(key, arch, out _);
-            world.newArchetypes.Add(arch);
             world.archetypesCount++;
+
+            var current = head;
+            var tree = world.filtersTree;
+            do {
+                if (tree == null) {
+                    break;
+                }
+                if (tree.TryGetValue(current.offset, out var node)) {
+                    foreach (var filter in node.filters) {
+                        filter.AddArchetype(arch);
+                    }
+                    tree = node.nodes;
+                }
+                else {
+                    break;
+                }
+                current = head.next;
+            }
+            while (current != head);
             return arch;
         }
 
