@@ -172,7 +172,8 @@ namespace Scellecs.Morpeh {
             else {
                 var head = entity.head;
                 var tail = entity.head.previous;
-                for (int i = 0, length = entity.currentArchetypeLength * 2; i < length; i++) {
+                for (int i = 0, length = entity.currentArchetypeLength - (entity.currentArchetypeLength / 2); i < length; i++) {
+                    //MLogger.Log($"ADD OFFSET {offset} {head.offset} {tail.offset}");
                     if (offset > tail.offset) {
                         node.offset = tail.offset;
                         node.previous = tail.previous;
@@ -189,6 +190,7 @@ namespace Scellecs.Morpeh {
                         head.offset = offset;
                         head.next.previous = node;
                         head.next = node;
+                        //MLogger.Log($"HEAD OFFSET {node.offset} {node.next.offset} {head.offset} {head.next.offset}");
                         break;
                     }
                     tail = tail.previous;
@@ -226,7 +228,7 @@ namespace Scellecs.Morpeh {
             }
             else {
                 var tail = entity.head.previous;
-                for (int i = 0, length = entity.currentArchetypeLength * 2; i < length; i++) {
+                for (int i = 0, length = entity.currentArchetypeLength - (entity.currentArchetypeLength / 2); i < length; i++) {
                     if (tail.offset == offset) {
                         tail.previous.next = tail.next;
                         tail.next.previous = tail.previous;
@@ -277,7 +279,7 @@ namespace Scellecs.Morpeh {
                     current.Add(entity);
                 }
                 else {
-                    CreateArchetype(entity.currentArchetype, entity.world, entity.head).Add(entity);
+                    CreateArchetype(entity.currentArchetype, entity.world, entity.head, entity.currentArchetypeLength).Add(entity);
                 }
             }
 
@@ -285,7 +287,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static Archetype CreateArchetype(this long key, World world, ComponentNode head) {
+        internal static Archetype CreateArchetype(this long key, World world, ComponentNode head, int len) {
             Archetype arch;
             if (world.emptyArchetypes.length > 0) {
                 var id = world.emptyArchetypes.length - 1;
@@ -299,24 +301,35 @@ namespace Scellecs.Morpeh {
             world.archetypes.Add(key, arch, out _);
             world.archetypesCount++;
 
-            var current = head;
-            var tree = world.filtersTree;
-            do {
-                if (tree == null) {
-                    break;
-                }
-                if (tree.TryGetValue(current.offset, out var node)) {
-                    foreach (var filter in node.filters) {
-                        filter.AddArchetype(arch);
-                    }
-                    tree = node.nodes;
-                }
-                else {
-                    break;
-                }
-                current = head.next;
+            var t = head;
+            for (int i = 0, length = len; i < length; i++) {
+                t = t.next;
             }
-            while (current != head);
+            
+            void TreeLanding(ComponentNode h, LongHashMap<FilterNode> t, int l) {
+                for (int i = 0, length = l; i < length; i++) {
+                    if (t == null) {
+                        break;
+                    }
+                    if (t.TryGetValue(h.offset, out var node)) {
+                        foreach (var filter in node.filters) {
+                            filter.AddArchetype(arch);
+                        }
+                        t = node.nodes;
+                    }
+                    else {
+                        break;
+                    }
+                    h = h.next;
+                }
+            }
+
+            var h = head;
+            for (int i = 0, length = len; i < length; i++) {
+                TreeLanding(h, world.filtersTree, len - i);
+                h = head.next;
+            }
+            
             return arch;
         }
 
