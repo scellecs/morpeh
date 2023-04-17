@@ -460,60 +460,34 @@ namespace Scellecs.Morpeh {
             }
 
             world.dirtyEntities.Clear();
-            if (world.removedArchetypes.length > 0) {
-                void TreeStep(Archetype arch, LongHashMap<FilterNode> tree, long[] offsets, int start, int end) {
-                    for (int i = start; i < end; i++) {
-                        var offset = offsets[i];
-                        if (tree.TryGetValue(offset, out var node)) {
-                            foreach (var filter in node.filters) {
-                                filter.RemoveArchetype(arch);
-                            }
-                            if (node.nodes != null) {
-                                TreeBranch(arch, node.nodes, offsets, i, end);
-                            }
-                        }
-                    }
-                }
-
-                void TreeBranch(Archetype arch, LongHashMap<FilterNode> tree, long[] offsets, int start, int end) {
-                    for (int i = start; i < end; i++) {
-                        TreeStep(arch, tree, offsets, i, end);
-                    }
-                }
-                
-                for (var index = 0; index < world.removedArchetypes.length; index++) {
-                    var arch = world.removedArchetypes.data[index];
-                    TreeBranch(arch, world.filtersTree, arch.offsets, 0, arch.offsets.Length);
-                }
-
-                world.emptyArchetypes.AddListRange(world.removedArchetypes);
-                world.removedArchetypes.Clear();
-            }
 
             if (world.newArchetypes.length > 0) {
                 void TreeStep(Archetype arch, LongHashMap<FilterNode> tree, long[] offsets, int start, int end) {
                     for (int i = start; i < end; i++) {
                         var offset = offsets[i];
-                        // MLogger.Log($"BEGIN Step start{i} end{end} offset{offset}");
+                        //MLogger.Log($"BEGIN Step start{i} end{end} offset{offset}");
                         if (tree.TryGetValue(offset, out var node)) {
                             //MLogger.Log($"OKAY");
                             foreach (var filter in node.filters) {
                                 filter.AddArchetype(arch);
                             }
                             if (node.nodes != null) {
-                                TreeBranch(arch, node.nodes, offsets, i, end);
+                                TreeBranch(arch, node.nodes, offsets, i + 1, end);
                             }
                         }
-                        // MLogger.Log($"END Step start{i} end{end}");
+                        else {
+                            break;
+                        }
+                        //MLogger.Log($"END Step start{i} end{end}");
                     }
                 }
 
                 void TreeBranch(Archetype arch, LongHashMap<FilterNode> tree, long[] offsets, int start, int end) {
-                    // MLogger.Log($"BEGIN BRANCH start{start} end{end}");
+                    //MLogger.Log($"BEGIN BRANCH start{start} end{end}");
                     for (int i = start; i < end; i++) {
                         TreeStep(arch, tree, offsets, i, end);
                     }
-                    // MLogger.Log($"END BRANCH start{start} end{end}");
+                    //MLogger.Log($"END BRANCH start{start} end{end}");
                 }
                 
                 for (var index = 0; index < world.newArchetypes.length; index++) {
