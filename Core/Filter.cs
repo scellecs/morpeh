@@ -67,6 +67,7 @@ namespace Scellecs.Morpeh {
             var node = default(FilterNode);
             var tree = this.world.filtersTree;
             foreach (var offset in includedOffsets) {
+                UnityEngine.Debug.LogWarning($"FILTER OFFSET {offset}");
                 if (tree.TryGetValue(offset, out node)) {
                     if (node.nodes == null) {
                         node.nodes = new LongHashMap<FilterNode>();

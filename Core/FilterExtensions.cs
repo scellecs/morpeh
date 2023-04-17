@@ -46,6 +46,29 @@ namespace Scellecs.Morpeh {
                 filter.chunks.Resize(filter.archetypes.capacity);
             }
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddArchetype(this Filter filter, Archetype archetype) {
+            MLogger.Log("ADD");
+            //todo check offset instead entity
+            var entity = filter.world.GetEntity(archetype.entities.First());
+            foreach (var excludedTypeId in filter.excludedTypeIds) {
+                var stash = filter.world.GetStash(excludedTypeId);
+                if (stash == null) {
+                    continue;
+                }
+                if (stash.Has(entity)) {
+                    return;
+                }
+            }
+            //
+
+            filter.archetypes.Add(archetype);
+            archetype.AddFilter(filter);
+            if (filter.chunks.capacity < filter.archetypes.length) {
+                filter.chunks.Resize(filter.archetypes.capacity);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetypes(this Filter filter) {
@@ -55,6 +78,12 @@ namespace Scellecs.Morpeh {
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
             }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
+            MLogger.Log("REM");
+            filter.archetypes.RemoveSwapSave(archetype, out _);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -189,6 +218,7 @@ namespace Scellecs.Morpeh {
                 world = builder.world,
                 mode = Filter.Mode.Include,
                 typeId = TypeIdentifier<T>.info.id,
+                offset = TypeIdentifier<T>.info.offset,
                 level = builder.level + 1
             };
 
@@ -217,6 +247,7 @@ namespace Scellecs.Morpeh {
                 if (current.mode == Filter.Mode.Include) {
                     includedTypeIds.Add(current.typeId);
                     includedOffsets.Add(current.offset);
+                    MLogger.LogWarning(current.offset);
                 }
                 else if (current.mode == Filter.Mode.Exclude) {
                     excludedTypeIds.Add(current.typeId);

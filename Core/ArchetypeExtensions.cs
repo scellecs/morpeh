@@ -10,7 +10,6 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Ctor(this Archetype archetype) {
             archetype.world   = World.worlds.data[archetype.worldId];
-            archetype.filters = new FastList<Filter>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -20,7 +19,7 @@ namespace Scellecs.Morpeh {
             archetype.id      = -1;
             archetype.length  = -1;
 
-            archetype.typeIds = null;
+            archetype.offsets = null;
             archetype.world   = null;
 
             archetype.entities?.Clear();
@@ -68,11 +67,11 @@ namespace Scellecs.Morpeh {
             archetype.usedInNative = false;
             archetype.entities.Clear();
             archetype.entitiesNative = null;
-            // for (var index = 0; index < archetype.filters.length; index++) {
-            //     var filter = archetype.filters.data[index];
-            //     filter.RemoveArchetype(archetype);
-            //     archetype.filters.data[index] = default;
-            // }
+             for (var index = 0; index < archetype.filters.length; index++) {
+                 var filter = archetype.filters.data[index];
+                 filter.RemoveArchetype(archetype);
+                 archetype.filters.data[index] = default;
+             }
             archetype.filters.length = 0;
             archetype.filters.lastSwappedIndex = -1;
         }

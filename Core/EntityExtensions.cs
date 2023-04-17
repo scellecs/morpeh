@@ -276,7 +276,7 @@ namespace Scellecs.Morpeh {
                     current.Add(entity);
                 }
                 else {
-                    CreateArchetype(entity.currentArchetype, entity.world).Add(entity);
+                    CreateArchetype(entity).Add(entity);
                 }
             }
 
@@ -284,16 +284,27 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static Archetype CreateArchetype(this long key, World world) {
+        internal static Archetype CreateArchetype(Entity entity) {
+            var world = entity.world;
+            var key = entity.currentArchetype;
+
+            var offsets = new long[entity.currentArchetypeLength];
+            var head = entity.head;
+            for (int i = 0, length = entity.currentArchetypeLength; i < length; i++) {
+                offsets[i] = head.offset;
+                head = head.next;
+            }
+            
             Archetype arch;
             if (world.emptyArchetypes.length > 0) {
                 var id = world.emptyArchetypes.length - 1;
                 arch = world.emptyArchetypes.data[id];
                 world.emptyArchetypes.RemoveAt(id);
                 arch.id = key;
+                arch.offsets = offsets;
             }
             else {
-                arch = new Archetype(key, world);
+                arch = new Archetype(key, offsets, world);
             }
             world.archetypes.Add(key, arch, out _);
             world.newArchetypes.Add(arch);
