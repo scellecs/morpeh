@@ -460,39 +460,41 @@ namespace Scellecs.Morpeh {
             }
 
             world.dirtyEntities.Clear();
+            
+            if (world.removedArchetypes.length > 0) {
+                for (var index = 0; index < world.removedArchetypes.length; index++) {
+                    var arch = world.removedArchetypes.data[index];
+                    for (var i = 0; i < arch.filters.length; i++) {
+                        var filter = arch.filters.data[i];
+                        filter.RemoveArchetype(arch);
+                        arch.filters.data[i] = default;
+                    }
+                    arch.filters.length = 0;
+                    arch.filters.lastSwappedIndex = -1;
+                }
+
+                world.emptyArchetypes.AddListRange(world.removedArchetypes);
+                world.removedArchetypes.Clear();
+            }
 
             if (world.newArchetypes.length > 0) {
                 void TreeStep(Archetype arch, LongHashMap<FilterNode> tree, long[] offsets, int start, int end) {
                     for (int i = start; i < end; i++) {
                         var offset = offsets[i];
-                        //MLogger.Log($"BEGIN Step start{i} end{end} offset{offset}");
                         if (tree.TryGetValue(offset, out var node)) {
-                            //MLogger.Log($"OKAY");
                             foreach (var filter in node.filters) {
                                 filter.AddArchetype(arch);
                             }
                             if (node.nodes != null) {
-                                TreeBranch(arch, node.nodes, offsets, i + 1, end);
+                                TreeStep(arch, node.nodes, offsets, i + 1, end);
                             }
                         }
-                        else {
-                            break;
-                        }
-                        //MLogger.Log($"END Step start{i} end{end}");
                     }
-                }
-
-                void TreeBranch(Archetype arch, LongHashMap<FilterNode> tree, long[] offsets, int start, int end) {
-                    //MLogger.Log($"BEGIN BRANCH start{start} end{end}");
-                    for (int i = start; i < end; i++) {
-                        TreeStep(arch, tree, offsets, i, end);
-                    }
-                    //MLogger.Log($"END BRANCH start{start} end{end}");
                 }
                 
                 for (var index = 0; index < world.newArchetypes.length; index++) {
                     var arch = world.newArchetypes.data[index];
-                    TreeBranch(arch, world.filtersTree, arch.offsets, 0, arch.offsets.Length);
+                    TreeStep(arch, world.filtersTree, arch.offsets, 0, arch.offsets.Length);
                 }
                 
                 world.newArchetypes.Clear();

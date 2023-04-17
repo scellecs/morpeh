@@ -62,18 +62,11 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Pool(Archetype archetype) {
             archetype.world.archetypes.Remove(archetype.id, out _);
-            archetype.world.emptyArchetypes.Add(archetype);
+            archetype.world.removedArchetypes.Add(archetype);
             archetype.world.archetypesCount--;
             archetype.usedInNative = false;
             archetype.entities.Clear();
             archetype.entitiesNative = null;
-             for (var index = 0; index < archetype.filters.length; index++) {
-                 var filter = archetype.filters.data[index];
-                 filter.RemoveArchetype(archetype);
-                 archetype.filters.data[index] = default;
-             }
-            archetype.filters.length = 0;
-            archetype.filters.lastSwappedIndex = -1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

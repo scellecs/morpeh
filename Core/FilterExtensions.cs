@@ -47,23 +47,36 @@ namespace Scellecs.Morpeh {
             }
         }
         
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // internal static void AddArchetype(this Filter filter, Archetype archetype) {
+        //     //todo check offset instead entity
+        //     var entity = filter.world.GetEntity(archetype.entities.First());
+        //     foreach (var excludedTypeId in filter.excludedTypeIds) {
+        //         var stash = filter.world.GetStash(excludedTypeId);
+        //         if (stash == null) {
+        //             continue;
+        //         }
+        //         if (stash.Has(entity)) {
+        //             return;
+        //         }
+        //     }
+        //     //
+        //
+        //     filter.archetypes.Add(archetype);
+        //     archetype.AddFilter(filter);
+        //     if (filter.chunks.capacity < filter.archetypes.length) {
+        //         filter.chunks.Resize(filter.archetypes.capacity);
+        //     }
+        // }
+        
+        //todo: dont add duplicates!
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetype(this Filter filter, Archetype archetype) {
-            //todo check offset instead entity
-            var entity = filter.world.GetEntity(archetype.entities.First());
-            foreach (var excludedTypeId in filter.excludedTypeIds) {
-                var stash = filter.world.GetStash(excludedTypeId);
-                if (stash == null) {
-                    continue;
-                }
-                if (stash.Has(entity)) {
-                    return;
-                }
+            if (archetype.filters.Contains(filter)) {
+                return;
             }
-            //
-
-            filter.archetypes.Add(archetype);
-            archetype.AddFilter(filter);
+            
+            filter.CheckArchetype(archetype);
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
             }
@@ -136,6 +149,7 @@ namespace Scellecs.Morpeh {
             }
 
             filter.archetypes.Add(archetype);
+            archetype.AddFilter(filter);
         }
 
         [NotNull]
