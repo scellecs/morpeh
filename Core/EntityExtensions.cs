@@ -174,12 +174,13 @@ namespace Scellecs.Morpeh {
                 var tail = entity.head.previous;
                 for (int i = 0, length = entity.currentArchetypeLength - (entity.currentArchetypeLength / 2); i < length; i++) {
                     if (offset > tail.offset) {
-                        node.offset = tail.offset;
-                        node.previous = tail.previous;
-                        node.next = tail;
-                        tail.offset = offset;
-                        tail.previous.next = node;
-                        tail.previous = node;
+                        node.offset = offset;
+                        node.previous = tail;
+                        node.next = tail.next;
+                        
+                        tail.next.previous = node;
+                        tail.next = node;
+                        
                         break;
                     }
                     if (offset < head.offset) {
@@ -356,6 +357,14 @@ namespace Scellecs.Morpeh {
 
             entity.isDirty    = false;
             entity.isDisposed = true;
+        }
+
+        internal static void DumpHead(this Entity entity) {
+            var head = entity.head;
+            for (int i = 0, length = entity.currentArchetypeLength; i < length; i++) {
+                MLogger.LogError(head.offset);
+                head = head.next;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
