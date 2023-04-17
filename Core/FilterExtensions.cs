@@ -47,6 +47,7 @@ namespace Scellecs.Morpeh {
             }
         }
         
+        //todo wrong
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetype(this Filter filter, Archetype archetype, Entity entity) {
             foreach (var excludedTypeId in filter.excludedTypeIds) {
@@ -65,6 +66,18 @@ namespace Scellecs.Morpeh {
                 filter.chunks.Resize(filter.archetypes.capacity);
             }
         }
+        
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // internal static void AddArchetype(this Filter filter, Archetype archetype, Entity entity) {
+        //     if (archetype.filters.Contains(filter)) {
+        //         return;
+        //     }
+        //     
+        //     filter.CheckArchetype(archetype);
+        //     if (filter.chunks.capacity < filter.archetypes.length) {
+        //         filter.chunks.Resize(filter.archetypes.capacity);
+        //     }
+        // }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetypes(this Filter filter) {
