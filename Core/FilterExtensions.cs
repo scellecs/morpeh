@@ -49,7 +49,6 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetype(this Filter filter, Archetype archetype) {
-            MLogger.Log("ADD");
             //todo check offset instead entity
             var entity = filter.world.GetEntity(archetype.entities.First());
             foreach (var excludedTypeId in filter.excludedTypeIds) {
@@ -82,7 +81,6 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
-            MLogger.Log("REM");
             filter.archetypes.RemoveSwapSave(archetype, out _);
         }
         
@@ -247,7 +245,6 @@ namespace Scellecs.Morpeh {
                 if (current.mode == Filter.Mode.Include) {
                     includedTypeIds.Add(current.typeId);
                     includedOffsets.Add(current.offset);
-                    MLogger.LogWarning(current.offset);
                 }
                 else if (current.mode == Filter.Mode.Exclude) {
                     excludedTypeIds.Add(current.typeId);
