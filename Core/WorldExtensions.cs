@@ -39,6 +39,8 @@ namespace Scellecs.Morpeh {
             world.filters          = new FastList<Filter>();
             world.filtersTree      = new LongHashMap<FilterNode>();
             world.dirtyEntities    = new BitMap();
+            
+            world.componentNodes = new FastList<ComponentNode>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

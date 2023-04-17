@@ -102,6 +102,8 @@ namespace Scellecs.Morpeh {
         internal FastList<Archetype> emptyArchetypes;
         
         internal FastList<long> archetypeCache;
+        
+        internal FastList<ComponentNode> componentNodes;
 
         [ShowInInspector]
         internal int identifier;
