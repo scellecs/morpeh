@@ -7,10 +7,22 @@ namespace Scellecs.Morpeh {
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    public sealed class FilterNode {
+        public FastList<Filter> filters;
+        public LongHashMap<FilterNode> nodes;
+    }
+
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class FilterBuilder {
         internal World world;
         internal FilterBuilder parent;
         internal long typeId;
+        internal long offset;
         internal Filter.Mode mode;
         internal int level;
     }
@@ -42,7 +54,7 @@ namespace Scellecs.Morpeh {
         internal FastList<long> includedTypeIds;
         internal FastList<long> excludedTypeIds;
 
-        internal Filter(World world, FastList<long> includedTypeIds, FastList<long> excludedTypeIds) {
+        internal Filter(World world, FastList<long> includedTypeIds, FastList<long> excludedTypeIds, FastList<long> includedOffsets) {
             this.world = world;
 
             this.archetypes = new FastList<Archetype>();
@@ -52,6 +64,23 @@ namespace Scellecs.Morpeh {
             this.excludedTypeIds = excludedTypeIds;
 
             this.world.filters.Add(this);
+            var node = default(FilterNode);
+            var tree = this.world.filtersTree;
+            foreach (var offset in includedOffsets) {
+                if (tree.TryGetValue(offset, out node)) {
+                    if (node.nodes == null) {
+                        node.nodes = new LongHashMap<FilterNode>();
+                    }
+                    tree = node.nodes;
+                }
+                else {
+                    node = new FilterNode {
+                        filters = new FastList<Filter>()
+                    };
+                    tree.Add(offset, node, out _);
+                }
+            }
+            node.filters.Add(this);
             this.AddArchetypes();
         }
 

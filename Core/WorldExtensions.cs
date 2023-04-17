@@ -37,6 +37,7 @@ namespace Scellecs.Morpeh {
 
             world.Filter           = new FilterBuilder{ world = world };
             world.filters          = new FastList<Filter>();
+            world.filtersTree      = new LongHashMap<FilterNode>();
             world.dirtyEntities    = new BitMap();
         }
 

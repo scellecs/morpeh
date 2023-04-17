@@ -209,18 +209,23 @@ namespace Scellecs.Morpeh {
         public static Filter Build(this FilterBuilder builder) {
             var includedTypeIds = new FastList<long>();
             var excludedTypeIds = new FastList<long>();
+            var includedOffsets = new FastList<long>();
+            
             var current = builder;
 
             while (current.parent != null) {
                 if (current.mode == Filter.Mode.Include) {
                     includedTypeIds.Add(current.typeId);
+                    includedOffsets.Add(current.offset);
                 }
                 else if (current.mode == Filter.Mode.Exclude) {
                     excludedTypeIds.Add(current.typeId);
                 }
                 current = current.parent;
             }
-            return new Filter(builder.world, includedTypeIds, excludedTypeIds);
+            
+            includedOffsets.data.InsertionSort(0, includedOffsets.length);
+            return new Filter(builder.world, includedTypeIds, excludedTypeIds, includedOffsets);
         }
     }
 }
