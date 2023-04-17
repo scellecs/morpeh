@@ -172,7 +172,7 @@ namespace Scellecs.Morpeh {
             else {
                 var head = entity.head;
                 var tail = entity.head.previous;
-                for (int i = 0, length = entity.currentArchetypeLength - (entity.currentArchetypeLength / 2); i < length; i++) {
+                for (int i = 0, length = entity.currentArchetypeLength; i < length; i++) {
                     if (offset > tail.offset) {
                         node.offset = offset;
                         node.previous = tail;
