@@ -48,8 +48,9 @@ namespace Scellecs.Morpeh {
 
         
         #pragma warning disable 0612
-        internal static long GetID<T>() where T : struct, IComponent {
-            var id   = Math.Abs(7_777_777_777_777_777_773L * Interlocked.Increment(ref counter));
+        internal static void GetID<T>(out long id, out long offset) where T : struct, IComponent {
+            offset = Interlocked.Increment(ref counter);
+            id   = Math.Abs(7_777_777_777_777_777_773L * offset);
             var type = typeof(T);
 
             var info = new InternalTypeDefinition {
@@ -62,12 +63,11 @@ namespace Scellecs.Morpeh {
             };
             longTypeAssociation.Add(id, info);
             typeAssociation.Add(type, info);
-            return id;
         }
         #pragma warning restore 0612
 
         internal struct InternalTypeDefinition {
-            public long                    id;
+            public long                   id;
             public Type                   type;
             public Func<Entity, object>   entityGetComponentBoxed;
             public Action<Entity, object> entitySetComponentBoxed;
@@ -77,6 +77,7 @@ namespace Scellecs.Morpeh {
 
         internal class TypeInfo {
             internal long id;
+            internal long offset;
             internal bool isMarker;
             internal int stashSize;
 
@@ -85,8 +86,9 @@ namespace Scellecs.Morpeh {
                 this.stashSize = stashSize;
             }
 
-            public void SetID(long id) {
+            public void SetID(long id, long offset) {
                 this.id = id;
+                this.offset = offset;
             }
         }
     }
@@ -118,8 +120,8 @@ namespace Scellecs.Morpeh {
 
             var typeFieldsLength = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length;
             info = new CommonTypeIdentifier.TypeInfo(typeFieldsLength == 0, stashSize);
-            var id = CommonTypeIdentifier.GetID<T>();
-            info.SetID(id);
+            CommonTypeIdentifier.GetID<T>(out var id, out var offset);
+            info.SetID(id, offset);
         }
     }
 }
