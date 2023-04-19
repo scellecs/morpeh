@@ -72,8 +72,11 @@ namespace Scellecs.Morpeh {
         //todo: dont add duplicates!
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetype(this Filter filter, Archetype archetype) {
-            if (archetype.filters.Contains(filter)) {
-                return;
+            for (int i = 0, length = archetype.filters.length; i < length; i++) {
+                var currentFilter = archetype.filters.data[i];
+                if (currentFilter == filter) {
+                    return;
+                }
             }
             
             filter.CheckArchetype(archetype);
@@ -113,20 +116,20 @@ namespace Scellecs.Morpeh {
                 if (archetype.entitiesNative.length == 0) {
                     return;
                 }
-                entityId = archetype.entitiesNative.First();
+                var enumerator = archetype.entitiesNative.GetEnumerator();
+                enumerator.MoveNext();
+                entityId = enumerator.Current;
             }
             else {
                 if (archetype.entities.length == 0) {
                     return;
                 }
-                entityId = archetype.entities.First();
+                var enumerator = archetype.entities.GetEnumerator();
+                enumerator.MoveNext();
+                entityId = enumerator.Current;
             }
            
             var ent = filter.world.GetEntity(entityId);
-            //todo remove it
-            if (ent.IsNullOrDisposed()) {
-                return;
-            }
 
             foreach (var includedTypeId in filter.includedTypeIds) {
                 var stash = filter.world.GetStash(includedTypeId);
