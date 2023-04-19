@@ -339,9 +339,13 @@ namespace Scellecs.Morpeh {
             entity.world.ThreadSafetyCheck();
             
             if (entity.currentArchetypeLength > 0) {
-                foreach (var id in entity.world.stashes) {
-                    var stash = Stash.stashes.data[entity.world.stashes.GetValueByIndex(id)];
+                var head = entity.head;
+                for (int i = 0, length = entity.currentArchetypeLength; i < length; i++) {
+                    var offset = head.offset;
+                    var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
+                    var stash = Stash.stashes.data[entity.world.stashes.GetValueByKey(id)];
                     stash.Clean(entity);
+                    head = head.next;
                 }
             }
 

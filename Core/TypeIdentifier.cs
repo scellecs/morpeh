@@ -20,7 +20,8 @@ namespace Scellecs.Morpeh {
     internal static class CommonTypeIdentifier {
         internal static long counter;
 
-        internal static Dictionary<long, InternalTypeDefinition>  longTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
+        internal static Dictionary<long, InternalTypeDefinition>  idTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
+        internal static Dictionary<long, InternalTypeDefinition>  offsetTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
         internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
         
         static CommonTypeIdentifier() {
@@ -55,19 +56,22 @@ namespace Scellecs.Morpeh {
 
             var info = new InternalTypeDefinition {
                 id                      = id,
+                offset                  = offset,
                 type                    = type,
                 entityGetComponentBoxed = (entity) => entity.world.GetStash<T>().Get(entity),
                 entitySetComponentBoxed = (entity, component) => entity.world.GetStash<T>().Set(entity, (T)component),
                 entityRemoveComponent   = (entity) => entity.world.GetStash<T>().Remove(entity),
                 typeInfo                = TypeIdentifier<T>.info
             };
-            longTypeAssociation.Add(id, info);
+            idTypeAssociation.Add(id, info);
+            offsetTypeAssociation.Add(offset, info);
             typeAssociation.Add(type, info);
         }
         #pragma warning restore 0612
 
         internal struct InternalTypeDefinition {
             public long                   id;
+            public long                   offset;
             public Type                   type;
             public Func<Entity, object>   entityGetComponentBoxed;
             public Action<Entity, object> entitySetComponentBoxed;
