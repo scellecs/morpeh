@@ -74,6 +74,7 @@ namespace Scellecs.Morpeh {
             world.archetypes         = new LongHashMap<Archetype>();
             world.archetypesCount    = 1;
             world.emptyArchetypes   = new FastList<Archetype>();
+            world.removedArchetypes = new FastList<Archetype>();
 
             if (World.plugins != null) {
                 foreach (var plugin in World.plugins) {
@@ -457,6 +458,22 @@ namespace Scellecs.Morpeh {
             }
 
             world.dirtyEntities.Clear();
+            
+            if (world.removedArchetypes.length > 0) {
+                for (var index = 0; index < world.removedArchetypes.length; index++) {
+                    var arch = world.removedArchetypes.data[index];
+                    for (var i = 0; i < arch.filters.length; i++) {
+                        var filter = arch.filters.data[i];
+                        filter.RemoveArchetype(arch);
+                        arch.filters.data[i] = default;
+                    }
+                    arch.filters.length = 0;
+                    arch.filters.lastSwappedIndex = -1;
+                }
+
+                world.emptyArchetypes.AddListRange(world.removedArchetypes);
+                world.removedArchetypes.Clear();
+            }
 
             if (world.nextFreeEntityIDs.length > 0) {
                 world.freeEntityIDs.PushRange(world.nextFreeEntityIDs);
