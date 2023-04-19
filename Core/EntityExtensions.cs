@@ -314,7 +314,7 @@ namespace Scellecs.Morpeh {
                             filter.AddArchetype(a);
                         }
                         if (node.nodes != null) {
-                            TreeStep(a, node.nodes, head.next, i + 1, end);
+                            TreeStep(a, node.nodes, h.next, i + 1, end);
                         }
                     }
                     h = head.next;
