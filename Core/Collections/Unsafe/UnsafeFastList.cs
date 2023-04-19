@@ -9,7 +9,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed unsafe class UnsafeFastList<T> : IEnumerable<T> where T : unmanaged {
+    public sealed unsafe class UnsafeFastList<T> where T : unmanaged {
         public PinnedArray<T> data;
         public int length;
         public int capacity;
@@ -59,10 +59,6 @@ namespace Scellecs.Morpeh.Collections {
             return e;
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -74,7 +70,7 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator : IEnumerator<T> {
+        public struct Enumerator {
             public UnsafeFastList<T> list;
 
             public int length;
@@ -84,12 +80,15 @@ namespace Scellecs.Morpeh.Collections {
             public bool MoveNext() {
                 var lastSwappedIndex = this.list.lastSwappedIndex;
                 if (lastSwappedIndex != -1) {
+                    this.length = this.list.length;
                     var previousIndex = this.index - 1;
                     if (lastSwappedIndex == previousIndex) {
                         this.index--;
                     }
                     else if (lastSwappedIndex < previousIndex) {
+#if MORPEH_DEBUG
                         throw new InvalidOperationException("Earlier collection items have been modified, this is not allowed");
+#endif
                     }
                 }
                 
@@ -103,16 +102,10 @@ namespace Scellecs.Morpeh.Collections {
                 return true;
             }
 
-            public void Reset() {
-                this.index   = 0;
-                this.current = default;
-                this.list.lastSwappedIndex = -1;
-            }
-
-            public T           Current => this.current;
-            object IEnumerator.Current => this.current;
-
-            public void Dispose() {
+            public T Current
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => this.current;
             }
         }
     }
