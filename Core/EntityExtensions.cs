@@ -311,13 +311,13 @@ namespace Scellecs.Morpeh {
                     var offset = h.offset;
                     if (tree.TryGetValue(offset, out var node)) {
                         foreach (var filter in node.filters) {
-                            filter.AddArchetype(a);
+                            filter.AddArchetype(a, entity);
                         }
                         if (node.nodes != null) {
                             TreeStep(a, node.nodes, h.next, i + 1, end);
                         }
                     }
-                    h = head.next;
+                    h = h.next;
                 }
             }
             

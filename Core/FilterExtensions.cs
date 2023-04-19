@@ -47,39 +47,20 @@ namespace Scellecs.Morpeh {
             }
         }
         
-        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        // internal static void AddArchetype(this Filter filter, Archetype archetype) {
-        //     //todo check offset instead entity
-        //     var entity = filter.world.GetEntity(archetype.entities.First());
-        //     foreach (var excludedTypeId in filter.excludedTypeIds) {
-        //         var stash = filter.world.GetStash(excludedTypeId);
-        //         if (stash == null) {
-        //             continue;
-        //         }
-        //         if (stash.Has(entity)) {
-        //             return;
-        //         }
-        //     }
-        //     //
-        //
-        //     filter.archetypes.Add(archetype);
-        //     archetype.AddFilter(filter);
-        //     if (filter.chunks.capacity < filter.archetypes.length) {
-        //         filter.chunks.Resize(filter.archetypes.capacity);
-        //     }
-        // }
-        
-        //todo: dont add duplicates!
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddArchetype(this Filter filter, Archetype archetype) {
-            for (int i = 0, length = archetype.filters.length; i < length; i++) {
-                var currentFilter = archetype.filters.data[i];
-                if (currentFilter == filter) {
+        internal static void AddArchetype(this Filter filter, Archetype archetype, Entity entity) {
+            foreach (var excludedTypeId in filter.excludedTypeIds) {
+                var stash = filter.world.GetStash(excludedTypeId);
+                if (stash == null) {
+                    continue;
+                }
+                if (stash.Has(entity)) {
                     return;
                 }
             }
-            
-            filter.CheckArchetype(archetype);
+        
+            filter.archetypes.Add(archetype);
+            archetype.AddFilter(filter);
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
             }
