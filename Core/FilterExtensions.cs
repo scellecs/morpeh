@@ -38,16 +38,6 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddArchetypes(this Filter filter, FastList<Archetype> newArchetypes) {
-            foreach (var arch in newArchetypes) {
-                filter.CheckArchetype(arch);
-            }
-            if (filter.chunks.capacity < filter.archetypes.length) {
-                filter.chunks.Resize(filter.archetypes.capacity);
-            }
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetype(this Filter filter, Archetype archetype, Entity entity) {
             foreach (var excludedTypeId in filter.excludedTypeIds) {
                 var stash = filter.world.GetStash(excludedTypeId);
@@ -165,6 +155,9 @@ namespace Scellecs.Morpeh {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
+            if (filter.archetypes.length == 0) {
+                return default;
+            }
             // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             if (enumerator.MoveNext()) {
