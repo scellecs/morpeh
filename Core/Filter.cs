@@ -68,16 +68,15 @@ namespace Scellecs.Morpeh {
             var tree = this.world.filtersTree;
             foreach (var offset in includedOffsets) {
                 if (tree.TryGetValue(offset, out node)) {
-                    if (node.nodes == null) {
-                        node.nodes = new LongHashMap<FilterNode>();
-                    }
                     tree = node.nodes;
                 }
                 else {
                     node = new FilterNode {
-                        filters = new FastList<Filter>()
+                        filters = new FastList<Filter>(),
+                        nodes = new LongHashMap<FilterNode>()
                     };
                     tree.Add(offset, node, out _);
+                    tree = node.nodes;
                 }
             }
             node.filters.Add(this);
