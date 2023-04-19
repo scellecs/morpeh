@@ -86,6 +86,9 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public EntityEnumerator GetEnumerator() {
             this.world.ThreadSafetyCheck();
+            if (this.archetypes.length == 0) {
+                return default;
+            }
             return new EntityEnumerator(this);
         }
 
@@ -151,6 +154,10 @@ namespace Scellecs.Morpeh {
             }
 
             public bool MoveNext() {
+                if (this.archetypeCount == 0) {
+                    return false;
+                }
+                
                 if (this.archetypeCount == 1) {
                     if (this.currentArchetypeIsNative) {
                         if (this.currentEnumeratorNative.MoveNext()) {
