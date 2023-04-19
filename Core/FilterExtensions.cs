@@ -193,19 +193,7 @@ namespace Scellecs.Morpeh {
         public static bool IsEmpty(this Filter filter) {
             filter.world.ThreadSafetyCheck();
 
-            foreach (var arch in filter.archetypes) {
-                if (arch.usedInNative) {
-                    if (arch.entitiesNative.length > 0) {
-                        return false;
-                    }
-                }
-                else {
-                    if (arch.entities.count > 0) {
-                        return false;
-                    }
-                }
-            }
-            return true;
+            return filter.archetypes.length == 0;
         }
 
         public static FilterBuilder With<T>(this FilterBuilder builder) where T : struct, IComponent
