@@ -178,7 +178,9 @@ namespace Scellecs.Morpeh {
         public static int GetLengthSlow(this Filter filter) {
             filter.world.ThreadSafetyCheck();
             int accum = 0;
-            foreach (var arch in filter.archetypes) {
+
+            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+                var arch = filter.archetypes.data[i];
                 if (arch.usedInNative) {
                     accum += arch.entitiesNative.length;
                 }
