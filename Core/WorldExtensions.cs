@@ -524,6 +524,13 @@ namespace Scellecs.Morpeh {
         }
         
         [PublicAPI]
+        public static void WarmupArchetypes(this World world, int count) {
+            for (int i = 0, length = count; i < length; i++) {
+                world.emptyArchetypes.Add(new Archetype(-1, world));
+            }
+        }
+        
+        [PublicAPI]
         public static AspectFactory<T> GetAspectFactory<T>(this World world) where T : struct, IAspect {
             world.ThreadSafetyCheck();
             var aspectFactory = default(AspectFactory<T>);
