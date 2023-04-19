@@ -219,10 +219,14 @@ namespace Scellecs.Morpeh {
 
             var head = entity.head;
             if (head.offset == offset) {
-                entity.head = head.next;
-                head.previous.next = head.next;
-                head.next.previous = head.previous;
-
+                if (head == head.next) {
+                    entity.head = null;
+                }
+                else {
+                    entity.head = head.next;
+                    head.previous.next = head.next;
+                    head.next.previous = head.previous;
+                }
                 nodes.Add(head);
             }
             else {
