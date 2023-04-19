@@ -73,9 +73,6 @@ namespace Scellecs.Morpeh {
 
             world.archetypes         = new LongHashMap<Archetype>();
             world.archetypesCount    = 1;
-
-            world.newArchetypes     = new FastList<Archetype>();
-            world.removedArchetypes = new FastList<Archetype>();
             world.emptyArchetypes   = new FastList<Archetype>();
 
             if (World.plugins != null) {
@@ -460,45 +457,6 @@ namespace Scellecs.Morpeh {
             }
 
             world.dirtyEntities.Clear();
-            
-            if (world.removedArchetypes.length > 0) {
-                for (var index = 0; index < world.removedArchetypes.length; index++) {
-                    var arch = world.removedArchetypes.data[index];
-                    for (var i = 0; i < arch.filters.length; i++) {
-                        var filter = arch.filters.data[i];
-                        filter.RemoveArchetype(arch);
-                        arch.filters.data[i] = default;
-                    }
-                    arch.filters.length = 0;
-                    arch.filters.lastSwappedIndex = -1;
-                }
-
-                world.emptyArchetypes.AddListRange(world.removedArchetypes);
-                world.removedArchetypes.Clear();
-            }
-
-            if (world.newArchetypes.length > 0) {
-                void TreeStep(Archetype arch, LongHashMap<FilterNode> tree, long[] offsets, int start, int end) {
-                    for (int i = start; i < end; i++) {
-                        var offset = offsets[i];
-                        if (tree.TryGetValue(offset, out var node)) {
-                            foreach (var filter in node.filters) {
-                                filter.AddArchetype(arch);
-                            }
-                            if (node.nodes != null) {
-                                TreeStep(arch, node.nodes, offsets, i + 1, end);
-                            }
-                        }
-                    }
-                }
-                
-                for (var index = 0; index < world.newArchetypes.length; index++) {
-                    var arch = world.newArchetypes.data[index];
-                    TreeStep(arch, world.filtersTree, arch.offsets, 0, arch.offsets.Length);
-                }
-                
-                world.newArchetypes.Clear();
-            }
 
             if (world.nextFreeEntityIDs.length > 0) {
                 world.freeEntityIDs.PushRange(world.nextFreeEntityIDs);

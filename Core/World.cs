@@ -95,10 +95,6 @@ namespace Scellecs.Morpeh {
         internal int archetypesCount;
         
         [ShowInInspector]
-        internal FastList<Archetype> newArchetypes;
-        [ShowInInspector]
-        internal FastList<Archetype> removedArchetypes;
-        [ShowInInspector]
         internal FastList<Archetype> emptyArchetypes;
         
         internal FastList<long> archetypeCache;
@@ -264,15 +260,9 @@ namespace Scellecs.Morpeh {
 
             this.archetypes.Clear();
             this.archetypes = null;
-
-            this.newArchetypes.Clear();
-            this.newArchetypes = null;
             
             this.emptyArchetypes.Clear();
             this.emptyArchetypes = null;
-            
-            this.removedArchetypes.Clear();
-            this.removedArchetypes = null;
 
             worlds.Remove(this);
         }

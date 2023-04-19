@@ -281,7 +281,7 @@ namespace Scellecs.Morpeh {
                     current.Add(entity);
                 }
                 else {
-                    CreateArchetype(entity).Add(entity);
+                    CreateArchetype(entity);
                 }
             }
 
@@ -289,16 +289,9 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static Archetype CreateArchetype(Entity entity) {
+        internal static void CreateArchetype(Entity entity) {
             var world = entity.world;
             var key = entity.currentArchetype;
-
-            var offsets = new long[entity.currentArchetypeLength];
-            var head = entity.head;
-            for (int i = 0, length = entity.currentArchetypeLength; i < length; i++) {
-                offsets[i] = head.offset;
-                head = head.next;
-            }
             
             Archetype arch;
             if (world.emptyArchetypes.length > 0) {
@@ -306,15 +299,32 @@ namespace Scellecs.Morpeh {
                 arch = world.emptyArchetypes.data[id];
                 world.emptyArchetypes.RemoveAt(id);
                 arch.id = key;
-                arch.offsets = offsets;
             }
             else {
-                arch = new Archetype(key, offsets, world);
+                arch = new Archetype(key, world);
             }
+            arch.Add(entity);
+            
+            void TreeStep(Archetype a, LongHashMap<FilterNode> tree, ComponentNode head, int start, int end) {
+                var h = head;
+                for (int i = start; i < end; i++) {
+                    var offset = h.offset;
+                    if (tree.TryGetValue(offset, out var node)) {
+                        foreach (var filter in node.filters) {
+                            filter.AddArchetype(a);
+                        }
+                        if (node.nodes != null) {
+                            TreeStep(a, node.nodes, head.next, i + 1, end);
+                        }
+                    }
+                    h = head.next;
+                }
+            }
+            
+            TreeStep(arch, world.filtersTree, entity.head, 0, entity.currentArchetypeLength);
+            
             world.archetypes.Add(key, arch, out _);
-            world.newArchetypes.Add(arch);
             world.archetypesCount++;
-            return arch;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
