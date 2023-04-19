@@ -143,9 +143,14 @@ namespace Scellecs.Morpeh {
 #endif
 
             var world = from.world;
-            foreach (var stashId in world.stashes) {
-                var stash = Stash.stashes.data[world.stashes.GetValueByIndex(stashId)];
+            
+            var head = from.head;
+            for (int i = 0, length = from.currentArchetypeLength; i < length; i++) {
+                var offset = head.offset;
+                var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
+                var stash = Stash.stashes.data[world.stashes.GetValueByKey(id)];
                 stash.Migrate(from, to, overwrite);
+                head = head.next;
             }
         }
         
