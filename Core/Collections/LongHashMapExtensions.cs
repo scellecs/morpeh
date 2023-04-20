@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh.Collections {
             hashMap.slots.Resize(newCapacity);
             ArrayHelpers.Grow(ref hashMap.data, newCapacity);
 
-            var newBuckets = new PinnedArray<int>(newCapacity);
+            var newBuckets = new IntPinnedArray(newCapacity);
 
             for (int i = 0, len = hashMap.lastIndex; i < len; ++i) {
                 ref var slot = ref hashMap.slots.ptr[i];
@@ -41,7 +41,7 @@ namespace Scellecs.Morpeh.Collections {
             hashMap.slots.Resize(newCapacity);
             ArrayHelpers.Grow(ref hashMap.data, newCapacity);
 
-            var newBuckets = new PinnedArray<int>(newCapacity);
+            var newBuckets = new IntPinnedArray(newCapacity);
 
             for (int i = 0, len = hashMap.lastIndex; i < len; ++i) {
                 ref var slot = ref hashMap.slots.ptr[i];

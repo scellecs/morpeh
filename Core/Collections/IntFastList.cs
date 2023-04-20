@@ -20,26 +20,26 @@ namespace Scellecs.Morpeh.Collections {
         public int length;
         public int capacity;
 
-        public PinnedArray<int> data;
+        public IntPinnedArray data;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList() {
             this.capacity = 4;
-            this.data     = new PinnedArray<int>(this.capacity);
+            this.data     = new IntPinnedArray(this.capacity);
             this.length   = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList(int capacity) {
             this.capacity = HashHelpers.GetCapacity(capacity);
-            this.data     = new PinnedArray<int>(this.capacity);
+            this.data     = new IntPinnedArray(this.capacity);
             this.length   = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList(IntFastList other) {
             this.capacity = other.capacity;
-            this.data     = new PinnedArray<int>(this.capacity);
+            this.data     = new IntPinnedArray(this.capacity);
             this.length   = other.length;
             Array.Copy(other.data.data, 0, this.data.data, 0, this.length);
         }

@@ -15,7 +15,7 @@ namespace Scellecs.Morpeh.Collections {
             hashMap.slots.Resize(newCapacity);
             hashMap.data.Resize(newCapacity);
 
-            var newBuckets = new PinnedArray<int>(newCapacity);
+            var newBuckets = new IntPinnedArray(newCapacity);
 
             {
                 var slotsPtr = hashMap.slots.ptr;

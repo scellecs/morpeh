@@ -87,7 +87,7 @@ namespace Scellecs.Morpeh.Collections {
             bitmap.slots.Resize(newCapacity << 1);
             bitmap.data.Resize(newCapacity);
 
-            var newBuckets = new PinnedArray<int>(newCapacity);
+            var newBuckets = new IntPinnedArray(newCapacity);
 
             {
                 var slotsPtr = bitmap.slots.ptr;
