@@ -35,7 +35,7 @@ namespace Scellecs.Morpeh.Collections {
 
                     hashSet.slots.Resize(newCapacity * 2);
 
-                    var newBuckets = new PinnedArray<int>(newCapacity);
+                    var newBuckets = new IntPinnedArray(newCapacity);
 
                     {
                         var slotsPtr = hashSet.slots.ptr;

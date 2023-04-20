@@ -11,12 +11,12 @@ namespace Scellecs.Morpeh.Collections {
         public int length;
         public int capacity;
 
-        public PinnedArray<int> data;
+        public IntPinnedArray data;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntStack() {
             this.capacity = 4;
-            this.data     = new PinnedArray<int>(this.capacity);
+            this.data     = new IntPinnedArray(this.capacity);
             this.length   = 0;
         }
 

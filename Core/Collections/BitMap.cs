@@ -21,9 +21,9 @@ namespace Scellecs.Morpeh.Collections {
         public int lastIndex;
         public int freeIndex;
 
-        public PinnedArray<int> buckets;
-        public PinnedArray<int> data;
-        public PinnedArray<int> slots;
+        public IntPinnedArray buckets;
+        public IntPinnedArray data;
+        public IntPinnedArray slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BitMap(in int capacity = 0) {
@@ -35,9 +35,9 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
             this.capacity         = this.capacityMinusOne + 1;
 
-            this.buckets = new PinnedArray<int>(this.capacity);
-            this.slots   = new PinnedArray<int>(this.capacity << 1);
-            this.data    = new PinnedArray<int>(this.capacity);
+            this.buckets = new IntPinnedArray(this.capacity);
+            this.slots   = new IntPinnedArray(this.capacity << 1);
+            this.data    = new IntPinnedArray(this.capacity);
         }
 
         ~BitMap() {

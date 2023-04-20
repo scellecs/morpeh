@@ -16,8 +16,8 @@ namespace Scellecs.Morpeh.Collections {
         public int lastIndex;
         public int freeIndex;
 
-        public PinnedArray<int> buckets;
-        public PinnedArray<int> slots;
+        public IntPinnedArray buckets;
+        public IntPinnedArray slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntHashSet() : this(0) {
@@ -31,8 +31,8 @@ namespace Scellecs.Morpeh.Collections {
 
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
             this.capacity         = this.capacityMinusOne + 1;
-            this.buckets          = new PinnedArray<int>(this.capacity);
-            this.slots            = new PinnedArray<int>(this.capacity / 2);
+            this.buckets          = new IntPinnedArray(this.capacity);
+            this.slots            = new IntPinnedArray(this.capacity / 2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
