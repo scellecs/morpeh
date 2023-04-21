@@ -1,7 +1,11 @@
 ﻿#if MORPEH_BURST
 namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
+    using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class NativeStashExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeStash<TNative> AsNative<TNative>(this Stash<TNative> stash) where TNative : unmanaged, IComponent {

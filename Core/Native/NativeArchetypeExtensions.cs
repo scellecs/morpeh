@@ -2,7 +2,11 @@
 namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
+    using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class NativeArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe Filter.Chunk AsChunk(this Archetype archetype) {

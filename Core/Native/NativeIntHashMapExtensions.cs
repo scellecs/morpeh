@@ -3,7 +3,11 @@ namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.Collections.LowLevel.Unsafe;
+    using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static unsafe class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static NativeIntHashMap<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
