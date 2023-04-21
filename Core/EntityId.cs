@@ -9,6 +9,7 @@
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
+    [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
