@@ -153,24 +153,6 @@ namespace Scellecs.Morpeh {
                 if (this.archetypeCount == 0) {
                     return false;
                 }
-                
-                if (this.archetypeCount == 1) {
-                    if (this.currentArchetypeIsNative) {
-                        if (this.currentEnumeratorNative.MoveNext()) {
-                            this.current = this.world.entities[this.currentEnumeratorNative.current];
-                            return true;
-                        }
-                    }
-                    else {
-                        if (this.currentEnumerator.MoveNext()) {
-                            this.current = this.world.entities[this.currentEnumerator.current];
-                            return true;
-                        }
-                    }
-                    
-
-                    return false;
-                }
 
                 if (this.archetypeId < this.archetypeCount) {
                     if (this.currentArchetypeIsNative) {
