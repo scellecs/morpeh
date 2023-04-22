@@ -26,9 +26,6 @@ namespace Scellecs.Morpeh {
         [NonSerialized]
         internal World world;
 
-        [SerializeField]
-        internal int worldID;
-        
         internal ComponentNode head;
 
         [SerializeField]

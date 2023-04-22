@@ -16,11 +16,9 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class EntityExtensions {
-        internal static Entity Create(int id, int worldId) {
-            var world = World.worlds.data[worldId];
+        internal static Entity Create(int id, World world) {
             var newEntity = new Entity { 
                 entityId = new EntityId(id, world.entitiesGens[id]), 
-                worldID = worldId,
                 world = world
             };
 
@@ -376,7 +374,6 @@ namespace Scellecs.Morpeh {
 
             entity.world      = null;
             entity.entityId   = EntityId.Invalid;
-            entity.worldID    = -1;
 
             entity.isDirty    = false;
             entity.isDisposed = true;

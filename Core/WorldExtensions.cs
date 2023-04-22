@@ -364,7 +364,7 @@ namespace Scellecs.Morpeh {
                 world.entitiesCapacity = newCapacity;
             }
 
-            world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
+            world.entities[id] = EntityExtensions.Create(id, world);
             ++world.entitiesCount;
 
             return world.entities[id];
@@ -388,7 +388,7 @@ namespace Scellecs.Morpeh {
                 world.entitiesCapacity = newCapacity;
             }
 
-            world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
+            world.entities[id] = EntityExtensions.Create(id, world);
             ++world.entitiesCount;
 
             return world.entities[id];
