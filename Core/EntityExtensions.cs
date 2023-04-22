@@ -392,17 +392,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed([CanBeNull] this Entity entity) {
-            if (entity != null) {
-                if (entity.world != null) {
-                    entity.world.ThreadSafetyCheck();
-                    if (entity.isDisposed) {
-                        return true;
-                    }
-                    return false;
-                }
-                return true;
-            }
-            return true;
+            return entity == null || entity.isDisposed || entity.entityId == EntityId.Invalid || entity.world == null;
         }
     }
 }
