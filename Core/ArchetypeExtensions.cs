@@ -8,11 +8,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class ArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Ctor(this Archetype archetype) {
-            archetype.world   = World.worlds.data[archetype.worldId];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Archetype archetype) {
             archetype.usedInNative = false;
             

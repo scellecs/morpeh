@@ -12,7 +12,6 @@ namespace Scellecs.Morpeh {
         internal UnsafeFastList<int> entitiesNative;
         internal FastList<Filter> filters;
         internal int length;
-        internal int worldId;
         internal long id;
         internal bool usedInNative;
 
