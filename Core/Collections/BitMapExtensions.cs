@@ -14,21 +14,22 @@ namespace Scellecs.Morpeh.Collections {
             var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
 
             var rem = dataIndex & bitmap.capacityMinusOne;
+            
+            var slotsPtr = bitmap.slots.ptr;
+            var bucketsPtr = bitmap.buckets.ptr;
+            var dataPtr = bitmap.data.ptr;
 
             {
-                var slotsPtr = bitmap.slots.ptr;
-                var bucketsPtr = bitmap.buckets.ptr;
-                var dataPtr = bitmap.data.ptr;
                 int* slot;
-                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
+                for (var i = bucketsPtr[rem] - 1; i >= 0; i = *(slot + 1)) {
                     slot = slotsPtr + i;
                     if (*slot - 1 == dataIndex) {
-                        var data    = *(dataPtr + (i >> 1));
+                        var data    = dataPtr[i >> 1];
                         var dataOld = data;
 
                         data |= 1 << bitIndex;
 
-                        *(dataPtr + (i >> 1)) = data;
+                        dataPtr[i >> 1] = data;
 
                         var check = data != dataOld;
                         if (check) {
@@ -43,10 +44,7 @@ namespace Scellecs.Morpeh.Collections {
             int slotIndex;
             if (bitmap.freeIndex >= 0) {
                 slotIndex = bitmap.freeIndex;
-                {
-                    var slotsPtr = bitmap.slots.ptr;
-                    bitmap.freeIndex = *(slotsPtr + slotIndex + 1);
-                }
+                bitmap.freeIndex = slotsPtr[slotIndex + 1];
             }
             else {
                 if (bitmap.lastIndex == bitmap.capacity << 1) {
@@ -57,21 +55,12 @@ namespace Scellecs.Morpeh.Collections {
                 bitmap.lastIndex += 2;
             }
 
-            {
-                var slotsPtr = bitmap.slots.ptr;
-                var bucketsPtr = bitmap.buckets.ptr;
-                var dataPtr = bitmap.data.ptr;
-                
-                var bucket = bucketsPtr + rem;
-                var slot   = slotsPtr + slotIndex;
+            slotsPtr[slotIndex] = dataIndex + 1;
+            slotsPtr[slotIndex + 1] = bucketsPtr[rem] - 1;
 
-                *slot       = dataIndex + 1;
-                *(slot + 1) = *bucket - 1;
+            dataPtr[slotIndex >> 1] |= 1 << bitIndex;
 
-                *(dataPtr + (slotIndex >> 1)) |= 1 << bitIndex;
-
-                *bucket = slotIndex + 1;
-            }
+            bucketsPtr[rem] = slotIndex + 1;
 
             ++bitmap.length;
             ++bitmap.count;
@@ -89,19 +78,12 @@ namespace Scellecs.Morpeh.Collections {
 
             var newBuckets = new IntPinnedArray(newCapacity);
 
-            {
-                var slotsPtr = bitmap.slots.ptr;
-                var newBucketsPtr = newBuckets.ptr;
-                for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
-                    var slotPtr = slotsPtr + i;
-
-                    var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
-                    var newCurrentBucket = newBucketsPtr + newResizeIndex;
-
-                    *(slotPtr + 1) = *newCurrentBucket - 1;
-
-                    *newCurrentBucket = i + 1;
-                }
+            var slotsPtr = bitmap.slots.ptr;
+            var newBucketsPtr = newBuckets.ptr;
+            for (int i = 0, len = bitmap.lastIndex; i < len; i += 2) {
+                var newResizeIndex   = (slotsPtr[i] - 1) & newCapacityMinusOne;
+                slotsPtr[i + 1] = newBucketsPtr[newResizeIndex] - 1;
+                newBucketsPtr[newResizeIndex] = i + 1;
             }
 
             bitmap.buckets.Dispose();
@@ -117,57 +99,53 @@ namespace Scellecs.Morpeh.Collections {
             var dataIndex = key >> BitMap.BITS_PER_FIELD_SHIFT;
             var bitIndex  = key - (dataIndex << BitMap.BITS_PER_FIELD_SHIFT);
             var rem       = dataIndex & bitmap.capacityMinusOne;
+            
+            var slotsPtr = bitmap.slots.ptr;
+            var bucketsPtr = bitmap.buckets.ptr;
+            var dataPtr = bitmap.data.ptr;
 
-            {
-                var slotsPtr = bitmap.slots.ptr;
-                var bucketsPtr = bitmap.buckets.ptr;
-                var dataPtr = bitmap.data.ptr;
-                int next;
-                var num = -1;
+            int next;
+            var num = -1;
 
-                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = next) {
-                    var slot     = slotsPtr + i;
-                    var slotNext = slot + 1;
-
-                    if (*slot - 1 == dataIndex) {
-                        var data    = *(dataPtr + (i >> 1));
-                        var dataOld = data;
-                        data &= ~(1 << bitIndex);
-                        if (data == 0) {
-                            if (num < 0) {
-                                *(bucketsPtr + rem) = *slotNext + 1;
-                            }
-                            else {
-                                *(slotsPtr + num + 1) = *slotNext;
-                            }
-                            *slot     = -1;
-                            *slotNext = bitmap.freeIndex;
-
-                            if (--bitmap.length == 0) {
-                                bitmap.lastIndex = 0;
-                                bitmap.freeIndex = -1;
-                            }
-                            else {
-                                bitmap.freeIndex = i;
-                            }
-
+            for (var i = bucketsPtr[rem] - 1; i >= 0; i = next) {
+                if (slotsPtr[i] - 1 == dataIndex) {
+                    var data    = dataPtr[i >> 1];
+                    var dataOld = data;
+                    data &= ~(1 << bitIndex);
+                    if (data == 0) {
+                        if (num < 0) {
+                            bucketsPtr[rem] = slotsPtr[i + 1] + 1;
                         }
-                        *(dataPtr + (i >> 1)) = data;
-
-                        var check = dataOld != data;
-                        if (check) {
-                            --bitmap.count;
+                        else {
+                            slotsPtr[num + 1] = slotsPtr[i + 1];
                         }
-                        
-                        return check;
+                        slotsPtr[i]     = -1;
+                        slotsPtr[i + 1] = bitmap.freeIndex;
+
+                        if (--bitmap.length == 0) {
+                            bitmap.lastIndex = 0;
+                            bitmap.freeIndex = -1;
+                        }
+                        else {
+                            bitmap.freeIndex = i;
+                        }
+
                     }
+                    dataPtr[i >> 1] = data;
 
-                    next = *slotNext;
-                    num  = i;
+                    var check = dataOld != data;
+                    if (check) {
+                        --bitmap.count;
+                    }
+                    
+                    return check;
                 }
 
-                return false;
+                next = slotsPtr[i + 1];
+                num  = i;
             }
+
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -177,16 +155,13 @@ namespace Scellecs.Morpeh.Collections {
 
             var rem = dataIndex & bitmap.capacityMinusOne;
 
-            {
-                var slotsPtr = bitmap.slots.ptr;
-                var bucketsPtr = bitmap.buckets.ptr;
-                var dataPtr = bitmap.data.ptr;
-                int* slot;
-                for (var i = *(bucketsPtr + rem) - 1; i >= 0; i = *(slot + 1)) {
-                    slot = slotsPtr + i;
-                    if (*slot - 1 == dataIndex) {
-                        return (*(dataPtr + (i >> 1)) & (1 << bitIndex)) != 0;
-                    }
+            var slotsPtr = bitmap.slots.ptr;
+            var bucketsPtr = bitmap.buckets.ptr;
+            var dataPtr = bitmap.data.ptr;
+            
+            for (var i = bucketsPtr[rem] - 1; i >= 0; i = slotsPtr[i + 1]) {
+                if (slotsPtr[i] - 1 == dataIndex) {
+                    return (dataPtr[i >> 1] & (1 << bitIndex)) != 0;
                 }
             }
 
