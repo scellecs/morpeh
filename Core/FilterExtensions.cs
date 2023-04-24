@@ -190,6 +190,13 @@ namespace Scellecs.Morpeh {
 
             return filter.archetypes.length == 0;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNotEmpty(this Filter filter) {
+            filter.world.ThreadSafetyCheck();
+
+            return filter.archetypes.length != 0;
+        }
 
         public static FilterBuilder With<T>(this FilterBuilder builder) where T : struct, IComponent
             => new FilterBuilder {
