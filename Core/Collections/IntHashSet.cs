@@ -61,7 +61,7 @@ namespace Scellecs.Morpeh.Collections {
                 {
                     var slotsPtr = this.set.slots.ptr;
                     for (var len = this.set.lastIndex; this.index < len; ++this.index) {
-                        var v = *slotsPtr - 1;
+                        var v = slotsPtr[this.index] - 1;
                         if (v < 0) {
                             continue;
                         }
