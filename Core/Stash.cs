@@ -363,6 +363,19 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsEmpty() {
+            world.ThreadSafetyCheck();
+            
+            return this.components.length == 0;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsNotEmpty() {
+            world.ThreadSafetyCheck();
+            
+            return this.components.length != 0;
+        }
 
         public override void Dispose() {
             world.ThreadSafetyCheck();
