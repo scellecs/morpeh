@@ -19,25 +19,21 @@ namespace Scellecs.Morpeh.Collections {
             var bucketsPtr = bitmap.buckets.ptr;
             var dataPtr = bitmap.data.ptr;
 
-            {
-                int* slot;
-                for (var i = bucketsPtr[rem] - 1; i >= 0; i = *(slot + 1)) {
-                    slot = slotsPtr + i;
-                    if (*slot - 1 == dataIndex) {
-                        var data    = dataPtr[i >> 1];
-                        var dataOld = data;
+            for (var i = bucketsPtr[rem] - 1; i >= 0; i = slotsPtr[i + 1]) {
+                if (slotsPtr[i] - 1 == dataIndex) {
+                    var data    = dataPtr[i >> 1];
+                    var dataOld = data;
 
-                        data |= 1 << bitIndex;
+                    data |= 1 << bitIndex;
 
-                        dataPtr[i >> 1] = data;
+                    dataPtr[i >> 1] = data;
 
-                        var check = data != dataOld;
-                        if (check) {
-                            ++bitmap.count;
-                        }
-                        
-                        return check;
+                    var check = data != dataOld;
+                    if (check) {
+                        ++bitmap.count;
                     }
+                    
+                    return check;
                 }
             }
 
