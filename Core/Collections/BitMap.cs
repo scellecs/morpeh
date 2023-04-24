@@ -79,12 +79,12 @@ namespace Scellecs.Morpeh.Collections {
                     var slotsPtr = this.bitMap.slots.ptr;
                     var dataPtr = this.bitMap.data.ptr;
                     for (; this.index < this.bitMap.lastIndex; this.index += 2) {
-                        var dataIndex = *(slotsPtr + this.index) - 1;
+                        var dataIndex = slotsPtr[this.index] - 1;
                         if (dataIndex < 0) {
                             continue;
                         }
 
-                        this.currentData      =  *(dataPtr + (this.index >> 1));
+                        this.currentData      =  dataPtr[this.index >> 1];
                         this.currentDataIndex =  dataIndex * BITS_PER_FIELD;
                         this.current          =  this.currentDataIndex + BitMapExtensions.NumberOfTrailingZeros(this.currentData);
                         this.currentData      &= this.currentData - 1;
