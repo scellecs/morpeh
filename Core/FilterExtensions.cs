@@ -54,7 +54,7 @@ namespace Scellecs.Morpeh {
             filter.archetypes.Add(archetype);
             filter.archetypesLength++;
             archetype.AddFilter(filter);
-            if (filter.chunks.capacity < filter.archetypes.length) {
+            if (filter.chunks.capacity < filter.archetypesLength) {
                 filter.chunks.Resize(filter.archetypes.capacity);
             }
         }
