@@ -72,7 +72,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
             filter.archetypes.RemoveSwapSave(archetype, out _);
-            filter.archetypesLength++;
+            filter.archetypesLength--;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
