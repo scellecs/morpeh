@@ -29,12 +29,14 @@ namespace Scellecs.Morpeh {
 
                 filter.chunks.Clear();
                 filter.chunks = null;
+                filter.archetypesLength = 0;
             }
-
+            
             filter.includedTypeIds?.Clear();
             filter.includedTypeIds = null;
             filter.excludedTypeIds?.Clear();
             filter.excludedTypeIds = null;
+            
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -50,6 +52,7 @@ namespace Scellecs.Morpeh {
             }
         
             filter.archetypes.Add(archetype);
+            filter.archetypesLength++;
             archetype.AddFilter(filter);
             if (filter.chunks.capacity < filter.archetypes.length) {
                 filter.chunks.Resize(filter.archetypes.capacity);
@@ -69,13 +72,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
             filter.archetypes.RemoveSwapSave(archetype, out _);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RemoveArchetypes(this Filter filter, FastList<Archetype> removedArchetypes) {
-            foreach (var arch in removedArchetypes) {
-                filter.archetypes.RemoveSwapSave(arch, out _);
-            }
+            filter.archetypesLength++;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,6 +120,7 @@ namespace Scellecs.Morpeh {
             }
 
             filter.archetypes.Add(archetype);
+            filter.archetypesLength++;
             archetype.AddFilter(filter);
         }
 
@@ -155,7 +153,7 @@ namespace Scellecs.Morpeh {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
-            if (filter.archetypes.length == 0) {
+            if (filter.archetypesLength == 0) {
                 return default;
             }
             // ReSharper disable once GenericEnumeratorNotDisposed
@@ -166,6 +164,7 @@ namespace Scellecs.Morpeh {
 
             return default;
         }
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetLengthSlow(this Filter filter) {
@@ -188,14 +187,14 @@ namespace Scellecs.Morpeh {
         public static bool IsEmpty(this Filter filter) {
             filter.world.ThreadSafetyCheck();
 
-            return filter.archetypes.length == 0;
+            return filter.archetypesLength == 0;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNotEmpty(this Filter filter) {
             filter.world.ThreadSafetyCheck();
 
-            return filter.archetypes.length != 0;
+            return filter.archetypesLength != 0;
         }
 
         public static FilterBuilder With<T>(this FilterBuilder builder) where T : struct, IComponent

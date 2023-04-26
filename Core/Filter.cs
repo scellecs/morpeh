@@ -53,6 +53,8 @@ namespace Scellecs.Morpeh {
 
         internal FastList<long> includedTypeIds;
         internal FastList<long> excludedTypeIds;
+        
+        internal int archetypesLength;
 
         internal Filter(World world, FastList<long> includedTypeIds, FastList<long> excludedTypeIds, FastList<long> includedOffsets) {
             this.world = world;
