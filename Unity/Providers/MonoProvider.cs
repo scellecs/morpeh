@@ -19,7 +19,10 @@
         private T Data {
             get {
                 if (this.cachedEntity.IsNullOrDisposed() == false) {
-                    return this.Stash.Get(this.cachedEntity);
+                    var data = this.Stash.Get(this.cachedEntity, out var exist);
+                    if (exist) {
+                        return data;
+                    }
                 }
 
                 return this.serializedData;

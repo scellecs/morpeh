@@ -101,7 +101,6 @@ namespace Scellecs.Morpeh.Providers {
                     map.Remove(instanceId, out _);
                 }
             }
-            this.cachedEntity = null;
         }
 
         private bool IsPrefab() => this.gameObject.scene.rootCount == 0;
