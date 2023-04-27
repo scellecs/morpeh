@@ -45,6 +45,9 @@ namespace Scellecs.Morpeh.Collections {
             else {
                 if (bitmap.lastIndex == bitmap.capacity << 1) {
                     bitmap.Resize(out rem, dataIndex);
+                    slotsPtr = bitmap.slots.ptr;
+                    bucketsPtr = bitmap.buckets.ptr;
+                    dataPtr = bitmap.data.ptr;
                 }
 
                 slotIndex        =  bitmap.lastIndex;
