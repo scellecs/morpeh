@@ -35,9 +35,10 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Chunk {
+        public unsafe struct Chunk {
             [ReadOnly]
-            public NativeArray<int> entities;
+            [NativeDisableUnsafePtrRestriction]
+            public int* entities;
             [ReadOnly]
             public int entitiesLength;
         }

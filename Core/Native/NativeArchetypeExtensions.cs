@@ -3,12 +3,13 @@ namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public static class NativeArchetypeExtensions {
+    public static unsafe class NativeArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Filter.Chunk AsChunk(this Archetype archetype) {
             var len = archetype.entities.length;
@@ -20,7 +21,7 @@ namespace Scellecs.Morpeh.Native {
             }
             
             var chunk = new Filter.Chunk {
-                entities = data,
+                entities = (int*)data.GetUnsafeReadOnlyPtr(),
                 entitiesLength = len
             };
             
