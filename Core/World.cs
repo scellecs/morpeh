@@ -15,6 +15,7 @@ namespace Scellecs.Morpeh {
     using Unity.IL2CPP.CompilerServices;
 #if MORPEH_BURST
     using Unity.Jobs;
+    using Unity.Collections;
 #endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -41,6 +42,8 @@ namespace Scellecs.Morpeh {
 #if MORPEH_BURST
         [PublicAPI]
         public JobHandle JobHandle;
+        //todo will be replaced with smart enumerator
+        internal FastList<NativeArray<int>> tempArrays;
 #endif
         internal FastList<Filter> filters;
         internal LongHashMap<FilterNode> filtersTree;
@@ -111,6 +114,7 @@ namespace Scellecs.Morpeh {
 
         [ShowInInspector]
         internal int threadIdLock;
+        
 
         [ShowInInspector]
         public Metrics metrics;

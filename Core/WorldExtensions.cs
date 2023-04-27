@@ -13,11 +13,12 @@
 namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
-    using Morpeh;
+#if MORPEH_BURST
+    using Unity.Collections;
+#endif
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -41,6 +42,9 @@ namespace Scellecs.Morpeh {
             world.dirtyEntities    = new BitMap();
             
             world.componentNodes = new FastList<ComponentNode>();
+#if MORPEH_BURST
+            world.tempArrays = new FastList<NativeArray<int>>();
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -305,6 +309,10 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
 #if MORPEH_BURST
             world.JobHandle.Complete();
+            foreach (var array in world.tempArrays) {
+                array.Dispose();
+            }
+            world.tempArrays.Clear();
 #endif
         }
 

@@ -13,7 +13,7 @@ namespace Scellecs.Morpeh.Native {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Filter.Chunk AsChunk(this Archetype archetype) {
             var len = archetype.entities.length;
-            var data = new NativeArray<int>(len, Allocator.Temp);
+            var data = new NativeArray<int>(len, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 
             var counter = 0;
             foreach (var entityId in archetype.entities) {
@@ -24,6 +24,8 @@ namespace Scellecs.Morpeh.Native {
                 entities = (int*)data.GetUnsafeReadOnlyPtr(),
                 entitiesLength = len
             };
+
+            archetype.world.tempArrays.Add(data);
             
             return chunk;
         }
