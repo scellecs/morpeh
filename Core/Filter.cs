@@ -4,6 +4,7 @@ namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
+    using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     
@@ -34,9 +35,10 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public unsafe struct Chunk {
-            [NativeDisableUnsafePtrRestriction]
-            public int* entities;
+        public struct Chunk {
+            [ReadOnly]
+            public NativeArray<int> entities;
+            [ReadOnly]
             public int entitiesLength;
         }
         
@@ -108,11 +110,7 @@ namespace Scellecs.Morpeh {
             private World world;
 
             private BitMap archetypeEntities;
-            private UnsafeFastList<int> archetypeEntitiesNative;
-
-            private bool                        currentArchetypeIsNative;
-            private UnsafeFastList<int>.Enumerator currentEnumeratorNative;
-            private BitMap.Enumerator           currentEnumerator;
+            private BitMap.Enumerator currentEnumerator;
 
             internal EntityEnumerator(Filter filter) {
                 this.world      = filter.world;
@@ -124,28 +122,10 @@ namespace Scellecs.Morpeh {
                 if (this.archetypeCount != 0) {
                     var currentArchetype = this.archetypes.data[0];
                     
-                    this.currentArchetypeIsNative = currentArchetype.usedInNative;
-                    if (this.currentArchetypeIsNative) {
-                        this.archetypeEntitiesNative = currentArchetype.entitiesNative;
-                        this.currentEnumeratorNative = this.archetypeEntitiesNative.GetEnumerator();
-                        
-                        this.archetypeEntities = default;
-                        this.currentEnumerator = default;
-                    }
-                    else {
-                        this.archetypeEntities = currentArchetype.entities;
-                        this.currentEnumerator = this.archetypeEntities.GetEnumerator();
-                        
-                        this.archetypeEntitiesNative = default;
-                        this.currentEnumeratorNative = default;
-                    }
+                    this.archetypeEntities = currentArchetype.entities;
+                    this.currentEnumerator = this.archetypeEntities.GetEnumerator();
                 }
                 else {
-                    this.currentArchetypeIsNative = false;
-                    
-                    this.archetypeEntitiesNative = default;
-                    this.currentEnumeratorNative = default;
-                    
                     this.archetypeEntities = default;
                     this.currentEnumerator = default;
                 }
@@ -157,44 +137,20 @@ namespace Scellecs.Morpeh {
                 }
 
                 if (this.archetypeId < this.archetypeCount) {
-                    if (this.currentArchetypeIsNative) {
-                        if (this.currentEnumeratorNative.MoveNext()) {
-                            this.current = this.world.entities[this.currentEnumeratorNative.current];
-                            return true;
-                        }
-                    }
-                    else {
-                        if (this.currentEnumerator.MoveNext()) {
-                            this.current = this.world.entities[this.currentEnumerator.current];
-                            return true;
-                        }
+                    if (this.currentEnumerator.MoveNext()) {
+                        this.current = this.world.entities[this.currentEnumerator.current];
+                        return true;
                     }
 
                     while (++this.archetypeId < this.archetypeCount) {
-                        var currentArchetype = this.archetypes.data[this.archetypeId];
-                        this.currentArchetypeIsNative = currentArchetype.usedInNative;
+                        this.archetypeEntities = this.archetypes.data[this.archetypeId].entities;
+                        if (this.archetypeEntities.count > 0) {
+                            this.currentEnumerator = this.archetypeEntities.GetEnumerator();
+                            this.currentEnumerator.MoveNext();
 
-                        if (this.currentArchetypeIsNative) {
-                            this.archetypeEntitiesNative = this.archetypes.data[this.archetypeId].entitiesNative;
-                            if (this.archetypeEntitiesNative.length > 0) {
-                                this.currentEnumeratorNative = this.archetypeEntitiesNative.GetEnumerator();
-                                this.currentEnumeratorNative.MoveNext();
-
-                                this.current = this.world.entities[this.currentEnumeratorNative.current];
-                                return true;
-                            }
+                            this.current = this.world.entities[this.currentEnumerator.current];
+                            return true;
                         }
-                        else {
-                            this.archetypeEntities = this.archetypes.data[this.archetypeId].entities;
-                            if (this.archetypeEntities.count > 0) {
-                                this.currentEnumerator = this.archetypeEntities.GetEnumerator();
-                                this.currentEnumerator.MoveNext();
-
-                                this.current = this.world.entities[this.currentEnumerator.current];
-                                return true;
-                            }
-                        }
-                        
                     }
                 }
 

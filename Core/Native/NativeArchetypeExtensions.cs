@@ -2,6 +2,7 @@
 namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
+    using Unity.Collections;
     using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -9,21 +10,18 @@ namespace Scellecs.Morpeh.Native {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class NativeArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe Filter.Chunk AsChunk(this Archetype archetype) {
-            if (archetype.usedInNative == false) {
-                var data = archetype.entitiesNative = new UnsafeFastList<int>(archetype.entities.count);
+        internal static Filter.Chunk AsChunk(this Archetype archetype) {
+            var len = archetype.entities.length;
+            var data = new NativeArray<int>(len, Allocator.Temp);
 
-                foreach (var entityId in archetype.entities) {
-                    archetype.world.entities[entityId].indexInCurrentArchetype = data.Add(entityId);
-                }
-
-                archetype.entities.Clear();
-                archetype.usedInNative = true;
+            var counter = 0;
+            foreach (var entityId in archetype.entities) {
+                data[counter++] = entityId;
             }
             
             var chunk = new Filter.Chunk {
-                entities = archetype.entitiesNative.data.ptr,
-                entitiesLength = archetype.entitiesNative.length
+                entities = data,
+                entitiesLength = len
             };
             
             return chunk;

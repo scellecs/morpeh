@@ -42,9 +42,6 @@ namespace Scellecs.Morpeh {
         [SerializeField]
         internal int currentArchetypeLength;
 
-        [NonSerialized]
-        internal int indexInCurrentArchetype;
-
         [SerializeField]
         internal EntityId entityId;
         

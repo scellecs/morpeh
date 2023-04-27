@@ -80,22 +80,12 @@ namespace Scellecs.Morpeh {
             int entityId;
             
             //todo fix it
-            if (archetype.usedInNative) {
-                if (archetype.entitiesNative.length == 0) {
-                    return;
-                }
-                var enumerator = archetype.entitiesNative.GetEnumerator();
-                enumerator.MoveNext();
-                entityId = enumerator.Current;
+            if (archetype.entities.length == 0) {
+                return;
             }
-            else {
-                if (archetype.entities.length == 0) {
-                    return;
-                }
-                var enumerator = archetype.entities.GetEnumerator();
-                enumerator.MoveNext();
-                entityId = enumerator.Current;
-            }
+            var enumerator = archetype.entities.GetEnumerator();
+            enumerator.MoveNext();
+            entityId = enumerator.Current;
            
             var ent = filter.world.GetEntity(entityId);
 
@@ -173,12 +163,7 @@ namespace Scellecs.Morpeh {
 
             for (int i = 0, length = filter.archetypes.length; i < length; i++) {
                 var arch = filter.archetypes.data[i];
-                if (arch.usedInNative) {
-                    accum += arch.entitiesNative.length;
-                }
-                else {
-                    accum += arch.entities.count;
-                }
+                accum += arch.entities.count;
             }
             return accum;
         }
