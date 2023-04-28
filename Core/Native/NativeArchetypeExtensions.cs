@@ -12,7 +12,7 @@ namespace Scellecs.Morpeh.Native {
     public static unsafe class NativeArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Filter.Chunk AsChunk(this Archetype archetype) {
-            var len = archetype.entities.length;
+            var len = archetype.entities.count;
             var data = new NativeArray<int>(len, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 
             var counter = 0;
