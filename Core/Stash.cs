@@ -56,7 +56,7 @@ namespace Scellecs.Morpeh {
         internal int commonStashId;
         internal int typedStashId;
         internal long typeId;
-        internal long offset;
+        internal int offset;
         internal World world;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

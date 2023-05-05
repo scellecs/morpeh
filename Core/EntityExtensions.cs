@@ -19,7 +19,8 @@ namespace Scellecs.Morpeh {
         internal static Entity Create(int id, World world) {
             var newEntity = new Entity { 
                 entityId = new EntityId(id, world.entitiesGens[id]), 
-                world = world
+                world = world,
+                components = new SortedBitMap()
             };
 
             return newEntity;
@@ -141,64 +142,24 @@ namespace Scellecs.Morpeh {
 #endif
 
             var world = from.world;
-            
-            var head = from.head;
-            for (int i = 0, length = from.currentArchetypeLength; i < length; i++) {
-                var offset = head.offset;
+
+            foreach (var offset in from.components) {
                 var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
                 var stash = Stash.stashes.data[world.stashes.GetValueByKey(id)];
                 stash.Migrate(from, to, overwrite);
-                head = head.next;
             }
         }
         
 #endif
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddTransfer(this Entity entity, long typeId, long offset) {
+        internal static void AddTransfer(this Entity entity, long typeId, int offset) {
             if (entity.previousArchetypeLength == 0) {
                 entity.previousArchetype = entity.currentArchetype;
                 entity.previousArchetypeLength = entity.currentArchetypeLength;
             }
-
-            var nodes = entity.world.componentNodes;
-            //todo replace with arraylinkedlist
-            var node = nodes.length > 0 ? nodes.data[--nodes.length] : new ComponentNode();
-
-            if (entity.head == null) {
-                node.offset = offset;
-                node.previous = node;
-                node.next = node;
-
-                entity.head = node;
-            }
-            else {
-                var head = entity.head;
-                var tail = entity.head.previous;
-                for (int i = 0, length = entity.currentArchetypeLength; i < length; i++) {
-                    if (offset > tail.offset) {
-                        node.offset = offset;
-                        node.previous = tail;
-                        node.next = tail.next;
-                        
-                        tail.next.previous = node;
-                        tail.next = node;
-                        
-                        break;
-                    }
-                    if (offset < head.offset) {
-                        node.offset = head.offset;
-                        node.previous = head;
-                        node.next = head.next;
-                        head.offset = offset;
-                        head.next.previous = node;
-                        head.next = node;
-                        break;
-                    }
-                    tail = tail.previous;
-                    head = head.next;
-                }
-            }
+            
+            entity.components.Set(offset);
             
             entity.currentArchetype ^= typeId;
             entity.currentArchetypeLength++;
@@ -212,47 +173,13 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RemoveTransfer(this Entity entity, long typeId, long offset) {
+        internal static void RemoveTransfer(this Entity entity, long typeId, int offset) {
             if (entity.previousArchetypeLength == 0) {
                 entity.previousArchetype = entity.currentArchetype;
                 entity.previousArchetypeLength = entity.currentArchetypeLength;
             }
-            
-            var nodes = entity.world.componentNodes;
 
-            var head = entity.head;
-            if (head.offset == offset) {
-                if (head == head.next) {
-                    entity.head = null;
-                }
-                else {
-                    entity.head = head.next;
-                    head.previous.next = head.next;
-                    head.next.previous = head.previous;
-                }
-                nodes.Add(head);
-            }
-            else {
-                var tail = entity.head.previous;
-                for (int i = 0, length = entity.currentArchetypeLength - (entity.currentArchetypeLength / 2); i < length; i++) {
-                    if (tail.offset == offset) {
-                        tail.previous.next = tail.next;
-                        tail.next.previous = tail.previous;
-
-                        nodes.Add(tail);
-                        break;
-                    }
-                    if (head.offset == offset) {
-                        head.previous.next = head.next;
-                        head.next.previous = head.previous;
-
-                        nodes.Add(head);
-                        break;
-                    }
-                    tail = tail.previous;
-                    head = head.next;
-                }
-            }
+            entity.components.Unset(offset);
 
             entity.currentArchetype ^= typeId;
             entity.currentArchetypeLength--;
@@ -308,23 +235,23 @@ namespace Scellecs.Morpeh {
             }
             arch.Add(entity);
             
-            void TreeStep(Archetype a, LongHashMap<FilterNode> tree, ComponentNode head, int start, int end) {
-                var h = head;
+            void TreeStep(Archetype a, LongHashMap<FilterNode> tree, SortedBitMap.Enumerator components, int start, int end) {
+                var c = components;
                 for (int i = start; i < end; i++) {
-                    var offset = h.offset;
+                    c.MoveNext();
+                    var offset = c.current;
                     if (tree.TryGetValue(offset, out var node)) {
                         foreach (var filter in node.filters) {
                             filter.AddArchetype(a, entity);
                         }
                         if (node.nodes != null) {
-                            TreeStep(a, node.nodes, h.next, i + 1, end);
+                            TreeStep(a, node.nodes, c, i + 1, end);
                         }
                     }
-                    h = h.next;
                 }
             }
             
-            TreeStep(arch, world.filtersTree, entity.head, 0, entity.currentArchetypeLength);
+            TreeStep(arch, world.filtersTree, entity.components.GetEnumerator(), 0, entity.currentArchetypeLength);
             
             world.archetypes.Add(key, arch, out _);
             world.archetypesCount++;
@@ -342,13 +269,10 @@ namespace Scellecs.Morpeh {
             entity.world.ThreadSafetyCheck();
             
             if (entity.currentArchetypeLength > 0) {
-                var head = entity.head;
-                for (int i = 0, length = entity.currentArchetypeLength; i < length; i++) {
-                    var offset = head.offset;
+                foreach (var offset in entity.components) {
                     var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
                     var stash = Stash.stashes.data[entity.world.stashes.GetValueByKey(id)];
                     stash.Clean(entity);
-                    head = head.next;
                 }
             }
 
@@ -380,10 +304,8 @@ namespace Scellecs.Morpeh {
         }
 
         internal static void DumpHead(this Entity entity) {
-            var head = entity.head;
-            for (int i = 0, length = entity.currentArchetypeLength; i < length; i++) {
-                MLogger.LogError(head.offset);
-                head = head.next;
+            foreach (var offset in entity.components) {
+                MLogger.Log(offset);
             }
         }
 

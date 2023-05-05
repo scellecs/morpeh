@@ -41,7 +41,6 @@ namespace Scellecs.Morpeh {
             world.filtersTree      = new LongHashMap<FilterNode>();
             world.dirtyEntities    = new BitMap();
             
-            world.componentNodes = new FastList<ComponentNode>();
 #if MORPEH_BURST
             world.tempArrays = new FastList<NativeArray<int>>();
 #endif

@@ -19,7 +19,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class CommonTypeIdentifier {
-        internal static long counter;
+        internal static int counter;
 
         internal static Dictionary<long, InternalTypeDefinition>  idTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
         internal static Dictionary<long, InternalTypeDefinition>  offsetTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
@@ -50,7 +50,7 @@ namespace Scellecs.Morpeh {
 
         
         #pragma warning disable 0612
-        internal static void GetID<T>(out long id, out long offset) where T : struct, IComponent {
+        internal static void GetID<T>(out long id, out int offset) where T : struct, IComponent {
             offset = Interlocked.Increment(ref counter);
             id   = Math.Abs(7_777_777_777_777_777_773L * offset);
             var type = typeof(T);
@@ -72,7 +72,7 @@ namespace Scellecs.Morpeh {
 
         internal struct InternalTypeDefinition {
             public long                   id;
-            public long                   offset;
+            public int                    offset;
             public Type                   type;
             public Func<Entity, object>   entityGetComponentBoxed;
             public Action<Entity, object> entitySetComponentBoxed;
@@ -82,7 +82,7 @@ namespace Scellecs.Morpeh {
 
         internal class TypeInfo {
             internal long id;
-            internal long offset;
+            internal int offset;
             internal bool isMarker;
             internal int stashSize;
 
@@ -91,7 +91,7 @@ namespace Scellecs.Morpeh {
                 this.stashSize = stashSize;
             }
 
-            public void SetID(long id, long offset) {
+            public void SetID(long id, int offset) {
                 this.id = id;
                 this.offset = offset;
             }

@@ -18,18 +18,17 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Add(this Archetype archetype, Entity entity) {
-            archetype.length++;
-            
-            archetype.entities.Set(entity.entityId.id);
+            if (archetype.entities.Set(entity.entityId.id)) {
+                archetype.length++;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove(this Archetype archetype, Entity entity) {
-            archetype.length--;
-
-            archetype.entities.Unset(entity.entityId.id);
-            if (archetype.length == 0) {
-                Pool(archetype);
+            if (archetype.entities.Unset(entity.entityId.id)) {
+                if (--archetype.length == 0) {
+                    Pool(archetype);
+                }
             }
         }
 
