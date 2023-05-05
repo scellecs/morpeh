@@ -43,7 +43,7 @@
                 bitmap.freeIndex = slotsPtr[slotIndex + 1];
             }
             else {
-                if (bitmap.lastIndex == bitmap.capacity << 1) {
+                if (bitmap.lastIndex == bitmap.capacity << 2) {
                     bitmap.Resize(out rem, dataIndex);
                     slotsPtr = bitmap.slots.ptr;
                     bucketsPtr = bitmap.buckets.ptr;
