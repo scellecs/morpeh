@@ -20,6 +20,8 @@
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
   * [Getting Started](#-getting-started)
   * [Advanced](#-advanced)
+    * [Filter Extensions](#-filter-extensions)
+    * [Aspects](#-aspects)
     * [Component Disposing](#-component-disposing)
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
 * [Examples](#-examples)
@@ -37,7 +39,7 @@ Russian version: [Гайд по миграции](MIGRATION_RU.md)
 ### Unity Engine 
 
 Minimal Unity Version is 2020.3.*  
-Require [Git](https://git-scm.com/).  
+Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
 Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.
 
 <details>
@@ -49,7 +51,7 @@ Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/u
 
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
 &nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh.git#develop  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2022.2.3
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2023.1.0  
 
 ### .Net Platform
 
@@ -455,6 +457,166 @@ Now press the play button, and you will see Debug.Log with healthPoints.
 Nice!
 
 ### 📖 Advanced
+
+#### 🧩 Filter Extensions
+
+Filter extensions required for easy reuse of filter queries.  
+Let's look at an example:  
+
+We need to implement the IFilterExtension interface and the type must be a struct.  
+
+```c#  
+public struct SomeExtension : IFilterExtension {
+    public Filter Extend(Filter rootFilter) => rootFilter.With<Translation>().With<Rotation>();
+}
+```
+
+The next step is to call the Extend method in any order when requesting a filter.  
+The Extend method continues query.
+
+```c#  
+private Filter filter;
+
+public void OnAwake() {
+    this.filter = this.World.Filter.With<TestA>()
+                                   .Extend<SomeExtension>()
+                                   .With<TestC>();
+}
+```
+
+#### 🔍 Aspects
+An aspect is an object-like wrapper that you can use to group together a subset of an entity's components into a single C# struct. Aspects are useful for organizing component code and simplifying queries in your systems.  
+
+For example, the Transform groups together the individual position, rotation, and scale of components and enables you to access these components from a query that includes the Transform. You can also define your own aspects with the IAspect interface.  
+
+Our components:
+```c#  
+    public struct Translation : IComponent {
+        public float x;
+        public float y;
+        public float z;
+    }
+    
+    public struct Rotation : IComponent {
+        public float x;
+        public float y;
+        public float z;
+        public float w;
+    }
+
+    public struct Scale : IComponent {
+        public float x;
+        public float y;
+        public float z;
+    }
+```
+
+Let's group them in aspect.  
+Simple entity version:
+
+```c#  
+public struct Transform : IAspect {
+    //Set on each call of AspectFactory.Get(Entity entity)
+    public Entity Entity { get; set;}
+    
+    public ref Translation Translation => ref this.Entity.GetComponent<Translation>();
+    public ref Rotation Rotation => ref this.Entity.GetComponent<Rotation>();
+    public ref Scale Scale => ref this.Entity.GetComponent<Scale>();
+
+    //Called once on world.GetAspectFactory<T>
+    public void OnGetAspectFactory(World world) {
+    }
+}
+```
+
+In an aspect, you can write any combination of properties and methods to work with components on an entity.  
+Let's write a variation with stashes to make it work faster.
+
+```c#  
+public struct Transform : IAspect {
+    public Entity Entity { get; set;}
+    
+    public ref Translation Translation => ref this.translation.Get(this.Entity);
+    public ref Rotation Rotation => ref this.rotation.Get(this.Entity);
+    public ref Scale Scale => ref this.scale.Get(this.Entity);
+    
+    private Stash<Translation> translation;
+    private Stash<Rotation> rotation;
+    private Stash<Scale> scale;
+
+    public void OnGetAspectFactory(World world) {
+        this.translation = world.GetStash<Translation>();
+        this.rotation = world.GetStash<Rotation>();
+        this.scale = world.GetStash<Scale>();
+    }
+}
+```
+Let's add an IFilterExtension implementation to always have a query.
+
+```c#  
+public struct Transform : IAspect, IFilterExtension {
+    public Entity Entity { get; set;}
+    
+    public ref Translation Translation => ref this.translation.Get(this.Entity);
+    public ref Rotation Rotation => ref this.rotation.Get(this.Entity);
+    public ref Scale Scale => ref this.scale.Get(this.Entity);
+    
+    private Stash<Translation> translation;
+    private Stash<Rotation> rotation;
+    private Stash<Scale> scale;
+
+    public void OnGetAspectFactory(World world) {
+        this.translation = world.GetStash<Translation>();
+        this.rotation = world.GetStash<Rotation>();
+        this.scale = world.GetStash<Scale>();
+    }
+    public Filter Extend(Filter rootFilter) => rootFilter.With<Translation>().With<Rotation>().With<Scale>();
+}
+```
+
+Now we write a system that uses our aspect.
+
+```c#  
+public class TransformAspectSystem : ISystem {
+    public World World { get; set; }
+
+    private Filter filter;
+    private AspectFactory<Transform> transform;
+    
+    public void OnAwake() {
+        //Extend filter with ready query from Transform
+        this.filter = this.World.Filter.Extend<Transform>();
+        //Getting aspect factory AspectFactory<Transform>
+        this.transform = this.World.GetAspectFactory<Transform>();
+
+        for (int i = 0, length = 100; i < length; i++) {
+            var entity = this.World.CreateEntity();
+            
+            entity.AddComponent<Translation>();
+            entity.AddComponent<Rotation>();
+            entity.AddComponent<Scale>();
+        }
+    }
+    public void OnUpdate(float deltaTime) {
+        foreach (var entity in this.filter) {
+            //Getting aspect copy for current entity
+            var trs = this.transform.Get(entity);
+
+            ref var trans = ref trs.Translation;
+            trans.x += 1;
+
+            ref var rot = ref trs.Rotation;
+            rot.x += 1;
+            
+            ref var scale = ref trs.Scale;
+            scale.x += 1;
+        }
+    }
+    
+    public void Dispose() {
+    }
+}
+```
 
 #### 🧹 Component Disposing
 

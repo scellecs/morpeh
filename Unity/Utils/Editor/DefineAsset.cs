@@ -5,38 +5,26 @@ namespace Scellecs.Morpeh.Utils.Editor {
     using System.Linq;
     using UnityEditor;
     using UnityEngine;
-#if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
-#endif
 
     [CreateAssetMenu(menuName = "ECS/Utils/Define")]
     public class DefineAsset : ScriptableObject {
         private const string PREFS_KEY = "__MORPEH_DEFINES";
-#if ODIN_INSPECTOR
-        [OnValueChanged(nameof(OnChange))]
-#endif
         [SerializeField]
         private List<DefineWrapper> defines = default;
 
-        [Serializable]
+        [Button]
+        [PropertyOrder(-10)]
+        public void Apply() {
+            Initialize();
+        }
+
+        [Serializable, InlineProperty]
         private class DefineWrapper {
-#if ODIN_INSPECTOR
             [HideLabel]
-            [InlineProperty]
-            [OnValueChanged(nameof(OnChange))]
-            [DelayedProperty]
-#endif
             public string define = default;
-            
-            private void OnChange() {
-                EditorApplication.delayCall += Initialize;
-            }
 
             public override string ToString() => this.define;
-        }
-        
-        private void OnChange() {
-            EditorApplication.delayCall += Initialize;
         }
 
         public class DefineAssetModificationProcessor : AssetPostprocessor {

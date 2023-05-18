@@ -9,7 +9,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class FastList<T> : IEnumerable<T> {
+    public sealed class FastList<T> {
         public T[] data;
         public int length;
         public int capacity;
@@ -19,7 +19,7 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FastList() {
-            this.capacity = 3;
+            this.capacity = 4;
             this.data     = new T[this.capacity];
             this.length   = 0;
             this.lastSwappedIndex = -1;
@@ -29,7 +29,7 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FastList(int capacity) {
-            this.capacity = HashHelpers.GetCapacity(capacity);
+            this.capacity = HashHelpers.GetCapacity(capacity) + 1;
             this.data     = new T[this.capacity];
             this.length   = 0;
             this.lastSwappedIndex = -1;
@@ -51,16 +51,13 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             Enumerator e;
+            e.length = this.length;
             e.list    = this;
             e.current = default;
             e.index   = 0;
             this.lastSwappedIndex = -1;
             return e;
         }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -73,25 +70,29 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator : IEnumerator<T> {
+        public struct Enumerator {
             public FastList<T> list;
 
+            public int length;
             public T   current;
             public int index;
 
             public bool MoveNext() {
                 var lastSwappedIndex = this.list.lastSwappedIndex;
                 if (lastSwappedIndex != -1) {
+                    this.length = this.list.length;
                     var previousIndex = this.index - 1;
                     if (lastSwappedIndex == previousIndex) {
                         this.index--;
                     }
                     else if (lastSwappedIndex < previousIndex) {
+#if MORPEH_DEBUG
                         throw new InvalidOperationException("Earlier collection items have been modified, this is not allowed");
+#endif
                     }
                 }
                 
-                if (this.index >= this.list.length) {
+                if (this.index >= this.length) {
                     return false;
                 }
 
@@ -101,16 +102,9 @@ namespace Scellecs.Morpeh.Collections {
                 return true;
             }
 
-            public void Reset() {
-                this.index   = 0;
-                this.current = default;
-                this.list.lastSwappedIndex = -1;
-            }
-
-            public T           Current => this.current;
-            object IEnumerator.Current => this.current;
-
-            public void Dispose() {
+            public T Current {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => this.current;
             }
         }
     }

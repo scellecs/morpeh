@@ -1,23 +1,22 @@
 ﻿namespace Scellecs.Morpeh.Providers {
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
     using Sirenix.OdinInspector;
 #endif
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
-    using Debug = UnityEngine.Debug;
 
     public class UniversalProvider : EntityProvider {
         private static TypeComponentEqualityComparer comparer = new TypeComponentEqualityComparer();
         
         [Space]
         [SerializeReference]
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         [HideIf(nameof(ShowSerializedComponents))]
 #endif
         public IComponent[] serializedComponents = new IComponent[0];
         
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         private bool ShowSerializedComponents => this.Entity.IsNullOrDisposed() == false;
 #endif
 
@@ -42,32 +41,21 @@
             if (entity.IsNullOrDisposed() == false) {
                 foreach (var component in this.serializedComponents) {
                     var type = component.GetType();
-                    if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                        definition.entitySetComponentBoxed(entity, component);
-                    }
-                    else {
-                        Debug.LogError(
-                            $"[MORPEH] For using {type.Name} in a UniversalProvider you must warmup it or IL2CPP will strip it from the build.\nCall <b>TypeIdentifier<{type.Name}>.Warmup();</b> before access this UniversalProvider.");
-                    }
+                    var definition = CommonTypeIdentifier.Get(type);
+                    definition.entitySetComponentBoxed(entity, component);
                 }
             }
         }
 
-        protected override void OnDisable() {
+        protected override void PreDeinitialize() {
             var ent = this.Entity;
             if (ent.IsNullOrDisposed() == false) {
                 foreach (var component in this.serializedComponents) {
                     var type = component.GetType();
-                    if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                        definition.entityRemoveComponent(ent);
-                    }
-                    else {
-                        Debug.LogError(
-                            $"[MORPEH] For using {type.Name} in a UniversalProvider you must warmup it or IL2CPP will strip it from the build.\nCall <b>TypeIdentifier<{type.Name}>.Warmup();</b> before access this UniversalProvider.");
-                    }
+                    var definition = CommonTypeIdentifier.Get(type);
+                    definition.entityRemoveComponent(ent);
                 }
             }
-            base.OnDisable();
         }
         
         private class TypeComponentEqualityComparer : IEqualityComparer<IComponent> {

@@ -19,7 +19,13 @@ namespace Scellecs.Morpeh {
     public static class SystemsGroupExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Initialize(this SystemsGroup systemsGroup) {
+            if (systemsGroup.disposables.length == 0 && systemsGroup.newInitializers.length == 0) {
+                return;
+            }
+            
             MLogger.BeginSample("SystemGroup.Initialize()");
+            systemsGroup.DropDelayedAction();
+            
             if (systemsGroup.disposables.length > 0) {
                 systemsGroup.world.Commit();
 
@@ -45,15 +51,23 @@ namespace Scellecs.Morpeh {
 
                 systemsGroup.newInitializers.Clear();
             }
+            systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Update(this SystemsGroup systemsGroup, float deltaTime) {
+            systemsGroup.Initialize();
+
+            if (systemsGroup.systems.length == 0) {
+                return;
+            }
+            
             MLogger.BeginSample("SystemGroup.Update()");
             systemsGroup.DropDelayedAction();
-
-            systemsGroup.Initialize();
+            systemsGroup.world.Commit();
+            
             for (int i = 0, length = systemsGroup.systems.length; i < length; i++) {
                 var system = systemsGroup.systems.data[i];
 
@@ -64,11 +78,15 @@ namespace Scellecs.Morpeh {
             }
 
             systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FixedUpdate(this SystemsGroup systemsGroup, float deltaTime) {
+            if (systemsGroup.fixedSystems.length == 0) {
+                return;
+            }
             MLogger.BeginSample("SystemGroup.FixedUpdate()");
             systemsGroup.DropDelayedAction();
             systemsGroup.world.Commit();
@@ -83,11 +101,16 @@ namespace Scellecs.Morpeh {
             }
 
             systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LateUpdate(this SystemsGroup systemsGroup, float deltaTime) {
+            if (systemsGroup.lateSystems.length == 0) {
+                return;
+            }
+            
             MLogger.BeginSample("SystemGroup.LateUpdate()");
             systemsGroup.DropDelayedAction();
             systemsGroup.world.Commit();
@@ -101,11 +124,16 @@ namespace Scellecs.Morpeh {
             }
 
             systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CleanupUpdate(this SystemsGroup systemsGroup, float deltaTime) {
+            if (systemsGroup.cleanupSystems.length == 0) {
+                return;
+            }
+            
             MLogger.BeginSample("SystemGroup.CleanupUpdate()");
             systemsGroup.DropDelayedAction();
             systemsGroup.world.Commit();
@@ -119,6 +147,7 @@ namespace Scellecs.Morpeh {
             }
 
             systemsGroup.InvokeDelayedAction();
+            systemsGroup.world.JobsComplete();
             MLogger.EndSample();
         }
 
@@ -137,9 +166,15 @@ namespace Scellecs.Morpeh {
         [Conditional("MORPEH_DEBUG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SystemThrowException(this SystemsGroup systemsGroup, ISystem system, Exception exception) {
-            MLogger.LogError($"Can not update {system.GetType()}. System will be disabled.");
-            MLogger.LogException(exception);
-            systemsGroup.delayedAction += () => systemsGroup.DisableSystem(system);
+            if (systemsGroup.world.DoNotDisableSystemOnException) {
+                MLogger.LogError($"Can not update {system.GetType()}.");
+                MLogger.LogException(exception);
+            }
+            else {
+                MLogger.LogError($"Can not update {system.GetType()}. System will be disabled.");
+                MLogger.LogException(exception);
+                systemsGroup.delayedAction += () => systemsGroup.DisableSystem(system);
+            }
         }
 
         [Conditional("MORPEH_DEBUG")]

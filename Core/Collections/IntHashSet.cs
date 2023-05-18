@@ -16,8 +16,8 @@ namespace Scellecs.Morpeh.Collections {
         public int lastIndex;
         public int freeIndex;
 
-        public int[] buckets;
-        public int[] slots;
+        public IntPinnedArray buckets;
+        public IntPinnedArray slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntHashSet() : this(0) {
@@ -31,8 +31,8 @@ namespace Scellecs.Morpeh.Collections {
 
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
             this.capacity         = this.capacityMinusOne + 1;
-            this.buckets          = new int[this.capacity];
-            this.slots            = new int[this.capacity / 2];
+            this.buckets          = new IntPinnedArray(this.capacity);
+            this.slots            = new IntPinnedArray(this.capacity / 2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -58,9 +58,10 @@ namespace Scellecs.Morpeh.Collections {
             public int current;
 
             public bool MoveNext() {
-                fixed (int* slotsPtr = &this.set.slots[0]) {
+                {
+                    var slotsPtr = this.set.slots.ptr;
                     for (var len = this.set.lastIndex; this.index < len; ++this.index) {
-                        var v = *slotsPtr - 1;
+                        var v = slotsPtr[this.index] - 1;
                         if (v < 0) {
                             continue;
                         }

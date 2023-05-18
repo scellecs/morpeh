@@ -1,7 +1,11 @@
 ﻿#if MORPEH_BURST
 namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
+    using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class NativeWorldExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe NativeWorld AsNative(this World world) {

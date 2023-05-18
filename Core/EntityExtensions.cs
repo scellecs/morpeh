@@ -16,20 +16,16 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class EntityExtensions {
-        internal static Entity Create(int id, int worldID)
-        {
-            var world = World.worlds.data[worldID];
-            var newEntity = new Entity { entityId = new EntityId(id, world.entitiesGens[id]), worldID = worldID };
-
-            newEntity.world = world;
-
-            newEntity.previousArchetypeId = -1;
-            newEntity.currentArchetypeId  = 0;
-
-            newEntity.currentArchetype = newEntity.world.archetypes.data[0];
+        internal static Entity Create(int id, World world) {
+            var newEntity = new Entity { 
+                entityId = new EntityId(id, world.entitiesGens[id]), 
+                world = world,
+                components = new SortedBitMap()
+            };
 
             return newEntity;
         }
+        
 #if !MORPEH_STRICT_MODE
 #if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Add() instead.")]
@@ -41,9 +37,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return ref cache.Add(entity);
+            return ref stash.Add(entity);
         }
 
 #if MORPEH_LEGACY
@@ -56,9 +52,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return ref cache.Add(entity, out exist);
+            return ref stash.Add(entity, out exist);
         }
 
 #if MORPEH_LEGACY
@@ -70,9 +66,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return ref cache.Get(entity);
+            return ref stash.Get(entity);
         }
 
 #if MORPEH_LEGACY
@@ -85,9 +81,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return ref cache.Get(entity, out exist);
+            return ref stash.Get(entity, out exist);
         }
 
 #if MORPEH_LEGACY
@@ -100,9 +96,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying SetComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            cache.Set(entity, value);
+            stash.Set(entity, value);
         }
 
 #if MORPEH_LEGACY
@@ -115,9 +111,9 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying RemoveComponent on null or disposed entity");
             }
 #endif
-            var cache = entity.world.GetStash<T>();
+            var stash = entity.world.GetStash<T>();
 
-            return cache.Remove(entity);
+            return stash.Remove(entity);
         }
 
 #if MORPEH_LEGACY
@@ -131,8 +127,8 @@ namespace Scellecs.Morpeh {
             }
 #endif
 
-            var cache = entity.world.GetStash<T>();
-            return cache.Has(entity);
+            var stash = entity.world.GetStash<T>();
+            return stash.Has(entity);
         }
 
 #if MORPEH_LEGACY
@@ -146,36 +142,47 @@ namespace Scellecs.Morpeh {
 #endif
 
             var world = from.world;
-            foreach (var cacheId in world.stashes) {
-                var cache = Stash.stashes.data[world.stashes.GetValueByIndex(cacheId)];
-                cache.Migrate(from, to, overwrite);
+
+            foreach (var offset in from.components) {
+                var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
+                var stash = Stash.stashes.data[world.stashes.GetValueByKey(id)];
+                stash.Migrate(from, to, overwrite);
             }
         }
         
 #endif
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddTransfer(this Entity entity, int typeId) {
-            if (entity.previousArchetypeId == -1) {
-                entity.previousArchetypeId = entity.currentArchetypeId;
+        internal static void AddTransfer(this Entity entity, long typeId, int offset) {
+            if (entity.previousArchetypeLength == 0) {
+                entity.previousArchetype = entity.currentArchetype;
+                entity.previousArchetypeLength = entity.currentArchetypeLength;
             }
-
-            entity.currentArchetype.AddTransfer(typeId, out entity.currentArchetypeId, out entity.currentArchetype);
+            
+            entity.components.Set(offset);
+            
+            entity.currentArchetype ^= typeId;
+            entity.currentArchetypeLength++;
+            
             if (entity.isDirty == true) {
                 return;
             }
-
+            
             entity.world.dirtyEntities.Set(entity.entityId.id);
             entity.isDirty = true;
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RemoveTransfer(this Entity entity, int typeId) {
-            if (entity.previousArchetypeId == -1) {
-                entity.previousArchetypeId = entity.currentArchetypeId;
+        internal static void RemoveTransfer(this Entity entity, long typeId, int offset) {
+            if (entity.previousArchetypeLength == 0) {
+                entity.previousArchetype = entity.currentArchetype;
+                entity.previousArchetypeLength = entity.currentArchetypeLength;
             }
 
-            entity.currentArchetype.RemoveTransfer(typeId, out entity.currentArchetypeId, out entity.currentArchetype);
+            entity.components.Unset(offset);
+
+            entity.currentArchetype ^= typeId;
+            entity.currentArchetypeLength--;
             if (entity.isDirty == true) {
                 return;
             }
@@ -186,21 +193,68 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransfer(this Entity entity) {
-            if (entity.currentArchetypeId == 0) {
+            if (entity.currentArchetypeLength == 0) {
                 entity.world.RemoveEntity(entity);
                 return;
             }
 
-            if (entity.previousArchetypeId != entity.currentArchetypeId) {
-                if (entity.previousArchetypeId >= 0) {
-                    entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
+            if (entity.previousArchetype != entity.currentArchetype || entity.previousArchetypeLength != entity.currentArchetypeLength) {
+                if (entity.previousArchetypeLength > 0) {
+                    if (entity.world.archetypes.TryGetValue(entity.previousArchetype, out var prev)) {
+                        prev.Remove(entity);
+                    }
+                    entity.previousArchetype = 0;
+                    entity.previousArchetypeLength = 0;
                 }
-                
-                entity.currentArchetype.Add(entity);
-                entity.previousArchetypeId = -1;
+
+                if (entity.world.archetypes.TryGetValue(entity.currentArchetype, out var current)) {
+                    current.Add(entity);
+                }
+                else {
+                    CreateArchetype(entity);
+                }
             }
 
             entity.isDirty = false;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void CreateArchetype(Entity entity) {
+            var world = entity.world;
+            var key = entity.currentArchetype;
+            
+            Archetype arch;
+            if (world.emptyArchetypes.length > 0) {
+                var id = world.emptyArchetypes.length - 1;
+                arch = world.emptyArchetypes.data[id];
+                world.emptyArchetypes.RemoveAt(id);
+                arch.id = key;
+            }
+            else {
+                arch = new Archetype(key, world);
+            }
+            arch.Add(entity);
+            
+            void TreeStep(Archetype a, LongHashMap<FilterNode> tree, SortedBitMap.Enumerator components, int start, int end) {
+                var c = components;
+                for (int i = start; i < end; i++) {
+                    c.MoveNext();
+                    var offset = c.current;
+                    if (tree.TryGetValue(offset, out var node)) {
+                        foreach (var filter in node.filters) {
+                            filter.AddArchetype(a, entity);
+                        }
+                        if (node.nodes != null) {
+                            TreeStep(a, node.nodes, c, i + 1, end);
+                        }
+                    }
+                }
+            }
+            
+            TreeStep(arch, world.filtersTree, entity.components.GetEnumerator(), 0, entity.currentArchetypeLength);
+            
+            world.archetypes.Add(key, arch, out _);
+            world.archetypesCount++;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -214,20 +268,19 @@ namespace Scellecs.Morpeh {
             
             entity.world.ThreadSafetyCheck();
             
-            var currentArchetype = entity.currentArchetype;
-
-            var caches = currentArchetype.world.stashes;
-            foreach (var typeId in currentArchetype.typeIds) {
-                if (caches.TryGetValue(typeId, out var index)) {
-                    Stash.stashes.data[index].Clean(entity);
+            if (entity.currentArchetypeLength > 0) {
+                foreach (var offset in entity.components) {
+                    var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
+                    var stash = Stash.stashes.data[entity.world.stashes.GetValueByKey(id)];
+                    stash.Clean(entity);
                 }
             }
-            
-            if (entity.previousArchetypeId >= 0) {
-                entity.world.archetypes.data[entity.previousArchetypeId].Remove(entity);
+
+            if (entity.previousArchetypeLength > 0) {
+                entity.world.archetypes.GetValueByKey(entity.previousArchetype)?.Remove(entity);
             }
             else {
-                currentArchetype.Remove(entity);
+                entity.world.archetypes.GetValueByKey(entity.currentArchetype)?.Remove(entity);
             }
 
             entity.world.ApplyRemoveEntity(entity.entityId.id);
@@ -238,17 +291,22 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeFast(this Entity entity) {
-            entity.previousArchetypeId = -1;
-            entity.currentArchetypeId  = -1;
+            entity.previousArchetype = 0;
+            entity.currentArchetype = 0;
+            entity.previousArchetypeLength = 0;
+            entity.currentArchetypeLength = 0;
 
-            entity.world            = null;
-            entity.currentArchetype = null;
-
+            entity.world      = null;
             entity.entityId   = EntityId.Invalid;
-            entity.worldID    = -1;
 
             entity.isDirty    = false;
             entity.isDisposed = true;
+        }
+
+        internal static void DumpHead(this Entity entity) {
+            foreach (var offset in entity.components) {
+                MLogger.Log(offset);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -256,35 +314,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed([CanBeNull] this Entity entity) {
-            if (entity != null) {
-                if (entity.world != null) {
-                    entity.world.ThreadSafetyCheck();
-                    if (entity.isDisposed) {
-                        return true;
-                    }
-                    return false;
-                }
-                return true;
-            }
-            return true;
-        }
-    }
-    namespace Experimental {
-        [Il2CppSetOption(Option.NullChecks, false)]
-        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public static class EntityExtensionsExperimental {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static T As<T>(this Entity entity) where T : struct, IAspect {
-#if MORPEH_DEBUG
-                if (entity.IsNullOrDisposed()) {
-                    throw new Exception("[MORPEH] You are trying As<T> on null or disposed entity");
-                }
-#endif
-                var aspect = default(T);
-                aspect.Entity = entity;
-                return aspect;
-            }
+            return entity == null || entity.isDisposed || entity.entityId == EntityId.Invalid || entity.world == null;
         }
     }
 }

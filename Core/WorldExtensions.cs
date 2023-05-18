@@ -6,14 +6,19 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
+#if ENABLE_MONO || ENABLE_IL2CPP
+#define MORPEH_UNITY
+#endif
+
 namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
-    using Morpeh;
+#if MORPEH_BURST
+    using Unity.Collections;
+#endif
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -21,8 +26,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class WorldExtensions {
-        internal static FastList<IWorldPlugin> plugins;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Ctor(this World world) {
             world.threadIdLock = System.Threading.Thread.CurrentThread.ManagedThreadId;
@@ -33,18 +36,14 @@ namespace Scellecs.Morpeh {
             world.pluginSystemsGroups    = new FastList<SystemsGroup>();
             world.newPluginSystemsGroups = new FastList<SystemsGroup>();
 
-            world.Filter         = new Filter(world);
-            world.filters        = new FastList<Filter>();
-            world.archetypeCache = new IntFastList();
-            world.dirtyEntities  = new BitMap();
-
-            if (world.archetypes != null) {
-                foreach (var archetype in world.archetypes) {
-                    archetype.Ctor();
-                }
-            }
-
-            Warmup();
+            world.Filter           = new FilterBuilder{ world = world };
+            world.filters          = new FastList<Filter>();
+            world.filtersTree      = new LongHashMap<FilterNode>();
+            world.dirtyEntities    = new BitMap();
+            
+#if MORPEH_BURST
+            world.tempArrays = new FastList<NativeArray<int>>();
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -64,10 +63,10 @@ namespace Scellecs.Morpeh {
                 World.worlds.Add(world);
             }
             world.identifier        = added ? id : World.worlds.length - 1;
-            world.freeEntityIDs     = new IntFastList();
-            world.nextFreeEntityIDs = new IntFastList();
-            world.stashes           = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
-            world.typedStashes      = new UnsafeIntHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.freeEntityIDs     = new IntStack();
+            world.nextFreeEntityIDs = new IntStack();
+            world.stashes           = new LongHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.typedStashes      = new LongHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
 
             world.entitiesCount    = 0;
             world.entitiesLength   = 0;
@@ -75,28 +74,41 @@ namespace Scellecs.Morpeh {
             world.entities         = new Entity[world.entitiesCapacity];
             world.entitiesGens     = new int[world.entitiesCapacity];
 
-            world.archetypes         = new FastList<Archetype> { new Archetype(0, Array.Empty<int>(), world.identifier) };
-            world.archetypesByLength = new IntHashMap<IntFastList>();
-            world.archetypesByLength.Add(0, new IntFastList { 0 }, out _);
-            world.newArchetypes = new IntFastList();
-            
-            foreach (var worldPlugin in plugins) {
-                worldPlugin.Initialize(world);
+            world.archetypes         = new LongHashMap<Archetype>();
+            world.archetypesCount    = 1;
+            world.emptyArchetypes   = new FastList<Archetype>();
+            world.removedArchetypes = new FastList<Archetype>();
+
+            if (World.plugins != null) {
+                foreach (var plugin in World.plugins) {
+#if MORPEH_DEBUG
+                    try {
+#endif
+                        plugin.Initialize(world);
+#if MORPEH_DEBUG
+                    }
+                    catch (Exception e) {
+                        MLogger.LogError($"Can not initialize world plugin {plugin.GetType()}");
+                        MLogger.LogException(e);
+                    }
+#endif
+                }
             }
 
             return world;
         }
 
-#if UNITY_2019_1_OR_NEWER && !MORPEH_DISABLE_AUTOINITIALIZATION
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+#if MORPEH_UNITY && !MORPEH_DISABLE_AUTOINITIALIZATION
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 #endif
+        [PublicAPI]
         public static void InitializationDefaultWorld() {
             Stash.cleanup();
 
             World.worlds.Clear();
             var defaultWorld = World.Create("Default World");
             defaultWorld.UpdateByUnity = true;
-#if UNITY_2019_1_OR_NEWER
+#if MORPEH_UNITY
             var go = new GameObject {
                 name      = "MORPEH_UNITY_RUNTIME_HELPER",
                 hideFlags = HideFlags.DontSaveInEditor
@@ -105,102 +117,19 @@ namespace Scellecs.Morpeh {
             go.hideFlags = HideFlags.HideAndDontSave;
             UnityEngine.Object.DontDestroyOnLoad(go);
 #endif
-            Warmup();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void Warmup() {
-            if (plugins != null) {
-                return;
+        public static void AddWorldPlugin<T>(T plugin) where T : class, IWorldPlugin {
+            if (World.plugins == null) {
+                World.plugins = new FastList<IWorldPlugin>();
             }
-
-            plugins = new FastList<IWorldPlugin>();
-            var componentType = typeof(IComponent);
-            var pluginType    = typeof(IWorldPlugin);
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
-                foreach (var type in assembly.GetTypes()) {
-                    if (componentType.IsAssignableFrom(type) && type.IsValueType && !type.ContainsGenericParameters) {
-                        try {
-                            typeof(TypeIdentifier<>)
-                                .MakeGenericType(type)
-                                .GetMethod("Warmup", BindingFlags.Static | BindingFlags.Public)
-                                .Invoke(null, null);
-                        }
-                        catch {
-                            MLogger.LogWarning($"Attention component type {type.FullName} not used, but exists in build");
-                        }
-                    }
-                    else if (pluginType.IsAssignableFrom(type) && !type.IsValueType && !type.ContainsGenericParameters && pluginType != type) {
-                        var instance = (IWorldPlugin)Activator.CreateInstance(type);
-                        plugins.Add(instance);
-                    }
-                }
-            }
-        }
-
-        //TODO refactor allocations and fast sort(maybe without it?)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Archetype GetArchetype(this World world, int[] typeIds, int newTypeId, bool added, out int archetypeId) {
-            Archetype archetype = null;
-            archetypeId = -1;
-
-            world.archetypeCache.Clear();
-            for (int i = 0, length = typeIds.Length; i < length; i++) {
-                var typeId = typeIds[i];
-                if (typeId >= 0) {
-                    world.archetypeCache.Add(typeIds[i]);
-                }
-            }
-
-            if (added) {
-                world.archetypeCache.Add(newTypeId);
-            }
-            else {
-                world.archetypeCache.Remove(newTypeId);
-            }
-
-            world.archetypeCache.Sort();
-            var typesLength = world.archetypeCache.length;
-
-            if (world.archetypesByLength.TryGetValue(typesLength, out var archetypesList)) {
-                for (var index = 0; index < archetypesList.length; index++) {
-                    archetypeId = archetypesList.Get(index);
-                    archetype   = world.archetypes.data[archetypeId];
-                    var check = true;
-                    for (int i = 0, length = typesLength; i < length; i++) {
-                        if (archetype.typeIds[i] != world.archetypeCache.Get(i)) {
-                            check = false;
-                            break;
-                        }
-                    }
-
-                    if (check) {
-                        return archetype;
-                    }
-                }
-            }
-
-            archetypeId = world.archetypes.length;
-            var newArchetype = new Archetype(archetypeId, world.archetypeCache.ToArray(), world.identifier);
-            world.archetypes.Add(newArchetype);
-            if (world.archetypesByLength.TryGetValue(typesLength, out archetypesList)) {
-                archetypesList.Add(archetypeId);
-            }
-            else {
-                world.archetypesByLength.Add(typesLength, new IntFastList { archetypeId }, out _);
-            }
-
-            world.newArchetypes.Add(archetypeId);
-
-            archetype = newArchetype;
-
-            return archetype;
+            World.plugins.Add(plugin);
         }
 
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Stash GetStash(this World world, int typeId) {
+        internal static Stash GetStash(this World world, long typeId) {
             if (world.stashes.TryGetValue(typeId, out var index)) {
                 return Stash.stashes.data[index];
             }
@@ -209,6 +138,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
         public static Stash GetReflectionStash(this World world, Type type) {
             world.ThreadSafetyCheck();
             
@@ -231,6 +161,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
         public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
             world.ThreadSafetyCheck();
             
@@ -248,8 +179,6 @@ namespace Scellecs.Morpeh {
             return stash;
         }
 
-
-
         public static void GlobalUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -259,6 +188,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
         public static void Update(this World world, float deltaTime) {
             world.ThreadSafetyCheck();
             
@@ -293,6 +223,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         public static void GlobalFixedUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -301,6 +232,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FixedUpdate(this World world, float deltaTime) {
             world.ThreadSafetyCheck();
@@ -315,6 +247,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         public static void GlobalLateUpdate(float deltaTime) {
             foreach (var world in World.worlds) {
                 if (world.UpdateByUnity) {
@@ -324,6 +257,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LateUpdate(this World world, float deltaTime) {
             world.ThreadSafetyCheck();
@@ -338,6 +272,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CleanupUpdate(this World world, float deltaTime) {
             world.ThreadSafetyCheck();
@@ -350,14 +285,44 @@ namespace Scellecs.Morpeh {
                 var systemsGroup = world.pluginSystemsGroups.data[i];
                 systemsGroup.CleanupUpdate(deltaTime);
             }
+
+            ref var m = ref world.newMetrics;
+            m.entities = world.entitiesCount;
+            m.archetypes = world.archetypes.length;
+            m.filters = world.filters.length;
+            foreach (var systemsGroup in world.systemsGroups.Values) {
+                m.systems += systemsGroup.systems.length;
+                m.systems += systemsGroup.fixedSystems.length;
+                m.systems += systemsGroup.lateSystems.length;
+                m.systems += systemsGroup.cleanupSystems.length;
+            }
+            world.metrics = m;
+            m = default;
+            
+            
         }
 
+        [PublicAPI]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void JobsComplete(this World world) {
+            world.ThreadSafetyCheck();
+#if MORPEH_BURST
+            world.JobHandle.Complete();
+            foreach (var array in world.tempArrays) {
+                array.Dispose();
+            }
+            world.tempArrays.Clear();
+#endif
+        }
+
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SystemsGroup CreateSystemsGroup(this World world) {
             world.ThreadSafetyCheck();
             return new SystemsGroup(world);
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
             world.ThreadSafetyCheck();
@@ -365,6 +330,7 @@ namespace Scellecs.Morpeh {
             world.newSystemsGroups.Add(order, systemsGroup);
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddPluginSystemsGroup(this World world, SystemsGroup systemsGroup) {
             world.ThreadSafetyCheck();
@@ -372,6 +338,7 @@ namespace Scellecs.Morpeh {
             world.newPluginSystemsGroups.Add(systemsGroup);
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveSystemsGroup(this World world, SystemsGroup systemsGroup) {
             world.ThreadSafetyCheck();
@@ -385,56 +352,57 @@ namespace Scellecs.Morpeh {
             }
         }
 
+        [PublicAPI]
         public static Entity CreateEntity(this World world) {
             world.ThreadSafetyCheck();
             
             int id;
             if (world.freeEntityIDs.length > 0) {
-                id = world.freeEntityIDs.Get(0);
-                world.freeEntityIDs.RemoveAtSwap(0, out _);
+                id = world.freeEntityIDs.Pop();
             }
             else {
                 id = world.entitiesLength++;
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
+                var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
                 Array.Resize(ref world.entitiesGens, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
 
-            world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
+            world.entities[id] = EntityExtensions.Create(id, world);
             ++world.entitiesCount;
 
             return world.entities[id];
         }
 
+        [PublicAPI]
         public static Entity CreateEntity(this World world, out int id) {
             world.ThreadSafetyCheck();
 
             if (world.freeEntityIDs.length > 0) {
-                id = world.freeEntityIDs.Get(0);
-                world.freeEntityIDs.RemoveAtSwap(0, out _);
+                id = world.freeEntityIDs.Pop();
             }
             else {
                 id = world.entitiesLength++;
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var newCapacity = HashHelpers.ExpandCapacity(world.entitiesCapacity) + 1;
+                var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
                 Array.Resize(ref world.entitiesGens, newCapacity);
                 world.entitiesCapacity = newCapacity;
             }
 
-            world.entities[id] = EntityExtensions.Create(id, World.worlds.IndexOf(world));
+            world.entities[id] = EntityExtensions.Create(id, world);
             ++world.entitiesCount;
 
             return world.entities[id];
         }
 
         [CanBeNull]
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this World world, in int id) {
             world.ThreadSafetyCheck();
@@ -460,6 +428,7 @@ namespace Scellecs.Morpeh {
             return !entity.IsNullOrDisposed();
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveEntity(this World world, Entity entity) {
             world.ThreadSafetyCheck();
@@ -471,43 +440,63 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyRemoveEntity(this World world, int id) {
-            world.nextFreeEntityIDs.Add(id);
+            world.nextFreeEntityIDs.Push(id);
             world.entities[id] = null;
             world.entitiesGens[id]++;
             --world.entitiesCount;
         }
 
+        [PublicAPI]
         public static void Commit(this World world) {
             world.ThreadSafetyCheck();
             
+            world.newMetrics.commits++;
             MLogger.BeginSample("World.Commit()");
+#if MORPEH_DEBUG && MORPEH_BURST
+            if (world.dirtyEntities.count > 0 && (world.JobHandle.IsCompleted == false)) {
+                MLogger.LogError("You have changed entities before all scheduled jobs are completed. This may lead to unexpected behavior or crash. Jobs will be forced.");
+                world.JobsComplete();
+            }
+#endif
+            world.newMetrics.migrations += world.dirtyEntities.count;
+            
             foreach (var entityId in world.dirtyEntities) {
                 world.entities[entityId]?.ApplyTransfer();
             }
 
             world.dirtyEntities.Clear();
-
-            if (world.newArchetypes.length > 0) {
-                for (var index = 0; index < world.filters.length; index++) {
-                    world.filters.data[index].FindArchetypes(world.newArchetypes);
+            
+            if (world.removedArchetypes.length > 0) {
+                for (var index = 0; index < world.removedArchetypes.length; index++) {
+                    var arch = world.removedArchetypes.data[index];
+                    for (var i = 0; i < arch.filters.length; i++) {
+                        var filter = arch.filters.data[i];
+                        filter.RemoveArchetype(arch);
+                        arch.filters.data[i] = default;
+                    }
+                    arch.filters.length = 0;
+                    arch.filters.lastSwappedIndex = -1;
                 }
 
-                world.newArchetypes.Clear();
+                world.emptyArchetypes.AddListRange(world.removedArchetypes);
+                world.removedArchetypes.Clear();
             }
 
             if (world.nextFreeEntityIDs.length > 0) {
-                world.freeEntityIDs.AddListRange(world.nextFreeEntityIDs);
+                world.freeEntityIDs.PushRange(world.nextFreeEntityIDs);
                 world.nextFreeEntityIDs.Clear();
             }
             MLogger.EndSample();
         }
 
+        [PublicAPI]
         public static void SetFriendlyName(this World world, string friendlyName) {
             world.ThreadSafetyCheck();
             
             world.friendlyName = friendlyName;
         }
 
+        [PublicAPI]
         public static string GetFriendlyName(this World world) {
             world.ThreadSafetyCheck();
             
@@ -518,10 +507,13 @@ namespace Scellecs.Morpeh {
             return world.friendlyName;
         }
 
+        [PublicAPI]
         public static void SetThreadId(this World world, int threadId) {
+            world.ThreadSafetyCheck();
             world.threadIdLock = threadId;
         }
         
+        [PublicAPI]
         public static int GetThreadId(this World world) {
             return world.threadIdLock;
         }
@@ -531,11 +523,26 @@ namespace Scellecs.Morpeh {
             if (world == null) {
                 return;
             }
-            
-            var currentThread = System.Threading.Thread.CurrentThread.ManagedThreadId;
+
+            var currentThread = Environment.CurrentManagedThreadId;
             if (world.threadIdLock != currentThread) {
                 throw new Exception($"[MORPEH] Thread safety check failed. You are trying touch the world from a thread {currentThread}, but the world associated with the thread {world.threadIdLock}");
             }
+        }
+        
+        [PublicAPI]
+        public static void WarmupArchetypes(this World world, int count) {
+            for (int i = 0, length = count; i < length; i++) {
+                world.emptyArchetypes.Add(new Archetype(-1, world));
+            }
+        }
+        
+        [PublicAPI]
+        public static AspectFactory<T> GetAspectFactory<T>(this World world) where T : struct, IAspect {
+            world.ThreadSafetyCheck();
+            var aspectFactory = default(AspectFactory<T>);
+            aspectFactory.value.OnGetAspectFactory(world);
+            return aspectFactory;
         }
     }
 }

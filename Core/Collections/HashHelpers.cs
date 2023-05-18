@@ -3,6 +3,7 @@ namespace Scellecs.Morpeh.Collections {
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -61,18 +62,6 @@ namespace Scellecs.Morpeh.Collections {
             536_870_912,
             1_073_741_823
         };
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ExpandCapacity(int oldSize) {
-            var min = oldSize - 1 << 1;
-            return min > 2_146_435_069U && 2_146_435_069 > oldSize ? 2_146_435_069 : GetCapacity(min);
-        }
-            
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ExpandCapacitySmall(int oldSize) {
-            var min = oldSize - 1 << 1;
-            return min > 2_146_435_069U && 2_146_435_069 > oldSize ? 2_146_435_069 : GetCapacitySmall(min);
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetCapacity(int min) {

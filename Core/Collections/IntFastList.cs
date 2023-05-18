@@ -1,3 +1,10 @@
+#if UNITY_EDITOR
+#define MORPEH_DEBUG
+#endif
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
 namespace Scellecs.Morpeh.Collections {
     using System;
     using System.Collections;
@@ -9,32 +16,32 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed unsafe class IntFastList : IEnumerable<int> {
+    public sealed unsafe class IntFastList {
         public int length;
         public int capacity;
 
-        public int[] data;
+        public IntPinnedArray data;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList() {
-            this.capacity = 3;
-            this.data     = new int[this.capacity];
+            this.capacity = 4;
+            this.data     = new IntPinnedArray(this.capacity);
             this.length   = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList(int capacity) {
             this.capacity = HashHelpers.GetCapacity(capacity);
-            this.data     = new int[this.capacity];
+            this.data     = new IntPinnedArray(this.capacity);
             this.length   = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntFastList(IntFastList other) {
             this.capacity = other.capacity;
-            this.data     = new int[this.capacity];
+            this.data     = new IntPinnedArray(this.capacity);
             this.length   = other.length;
-            Array.Copy(other.data, 0, this.data, 0, this.length);
+            Array.Copy(other.data.data, 0, this.data.data, 0, this.length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -45,10 +52,6 @@ namespace Scellecs.Morpeh.Collections {
             e.index       = 0;
             return e;
         }
-
-        IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -61,7 +64,7 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator : IEnumerator<int> {
+        public struct Enumerator {
             public IntFastList intFastList;
 
             public int current;
@@ -72,22 +75,14 @@ namespace Scellecs.Morpeh.Collections {
                     return false;
                 }
 
-                fixed (int* d = &this.intFastList.data[0]) {
-                    this.current = *(d + this.index++);
-                }
+                this.current = this.intFastList.data.ptr[this.index++];
 
                 return true;
             }
 
-            public void Reset() {
-                this.index   = 0;
-                this.current = default;
-            }
-
-            public int         Current => this.current;
-            object IEnumerator.Current => this.current;
-
-            public void Dispose() {
+            public int Current {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => this.current;
             }
         }
     }

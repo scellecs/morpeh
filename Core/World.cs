@@ -13,97 +13,116 @@ namespace Scellecs.Morpeh {
     using JetBrains.Annotations;
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
-    using UnityEngine;
-
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
+#if MORPEH_BURST
+    using Unity.Jobs;
+    using Unity.Collections;
 #endif
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class World : IDisposable {
         [CanBeNull]
+        [PublicAPI]
         public static World Default => worlds.data[0];
         [NotNull]
-        internal static FastList<World> worlds = new FastList<World> { null };
+        [PublicAPI]
+        internal static FastList<World> worlds = new FastList<World>().WithElement(null);
+        
+        [CanBeNull]
+        internal static FastList<IWorldPlugin> plugins;
 
-        [NonSerialized]
-        public Filter Filter;
-        [SerializeField]
+        [PublicAPI]
+        [NotNull]
+        public FilterBuilder Filter;
+        [PublicAPI]
         public bool UpdateByUnity;
-
-        [NonSerialized]
+        [PublicAPI]
+        public bool DoNotDisableSystemOnException;
+#if MORPEH_BURST
+        [PublicAPI]
+        public JobHandle JobHandle;
+        //todo will be replaced with smart enumerator
+        internal FastList<NativeArray<int>> tempArrays;
+#endif
         internal FastList<Filter> filters;
+        internal LongHashMap<FilterNode> filtersTree;
 
         //todo custom collection
         [ShowInInspector]
-        [NonSerialized]
         internal SortedList<int, SystemsGroup> systemsGroups;
         
         //todo custom collection
         [ShowInInspector]
-        [NonSerialized]
         internal FastList<SystemsGroup> pluginSystemsGroups;
 
         //todo custom collection
         [ShowInInspector]
-        [NonSerialized]
         internal SortedList<int, SystemsGroup> newSystemsGroups;
         
         //todo custom collection
         [ShowInInspector]
-        [NonSerialized]
         internal FastList<SystemsGroup> newPluginSystemsGroups;
 
-        [SerializeField]
+        [ShowInInspector]
         internal Entity[] entities;
 
-        [SerializeField]
+        [ShowInInspector]
         internal int[] entitiesGens;
         
         //real entities count
-        [SerializeField]
+        [ShowInInspector]
         internal int entitiesCount;
         //count + unused slots
-        [SerializeField]
+        [ShowInInspector]
         internal int entitiesLength;
         //all possible slots
-        [SerializeField]
+        [ShowInInspector]
         internal int entitiesCapacity;
 
-        [NonSerialized]
         internal BitMap dirtyEntities;
 
-        [SerializeField]
-        internal IntFastList freeEntityIDs;
-        [SerializeField]
-        internal IntFastList nextFreeEntityIDs;
+        [ShowInInspector]
+        internal IntStack freeEntityIDs;
+        [ShowInInspector]
+        internal IntStack nextFreeEntityIDs;
 
-        [SerializeField]
-        internal UnsafeIntHashMap<int> stashes;
-        [SerializeField]
-        internal UnsafeIntHashMap<int> typedStashes;
+        [ShowInInspector]
+        internal LongHashMap<int> stashes;
+        [ShowInInspector]
+        internal LongHashMap<int> typedStashes;
 
-        [SerializeField]
-        internal FastList<Archetype> archetypes;
-        [SerializeField]
-        internal IntHashMap<IntFastList> archetypesByLength;
-        [SerializeField]
-        internal IntFastList newArchetypes;
-        [NonSerialized]
-        internal IntFastList archetypeCache;
+        [ShowInInspector]
+        internal LongHashMap<Archetype> archetypes;
+        [ShowInInspector]
+        internal int archetypesCount;
+        
+        [ShowInInspector]
+        internal FastList<Archetype> removedArchetypes;
+        [ShowInInspector]
+        internal FastList<Archetype> emptyArchetypes;
+        
+        internal FastList<long> archetypeCache;
 
-        [SerializeField]
+        [ShowInInspector]
         internal int identifier;
 
-        [SerializeField]
+        [ShowInInspector]
         internal string friendlyName;
 
+        [ShowInInspector]
         internal int threadIdLock;
+        
 
+        [ShowInInspector]
+        public Metrics metrics;
+        internal Metrics newMetrics;
+
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
 
+        [PublicAPI]
         public static World Create(string friendlyName) {
             var world = Create();
             world.SetFriendlyName(friendlyName);
@@ -113,7 +132,24 @@ namespace Scellecs.Morpeh {
         private World() => this.Ctor();
 
         //todo rework defines to conditionals
+        [PublicAPI]
         public void Dispose() {
+            if (plugins != null) {
+                foreach (var plugin in plugins) {
+#if MORPEH_DEBUG
+                    try {
+#endif
+                        plugin.Deinitialize(this);
+#if MORPEH_DEBUG
+                    }
+                    catch (Exception e) {
+                        MLogger.LogError($"Can not deinitialize world plugin {plugin.GetType()}");
+                        MLogger.LogException(e);
+                    }
+#endif
+                }
+            }
+            
             foreach (var systemsGroup in this.systemsGroups.Values) {
 #if MORPEH_DEBUG
                 try {
@@ -177,21 +213,14 @@ namespace Scellecs.Morpeh {
             this.freeEntityIDs = null;
             this.nextFreeEntityIDs.Clear();
             this.nextFreeEntityIDs = null;
-#if MORPEH_DEBUG
-            try {
-#endif
-                this.Filter.Dispose();
-#if MORPEH_DEBUG
-            }
-            catch (Exception e) {
-                MLogger.LogError("Can not dispose root filter");
-                MLogger.LogException(e);
-            }
-#endif
+            
             this.Filter = null;
 
             this.filters.Clear();
             this.filters = null;
+            
+            this.filtersTree.Clear();
+            this.filtersTree = null;
 
             var tempStashes = new FastList<Stash>();
 
@@ -223,11 +252,11 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    archetype.Dispose();
+                    this.archetypes.GetValueByIndex(archetype).Dispose();
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose archetype id {archetype.id}");
+                    MLogger.LogError($"Can not dispose archetype id {archetype}");
                     MLogger.LogException(e);
                 }
 #endif
@@ -235,18 +264,23 @@ namespace Scellecs.Morpeh {
 
             this.archetypes.Clear();
             this.archetypes = null;
-
-            foreach (var index in this.archetypesByLength) {
-                this.archetypesByLength.GetValueByIndex(index).Clear();
-            }
-
-            this.archetypesByLength.Clear();
-            this.archetypesByLength = null;
-
-            this.newArchetypes.Clear();
-            this.newArchetypes = null;
+            
+            this.emptyArchetypes.Clear();
+            this.emptyArchetypes = null;
+            
+            this.removedArchetypes.Clear();
+            this.removedArchetypes = null;
 
             worlds.Remove(this);
+        }
+
+        public struct Metrics {
+            public int entities;
+            public int archetypes;
+            public int filters;
+            public int systems;
+            public int commits;
+            public int migrations;
         }
     }
 }

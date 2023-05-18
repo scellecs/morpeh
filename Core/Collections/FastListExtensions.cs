@@ -8,10 +8,20 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class FastListExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Expand<T>(this FastList<T> list) where T : unmanaged {
+            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Resize<T>(this FastList<T> list, int newCapacity) where T : unmanaged {
+            ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(newCapacity - 1) + 1);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Add<T>(this FastList<T> list) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity <<= 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
             }
 
             return index;
@@ -21,31 +31,29 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add<T>(this FastList<T> list, T value) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity <<= 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
             }
 
             list.data[index] = value;
             return index;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FastList<T> WithElement<T>(this FastList<T> list, T value) {
+            list.Add(value);
+            return list;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddListRange<T>(this FastList<T> list, FastList<T> other) {
             if (other.length > 0) {
                 var newSize = list.length + other.length;
+                
                 if (newSize > list.capacity) {
-                    while (newSize > list.capacity) {
-                        list.capacity <<= 1;
-                    }
-
-                    ArrayHelpers.Grow(ref list.data, list.capacity);
+                    ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(newSize - 1) + 1);
                 }
-
-                if (list == other) {
-                    Array.Copy(list.data, 0, list.data, list.length, list.length);
-                }
-                else {
-                    Array.Copy(other.data, 0, list.data, list.length, other.length);
-                }
+                
+                Array.Copy(other.data, 0, list.data, list.length, other.length);
 
                 list.length += other.length;
             }
@@ -59,13 +67,41 @@ namespace Scellecs.Morpeh.Collections {
         } 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOf<T>(this FastList<T> list, T value) => ArrayHelpers.IndexOf(list.data, value, list.comparer);
+        public static int IndexOf<T>(this FastList<T> list, T value) {
+            for (int i = 0, length = list.length; i < length; i++) {
+                if (list.comparer.Equals(value, list.data[i])) {
+                    return i;
+                }
+            }
+            return -1;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Remove<T>(this FastList<T> list, T value) => list.RemoveAt(list.IndexOf(value));
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void RemoveSave<T>(this FastList<T> list, T value) {
+            var index = list.IndexOf(value);
+            if (index < 0) {
+                return;
+            }
+            list.RemoveAt(index);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveSwap<T>(this FastList<T> list, T value, out FastList<T>.ResultSwap swap) => list.RemoveAtSwap(list.IndexOf(value), out swap);
+        public static void RemoveSwap<T>(this FastList<T> list, T value, out FastList<T>.ResultSwap swap) {
+            list.RemoveAtSwap(list.IndexOf(value), out swap);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void RemoveSwapSave<T>(this FastList<T> list, T value, out FastList<T>.ResultSwap swap) {
+            var index = list.IndexOf(value);
+            if (index < 0) {
+                swap = default;
+                return;
+            }
+            list.RemoveAtSwap(index, out swap);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveAt<T>(this FastList<T> list, int index) {

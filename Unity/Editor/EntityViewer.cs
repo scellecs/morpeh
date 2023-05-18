@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR && ODIN_INSPECTOR
+﻿#if UNITY_EDITOR
 namespace Scellecs.Morpeh.Editor {
     using System;
     using System.Collections.Generic;
@@ -7,9 +7,6 @@ namespace Scellecs.Morpeh.Editor {
     using UnityEngine;
 
     [Serializable]
-    [InlineProperty]
-    [HideReferenceObjectPicker]
-    [HideLabel]
     internal class EntityViewer {
         internal Func<Entity> getter = () => null;
         private  Entity       entity => this.getter();
@@ -30,7 +27,7 @@ namespace Scellecs.Morpeh.Editor {
                         var cache = Stash.stashes.data[caches.GetValueByIndex(cacheId)];
                         if (cache.Has(this.entity)) {
                             var view = new ComponentView {
-                                internalTypeDefinition = CommonTypeIdentifier.intTypeAssociation[cache.typeId],
+                                internalTypeDefinition = CommonTypeIdentifier.idTypeAssociation[cache.typeId],
                                 entity                 = this.entity
                             };
                             this.componentViews.Add(view);
@@ -44,7 +41,8 @@ namespace Scellecs.Morpeh.Editor {
         }
 
 
-        [PropertyTooltip("$" + nameof(FullName))]
+        //TODO: impl PropertyTooltip attribute
+        //[PropertyTooltip("$" + nameof(FullName))]
         [Serializable]
         private struct ComponentView {
             internal CommonTypeIdentifier.InternalTypeDefinition internalTypeDefinition;
@@ -82,15 +80,6 @@ namespace Scellecs.Morpeh.Editor {
                 }
             }
         }
-    }
-
-    [Serializable]
-    [InlineProperty]
-    [HideReferenceObjectPicker]
-    [HideLabel]
-    [Title("","Debug Info", HorizontalLine = true)]
-    internal class EntityViewerWithHeader : EntityViewer {
-        
     }
 }
 #endif

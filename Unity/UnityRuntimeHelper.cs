@@ -1,8 +1,4 @@
 namespace Scellecs.Morpeh {
-#if UNITY_EDITOR && ODIN_INSPECTOR
-    using Sirenix.OdinInspector;
-    using Sirenix.Serialization;
-#endif
 #if UNITY_EDITOR
     using UnityEditor;
 #endif
@@ -10,27 +6,25 @@ namespace Scellecs.Morpeh {
     using System.Reflection;
     using Collections;
     using Unity.IL2CPP.CompilerServices;
+    using Unity.Profiling;
     using UnityEngine;
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-#if UNITY_EDITOR && ODIN_INSPECTOR
-    internal class UnityRuntimeHelper : SerializedMonoBehaviour {
-#else
     internal class UnityRuntimeHelper : MonoBehaviour {
-#endif
         internal static Action             onApplicationFocusLost = () => {};
         internal static UnityRuntimeHelper instance;
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        [OdinSerialize]
-        private FastList<World> worldsSerialized = null;
-        [OdinSerialize]
-        private FastList<string> types = null;
-        [OdinSerialize]
-        private FastList<Stash> stashes = null;
+        
+#if MORPEH_METRICS
+        private static readonly ProfilerCounterValue<int> entitiesCounter = new(ProfilerCategory.Scripts, "Entities", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
+        private static readonly ProfilerCounterValue<int> archetypesCounter = new(ProfilerCategory.Scripts, "Archetypes", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
+        private static readonly ProfilerCounterValue<int> filtersCounter = new(ProfilerCategory.Scripts, "Filters", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
+        private static readonly ProfilerCounterValue<int> systemsCounter = new(ProfilerCategory.Scripts, "Systems", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
+        private static readonly ProfilerCounterValue<int> commitsCounter = new(ProfilerCategory.Scripts, "Commits", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
+        private static readonly ProfilerCounterValue<int> migrationsCounter = new(ProfilerCategory.Scripts, "Migrations", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
 #endif
-
+        
 #if UNITY_EDITOR
         private void OnEnable() {
             if (instance == null) {
@@ -59,6 +53,8 @@ namespace Scellecs.Morpeh {
 
                 World.worlds.Clear();
                 World.worlds.Add(null);
+                
+                World.plugins?.Clear();
 
                 if (this != null && this.gameObject != null) {
                     DestroyImmediate(this.gameObject);
@@ -72,7 +68,21 @@ namespace Scellecs.Morpeh {
         private void Update() => WorldExtensions.GlobalUpdate(Time.deltaTime);
 
         private void FixedUpdate() => WorldExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
-        private void LateUpdate()  => WorldExtensions.GlobalLateUpdate(Time.deltaTime);
+        private void LateUpdate() {
+            WorldExtensions.GlobalLateUpdate(Time.deltaTime);
+#if MORPEH_METRICS
+            var w = World.Default;
+            if (w != null) {
+                var m = w.metrics;
+                entitiesCounter.Value = w.metrics.entities;
+                archetypesCounter.Value = w.metrics.archetypes;
+                filtersCounter.Value = w.metrics.filters;
+                systemsCounter.Value = w.metrics.systems;
+                commitsCounter.Value = w.metrics.commits;
+                migrationsCounter.Value = w.metrics.migrations;
+            }
+#endif
+        }
 
         internal void OnApplicationPause(bool pauseStatus) {
             if (pauseStatus) {
@@ -91,74 +101,5 @@ namespace Scellecs.Morpeh {
         internal void OnApplicationQuit() {
             onApplicationFocusLost.Invoke();
         }
-
-#if UNITY_EDITOR && ODIN_INSPECTOR
-        protected override void OnBeforeSerialize() {
-            this.worldsSerialized = World.worlds;
-            foreach (var world in this.worldsSerialized) {
-                world.Commit();
-            }
-            if (this.types == null) {
-                this.types = new FastList<string>();
-            }
-
-            this.types.Clear();
-            foreach (var info in CommonTypeIdentifier.intTypeAssociation.Values) {
-                this.types.Add(info.type.AssemblyQualifiedName);
-            }
-
-            this.stashes = Stash.stashes;
-        }
-
-
-        protected override void OnAfterDeserialize() {
-            if (this.worldsSerialized != null) {
-                Stash.stashes = this.stashes;
-
-                foreach (var t in this.types) {
-                    var genType = Type.GetType(t);
-                    if (genType != null) {
-                        {
-                            var openGeneric   = typeof(TypeIdentifier<>);
-                            var closedGeneric = openGeneric.MakeGenericType(genType);
-                            var infoFI        = closedGeneric.GetField("info", BindingFlags.Static | BindingFlags.NonPublic);
-                            infoFI.GetValue(null);
-                        }
-                        {
-                            var openGeneric   = typeof(Stash<>);
-                            var closedGeneric = openGeneric.MakeGenericType(genType);
-                            var infoFI        = closedGeneric.GetMethod("Refill", BindingFlags.Static | BindingFlags.NonPublic);
-                            infoFI.Invoke(null, null);
-                        }
-                    }
-                    //todo idk how it is works
-                    // else {
-                    //     CommonCacheTypeIdentifier.GetID();
-                    // }
-                }
-
-                World.worlds = this.worldsSerialized;
-                foreach (var world in this.worldsSerialized) {
-                    if (world != null && world.entities != null) {
-                        for (int i = 0, length = world.entities.Length; i < length; i++) {
-                            var e = world.entities[i];
-                            if (e == null) {
-                                continue;
-                            }
-
-                            if (e.IsNullOrDisposed()) {
-                                world.entities[i] = null;
-                            }
-
-                            e.world            = world;
-                            e.currentArchetype = world.archetypes.data[e.currentArchetypeId];
-                        }
-
-                        world.Ctor();
-                    }
-                }
-            }
-        }
-#endif
     }
 }

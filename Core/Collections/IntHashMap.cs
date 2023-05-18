@@ -18,17 +18,17 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class IntHashMap<T> : IEnumerable<int> {
+    public sealed class IntHashMap<T> {
         public int length;
         public int capacity;
         public int capacityMinusOne;
         public int lastIndex;
         public int freeIndex;
 
-        public int[] buckets;
+        public IntPinnedArray buckets;
 
         public T[]    data;
-        public IntHashMapSlot[] slots;
+        public PinnedArray<IntHashMapSlot> slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntHashMap(in int capacity = 0) {
@@ -36,12 +36,17 @@ namespace Scellecs.Morpeh.Collections {
             this.length    = 0;
             this.freeIndex = -1;
 
-            this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
+            this.capacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
             this.capacity         = this.capacityMinusOne + 1;
 
-            this.buckets = new int[this.capacity];
-            this.slots   = new IntHashMapSlot[this.capacity];
+            this.buckets = new IntPinnedArray(this.capacity);
+            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
             this.data    = new T[this.capacity];
+        }
+
+        ~IntHashMap() {
+            this.buckets.Dispose();
+            this.slots.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -53,14 +58,10 @@ namespace Scellecs.Morpeh.Collections {
             return e;
         }
 
-        IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator : IEnumerator<int> {
+        public unsafe struct Enumerator {
             public IntHashMap<T> hashMap;
 
             public int index;
@@ -68,7 +69,7 @@ namespace Scellecs.Morpeh.Collections {
 
             public bool MoveNext() {
                 for (; this.index < this.hashMap.lastIndex; ++this.index) {
-                    ref var slot = ref this.hashMap.slots[this.index];
+                    ref var slot = ref this.hashMap.slots.ptr[this.index];
                     if (slot.key - 1 < 0) {
                         continue;
                     }
@@ -85,16 +86,6 @@ namespace Scellecs.Morpeh.Collections {
             }
 
             public int Current => this.current;
-
-            object IEnumerator.Current => this.current;
-
-            void IEnumerator.Reset() {
-                this.index   = 0;
-                this.current = default;
-            }
-
-            public void Dispose() {
-            }
         }
     }
 }

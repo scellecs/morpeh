@@ -9,10 +9,10 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class BitMap : IEnumerable<int> {
+    public sealed class BitMap {
         internal const int BITS_PER_BYTE        = 8;
         internal const int BITS_PER_FIELD       = BITS_PER_BYTE * sizeof(int);
-        internal const int BITS_PER_FIELD_SHIFT = 5; //6 for long
+        internal const int BITS_PER_FIELD_SHIFT = 5; //5 for int, 6 for long
 
         public int count; //count of set bits
         public int length; //count of ints
@@ -21,9 +21,9 @@ namespace Scellecs.Morpeh.Collections {
         public int lastIndex;
         public int freeIndex;
 
-        public int[] buckets;
-        public int[] data;
-        public int[] slots;
+        public IntPinnedArray buckets;
+        public IntPinnedArray data;
+        public IntPinnedArray slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BitMap(in int capacity = 0) {
@@ -35,14 +35,16 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
             this.capacity         = this.capacityMinusOne + 1;
 
-            this.buckets = new int[this.capacity];
-            this.slots   = new int[this.capacity << 1];
-            this.data    = new int[this.capacity];
+            this.buckets = new IntPinnedArray(this.capacity);
+            this.slots   = new IntPinnedArray(this.capacity << 1);
+            this.data    = new IntPinnedArray(this.capacity);
         }
 
-        IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        ~BitMap() {
+            this.buckets.Dispose();
+            this.data.Dispose();
+            this.slots.Dispose();
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
@@ -58,7 +60,7 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public unsafe struct Enumerator : IEnumerator<int> {
+        public unsafe struct Enumerator {
             public BitMap bitMap;
 
             public int index;
@@ -73,15 +75,16 @@ namespace Scellecs.Morpeh.Collections {
                     return true;
                 }
 
-                fixed (int* slotsPtr = &this.bitMap.slots[0])
-                fixed (int* dataPtr = &this.bitMap.data[0]) {
+                {
+                    var slotsPtr = this.bitMap.slots.ptr;
+                    var dataPtr = this.bitMap.data.ptr;
                     for (; this.index < this.bitMap.lastIndex; this.index += 2) {
-                        var dataIndex = *(slotsPtr + this.index) - 1;
+                        var dataIndex = slotsPtr[this.index] - 1;
                         if (dataIndex < 0) {
                             continue;
                         }
 
-                        this.currentData      =  *(dataPtr + (this.index >> 1));
+                        this.currentData      =  dataPtr[this.index >> 1];
                         this.currentDataIndex =  dataIndex * BITS_PER_FIELD;
                         this.current          =  this.currentDataIndex + BitMapExtensions.NumberOfTrailingZeros(this.currentData);
                         this.currentData      &= this.currentData - 1;
@@ -98,18 +101,6 @@ namespace Scellecs.Morpeh.Collections {
             }
 
             public int Current => this.current;
-
-            object IEnumerator.Current => this.current;
-
-            void IEnumerator.Reset() {
-                this.index            = default;
-                this.current          = default;
-                this.currentData      = default;
-                this.currentDataIndex = default;
-            }
-
-            public void Dispose() {
-            }
         }
     }
 }

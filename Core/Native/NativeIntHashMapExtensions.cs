@@ -3,7 +3,11 @@ namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
     using Unity.Collections.LowLevel.Unsafe;
+    using Unity.IL2CPP.CompilerServices;
 
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static unsafe class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static NativeIntHashMap<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
@@ -14,17 +18,15 @@ namespace Scellecs.Morpeh.Native {
             fixed (int* capacityMinusOnePtr = &hashMap.capacityMinusOne)
             fixed (int* lastIndexPtr = &hashMap.lastIndex)
             fixed (int* freeIndexPtr = &hashMap.freeIndex)
-            fixed (TNative* dataPtr = &hashMap.data[0])
-            fixed (int* bucketsPtr = &hashMap.buckets[0])
-            fixed (IntHashMapSlot* slotsPtr = &hashMap.slots[0]){
+            fixed (TNative* dataPtr = &hashMap.data[0]) {
                 nativeIntHashMap.lengthPtr           = lengthPtr;
                 nativeIntHashMap.capacityPtr         = capacityPtr;
                 nativeIntHashMap.capacityMinusOnePtr = capacityMinusOnePtr;
                 nativeIntHashMap.lastIndexPtr        = lastIndexPtr;
                 nativeIntHashMap.freeIndexPtr        = freeIndexPtr;
                 nativeIntHashMap.data                = dataPtr;
-                nativeIntHashMap.buckets             = bucketsPtr;
-                nativeIntHashMap.slots               = slotsPtr;
+                nativeIntHashMap.buckets             = hashMap.buckets.ptr;
+                nativeIntHashMap.slots               = hashMap.slots.ptr;
             }
 
             return nativeIntHashMap;

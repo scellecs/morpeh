@@ -17,7 +17,7 @@ namespace Scellecs.Morpeh.Providers {
             public int    refCounter;
         }
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         [ShowInInspector]
         [PropertyOrder(-1)]
         [ReadOnly]
@@ -74,7 +74,7 @@ namespace Scellecs.Morpeh.Providers {
         }
 
         protected virtual void OnEnable() {
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
             this.entityViewer.getter = () => this.Entity;
 #endif
             if (this.IsEditmodeOrPrefab()) {
@@ -117,7 +117,7 @@ namespace Scellecs.Morpeh.Providers {
         protected virtual void Deinitialize() {
         }
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         private bool IsNotEntityProvider {
             get {
                 var type = this.GetType();

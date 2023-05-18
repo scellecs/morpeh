@@ -2,30 +2,32 @@
 namespace Scellecs.Morpeh.Native {
     using System.Runtime.CompilerServices;
     using Collections;
+    using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
+    using Unity.IL2CPP.CompilerServices;
 
-    public static class NativeArchetypeExtensions {
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    public static unsafe class NativeArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe NativeArchetype AsNative(this Archetype archetype) {
-            if (archetype.usedInNative == false) {
-                var list = archetype.entitiesNative = new FastList<int>(archetype.entities.count);
-                
-                foreach (var entityId in archetype.entities) {
-                    archetype.world.entities[entityId].indexInCurrentArchetype = list.Add(entityId);
-                }
+        internal static Filter.Chunk AsChunk(this Archetype archetype) {
+            var len = archetype.entities.count;
+            var data = new NativeArray<int>(len, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 
-                archetype.entities     = null;
-                archetype.usedInNative = true;
+            var counter = 0;
+            foreach (var entityId in archetype.entities) {
+                data[counter++] = entityId;
             }
             
-            var nativeArchetype = new NativeArchetype {
-                entities = archetype.entitiesNative.AsNative()
+            var chunk = new Filter.Chunk {
+                entities = (int*)data.GetUnsafeReadOnlyPtr(),
+                entitiesLength = len
             };
 
-            fixed (int* lengthPtr = &archetype.length) {
-                nativeArchetype.lengthPtr = lengthPtr;
-            }
-
-            return nativeArchetype;
+            archetype.world.tempArrays.Add(data);
+            
+            return chunk;
         }
     }
 }
