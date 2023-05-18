@@ -18,15 +18,18 @@
 #endif
         private T Data {
             get {
-                if (this.Entity.IsNullOrDisposed() == false) {
-                    return this.Stash.Get(this.Entity);
+                if (this.cachedEntity.IsNullOrDisposed() == false) {
+                    var data = this.Stash.Get(this.cachedEntity, out var exist);
+                    if (exist) {
+                        return data;
+                    }
                 }
 
                 return this.serializedData;
             }
             set {
-                if (this.Entity.IsNullOrDisposed() == false) {
-                    this.Stash.Set(this.Entity, value);
+                if (this.cachedEntity.IsNullOrDisposed() == false) {
+                    this.Stash.Set(this.cachedEntity, value);
                 }
                 else {
                     this.serializedData = value;
@@ -46,9 +49,10 @@
         public ref T GetSerializedData() => ref this.serializedData;
 
         public ref T GetData() {
-            if (this.Entity.IsNullOrDisposed() == false) {
-                if (this.Stash.Has(this.Entity)) {
-                    return ref this.Stash.Get(this.Entity);
+            var ent = this.Entity;
+            if (ent.IsNullOrDisposed() == false) {
+                if (this.Stash.Has(ent)) {
+                    return ref this.Stash.Get(ent);
                 }
             }
 
@@ -56,8 +60,8 @@
         }
 
         public ref T GetData(out bool existOnEntity) {
-            if (this.Entity.IsNullOrDisposed() == false) {
-                return ref this.Stash.Get(this.Entity, out existOnEntity);
+            if (this.cachedEntity.IsNullOrDisposed() == false) {
+                return ref this.Stash.Get(this.cachedEntity, out existOnEntity);
             }
 
             existOnEntity = false;
@@ -76,15 +80,14 @@
         }
 
         protected sealed override void PreInitialize() {
-            this.Stash.Set(this.Entity, this.serializedData);
+            this.Stash.Set(this.cachedEntity, this.serializedData);
         }
 
-        protected override void OnDisable() {
-            var ent = this.Entity;
+        protected sealed override void PreDeinitialize() {
+            var ent = this.cachedEntity;
             if (ent.IsNullOrDisposed() == false) {
                 this.Stash.Remove(ent);
             }
-            base.OnDisable();
         }
     }
 }

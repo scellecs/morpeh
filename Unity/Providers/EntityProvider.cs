@@ -1,4 +1,5 @@
 namespace Scellecs.Morpeh.Providers {
+    using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
     using Collections;
     using Sirenix.OdinInspector;
@@ -18,63 +19,82 @@ namespace Scellecs.Morpeh.Providers {
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         [ShowInInspector]
+        [PropertyOrder(-1)]
         [ReadOnly]
 #endif
         private int EntityID => this.cachedEntity.IsNullOrDisposed() == false ? this.cachedEntity.ID.id : -1;
 
-        private Entity cachedEntity;
+        protected internal Entity cachedEntity;
 
         [CanBeNull]
         public Entity Entity {
             get {
-                if (World.Default == null) {
+                if (this.IsEditmodeOrPrefab()) {
                     return default;
-                }
-                
-                if (this.IsPrefab()) {
-                    return default;
-                }
-
-                if (!Application.isPlaying) {
-                    return default;
-                }
-
-                if (this.cachedEntity.IsNullOrDisposed()) {
-                    var instanceId = this.gameObject.GetInstanceID();
-                    if (map.TryGetValue(instanceId, out var item)) {
-                        if (item.entity.IsNullOrDisposed()) {
-                            this.cachedEntity = item.entity = World.Default.CreateEntity();
-                        }
-                        else {
-                            this.cachedEntity = item.entity;
-                        }
-                        item.refCounter++;
-                        map.Set(instanceId, item, out _);
-                    }
-                    else {
-                        this.cachedEntity = item.entity = World.Default.CreateEntity();
-                        item.refCounter   = 1;
-                        map.Add(instanceId, item, out _);
-                    }
                 }
 
                 return this.cachedEntity;
             }
         }
 
-        private protected virtual void OnEnable() {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected bool IsEditmodeOrPrefab() {
+            if (World.Default == null) {
+                return true;
+            }
+            if (Application.isPlaying == false) {
+                return true;
+            }
+            if (this.IsPrefab() == true) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        protected void CheckEntityInitialization() {
+            if (this.cachedEntity.IsNullOrDisposed()) {
+                var instanceId = this.gameObject.GetInstanceID();
+                if (map.TryGetValue(instanceId, out var item)) {
+                    if (item.entity.IsNullOrDisposed()) {
+                        this.cachedEntity = item.entity = World.Default.CreateEntity();
+                    }
+                    else {
+                        this.cachedEntity = item.entity;
+                    }
+                    item.refCounter++;
+                    map.Set(instanceId, item, out _);
+                }
+                else {
+                    this.cachedEntity = item.entity = World.Default.CreateEntity();
+                    item.refCounter   = 1;
+                    map.Add(instanceId, item, out _);
+                }
+            }
+        }
+
+        protected virtual void OnEnable() {
 #if UNITY_EDITOR && ODIN_INSPECTOR
             this.entityViewer.getter = () => this.Entity;
 #endif
-            if (!Application.isPlaying) {
+            if (this.IsEditmodeOrPrefab()) {
                 return;
             }
-
+            
+            this.CheckEntityInitialization();
+            
             this.PreInitialize();
             this.Initialize();
         }
 
         protected virtual void OnDisable() {
+            if (this.IsEditmodeOrPrefab()) {
+                return;
+            }
+            
+            this.PreDeinitialize();
+            this.Deinitialize();
+            
             var instanceId = this.gameObject.GetInstanceID();
             if (map.TryGetValue(instanceId, out var item)) {
                 if (--item.refCounter <= 0) {
@@ -90,6 +110,12 @@ namespace Scellecs.Morpeh.Providers {
 
         protected virtual void Initialize() {
         }
+        
+        protected virtual void PreDeinitialize() {
+        }
+
+        protected virtual void Deinitialize() {
+        }
 
 #if UNITY_EDITOR && ODIN_INSPECTOR
         private bool IsNotEntityProvider {
@@ -100,9 +126,13 @@ namespace Scellecs.Morpeh.Providers {
         }
 
         [HideIf("$" + nameof(IsNotEntityProvider))]
-        [ShowInInspector]
         [PropertyOrder(100)]
-        private Editor.EntityViewerWithHeader entityViewer = new Editor.EntityViewerWithHeader();
+        [ShowInInspector]
+        [InlineProperty]
+        [HideReferenceObjectPicker]
+        [HideLabel]
+        [Title("","Debug Info", HorizontalLine = true)]
+        private Editor.EntityViewer entityViewer = new Editor.EntityViewer();
 #endif
     }
 }
