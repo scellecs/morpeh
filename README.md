@@ -47,8 +47,7 @@ Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/u
 ![installation_step2.png](Gifs~/installation_step2.png)
 </details>
 
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh.git#develop  
+&nbsp;&nbsp;&nbsp;&nbsp;⭐ Main: https://github.com/scellecs/morpeh.git  
 &nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2022.2.3
 
 ### .Net Platform
