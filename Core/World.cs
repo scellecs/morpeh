@@ -39,6 +39,8 @@ namespace Scellecs.Morpeh {
         public bool UpdateByUnity;
         [PublicAPI]
         public bool DoNotDisableSystemOnException;
+        [PublicAPI]
+        public bool IsDisposed;
 #if MORPEH_BURST
         [PublicAPI]
         public JobHandle JobHandle;
@@ -272,6 +274,8 @@ namespace Scellecs.Morpeh {
             this.removedArchetypes = null;
 
             worlds.Remove(this);
+            
+            IsDisposed = true;
         }
 
         public struct Metrics {

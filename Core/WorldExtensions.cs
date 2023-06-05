@@ -544,5 +544,10 @@ namespace Scellecs.Morpeh {
             aspectFactory.value.OnGetAspectFactory(world);
             return aspectFactory;
         }
+        
+        [PublicAPI]
+        public static bool IsNullOrDisposed(this World world) {
+            return world == null || world.IsDisposed;
+        }
     }
 }
