@@ -275,7 +275,7 @@ namespace Scellecs.Morpeh {
 
             worlds.Remove(this);
             
-            IsDisposed = true;
+            this.IsDisposed = true;
         }
 
         public struct Metrics {
