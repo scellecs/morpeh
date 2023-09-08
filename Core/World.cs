@@ -21,7 +21,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class World : IDisposable {
+    public sealed partial class World : IDisposable {
         [CanBeNull]
         [PublicAPI]
         public static World Default => worlds.data[0];
