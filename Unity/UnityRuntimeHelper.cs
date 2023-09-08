@@ -25,12 +25,13 @@ namespace Scellecs.Morpeh {
         private static readonly ProfilerCounterValue<int> migrationsCounter = new(ProfilerCategory.Scripts, "Migrations", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
 #endif
         
-#if UNITY_EDITOR
+
         private void OnEnable() {
             if (instance == null) {
                 instance = this;
-
+#if UNITY_EDITOR
                 EditorApplication.playModeStateChanged += this.OnEditorApplicationOnplayModeStateChanged;
+#endif
             }
             else {
                 Destroy(this);
@@ -42,7 +43,8 @@ namespace Scellecs.Morpeh {
                 instance = null;
             }
         }
-
+        
+#if UNITY_EDITOR
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             //todo: check for fastmode
             if (state == PlayModeStateChange.EnteredEditMode) {
