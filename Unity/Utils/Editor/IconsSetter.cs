@@ -1,4 +1,5 @@
-﻿namespace Scellecs.Morpeh.Utils.Editor {
+﻿#if !MORPEH_DISABLE_SET_ICONS
+namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -152,3 +153,4 @@
         }
     }
 }
+#endif
