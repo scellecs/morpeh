@@ -107,7 +107,11 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct EntityEnumerator {
+        public struct EntityEnumerator 
+#if MORPEH_DEBUG
+            : IEnumerator<Entity>
+#endif
+        {
             private readonly FastList<Archetype> archetypes;
             private readonly int                 archetypeCount;
 
@@ -177,6 +181,10 @@ namespace Scellecs.Morpeh {
             public void Dispose() {
                 this.world.iteratorLevel--;
             }
+
+            object IEnumerator.Current => this.current;
+
+            void IEnumerator.Reset() {}
 #endif
         }
     }

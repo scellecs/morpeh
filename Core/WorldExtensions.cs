@@ -452,7 +452,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (world.iteratorLevel > 0) {
-                MLogger.LogError("You can not world.Commit() inside foreach loop. Place it outside of foreach block. ");
+                MLogger.LogError("You can not call world.Commit() inside Filter foreach loop. Place it outside of foreach block. ");
                 return;
             }
 #endif
