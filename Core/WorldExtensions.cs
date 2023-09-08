@@ -450,6 +450,13 @@ namespace Scellecs.Morpeh {
         public static void Commit(this World world) {
             world.ThreadSafetyCheck();
             
+#if MORPEH_DEBUG
+            if (world.iteratorLevel > 0) {
+                MLogger.LogError("You can not world.Commit() inside foreach loop. Place it outside of foreach block. ");
+                return;
+            }
+#endif
+            
             world.newMetrics.commits++;
             MLogger.BeginSample("World.Commit()");
 #if MORPEH_DEBUG && MORPEH_BURST

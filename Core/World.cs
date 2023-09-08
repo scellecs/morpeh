@@ -115,7 +115,10 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         internal int threadIdLock;
         
-
+#if MORPEH_DEBUG
+        [ShowInInspector]
+        internal int iteratorLevel;
+#endif
         [ShowInInspector]
         public Metrics metrics;
         internal Metrics newMetrics;

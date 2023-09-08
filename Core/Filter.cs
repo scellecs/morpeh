@@ -1,3 +1,10 @@
+#if UNITY_EDITOR
+#define MORPEH_DEBUG
+#endif
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
 namespace Scellecs.Morpeh {
     using System.Collections;
     using System.Collections.Generic;
@@ -100,7 +107,7 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct EntityEnumerator{
+        public struct EntityEnumerator {
             private readonly FastList<Archetype> archetypes;
             private readonly int                 archetypeCount;
 
@@ -130,6 +137,9 @@ namespace Scellecs.Morpeh {
                     this.archetypeEntities = default;
                     this.currentEnumerator = default;
                 }
+#if MORPEH_DEBUG
+                this.world.iteratorLevel++;
+#endif
             }
 
             public bool MoveNext() {
@@ -163,6 +173,11 @@ namespace Scellecs.Morpeh {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => this.current;
             }
+#if MORPEH_DEBUG
+            public void Dispose() {
+                this.world.iteratorLevel--;
+            }
+#endif
         }
     }
 }
