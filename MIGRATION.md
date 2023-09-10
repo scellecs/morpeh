@@ -7,7 +7,7 @@
 
 ### New API
 * Tri Inspector support is now available as a free alternative to Odin Inspector integration. The framework has no paid dependencies as of now, and both Tri Inspector and Odin Inspector can be chosen by the developers.
-* Added Aspects, which are represented as helper tool combining multiple components into one structure. Read README for more details.
+* Added Aspects, which are represented as a helper tool combining multiple components into one structure. Read README for more details.
 * Thread Safety Checks. If you are willing to debug or prevent multi-threading issues, e.g. if you use async methods, you may add a preprocessor definition `MORPEH_THREAD_SAFETY` and the framework will keep track of all calls making sure they come from their primary thread. Each world can be assigned its own primary thread, which is defined by the world creation thread.
 * Stash API now includes `stash.RemoveAll()`, which can be used to remove a certain component from all entities in one single call. Useful with OneFrame components, e.g. when you have to make sure that no entities have a specific component at an exact point of time.
 * Providers now have deinitialization methods the same way initialization existed.
