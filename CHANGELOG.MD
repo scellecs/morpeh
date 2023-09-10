@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Small bugfix providers, when entity was destroyed.
 ### Added
 - Aspects API. `IAspect`, `IFilterExtensions`, `Filter.Extend()`.
-- Thread Safety Checks.
+- Thread Safety Checks. New define for it `MORPEH_THREAD_SAFETY`.
 - New method for stashes `RemoveAll()` by @SH42913.
 - Deinitilize method for `EntityProvider`, `MonoProvider`.
 - `World.JobHandle`.
@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Entity` and `World` now has partial modifier.
 ### Removed
 - Discover window.
-- `ComponentProvider`.
+- **[Breaking]** Removed `ComponentProvider`.
 
 ## [2022.2.3] - 18.05.2023
 ### Fixed
