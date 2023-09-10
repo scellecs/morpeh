@@ -179,7 +179,9 @@ namespace Scellecs.Morpeh {
             }
 #if MORPEH_DEBUG
             public void Dispose() {
-                this.world.iteratorLevel--;
+                if (this.world != null) {
+                    this.world.iteratorLevel--;
+                }
             }
 
             object IEnumerator.Current => this.current;
