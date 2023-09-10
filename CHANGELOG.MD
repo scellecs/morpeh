@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2023.1.0] - 09.10.2023
+### Fixed
+- Fix `NativeFilter` allocations.
+- Calling `World.InitializeDefaultWorld()` do not create new Update Loop Runner.
+- Avoid defines modification by @vanifatovvlad.
+- Small bugfix providers, when entity was destroyed.
+### Added
+- Aspects API. `IAspect`, `IFilterExtensions`, `Filter.Extend()`.
+- Thread Safety Checks.
+- New method for stashes `RemoveAll()` by @SH42913.
+- Deinitilize method for `EntityProvider`, `MonoProvider`.
+- `World.JobHandle`.
+- Metrics for Unity Profiler.
+- World Plugins.
+- TriInspector Integration for replacing paid Odin Inspector.
+- `World.IsDisposed` and `World.IsNullOrDisposed()`
+- `MORPEH_DISABLE_SET_ICONS` define for disabling set icons in Project Window.
+- Safety check for `World.Commit()` inside Filter foreach loop.
+- New Pinned Collections.
+- `World.DoNotDisableSystemOnException`
+- `Filter.IsNotEmpty()`
+### Changed
+- **[Breaking]** Filters must be initialized with `Build()` method.
+- Overrided Entity.ToString() will output ID by @SH42913.
+- Rework types warmup for fast start of application.
+- All archetypes are reworked. Performance has been significantly improved and RAM consumption has been reduced.
+- All Native API changed from internal to public.
+- `Entity` and `World` now has partial modifier.
+### Removed
+- Discover window.
+- `ComponentProvider`.
+
 ## [2022.2.3] - 18.05.2023
 ### Fixed
 - RemoveEntityOnDestroy doesnt work properly.
