@@ -506,6 +506,8 @@ public sealed class HealthProvider : MonoProvider<HealthComponent> {
 Now press the play button, and you will see Debug.Log with healthPoints.  
 Nice!
 
+---
+
 ### 📖 Advanced
 
 #### 🧩 Filter Extensions
