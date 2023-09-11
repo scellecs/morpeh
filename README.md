@@ -293,6 +293,7 @@ var stash = monoProvider.Stash;
 We also have one additional provider that allows you to destroy an entity when a GameObject is removed from the scene.  
 You can simply hang it on a GameObject and no matter how many components are left on the entity, it will be deleted.  
 The provider is called `RemoveEntityOnDestroy`.  
+
 ---
 
 ### 📘 Getting Started
