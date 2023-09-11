@@ -24,6 +24,9 @@
     * [Aspects](#-aspects)
     * [Component Disposing](#-component-disposing)
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
+    * [Defines](#-defines)
+    * [World Plugins](#-world-plugins)
+* [Plugins](#-plugins)
 * [Examples](#-examples)
 * [Games](#-games)
 * [License](#-license)
@@ -727,6 +730,7 @@ Can be set by user:
 * `MORPEH_DEBUG` Define if you need debug in application build. In editor it works automatically.
 * `MORPEH_EXTERNAL_IL2CPP_ATTRS` If you have conflicts with attributes, you can set this define and Morpeh core will be use internal version of attributes.
 * `MORPEH_PROFILING` Define for systems profiling in Unity Profiling Window.
+* `MORPEH_METRICS` Define for additional Morpeh Metrics in Unity Profiling Window.
 * `MORPEH_NON_SERIALIZED` Define to avoid serialization of Morpeh core parts.
 * `MORPEH_THREAD_SAFETY` Define that forces the kernel to validate that all calls come from the same thread the world was created on. The binding to a thread can be changed using the `World.GetThreadId(), World.SetThreadId()` methods.
 * `MORPEH_DISABLE_SET_ICONS` Define for disabling set icons in Project Window.
@@ -763,6 +767,45 @@ class GlobalsWorldPlugin : IWorldPlugin {
     }
 }
 ```
+
+####  📊 Metrics
+To debug the game, you may need statistics on basic data in the ECS framework, such as:
+
+1. Number of entities
+2. Number of archetypes
+3. Number of filters
+4. Number of systems
+5. Number of commits in the world
+6. Number of entity migrations
+
+You can find all this in the profiler window.  
+To do this, you need to add the official Unity Profiling Core API package to your project.  
+Its quick name to search is: `com.unity.profiling.core`  
+
+After this, specify the `MORPEH_METRICS` definition in the project.  
+Now you can observe all the statistics for the kernel.  
+
+Open the profiler window.  
+On the top left, click the Profiler Modules button and find Morpeh there.  
+We turn it on with a checkmark and can move it higher or lower. 
+
+Metrics work the same way in debug builds, so you can see the whole picture directly from the device.
+
+<details>
+    <summary>It will be look like this in playmode. </summary>
+
+![metrics.png](Gifs~/metrics.png)
+</details>
+
+
+## 🔌 Plugins
+
+* [**Morpeh Helpers**](https://github.com/SH42913/morpeh.helpers)
+* [**Morpeh.Events**](https://github.com/codewriter-packages/Morpeh.Events)
+* [**Morpeh.SystemStateProcessor**](https://github.com/codewriter-packages/Morpeh.SystemStateProcessor)
+* [**Morpeh.Queries**](https://github.com/actionk/Morpeh.Queries)
+* [**Morpeh.SourceGenerator**](https://github.com/kandreyc/Scellecs.Morpeh.SourceGenerator)
+* [**PlayerLoopAPI Runner Morpeh plugin**](https://github.com/skelitheprogrammer/PlayerLoopCustomizationAPI.Runner.Morpeh-Plugin)
 
 ## 📚 Examples
 
