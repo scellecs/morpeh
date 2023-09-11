@@ -26,6 +26,7 @@
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
     * [Defines](#-defines)
     * [World Plugins](#-world-plugins)
+    * [Metrics](#-metrics)
 * [Plugins](#-plugins)
 * [Examples](#-examples)
 * [Games](#-games)
