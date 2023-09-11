@@ -39,7 +39,7 @@ Russian version: [Гайд по миграции](MIGRATION_RU.md)
 ### Unity Engine 
 
 Minimal Unity Version is 2020.3.*  
-Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
+Require [Git](https://git-scm.com/) for installing package.  
 Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) for drawing in inspector.
 
 <details>
@@ -50,7 +50,7 @@ Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) fo
 </details>
 
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Dev:  https://github.com/scellecs/morpeh.git#develop  
+&nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git#stage-2023.1  
 &nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2023.1.0  
 
 ### .Net Platform
@@ -733,6 +733,36 @@ Can be set by user:
 
 Will be set by framework:
 * `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
+
+####  🌍️ World Plugins
+
+Sometimes you need to make an automatic plugin for the world.  
+Add some systems, make a custom loop player, or automatic serialization.  
+World plugins are great for this.  
+
+To do this, you need to declare a class that implements the IWorldPlugin interface.  
+After that, create a static method with an attribute and register the plugin in the kernel.  
+
+For example:
+```c#
+class GlobalsWorldPlugin : IWorldPlugin {
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    public static void RuntimeInitialize() {
+        WorldExtensions.AddWorldPlugin(new GlobalsWorldPlugin());
+    }
+    
+    public void Initialize(World world) {
+        var sg = world.CreateSystemsGroup();
+        sg.AddSystem(new ECS.ProcessEventsSystem());
+        world.AddPluginSystemsGroup(sg);
+    }
+    
+    public void Deinitialize(World world) {
+        
+    }
+}
+```
 
 ## 📚 Examples
 
