@@ -269,12 +269,12 @@ At the time of calling `Initialize()`, the entity is definitely created.
 
 API:
 ```c#
-var entityProvider = someGameObject.GetComponent<EntityProvider();
+var entityProvider = someGameObject.GetComponent<EntityProvider>();
 var entity = entityProvider.Entity;
 ```
 
 ```c#
-var monoProvider = someGameObject.GetComponent<MyCustomMonoProvider();
+var monoProvider = someGameObject.GetComponent<MyCustomMonoProvider>();
 
 var entity = monoProvider.Entity;
 //returns serialized data or direct value of component
