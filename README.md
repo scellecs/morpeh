@@ -812,6 +812,7 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 
 * [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
 * [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*  
+* [**Flappy Bird**](https://github.com/R1nge/MorpehECS_FlappyBird) by *R1nge*  
 
 ## 🔥 Games
 
