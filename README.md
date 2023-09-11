@@ -84,6 +84,8 @@ bool hasHealthComponent = entity.Has<HealthComponent>();
 var newEntity = this.World.CreateEntity();
 //after migration entity has no components, so it will be destroyd on next world.Commit()
 entity.MigrateTo(newEntity);
+//get string with entity ID
+var debugString = entity.ToString();
 ```
 
 
@@ -227,6 +229,9 @@ bool removed = healthStash.Remove(entity);
 healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
+
+//delete all components that type from the world
+healthStash.RemoveAll();
 
 var newEntity = this.World.CreateEntity();
 //transfers a component from one entity to another
