@@ -741,7 +741,7 @@ Will be set by framework:
 ####  🌍️ World Plugins
 
 Sometimes you need to make an automatic plugin for the world.  
-Add some systems, make a custom loop player, or automatic serialization.  
+Add some systems, make a custom game loop, or automatic serialization.  
 World plugins are great for this.  
 
 To do this, you need to declare a class that implements the IWorldPlugin interface.  
