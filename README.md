@@ -732,7 +732,7 @@ Can be set by user:
 * `MORPEH_PROFILING` Define for systems profiling in Unity Profiling Window.
 * `MORPEH_METRICS` Define for additional Morpeh Metrics in Unity Profiling Window.
 * `MORPEH_NON_SERIALIZED` Define to avoid serialization of Morpeh core parts.
-* `MORPEH_THREAD_SAFETY` Define that forces the kernel to validate that all calls come from the same thread the world was created on. The binding to a thread can be changed using the `World.GetThreadId(), World.SetThreadId()` methods.
+* `MORPEH_THREAD_SAFETY` Define that forces the kernel to validate that all calls come from the same thread the world was created on. The binding to a thread can be changed using the `World.GetThreadId()`, `World.SetThreadId()` methods.
 * `MORPEH_DISABLE_SET_ICONS` Define for disabling set icons in Project Window.
 
 Will be set by framework:
