@@ -779,7 +779,7 @@ To debug the game, you may need statistics on basic data in the ECS framework, s
 6. Number of entity migrations
 
 You can find all this in the profiler window.  
-To do this, you need to add the official Unity Profiling Core API package to your project.  
+To do this, you need to add the official **Unity Profiling Core API** package to your project.  
 Its quick name to search is: `com.unity.profiling.core`  
 
 After this, specify the `MORPEH_METRICS` definition in the project.  
