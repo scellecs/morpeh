@@ -40,7 +40,7 @@ Russian version: [Гайд по миграции](MIGRATION_RU.md)
 
 Minimal Unity Version is 2020.3.*  
 Require [Git](https://git-scm.com/) + [Git LFS](https://git-lfs.github.com/) for installing package.  
-Currently require [Odin Inspector](https://assetstore.unity.com/packages/tools/utilities/odin-inspector-and-serializer-89041) for drawing in inspector.
+Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) for drawing in inspector.
 
 <details>
     <summary>Open Unity Package Manager and add Morpeh URL.  </summary>
@@ -107,7 +107,7 @@ public class HealthSystem : ISystem {
     private Filter filter;
 
     public void OnAwake() {
-        this.filter = this.World.Filter.With<HealthComponent>();
+        this.filter = this.World.Filter.With<HealthComponent>().Build();
     }
 
     public void OnUpdate(float deltaTime) {
@@ -191,11 +191,13 @@ newWorld.Commit();
 
 #### 🔖 Filter
 A type that contains entities constrained by conditions With and/or Without.  
-You can chain them in any order and quantity.
+You can chain them in any order and quantity.  
+After compose all constrains you should call Build() method.
 ```c#
 var filter = this.World.Filter.With<HealthComponent>()
                               .With<BooComponent>()
-                              .Without<DummyComponent>();
+                              .Without<DummyComponent>()
+                              .Build();
 
 var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
@@ -241,8 +243,10 @@ bool hasHealthComponent = reflectionHealthCache.Has(entity);
 
 ### 📘 Getting Started
 > 💡 **IMPORTANT**  
-> For a better user experience, we strongly recommend having Odin Inspector in the project.  
 > All GIFs are hidden under spoilers.
+
+First step: install [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector).  
+Second step: install Morpeh.
 
 <details>
     <summary>After installation import ScriptTemplates and Restart Unity.  </summary>
@@ -319,7 +323,7 @@ public sealed class HealthSystem : UpdateSystem {
     private Filter filter;
     
     public override void OnAwake() {
-        this.filter = this.World.Filter.With<HealthComponent>();
+        this.filter = this.World.Filter.With<HealthComponent>().Build();
     }
 
     public override void OnUpdate(float deltaTime) {
@@ -327,7 +331,7 @@ public sealed class HealthSystem : UpdateSystem {
 }
 ```
 > 💡 You can chain filters by two operators `With<>` and `Without<>`.  
-> For example `this.World.Filter.With<FooComponent>().With<BarComponent>().Without<BeeComponent>();`
+> For example `this.World.Filter.With<FooComponent>().With<BarComponent>().Without<BeeComponent>().Build();`
 
 The filters themselves are very lightweight and are free to create.  
 They do not store entities directly, so if you like, you can declare them directly in hot methods like `OnUpdate()`.  
@@ -340,10 +344,10 @@ public sealed class HealthSystem : UpdateSystem {
     }
 
     public override void OnUpdate(float deltaTime) {
-        var filter = this.World.Filter.With<HealthComponent>();
+        var filter = this.World.Filter.With<HealthComponent>().Build();
         
         //Or just iterate without variable
-        foreach (var entity in this.World.Filter.With<HealthComponent>()) {
+        foreach (var entity in this.World.Filter.With<HealthComponent>().Build()) {
         }
     }
 }
@@ -357,7 +361,7 @@ public sealed class HealthSystem : UpdateSystem {
     private Filter filter;
     
     public override void OnAwake() {
-        this.filter = this.World.Filter.With<HealthComponent>();
+        this.filter = this.World.Filter.With<HealthComponent>().Build();
     }
 
     public override void OnUpdate(float deltaTime) {
@@ -381,7 +385,7 @@ public sealed class HealthSystem : UpdateSystem {
     private Stash<HealthComponent> healthStash;
     
     public override void OnAwake() {
-        this.filter = this.World.Filter.With<HealthComponent>();
+        this.filter = this.World.Filter.With<HealthComponent>().Build();
         this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
@@ -585,7 +589,7 @@ public class TransformAspectSystem : ISystem {
     
     public void OnAwake() {
         //Extend filter with ready query from Transform
-        this.filter = this.World.Filter.Extend<Transform>();
+        this.filter = this.World.Filter.Extend<Transform>().Build();
         //Getting aspect factory AspectFactory<Transform>
         this.transform = this.World.GetAspectFactory<Transform>();
 
@@ -717,12 +721,29 @@ public struct TestParallelJobReference : IJobParallelFor {
 }
 ```
 
+####  🗒️ Defines
+
+Can be set by user:
+* `MORPEH_DEBUG` Define if you need debug in application build. In editor it works automatically.
+* `MORPEH_EXTERNAL_IL2CPP_ATTRS` If you have conflicts with attributes, you can set this define and Morpeh core will be use internal version of attributes.
+* `MORPEH_PROFILING` Define for systems profiling in Unity Profiling Window.
+* `MORPEH_NON_SERIALIZED` Define to avoid serialization of Morpeh core parts.
+* `MORPEH_THREAD_SAFETY` Define that forces the kernel to validate that all calls come from the same thread the world was created on. The binding to a thread can be changed using the `World.GetThreadId(), World.SetThreadId()` methods.
+* `MORPEH_DISABLE_SET_ICONS` Define for disabling set icons in Project Window.
+
+Will be set by framework:
+* `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
+
 ## 📚 Examples
 
 * [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
 * [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*  
 
 ## 🔥 Games
+
+* **One State RP - Life Simulator** by *Chillbase*  
+  [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
+
 
 * **Zombie City** by *GreenButtonGames*  
   [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/us/app/zombie-city-master/id1543420906)
@@ -736,8 +757,8 @@ public struct TestParallelJobReference : IJobParallelFor {
   [Android](https://play.google.com/store/apps/details?id=com.multicastgames.sow3) [iOS](https://apps.apple.com/us/app/stickman-of-wars-rpg-shooters/id1620422798)
 
 
-* **One State RP - Life Simulator** by *Chillbase*  
-  [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
+* **Cowravaneer** by *FESUNENKO GAMES*  
+  [Android](https://play.google.com/store/apps/details?id=com.FesunenkoGames.Cowravaneer)
 
 ## 📘 License
 

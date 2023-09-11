@@ -12,12 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Small bugfix providers, when entity was destroyed.
 ### Added
 - Aspects API. `IAspect`, `IFilterExtensions`, `Filter.Extend()`.
-- Thread Safety Checks. New define for it `MORPEH_THREAD_SAFETY`.
 - New method for stashes `RemoveAll()` by @SH42913.
 - Deinitilize method for `EntityProvider`, `MonoProvider`.
 - `World.JobHandle`.
 - Metrics for Unity Profiler.
-- World Plugins.
 - TriInspector Integration for replacing paid Odin Inspector.
 - `World.IsDisposed` and `World.IsNullOrDisposed()`
 - `MORPEH_DISABLE_SET_ICONS` define for disabling set icons in Project Window.
