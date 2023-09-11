@@ -243,6 +243,48 @@ bool removed = reflectionHealthCache.Remove(entity);
 bool hasHealthComponent = reflectionHealthCache.Has(entity);
 ```
 
+#### 🅿️ Providers
+
+Morpeh has providers for integration with the game engine.  
+This is a `MonoBehaviour` that allows you to create associations between GameObject and Entity.  
+For each ECS component, you can create a provider; it will allow you to change the component values directly through the inspector, use prefabs and use the workflow as close as possible to classic Unity development.  
+
+There are two main types of providers.  
+* **EntityProvider**. It automatically creates an associated entity and allows you to access it.  
+* **MonoProvider**. It is an inheritor of EntityProvider, and adds a component to the entity. Allows you to view and change component values directly in the playmode.
+
+> 💡 Hint.  
+> Precisely because providers allow you to work with component values directly from the kernel, because components are not stored in the provider, it only renders them;  
+> We use third-party solutions for rendering inspectors like Tri Inspector or Odin Inspector.  
+> It's a difficult task to render the completely different data that you can put into a component.
+
+All providers do their work in the `OnEnable()` and `OnDisable()` methods.  
+This allows you to emulate turning components on and off, although the kernel does not have such a feature.  
+
+All providers are synchronized with each other, so if you attach several providers to one GameObject, they will be associated with one entity, and will not create several different ones.  
+
+Providers can be inherited and logic can be overridden in the `Initialize()` and `Deinitialize()` methods.  
+We do not use methods like `Awake()`, `Start()` and others, because the provider needs to control the creation of the entity and synchronize with other providers.  
+At the time of calling `Initialize()`, the entity is definitely created.  
+
+API:
+```c#
+var entityProvider = someGameObject.GetComponent<EntityProvider();
+var entity = entityProvider.Entity;
+```
+
+```c#
+var monoProvider = someGameObject.GetComponent<MyCustomMonoProvider();
+
+var entity = monoProvider.Entity;
+//returns serialized data or direct value of component
+ref var data = ref monoProvider.GetData();
+ref var data = ref monoProvider.GetData(out bool existOnEntity);
+ref var serializedData = ref monoProvider.GetSerializedData();
+
+var stash = monoProvider.Stash;
+```
+
 ---
 
 ### 📘 Getting Started
@@ -797,6 +839,7 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 ![metrics.png](Gifs~/metrics.png)
 </details>
 
+---
 
 ## 🔌 Plugins
 
@@ -807,11 +850,15 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 * [**Morpeh.SourceGenerator**](https://github.com/kandreyc/Scellecs.Morpeh.SourceGenerator)
 * [**PlayerLoopAPI Runner Morpeh plugin**](https://github.com/skelitheprogrammer/PlayerLoopCustomizationAPI.Runner.Morpeh-Plugin)
 
+---
+
 ## 📚 Examples
 
 * [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
 * [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*  
 * [**Flappy Bird**](https://github.com/R1nge/MorpehECS_FlappyBird) by *R1nge*  
+
+---
 
 ## 🔥 Games
 
@@ -834,9 +881,13 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 * **Cowravaneer** by *FESUNENKO GAMES*  
   [Android](https://play.google.com/store/apps/details?id=com.FesunenkoGames.Cowravaneer)
 
+---
+
 ## 📘 License
 
 📄 [MIT License](LICENSE.md)
+
+---
 
 ## 💬 Contacts
 
