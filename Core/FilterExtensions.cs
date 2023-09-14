@@ -182,24 +182,50 @@ namespace Scellecs.Morpeh {
             return filter.archetypesLength != 0;
         }
 
-        public static FilterBuilder With<T>(this FilterBuilder builder) where T : struct, IComponent
-            => new FilterBuilder {
+        public static FilterBuilder With<T>(this FilterBuilder builder) where T : struct, IComponent {
+            var typeId = TypeIdentifier<T>.info.id;
+            var offset = TypeIdentifier<T>.info.offset;
+            var current = builder;
+
+            while (current.parent != null) {
+                if (current.mode == Filter.Mode.Include && current.offset == offset) {
+                    return builder;
+                }
+                current = current.parent;
+            }
+            
+            return new FilterBuilder {
                 parent = builder,
                 world = builder.world,
                 mode = Filter.Mode.Include,
-                typeId = TypeIdentifier<T>.info.id,
+                typeId = typeId,
                 offset = TypeIdentifier<T>.info.offset,
-                level = builder.level + 1
+                level = builder.level + 1,
+                includeHash = builder.includeHash ^ typeId 
             };
+        }
 
-        public static FilterBuilder Without<T>(this FilterBuilder builder) where T : struct, IComponent
-            => new FilterBuilder {
+        public static FilterBuilder Without<T>(this FilterBuilder builder) where T : struct, IComponent {
+            var typeId = TypeIdentifier<T>.info.id;
+            var offset = TypeIdentifier<T>.info.offset;
+            var current = builder;
+
+            while (current.parent != null) {
+                if (current.mode == Filter.Mode.Exclude && current.offset == offset) {
+                    return builder;
+                }
+                current = current.parent;
+            }
+            
+            return new FilterBuilder {
                 parent = builder,
                 world = builder.world,
                 mode = Filter.Mode.Exclude,
                 typeId = TypeIdentifier<T>.info.id,
-                level = builder.level + 1
+                level = builder.level + 1,
+                excludeHash = builder.excludeHash ^ typeId
             };
+        }
 
         public static FilterBuilder Extend<T>(this FilterBuilder builder) where T : struct, IFilterExtension {
             var newFilter = default(T).Extend(builder);
@@ -207,6 +233,27 @@ namespace Scellecs.Morpeh {
         }
 
         public static Filter Build(this FilterBuilder builder) {
+            var lookup = builder.world.filtersLookup;
+
+            if (lookup.TryGetValue(builder.includeHash, out var excludeMap)) {
+                if (excludeMap.TryGetValue(builder.excludeHash, out var existFilter)) {
+                    return existFilter;
+                }
+                var filter = CompleteBuild(builder);
+                excludeMap.Add(builder.excludeHash, filter, out _);
+                return filter;
+            }
+            else {
+                var filter = CompleteBuild(builder);
+                var newMap = new LongHashMap<Filter>();
+                newMap.Add(builder.excludeHash, filter, out _);
+                lookup.Add(builder.includeHash, newMap, out _);
+                return filter;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static Filter CompleteBuild(this FilterBuilder builder) {
             var includedTypeIds = new FastList<long>();
             var excludedTypeIds = new FastList<long>();
             var includedOffsets = new FastList<long>();
@@ -225,6 +272,7 @@ namespace Scellecs.Morpeh {
             }
             
             includedOffsets.data.InsertionSort(0, includedOffsets.length);
+
             return new Filter(builder.world, includedTypeIds, excludedTypeIds, includedOffsets);
         }
     }

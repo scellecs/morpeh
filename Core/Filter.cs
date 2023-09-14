@@ -33,6 +33,8 @@ namespace Scellecs.Morpeh {
         internal long offset;
         internal Filter.Mode mode;
         internal int level;
+        internal long includeHash;
+        internal long excludeHash;
     }
 
     [Il2CppSetOption(Option.NullChecks, false)]

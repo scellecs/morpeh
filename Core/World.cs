@@ -49,6 +49,7 @@ namespace Scellecs.Morpeh {
 #endif
         internal FastList<Filter> filters;
         internal LongHashMap<FilterNode> filtersTree;
+        internal LongHashMap<LongHashMap<Filter>> filtersLookup;
 
         //todo custom collection
         [ShowInInspector]
@@ -226,6 +227,9 @@ namespace Scellecs.Morpeh {
             
             this.filtersTree.Clear();
             this.filtersTree = null;
+            
+            this.filtersLookup.Clear();
+            this.filtersLookup = null;
 
             var tempStashes = new FastList<Stash>();
 
