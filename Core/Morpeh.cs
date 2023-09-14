@@ -127,10 +127,18 @@ namespace UnityEngine.Scripting {
 #endif
 }
 
+namespace Unity.Collections {
+#if !MORPEH_UNITY
+    using System;
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
+    public sealed class ReadOnlyAttribute : System.Attribute { }
+#endif
+}
+
 namespace Unity.Collections.LowLevel.Unsafe {
-    #if !MORPEH_UNITY
+#if !MORPEH_UNITY
     public sealed class NativeDisableUnsafePtrRestrictionAttribute : System.Attribute { }
-    #endif
+#endif
 }
 
 namespace JetBrains.Annotations {

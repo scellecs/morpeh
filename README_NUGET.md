@@ -22,7 +22,7 @@
 #### 🔖 Entity
 Container of components.  
 Has a set of methods for add, get, set, remove components.  
-It is reference type. Each entity is unique and not pooled. Only entity IDs are reused.  
+It is reference type. Each entity is unique and not pooled. Only entity IDs are reused.
 
 ```c#
 var entity = this.World.CreateEntity();
@@ -39,6 +39,8 @@ bool hasHealthComponent = entity.Has<HealthComponent>();
 var newEntity = this.World.CreateEntity();
 //after migration entity has no components, so it will be destroyd on next world.Commit()
 entity.MigrateTo(newEntity);
+//get string with entity ID
+var debugString = entity.ToString();
 ```
 
 
@@ -66,7 +68,7 @@ public class HealthSystem : ISystem {
     private Filter filter;
 
     public void OnAwake() {
-        this.filter = this.World.Filter.With<HealthComponent>();
+        this.filter = this.World.Filter.With<HealthComponent>().Build();
     }
 
     public void OnUpdate(float deltaTime) {
@@ -81,7 +83,7 @@ public class HealthSystem : ISystem {
 }
 ```
 
-All systems types:  
+All systems types:
 * `IInitializer` & `Initializer` - have only OnAwake and Dispose methods, convenient for executing startup logic
 * `ISystem` & `UpdateSystem`
 * `IFixedSystem` & `FixedUpdateSystem`
@@ -91,7 +93,7 @@ All systems types:
 #### 🔖 SystemsGroup
 
 The type that contains the systems.  
-There is an `Installer` wrapper to work in the inspector, but if you want to control everything from code, you can use the systems group directly.  
+There is an `Installer` wrapper to work in the inspector, but if you want to control everything from code, you can use the systems group directly.
 
 ```c#
 var newWorld = World.Create();
@@ -150,11 +152,13 @@ newWorld.Commit();
 
 #### 🔖 Filter
 A type that contains entities constrained by conditions With and/or Without.  
-You can chain them in any order and quantity.
+You can chain them in any order and quantity.  
+After compose all constrains you should call Build() method.
 ```c#
 var filter = this.World.Filter.With<HealthComponent>()
                               .With<BooComponent>()
-                              .Without<DummyComponent>();
+                              .Without<DummyComponent>()
+                              .Build();
 
 var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
@@ -180,6 +184,9 @@ bool removed = healthStash.Remove(entity);
 healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
+
+//delete all components that type from the world
+healthStash.RemoveAll();
 
 var newEntity = this.World.CreateEntity();
 //transfers a component from one entity to another
@@ -243,12 +250,32 @@ public class PlayerViewSystem : UpdateSystem {
 
 Now, when the component is removed from the entity, the `Dispose()` method will be called on the `PlayerView` component.  
 
+---
+
+## 🔌 Plugins
+
+* [**Morpeh Helpers**](https://github.com/SH42913/morpeh.helpers)
+* [**Morpeh.Events**](https://github.com/codewriter-packages/Morpeh.Events)
+* [**Morpeh.SystemStateProcessor**](https://github.com/codewriter-packages/Morpeh.SystemStateProcessor)
+* [**Morpeh.Queries**](https://github.com/actionk/Morpeh.Queries)
+* [**Morpeh.SourceGenerator**](https://github.com/kandreyc/Scellecs.Morpeh.SourceGenerator)
+* [**PlayerLoopAPI Runner Morpeh plugin**](https://github.com/skelitheprogrammer/PlayerLoopCustomizationAPI.Runner.Morpeh-Plugin)
+
+---
+
 ## 📚 Examples
 
-* [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
-* [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*  
+* [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*
+* [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*
+* [**Flappy Bird**](https://github.com/R1nge/MorpehECS_FlappyBird) by *R1nge*
+
+---
 
 ## 🔥 Games
+
+* **One State RP - Life Simulator** by *Chillbase*  
+  [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
+
 
 * **Zombie City** by *GreenButtonGames*  
   [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/us/app/zombie-city-master/id1543420906)
@@ -262,15 +289,20 @@ Now, when the component is removed from the entity, the `Dispose()` method will 
   [Android](https://play.google.com/store/apps/details?id=com.multicastgames.sow3) [iOS](https://apps.apple.com/us/app/stickman-of-wars-rpg-shooters/id1620422798)
 
 
-* **One State RP - Life Simulator** by *Chillbase*  
-  [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
+* **Cowravaneer** by *FESUNENKO GAMES*  
+  [Android](https://play.google.com/store/apps/details?id=com.FesunenkoGames.Cowravaneer)
+
+---
 
 ## 📘 License
 
 📄 [MIT License](LICENSE.md)
+
+---
 
 ## 💬 Contacts
 
 ✉️ Telegram: [olegmrzv](https://t.me/olegmrzv)  
 📧 E-Mail: [benjminmoore@gmail.com](mailto:benjminmoore@gmail.com)  
 👥 Telegram Community RU: [Morpeh ECS Development](https://t.me/morpeh_development_chat)
+
