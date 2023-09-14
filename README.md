@@ -777,6 +777,28 @@ public struct TestParallelJobReference : IJobParallelFor {
 }
 ```
 
+For flexible Job scheduling, you can use `World.JobHandle`.  
+It allows you to schedule Jobs within one SystemsGroup, rather than calling `.Complete()` directly on the system.  
+Planning between SystemsGroup is impossible because in Morpeh, unlike Entities or other frameworks, there is no dependency graph that would allow Jobs to be planned among all systems, taking into account dependencies.  
+
+Example scheduling:
+```c#  
+public sealed class SomeSystem : UpdateSystem {
+    private Filter filter;
+    private Stash<HealthComponent> stash;
+    ...
+    public override void OnUpdate(float deltaTime) {
+        using (var nativeFilter = this.filter.AsNative()) {
+            var parallelJob = new ExampleParallelJob {
+                entities = nativeFilter,
+                healthComponents = stash.AsNative()
+            };
+            World.JobHandle = parallelJob.Schedule(nativeFilter.length, 64, World.JobHandle);
+        }
+    }
+}
+```
+
 ####  🗒️ Defines
 
 Can be set by user:
