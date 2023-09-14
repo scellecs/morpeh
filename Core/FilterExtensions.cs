@@ -199,7 +199,7 @@ namespace Scellecs.Morpeh {
                 world = builder.world,
                 mode = Filter.Mode.Include,
                 typeId = typeId,
-                offset = TypeIdentifier<T>.info.offset,
+                offset = offset,
                 level = builder.level + 1,
                 includeHash = builder.includeHash ^ typeId 
             };
@@ -221,7 +221,7 @@ namespace Scellecs.Morpeh {
                 parent = builder,
                 world = builder.world,
                 mode = Filter.Mode.Exclude,
-                typeId = TypeIdentifier<T>.info.id,
+                typeId = typeId,
                 level = builder.level + 1,
                 excludeHash = builder.excludeHash ^ typeId
             };
