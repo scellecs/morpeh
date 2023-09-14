@@ -258,7 +258,7 @@ There are two main types of providers.
 * **EntityProvider**. It automatically creates an associated entity and allows you to access it.  
 * **MonoProvider**. It is an inheritor of EntityProvider, and adds a component to the entity. Allows you to view and change component values directly in the playmode.
 
-> 💡 Hint.  
+> [!NOTE]  
 > Precisely because providers allow you to work with component values directly from the kernel, because components are not stored in the provider, it only renders them;  
 > We use third-party solutions for rendering inspectors like Tri Inspector or Odin Inspector.  
 > It's a difficult task to render the completely different data that you can put into a component.
@@ -297,8 +297,8 @@ The provider is called `RemoveEntityOnDestroy`.
 ---
 
 ### 📘 Getting Started
-> 💡 **IMPORTANT**  
-> All GIFs are hidden under spoilers.
+> [!IMPORTANT]  
+> All GIFs are hidden under spoilers. Press ➤ to open it.
 
 First step: install [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector).  
 Second step: install Morpeh.
@@ -330,8 +330,11 @@ using Unity.IL2CPP.CompilerServices;
 public struct HealthComponent : IComponent {
 }
 ```
-> 💡 Don't care about attributes.  
-> Il2CppSetOption attribute can give you better performance.
+> [!NOTE]  
+> Don't care about attributes.  
+> Il2CppSetOption attribute can give you better performance.  
+> It is important to understand that this disables any checks for null, so in the release build any calls to a null object will lead to a hard crash.  
+> We recommend that in places where you are in doubt about using this attribute, you check everything for null yourself.  
 
 Add health points field to the component.
 
@@ -350,7 +353,8 @@ Now let's create first system.
 ![create_system.gif](Gifs~/create_system.gif)
 </details>
 
-> 💡 Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem, CleanupSystem.  
+> [!NOTE]  
+> Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem, CleanupSystem.  
 > They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate. CleanupSystem called the most recent in LateUpdate.
 
 System looks like this.
@@ -385,7 +389,8 @@ public sealed class HealthSystem : UpdateSystem {
     }
 }
 ```
-> 💡 You can chain filters by two operators `With<>` and `Without<>`.  
+> [!NOTE]  
+> You can chain filters by two operators `With<>` and `Without<>`.  
 > For example `this.World.Filter.With<FooComponent>().With<BarComponent>().Without<BeeComponent>().Build();`
 
 The filters themselves are very lightweight and are free to create.  
@@ -427,7 +432,8 @@ public sealed class HealthSystem : UpdateSystem {
     }
 }
 ```
-> 💡 Don't forget about `ref` operator.  
+> [!IMPORTANT]  
+> Don't forget about `ref` operator.  
 > Components are struct and if you want to change them directly, then you must use reference operator.
 
 For high performance, you can use stash directly.  
@@ -722,7 +728,8 @@ Now, when the component is removed from the entity, the `Dispose()` method will 
 
 ####  🧨 Unity Jobs And Burst
 
-> 💡 Supported only in Unity. Subjected to further improvements and modifications.
+> [!IMPORTANT]  
+> Supported only in Unity. Subjected to further improvements and modifications.
 
 You can convert `Filter<T>` to `NativeFilter<TNative>` which allows you to do component-based manipulations inside a Job.  
 Conversion of `Stash<T>` to `NativeStash<TNative>` allows you to operate on components based on entity ids.  
@@ -781,6 +788,7 @@ For flexible Job scheduling, you can use `World.JobHandle`.
 It allows you to schedule Jobs within one SystemsGroup, rather than calling `.Complete()` directly on the system.  
 Planning between SystemsGroup is impossible because in Morpeh, unlike Entities or other frameworks, there is no dependency graph that would allow Jobs to be planned among all systems, taking into account dependencies.  
 
+
 Example scheduling:
 ```c#  
 public sealed class SomeSystem : UpdateSystem {
@@ -798,6 +806,22 @@ public sealed class SomeSystem : UpdateSystem {
     }
 }
 ```
+
+`World.JobHandle.Complete()` is called automatically after each Update type.
+For example:
+* Call OnUpdate() on all systems within the SystemsGroup.
+* Call World.JobHandle.Complete().
+* Call OnFixedUpdate() on all systems within the SystemsGroup.
+* Call World.JobHandle.Complete().
+
+> [!WARNING]  
+> You cannot change the set of components on any entities if you have scheduled Jobs.  
+> Any addition or deletion of components is considered a change.  
+> The kernel will warn you at World.Commit() that you cannot do this.  
+
+You can manually control `World.JobHandle`, assign it, and call `.Complete()` on systems if you need to.  
+Currently Morpeh uses some additional temporary collections for the native part, so instead of just calling `World.JobHandle.Complete()` we recommend using `World.JobsComplete()`.  
+This method is optional; the kernel will clear these collections one way or another, it will simply do it later.
 
 ####  🗒️ Defines
 
