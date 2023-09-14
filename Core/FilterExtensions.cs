@@ -121,10 +121,15 @@ namespace Scellecs.Morpeh {
             var enumerator = filter.GetEnumerator();
             for (int i = 0, length = id + 1; i < length; i++) {
                 if (enumerator.MoveNext() == false) {
+#if MORPEH_DEBUG
+                    enumerator.Dispose();
+#endif
                     throw new IndexOutOfRangeException();
                 }
             }
-
+#if MORPEH_DEBUG
+            enumerator.Dispose();
+#endif
             return enumerator.Current;
         }
 
@@ -134,8 +139,14 @@ namespace Scellecs.Morpeh {
             // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             if (enumerator.MoveNext()) {
+#if MORPEH_DEBUG
+                enumerator.Dispose();
+#endif
                 return enumerator.Current;
             }
+#if MORPEH_DEBUG
+            enumerator.Dispose();
+#endif
 
             throw new InvalidOperationException("The source sequence is empty.");
         }
@@ -149,8 +160,14 @@ namespace Scellecs.Morpeh {
             // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             if (enumerator.MoveNext()) {
+#if MORPEH_DEBUG
+                enumerator.Dispose();
+#endif
                 return enumerator.Current;
             }
+#if MORPEH_DEBUG
+            enumerator.Dispose();
+#endif
 
             return default;
         }
@@ -201,7 +218,8 @@ namespace Scellecs.Morpeh {
                 typeId = typeId,
                 offset = offset,
                 level = builder.level + 1,
-                includeHash = builder.includeHash ^ typeId 
+                includeHash = builder.includeHash ^ typeId,
+                excludeHash = builder.excludeHash
             };
         }
 
@@ -223,6 +241,7 @@ namespace Scellecs.Morpeh {
                 mode = Filter.Mode.Exclude,
                 typeId = typeId,
                 level = builder.level + 1,
+                includeHash = builder.includeHash,
                 excludeHash = builder.excludeHash ^ typeId
             };
         }
