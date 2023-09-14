@@ -2,7 +2,8 @@
     "name": "Scellecs.Morpeh.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:3377deebfb0acde45876d12c6e3d27cc"
+        "GUID:3377deebfb0acde45876d12c6e3d27cc",
+        "GUID:324caed91501a9c47a04ebfd87b68794"
     ],
     "includePlatforms": [
         "Editor"

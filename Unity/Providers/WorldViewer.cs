@@ -4,12 +4,12 @@ namespace Scellecs.Morpeh.Providers {
     using Sirenix.OdinInspector;
     using UnityEngine;
 
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
     [HideMonoScript]
 #endif
     public class WorldViewer : MonoBehaviour {
       
-#if UNITY_EDITOR && ODIN_INSPECTOR
+#if UNITY_EDITOR
         public World World {
             get {
                 if (this.world == null) {
@@ -32,11 +32,12 @@ namespace Scellecs.Morpeh.Providers {
         [Searchable]
         private List<EntityView> Entities {
             get {
-                if (Application.isPlaying) {
-                    if (this.World.entitiesCount != this.entityViews.Count) {
+                var w = this.World;
+                if (Application.isPlaying && w != null) {
+                    if (w.entitiesCount != this.entityViews.Count) {
                         this.entityViews.Clear();
-                        for (int i = 0, length = this.World.entitiesLength; i < length; i++) {
-                            var entity = this.World.entities[i];
+                        for (int i = 0, length = w.entitiesLength; i < length; i++) {
+                            var entity = w.entities[i];
                             if (entity != null) {
                                 var view = new EntityView {ID = entity.entityId.id, entityViewer = {getter = () => entity}};
                                 this.entityViews.Add(view);
@@ -60,6 +61,9 @@ namespace Scellecs.Morpeh.Providers {
             public int ID;
             
             [ShowInInspector]
+            [InlineProperty]
+            [HideReferenceObjectPicker]
+            [HideLabel]
             internal Editor.EntityViewer entityViewer = new Editor.EntityViewer();
         }
 #endif

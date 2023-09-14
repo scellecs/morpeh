@@ -2,8 +2,8 @@
 namespace Scellecs.Morpeh.Native {
 
     public struct NativeStash<TNative> where TNative : unmanaged, IComponent {
-        internal NativeIntHashMap<TNative> components;
-        internal NativeWorld world;
+        public NativeIntHashMap<TNative> components;
+        public NativeWorld world;
     }
 }
 #endif

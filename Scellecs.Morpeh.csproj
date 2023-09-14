@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>2022.2.3</Version>
+        <Version>2023.1.0-rc7</Version>
         <Title>Scellecs.Morpeh</Title>
         <Authors>Oleg Morozov, Igor Boyko</Authors>
         <Description>ECS Framework for Unity Game Engine and .Net Platform</Description>
@@ -183,6 +183,20 @@
       <None Remove="MIGRATION.md.meta" />
       <None Remove="MIGRATION_RU.md.meta" />
       <None Remove="README_NUGET.md.meta" />
+      <None Remove="Core\Aspect.cs.meta" />
+      <None Remove="Core\AspectExtensions.cs.meta" />
+      <None Remove="Core\Collections\Raw.meta" />
+      <None Remove="Core\Collections\Unsafe.meta" />
+      <None Remove="Core\Collections\Unsafe\PinnedArray.cs.meta" />
+      <None Remove="Core\Collections\Unsafe\UnsafeFastList.cs.meta" />
+      <None Remove="Core\Collections\Unsafe\UnsafeFastListExtensions.cs.meta" />
+      <None Remove="Core\Collections\Unsafe\UnsafeIntHashMap.cs.meta" />
+      <None Remove="Core\Collections\Unsafe\UnsafeIntHashMapExtensions.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedArray.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedList.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedStorage.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedStorageUtils.cs.meta" />
+      <None Remove="Core\Collections\Raw\UnmanagedUtils.cs.meta" />
     </ItemGroup>
 
 </Project>

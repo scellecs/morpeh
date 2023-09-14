@@ -11,10 +11,8 @@ namespace Scellecs.Morpeh {
     using Collections;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
-
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
-#endif
+    
+    [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -55,13 +53,10 @@ namespace Scellecs.Morpeh {
             stash.commonStashId = -1;
         }
 
-        [SerializeField]
         internal int commonStashId;
-        [SerializeField]
         internal int typedStashId;
-        [SerializeField]
-        internal int typeId;
-        [SerializeField]
+        internal long typeId;
+        internal int offset;
         internal World world;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -69,6 +64,9 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract bool Remove(Entity entity);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public abstract void RemoveAll();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal abstract bool Clean(Entity entity);
@@ -82,9 +80,7 @@ namespace Scellecs.Morpeh {
         public abstract void Dispose();
     }
 
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
-#endif
+    [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -95,7 +91,6 @@ namespace Scellecs.Morpeh {
 
         internal delegate void ComponentDispose(ref T component);
 
-        [SerializeField]
         internal IntHashMap<T> components;
 
         internal ComponentDispose componentDispose;
@@ -139,6 +134,7 @@ namespace Scellecs.Morpeh {
             var info = TypeIdentifier<T>.info;
             
             this.typeId = info.id;
+            this.offset = info.offset;
 
             this.components = new IntHashMap<T>(info.stashSize);
 
@@ -154,11 +150,11 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
 #endif
             if (this.components.Add(entity.entityId.id, default, out var slotIndex)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(this.typeId, this.offset);
                 return ref this.components.data[slotIndex];
             }
 #if MORPEH_DEBUG
@@ -173,11 +169,11 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
 #endif
             if (this.components.Add(entity.entityId.id, default, out var slotIndex)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(this.typeId, this.offset);
                 exist = false;
                 return ref this.components.data[slotIndex];
             }
@@ -192,11 +188,11 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
 #endif
             if (this.components.Add(entity.entityId.id, value, out _)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(this.typeId, this.offset);
                 return true;
             }
 
@@ -212,7 +208,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
             }
 
             if (!this.components.Has(entity.entityId.id)) {
@@ -228,7 +224,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
             }
 #endif
             return ref this.components.TryGetValueRefByKey(entity.entityId.id, out exist);
@@ -240,12 +236,12 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity");
             }
 #endif
 
             if (this.components.Set(entity.entityId.id, default, out _)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(this.typeId, this.offset);
             }
         }
 
@@ -255,12 +251,12 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity");
             }
 #endif
 
             if (this.components.Set(entity.entityId.id, value, out _)) {
-                entity.AddTransfer(this.typeId);
+                entity.AddTransfer(this.typeId, this.offset);
             }
         }
 
@@ -273,16 +269,38 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Remove on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Remove on null or disposed entity");
             }
 #endif
 
             if (this.components.Remove(entity.entityId.id, out var lastValue)) {
-                entity.RemoveTransfer(this.typeId);
+                entity.RemoveTransfer(this.typeId, this.offset);
                 this.componentDispose?.Invoke(ref lastValue);
                 return true;
             }
             return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override void RemoveAll() {
+            world.ThreadSafetyCheck();
+
+            if (this.componentDispose != null) {
+                foreach (var index in this.components) {
+                    this.componentDispose.Invoke(ref this.components.data[index]);
+
+                    var entityId = this.components.GetKeyByIndex(index);
+                    this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
+                }
+            } 
+            else {
+                foreach (var index in this.components) {
+                    var entityId = this.components.GetKeyByIndex(index);
+                    this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
+                }
+            }
+
+            this.components.Clear();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -300,7 +318,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
 
@@ -313,10 +331,10 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity {from.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity");
             }
             if (to.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity {to.entityId.id}");
+                throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity");
             }
 #endif
 
@@ -327,24 +345,37 @@ namespace Scellecs.Morpeh {
                     }
                     else {
                         if (this.components.Add(to.entityId.id, component, out _)) {
-                            to.AddTransfer(this.typeId);
+                            to.AddTransfer(this.typeId, this.offset);
                         }
                     }
                 }
                 else {
                     if (this.components.Has(to.entityId.id) == false) {
                         if (this.components.Add(to.entityId.id, component, out _)) {
-                            to.AddTransfer(this.typeId);
+                            to.AddTransfer(this.typeId, this.offset);
                         }
                     }
                 }
 
                 if (this.components.Remove(from.entityId.id, out _)) {
-                    from.RemoveTransfer(this.typeId);
+                    from.RemoveTransfer(this.typeId, this.offset);
                 }
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsEmpty() {
+            world.ThreadSafetyCheck();
+            
+            return this.components.length == 0;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsNotEmpty() {
+            world.ThreadSafetyCheck();
+            
+            return this.components.length != 0;
+        }
 
         public override void Dispose() {
             world.ThreadSafetyCheck();

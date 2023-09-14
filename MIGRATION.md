@@ -1,4 +1,28 @@
 # 🚀 Migration Guide  
+## Migration from version 2022.2 to 2023.1
+
+### Breaking changes
+* `Filter` initialization should end with a `Build()` call, for example: `World.Filter.With<Component>().Build()`.
+* `ComponentProvider` has been removed. If you still need it, you may copy it from older versions, or code your own alternative.
+
+### New API
+* Tri Inspector support is now available as a free alternative to Odin Inspector integration. The framework has no paid dependencies as of now, and both Tri Inspector and Odin Inspector can be chosen by the developers.
+* Added Aspects, which are represented as a helper tool combining multiple components into one structure. Read README for more details.
+* Stash API now includes `stash.RemoveAll()`, which can be used to remove a certain component from all entities in one single call. Useful with OneFrame components, e.g. when you have to make sure that no entities have a specific component at an exact point of time.
+* Providers now have deinitialization methods the same way initialization existed.
+* `World.JobHandle` allows combining Jobs within one `SystemsGroup`. Read README for more details.
+* Added profiling metrics which allow tracking entities count, archetypes count and etc. Read README for details.
+* Added a flag and a method to check that the world has been removed and cannot be used anymore: `World.IsDisposed` and `World.IsNullOrDisposed()`
+* Added preprocessor definition `MORPEH_DISABLE_SET_ICONS` which disables automatic icon assignment to systems, providers, etc.
+* `World.Commit()` now checks that it is not being called inside filter iterations.
+* Added `World.DoNotDisableSystemOnException` which prevents system from stopping on exception in debug mode. Does not affect release builds.
+* Added `Filter.IsNotEmpty()`.
+
+### Odin Inspector
+You can continue using Odin Inspector or switch to Tri Inspector.
+To do this you need to add Tri Inspector via Git URL.
+Remove Odin, and remove Odin Inspector defines from Player Settings.
+
 ## Migration from version 2022.1 to 2022.2
 
 ### Breaking changes

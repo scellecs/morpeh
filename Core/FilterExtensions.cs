@@ -8,6 +8,7 @@
 
 namespace Scellecs.Morpeh {
     using System;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
@@ -18,13 +19,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class FilterExtensions {
         internal static void Dispose(this Filter filter) {
-            foreach (var child in filter.childs) {
-                child.Dispose();
-            }
-
-            filter.childs.Clear();
-            filter.childs = null;
-
             if (filter.archetypes != null) {
                 foreach (var archetype in filter.archetypes) {
                     archetype.RemoveFilter(filter);
@@ -32,110 +26,127 @@ namespace Scellecs.Morpeh {
 
                 filter.archetypes.Clear();
                 filter.archetypes = null;
-            }
 
+                filter.chunks.Clear();
+                filter.chunks = null;
+                filter.archetypesLength = 0;
+            }
+            
             filter.includedTypeIds?.Clear();
             filter.includedTypeIds = null;
             filter.excludedTypeIds?.Clear();
             filter.excludedTypeIds = null;
+            
+        }
 
-            filter.typeID = -1;
-            filter.mode   = Filter.Mode.None;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddArchetype(this Filter filter, Archetype archetype, Entity entity) {
+            foreach (var excludedTypeId in filter.excludedTypeIds) {
+                var stash = filter.world.GetStash(excludedTypeId);
+                if (stash == null) {
+                    continue;
+                }
+                if (stash.Has(entity)) {
+                    return;
+                }
+            }
+        
+            filter.archetypes.Add(archetype);
+            filter.archetypesLength++;
+            archetype.AddFilter(filter);
+            if (filter.chunks.capacity < filter.archetypesLength) {
+                filter.chunks.Resize(filter.archetypes.capacity);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddArchetypes(this Filter filter) {
+            foreach (var arch in filter.world.archetypes) {
+                filter.CheckArchetype(filter.world.archetypes.GetValueByIndex(arch));
+            }
+            if (filter.chunks.capacity < filter.archetypes.length) {
+                filter.chunks.Resize(filter.archetypes.capacity);
+            }
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FindArchetypes(this Filter filter, IntFastList newArchetypes) {
-            var minLength = filter.includedTypeIds.length;
-            foreach (var archId in newArchetypes) {
-                var arch = filter.world.archetypes.data[archId];
-                filter.CheckArchetype(arch, minLength);
-            }
+        internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
+            filter.archetypes.RemoveSwapSave(archetype, out _);
+            filter.archetypesLength--;
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void FindArchetypes(this Filter filter) {
-            var minLength = filter.includedTypeIds.length;
-            foreach (var arch in filter.world.archetypes) {
-                filter.CheckArchetype(arch, minLength);
+        private static void CheckArchetype(this Filter filter, Archetype archetype) {
+            int entityId;
+            
+            //todo fix it
+            if (archetype.entities.length == 0) {
+                return;
             }
-        }
+            var enumerator = archetype.entities.GetEnumerator();
+            enumerator.MoveNext();
+            entityId = enumerator.Current;
+           
+            var ent = filter.world.GetEntity(entityId);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void CheckArchetype(this Filter filter, Archetype archetype, int minLength) {
-            var typeIdsLength = archetype.typeIds.Length;
-            if (typeIdsLength >= minLength) {
-                var check = true;
-                for (int i = 0, length = minLength; i < length; i++) {
-                    var includedTypeId = filter.includedTypeIds.Get(i);
-                    var foundInclude   = false;
-                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
-                        var typeId = archetype.typeIds[j];
-                        if (typeId > includedTypeId) {
-                            check = false;
-                            goto BREAK;
-                        }
-
-                        if (typeId == includedTypeId) {
-                            foundInclude = true;
-                            break;
-                        }
-                    }
-
-                    if (foundInclude == false) {
-                        check = false;
-                        goto BREAK;
-                    }
+            foreach (var includedTypeId in filter.includedTypeIds) {
+                var stash = filter.world.GetStash(includedTypeId);
+                if (stash == null) {
+                    return;
                 }
-
-                for (int i = 0, length = filter.excludedTypeIds.length; i < length; i++) {
-                    var excludedTypeId = filter.excludedTypeIds.Get(i);
-                    for (int j = 0, lengthj = typeIdsLength; j < lengthj; j++) {
-                        var typeId = archetype.typeIds[j];
-                        if (typeId > excludedTypeId) {
-                            break;
-                        }
-
-                        if (typeId == excludedTypeId) {
-                            check = false;
-                            goto BREAK;
-                        }
-                    }
-                }
-
-                BREAK:
-                if (check) {
-                    for (int i = 0, length = filter.archetypes.length; i < length; i++) {
-                        if (filter.archetypes.data[i] == archetype) {
-                            return;
-                        }
-                    }
-
-                    filter.archetypes.Add(archetype);
-                    archetype.AddFilter(filter);
+                if (!stash.Has(ent)) {
+                    return;
                 }
             }
+
+            foreach (var excludedTypeId in filter.excludedTypeIds) {
+                var stash = filter.world.GetStash(excludedTypeId);
+                if (stash == null) {
+                    continue;
+                }
+                if (stash.Has(ent)) {
+                    return;
+                }
+            }
+
+            filter.archetypes.Add(archetype);
+            filter.archetypesLength++;
+            archetype.AddFilter(filter);
         }
 
-        [CanBeNull]
+        [NotNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this Filter filter, in int id) {
+            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             for (int i = 0, length = id + 1; i < length; i++) {
                 if (enumerator.MoveNext() == false) {
+#if MORPEH_DEBUG
+                    enumerator.Dispose();
+#endif
                     throw new IndexOutOfRangeException();
                 }
             }
-
+#if MORPEH_DEBUG
+            enumerator.Dispose();
+#endif
             return enumerator.Current;
         }
 
-        [CanBeNull]
+        [NotNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity First(this Filter filter) {
+            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             if (enumerator.MoveNext()) {
+#if MORPEH_DEBUG
+                enumerator.Dispose();
+#endif
                 return enumerator.Current;
             }
+#if MORPEH_DEBUG
+            enumerator.Dispose();
+#endif
 
             throw new InvalidOperationException("The source sequence is empty.");
         }
@@ -143,108 +154,145 @@ namespace Scellecs.Morpeh {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
+            if (filter.archetypesLength == 0) {
+                return default;
+            }
+            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumerator = filter.GetEnumerator();
             if (enumerator.MoveNext()) {
+#if MORPEH_DEBUG
+                enumerator.Dispose();
+#endif
                 return enumerator.Current;
             }
+#if MORPEH_DEBUG
+            enumerator.Dispose();
+#endif
 
             return default;
         }
         
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetLengthSlow(this Filter filter) {
             filter.world.ThreadSafetyCheck();
             int accum = 0;
-            foreach (var arch in filter.archetypes) {
-                if (arch.usedInNative) {
-                    accum += arch.entitiesNative.length;
-                }
-                else {
-                    accum += arch.entities.count;
-                }
+
+            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+                var arch = filter.archetypes.data[i];
+                accum += arch.entities.count;
             }
             return accum;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEmpty(this Filter filter) {
             filter.world.ThreadSafetyCheck();
-            
-            foreach (var arch in filter.archetypes) {
-                if (arch.usedInNative) {
-                    if (arch.entitiesNative.length > 0) {
-                        return false;
-                    }
-                }
-                else {
-                    if (arch.entities.count > 0) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
 
-        public static Filter With<T>(this Filter filter) where T : struct, IComponent {
+            return filter.archetypesLength == 0;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNotEmpty(this Filter filter) {
             filter.world.ThreadSafetyCheck();
-            return filter.CreateFilter<T>(Filter.Mode.Include);
+
+            return filter.archetypesLength != 0;
         }
 
-        public static Filter Without<T>(this Filter filter) where T : struct, IComponent {
-            filter.world.ThreadSafetyCheck();
-            return filter.CreateFilter<T>(Filter.Mode.Exclude);
-        }
+        public static FilterBuilder With<T>(this FilterBuilder builder) where T : struct, IComponent {
+            var typeId = TypeIdentifier<T>.info.id;
+            var offset = TypeIdentifier<T>.info.offset;
+            var current = builder;
 
-        private static Filter CreateFilter<T>(this Filter filter, Filter.Mode mode) where T : struct, IComponent {
-            var currentTypeId = TypeIdentifier<T>.info.id;
-
-#if MORPEH_DEBUG
-            if (filter.includedTypeIds != null) {
-                foreach (var typeId in filter.includedTypeIds) {
-                    if (typeId == currentTypeId) {
-                        throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
-                    }
+            while (current.parent != null) {
+                if (current.mode == Filter.Mode.Include && current.offset == offset) {
+                    return builder;
                 }
+                current = current.parent;
             }
-            if (filter.excludedTypeIds != null) {
-                foreach (var typeId in filter.excludedTypeIds) {
-                    if (typeId == currentTypeId) {
-                        throw new Exception($"[MORPEH] The filter already contains the current type {typeof(T)}");
-                    }
-                }
-            }
-#endif
             
-            for (int i = 0, length = filter.childs.length; i < length; i++) {
-                var child = filter.childs.data[i];
-                if (child.mode == mode && child.typeID == currentTypeId) {
-                    return child;
+            return new FilterBuilder {
+                parent = builder,
+                world = builder.world,
+                mode = Filter.Mode.Include,
+                typeId = typeId,
+                offset = offset,
+                level = builder.level + 1,
+                includeHash = builder.includeHash ^ typeId,
+                excludeHash = builder.excludeHash
+            };
+        }
+
+        public static FilterBuilder Without<T>(this FilterBuilder builder) where T : struct, IComponent {
+            var typeId = TypeIdentifier<T>.info.id;
+            var offset = TypeIdentifier<T>.info.offset;
+            var current = builder;
+
+            while (current.parent != null) {
+                if (current.mode == Filter.Mode.Exclude && current.offset == offset) {
+                    return builder;
                 }
+                current = current.parent;
             }
+            
+            return new FilterBuilder {
+                parent = builder,
+                world = builder.world,
+                mode = Filter.Mode.Exclude,
+                typeId = typeId,
+                level = builder.level + 1,
+                includeHash = builder.includeHash,
+                excludeHash = builder.excludeHash ^ typeId
+            };
+        }
 
+        public static FilterBuilder Extend<T>(this FilterBuilder builder) where T : struct, IFilterExtension {
+            var newFilter = default(T).Extend(builder);
+            return newFilter;
+        }
 
-            IntFastList newIncludedTypeIds;
-            IntFastList newExcludedTypeIds;
-            if (filter.typeID == -1) {
-                newIncludedTypeIds = new IntFastList();
-                newExcludedTypeIds = new IntFastList();
+        public static Filter Build(this FilterBuilder builder) {
+            var lookup = builder.world.filtersLookup;
+
+            if (lookup.TryGetValue(builder.includeHash, out var excludeMap)) {
+                if (excludeMap.TryGetValue(builder.excludeHash, out var existFilter)) {
+                    return existFilter;
+                }
+                var filter = CompleteBuild(builder);
+                excludeMap.Add(builder.excludeHash, filter, out _);
+                return filter;
             }
             else {
-                newIncludedTypeIds = new IntFastList(filter.includedTypeIds);
-                newExcludedTypeIds = new IntFastList(filter.excludedTypeIds);
+                var filter = CompleteBuild(builder);
+                var newMap = new LongHashMap<Filter>();
+                newMap.Add(builder.excludeHash, filter, out _);
+                lookup.Add(builder.includeHash, newMap, out _);
+                return filter;
             }
+        }
 
-            if (mode == Filter.Mode.Include) {
-                newIncludedTypeIds.Add(currentTypeId);
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static Filter CompleteBuild(this FilterBuilder builder) {
+            var includedTypeIds = new FastList<long>();
+            var excludedTypeIds = new FastList<long>();
+            var includedOffsets = new FastList<long>();
+            
+            var current = builder;
+
+            while (current.parent != null) {
+                if (current.mode == Filter.Mode.Include) {
+                    includedTypeIds.Add(current.typeId);
+                    includedOffsets.Add(current.offset);
+                }
+                else if (current.mode == Filter.Mode.Exclude) {
+                    excludedTypeIds.Add(current.typeId);
+                }
+                current = current.parent;
             }
-            else if (mode == Filter.Mode.Exclude) {
-                newExcludedTypeIds.Add(currentTypeId);
-            }
+            
+            includedOffsets.data.InsertionSort(0, includedOffsets.length);
 
-            var newFilter = new Filter(filter.world, currentTypeId, newIncludedTypeIds, newExcludedTypeIds, mode);
-            filter.childs.Add(newFilter);
-
-            return newFilter;
+            return new Filter(builder.world, includedTypeIds, excludedTypeIds, includedOffsets);
         }
     }
 }

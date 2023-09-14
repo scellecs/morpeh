@@ -9,6 +9,7 @@
 #if !MORPEH_NON_SERIALIZED
     [Serializable]
 #endif
+    [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -55,7 +56,7 @@
         }
 
         public override string ToString() {
-            return $"EntityId(id={this.id}, gen={this.gen})";
+            return $"EntityId(id={this.id.ToString()}, gen={this.gen.ToString()})";
         }
         
         public int CompareTo(EntityId other) {

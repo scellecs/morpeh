@@ -14,36 +14,65 @@ namespace Scellecs.Morpeh {
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
+    [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class CommonTypeIdentifier {
-        private static int counter;
+        internal static int counter;
 
-        internal static Dictionary<int, InternalTypeDefinition>  intTypeAssociation = new Dictionary<int, InternalTypeDefinition>();
+        internal static Dictionary<long, InternalTypeDefinition>  idTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
+        internal static Dictionary<long, InternalTypeDefinition>  offsetTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
         internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
+        
+        static CommonTypeIdentifier() {
+            counter = 1;
+        }
 
+        internal static InternalTypeDefinition Get(Type type) {
+            if (typeAssociation.TryGetValue(type, out var definition) == false) {
+                Warmup(type);
+                definition = typeAssociation[type];
+            }
+            return definition;
+        }
+
+        private static void Warmup(Type type) {
+            try {
+                var typeId = typeof(TypeIdentifier<>).MakeGenericType(type);
+                var warm = typeId.GetMethod("Warmup", BindingFlags.Static | BindingFlags.Public);
+                warm.Invoke(null, null);
+            }
+            catch {
+                MLogger.LogError($"[MORPEH] For using {type.Name} you must warmup it or IL2CPP will strip it from the build.\nCall <b>TypeIdentifier<{type.Name}>.Warmup();</b> before access this UniversalProvider.");
+            }
+        }
+
+        
         #pragma warning disable 0612
-        internal static int GetID<T>() where T : struct, IComponent {
-            var id   = Interlocked.Increment(ref counter);
+        internal static void GetID<T>(out long id, out int offset) where T : struct, IComponent {
+            offset = Interlocked.Increment(ref counter);
+            id   = Math.Abs(7_777_777_777_777_777_773L * offset);
             var type = typeof(T);
 
             var info = new InternalTypeDefinition {
                 id                      = id,
+                offset                  = offset,
                 type                    = type,
                 entityGetComponentBoxed = (entity) => entity.world.GetStash<T>().Get(entity),
                 entitySetComponentBoxed = (entity, component) => entity.world.GetStash<T>().Set(entity, (T)component),
                 entityRemoveComponent   = (entity) => entity.world.GetStash<T>().Remove(entity),
                 typeInfo                = TypeIdentifier<T>.info
             };
-            intTypeAssociation.Add(id, info);
+            idTypeAssociation.Add(id, info);
+            offsetTypeAssociation.Add(offset, info);
             typeAssociation.Add(type, info);
-            return id;
         }
         #pragma warning restore 0612
 
         internal struct InternalTypeDefinition {
-            public int                    id;
+            public long                   id;
+            public int                    offset;
             public Type                   type;
             public Func<Entity, object>   entityGetComponentBoxed;
             public Action<Entity, object> entitySetComponentBoxed;
@@ -51,13 +80,10 @@ namespace Scellecs.Morpeh {
             public TypeInfo               typeInfo;
         }
 
-        [Serializable]
         internal class TypeInfo {
-            [SerializeField]
-            internal int id;
-            [SerializeField]
+            internal long id;
+            internal int offset;
             internal bool isMarker;
-            [SerializeField]
             internal int stashSize;
 
             public TypeInfo(bool isMarker, int stashSize) {
@@ -65,12 +91,14 @@ namespace Scellecs.Morpeh {
                 this.stashSize = stashSize;
             }
 
-            public void SetID(int id) {
+            public void SetID(long id, int offset) {
                 this.id = id;
+                this.offset = offset;
             }
         }
     }
 
+    [Il2CppEagerStaticClassConstruction]
     [UnityEngine.Scripting.Preserve]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -98,8 +126,8 @@ namespace Scellecs.Morpeh {
 
             var typeFieldsLength = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length;
             info = new CommonTypeIdentifier.TypeInfo(typeFieldsLength == 0, stashSize);
-            var id = CommonTypeIdentifier.GetID<T>();
-            info.SetID(id);
+            CommonTypeIdentifier.GetID<T>(out var id, out var offset);
+            info.SetID(id, offset);
         }
     }
 }

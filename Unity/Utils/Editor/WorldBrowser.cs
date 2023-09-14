@@ -1,10 +1,9 @@
-﻿#if UNITY_EDITOR && ODIN_INSPECTOR
+﻿#if UNITY_EDITOR
 namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using Scellecs.Morpeh;
     using Scellecs.Morpeh.Providers;
-    using Sirenix.Utilities.Editor;
     using UnityEditor;
     using UnityEngine;
     using Object = UnityEngine.Object;
@@ -64,6 +63,10 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         private void Flush() {
+            if (this.references == null) {
+                return;
+            }
+            
             foreach (var reference in this.references) {
                 reference.Dispose();
             }
@@ -90,12 +93,19 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             foreach (var reference in this.references) {
                 reference.scrollPos = EditorGUILayout.BeginScrollView(reference.scrollPos);
-                GUIHelper.PushHierarchyMode(false);
+
+                var oldHierarchyMode = EditorGUIUtility.hierarchyMode;
+                EditorGUIUtility.hierarchyMode = false;
+                
                 reference.HandleInspectorGUI();
-                GUIHelper.PopHierarchyMode();
+
+                EditorGUIUtility.hierarchyMode = oldHierarchyMode;
+                
                 EditorGUILayout.EndScrollView();
 
-                this.RepaintIfRequested();
+#if ODIN_INSPECTOR
+                Sirenix.Utilities.Editor.GUIHelper.RepaintIfRequested(this);
+#endif
             }
         }
  

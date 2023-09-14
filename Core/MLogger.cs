@@ -6,13 +6,17 @@
 #define MORPEH_DEBUG_DISABLED
 #endif
 
+#if ENABLE_MONO || ENABLE_IL2CPP
+#define MORPEH_UNITY
+#endif
+
 namespace Scellecs.Morpeh {
     using System;
     using System.Diagnostics;
     using Logging;
 
     public static class MLogger {
-#if UNITY_2019_1_OR_NEWER
+#if MORPEH_UNITY
         internal static IMorpehLogger Instance = new MorpehUnityLogger();
 #else
         internal static IMorpehLogger Instance = new MorpehSystemLogger();

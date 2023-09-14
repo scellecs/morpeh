@@ -1,4 +1,8 @@
-﻿#if UNITY_2019_1_OR_NEWER
+﻿#if ENABLE_MONO || ENABLE_IL2CPP
+#define MORPEH_UNITY
+#endif
+
+#if MORPEH_UNITY
 namespace Scellecs.Morpeh.Logging {
     internal class MorpehUnityLogger : IMorpehLogger {
         void IMorpehLogger.Log(string message)                      => UnityEngine.Debug.Log(message);

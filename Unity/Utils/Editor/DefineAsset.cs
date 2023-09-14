@@ -5,38 +5,26 @@ namespace Scellecs.Morpeh.Utils.Editor {
     using System.Linq;
     using UnityEditor;
     using UnityEngine;
-#if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
-#endif
 
     [CreateAssetMenu(menuName = "ECS/Utils/Define")]
     public class DefineAsset : ScriptableObject {
         private const string PREFS_KEY = "__MORPEH_DEFINES";
-#if ODIN_INSPECTOR
-        [OnValueChanged(nameof(OnChange))]
-#endif
         [SerializeField]
         private List<DefineWrapper> defines = default;
 
-        [Serializable]
+        [Button]
+        [PropertyOrder(-10)]
+        public void Apply() {
+            Initialize();
+        }
+
+        [Serializable, InlineProperty]
         private class DefineWrapper {
-#if ODIN_INSPECTOR
             [HideLabel]
-            [InlineProperty]
-            [OnValueChanged(nameof(OnChange))]
-            [DelayedProperty]
-#endif
             public string define = default;
-            
-            private void OnChange() {
-                EditorApplication.delayCall += Initialize;
-            }
 
             public override string ToString() => this.define;
-        }
-        
-        private void OnChange() {
-            EditorApplication.delayCall += Initialize;
         }
 
         public class DefineAssetModificationProcessor : AssetPostprocessor {
@@ -61,6 +49,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 savedDefines += ";";
             }
 
+            var savedDefinesChanged = false;
+
             var guids = AssetDatabase.FindAssets("t:DefineAsset");
             foreach (var guid in guids) {
                 if (string.IsNullOrEmpty(guid)) {
@@ -73,6 +63,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
                         if (!savedDefines.Contains($";{define};") && !savedDefines.StartsWith($"{define};")) {
                             savedDefines += $"{define};";
                             addedDefines.Add(define.define);
+
+                            savedDefinesChanged = true;
                         }
                         else {
                             existsDefines.Add(define.define);
@@ -83,6 +75,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             var summaryDefines = addedDefines.Concat(existsDefines).ToList();
 
+            // we have to find at least MORPEH define
+            if (summaryDefines.Count == 0) {
+                Debug.LogError("DefineAsset postprocess failed");
+                return;
+            }
+
             cachedDefines.RemoveAll(summaryDefines.Contains);
             foreach (var cachedDefine in cachedDefines) {
                 if (string.IsNullOrEmpty(cachedDefine)) {
@@ -90,9 +88,14 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 }
 
                 savedDefines = savedDefines.Replace($"{cachedDefine};", string.Empty);
+
+                savedDefinesChanged = true;
             }
 
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, savedDefines);
+            if (savedDefinesChanged) {
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, savedDefines);
+            }
+
             EditorPrefs.SetString(PREFS_KEY, string.Join(",", summaryDefines));
         }
     }
