@@ -74,6 +74,20 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.references = null;
         }
         
+        private void Fetch()
+        {
+            if (this.references == null)
+            {
+                return;
+            }
+
+            if (this.references.Count != World.worlds.length)
+            {
+                Flush();
+                Initialize();
+            }
+        }
+
         private void OnEnable() {
             this.titleContent = new GUIContent("World Browser",
                 Resources.Load<Texture>("MorpehIcons/64x64_W"),
@@ -82,6 +96,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
             EditorApplication.playModeStateChanged += this.EditorApplicationOnplayModeStateChanged;
             if (EditorApplication.isPlaying) {
                 this.Initialize();
+            }
+        }
+
+        private void OnInspectorUpdate() {
+            if (EditorApplication.isPlaying) {
+                Fetch();
             }
         }
 
