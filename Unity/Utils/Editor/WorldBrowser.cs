@@ -74,8 +74,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.references = null;
         }
         
-        private void Fetch()
-        {
+        private void Fetch() {
             if (this.references == null)
             {
                 return;
@@ -99,7 +98,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
             }
         }
 
-        private void OnInspectorUpdate() {
+        private void OnFocus() {
             if (EditorApplication.isPlaying) {
                 Fetch();
             }
