@@ -547,7 +547,8 @@ private Filter filter;
 public void OnAwake() {
     this.filter = this.World.Filter.With<TestA>()
                                    .Extend<SomeExtension>()
-                                   .With<TestC>();
+                                   .With<TestC>()
+                                   .Build();
 }
 ```
 
