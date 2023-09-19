@@ -33,7 +33,7 @@
 * [License](#-license)
 * [Contacts](#-contacts)
 
-## ✈️ Migration To New Version 
+## 🛸 Migration To New Version 
 
 English version: [Migration Guide](MIGRATION.md)  
 Russian version: [Гайд по миграции](MIGRATION_RU.md)
@@ -534,7 +534,7 @@ We need to implement the IFilterExtension interface and the type must be a struc
 
 ```c#  
 public struct SomeExtension : IFilterExtension {
-    public Filter Extend(Filter rootFilter) => rootFilter.With<Translation>().With<Rotation>();
+    public FilterBuilder Extend(FilterBuilder rootFilter) => rootFilter.With<Translation>().With<Rotation>();
 }
 ```
 
@@ -547,7 +547,8 @@ private Filter filter;
 public void OnAwake() {
     this.filter = this.World.Filter.With<TestA>()
                                    .Extend<SomeExtension>()
-                                   .With<TestC>();
+                                   .With<TestC>()
+                                   .Build();
 }
 ```
 
@@ -637,7 +638,7 @@ public struct Transform : IAspect, IFilterExtension {
         this.rotation = world.GetStash<Rotation>();
         this.scale = world.GetStash<Scale>();
     }
-    public Filter Extend(Filter rootFilter) => rootFilter.With<Translation>().With<Rotation>().With<Scale>();
+    public FilterBuilder Extend(FilterBuilder rootFilter) => rootFilter.With<Translation>().With<Rotation>().With<Scale>();
 }
 ```
 
@@ -737,7 +738,6 @@ Conversion of `Stash<T>` to `NativeStash<TNative>` allows you to operate on comp
 Current limitations:
 * `NativeFilter` and `NativeStash` and their contents should never be re-used outside of single system tick.
 * `NativeFilter` and `NativeStash` cannot be used in-between `World.Commit()` calls inside Morpeh.
-* Jobs can be chained only within current system execution, `NativeFilter` can be disposed only after execution of all scheduled jobs.
 
 Example job scheduling:
 ```c#  
@@ -746,15 +746,14 @@ public sealed class SomeSystem : UpdateSystem {
     private Stash<HealthComponent> stash;
     ...
     public override void OnUpdate(float deltaTime) {
-        using (var nativeFilter = this.filter.AsNative()) {
-            var parallelJob = new ExampleParallelJob {
-                entities = nativeFilter,
-                healthComponents = stash.AsNative(),
-                // Add more native stashes if needed
-            };
-            var parallelJobHandle = parallelJob.Schedule(nativeFilter.length, 64);
-            parallelJobHandle.Complete();
-        }
+        var nativeFilter = this.filter.AsNative();
+        var parallelJob = new ExampleParallelJob {
+            entities = nativeFilter,
+            healthComponents = stash.AsNative(),
+            // Add more native stashes if needed
+        };
+        var parallelJobHandle = parallelJob.Schedule(nativeFilter.length, 64);
+        parallelJobHandle.Complete();
     }
 }
 ```
@@ -796,13 +795,12 @@ public sealed class SomeSystem : UpdateSystem {
     private Stash<HealthComponent> stash;
     ...
     public override void OnUpdate(float deltaTime) {
-        using (var nativeFilter = this.filter.AsNative()) {
-            var parallelJob = new ExampleParallelJob {
-                entities = nativeFilter,
-                healthComponents = stash.AsNative()
-            };
-            World.JobHandle = parallelJob.Schedule(nativeFilter.length, 64, World.JobHandle);
-        }
+        var nativeFilter = this.filter.AsNative();
+        var parallelJob = new ExampleParallelJob {
+            entities = nativeFilter,
+            healthComponents = stash.AsNative()
+        };
+        World.JobHandle = parallelJob.Schedule(nativeFilter.length, 64, World.JobHandle);
     }
 }
 ```
@@ -833,6 +831,7 @@ Can be set by user:
 * `MORPEH_NON_SERIALIZED` Define to avoid serialization of Morpeh core parts.
 * `MORPEH_THREAD_SAFETY` Define that forces the kernel to validate that all calls come from the same thread the world was created on. The binding to a thread can be changed using the `World.GetThreadId()`, `World.SetThreadId()` methods.
 * `MORPEH_DISABLE_SET_ICONS` Define for disabling set icons in Project Window.
+* `MORPEH_DISABLE_AUTOINITIALIZATION` Define for disable default world creation and creating Morpeh Runner GameObject.
 
 Will be set by framework:
 * `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
