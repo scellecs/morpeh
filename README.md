@@ -738,7 +738,6 @@ Conversion of `Stash<T>` to `NativeStash<TNative>` allows you to operate on comp
 Current limitations:
 * `NativeFilter` and `NativeStash` and their contents should never be re-used outside of single system tick.
 * `NativeFilter` and `NativeStash` cannot be used in-between `World.Commit()` calls inside Morpeh.
-* Jobs can be chained only within current system execution, `NativeFilter` can be disposed only after execution of all scheduled jobs.
 
 Example job scheduling:
 ```c#  
