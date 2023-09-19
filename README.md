@@ -12,7 +12,7 @@
 
 ## 📖 Table of Contents
 
-* [Migration](#-migration-to-new-version-)
+* [Migration](#-migration-to-new-version)
 * [How To Install](#-how-to-install)
   * [Unity Engine](#unity-engine)
   * [.Net Platform](#net-platform)
@@ -33,7 +33,7 @@
 * [License](#-license)
 * [Contacts](#-contacts)
 
-## ✈️ Migration To New Version 
+## 🛸 Migration To New Version 
 
 English version: [Migration Guide](MIGRATION.md)  
 Russian version: [Гайд по миграции](MIGRATION_RU.md)
