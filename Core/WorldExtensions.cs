@@ -291,7 +291,8 @@ namespace Scellecs.Morpeh {
             m.entities = world.entitiesCount;
             m.archetypes = world.archetypes.length;
             m.filters = world.filters.length;
-            foreach (var systemsGroup in world.systemsGroups.Values) {
+            for (int index = 0, length = world.systemsGroups.Values.Count; index < length; index++) {
+                var systemsGroup = world.systemsGroups.Values[index];
                 m.systems += systemsGroup.systems.length;
                 m.systems += systemsGroup.fixedSystems.length;
                 m.systems += systemsGroup.lateSystems.length;
