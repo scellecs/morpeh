@@ -904,6 +904,7 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 * [**Morpeh.SystemStateProcessor**](https://github.com/codewriter-packages/Morpeh.SystemStateProcessor)
 * [**Morpeh.Queries**](https://github.com/actionk/Morpeh.Queries)
 * [**Morpeh.SourceGenerator**](https://github.com/kandreyc/Scellecs.Morpeh.SourceGenerator)
+* [**Morpeh.Addons**](https://github.com/MexicanMan/morpeh.addons)
 * [**PlayerLoopAPI Runner Morpeh plugin**](https://github.com/skelitheprogrammer/PlayerLoopCustomizationAPI.Runner.Morpeh-Plugin)
 
 ---
