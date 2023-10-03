@@ -191,5 +191,6 @@ namespace Scellecs.Morpeh {
             void IEnumerator.Reset() {}
 #endif
         }
+        public static implicit operator Filter(FilterBuilder builder) => builder.Build();
     }
 }
