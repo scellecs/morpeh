@@ -138,7 +138,7 @@ namespace Scellecs.Morpeh {
 
             this.components = new IntHashMap<T>(info.stashSize);
 
-            this.components.Add(-1, default, out _);
+            this.components.AddDefault();
 
             RegisterStash(this);
             RegisterTypedStash(this);
@@ -301,6 +301,7 @@ namespace Scellecs.Morpeh {
             }
 
             this.components.Clear();
+            this.components.AddDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
