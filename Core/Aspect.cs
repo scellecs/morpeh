@@ -5,7 +5,7 @@ namespace Scellecs.Morpeh {
         void OnGetAspectFactory(World world);
     }
     
-    public struct AspectFactory<T> where T : struct, IAspect {
+    public partial struct AspectFactory<T> where T : struct, IAspect {
         internal T value;
     }
 }
