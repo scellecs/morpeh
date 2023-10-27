@@ -24,8 +24,8 @@
     * [Aspects](#-aspects)
     * [Component Disposing](#-component-disposing)
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
-    * [Defines](#-defines)
-    * [World Plugins](#-world-plugins)
+    * [Defines](#%EF%B8%8F-defines)
+    * [World Plugins](#%EF%B8%8F-world-plugins)
     * [Metrics](#-metrics)
 * [Plugins](#-plugins)
 * [Examples](#-examples)
@@ -904,6 +904,7 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 * [**Morpeh.SystemStateProcessor**](https://github.com/codewriter-packages/Morpeh.SystemStateProcessor)
 * [**Morpeh.Queries**](https://github.com/actionk/Morpeh.Queries)
 * [**Morpeh.SourceGenerator**](https://github.com/kandreyc/Scellecs.Morpeh.SourceGenerator)
+* [**Morpeh.Addons**](https://github.com/MexicanMan/morpeh.addons)
 * [**PlayerLoopAPI Runner Morpeh plugin**](https://github.com/skelitheprogrammer/PlayerLoopCustomizationAPI.Runner.Morpeh-Plugin)
 
 ---
@@ -912,7 +913,8 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 
 * [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
 * [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*  
-* [**Flappy Bird**](https://github.com/R1nge/MorpehECS_FlappyBird) by *R1nge*  
+* [**Flappy Bird**](https://github.com/R1nge/MorpehECS_FlappyBird) by *R1nge*
+* [**Mobile Runner Hypercasual**](https://github.com/StinkySteak/unity-morpeh-hypercasual) by *StinkySteak*
 
 ---
 
