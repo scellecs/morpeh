@@ -939,6 +939,10 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
   [Android](https://play.google.com/store/apps/details?id=com.multicastgames.sow3) [iOS](https://apps.apple.com/us/app/stickman-of-wars-rpg-shooters/id1620422798)
 
 
+* **Alien Invasion: RPG Idle Space** by *Multicast Games*  
+  [Android](https://play.google.com/store/apps/details?id=com.multicastgames.venomSurvive) [iOS](https://apps.apple.com/tr/app/alien-invasion-rpg-idle-space/id6443697602)
+
+
 * **Cowravaneer** by *FESUNENKO GAMES*  
   [Android](https://play.google.com/store/apps/details?id=com.FesunenkoGames.Cowravaneer)
 
