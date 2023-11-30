@@ -923,6 +923,9 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 * **One State RP - Life Simulator** by *Chillbase*  
   [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
 
+* **FatalZone** by *Midhard Games*  
+  [Steam](https://store.steampowered.com/app/2488510/FatalZone/)
+
 
 * **Zombie City** by *GreenButtonGames*  
   [Android](https://play.google.com/store/apps/details?id=com.greenbuttongames.zombiecity) [iOS](https://apps.apple.com/us/app/zombie-city-master/id1543420906)
