@@ -34,7 +34,7 @@ namespace Scellecs.Morpeh.Native {
         
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref TNative GetValueRefByKey<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
+        public static ref TNative GetValueRefByKey<TNative>(this ref NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
             var rem = key & *nativeIntHashMap.capacityMinusOnePtr;
 
             int next;

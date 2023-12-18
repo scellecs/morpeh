@@ -22,12 +22,12 @@ namespace Scellecs.Morpeh.Native {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref TNative Get<TNative>(this NativeStash<TNative> nativeStash, in EntityId entityId) where TNative : unmanaged, IComponent {
+        public static ref TNative Get<TNative>(this ref NativeStash<TNative> nativeStash, in EntityId entityId) where TNative : unmanaged, IComponent {
             return ref nativeStash.components.GetValueRefByKey(in entityId.id);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref TNative Get<TNative>(this NativeStash<TNative> nativeStash, in EntityId entityId, out bool exists) where TNative : unmanaged, IComponent {
+        public static ref TNative Get<TNative>(this ref NativeStash<TNative> nativeStash, in EntityId entityId, out bool exists) where TNative : unmanaged, IComponent {
             exists = nativeStash.world.Has(in entityId) && nativeStash.Has(in entityId);
             return ref nativeStash.components.GetValueRefByKey(in entityId.id);
         }
