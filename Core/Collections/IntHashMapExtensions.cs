@@ -57,11 +57,6 @@ namespace Scellecs.Morpeh.Collections {
             hashMap.capacity         = newCapacity;
             hashMap.capacityMinusOne = newCapacityMinusOne;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddDefault<T>(this IntHashMap<T> hashMap) {
-            hashMap.Add(-1, default, out _);
-        }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Add<T>(this IntHashMap<T> hashMap, in int key, in T value, out int slotIndex) {

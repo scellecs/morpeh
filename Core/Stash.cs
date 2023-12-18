@@ -91,6 +91,7 @@ namespace Scellecs.Morpeh {
 
         internal delegate void ComponentDispose(ref T component);
 
+        internal T empty;
         internal IntHashMap<T> components;
 
         internal ComponentDispose componentDispose;
@@ -138,8 +139,6 @@ namespace Scellecs.Morpeh {
 
             this.components = new IntHashMap<T>(info.stashSize);
 
-            this.components.AddDefault();
-
             RegisterStash(this);
             RegisterTypedStash(this);
         }
@@ -160,7 +159,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
             MLogger.LogError($"You're trying to add on entity {entity.entityId.id} a component that already exists! Use Get or Set instead!");
 #endif
-            return ref this.components.data[0];
+            return ref this.empty;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -179,7 +178,7 @@ namespace Scellecs.Morpeh {
             }
 
             exist = true;
-            return ref this.components.data[0];
+            return ref this.empty;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -261,7 +260,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ref T Empty() => ref this.components.data[0];
+        internal ref T Empty() => ref this.empty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Remove(Entity entity) {
@@ -301,7 +300,6 @@ namespace Scellecs.Morpeh {
             }
 
             this.components.Clear();
-            this.components.AddDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

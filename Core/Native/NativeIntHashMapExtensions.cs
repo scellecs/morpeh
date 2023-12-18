@@ -47,7 +47,7 @@ namespace Scellecs.Morpeh.Native {
                 next = slot.next;
             }
 
-            return ref UnsafeUtility.ArrayElementAsRef<TNative>(nativeIntHashMap.data, 0);
+            return ref nativeIntHashMap.empty;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

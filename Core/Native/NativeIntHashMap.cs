@@ -31,6 +31,8 @@ namespace Scellecs.Morpeh.Native {
         [NativeDisableParallelForRestriction]
         [NativeDisableUnsafePtrRestriction]
         public unsafe TNative* data;
+
+        public TNative empty;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {

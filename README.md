@@ -209,6 +209,7 @@ var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
 
 bool filterIsEmpty = filter.IsEmpty();
+bool filterIsNotEmpty = filter.IsNotEmpty();
 int filterLengthCalculatedOnCall = filter.GetLengthSlow();
 
 ```
@@ -232,6 +233,9 @@ bool hasHealthComponent = healthStash.Has(entity);
 
 //delete all components that type from the world
 healthStash.RemoveAll();
+
+bool healthStashIsEmpty = healthStash.IsEmpty();
+bool healthStashIsNotEmpty = healthStash.IsNotEmpty();
 
 var newEntity = this.World.CreateEntity();
 //transfers a component from one entity to another
