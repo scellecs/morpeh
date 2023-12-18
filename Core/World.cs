@@ -112,7 +112,7 @@ namespace Scellecs.Morpeh {
 
         [ShowInInspector]
         internal string friendlyName;
-
+        
         [ShowInInspector]
         internal int threadIdLock;
         
@@ -137,9 +137,12 @@ namespace Scellecs.Morpeh {
 
         private World() => this.Ctor();
 
-        //todo rework defines to conditionals
         [PublicAPI]
         public void Dispose() {
+            if (this.IsDisposed) {
+                return;
+            }
+            
             if (plugins != null) {
                 foreach (var plugin in plugins) {
 #if MORPEH_DEBUG

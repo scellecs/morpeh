@@ -9,6 +9,7 @@ namespace Scellecs.Morpeh {
     using System;
     using System.Runtime.CompilerServices;
     using Collections;
+    using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
     
@@ -17,6 +18,9 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public abstract class Stash : IDisposable {
+        [PublicAPI]
+        public bool IsDisposed;
+        
         internal static FastList<Stash> stashes;
         internal static IntStack stashesFreeIds;
 
@@ -377,6 +381,10 @@ namespace Scellecs.Morpeh {
         }
 
         public override void Dispose() {
+            if (this.IsDisposed) {
+                return;
+            }
+            
             world.ThreadSafetyCheck();
             
             if (this.componentDispose != null) {
@@ -392,6 +400,7 @@ namespace Scellecs.Morpeh {
             UnregisterStash(this);
 
             this.componentDispose = null;
+            this.IsDisposed = true;
         }
     }
 
