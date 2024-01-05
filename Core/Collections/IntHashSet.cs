@@ -32,7 +32,7 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity);
             this.capacity         = this.capacityMinusOne + 1;
             this.buckets          = new IntPinnedArray(this.capacity);
-            this.slots            = new IntPinnedArray(this.capacity / 2);
+            this.slots            = new IntPinnedArray(this.capacity * 2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
