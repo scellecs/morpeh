@@ -27,6 +27,7 @@
     * [Defines](#%EF%B8%8F-defines)
     * [World Plugins](#%EF%B8%8F-world-plugins)
     * [Metrics](#-metrics)
+    * [Clone a stash](#2%EF%B8%8F⃣-clone-a-stash)
 * [Plugins](#-plugins)
 * [Examples](#-examples)
 * [Games](#-games)
