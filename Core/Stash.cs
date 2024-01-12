@@ -135,14 +135,25 @@ namespace Scellecs.Morpeh {
         }
 
         [UnityEngine.Scripting.Preserve]
-        internal Stash() {
+        public Stash(int capacity = -1) {
             var info = TypeIdentifier<T>.info;
             
             this.typeId = info.id;
             this.offset = info.offset;
 
-            this.components = new IntHashMap<T>(info.stashSize);
+            this.components = new IntHashMap<T>(capacity < 0 ? info.stashSize : capacity);
 
+            RegisterStash(this);
+            RegisterTypedStash(this);
+        }
+
+        internal Stash(Stash<T> other) {
+            this.typeId = other.typeId;
+            this.offset = other.offset;
+
+            this.components = new IntHashMap<T>(other.components);
+            this.componentDispose = other.componentDispose;
+            
             RegisterStash(this);
             RegisterTypedStash(this);
         }

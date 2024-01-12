@@ -899,6 +899,60 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 ![metrics.png](Gifs~/metrics.png)
 </details>
 
+####  2️⃣ Clone a stash
+
+If you have **unmanaged** components, you can create clone of stash for saving data for some purpose.  
+
+For example:
+```c#
+[System.Serializable]
+public struct TestComponent0 : IComponent {
+    public int test0;
+    public float test1;
+    public byte test2;
+}
+
+public class FooSystem : ISystem {
+    public World World { get; set; }
+
+    private Filter filter;
+    private Stash<TestComponent0> stash;
+    private Stash<TestComponent0> cloneStash;
+
+    public void OnAwake() {
+        this.filter = this.World.Filter.With<TestComponent0>().Build();
+        this.stash = this.World.GetStash<TestComponent0>();
+        for (int i = 0, length = 1_000; i < length; i++) {
+            var e = this.World.CreateEntity();
+            e.AddComponent<TestComponent0>();
+        }
+
+        //creating clone of the stash
+        this.cloneStash = this.stash.Clone();
+        
+        //or simply create empty stash with optional capacity
+        this.cloneStash = new Stash<TestComponent0>(capacity: 463829);
+    }
+    
+    public void OnUpdate(float deltaTime) {
+        foreach (var entity in this.filter) {
+            this.stash.Get(entity).test0++;
+        }
+        
+        //copy data from origin stash
+        this.cloneStash.CopyFrom(this.stash);
+        
+        foreach (var entity in this.filter) {
+            Debug.Log(this.cloneStash.Get(entity).test0);
+        }
+    }
+    
+    public void Dispose() {
+    }
+}
+```
+
+
 ---
 
 ## 🔌 Plugins
