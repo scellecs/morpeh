@@ -32,6 +32,7 @@ namespace Scellecs.Morpeh.Native {
         [NativeDisableUnsafePtrRestriction]
         public unsafe TNative* data;
 
+        [NativeDisableUnsafePtrRestriction]
         public TNative empty;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
