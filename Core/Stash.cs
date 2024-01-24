@@ -133,6 +133,9 @@ namespace Scellecs.Morpeh {
             typedStashesFreeIds.Push(id);
             stash.typedStashId = -1;
         }
+        
+        [UnityEngine.Scripting.Preserve]
+        internal Stash() : this(-1) { }
 
         [UnityEngine.Scripting.Preserve]
         public Stash(int capacity = -1) {
