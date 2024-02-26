@@ -168,7 +168,7 @@ namespace Scellecs.Morpeh {
             
             var info = TypeIdentifier<T>.info;
             if (world.typedStashes.TryGetValue(info.id, out var typedIndex)) {
-                return Stash<T>.typedStashes.data[typedIndex];
+                return (Stash<T>)Stash<T>.typedStashes.data[typedIndex];
             }
 
             var stash = new Stash<T>();
