@@ -9,6 +9,7 @@ namespace Scellecs.Morpeh {
     using System;
     using Collections;
     public static class StashExtensions {
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
         public static Stash<T> AsDisposable<T>(this Stash<T> stash) where T : struct, IComponent, IDisposable {
 #if MORPEH_DEBUG
             if (stash == null || stash.components == null) {
@@ -25,6 +26,7 @@ namespace Scellecs.Morpeh {
 
             return stash;
         }
+#endif
 
         public static Stash<T> Clone<T>(this Stash<T> stash) where T : unmanaged, IComponent {
 #if MORPEH_DEBUG
