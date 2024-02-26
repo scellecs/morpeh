@@ -973,7 +973,8 @@ public class FooSystem : ISystem {
 
 * [**Tanks**](https://github.com/scellecs/morpeh.examples.tanks) by *SH42913*  
 * [**Ping Pong**](https://github.com/scellecs/morpeh.examples.pong) by *SH42913*  
-* [**Flappy Bird**](https://github.com/R1nge/MorpehECS_FlappyBird) by *R1nge*
+* [**Flappy Bird**](https://github.com/R1nge/MorpehECS_FlappyBird) by *R1nge*        
+* [**3D Asteroids**](https://github.com/R1nge/MorpehECS_3D_Asteroids) by *R1nge*    
 * [**Mobile Runner Hypercasual**](https://github.com/StinkySteak/unity-morpeh-hypercasual) by *StinkySteak*
 
 ---
