@@ -837,6 +837,7 @@ Can be set by user:
 * `MORPEH_THREAD_SAFETY` Define that forces the kernel to validate that all calls come from the same thread the world was created on. The binding to a thread can be changed using the `World.GetThreadId()`, `World.SetThreadId()` methods.
 * `MORPEH_DISABLE_SET_ICONS` Define for disabling set icons in Project Window.
 * `MORPEH_DISABLE_AUTOINITIALIZATION` Define for disable default world creation and creating Morpeh Runner GameObject.
+* `MORPEH_DISABLE_COMPILATION_REPORT` Define for disable compilation report in Editor Console.
 
 Will be set by framework:
 * `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
