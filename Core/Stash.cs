@@ -89,7 +89,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class Stash<T> : Stash where T : struct, IComponent {
-        internal static FastList<Stash<T>> typedStashes;
+        internal static FastList<Stash> typedStashes;
         // ReSharper disable once StaticMemberInGenericType
         internal static IntStack typedStashesFreeIds;
 
@@ -106,7 +106,7 @@ namespace Scellecs.Morpeh {
                 typedStashes.Clear();
                 typedStashesFreeIds.Clear();
             };
-            typedStashes = new FastList<Stash<T>>();
+            typedStashes = new FastList<Stash>();
             typedStashesFreeIds = new IntStack();
             
         }
