@@ -97,8 +97,12 @@ namespace Scellecs.Morpeh.Providers {
             
             var instanceId = this.gameObject.GetInstanceID();
             if (map.TryGetValue(instanceId, out var item)) {
-                if (--item.refCounter <= 0) {
+                item.refCounter--;
+                if (item.refCounter <= 0) {
                     map.Remove(instanceId, out _);
+                } 
+                else {
+                    map.Set(instanceId, item, out _);
                 }
             }
         }
