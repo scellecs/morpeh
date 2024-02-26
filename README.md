@@ -838,7 +838,7 @@ Can be set by user:
 * `MORPEH_DISABLE_SET_ICONS` Define for disabling set icons in Project Window.
 * `MORPEH_DISABLE_AUTOINITIALIZATION` Define for disable default world creation and creating Morpeh Runner GameObject.
 * `MORPEH_DISABLE_COMPILATION_REPORT` Define for disable compilation report in Editor Console.
-
+* `MORPEH_DISABLE_COMPONENT_DISPOSE` Define to disable component disposing feature.
 Will be set by framework:
 * `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
 

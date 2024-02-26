@@ -93,12 +93,16 @@ namespace Scellecs.Morpeh {
         // ReSharper disable once StaticMemberInGenericType
         internal static IntStack typedStashesFreeIds;
 
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
         internal delegate void ComponentDispose(ref T component);
+#endif
 
         internal T empty;
         internal IntHashMap<T> components;
 
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
         internal ComponentDispose componentDispose;
+#endif
 
         [UnityEngine.Scripting.Preserve]
         static Stash() {
@@ -153,9 +157,11 @@ namespace Scellecs.Morpeh {
         internal Stash(Stash<T> other) {
             this.typeId = other.typeId;
             this.offset = other.offset;
-
+            
             this.components = new IntHashMap<T>(other.components);
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
             this.componentDispose = other.componentDispose;
+#endif
             
             RegisterStash(this);
             RegisterTypedStash(this);
@@ -292,7 +298,9 @@ namespace Scellecs.Morpeh {
 
             if (this.components.Remove(entity.entityId.id, out var lastValue)) {
                 entity.RemoveTransfer(this.typeId, this.offset);
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref lastValue);
+#endif
                 return true;
             }
             return false;
@@ -302,6 +310,7 @@ namespace Scellecs.Morpeh {
         public override void RemoveAll() {
             world.ThreadSafetyCheck();
 
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
             if (this.componentDispose != null) {
                 foreach (var index in this.components) {
                     this.componentDispose.Invoke(ref this.components.data[index]);
@@ -310,7 +319,9 @@ namespace Scellecs.Morpeh {
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
                 }
             } 
-            else {
+            else 
+#endif
+            {
                 foreach (var index in this.components) {
                     var entityId = this.components.GetKeyByIndex(index);
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
@@ -323,7 +334,9 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal override bool Clean(Entity entity) {
             if (this.components.Remove(entity.entityId.id, out var lastValue)) {
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref lastValue);
+#endif
                 return true;
             }
             return false;
@@ -401,11 +414,13 @@ namespace Scellecs.Morpeh {
             
             world.ThreadSafetyCheck();
             
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
             if (this.componentDispose != null) {
                 foreach (var componentId in this.components) {
                     this.componentDispose.Invoke(ref this.components.data[componentId]);
                 }
             }
+#endif
 
             this.components.Clear();
             this.components = null;
@@ -413,7 +428,9 @@ namespace Scellecs.Morpeh {
             UnregisterTypedStash(this);
             UnregisterStash(this);
 
+#if !MORPEH_DISABLE_COMPONENT_DISPOSE
             this.componentDispose = null;
+#endif
             this.IsDisposed = true;
         }
     }
