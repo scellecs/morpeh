@@ -175,9 +175,16 @@ namespace Scellecs.Morpeh {
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
+
+            var previousCapacity = this.components.capacity;
 #endif
             if (this.components.Add(entity.entityId.id, default, out var slotIndex)) {
                 entity.AddTransfer(this.typeId, this.offset);
+#if MORPEH_DEBUG
+                if (previousCapacity != this.components.capacity) {
+                    world.newMetrics.stashResizes++;
+                }
+#endif
                 return ref this.components.data[slotIndex];
             }
 #if MORPEH_DEBUG
@@ -194,10 +201,17 @@ namespace Scellecs.Morpeh {
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
+            
+            var previousCapacity = this.components.capacity;
 #endif
             if (this.components.Add(entity.entityId.id, default, out var slotIndex)) {
                 entity.AddTransfer(this.typeId, this.offset);
                 exist = false;
+#if MORPEH_DEBUG
+                if (previousCapacity != this.components.capacity) {
+                    world.newMetrics.stashResizes++;
+                }
+#endif
                 return ref this.components.data[slotIndex];
             }
 
@@ -213,9 +227,16 @@ namespace Scellecs.Morpeh {
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
             }
+            
+            var previousCapacity = this.components.capacity;
 #endif
             if (this.components.Add(entity.entityId.id, value, out _)) {
                 entity.AddTransfer(this.typeId, this.offset);
+#if MORPEH_DEBUG
+                if (previousCapacity != this.components.capacity) {
+                    world.newMetrics.stashResizes++;
+                }
+#endif
                 return true;
             }
 
@@ -261,9 +282,16 @@ namespace Scellecs.Morpeh {
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Set on null or disposed entity");
             }
+            
+            var previousCapacity = this.components.capacity;
 #endif
 
             if (this.components.Set(entity.entityId.id, default, out _)) {
+#if MORPEH_DEBUG
+                if (previousCapacity != this.components.capacity) {
+                    world.newMetrics.stashResizes++;
+                }
+#endif
                 entity.AddTransfer(this.typeId, this.offset);
             }
         }
@@ -276,9 +304,15 @@ namespace Scellecs.Morpeh {
             if (entity.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Set on null or disposed entity");
             }
+            var previousCapacity = this.components.capacity;
 #endif
 
             if (this.components.Set(entity.entityId.id, value, out _)) {
+#if MORPEH_DEBUG
+                if (previousCapacity != this.components.capacity) {
+                    world.newMetrics.stashResizes++;
+                }
+#endif
                 entity.AddTransfer(this.typeId, this.offset);
             }
         }
@@ -366,6 +400,7 @@ namespace Scellecs.Morpeh {
             if (to.IsNullOrDisposed()) {
                 throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity");
             }
+            var previousCapacity = this.components.capacity;
 #endif
 
             if (this.components.TryGetValue(from.entityId.id, out var component)) {
@@ -391,6 +426,11 @@ namespace Scellecs.Morpeh {
                     from.RemoveTransfer(this.typeId, this.offset);
                 }
             }
+#if MORPEH_DEBUG
+            if (previousCapacity != this.components.capacity) {
+                world.newMetrics.stashResizes++;
+            }
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

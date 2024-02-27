@@ -881,6 +881,7 @@ To debug the game, you may need statistics on basic data in the ECS framework, s
 4. Number of systems
 5. Number of commits in the world
 6. Number of entity migrations
+7. Number of stash resizes
 
 You can find all this in the profiler window.  
 To do this, you need to add the official **Unity Profiling Core API** package to your project.  

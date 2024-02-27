@@ -295,6 +295,7 @@ namespace Scellecs.Morpeh {
             public int systems;
             public int commits;
             public int migrations;
+            public int stashResizes;
         }
     }
 }
