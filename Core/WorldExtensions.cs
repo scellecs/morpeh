@@ -103,6 +103,11 @@ namespace Scellecs.Morpeh {
 #endif
         [PublicAPI]
         public static void InitializationDefaultWorld() {
+            foreach (var world in World.worlds) {
+                if (!world.IsNullOrDisposed()) {
+                    world.Dispose();
+                }
+            }
             World.worlds.Clear();
             var defaultWorld = World.Create("Default World");
             defaultWorld.UpdateByUnity = true;
