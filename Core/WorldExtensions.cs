@@ -66,8 +66,7 @@ namespace Scellecs.Morpeh {
             world.identifier        = added ? id : World.worlds.length - 1;
             world.freeEntityIDs     = new IntStack();
             world.nextFreeEntityIDs = new IntStack();
-            world.stashes           = new LongHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
-            world.typedStashes      = new LongHashMap<int>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.stashes           = new LongHashMap<Stash>(Constants.DEFAULT_WORLD_STASHES_CAPACITY);
 
             world.entitiesCount    = 0;
             world.entitiesLength   = 0;
@@ -104,8 +103,11 @@ namespace Scellecs.Morpeh {
 #endif
         [PublicAPI]
         public static void InitializationDefaultWorld() {
-            Stash.cleanup();
-
+            foreach (var world in World.worlds) {
+                if (!world.IsNullOrDisposed()) {
+                    world.Dispose();
+                }
+            }
             World.worlds.Clear();
             var defaultWorld = World.Create("Default World");
             defaultWorld.UpdateByUnity = true;
@@ -131,11 +133,7 @@ namespace Scellecs.Morpeh {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Stash GetStash(this World world, long typeId) {
-            if (world.stashes.TryGetValue(typeId, out var index)) {
-                return Stash.stashes.data[index];
-            }
-
-            return null;
+            return world.stashes.TryGetValue(typeId, out var value) ? value : null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -144,8 +142,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
             if (CommonTypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                if (world.stashes.TryGetValue(definition.id, out var index)) {
-                    return Stash.stashes.data[index];
+                if (world.stashes.TryGetValue(definition.id, out var value)) {
+                    return value;
                 }
             }
 
@@ -155,8 +153,7 @@ namespace Scellecs.Morpeh {
             stash.world = world;
 
             CommonTypeIdentifier.typeAssociation.TryGetValue(type, out definition);
-            world.stashes.Add(definition.id, stash.commonStashId, out _);
-            world.typedStashes.Add(definition.id, stash.typedStashId, out _);
+            world.stashes.Add(definition.id, stash, out _);
 
             return stash;
         }
@@ -167,15 +164,14 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
             var info = TypeIdentifier<T>.info;
-            if (world.typedStashes.TryGetValue(info.id, out var typedIndex)) {
-                return (Stash<T>)Stash<T>.typedStashes.data[typedIndex];
+            if (world.stashes.TryGetValue(info.id, out var value)) {
+                return (Stash<T>)value;
             }
 
             var stash = new Stash<T>();
             stash.world = world;
 
-            world.stashes.Add(info.id, stash.commonStashId, out _);
-            world.typedStashes.Add(info.id, stash.typedStashId, out _);
+            world.stashes.Add(info.id, stash, out _);
 
             return stash;
         }
