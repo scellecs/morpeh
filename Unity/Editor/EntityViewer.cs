@@ -24,8 +24,8 @@ namespace Scellecs.Morpeh.Editor {
                 if (this.entity != null && this.entity.world != null) {
                     var stashes = this.entity.world.stashes;
                     foreach (var stashId in stashes) {
-                        var cache = stashes.GetValueByIndex(stashId);
-                        if (cache.Has(this.entity)) {
+                        var stash = stashes.GetValueByIndex(stashId);
+                        if (stash.Has(this.entity)) {
                             var view = new ComponentView {
                                 internalTypeDefinition = CommonTypeIdentifier.idTypeAssociation[cache.typeId],
                                 entity                 = this.entity
