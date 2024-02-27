@@ -66,7 +66,7 @@ namespace Scellecs.Morpeh {
             world.identifier        = added ? id : World.worlds.length - 1;
             world.freeEntityIDs     = new IntStack();
             world.nextFreeEntityIDs = new IntStack();
-            world.stashes           = new LongHashMap<Stash>(Constants.DEFAULT_WORLD_CACHES_CAPACITY);
+            world.stashes           = new LongHashMap<Stash>(Constants.DEFAULT_WORLD_STASHES_CAPACITY);
 
             world.entitiesCount    = 0;
             world.entitiesLength   = 0;
