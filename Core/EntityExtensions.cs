@@ -145,7 +145,7 @@ namespace Scellecs.Morpeh {
 
             foreach (var offset in from.components) {
                 var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
-                var stash = world.stashes.GetValueByKey(id);
+                var stash = Stash.stashes.data[world.stashes.GetValueByKey(id)];
                 stash.Migrate(from, to, overwrite);
             }
         }
@@ -271,7 +271,7 @@ namespace Scellecs.Morpeh {
             if (entity.currentArchetypeLength > 0) {
                 foreach (var offset in entity.components) {
                     var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
-                    var stash = entity.world.stashes.GetValueByKey(id);
+                    var stash = Stash.stashes.data[entity.world.stashes.GetValueByKey(id)];
                     stash.Clean(entity);
                 }
             }

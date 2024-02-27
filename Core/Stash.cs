@@ -20,7 +20,45 @@ namespace Scellecs.Morpeh {
     public abstract class Stash : IDisposable {
         [PublicAPI]
         public bool IsDisposed;
+        
+        internal static FastList<Stash> stashes;
+        internal static IntStack stashesFreeIds;
 
+        internal static Action cleanup = () => {
+            stashes.Clear();
+            stashesFreeIds.Clear();
+        };
+
+        static Stash() {
+            stashes = new FastList<Stash>();
+            stashesFreeIds = new IntStack();
+        }
+        
+        internal static void RegisterStash(Stash stash) {
+            int id;
+            
+            if (stashesFreeIds.length > 0) {
+                id = stashesFreeIds.Pop();
+                stashes.data[id] = stash;
+                stash.commonStashId = id;
+                return;
+            }
+            
+            id = stashes.length;
+            stashes.Add(stash);
+            stash.commonStashId = id;
+        }
+
+        internal static void UnregisterStash(Stash stash) {
+            var id = stash.commonStashId;
+            
+            stashes.data[id] = null;
+            stashesFreeIds.Push(id);
+            stash.commonStashId = -1;
+        }
+
+        internal int commonStashId;
+        internal int typedStashId;
         internal long typeId;
         internal int offset;
         internal World world;
@@ -51,6 +89,10 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class Stash<T> : Stash where T : struct, IComponent {
+        internal static FastList<Stash> typedStashes;
+        // ReSharper disable once StaticMemberInGenericType
+        internal static IntStack typedStashesFreeIds;
+
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
         internal delegate void ComponentDispose(ref T component);
 #endif
@@ -61,6 +103,40 @@ namespace Scellecs.Morpeh {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
         internal ComponentDispose componentDispose;
 #endif
+
+        [UnityEngine.Scripting.Preserve]
+        static Stash() {
+            cleanup += () => {
+                typedStashes.Clear();
+                typedStashesFreeIds.Clear();
+            };
+            typedStashes = new FastList<Stash>();
+            typedStashesFreeIds = new IntStack();
+            
+        }
+
+        internal static void RegisterTypedStash(Stash<T> stash) {
+            int id;
+            
+            if (typedStashesFreeIds.length > 0) {
+                id = typedStashesFreeIds.Pop();
+                typedStashes.data[id] = stash;
+                stash.typedStashId = id;
+                return;
+            }
+            
+            id = typedStashes.length;
+            typedStashes.Add(stash);
+            stash.typedStashId = id;
+        }
+
+        internal static void UnregisterTypedStash(Stash<T> stash) {
+            var id = stash.typedStashId;
+            
+            typedStashes.data[id] = null;
+            typedStashesFreeIds.Push(id);
+            stash.typedStashId = -1;
+        }
         
         [UnityEngine.Scripting.Preserve]
         internal Stash() : this(-1) { }
@@ -73,6 +149,9 @@ namespace Scellecs.Morpeh {
             this.offset = info.offset;
 
             this.components = new IntHashMap<T>(capacity < 0 ? info.stashSize : capacity);
+
+            RegisterStash(this);
+            RegisterTypedStash(this);
         }
 
         internal Stash(Stash<T> other) {
@@ -83,6 +162,9 @@ namespace Scellecs.Morpeh {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
             this.componentDispose = other.componentDispose;
 #endif
+            
+            RegisterStash(this);
+            RegisterTypedStash(this);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -342,7 +424,10 @@ namespace Scellecs.Morpeh {
 
             this.components.Clear();
             this.components = null;
-            
+
+            UnregisterTypedStash(this);
+            UnregisterStash(this);
+
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
             this.componentDispose = null;
 #endif

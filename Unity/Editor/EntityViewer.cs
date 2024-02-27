@@ -22,10 +22,10 @@ namespace Scellecs.Morpeh.Editor {
             get {
                 this.componentViews.Clear();
                 if (this.entity != null && this.entity.world != null) {
-                    var stashes = this.entity.world.stashes;
-                    foreach (var stashId in stashes) {
-                        var stash = stashes.GetValueByIndex(stashId);
-                        if (stash.Has(this.entity)) {
+                    var caches = this.entity.world.stashes;
+                    foreach (var cacheId in caches) {
+                        var cache = Stash.stashes.data[caches.GetValueByIndex(cacheId)];
+                        if (cache.Has(this.entity)) {
                             var view = new ComponentView {
                                 internalTypeDefinition = CommonTypeIdentifier.idTypeAssociation[cache.typeId],
                                 entity                 = this.entity
