@@ -310,7 +310,15 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool HasSlow(Entity entity) {
-            return this.Has(entity);
+            world.ThreadSafetyCheck();
+            
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity");
+            }
+#endif
+
+            return this.components.Has(entity.entityId.id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
