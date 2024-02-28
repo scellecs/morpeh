@@ -46,7 +46,7 @@ namespace Scellecs.Morpeh {
                 if (stash == null) {
                     continue;
                 }
-                if (stash.HasSlow(entity)) {
+                if (stash.Has(entity)) {
                     return;
                 }
             }
@@ -94,7 +94,7 @@ namespace Scellecs.Morpeh {
                 if (stash == null) {
                     return;
                 }
-                if (!stash.HasSlow(ent)) {
+                if (!stash.Has(ent)) {
                     return;
                 }
             }
@@ -104,7 +104,7 @@ namespace Scellecs.Morpeh {
                 if (stash == null) {
                     continue;
                 }
-                if (stash.HasSlow(ent)) {
+                if (stash.Has(ent)) {
                     return;
                 }
             }
