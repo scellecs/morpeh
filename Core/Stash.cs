@@ -38,7 +38,7 @@ namespace Scellecs.Morpeh {
         internal abstract bool Clean(Entity entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract bool Has(Entity entity);
+        public abstract bool HasSlow(Entity entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public abstract void Migrate(Entity from, Entity to, bool overwrite = true);
@@ -293,9 +293,23 @@ namespace Scellecs.Morpeh {
             }
             return false;
         }
+        
+        // Duplicate to remove virtcalls
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Has(Entity entity) {
+            world.ThreadSafetyCheck();
+            
+#if MORPEH_DEBUG
+            if (entity.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity");
+            }
+#endif
+
+            return this.components.Has(entity.entityId.id);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Has(Entity entity) {
+        public override bool HasSlow(Entity entity) {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
