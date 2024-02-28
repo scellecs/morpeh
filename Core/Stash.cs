@@ -25,14 +25,14 @@ namespace Scellecs.Morpeh {
         internal int offset;
         internal World world;
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract void Set(Entity entity);
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public abstract void Set(Entity entity);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract bool Remove(Entity entity);
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public abstract bool Remove(Entity entity);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public abstract void RemoveAll();
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public abstract void RemoveAll();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal abstract bool Clean(Entity entity);
@@ -193,7 +193,7 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override void Set(Entity entity) {
+        public void Set(Entity entity) {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
@@ -239,7 +239,7 @@ namespace Scellecs.Morpeh {
         internal ref T Empty() => ref this.empty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Remove(Entity entity) {
+        public bool Remove(Entity entity) {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
@@ -259,7 +259,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override void RemoveAll() {
+        public void RemoveAll() {
             world.ThreadSafetyCheck();
 
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
