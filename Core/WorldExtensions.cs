@@ -161,13 +161,13 @@ namespace Scellecs.Morpeh {
             
             var info = TypeIdentifier<T>.info;
             if (world.stashes.TryGetValue(info.id, out var value)) {
-                return value.GetTypedStash<T>();
+                return (Stash<T>)value.typelessStash;
             }
 
             var stash = Stash.Create<T>(world);
             world.stashes.Add(info.id, stash, out _);
 
-            return stash.GetTypedStash<T>();
+            return (Stash<T>)stash.typelessStash;
         }
 
         public static void GlobalUpdate(float deltaTime) {

@@ -18,8 +18,8 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class Stash : IDisposable {
-        private StashMap stashMap;
-        private IDisposable typelessStash;
+        internal StashMap stashMap;
+        internal IDisposable typelessStash;
         
         internal long typeId;
         
@@ -55,11 +55,6 @@ namespace Scellecs.Morpeh {
             };
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Stash<T> GetTypedStash<T>() where T : struct, IComponent {
-            return (Stash<T>)this.typelessStash;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(Entity entity) {
             this.setReflection(entity);
