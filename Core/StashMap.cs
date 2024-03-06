@@ -27,7 +27,7 @@ namespace Scellecs.Morpeh
             this.capacity = this.capacityMinusOne + 1;
 
             this.buckets = new IntPinnedArray(this.capacity);
-            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
+            this.slots = new PinnedArray<IntHashMapSlot>(this.capacity);
         }
 
         public StashMap(StashMap other) {
@@ -36,7 +36,7 @@ namespace Scellecs.Morpeh
             this.freeIndex = other.freeIndex;
 
             this.capacityMinusOne = other.capacityMinusOne;
-            this.capacity         = other.capacity;
+            this.capacity = other.capacity;
 
             this.buckets = new IntPinnedArray(this.capacity);
             this.slots = new PinnedArray<IntHashMapSlot>(this.capacity);
