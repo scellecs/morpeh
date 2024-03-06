@@ -10,13 +10,13 @@ namespace Scellecs.Morpeh
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public unsafe class StashMap
     {
-        public int length;
-        public int capacity;
-        public int capacityMinusOne;
-        public int lastIndex;
-        public int freeIndex;
-        public IntPinnedArray buckets;
-        public PinnedArray<IntHashMapSlot> slots;
+        internal int length;
+        internal int capacity;
+        internal int capacityMinusOne;
+        internal int lastIndex;
+        internal int freeIndex;
+        internal IntPinnedArray buckets;
+        internal PinnedArray<IntHashMapSlot> slots;
 
         public StashMap(int capacity) {
             this.lastIndex = 0;
