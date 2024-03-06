@@ -18,7 +18,7 @@ namespace Scellecs.Morpeh {
                 return false;
             }
 
-            slotIndex = stash.map.TakeSlot(in key, out var resized);
+            slotIndex = stash.map.TakeSlot(key, out var resized);
             
             if (resized) {
                 ArrayHelpers.Grow(ref stash.data, stash.map.capacity);
@@ -35,7 +35,7 @@ namespace Scellecs.Morpeh {
                 return false;
             }
 
-            slotIndex = stash.map.TakeSlot(in key, out var resized);
+            slotIndex = stash.map.TakeSlot(key, out var resized);
             
             if (resized) {
                 ArrayHelpers.Grow(ref stash.data, stash.map.capacity);

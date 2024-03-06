@@ -217,7 +217,7 @@ namespace Scellecs.Morpeh {
                 throw new Exception($"[MORPEH] You're trying to get on entity {entity.entityId.id} a component that doesn't exists!");
             }
 #endif
-            if (this.map.TryGetIndex(in entity.entityId.id, out var dataIndex)) {
+            if (this.map.TryGetIndex(entity.entityId.id, out var dataIndex)) {
                 return ref this.data[dataIndex];
             }
             
@@ -233,7 +233,7 @@ namespace Scellecs.Morpeh {
                 throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
             }
 #endif
-            if (this.map.TryGetIndex(in entity.entityId.id, out var dataIndex))
+            if (this.map.TryGetIndex(entity.entityId.id, out var dataIndex))
             {
                 exist = true;
                 return ref this.data[dataIndex];
@@ -376,7 +376,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
 
-            if (this.map.TryGetIndex(in from.entityId.id, out var dataIndex)) {
+            if (this.map.TryGetIndex(from.entityId.id, out var dataIndex)) {
                 var component = this.data[dataIndex];
                 
                 if (overwrite) {
