@@ -32,14 +32,14 @@ namespace Scellecs.Morpeh
 
         public StashMap(StashMap other) {
             this.lastIndex = other.lastIndex;
-            this.length    = other.length;
+            this.length = other.length;
             this.freeIndex = other.freeIndex;
 
             this.capacityMinusOne = other.capacityMinusOne;
             this.capacity         = other.capacity;
 
             this.buckets = new IntPinnedArray(this.capacity);
-            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
+            this.slots = new PinnedArray<IntHashMapSlot>(this.capacity);
             
             for (int i = 0, len = this.capacity; i < len; i++) {
                 this.buckets.data[i] = other.buckets.data[i];

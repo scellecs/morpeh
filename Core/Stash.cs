@@ -106,11 +106,11 @@ namespace Scellecs.Morpeh {
         [PublicAPI]
         public bool IsDisposed;
 
-        internal World world;
-        internal long typeId;
-        internal int offset;
+        private World world;
+        private long typeId;
+        private int offset;
         
-        internal StashMap map;
+        internal readonly StashMap map;
         public T[] data;
         private T empty;
 
