@@ -198,7 +198,7 @@ namespace Scellecs.Morpeh
             var rem = key & this.capacityMinusOne;
             ref var newSlot = ref this.slots.ptr[slotIndex];
 
-            newSlot.key  = key + 1;
+            newSlot.key = key + 1;
             newSlot.next = this.buckets.ptr[rem] - 1;
 
             this.buckets.ptr[rem] = slotIndex + 1;
