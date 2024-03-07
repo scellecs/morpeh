@@ -447,5 +447,29 @@ namespace Scellecs.Morpeh {
 #endif
             this.IsDisposed = true;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Enumerator GetEnumerator() {
+            return new Enumerator {
+                mapEnumerator = this.map.GetEnumerator(),
+                data = this.data,
+            };
+        }
+            
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        public struct Enumerator {
+            internal StashMap.Enumerator mapEnumerator;
+            internal T[] data;
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool MoveNext() => this.mapEnumerator.MoveNext();
+            
+            public ref T Current {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref this.data[this.mapEnumerator.Current];
+            }
+        }
     }
 }
