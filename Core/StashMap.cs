@@ -99,7 +99,7 @@ namespace Scellecs.Morpeh
 
             int next;
             for (var i = this.buckets.ptr[rem] - 1; i >= 0; i = next) {
-                ref var slot = ref this.slots.ptr[i];
+                var slot = this.slots.ptr[i];
                 if (slot.key - 1 == key) {
                     dataIndex = i;
                     return true;
