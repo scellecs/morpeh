@@ -9,9 +9,13 @@ namespace Scellecs.Morpeh {
     using System;
     using Collections;
     using System.Runtime.CompilerServices;
+    using Unity.IL2CPP.CompilerServices;
     
     public static class StashExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         internal static bool TryAddData<T>(this Stash<T> stash, in int key, in T value, out int slotIndex) where T : struct, IComponent {
             if (stash.map.IsKeySet(key, out _)) {
                 slotIndex = -1;
@@ -29,6 +33,9 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         internal static bool TrySetData<T>(this Stash<T> stash, in int key, in T value) where T : struct, IComponent {
             if (stash.map.IsKeySet(key, out var slotIndex)) {
                 stash.data[slotIndex] = value;
