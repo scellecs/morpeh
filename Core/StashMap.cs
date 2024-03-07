@@ -31,7 +31,7 @@ namespace Scellecs.Morpeh
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetKeyByIndex(int index) {
+        public int GetKeyBySlotIndex(int index) {
             return slots.ptr[index].key - 1;
         }
         
@@ -53,7 +53,7 @@ namespace Scellecs.Morpeh
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(int key, [CanBeNull] out int dataIndex) {
+        public bool Remove(int key, [CanBeNull] out int slotIndex) {
             var rem = key & this.capacityMinusOne;
 
             int next;
@@ -68,7 +68,7 @@ namespace Scellecs.Morpeh
                         this.slots.ptr[num].next = slot.next;
                     }
 
-                    dataIndex = i;
+                    slotIndex = i;
 
                     slot.key = -1;
                     slot.next = this.freeIndex;
@@ -89,26 +89,26 @@ namespace Scellecs.Morpeh
                 num  = i;
             }
 
-            dataIndex = default;
+            slotIndex = default;
             return false;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetIndex(int key, out int dataIndex) {
+        public bool TryGetIndex(int key, out int slotIndex) {
             var rem = key & this.capacityMinusOne;
 
             int next;
             for (var i = this.buckets.ptr[rem] - 1; i >= 0; i = next) {
                 var slot = this.slots.ptr[i];
                 if (slot.key - 1 == key) {
-                    dataIndex = i;
+                    slotIndex = i;
                     return true;
                 }
 
                 next = slot.next;
             }
 
-            dataIndex = default;
+            slotIndex = default;
             return false;
         }
         

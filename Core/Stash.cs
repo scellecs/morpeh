@@ -316,18 +316,18 @@ namespace Scellecs.Morpeh {
 
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
             if (this.componentDispose != null) {
-                foreach (var index in this.map) {
-                    this.componentDispose.Invoke(ref this.data[index]);
+                foreach (var slotIndex in this.map) {
+                    this.componentDispose.Invoke(ref this.data[slotIndex]);
 
-                    var entityId = this.map.GetKeyByIndex(index);
+                    var entityId = this.map.GetKeyBySlotIndex(slotIndex);
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
                 }
             } 
             else 
 #endif
             {
-                foreach (var index in this.map) {
-                    var entityId = this.map.GetKeyByIndex(index);
+                foreach (var slotIndex in this.map) {
+                    var entityId = this.map.GetKeyBySlotIndex(slotIndex);
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
                 }
             }
@@ -376,8 +376,8 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
 
-            if (this.map.TryGetIndex(from.entityId.id, out var dataIndex)) {
-                var component = this.data[dataIndex];
+            if (this.map.TryGetIndex(from.entityId.id, out var slotIndex)) {
+                var component = this.data[slotIndex];
                 
                 if (overwrite) {
                     if (this.map.Has(to.entityId.id)) {
@@ -431,8 +431,8 @@ namespace Scellecs.Morpeh {
             
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
             if (this.componentDispose != null) {
-                foreach (var componentId in this.map) {
-                    this.componentDispose.Invoke(ref this.data[componentId]);
+                foreach (var slotIndex in this.map) {
+                    this.componentDispose.Invoke(ref this.data[slotIndex]);
                 }
             }
 #endif
