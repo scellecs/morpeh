@@ -31,8 +31,8 @@ namespace Scellecs.Morpeh
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetKeyBySlotIndex(int index) {
-            return slots.ptr[index].key - 1;
+        public int GetKeyBySlotIndex(int slotIndex) {
+            return slots.ptr[slotIndex].key - 1;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -169,7 +169,7 @@ namespace Scellecs.Morpeh
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public int Expand() {
+        private int Expand() {
             var newCapacityMinusOne = HashHelpers.GetCapacity(this.length);
             var newCapacity= newCapacityMinusOne + 1;
 
