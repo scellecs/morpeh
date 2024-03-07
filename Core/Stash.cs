@@ -331,11 +331,9 @@ namespace Scellecs.Morpeh {
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
                 }
             }
-
-            if (!this.map.IsEmpty()) {
-                Array.Clear(this.data, 0, this.map.capacity);
-                this.map.Clear();
-            }
+            
+            Array.Clear(this.data, 0, this.map.capacity);
+            this.map.Clear();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
