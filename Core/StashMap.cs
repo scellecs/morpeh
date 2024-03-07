@@ -41,7 +41,7 @@ namespace Scellecs.Morpeh
 
             int next;
             for (var i = buckets.ptr[rem] - 1; i >= 0; i = next) {
-                ref var slot = ref slots.ptr[i];
+                var slot = slots.ptr[i];
                 if (slot.key - 1 == key) {
                     return true;
                 }
@@ -70,7 +70,7 @@ namespace Scellecs.Morpeh
 
                     dataIndex = i;
 
-                    slot.key  = -1;
+                    slot.key = -1;
                     slot.next = this.freeIndex;
 
                     --this.length;
