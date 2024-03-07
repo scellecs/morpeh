@@ -113,28 +113,6 @@ namespace Scellecs.Morpeh
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyFrom(StashMap from, out bool needResize) {
-            this.lastIndex = from.lastIndex;
-            this.length = from.length;
-            this.freeIndex = from.freeIndex;
-
-            needResize = this.capacity < from.capacity;
-
-            this.capacityMinusOne = from.capacityMinusOne;
-            this.capacity = from.capacity;
-
-            if (needResize) {
-                this.buckets = new IntPinnedArray(this.capacity);
-                this.slots = new PinnedArray<IntHashMapSlot>(this.capacity);
-            }
-
-            for (int i = 0, len = this.capacity; i < len; i++) {
-                this.buckets.data[i] = from.buckets.data[i];
-                this.slots.data[i] = from.slots.data[i];
-            }
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsKeySet(int key, out int slotIndex) {
             var rem = key & this.capacityMinusOne;
 
