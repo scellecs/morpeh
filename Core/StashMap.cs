@@ -202,5 +202,44 @@ namespace Scellecs.Morpeh
             this.length = 0;
             this.freeIndex = -1;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Enumerator GetEnumerator() {
+            Enumerator e;
+            e.map = this;
+            e.index = 0;
+            e.current = default;
+            return e;
+        }
+        
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+        public struct Enumerator {
+            public StashMap map;
+
+            public int index;
+            public int current;
+
+            public bool MoveNext() {
+                for (; this.index < this.map.lastIndex; ++this.index) {
+                    var slot = this.map.slots.ptr[this.index];
+                    if (slot.key - 1 < 0) {
+                        continue;
+                    }
+
+                    this.current = this.index;
+                    ++this.index;
+
+                    return true;
+                }
+
+                this.index = this.map.lastIndex + 1;
+                this.current = default;
+                return false;
+            }
+
+            public int Current => this.current;
+        }
     }
 }

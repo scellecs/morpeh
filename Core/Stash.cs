@@ -316,7 +316,7 @@ namespace Scellecs.Morpeh {
 
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
             if (this.componentDispose != null) {
-                foreach (var index in this) {
+                foreach (var index in this.map) {
                     this.componentDispose.Invoke(ref this.data[index]);
 
                     var entityId = this.map.GetKeyByIndex(index);
@@ -326,7 +326,7 @@ namespace Scellecs.Morpeh {
             else 
 #endif
             {
-                foreach (var index in this) {
+                foreach (var index in this.map) {
                     var entityId = this.map.GetKeyByIndex(index);
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
                 }
@@ -431,7 +431,7 @@ namespace Scellecs.Morpeh {
             
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
             if (this.componentDispose != null) {
-                foreach (var componentId in this) {
+                foreach (var componentId in this.map) {
                     this.componentDispose.Invoke(ref this.data[componentId]);
                 }
             }
@@ -447,45 +447,5 @@ namespace Scellecs.Morpeh {
 #endif
             this.IsDisposed = true;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Enumerator GetEnumerator() {
-            Enumerator e;
-            e.map = this.map;
-            e.index = 0;
-            e.current = default;
-            return e;
-        }
-
-        [Il2CppSetOption(Option.NullChecks, false)]
-        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public unsafe struct Enumerator {
-            public StashMap map;
-
-            public int index;
-            public int current;
-
-            public bool MoveNext() {
-                for (; this.index < this.map.lastIndex; ++this.index) {
-                    var slot = this.map.slots.ptr[this.index];
-                    if (slot.key - 1 < 0) {
-                        continue;
-                    }
-
-                    this.current = this.index;
-                    ++this.index;
-
-                    return true;
-                }
-
-                this.index = this.map.lastIndex + 1;
-                this.current = default;
-                return false;
-            }
-
-            public int Current => this.current;
-        }
     }
-
 }
