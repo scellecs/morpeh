@@ -1,15 +1,13 @@
-﻿using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
-using Scellecs.Morpeh.Collections;
-using Unity.IL2CPP.CompilerServices;
-
-namespace Scellecs.Morpeh
-{
+﻿namespace Scellecs.Morpeh {
+    using System.Runtime.CompilerServices;
+    using JetBrains.Annotations;
+    using Scellecs.Morpeh.Collections;
+    using Unity.IL2CPP.CompilerServices;
+    
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public unsafe class StashMap
-    {
+    public unsafe class StashMap {
         internal int length;
         internal int capacity;
         internal int capacityMinusOne;
