@@ -451,8 +451,8 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             Enumerator e;
-            e.stash = this;
-            e.index   = 0;
+            e.map = this.map;
+            e.index = 0;
             e.current = default;
             return e;
         }
@@ -461,14 +461,14 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public unsafe struct Enumerator {
-            public Stash<T> stash;
+            public StashMap map;
 
             public int index;
             public int current;
 
             public bool MoveNext() {
-                for (; this.index < this.stash.map.lastIndex; ++this.index) {
-                    ref var slot = ref this.stash.map.slots.ptr[this.index];
+                for (; this.index < this.map.lastIndex; ++this.index) {
+                    var slot = this.map.slots.ptr[this.index];
                     if (slot.key - 1 < 0) {
                         continue;
                     }
@@ -479,7 +479,7 @@ namespace Scellecs.Morpeh {
                     return true;
                 }
 
-                this.index   = this.stash.map.lastIndex + 1;
+                this.index = this.map.lastIndex + 1;
                 this.current = default;
                 return false;
             }
