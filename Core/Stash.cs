@@ -101,7 +101,7 @@ namespace Scellecs.Morpeh {
         [PublicAPI]
         public bool IsDisposed;
 
-        private World world;
+        internal World world;
         private long typeId;
         private int offset;
         
