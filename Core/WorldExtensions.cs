@@ -147,11 +147,7 @@ namespace Scellecs.Morpeh {
                 }
             }
 
-            var constructedType = typeof(Stash<>).MakeGenericType(type);
-            var stash           = (Stash)Activator.CreateInstance(constructedType, true);
-
-            stash.world = world;
-
+            var stash = Stash.CreateReflection(world, type);
             CommonTypeIdentifier.typeAssociation.TryGetValue(type, out definition);
             world.stashes.Add(definition.id, stash, out _);
 
@@ -165,15 +161,13 @@ namespace Scellecs.Morpeh {
             
             var info = TypeIdentifier<T>.info;
             if (world.stashes.TryGetValue(info.id, out var value)) {
-                return (Stash<T>)value;
+                return (Stash<T>)value.typelessStash;
             }
 
-            var stash = new Stash<T>();
-            stash.world = world;
-
+            var stash = Stash.Create<T>(world);
             world.stashes.Add(info.id, stash, out _);
 
-            return stash;
+            return (Stash<T>)stash.typelessStash;
         }
 
         public static void GlobalUpdate(float deltaTime) {
