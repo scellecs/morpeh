@@ -100,6 +100,12 @@ namespace Scellecs.Morpeh {
 #endif
         [PublicAPI]
         public bool IsDisposed;
+        
+        [PublicAPI]
+        public int Length {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => this.map.length;
+        }
 
         internal World world;
         private long typeId;
