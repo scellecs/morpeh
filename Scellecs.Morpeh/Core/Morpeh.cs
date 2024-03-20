@@ -16,6 +16,7 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Native")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Workaround")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Tests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Benchmarks")]
 namespace Scellecs.Morpeh {
     using System;
     using UnityEngine;

@@ -1,7 +1,11 @@
 ﻿namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
+    using Unity.IL2CPP.CompilerServices;
     using Scellecs.Morpeh.Collections;
     
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class TransientUtility {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Initialize(ref TransientArchetype transient) {
@@ -34,7 +38,7 @@
                 transient.addedComponents.Set(typeInfo.offset.GetValue(), typeInfo, out _);
             }
 
-            transient.nextArchetypeId = transient.nextArchetypeId.Combine(ref typeInfo.id);
+            transient.nextArchetypeId = transient.nextArchetypeId.Combine(typeInfo.id);
             MLogger.LogTrace($"[AddComponent] To: {transient.nextArchetypeId}");
         }
         
@@ -47,7 +51,7 @@
                 transient.removedComponents.Set(typeInfo.offset.GetValue(), typeInfo, out _);
             }
             
-            transient.nextArchetypeId = transient.nextArchetypeId.Combine(ref typeInfo.id);
+            transient.nextArchetypeId = transient.nextArchetypeId.Combine(typeInfo.id);
             MLogger.LogTrace($"[RemoveComponent] To: {transient.nextArchetypeId}");
         }
     }

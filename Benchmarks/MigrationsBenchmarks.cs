@@ -52,7 +52,7 @@ public class MigrationsBenchmarks {
         this.filter = null;
     }
 
-    // [Benchmark]
+    //[Benchmark]
     public void SetRemoveComponentArraySingle() {
         foreach (var entity in this.buffer) {
             this.test2.Set(entity, new Test2());
@@ -99,7 +99,7 @@ public class MigrationsBenchmarks {
         this.world.Commit();
     }
     
-    // [Benchmark]
+    //[Benchmark]
     public void NewArchetypeFuckery() {
         foreach (var entity in this.buffer) {
             this.test2.Set(entity, new Test2());
