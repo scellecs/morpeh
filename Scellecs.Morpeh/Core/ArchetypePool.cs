@@ -1,7 +1,11 @@
-﻿using System.Runtime.CompilerServices;
-using Scellecs.Morpeh.Collections;
+﻿namespace Scellecs.Morpeh {
+    using System.Runtime.CompilerServices;
+    using Scellecs.Morpeh.Collections;
+    using Unity.IL2CPP.CompilerServices;
 
-namespace Scellecs.Morpeh {
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal class ArchetypePool {
         private FastList<Archetype> archetypes;
         
@@ -36,7 +40,8 @@ namespace Scellecs.Morpeh {
         public void Return(Archetype archetype) {
             this.archetypes.Add(archetype);
             
-            foreach (var filter in archetype.filters) {
+            foreach (var idx in archetype.filters) {
+                var filter = archetype.filters.GetValueByIndex(idx);
                 filter.RemoveArchetype(archetype);
             }
             archetype.ClearFilters();

@@ -15,6 +15,7 @@ namespace Scellecs.Morpeh {
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     using System.Text;
+    using System.Threading;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -35,6 +36,14 @@ namespace Scellecs.Morpeh {
         internal int level;
         internal TypeId includeHash;
         internal TypeId excludeHash;
+    }
+
+    [Il2CppEagerStaticClassConstruction]
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    internal static class FilterIdStore {
+        internal static int id;
     }
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -68,6 +77,7 @@ namespace Scellecs.Morpeh {
         internal FastList<TypeInfo> excludedTypes;
         
         internal int archetypesLength;
+        internal int id;
 
         internal Filter(World world, FastList<TypeInfo> includedTypes, FastList<TypeInfo> excludedTypes) {
             this.world = world;
@@ -78,6 +88,8 @@ namespace Scellecs.Morpeh {
 
             this.includedTypes = includedTypes;
             this.excludedTypes = excludedTypes;
+            
+            this.id = Interlocked.Increment(ref FilterIdStore.id);
         }
 
         public override string ToString() {

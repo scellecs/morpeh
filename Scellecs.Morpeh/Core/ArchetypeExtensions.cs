@@ -50,7 +50,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddFilter(this Archetype archetype, Filter filter) {
-            if (archetype.filters.Add(filter)) {
+            if (archetype.filters.Add(filter.id, filter, out _)) {
                 MLogger.LogTrace($"[ArchetypeExtensions] Added filter {filter} to archetype {archetype.id}");
             } else {
                 MLogger.LogTrace($"[ArchetypeExtensions] Filter {filter} already in archetype {archetype.id}");
@@ -59,7 +59,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveFilter(this Archetype archetype, Filter filter) {
-            if (archetype.filters.Remove(filter)) {
+            if (archetype.filters.Remove(filter.id, out _)) {
                 MLogger.LogTrace($"[ArchetypeExtensions] Removed filter {filter} from archetype {archetype.id}");
             } else {
                 MLogger.LogTrace($"[ArchetypeExtensions] Filter {filter} not found in archetype {archetype.id}");

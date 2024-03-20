@@ -573,14 +573,14 @@ namespace Scellecs.Morpeh {
                 world.archetypes.Add(transient.nextArchetypeId.GetValue(), nextArchetype, out _);
                 world.archetypesCount++;
 
-                if (transient.baseArchetype != null && transient.baseArchetype.filters.Count > 0) {
+                if (transient.baseArchetype != null && transient.baseArchetype.filters.length > 0) {
                     AddMatchingPreviousFilters(nextArchetype, transient.baseArchetype.filters);
                 }
                 
                 world.AddMatchingDeltaFilters(nextArchetype, transient.addedComponents);
                 world.AddMatchingDeltaFilters(nextArchetype, transient.removedComponents);
                 
-                MLogger.LogTrace($"[WorldExtensions] Filter count for archetype {nextArchetype.id} is {nextArchetype.filters.Count}");
+                MLogger.LogTrace($"[WorldExtensions] Filter count for archetype {nextArchetype.id} is {nextArchetype.filters.length}");
             }
             
             // Remove from previous archetype
@@ -636,8 +636,9 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddMatchingPreviousFilters(Archetype archetype, HashSet<Filter> filters) {
-            foreach (var filter in filters) {
+        internal static void AddMatchingPreviousFilters(Archetype archetype, IntHashMap<Filter> filters) {
+            foreach (var idx in filters) {
+                var filter = filters.GetValueByIndex(idx);
                 if (filter.AddArchetypeIfMatches(archetype)) {
                     MLogger.LogTrace($"[WorldExtensions] Add PREVIOUS {filter} to archetype {archetype.id}");
                     archetype.AddFilter(filter);

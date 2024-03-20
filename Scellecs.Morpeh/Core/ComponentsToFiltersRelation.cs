@@ -1,6 +1,7 @@
 ﻿namespace Scellecs.Morpeh {
     using System;
     
+    // TODO: Rework to struct
     internal class ComponentsToFiltersRelation {
         internal Filter[][] componentsToFilters;
         
