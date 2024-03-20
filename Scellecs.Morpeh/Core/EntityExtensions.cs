@@ -131,15 +131,20 @@ namespace Scellecs.Morpeh {
             
             var world = entity.world;
             
-            // Clean components if entity is transient
+            // Clean new components if entity is transient
             
             if (world.dirtyEntities.Get(entity.ID.id))
             {
                 ref var transient = ref world.transients[entity.ID.id];
                 
-                foreach (var idx in transient.addedComponents) {
-                    ref var typeInfo = ref transient.addedComponents.GetValueRefByIndex(idx);
-                    var stash = world.stashes.GetValueByKey(typeInfo.offset.GetValue());
+                foreach (var idx in transient.changes) {
+                    var structuralChange = transient.changes.GetValueByIndex(idx);
+
+                    if (!structuralChange.isAddition) {
+                        continue;
+                    }
+                    
+                    var stash = world.stashes.GetValueByKey(structuralChange.typeOffset.GetValue());
                     stash.Clean(entity);
                 }
             }
@@ -153,7 +158,7 @@ namespace Scellecs.Morpeh {
                         stash.Clean(entity);
                     }
                     
-                    archetype.Remove(entity);
+                    archetype.Remove(entity.ID);
                     world.TryScheduleArchetypeForRemoval(archetype);
                 }
             }

@@ -1,11 +1,14 @@
 ﻿namespace Scellecs.Morpeh {
     using System;
+    using Unity.IL2CPP.CompilerServices;
     
-    // TODO: Rework to struct
-    internal class ComponentsToFiltersRelation {
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    internal struct ComponentsToFiltersRelation {
         internal Filter[][] componentsToFilters;
         
-        public ComponentsToFiltersRelation(int capacity = 32) {
+        public ComponentsToFiltersRelation(int capacity) {
             this.componentsToFilters = new Filter[capacity][];
         }
         
@@ -33,7 +36,7 @@
         private TypeOffset GetMaxOffset(TypeInfo[] typeInfos) {
             var maxTypeOffset = new TypeOffset(-1);
             foreach (var typeInfo in typeInfos) {
-                if (typeInfo.offset > maxTypeOffset) {
+                if (typeInfo.offset.GetValue() > maxTypeOffset.GetValue()) {
                     maxTypeOffset = typeInfo.offset;
                 }
             }

@@ -283,9 +283,15 @@ namespace Scellecs.Morpeh {
 
             var filter = new Filter(builder.world, includedOffsets, excludedOffsets);
 
-            builder.world.componentsToFiltersRelation.Add(typeOffsets, filter);
+            filter.world.componentsToFiltersRelation.Add(typeOffsets, filter);
             filter.world.filters.Add(filter);
-            filter.CheckAndAddArchetypes();
+            
+            foreach (var archetypeIndex in filter.world.archetypes) {
+                var archetype = filter.world.archetypes.GetValueByIndex(archetypeIndex);
+                if (filter.AddArchetypeIfMatches(archetype)) {
+                    archetype.AddFilter(filter);
+                }
+            }
             
             return filter;
         }

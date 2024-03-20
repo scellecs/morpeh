@@ -24,23 +24,15 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Add(this Archetype archetype, Entity entity) {
-            if (archetype.entities.Set(entity.entityId.id)) {
-                MLogger.LogTrace($"[ArchetypeExtensions] Added entity {entity} to archetype {archetype.id}");
-                archetype.length++;
-            } else {
-                MLogger.LogTrace($"[ArchetypeExtensions] Entity {entity} already in archetype {archetype.id}");
-            }
+        public static void Add(this Archetype archetype, EntityId entityId) {
+            archetype.entities.Set(entityId.id);
+            ++archetype.length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Remove(this Archetype archetype, Entity entity) {
-            if (archetype.entities.Unset(entity.entityId.id)) {
-                MLogger.LogTrace($"[ArchetypeExtensions] Removed entity {entity} from archetype {archetype.id}");
-                archetype.length--;
-            } else {
-                MLogger.LogTrace($"[ArchetypeExtensions] Entity {entity} not found in archetype {archetype.id}");
-            }
+        public static void Remove(this Archetype archetype, EntityId entityId) {
+            archetype.entities.Unset(entityId.id);
+            --archetype.length;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -50,26 +42,17 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddFilter(this Archetype archetype, Filter filter) {
-            if (archetype.filters.Add(filter.id, filter, out _)) {
-                MLogger.LogTrace($"[ArchetypeExtensions] Added filter {filter} to archetype {archetype.id}");
-            } else {
-                MLogger.LogTrace($"[ArchetypeExtensions] Filter {filter} already in archetype {archetype.id}");
-            }
+            archetype.filters.Add(filter.id, filter, out _);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveFilter(this Archetype archetype, Filter filter) {
-            if (archetype.filters.Remove(filter.id, out _)) {
-                MLogger.LogTrace($"[ArchetypeExtensions] Removed filter {filter} from archetype {archetype.id}");
-            } else {
-                MLogger.LogTrace($"[ArchetypeExtensions] Filter {filter} not found in archetype {archetype.id}");
-            }
+            archetype.filters.Remove(filter.id, out _);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ClearFilters(this Archetype archetype) {
             archetype.filters.Clear();
-            MLogger.LogTrace($"[ArchetypeExtensions] Removed all filters from archetype {archetype.id}");
         }
     }
 }

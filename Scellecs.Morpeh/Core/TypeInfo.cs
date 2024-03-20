@@ -16,21 +16,5 @@
         public override string ToString() {
             return $"TypeInfo({this.offset}, {this.id})";
         }
-
-        public override int GetHashCode() {
-            return this.offset.GetValue();
-        }
-        
-        public static bool operator ==(TypeInfo a, TypeInfo b) {
-            return a.offset.Equals(b.offset);
-        }
-        
-        public static bool operator !=(TypeInfo a, TypeInfo b) {
-            return !a.offset.Equals(b.offset);
-        }
-        
-        public override bool Equals(object obj) {
-            return obj is TypeInfo other && this.offset.Equals(other.offset);
-        }
     }
 }

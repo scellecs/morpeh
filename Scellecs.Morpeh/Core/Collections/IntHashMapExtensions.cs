@@ -338,7 +338,7 @@ namespace Scellecs.Morpeh.Collections {
 
             hashMap.slots.Clear();
             hashMap.buckets.Clear();
-            Array.Clear(hashMap.data, 0, hashMap.capacity);
+            Array.Clear(hashMap.data, 0, hashMap.lastIndex);
 
             hashMap.lastIndex = 0;
             hashMap.length    = 0;

@@ -1,7 +1,6 @@
 namespace Scellecs.Morpeh {
     using Collections;
     using Unity.IL2CPP.CompilerServices;
-    using System.Collections.Generic;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -13,7 +12,6 @@ namespace Scellecs.Morpeh {
         internal BitMap entities;
         internal IntHashMap<Filter> filters;
         
-       
         internal Archetype(ArchetypeId id) {
             this.id = id;
             this.length = 0;

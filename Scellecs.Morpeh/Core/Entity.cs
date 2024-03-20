@@ -16,12 +16,12 @@ namespace Scellecs.Morpeh {
     public sealed partial class Entity {
         [NonSerialized]
         internal World world;
-        
-        [SerializeField]
-        internal ArchetypeId currentArchetype;
 
         [SerializeField]
         internal EntityId entityId;
+        
+        [SerializeField]
+        internal ArchetypeId currentArchetype;
         
         [ShowInInspector]
         public EntityId ID

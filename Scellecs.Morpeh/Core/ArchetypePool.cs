@@ -6,10 +6,10 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    internal class ArchetypePool {
+    internal struct ArchetypePool {
         private FastList<Archetype> archetypes;
         
-        public ArchetypePool(int initialCapacity = 32) {
+        public ArchetypePool(int initialCapacity) {
             this.archetypes = new FastList<Archetype>(initialCapacity);
             WarmUp(initialCapacity);
         }

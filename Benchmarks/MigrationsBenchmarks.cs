@@ -1,13 +1,16 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Diagnostics.dotTrace;
 using Scellecs.Morpeh;
 
 namespace Benchmarks;
 
 [MemoryDiagnoser(false)]
+// [DotTraceDiagnoser]
 // [HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.BranchInstructions)]
 public class MigrationsBenchmarks {
     [Params(16, 512, 2048)]
+    //[Params(16)]
     public int Count;
 
     private World world;
@@ -38,21 +41,8 @@ public class MigrationsBenchmarks {
         
         this.world.Commit();
     }
-    
-    [GlobalCleanup]
-    public void TearDown() {
-        this.world.Dispose();
-        this.world = null;
 
-        this.test1 = null;
-        this.test2 = null;
-        
-        this.buffer = null;
-        
-        this.filter = null;
-    }
-
-    //[Benchmark]
+    // [Benchmark]
     public void SetRemoveComponentArraySingle() {
         foreach (var entity in this.buffer) {
             this.test2.Set(entity, new Test2());
@@ -99,7 +89,7 @@ public class MigrationsBenchmarks {
         this.world.Commit();
     }
     
-    //[Benchmark]
+    // [Benchmark]
     public void NewArchetypeFuckery() {
         foreach (var entity in this.buffer) {
             this.test2.Set(entity, new Test2());
