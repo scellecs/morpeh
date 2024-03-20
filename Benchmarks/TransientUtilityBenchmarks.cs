@@ -11,7 +11,7 @@ public class TransientUtilityBenchmarks {
     [Params(64)]
     public int Count;
     
-    [GlobalSetup]
+    //[GlobalSetup]
     public void SetUp() {
         TransientUtility.Initialize(ref this.transient);
         this.typeInfos = new TypeInfo[this.Count];
@@ -20,14 +20,14 @@ public class TransientUtilityBenchmarks {
         }
     }
     
-    [Benchmark]
+    //[Benchmark]
     public void Rebase() {
         for (var i = 0; i < this.Count; i++) {
             TransientUtility.Rebase(ref this.transient, null);
         }
     }
     
-    [Benchmark]
+    //[Benchmark]
     public void MultipleAdd() {
         for (var i = 0; i < this.Count; i++) {
             var typeInfo = this.typeInfos[i];
@@ -37,7 +37,7 @@ public class TransientUtilityBenchmarks {
         TransientUtility.Rebase(ref this.transient, null);
     }
     
-    [Benchmark]
+    //[Benchmark]
     public void MultipleRemove() {
         for (var i = 0; i < this.Count; i++) {
             var typeInfo = this.typeInfos[i];
@@ -47,7 +47,7 @@ public class TransientUtilityBenchmarks {
         TransientUtility.Rebase(ref this.transient, null);
     }
     
-    [Benchmark]
+    //[Benchmark]
     public void AddRemove() {
         for (var i = 0; i < this.Count; i++) {
             var typeInfo = this.typeInfos[i];

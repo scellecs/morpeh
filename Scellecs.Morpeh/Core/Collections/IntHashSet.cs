@@ -9,7 +9,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class IntHashSet : IEnumerable<int> {
+    public sealed class IntHashSet {
         public int length;
         public int capacity;
         public int capacityMinusOne;
@@ -44,14 +44,10 @@ namespace Scellecs.Morpeh.Collections {
             return e;
         }
 
-        IEnumerator<int> IEnumerable<int>.GetEnumerator() => this.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public unsafe struct Enumerator : IEnumerator<int> {
+        public unsafe struct Enumerator {
             public IntHashSet set;
 
             public int index;
@@ -79,16 +75,6 @@ namespace Scellecs.Morpeh.Collections {
             }
 
             public int Current => this.current;
-
-            object IEnumerator.Current => this.current;
-
-            void IEnumerator.Reset() {
-                this.index   = 0;
-                this.current = default;
-            }
-
-            public void Dispose() {
-            }
         }
     }
 }

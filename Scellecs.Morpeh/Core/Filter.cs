@@ -61,7 +61,7 @@ namespace Scellecs.Morpeh {
         internal World world;
 
         internal FastList<Archetype> archetypes;
-        internal HashSet<ArchetypeId> archetypeHashes; // TODO: Replace with something faster
+        internal LongHashSet archetypeIds;
         internal FastList<Chunk> chunks;
 
         internal FastList<TypeInfo> includedTypes;
@@ -73,7 +73,7 @@ namespace Scellecs.Morpeh {
             this.world = world;
 
             this.archetypes = new FastList<Archetype>();
-            this.archetypeHashes = new HashSet<ArchetypeId>();
+            this.archetypeIds = new LongHashSet();
             this.chunks  = new FastList<Chunk>();
 
             this.includedTypes = includedTypes;
