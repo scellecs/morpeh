@@ -14,6 +14,7 @@ namespace Scellecs.Morpeh {
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
+    using System.Text;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -60,7 +61,7 @@ namespace Scellecs.Morpeh {
         internal World world;
 
         internal FastList<Archetype> archetypes;
-        internal HashSet<ArchetypeId> archetypeHashes;
+        internal HashSet<ArchetypeId> archetypeHashes; // TODO: Replace with something faster
         internal FastList<Chunk> chunks;
 
         internal FastList<TypeInfo> includedTypes;
@@ -77,6 +78,27 @@ namespace Scellecs.Morpeh {
 
             this.includedTypes = includedTypes;
             this.excludedTypes = excludedTypes;
+        }
+
+        public override string ToString() {
+            var sb = new StringBuilder();
+            
+            sb.Append("Filter(");
+            
+            sb.Append("Include: ");
+            foreach (var type in this.includedTypes) {
+                sb.Append(type);
+                sb.Append(", ");
+            }
+            
+            sb.Append("Exclude: ");
+            foreach (var type in this.excludedTypes) {
+                sb.Append(type);
+                sb.Append(", ");
+            }
+            
+            sb.Append(")");
+            return sb.ToString();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

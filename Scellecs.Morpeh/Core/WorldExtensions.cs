@@ -72,7 +72,11 @@ namespace Scellecs.Morpeh {
             world.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
             world.entities         = new Entity[world.entitiesCapacity];
             world.entitiesGens     = new int[world.entitiesCapacity];
-            world.transientEntities = new TransientEntitiesCollection(world.entitiesCapacity);
+            
+            world.transients       = new TransientArchetype[world.entitiesCapacity];
+            for (var i = 0; i < world.entitiesCapacity; i++) {
+                TransientUtility.Initialize(ref world.transients[i]);
+            }
 
             world.archetypes         = new LongHashMap<Archetype>();
             world.archetypesCount    = 1;
@@ -360,10 +364,15 @@ namespace Scellecs.Morpeh {
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
+                var oldCapacity = world.entitiesCapacity;
                 var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
                 Array.Resize(ref world.entitiesGens, newCapacity);
-                world.transientEntities.Resize(newCapacity);
+                Array.Resize(ref world.transients, newCapacity);
+                for (var i = oldCapacity; i < newCapacity; i++) {
+                    TransientUtility.Initialize(ref world.transients[i]);
+                }
+                
                 world.entitiesCapacity = newCapacity;
             }
 
@@ -385,10 +394,14 @@ namespace Scellecs.Morpeh {
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
+                var oldCapacity = world.entitiesCapacity;
                 var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
                 Array.Resize(ref world.entities, newCapacity);
                 Array.Resize(ref world.entitiesGens, newCapacity);
-                world.transientEntities.Resize(newCapacity);
+                Array.Resize(ref world.transients, newCapacity);
+                for (var i = oldCapacity; i < newCapacity; i++) {
+                    TransientUtility.Initialize(ref world.transients[i]);
+                }
                 world.entitiesCapacity = newCapacity;
             }
 
@@ -446,6 +459,7 @@ namespace Scellecs.Morpeh {
         [PublicAPI]
         public static void Commit(this World world) {
             if (world.dirtyEntities.count == 0) {
+                MLogger.LogTrace("[WorldExtensions] No entities to commit");
                 return;
             }
             
@@ -503,35 +517,38 @@ namespace Scellecs.Morpeh {
             
             MLogger.LogTrace("[WorldExtensions] Commit done");
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RegisterTransientChange(this World world, Entity entity) {
+        internal static void TransientChangeAddComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
+            ref var transient = ref world.transients[entity.entityId.id];
+            
             if (world.dirtyEntities.Set(entity.entityId.id)) {
-                world.transientEntities.Rebase(entity.entityId, world.archetypes.GetValueByKey(entity.currentArchetype.GetValue()));
+                var archetype = world.archetypes.GetValueByKey(entity.currentArchetype.GetValue());
+                TransientUtility.Rebase(ref transient, archetype);
             }
+            
+            TransientUtility.AddComponent(ref transient, ref typeInfo);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void TransientChangeAddComponent(this World world, Entity entity, TypeInfo typeInfo) {
-            world.RegisterTransientChange(entity);
-            world.transientEntities.AddComponent(entity.entityId, typeInfo);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void TransientChangeRemoveComponent(this World world, Entity entity, TypeInfo typeInfo) {
-            world.RegisterTransientChange(entity);
-            world.transientEntities.RemoveComponent(entity.entityId, typeInfo);
+        internal static void TransientChangeRemoveComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
+            ref var transient = ref world.transients[entity.entityId.id];
+            
+            if (world.dirtyEntities.Set(entity.entityId.id)) {
+                TransientUtility.Rebase(ref transient, world.archetypes.GetValueByKey(entity.currentArchetype.GetValue()));
+            }
+            
+            TransientUtility.RemoveComponent(ref transient, ref typeInfo);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransientChanges(this World world, Entity entity) {
-            var transient = world.transientEntities.Get(entity.entityId);
+            ref var transient = ref world.transients[entity.entityId.id];
             
             // Don't do anything on empty change. Can happen when a component is added and removed in the same frame
             
             if (transient.IsEmpty) {
                 MLogger.LogTrace($"[WorldExtensions] Entity {entity} has no changes to apply");
-                transient.SoftReset();
                 return;
             }
             
@@ -550,18 +567,20 @@ namespace Scellecs.Morpeh {
                 nextArchetype.Add(entity);
             } else {
                 MLogger.LogTrace($"[WorldExtensions] Add entity {entity} to NEW archetype {transient.nextArchetypeId}");
-                nextArchetype = world.CreateArchetypeFromTransient(transient);
+                nextArchetype = world.CreateArchetypeFromTransient(ref transient);
                 nextArchetype.Add(entity);
                 
                 world.archetypes.Add(transient.nextArchetypeId.GetValue(), nextArchetype, out _);
                 world.archetypesCount++;
 
-                if (transient.baseArchetype != null) {
+                if (transient.baseArchetype != null && transient.baseArchetype.filters.Count > 0) {
                     AddMatchingPreviousFilters(nextArchetype, transient.baseArchetype.filters);
                 }
                 
                 world.AddMatchingDeltaFilters(nextArchetype, transient.addedComponents);
                 world.AddMatchingDeltaFilters(nextArchetype, transient.removedComponents);
+                
+                MLogger.LogTrace($"[WorldExtensions] Filter count for archetype {nextArchetype.id} is {nextArchetype.filters.Count}");
             }
             
             // Remove from previous archetype
@@ -572,8 +591,7 @@ namespace Scellecs.Morpeh {
             }
             
             // Finalize migration
-            
-            transient.Reset();
+            MLogger.LogTrace($"[WorldExtensions] Finalize migration for entity {entity} to archetype {nextArchetype.id}");
             entity.currentArchetype = nextArchetype.id;
         }
 
@@ -588,26 +606,30 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Archetype CreateArchetypeFromTransient(this World world, TransientArchetype transient) {
+        internal static Archetype CreateArchetypeFromTransient(this World world, ref TransientArchetype transient) {
             var nextArchetype = world.archetypePool.Rent(transient.nextArchetypeId);
             
             if (transient.baseArchetype != null) {
-                MLogger.LogTrace($"[WorldExtensions] Copy components from base archetype {transient.baseArchetype.id}");
-                foreach (var componentId in transient.baseArchetype.components) {
-                    nextArchetype.components.Set(componentId);
+                MLogger.LogTrace($"[WorldExtensions] Copy {transient.baseArchetype.components.count} components from base archetype {transient.baseArchetype.id}");
+                foreach (var offset in transient.baseArchetype.components) {
+                    if (transient.removedComponents.Has(offset)) {
+                        MLogger.LogTrace($"[WorldExtensions] Skip component {offset} because it was removed");
+                        continue;
+                    }
+                    
+                    MLogger.LogTrace($"[WorldExtensions] Copy component {offset} from base archetype {transient.baseArchetype.id}");
+                    
+                    nextArchetype.components.Set(offset);
                 }
             } else {
                 MLogger.LogTrace($"[WorldExtensions] Base archetype is null");
             }
             
-            MLogger.LogTrace($"[WorldExtensions] Add {transient.addedComponents.Count} components to archetype {transient.nextArchetypeId}");
-            foreach (var typeInfo in transient.addedComponents) {
+            MLogger.LogTrace($"[WorldExtensions] Add {transient.addedComponents.length} components to archetype {transient.nextArchetypeId}");
+            foreach (var idx in transient.addedComponents) {
+                ref var typeInfo = ref transient.addedComponents.GetValueRefByIndex(idx);
+                MLogger.LogTrace($"[WorldExtensions] Add {typeInfo} to archetype {transient.nextArchetypeId}");
                 nextArchetype.components.Set(typeInfo.offset.GetValue());
-            }
-            
-            MLogger.LogTrace($"[WorldExtensions] Remove {transient.removedComponents.Count} components from archetype {transient.nextArchetypeId}");
-            foreach (var typeInfo in transient.removedComponents) {
-                nextArchetype.components.Unset(typeInfo.offset.GetValue());
             }
             
             return nextArchetype;
@@ -626,9 +648,17 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddMatchingDeltaFilters(this World world, Archetype archetype, HashSet<TypeInfo> delta) {
-            foreach (var typeInfo in delta) {
-                var filters = world.componentsToFiltersRelation.GetFilters(typeInfo);
+        internal static void AddMatchingDeltaFilters(this World world, Archetype archetype, IntHashMap<TypeInfo> delta) {
+            foreach (var idx in delta) {
+                ref var typeInfo = ref delta.GetValueRefByIndex(idx);
+                var filters = world.componentsToFiltersRelation.GetFilters(typeInfo.offset.GetValue());
+                if (filters == null) {
+                    MLogger.LogTrace($"[WorldExtensions] No DELTA filters for component {typeInfo.offset.GetValue()}");
+                    continue;
+                }
+                
+                MLogger.LogTrace($"[WorldExtensions] Found {filters.Length} DELTA filters for component {typeInfo.offset.GetValue()}");
+                
                 foreach (var filter in filters) {
                     if (filter.AddArchetypeIfMatches(archetype)) {
                         MLogger.LogTrace($"[WorldExtensions] Add DELTA filter {filter} to archetype {archetype.id}");

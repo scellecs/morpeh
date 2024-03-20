@@ -27,7 +27,7 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ArchetypeId Combine(TypeId typeId) {
+        public ArchetypeId Combine(ref TypeId typeId) {
             return new ArchetypeId(this.value ^ typeId.GetValue());
         }
         

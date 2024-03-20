@@ -41,6 +41,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AddArchetypeIfMatches(this Filter filter, Archetype archetype) {
             if (filter.archetypeHashes.Contains(archetype.id)) {
+                MLogger.LogTrace($"Archetype {archetype.id} already in filter {filter}");
                 return false;
             }
             
@@ -48,8 +49,8 @@ namespace Scellecs.Morpeh {
                 return false;
             }
         
-            filter.archetypes.Add(archetype);
             filter.archetypeHashes.Add(archetype.id);
+            filter.archetypes.Add(archetype);
             filter.archetypesLength++;
             
             if (filter.chunks.capacity < filter.archetypesLength) {
@@ -63,7 +64,7 @@ namespace Scellecs.Morpeh {
         internal static void CheckAndAddArchetypes(this Filter filter) {
             foreach (var archetypeIndex in filter.world.archetypes) {
                 var archetype = filter.world.archetypes.GetValueByIndex(archetypeIndex);
-                if (!filter.archetypeHashes.Contains(archetype.id) && filter.AddArchetypeIfMatches(archetype)) {
+                if (filter.AddArchetypeIfMatches(archetype)) {
                     archetype.AddFilter(filter);
                 }
             }
@@ -73,9 +74,9 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void RemoveArchetype(this Filter filter, Archetype archetype)
-        {
+        internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
             if (!filter.archetypeHashes.Remove(archetype.id)) {
+                MLogger.LogTrace($"Archetype {archetype.id} is not in filter {filter}");
                 return;
             }
             
@@ -83,19 +84,22 @@ namespace Scellecs.Morpeh {
             filter.archetypesLength--;
         }
 
-        private static bool ArchetypeMatches(this Filter filter, Archetype archetype) {
+        internal static bool ArchetypeMatches(this Filter filter, Archetype archetype) {
             foreach (var includedTypeInfo in filter.includedTypes) {
                 if (!archetype.components.Get(includedTypeInfo.offset.GetValue())) {
+                    MLogger.LogTrace($"Archetype {archetype.id} does not match filter {filter} [include]");
                     return false;
                 }
             }
             
             foreach (var excludedTypeInfo in filter.excludedTypes) {
                 if (archetype.components.Get(excludedTypeInfo.offset.GetValue())) {
+                    MLogger.LogTrace($"Archetype {archetype.id} does not match filter {filter} [exclude]");
                     return false;
                 }
             }
             
+            MLogger.LogTrace($"Archetype {archetype.id} matches filter {filter}");
             return true;
         }
 

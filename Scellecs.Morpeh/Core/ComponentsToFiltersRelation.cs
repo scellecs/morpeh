@@ -8,12 +8,8 @@
             this.componentsToFilters = new Filter[capacity][];
         }
         
-        public Filter[] GetFilters(TypeInfo typeInfo) {
-            if (typeInfo.offset.GetValue() > this.componentsToFilters.Length) {
-                return Array.Empty<Filter>();
-            }
-            
-            return this.componentsToFilters[typeInfo.offset.GetValue()] ?? Array.Empty<Filter>();
+        public Filter[] GetFilters(int offset) {
+            return offset > this.componentsToFilters.Length ? null : this.componentsToFilters[offset];
         }
 
         public void Add(TypeInfo[] typeInfos, Filter filter) {

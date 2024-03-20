@@ -135,14 +135,13 @@ namespace Scellecs.Morpeh {
             
             if (world.dirtyEntities.Get(entity.ID.id))
             {
-                var transient = world.transientEntities.Get(entity.ID);
+                ref var transient = ref world.transients[entity.ID.id];
                 
-                foreach (var typeInfo in transient.addedComponents) {
+                foreach (var idx in transient.addedComponents) {
+                    ref var typeInfo = ref transient.addedComponents.GetValueRefByIndex(idx);
                     var stash = world.stashes.GetValueByKey(typeInfo.offset.GetValue());
                     stash.Clean(entity);
                 }
-                
-                transient.Reset();
             }
             
             // Clear components from existing archetype

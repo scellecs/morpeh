@@ -135,7 +135,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
             if (this.TryAddData(entity.entityId.id, default, out var slotIndex)) {
-                world.TransientChangeAddComponent(entity, this.typeInfo);
+                world.TransientChangeAddComponent(entity, ref this.typeInfo);
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
                     world.newMetrics.stashResizes++;
@@ -161,7 +161,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
             if (this.TryAddData(entity.entityId.id, default, out var slotIndex)) {
-                world.TransientChangeAddComponent(entity, this.typeInfo);
+                world.TransientChangeAddComponent(entity, ref this.typeInfo);
                 exist = false;
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
@@ -187,7 +187,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
             if (this.TryAddData(entity.entityId.id, value, out _)) {
-                world.TransientChangeAddComponent(entity, this.typeInfo);
+                world.TransientChangeAddComponent(entity, ref this.typeInfo);
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
                     world.newMetrics.stashResizes++;
@@ -259,7 +259,7 @@ namespace Scellecs.Morpeh {
                     world.newMetrics.stashResizes++;
                 }
 #endif
-                world.TransientChangeAddComponent(entity, this.typeInfo);
+                world.TransientChangeAddComponent(entity, ref this.typeInfo);
             }
         }
 
@@ -280,7 +280,7 @@ namespace Scellecs.Morpeh {
                     world.newMetrics.stashResizes++;
                 }
 #endif
-                world.TransientChangeAddComponent(entity, this.typeInfo);
+                world.TransientChangeAddComponent(entity, ref this.typeInfo);
             }
         }
 
@@ -298,7 +298,7 @@ namespace Scellecs.Morpeh {
 #endif
 
             if (this.map.Remove(entity.entityId.id, out var slotIndex)) {
-                world.TransientChangeRemoveComponent(entity, this.typeInfo);
+                world.TransientChangeRemoveComponent(entity, ref this.typeInfo);
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
 #endif
@@ -318,7 +318,7 @@ namespace Scellecs.Morpeh {
                     this.componentDispose.Invoke(ref this.data[slotIndex]);
 
                     var entityId = this.map.GetKeyBySlotIndex(slotIndex);
-                    this.world.TransientChangeRemoveComponent(this.world.GetEntity(entityId), this.typeInfo);
+                    this.world.TransientChangeRemoveComponent(this.world.GetEntity(entityId), ref this.typeInfo);
                 }
             } 
             else 
@@ -326,7 +326,7 @@ namespace Scellecs.Morpeh {
             {
                 foreach (var slotIndex in this.map) {
                     var entityId = this.map.GetKeyBySlotIndex(slotIndex);
-                    this.world.TransientChangeRemoveComponent(this.world.GetEntity(entityId), this.typeInfo);
+                    this.world.TransientChangeRemoveComponent(this.world.GetEntity(entityId), ref this.typeInfo);
                 }
             }
             

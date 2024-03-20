@@ -4,9 +4,9 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    internal readonly struct TypeInfo {
-        internal readonly TypeOffset offset;
-        internal readonly TypeId id;
+    internal struct TypeInfo {
+        internal TypeOffset offset;
+        internal TypeId id;
         
         internal TypeInfo(TypeOffset offset, TypeId id) {
             this.offset = offset;

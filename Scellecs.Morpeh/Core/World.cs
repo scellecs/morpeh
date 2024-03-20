@@ -68,11 +68,12 @@ namespace Scellecs.Morpeh {
 
         [ShowInInspector]
         internal Entity[] entities;
-        
-        internal TransientEntitiesCollection transientEntities;
 
         [ShowInInspector]
         internal int[] entitiesGens;
+        
+        [ShowInInspector]
+        internal TransientArchetype[] transients;
         
         //real entities count
         [ShowInInspector]
@@ -213,11 +214,11 @@ namespace Scellecs.Morpeh {
             }
 
             this.entities         = null;
+            this.entitiesGens     = null;
+            this.transients       = null;
             this.entitiesCount    = -1;
             this.entitiesLength   = -1;
             this.entitiesCapacity = -1;
-
-            this.transientEntities = null;
 
             this.freeEntityIDs.Clear();
             this.freeEntityIDs = null;
