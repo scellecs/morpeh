@@ -70,13 +70,14 @@ namespace Scellecs.Morpeh {
         internal World world;
 
         internal FastList<Archetype> archetypes;
+        internal int archetypesLength;
+        
         internal LongHashSet archetypeIds;
         internal FastList<Chunk> chunks;
 
         internal FastList<TypeInfo> includedTypes;
         internal FastList<TypeInfo> excludedTypes;
         
-        internal int archetypesLength;
         internal int id;
 
         internal Filter(World world, FastList<TypeInfo> includedTypes, FastList<TypeInfo> excludedTypes) {

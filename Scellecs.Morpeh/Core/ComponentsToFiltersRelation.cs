@@ -1,4 +1,6 @@
-﻿namespace Scellecs.Morpeh {
+﻿using Scellecs.Morpeh.Collections;
+
+namespace Scellecs.Morpeh {
     using System;
     using Unity.IL2CPP.CompilerServices;
     
@@ -16,7 +18,7 @@
             return offset > this.componentsToFilters.Length ? null : this.componentsToFilters[offset];
         }
 
-        public void Add(TypeInfo[] typeInfos, Filter filter) {
+        public void Add(FastList<TypeInfo> typeInfos, Filter filter) {
             var maxTypeOffset = this.GetMaxOffset(typeInfos);
             
             if (maxTypeOffset.GetValue() >= this.componentsToFilters.Length) {
@@ -33,7 +35,7 @@
             }
         }
         
-        private TypeOffset GetMaxOffset(TypeInfo[] typeInfos) {
+        private TypeOffset GetMaxOffset(FastList<TypeInfo> typeInfos) {
             var maxTypeOffset = new TypeOffset(-1);
             foreach (var typeInfo in typeInfos) {
                 if (typeInfo.offset.GetValue() > maxTypeOffset.GetValue()) {

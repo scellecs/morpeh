@@ -169,7 +169,7 @@ namespace Scellecs.Morpeh {
 
             for (int i = 0, length = filter.archetypes.length; i < length; i++) {
                 var archetype = filter.archetypes.data[i];
-                accum += archetype.entities.count;
+                accum += archetype.length;
             }
             return accum;
         }
@@ -261,8 +261,6 @@ namespace Scellecs.Morpeh {
         internal static Filter CompleteBuild(this FilterBuilder builder) {
             var includedOffsets = new FastList<TypeInfo>();
             var excludedOffsets = new FastList<TypeInfo>();
-
-            var typeOffsets = new TypeInfo[builder.level];
             
             var current = builder;
 
@@ -274,16 +272,14 @@ namespace Scellecs.Morpeh {
                     excludedOffsets.Add(current.typeInfo);
                 }
                 
-                if (current.mode != Filter.Mode.None) {
-                    typeOffsets[current.level - 1] = current.typeInfo;
-                }
-                
                 current = current.parent;
             }
 
             var filter = new Filter(builder.world, includedOffsets, excludedOffsets);
 
-            filter.world.componentsToFiltersRelation.Add(typeOffsets, filter);
+            filter.world.componentsToFiltersRelation.Add(includedOffsets, filter);
+            filter.world.componentsToFiltersRelation.Add(excludedOffsets, filter);
+            
             filter.world.filters.Add(filter);
             
             foreach (var archetypeIndex in filter.world.archetypes) {

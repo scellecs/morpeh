@@ -7,16 +7,21 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal sealed class Archetype {
         internal ArchetypeId id;
-        internal int length;
-        internal BitMap components;
+        
         internal BitMap entities;
+        internal int length;
+        
+        internal BitMap components;
         internal IntHashMap<Filter> filters;
         
+       
         internal Archetype(ArchetypeId id) {
             this.id = id;
-            this.length = 0;
-            this.components = new BitMap();
+            
             this.entities = new BitMap();
+            this.length = 0;
+            
+            this.components = new BitMap();
             this.filters = new IntHashMap<Filter>();
         }
     }

@@ -28,26 +28,54 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddComponent(ref TransientArchetype transient, ref TypeInfo typeInfo) {
-            if (transient.changesCount == transient.changes.Length) {
-                Array.Resize(ref transient.changes, transient.changesCount << 1);
+            if (!FilterDuplicate(ref transient, typeInfo.offset)) {
+                EnsureCapacity(ref transient);
+                transient.changes[transient.changesCount++] = StructuralChange.Create(typeInfo.offset, true);
             }
             
-            transient.changes[transient.changesCount] = StructuralChange.Create(typeInfo.offset, true);
-            ++transient.changesCount;
             transient.nextArchetypeId = transient.nextArchetypeId.Combine(typeInfo.id);
             MLogger.LogTrace($"[AddComponent] To: {transient.nextArchetypeId}");
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveComponent(ref TransientArchetype transient, ref TypeInfo typeInfo) {
+            if (!FilterDuplicate(ref transient, typeInfo.offset)) {
+                EnsureCapacity(ref transient);
+                transient.changes[transient.changesCount++] = StructuralChange.Create(typeInfo.offset, false);
+            }
+            
+            transient.nextArchetypeId = transient.nextArchetypeId.Combine(typeInfo.id);
+            MLogger.LogTrace($"[RemoveComponent] To: {transient.nextArchetypeId}");
+        }
+        
+        // We use array filtering with swap because we don't expect a lot of changes in one frame for one entity
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool FilterDuplicate(ref TransientArchetype transient, TypeOffset typeOffset) {
+            var changesCount = transient.changesCount;
+            
+            for (var i = 0; i < changesCount; i++) {
+                if (transient.changes[i].typeOffset != typeOffset) {
+                    continue;
+                }
+                
+                RemoveAtSwap(ref transient, i);
+                return true;
+            }
+            
+            return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void RemoveAtSwap(ref TransientArchetype transient, int index) {
+            transient.changes[index] = transient.changes[transient.changesCount - 1];
+            --transient.changesCount;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void EnsureCapacity(ref TransientArchetype transient) {
             if (transient.changesCount == transient.changes.Length) {
                 Array.Resize(ref transient.changes, transient.changesCount << 1);
             }
-            
-            transient.changes[transient.changesCount] = StructuralChange.Create(typeInfo.offset, false);
-            ++transient.changesCount;
-            transient.nextArchetypeId = transient.nextArchetypeId.Combine(typeInfo.id);
-            MLogger.LogTrace($"[RemoveComponent] To: {transient.nextArchetypeId}");
         }
     }
 }

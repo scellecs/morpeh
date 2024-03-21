@@ -655,7 +655,10 @@ namespace Scellecs.Morpeh {
                 
                 MLogger.LogTrace($"[WorldExtensions] Found {filters.Length} DELTA filters for component {structuralChange.typeOffset.GetValue()}");
                 
-                foreach (var filter in filters) {
+                var filtersCount = filters.Length;
+                for (var j = 0; j < filtersCount; j++) {
+                    var filter = filters[j];
+                    
                     if (filter.AddArchetypeIfMatches(archetype)) {
                         MLogger.LogTrace($"[WorldExtensions] Add DELTA filter {filter} to archetype {archetype.id}");
                         archetype.AddFilter(filter);
