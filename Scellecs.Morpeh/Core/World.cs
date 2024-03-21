@@ -238,7 +238,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    stash.Dispose();
+                    stash?.Dispose();
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
