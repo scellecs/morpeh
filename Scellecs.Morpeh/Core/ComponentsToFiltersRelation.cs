@@ -28,8 +28,8 @@
                 this.ResizeUpTo(newLength);
             }
             
-            foreach (var typeOffset in typeInfos) {
-                this.AppendFilter(typeOffset, filter);
+            foreach (var typeInfo in typeInfos) {
+                this.AppendFilter(typeInfo, filter);
             }
         }
         

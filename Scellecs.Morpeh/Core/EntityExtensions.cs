@@ -105,6 +105,18 @@ namespace Scellecs.Morpeh {
         }
 
 #if MORPEH_LEGACY
+        [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
+#endif
+        public static void Migrate<T>(this Entity from, Entity to, bool overwrite = true) where T : struct, IComponent {
+#if MORPEH_DEBUG
+            if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying MigrateTo on null or disposed entities");
+            }
+#endif
+            from.world.GetStash<T>().Migrate(from, to, overwrite);
+        }
+
+#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Has() instead.")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,6 +130,7 @@ namespace Scellecs.Morpeh {
         }
 #endif
 
+        // TODO: Move the logic to WorldExtensions and just call it from here
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Dispose(this Entity entity) {
             if (entity.IsDisposed()) {

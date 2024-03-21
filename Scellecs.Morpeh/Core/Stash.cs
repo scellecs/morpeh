@@ -26,6 +26,7 @@ namespace Scellecs.Morpeh {
         private Action<Entity> setReflection;
         private Func<Entity, bool> removeReflection;
         private Func<Entity, bool> cleanReflection;
+        private Action<Entity, Entity, bool> migrateReflection;
         private Action removeAllReflection;
         
         private Stash() { }
@@ -49,6 +50,7 @@ namespace Scellecs.Morpeh {
                 setReflection = stash.Set,
                 removeReflection = stash.Remove,
                 cleanReflection = stash.Clean,
+                migrateReflection = stash.Migrate,
                 removeAllReflection = stash.RemoveAll,
             };
         }
@@ -71,6 +73,11 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool Clean(Entity entity) {
             return this.cleanReflection(entity);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Migrate(Entity from, Entity to, bool overwrite = true) {
+            this.migrateReflection(from, to, overwrite);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -343,6 +350,52 @@ namespace Scellecs.Morpeh {
                 return true;
             }
             return false;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Migrate(Entity from, Entity to, bool overwrite = true) {
+            world.ThreadSafetyCheck();
+            
+#if MORPEH_DEBUG
+            if (from.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity");
+            }
+            if (to.IsNullOrDisposed()) {
+                throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity");
+            }
+            var previousCapacity = this.map.capacity;
+#endif
+
+            if (this.map.TryGetIndex(from.entityId.id, out var slotIndex)) {
+                var component = this.data[slotIndex];
+                
+                if (overwrite) {
+                    if (this.map.Has(to.entityId.id)) {
+                        this.TrySetData(to.entityId.id, component);
+                    }
+                    else {
+                        if (this.TryAddData(to.entityId.id, component, out _)) {
+                            this.world.TransientChangeAddComponent(to, ref this.typeInfo);
+                        }
+                    }
+                }
+                else {
+                    if (this.map.Has(to.entityId.id) == false) {
+                        if (this.TryAddData(to.entityId.id, component, out _)) {
+                            this.world.TransientChangeAddComponent(to, ref this.typeInfo);
+                        }
+                    }
+                }
+
+                if (this.map.Remove(from.entityId.id, out _)) {
+                    this.world.TransientChangeRemoveComponent(from, ref this.typeInfo);
+                }
+            }
+#if MORPEH_DEBUG
+            if (previousCapacity != this.map.capacity) {
+                world.newMetrics.stashResizes++;
+            }
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

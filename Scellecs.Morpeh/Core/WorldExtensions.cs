@@ -573,7 +573,7 @@ namespace Scellecs.Morpeh {
                 world.archetypes.Add(transient.nextArchetypeId.GetValue(), nextArchetype, out _);
                 world.archetypesCount++;
 
-                if (transient.baseArchetype != null && transient.baseArchetype.filters.length > 0) {
+                if (transient.baseArchetype != null) {
                     AddMatchingPreviousFilters(nextArchetype, transient.baseArchetype.filters);
                 }
                 
