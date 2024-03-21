@@ -92,6 +92,7 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         internal IntStack nextFreeEntityIDs;
 
+        // TODO: Make it an array
         [ShowInInspector]
         internal IntHashMap<Stash> stashes;
 

@@ -146,19 +146,23 @@ namespace Scellecs.Morpeh {
             
             // Clean new components if entity is transient
             
-            if (world.dirtyEntities.Get(entity.ID.id))
-            {
+            if (world.dirtyEntities.Get(entity.ID.id)) {
                 ref var transient = ref world.transients[entity.ID.id];
                 
-                foreach (var idx in transient.changes) {
-                    var structuralChange = transient.changes.GetValueByIndex(idx);
+                // As we clean stashes, changes count may increase, so we need to store it
+                var changesCount = transient.changesCount;
+                
+                for (var i = 0; i < changesCount; i++) {
+                    ref var structuralChange = ref transient.changes[i];
 
                     if (!structuralChange.isAddition) {
                         continue;
                     }
                     
                     var stash = world.stashes.GetValueByKey(structuralChange.typeOffset.GetValue());
-                    stash.Clean(entity);
+                    if (stash.Has(entity)) {
+                        stash.Clean(entity);
+                    }
                 }
             }
             

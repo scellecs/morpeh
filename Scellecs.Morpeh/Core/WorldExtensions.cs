@@ -458,11 +458,6 @@ namespace Scellecs.Morpeh {
 
         [PublicAPI]
         public static void Commit(this World world) {
-            if (world.dirtyEntities.count == 0) {
-                MLogger.LogTrace("[WorldExtensions] No entities to commit");
-                return;
-            }
-            
             MLogger.LogTrace("[WorldExtensions] Commit");
             
             world.ThreadSafetyCheck();
@@ -523,8 +518,7 @@ namespace Scellecs.Morpeh {
             ref var transient = ref world.transients[entity.entityId.id];
             
             if (world.dirtyEntities.Set(entity.entityId.id)) {
-                var archetype = world.archetypes.GetValueByKey(entity.currentArchetype.GetValue());
-                TransientUtility.Rebase(ref transient, archetype);
+                TransientUtility.Rebase(ref transient, world.archetypes.GetValueByKey(entity.currentArchetype.GetValue()));
             }
             
             TransientUtility.AddComponent(ref transient, ref typeInfo);
@@ -544,11 +538,11 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransientChanges(this World world, Entity entity) {
             ref var transient = ref world.transients[entity.entityId.id];
+
+            // No changes
             
-            // Don't do anything on empty change. Can happen when a component is added and removed in the same frame
-            
-            if (transient.IsEmpty) {
-                MLogger.LogTrace($"[WorldExtensions] Entity {entity} has no changes to apply");
+            if (transient.nextArchetypeId == entity.currentArchetype) {
+                MLogger.LogTrace($"[WorldExtensions] No changes for entity {entity}");
                 return;
             }
             
@@ -574,10 +568,10 @@ namespace Scellecs.Morpeh {
                 world.archetypesCount++;
 
                 if (transient.baseArchetype != null) {
-                    AddMatchingPreviousFilters(nextArchetype, transient.baseArchetype.filters);
+                    AddMatchingPreviousFilters(nextArchetype, ref transient);
                 }
                 
-                world.AddMatchingDeltaFilters(nextArchetype, transient.changes);
+                world.AddMatchingDeltaFilters(nextArchetype, ref transient);
                 
                 MLogger.LogTrace($"[WorldExtensions] Filter count for archetype {nextArchetype.id} is {nextArchetype.filters.length}");
             }
@@ -618,9 +612,10 @@ namespace Scellecs.Morpeh {
                 MLogger.LogTrace($"[WorldExtensions] Base archetype is null");
             }
             
-            MLogger.LogTrace($"[WorldExtensions] Add {transient.changes.length} components to archetype {transient.nextArchetypeId}");
-            foreach (var idx in transient.changes) {
-                var structuralChange = transient.changes.GetValueByIndex(idx);
+            MLogger.LogTrace($"[WorldExtensions] Add {transient.changesCount} components to archetype {transient.nextArchetypeId}");
+            var changesCount = transient.changesCount;
+            for (var i = 0; i < changesCount; i++) {
+                ref var structuralChange = ref transient.changes[i];
                 if (structuralChange.isAddition) {
                     MLogger.LogTrace($"[WorldExtensions] Add {structuralChange.typeOffset} to archetype {transient.nextArchetypeId}");
                     nextArchetype.components.Set(structuralChange.typeOffset.GetValue());
@@ -634,9 +629,9 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddMatchingPreviousFilters(Archetype archetype, IntHashMap<Filter> filters) {
-            foreach (var idx in filters) {
-                var filter = filters.GetValueByIndex(idx);
+        internal static void AddMatchingPreviousFilters(Archetype archetype, ref TransientArchetype transient) {
+            foreach (var idx in transient.baseArchetype.filters) {
+                var filter = transient.baseArchetype.filters.GetValueByIndex(idx);
                 if (filter.AddArchetypeIfMatches(archetype)) {
                     MLogger.LogTrace($"[WorldExtensions] Add PREVIOUS {filter} to archetype {archetype.id}");
                     archetype.AddFilter(filter);
@@ -647,9 +642,11 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddMatchingDeltaFilters(this World world, Archetype archetype, IntHashMap<StructuralChange> delta) {
-            foreach (var idx in delta) {
-                ref var structuralChange = ref delta.GetValueRefByIndex(idx);
+        internal static void AddMatchingDeltaFilters(this World world, Archetype archetype, ref TransientArchetype transient) {
+            var changesCount = transient.changesCount;
+            for (var i = 0; i < changesCount; i++) {
+                ref var structuralChange = ref transient.changes[i];
+                
                 var filters = world.componentsToFiltersRelation.GetFilters(structuralChange.typeOffset.GetValue());
                 if (filters == null) {
                     MLogger.LogTrace($"[WorldExtensions] No DELTA filters for component {structuralChange.typeOffset.GetValue()}");

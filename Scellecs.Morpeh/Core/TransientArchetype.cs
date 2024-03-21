@@ -1,20 +1,16 @@
 ﻿namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
-    using Collections;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal struct TransientArchetype {
-        internal IntHashMap<StructuralChange> changes;
         internal ArchetypeId nextArchetypeId;
         internal Archetype baseArchetype;
         
-        public bool IsEmpty {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => this.changes.length == 0;
-        }
+        internal StructuralChange[] changes;
+        internal int changesCount;
     }
     
     [Il2CppSetOption(Option.NullChecks, false)]
