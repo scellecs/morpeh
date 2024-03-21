@@ -159,10 +159,7 @@ namespace Scellecs.Morpeh {
                         continue;
                     }
                     
-                    var stash = world.stashes.GetValueByKey(structuralChange.typeOffset.GetValue());
-                    if (stash.Has(entity)) {
-                        stash.Clean(entity);
-                    }
+                    world.GetStash(structuralChange.typeOffset.GetValue())?.Clean(entity);
                 }
             }
             
@@ -171,8 +168,7 @@ namespace Scellecs.Morpeh {
             if (entity.currentArchetype != ArchetypeId.Invalid) {
                 if (world.archetypes.TryGetValue(entity.currentArchetype.GetValue(), out var archetype)) {
                     foreach (var offset in archetype.components) {
-                        var stash = world.stashes.GetValueByKey(offset);
-                        stash.Clean(entity);
+                        world.GetStash(offset)?.Clean(entity);
                     }
                     
                     archetype.Remove(entity.ID);

@@ -22,9 +22,14 @@ namespace Scellecs.Morpeh.Editor {
             get {
                 this.componentViews.Clear();
                 if (this.entity != null && this.entity.world != null) {
+
+                    // TODO: This has to be filtered via archetype instead of trying all stashes
                     var stashes = this.entity.world.stashes;
-                    foreach (var stashId in stashes) {
-                        var stash = stashes.GetValueByIndex(stashId);
+                    foreach (var stash in stashes) {
+                        if (stash == null) {
+                            continue;
+                        }
+                        
                         if (stash.Has(this.entity)) {
                             var view = new ComponentView {
                                 internalTypeDefinition = ExtendedTypeIdentifier.idTypeAssociation[stash.typeId.GetValue()],

@@ -94,7 +94,7 @@ namespace Scellecs.Morpeh {
 
         // TODO: Make it an array
         [ShowInInspector]
-        internal IntHashMap<Stash> stashes;
+        internal Stash[] stashes;
 
         [ShowInInspector]
         internal LongHashMap<Archetype> archetypes;
@@ -234,14 +234,7 @@ namespace Scellecs.Morpeh {
             this.filtersLookup.Clear();
             this.filtersLookup = null;
 
-            var tempStashes = new FastList<Stash>();
-
-            foreach (var stashId in this.stashes) {
-                var stash = this.stashes.GetValueByIndex(stashId);
-                tempStashes.Add(stash);
-            }
-
-            foreach (var stash in tempStashes) {
+            foreach (var stash in this.stashes) {
 #if MORPEH_DEBUG
                 try {
 #endif
@@ -254,8 +247,6 @@ namespace Scellecs.Morpeh {
                 }
 #endif
             }
-
-            this.stashes.Clear();
             this.stashes = null;
 
             foreach (var archetype in this.archetypes) {
