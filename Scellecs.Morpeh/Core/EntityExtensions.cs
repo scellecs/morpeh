@@ -129,22 +129,21 @@ namespace Scellecs.Morpeh {
             var world = from.world;
             ref var transient = ref world.transients[from.ID.id];
             
+            // We have to make a full copy because Migrate would modify the original data
+            
+            Span<StructuralChange> changes = stackalloc StructuralChange[transient.changesCount];
+            for (var i = 0; i < transient.changesCount; i++) {
+                changes[i] = transient.changes[i];
+            }
+            
             // Migrate all newly added components from transient archetype
             
-            if (transient.changesCount != 0) {
-                Span<StructuralChange> changes = stackalloc StructuralChange[transient.changesCount];
-                for (var i = 0; i < transient.changesCount; i++) {
-                    changes[i] = transient.changes[i];
+            foreach (var structuralChange in changes) {
+                if (!structuralChange.isAddition) {
+                    continue;
                 }
-                
-                foreach (var structuralChange in changes) {
-                    if (!structuralChange.isAddition) {
-                        continue;
-                    }
 
-                    var stash = world.GetStash(structuralChange.typeOffset.GetValue());
-                    stash?.Migrate(from, to, overwrite);
-                }
+                world.GetStash(structuralChange.typeOffset.GetValue())?.Migrate(from, to, overwrite);
             }
 
             if (from.currentArchetype == ArchetypeId.Invalid || !world.archetypes.TryGetValue(from.currentArchetype.GetValue(), out var fromArchetype)) {
@@ -154,8 +153,21 @@ namespace Scellecs.Morpeh {
             // Migrate all components that are not removed from the source entity from current archetype
             
             foreach (var offset in fromArchetype.components) {
-                var stash = world.GetStash(offset);
-                stash?.Migrate(from, to, overwrite);
+                var wasRemoved = false;
+                foreach (var structuralChange in changes) {
+                    if (structuralChange.typeOffset.GetValue() != offset || structuralChange.isAddition) {
+                        continue;
+                    }
+                    
+                    wasRemoved = true;
+                    break;
+                }
+                
+                if (wasRemoved) {
+                    continue;
+                }
+                
+                world.GetStash(offset)?.Migrate(from, to, overwrite);
             }
         }
 
