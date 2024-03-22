@@ -115,6 +115,49 @@ namespace Scellecs.Morpeh {
 #endif
             from.world.GetStash<T>().Migrate(from, to, overwrite);
         }
+        
+#if MORPEH_LEGACY
+        [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
+#endif
+        public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
+#if MORPEH_DEBUG
+            if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
+                throw new Exception("[MORPEH] You are trying MigrateTo on null or disposed entities");
+            }
+#endif
+
+            var world = from.world;
+            ref var transient = ref world.transients[from.ID.id];
+            
+            // Migrate all newly added components from transient archetype
+            
+            if (transient.changesCount != 0) {
+                Span<StructuralChange> changes = stackalloc StructuralChange[transient.changesCount];
+                for (var i = 0; i < transient.changesCount; i++) {
+                    changes[i] = transient.changes[i];
+                }
+                
+                foreach (var structuralChange in changes) {
+                    if (!structuralChange.isAddition) {
+                        continue;
+                    }
+
+                    var stash = world.GetStash(structuralChange.typeOffset.GetValue());
+                    stash?.Migrate(from, to, overwrite);
+                }
+            }
+
+            if (from.currentArchetype == ArchetypeId.Invalid || !world.archetypes.TryGetValue(from.currentArchetype.GetValue(), out var fromArchetype)) {
+                return;
+            }
+            
+            // Migrate all components that are not removed from the source entity from current archetype
+            
+            foreach (var offset in fromArchetype.components) {
+                var stash = world.GetStash(offset);
+                stash?.Migrate(from, to, overwrite);
+            }
+        }
 
 #if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Has() instead.")]
