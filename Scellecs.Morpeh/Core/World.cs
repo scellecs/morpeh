@@ -32,6 +32,8 @@ namespace Scellecs.Morpeh {
         [CanBeNull]
         internal static FastList<IWorldPlugin> plugins;
 
+        internal int filterCount;
+
         [PublicAPI]
         [NotNull]
         public FilterBuilder Filter;
@@ -230,6 +232,8 @@ namespace Scellecs.Morpeh {
 
             this.filters.Clear();
             this.filters = null;
+
+            this.filterCount = 0;
             
             this.filtersLookup.Clear();
             this.filtersLookup = null;
