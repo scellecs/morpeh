@@ -47,7 +47,7 @@ namespace Scellecs.Morpeh {
         [PublicAPI]
         public JobHandle JobHandle;
         //todo will be replaced with smart enumerator
-        internal FastList<NativeArray<int>> tempArrays;
+        internal FastList<NativeArray<Entity>> tempArrays;
 #endif
         internal FastList<Filter> filters;
         internal LongHashMap<LongHashMap<Filter>> filtersLookup;

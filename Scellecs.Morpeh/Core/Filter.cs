@@ -47,7 +47,7 @@ namespace Scellecs.Morpeh {
         public unsafe struct Chunk {
             [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
-            public int* entities;
+            public Entity* entities;
             [ReadOnly]
             public int entitiesLength;
         }

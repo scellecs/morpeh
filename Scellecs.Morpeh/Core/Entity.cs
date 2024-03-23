@@ -62,6 +62,10 @@ namespace Scellecs.Morpeh {
         public override int GetHashCode() {
             return this.value.GetHashCode();
         }
+        
+        public int CompareTo(Entity other) {
+            return this.Id.CompareTo(other.Id);
+        }
 
         public override string ToString() {
             return $"Entity: Id={this.Id}, Generation=({this.Generation}, WorldId={this.WorldId})";

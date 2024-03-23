@@ -21,9 +21,7 @@ namespace Scellecs.Morpeh.Native {
 
                     if (index >= totalChunkLength && index < totalChunkLength + chunkLength) {
                         var slotIndex = index - totalChunkLength;
-                        var entityId = chunk.entities[slotIndex];
-                        
-                        return new Entity(world.identifier, entityId, this.world.entitiesGens[entityId]);
+                        return chunk.entities[slotIndex];
                     }
 
                     totalChunkLength += chunkLength;

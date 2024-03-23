@@ -42,7 +42,7 @@ namespace Scellecs.Morpeh {
             world.dirtyEntities    = new BitMap();
             
 #if MORPEH_BURST
-            world.tempArrays = new FastList<NativeArray<int>>();
+            world.tempArrays = new FastList<NativeArray<Entity>>();
 #endif
         }
 
@@ -293,8 +293,6 @@ namespace Scellecs.Morpeh {
             
             world.nextFreeEntityIDs.Push(entity.Id);
             world.dirtyEntities.Unset(entity.Id);
-            
-            entityData = default;
             
             --world.entitiesCount;
         }
