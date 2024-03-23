@@ -49,7 +49,6 @@ namespace Scellecs.Morpeh {
                 
                 setReflection = stash.Set,
                 removeReflection = stash.Remove,
-                cleanReflection = stash.Clean,
                 migrateReflection = stash.Migrate,
                 removeAllReflection = stash.RemoveAll,
             };
@@ -68,11 +67,6 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveAll() {
             this.removeAllReflection();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool Clean(Entity entity) {
-            return this.cleanReflection(entity);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -339,17 +333,6 @@ namespace Scellecs.Morpeh {
             
             Array.Clear(this.data, 0, this.map.capacity);
             this.map.Clear();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool Clean(Entity entity) {
-            if (this.map.Remove(entity.Id, out var slotIndex)) {
-#if !MORPEH_DISABLE_COMPONENT_DISPOSE
-                this.componentDispose?.Invoke(ref this.data[slotIndex]);
-#endif
-                return true;
-            }
-            return false;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

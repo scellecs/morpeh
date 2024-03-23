@@ -1,5 +1,3 @@
-using System;
-
 namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
