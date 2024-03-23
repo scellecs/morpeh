@@ -69,13 +69,10 @@ namespace Scellecs.Morpeh {
         internal FastList<SystemsGroup> newPluginSystemsGroups;
 
         [ShowInInspector]
-        internal Entity[] entities;
-
-        [ShowInInspector]
-        internal int[] entitiesGens;
+        internal EntityData[] entities;
         
         [ShowInInspector]
-        internal TransientArchetype[] transients;
+        internal int[] entitiesGens;
         
         //real entities count
         [ShowInInspector]
@@ -110,9 +107,6 @@ namespace Scellecs.Morpeh {
         
         [ShowInInspector]
         internal int identifier;
-
-        [ShowInInspector]
-        internal string friendlyName;
         
         [ShowInInspector]
         internal int threadIdLock;
@@ -130,13 +124,6 @@ namespace Scellecs.Morpeh {
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World Create() => new World().Initialize();
-
-        [PublicAPI]
-        public static World Create(string friendlyName) {
-            var world = Create();
-            world.SetFriendlyName(friendlyName);
-            return world;
-        }
 
         private World() => this.Ctor();
 
@@ -202,23 +189,7 @@ namespace Scellecs.Morpeh {
             this.pluginSystemsGroups.Clear();
             this.pluginSystemsGroups = null;
 
-            foreach (var entity in this.entities) {
-#if MORPEH_DEBUG
-                try {
-#endif
-                    entity?.DisposeFast();
-#if MORPEH_DEBUG
-                }
-                catch (Exception e) {
-                    MLogger.LogError($"Can not dispose entity with ID {entity?.entityId}");
-                    MLogger.LogException(e);
-                }
-#endif
-            }
-
             this.entities         = null;
-            this.entitiesGens     = null;
-            this.transients       = null;
             this.entitiesCount    = -1;
             this.entitiesLength   = -1;
             this.entitiesCapacity = -1;

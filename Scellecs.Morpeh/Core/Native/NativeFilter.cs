@@ -12,7 +12,7 @@ namespace Scellecs.Morpeh.Native {
         [ReadOnly]
         public NativeWorld world;
 
-        public EntityId this[int index] {
+        public Entity this[int index] {
             get {
                 var totalChunkLength = 0;
                 for (int archetypeNum = 0, archetypesCount = *this.chunks.lengthPtr; archetypeNum < archetypesCount; archetypeNum++) {
@@ -23,13 +23,13 @@ namespace Scellecs.Morpeh.Native {
                         var slotIndex = index - totalChunkLength;
                         var entityId = chunk.entities[slotIndex];
                         
-                        return new EntityId(entityId, this.world.entitiesGens[entityId]);
+                        return new Entity(world.identifier, entityId, this.world.entitiesGens[entityId]);
                     }
 
                     totalChunkLength += chunkLength;
                 }
 
-                return EntityId.Invalid;
+                return Entity.Invalid;
             }
         }
     }

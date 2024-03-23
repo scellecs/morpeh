@@ -4,12 +4,12 @@ using Scellecs.Morpeh.Collections;
 
 // Basic
 
-TypeLayout.PrintLayout<EntityId>();
+TypeLayout.PrintLayout<Entity>();
+TypeLayout.PrintLayout<EntityData>();
 TypeLayout.PrintLayout<ArchetypeId>();
 TypeLayout.PrintLayout<TypeInfo>();
 TypeLayout.PrintLayout<TypeOffset>();
 TypeLayout.PrintLayout<TypeId>();
-TypeLayout.PrintLayout<TransientArchetype>();
 TypeLayout.PrintLayout<StructuralChange>();
 
 // Collections

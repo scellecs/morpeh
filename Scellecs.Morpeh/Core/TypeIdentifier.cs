@@ -48,9 +48,9 @@ namespace Scellecs.Morpeh {
             var info = new InternalTypeDefinition {
                 typeInfo = typeInfo,
                 type = typeof(T),
-                entityGetComponentBoxed = (entity) => entity.world.GetStash<T>().Get(entity),
-                entitySetComponentBoxed = (entity, component) => entity.world.GetStash<T>().Set(entity, (T)component),
-                entityRemoveComponent   = (entity) => entity.world.GetStash<T>().Remove(entity),
+                entityGetComponentBoxed = (entity) => entity.GetWorld().GetStash<T>().Get(entity),
+                entitySetComponentBoxed = (entity, component) => entity.GetWorld().GetStash<T>().Set(entity, (T)component),
+                entityRemoveComponent   = (entity) => entity.GetWorld().GetStash<T>().Remove(entity),
                 isMarker = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length == 0,
             };
             

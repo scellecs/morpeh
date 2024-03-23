@@ -68,11 +68,11 @@ namespace Scellecs.Morpeh {
         }
 #endif
 
-        private void Update() => WorldExtensions.GlobalUpdate(Time.deltaTime);
+        private void Update() => WorldLoopExtensions.GlobalUpdate(Time.deltaTime);
 
-        private void FixedUpdate() => WorldExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
+        private void FixedUpdate() => WorldLoopExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
         private void LateUpdate() {
-            WorldExtensions.GlobalLateUpdate(Time.deltaTime);
+            WorldLoopExtensions.GlobalLateUpdate(Time.deltaTime);
 #if MORPEH_METRICS
             var w = World.Default;
             if (w != null) {

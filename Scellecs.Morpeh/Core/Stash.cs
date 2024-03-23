@@ -82,7 +82,7 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(Entity entity) {
-            return this.map.Has(entity.entityId.id);
+            return this.map.Has(entity.Id);
         }
 
         public void Dispose() {
@@ -141,7 +141,7 @@ namespace Scellecs.Morpeh {
 
             var previousCapacity = this.map.capacity;
 #endif
-            if (this.TryAddData(entity.entityId.id, default, out var slotIndex)) {
+            if (this.TryAddData(entity.Id, default, out var slotIndex)) {
                 world.TransientChangeAddComponent(entity, ref this.typeInfo);
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
@@ -151,7 +151,7 @@ namespace Scellecs.Morpeh {
                 return ref this.data[slotIndex];
             }
 #if MORPEH_DEBUG
-            MLogger.LogError($"You're trying to add on entity {entity.entityId.id} a component that already exists! Use Get or Set instead!");
+            MLogger.LogError($"You're trying to add on entity {entity} a component that already exists! Use Get or Set instead!");
 #endif
             return ref this.empty;
         }
@@ -167,7 +167,7 @@ namespace Scellecs.Morpeh {
             
             var previousCapacity = this.map.capacity;
 #endif
-            if (this.TryAddData(entity.entityId.id, default, out var slotIndex)) {
+            if (this.TryAddData(entity.Id, default, out var slotIndex)) {
                 world.TransientChangeAddComponent(entity, ref this.typeInfo);
                 exist = false;
 #if MORPEH_DEBUG
@@ -193,7 +193,7 @@ namespace Scellecs.Morpeh {
             
             var previousCapacity = this.map.capacity;
 #endif
-            if (this.TryAddData(entity.entityId.id, value, out _)) {
+            if (this.TryAddData(entity.Id, value, out _)) {
                 world.TransientChangeAddComponent(entity, ref this.typeInfo);
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
@@ -204,7 +204,7 @@ namespace Scellecs.Morpeh {
             }
 
 #if MORPEH_DEBUG
-            MLogger.LogError($"You're trying to add on entity {entity.entityId.id} a component that already exists! Use Get or Set instead!");
+            MLogger.LogError($"You're trying to add on entity {entity} a component that already exists! Use Get or Set instead!");
 #endif
             return false;
         }
@@ -218,11 +218,11 @@ namespace Scellecs.Morpeh {
                 throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
             }
 
-            if (!this.map.Has(entity.entityId.id)) {
-                throw new Exception($"[MORPEH] You're trying to get on entity {entity.entityId.id} a component that doesn't exists!");
+            if (!this.map.Has(entity.Id)) {
+                throw new Exception($"[MORPEH] You're trying to get on entity {entity} a component that doesn't exists!");
             }
 #endif
-            if (this.map.TryGetIndex(entity.entityId.id, out var dataIndex)) {
+            if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
                 return ref this.data[dataIndex];
             }
             
@@ -238,7 +238,7 @@ namespace Scellecs.Morpeh {
                 throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
             }
 #endif
-            if (this.map.TryGetIndex(entity.entityId.id, out var dataIndex))
+            if (this.map.TryGetIndex(entity.Id, out var dataIndex))
             {
                 exist = true;
                 return ref this.data[dataIndex];
@@ -260,7 +260,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
 
-            if (this.TrySetData(entity.entityId.id, default)) {
+            if (this.TrySetData(entity.Id, default)) {
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
                     world.newMetrics.stashResizes++;
@@ -281,7 +281,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
 
-            if (this.TrySetData(entity.entityId.id, value)) {
+            if (this.TrySetData(entity.Id, value)) {
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
                     world.newMetrics.stashResizes++;
@@ -304,7 +304,7 @@ namespace Scellecs.Morpeh {
             }
 #endif
 
-            if (this.map.Remove(entity.entityId.id, out var slotIndex)) {
+            if (this.map.Remove(entity.Id, out var slotIndex)) {
                 world.TransientChangeRemoveComponent(entity, ref this.typeInfo);
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
@@ -325,7 +325,7 @@ namespace Scellecs.Morpeh {
                     this.componentDispose.Invoke(ref this.data[slotIndex]);
 
                     var entityId = this.map.GetKeyBySlotIndex(slotIndex);
-                    this.world.TransientChangeRemoveComponent(this.world.GetEntity(entityId), ref this.typeInfo);
+                    this.world.TransientChangeRemoveComponent(this.world.GetEntityAtIndex(entityId), ref this.typeInfo);
                 }
             } 
             else 
@@ -333,7 +333,7 @@ namespace Scellecs.Morpeh {
             {
                 foreach (var slotIndex in this.map) {
                     var entityId = this.map.GetKeyBySlotIndex(slotIndex);
-                    this.world.TransientChangeRemoveComponent(this.world.GetEntity(entityId), ref this.typeInfo);
+                    this.world.TransientChangeRemoveComponent(this.world.GetEntityAtIndex(entityId), ref this.typeInfo);
                 }
             }
             
@@ -343,7 +343,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool Clean(Entity entity) {
-            if (this.map.Remove(entity.entityId.id, out var slotIndex)) {
+            if (this.map.Remove(entity.Id, out var slotIndex)) {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
 #endif
@@ -366,28 +366,28 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
 
-            if (this.map.TryGetIndex(from.entityId.id, out var slotIndex)) {
+            if (this.map.TryGetIndex(from.Id, out var slotIndex)) {
                 var component = this.data[slotIndex];
                 
                 if (overwrite) {
-                    if (this.map.Has(to.entityId.id)) {
-                        this.TrySetData(to.entityId.id, component);
+                    if (this.map.Has(to.Id)) {
+                        this.TrySetData(to.Id, component);
                     }
                     else {
-                        if (this.TryAddData(to.entityId.id, component, out _)) {
+                        if (this.TryAddData(to.Id, component, out _)) {
                             this.world.TransientChangeAddComponent(to, ref this.typeInfo);
                         }
                     }
                 }
                 else {
-                    if (this.map.Has(to.entityId.id) == false) {
-                        if (this.TryAddData(to.entityId.id, component, out _)) {
+                    if (this.map.Has(to.Id) == false) {
+                        if (this.TryAddData(to.Id, component, out _)) {
                             this.world.TransientChangeAddComponent(to, ref this.typeInfo);
                         }
                     }
                 }
 
-                if (this.map.Remove(from.entityId.id, out _)) {
+                if (this.map.Remove(from.Id, out _)) {
                     this.world.TransientChangeRemoveComponent(from, ref this.typeInfo);
                 }
             }
@@ -408,7 +408,7 @@ namespace Scellecs.Morpeh {
             }
 #endif
 
-            return this.map.Has(entity.entityId.id);
+            return this.map.Has(entity.Id);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

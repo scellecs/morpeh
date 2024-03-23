@@ -1,3 +1,5 @@
+using System;
+
 namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
@@ -15,24 +17,32 @@ namespace Scellecs.Morpeh {
             
             archetype.components?.Clear();
             archetype.components = null;
-            
-            archetype.entities?.Clear();
-            archetype.entities = null;
+
+            archetype.entities.Dispose();
+            archetype.entities = default;
             
             archetype.filters?.Clear();
             archetype.filters = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Add(this Archetype archetype, EntityId entityId) {
-            archetype.entities.Set(entityId.id);
-            ++archetype.length;
+        public static int Add(this Archetype archetype, Entity entity) {
+            archetype.EnsureCapacity();
+            archetype.entities[archetype.length] = entity;
+            return archetype.length++;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Remove(this Archetype archetype, EntityId entityId) {
-            archetype.entities.Unset(entityId.id);
+        public static void Remove(this Archetype archetype, int index) {
+            archetype.entities[index] = archetype.entities[archetype.length - 1];
             --archetype.length;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void EnsureCapacity(this Archetype archetype) {
+            if (archetype.length == archetype.entities.Length) {
+                archetype.entities.Resize(archetype.length << 1);
+            }
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

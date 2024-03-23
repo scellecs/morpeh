@@ -20,7 +20,7 @@ namespace Scellecs.Morpeh.Providers {
             set => this.world = value;
         }
         
-        private string GetWorldTitle() => this.World?.GetFriendlyName() ?? "World";
+        private string GetWorldTitle() => "World";
 
         [DisableContextMenu]
         [PropertySpace]
@@ -37,9 +37,11 @@ namespace Scellecs.Morpeh.Providers {
                     if (w.entitiesCount != this.entityViews.Count) {
                         this.entityViews.Clear();
                         for (int i = 0, length = w.entitiesLength; i < length; i++) {
-                            var entity = w.entities[i];
-                            if (entity != null) {
-                                var view = new EntityView {ID = entity.entityId.id, entityViewer = {getter = () => entity}};
+                            ref var entityData = ref w.entities[i];
+                            
+                            if (entityData.currentArchetype != null) {
+                                var entity = new Entity(w.identifier, i, w.entitiesGens[i]);
+                                var view = new EntityView {ID = i, entityViewer = {getter = () => entity}};
                                 this.entityViews.Add(view);
                             }
                         }

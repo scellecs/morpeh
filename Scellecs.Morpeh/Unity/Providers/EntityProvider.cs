@@ -22,7 +22,7 @@ namespace Scellecs.Morpeh.Providers {
         [PropertyOrder(-1)]
         [ReadOnly]
 #endif
-        private int EntityID => this.cachedEntity.IsNullOrDisposed() == false ? this.cachedEntity.ID.id : -1;
+        private int EntityID => this.cachedEntity.IsNullOrDisposed() == false ? this.cachedEntity.Id : -1;
 
         protected internal Entity cachedEntity;
 

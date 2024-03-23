@@ -33,4 +33,13 @@ public static class TestExtensions {
     internal static void DumpFilterArchetypes(this Filter filter, ITestOutputHelper output) {
         output.WriteLine(DumpFilterArchetypes(filter));
     }
+    
+    internal static ArchetypeId ArchetypeOf(this World world, Entity entity) {
+        if (world.IsDisposed(entity)) {
+            return ArchetypeId.Invalid;
+        }
+
+        var archetype = world.entities[entity.Id].currentArchetype;
+        return archetype?.id ?? ArchetypeId.Invalid;
+    }
 }

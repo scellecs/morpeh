@@ -8,7 +8,7 @@ namespace Scellecs.Morpeh.Editor {
 
     [Serializable]
     internal class EntityViewer {
-        internal Func<Entity> getter = () => null;
+        internal Func<Entity> getter = () => Entity.Invalid;
         private  Entity       entity => this.getter();
 
         private readonly List<ComponentView> componentViews = new List<ComponentView>();
@@ -21,10 +21,10 @@ namespace Scellecs.Morpeh.Editor {
         private List<ComponentView> ComponentsOnEntity {
             get {
                 this.componentViews.Clear();
-                if (this.entity != null && this.entity.world != null) {
+                if (this.entity != null && this.entity.GetWorld() != null) {
 
                     // TODO: This has to be filtered via archetype instead of trying all stashes
-                    var stashes = this.entity.world.stashes;
+                    var stashes = this.entity.GetWorld().stashes;
                     foreach (var stash in stashes) {
                         if (stash == null) {
                             continue;

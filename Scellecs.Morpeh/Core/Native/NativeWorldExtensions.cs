@@ -12,6 +12,7 @@ namespace Scellecs.Morpeh.Native {
             var nativeWorld = new NativeWorld();
             fixed (int* entitiesGensPtr = world.entitiesGens)
             fixed (int* entitiesCapacityPtr = &world.entitiesCapacity) {
+                nativeWorld.identifier = world.identifier;
                 nativeWorld.entitiesGens = entitiesGensPtr;
                 nativeWorld.entitiesCapacity = entitiesCapacityPtr;
             }
@@ -20,12 +21,12 @@ namespace Scellecs.Morpeh.Native {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe bool Has(this NativeWorld nativeWorld, in EntityId entityId) {
-            if (entityId.id < 0 || entityId.id >= *nativeWorld.entitiesCapacity) {
+        public static unsafe bool Has(this NativeWorld nativeWorld, in Entity entity) {
+            if (entity.Id < 0 || entity.Id >= *nativeWorld.entitiesCapacity) {
                 return false;
             }
             
-            return entityId.gen == nativeWorld.entitiesGens[entityId.id];
+            return entity.Generation == nativeWorld.entitiesGens[entity.Id];
         }
     }
 }

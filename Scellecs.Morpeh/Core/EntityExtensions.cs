@@ -12,24 +12,13 @@ namespace Scellecs.Morpeh {
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
 
-    // TODO: Restore MigrateTo functionality
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    [Obsolete("Entity extensions are obsolete and will be removed in future versions of Morpeh.")]
     public static class EntityExtensions {
-        internal static Entity Create(int id, World world) {
-            var newEntity = new Entity { 
-                entityId = new EntityId(id, world.entitiesGens[id]), 
-                world = world,
-            };
-
-            return newEntity;
-        }
-        
 #if !MORPEH_STRICT_MODE
-#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Add() instead.")]
-#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -37,12 +26,10 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            return ref entity.world.GetStash<T>().Add(entity);
+            return ref entity.GetWorld().GetStash<T>().Add(entity);
         }
 
-#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Add() instead.")]
-#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -50,24 +37,21 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying AddComponent on null or disposed entity");
             }
 #endif
-            return ref entity.world.GetStash<T>().Add(entity, out exist);
+            return ref entity.GetWorld().GetStash<T>().Add(entity, out exist);
         }
 
-#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Get() instead.")]
-#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            return ref entity.world.GetStash<T>().Get(entity);
+            return ref entity.GetWorld().GetStash<T>().Get(entity);
         }
 
-#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Get() instead.")]
-#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -75,12 +59,10 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying GetComponent on null or disposed entity");
             }
 #endif
-            return ref entity.world.GetStash<T>().Get(entity, out exist);
+            return ref entity.GetWorld().GetStash<T>().Get(entity, out exist);
         }
 
-#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Set() instead.")]
-#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -88,12 +70,10 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying SetComponent on null or disposed entity");
             }
 #endif
-            entity.world.GetStash<T>().Set(entity, value);
+            entity.GetWorld().GetStash<T>().Set(entity, value);
         }
 
-#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Remove() instead.")]
-#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -101,24 +81,20 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying RemoveComponent on null or disposed entity");
             }
 #endif
-            return entity.world.GetStash<T>().Remove(entity);
+            return entity.GetWorld().GetStash<T>().Remove(entity);
         }
 
-#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
-#endif
         public static void Migrate<T>(this Entity from, Entity to, bool overwrite = true) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying MigrateTo on null or disposed entities");
             }
 #endif
-            from.world.GetStash<T>().Migrate(from, to, overwrite);
+            from.GetWorld().GetStash<T>().Migrate(from, to, overwrite);
         }
         
-#if MORPEH_LEGACY
-        [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
-#endif
+        [Obsolete("This method is slow and doesn't have a Stash-based alternative. Consider doing manual migration of required components.")]
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
@@ -126,14 +102,14 @@ namespace Scellecs.Morpeh {
             }
 #endif
 
-            var world = from.world;
-            ref var transient = ref world.transients[from.ID.id];
+            var world = from.GetWorld();
+            ref var fromEntityData = ref world.entities[from.Id];
             
             // We have to make a full copy because Migrate would modify the original data
             
-            Span<StructuralChange> changes = stackalloc StructuralChange[transient.changesCount];
-            for (var i = 0; i < transient.changesCount; i++) {
-                changes[i] = transient.changes[i];
+            Span<StructuralChange> changes = stackalloc StructuralChange[fromEntityData.changesCount];
+            for (var i = 0; i < fromEntityData.changesCount; i++) {
+                changes[i] = fromEntityData.changes[i];
             }
             
             // Migrate all newly added components from transient archetype
@@ -146,13 +122,13 @@ namespace Scellecs.Morpeh {
                 world.GetStash(structuralChange.typeOffset.GetValue())?.Migrate(from, to, overwrite);
             }
 
-            if (from.currentArchetype == ArchetypeId.Invalid || !world.archetypes.TryGetValue(from.currentArchetype.GetValue(), out var fromArchetype)) {
+            if (fromEntityData.currentArchetype == null) {
                 return;
             }
             
             // Migrate all components that are not removed from the source entity from current archetype
             
-            foreach (var offset in fromArchetype.components) {
+            foreach (var offset in fromEntityData.currentArchetype.components) {
                 var wasRemoved = false;
                 foreach (var structuralChange in changes) {
                     if (structuralChange.typeOffset.GetValue() != offset || structuralChange.isAddition) {
@@ -171,9 +147,7 @@ namespace Scellecs.Morpeh {
             }
         }
 
-#if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Has() instead.")]
-#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
@@ -181,76 +155,32 @@ namespace Scellecs.Morpeh {
                 throw new Exception("[MORPEH] You are trying Has on null or disposed entity");
             }
 #endif
-            return entity.world.GetStash<T>().Has(entity);
+            return entity.GetWorld().GetStash<T>().Has(entity);
         }
 #endif
 
-        // TODO: Move the logic to WorldExtensions and just call it from here
+        [Obsolete("[MORPEH] Use World.RemoveEntity() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Dispose(this Entity entity) {
-            if (entity.IsDisposed()) {
-#if MORPEH_DEBUG
-                MLogger.LogError($"You're trying to dispose disposed entity with ID {entity.entityId}.");
-#endif
-                return;
-            }
-            
-            entity.world.ThreadSafetyCheck();
-            
-            var world = entity.world;
-            
-            // Clean new components if entity is transient
-            
-            if (world.dirtyEntities.Get(entity.ID.id)) {
-                ref var transient = ref world.transients[entity.ID.id];
-                
-                // As we clean stashes, changes count may increase, so we need to store it
-                var changesCount = transient.changesCount;
-                
-                for (var i = 0; i < changesCount; i++) {
-                    ref var structuralChange = ref transient.changes[i];
-
-                    if (!structuralChange.isAddition) {
-                        continue;
-                    }
-                    
-                    world.GetStash(structuralChange.typeOffset.GetValue())?.Clean(entity);
-                }
-            }
-            
-            // Clear components from existing archetype
-            
-            if (entity.currentArchetype != ArchetypeId.Invalid) {
-                if (world.archetypes.TryGetValue(entity.currentArchetype.GetValue(), out var archetype)) {
-                    foreach (var offset in archetype.components) {
-                        world.GetStash(offset)?.Clean(entity);
-                    }
-                    
-                    archetype.Remove(entity.ID);
-                    world.TryScheduleArchetypeForRemoval(archetype);
-                }
-            }
-            
-            entity.world.ApplyRemoveEntity(entity.entityId.id);
-            entity.world.dirtyEntities.Unset(entity.entityId.id);
-
-            entity.DisposeFast();
+            entity.GetWorld().DisposeEntity(entity);
+        }
+        
+        [Obsolete("[MORPEH] Use World.IsDisposed() instead.")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsDisposed(this Entity entity) {
+            return entity.GetWorld().IsDisposed(entity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void DisposeFast(this Entity entity) {
-            entity.currentArchetype = ArchetypeId.Invalid;
-
-            entity.world      = null;
-            entity.entityId   = EntityId.Invalid;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsDisposed([NotNull] this Entity entity) => entity.entityId == EntityId.Invalid || entity.world == null;
-
+        [Obsolete("[MORPEH] Use World.IsDisposed() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed([CanBeNull] this Entity entity) {
-            return entity == null || entity.IsDisposed();
+            return entity == Entity.Invalid || entity.GetWorld().IsDisposed(entity);
+        }
+        
+        [Obsolete("[MORPEH] Use World operations instead")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static World GetWorld(this Entity entity) {
+            return World.worlds.data[entity.WorldId];
         }
     }
 }

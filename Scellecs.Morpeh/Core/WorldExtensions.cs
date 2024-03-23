@@ -70,13 +70,12 @@ namespace Scellecs.Morpeh {
             world.entitiesCount    = 0;
             world.entitiesLength   = 0;
             world.entitiesCapacity = Constants.DEFAULT_WORLD_ENTITIES_CAPACITY;
-            world.entities         = new Entity[world.entitiesCapacity];
-            world.entitiesGens     = new int[world.entitiesCapacity];
             
-            world.transients       = new TransientArchetype[world.entitiesCapacity];
+            world.entities = new EntityData[world.entitiesCapacity];
             for (var i = 0; i < world.entitiesCapacity; i++) {
-                TransientUtility.Initialize(ref world.transients[i]);
+                world.entities[i].Initialize();
             }
+            world.entitiesGens = new int[world.entitiesCapacity];
 
             world.archetypes         = new LongHashMap<Archetype>();
             world.archetypesCount    = 1;
@@ -116,7 +115,7 @@ namespace Scellecs.Morpeh {
                 }
             }
             World.worlds.Clear();
-            var defaultWorld = World.Create("Default World");
+            var defaultWorld = World.Create();
             defaultWorld.UpdateByUnity = true;
 #if MORPEH_UNITY
             var go = new GameObject {
@@ -127,203 +126,6 @@ namespace Scellecs.Morpeh {
             go.hideFlags = HideFlags.HideAndDontSave;
             UnityEngine.Object.DontDestroyOnLoad(go);
 #endif
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddWorldPlugin<T>(T plugin) where T : class, IWorldPlugin {
-            if (World.plugins == null) {
-                World.plugins = new FastList<IWorldPlugin>();
-            }
-            World.plugins.Add(plugin);
-        }
-
-        [CanBeNull]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Stash GetStash(this World world, int offset) {
-            if (offset < 0 || offset >= world.stashes.Length) {
-                return null;
-            }
-            
-            return world.stashes[offset];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [PublicAPI]
-        public static Stash GetReflectionStash(this World world, Type type) {
-            world.ThreadSafetyCheck();
-            
-            if (TypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                var candidate = world.GetStash(definition.offset.GetValue());
-                
-                if (candidate != null) {
-                    return candidate;
-                }
-            }
-
-            var stash = Stash.CreateReflection(world, type);
-            TypeIdentifier.typeAssociation.TryGetValue(type, out definition);
-            
-            world.EnsureStashCapacity(definition.offset.GetValue());
-            world.stashes[definition.offset.GetValue()] = stash;
-
-            return stash;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [PublicAPI]
-        public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
-            world.ThreadSafetyCheck();
-            
-            var info = TypeIdentifier<T>.info;
-            var offset = info.offset.GetValue();
-            
-            var candidate = world.GetStash(offset);
-            if (candidate != null) {
-                return (Stash<T>)candidate.typelessStash;
-            }
-
-            var stash = Stash.Create<T>(world);
-            
-            world.EnsureStashCapacity(offset);
-            world.stashes[offset] = stash;
-
-            return (Stash<T>)stash.typelessStash;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void EnsureStashCapacity(this World world, int capacity) {
-            var newSize = world.stashes.Length;
-            while (capacity >= newSize) {
-                newSize = newSize << 1;
-            }
-            
-            if (newSize > world.stashes.Length) {
-                Array.Resize(ref world.stashes, newSize);
-            }
-        }
-
-        public static void GlobalUpdate(float deltaTime) {
-            foreach (var world in World.worlds) {
-                if (world.UpdateByUnity) {
-                    world.Update(deltaTime);
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [PublicAPI]
-        public static void Update(this World world, float deltaTime) {
-            world.ThreadSafetyCheck();
-            
-            var newSysGroup = world.newSystemsGroups;
-
-            for (var i = 0; i < newSysGroup.Count; i++) {
-                var key          = newSysGroup.Keys[i];
-                var systemsGroup = newSysGroup.Values[i];
-
-                systemsGroup.Initialize();
-                world.systemsGroups.Add(key, systemsGroup);
-            }
-
-            newSysGroup.Clear();
-
-            for (var i = 0; i < world.newPluginSystemsGroups.length; i++) {
-                var systemsGroup = world.newPluginSystemsGroups.data[i];
-
-                systemsGroup.Initialize();
-                world.pluginSystemsGroups.Add(systemsGroup);
-            }
-            
-            world.newPluginSystemsGroups.Clear();
-
-            for (var i = 0; i < world.systemsGroups.Count; i++) {
-                var systemsGroup = world.systemsGroups.Values[i];
-                systemsGroup.Update(deltaTime);
-            }
-            for (var i = 0; i < world.pluginSystemsGroups.length; i++) {
-                var systemsGroup = world.pluginSystemsGroups.data[i];
-                systemsGroup.Update(deltaTime);
-            }
-        }
-
-        [PublicAPI]
-        public static void GlobalFixedUpdate(float deltaTime) {
-            foreach (var world in World.worlds) {
-                if (world.UpdateByUnity) {
-                    world.FixedUpdate(deltaTime);
-                }
-            }
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void FixedUpdate(this World world, float deltaTime) {
-            world.ThreadSafetyCheck();
-            
-            for (var i = 0; i < world.systemsGroups.Count; i++) {
-                var systemsGroup = world.systemsGroups.Values[i];
-                systemsGroup.FixedUpdate(deltaTime);
-            }
-            for (var i = 0; i < world.pluginSystemsGroups.length; i++) {
-                var systemsGroup = world.pluginSystemsGroups.data[i];
-                systemsGroup.FixedUpdate(deltaTime);
-            }
-        }
-
-        [PublicAPI]
-        public static void GlobalLateUpdate(float deltaTime) {
-            foreach (var world in World.worlds) {
-                if (world.UpdateByUnity) {
-                    world.LateUpdate(deltaTime);
-                    world.CleanupUpdate(deltaTime);
-                }
-            }
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LateUpdate(this World world, float deltaTime) {
-            world.ThreadSafetyCheck();
-            
-            for (var i = 0; i < world.systemsGroups.Count; i++) {
-                var systemsGroup = world.systemsGroups.Values[i];
-                systemsGroup.LateUpdate(deltaTime);
-            }
-            for (var i = 0; i < world.pluginSystemsGroups.length; i++) {
-                var systemsGroup = world.pluginSystemsGroups.data[i];
-                systemsGroup.LateUpdate(deltaTime);
-            }
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CleanupUpdate(this World world, float deltaTime) {
-            world.ThreadSafetyCheck();
-            
-            for (var i = 0; i < world.systemsGroups.Count; i++) {
-                var systemsGroup = world.systemsGroups.Values[i];
-                systemsGroup.CleanupUpdate(deltaTime);
-            }
-            for (var i = 0; i < world.pluginSystemsGroups.length; i++) {
-                var systemsGroup = world.pluginSystemsGroups.data[i];
-                systemsGroup.CleanupUpdate(deltaTime);
-            }
-
-            ref var m = ref world.newMetrics;
-            m.entities = world.entitiesCount;
-            m.archetypes = world.archetypes.length;
-            m.filters = world.filters.length;
-            for (int index = 0, length = world.systemsGroups.Values.Count; index < length; index++) {
-                var systemsGroup = world.systemsGroups.Values[index];
-                m.systems += systemsGroup.systems.length;
-                m.systems += systemsGroup.fixedSystems.length;
-                m.systems += systemsGroup.lateSystems.length;
-                m.systems += systemsGroup.cleanupSystems.length;
-            }
-            world.metrics = m;
-            m = default;
-            
-            
         }
 
         [PublicAPI]
@@ -356,14 +158,6 @@ namespace Scellecs.Morpeh {
 
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddPluginSystemsGroup(this World world, SystemsGroup systemsGroup) {
-            world.ThreadSafetyCheck();
-            
-            world.newPluginSystemsGroups.Add(systemsGroup);
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveSystemsGroup(this World world, SystemsGroup systemsGroup) {
             world.ThreadSafetyCheck();
             
@@ -385,26 +179,15 @@ namespace Scellecs.Morpeh {
                 id = world.freeEntityIDs.Pop();
             }
             else {
-                id = world.entitiesLength++;
+                id = ++world.entitiesLength;
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var oldCapacity = world.entitiesCapacity;
-                var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
-                Array.Resize(ref world.entities, newCapacity);
-                Array.Resize(ref world.entitiesGens, newCapacity);
-                Array.Resize(ref world.transients, newCapacity);
-                for (var i = oldCapacity; i < newCapacity; i++) {
-                    TransientUtility.Initialize(ref world.transients[i]);
-                }
-                
-                world.entitiesCapacity = newCapacity;
+                world.ExpandEntities();
             }
 
-            world.entities[id] = EntityExtensions.Create(id, world);
             ++world.entitiesCount;
-
-            return world.entities[id];
+            return new Entity(world.identifier, id, world.entitiesGens[id]);
         }
 
         [PublicAPI]
@@ -415,73 +198,114 @@ namespace Scellecs.Morpeh {
                 id = world.freeEntityIDs.Pop();
             }
             else {
-                id = world.entitiesLength++;
+                id = ++world.entitiesLength;
             }
 
             if (world.entitiesLength >= world.entitiesCapacity) {
-                var oldCapacity = world.entitiesCapacity;
-                var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
-                Array.Resize(ref world.entities, newCapacity);
-                Array.Resize(ref world.entitiesGens, newCapacity);
-                Array.Resize(ref world.transients, newCapacity);
-                for (var i = oldCapacity; i < newCapacity; i++) {
-                    TransientUtility.Initialize(ref world.transients[i]);
-                }
-                world.entitiesCapacity = newCapacity;
+                world.ExpandEntities();
             }
-
-            world.entities[id] = EntityExtensions.Create(id, world);
+            
             ++world.entitiesCount;
-
-            return world.entities[id];
+            return new Entity(world.identifier, id, world.entitiesGens[id]);
         }
 
-        [CanBeNull]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ExpandEntities(this World world) {
+            var oldCapacity = world.entitiesCapacity;
+            var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
+            
+            Array.Resize(ref world.entities, newCapacity);
+            for (var i = oldCapacity; i < newCapacity; i++)
+            {
+                world.entities[i].Initialize();
+            }
+            
+            Array.Resize(ref world.entitiesGens, newCapacity);
+
+            world.entitiesCapacity = newCapacity;
+        }
+
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Entity GetEntity(this World world, in int id) {
+        public static Entity GetEntityAtIndex(this World world, int id) {
             world.ThreadSafetyCheck();
-            
-            return world.entities[id];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryGetEntity(this World world, in EntityId entityId, out Entity entity) {
-            world.ThreadSafetyCheck();
-            
-            entity = default;
-
-            if (entityId.id < 0 || entityId.id >= world.entitiesCapacity) {
-                return false;
-            }
-
-            if (world.entitiesGens[entityId.id] != entityId.gen) {
-                return false;
-            }
-
-            entity = world.entities[entityId.id];
-            return !entity.IsNullOrDisposed();
+            return new Entity(world.identifier, id, world.entitiesGens[id]);
         }
 
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveEntity(this World world, Entity entity) {
-            world.ThreadSafetyCheck();
-            
-            if (world.entities[entity.entityId.id] == entity) {
-                entity.Dispose();
+            if (world.IsDisposed(entity)) {
+#if MORPEH_DEBUG
+                MLogger.LogError($"You're trying to dispose disposed entity {entity}.");
+#endif
+                return;
             }
+            
+            world.DisposeEntity(entity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ApplyRemoveEntity(this World world, int id) {
-            world.nextFreeEntityIDs.Push(id);
-            world.entities[id] = null;
-            world.entitiesGens[id]++;
+        internal static void DisposeEntity(this World world, Entity entity) {
+            world.ThreadSafetyCheck();
+            
+            ref var entityData = ref world.entities[entity.Id];
+            
+            // Clean new components if entity is transient
+            
+            if (world.dirtyEntities.Get(entity.Id)) {
+                // As we clean stashes, changes count may increase, so we need to store it
+                var changesCount = entityData.changesCount;
+                
+                for (var i = 0; i < changesCount; i++) {
+                    ref var structuralChange = ref entityData.changes[i];
+
+                    if (!structuralChange.isAddition) {
+                        continue;
+                    }
+                    
+                    world.GetStash(structuralChange.typeOffset.GetValue())?.Clean(entity);
+                }
+            }
+            
+            // Clear components from existing archetype
+            
+            if (entityData.currentArchetype != null) {
+                foreach (var offset in entityData.currentArchetype.components) {
+                    world.GetStash(offset)?.Clean(entity);
+                }
+
+                var index = entityData.indexInCurrentArchetype;
+                entityData.currentArchetype.Remove(index);
+                world.entities[index].indexInCurrentArchetype = index;
+                
+                world.TryScheduleArchetypeForRemoval(entityData.currentArchetype);
+                
+                entityData.currentArchetype = null;
+            }
+            
+            // Gens can only be 3 bytes long (0xFFFFFF)
+            
+            var newGen = ++world.entitiesGens[entity.Id];
+            if (newGen >= 0xFFFFFF) {
+                world.entitiesGens[entity.Id] = 0;
+            }
+            
+            world.nextFreeEntityIDs.Push(entity.Id);
+            world.dirtyEntities.Unset(entity.Id);
+            
+            entityData = default;
+            
             --world.entitiesCount;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsDisposed(this World world, Entity entity) {
+            return world.entitiesGens[entity.Id] != entity.Generation;
         }
 
         [PublicAPI]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Commit(this World world) {
             MLogger.LogTrace("[WorldExtensions] Commit");
             
@@ -502,115 +326,140 @@ namespace Scellecs.Morpeh {
                 world.JobsComplete();
             }
 #endif
-            world.newMetrics.migrations += world.dirtyEntities.count;
             
-            foreach (var entityId in world.dirtyEntities) {
-                var entity = world.entities[entityId];
-                world.ApplyTransientChanges(entity);
+            if (world.dirtyEntities.count > 0) {
+                world.newMetrics.migrations += world.dirtyEntities.count;
+                world.ApplyTransientChanges();
             }
-
-            world.dirtyEntities.Clear();
-
+            
             if (world.nextFreeEntityIDs.length > 0) {
-                world.freeEntityIDs.PushRange(world.nextFreeEntityIDs);
-                world.nextFreeEntityIDs.Clear();
+                world.PushFreeIds();
             }
-            
+
             if (world.emptyArchetypes.length > 0) {
-                foreach (var archetype in world.emptyArchetypes) {
-                    if (!archetype.IsEmpty()) {
-                        MLogger.LogTrace($"[WorldExtensions] Archetype {archetype.id} is not empty after complete migration of entities");
-                        continue;
-                    }
-                    
-                    MLogger.LogTrace($"[WorldExtensions] Remove archetype {archetype.id}");
-                    
-                    world.archetypes.Remove(archetype.id.GetValue(), out _);
-                    world.archetypesCount--;
-                    
-                    world.archetypePool.Return(archetype);
-                }
-                
-                world.emptyArchetypes.Clear();
+                world.ClearEmptyArchetypes();
             }
+
             MLogger.EndSample();
             
             MLogger.LogTrace("[WorldExtensions] Commit done");
         }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ApplyTransientChanges(this World world) {
+            foreach (var entityId in world.dirtyEntities) {
+                world.ApplyTransientChanges(new Entity(world.identifier, entityId, world.entitiesGens[entityId]));
+            }
+
+            world.dirtyEntities.Clear();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void PushFreeIds(this World world) {
+            world.freeEntityIDs.PushRange(world.nextFreeEntityIDs);
+            world.nextFreeEntityIDs.Clear();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ClearEmptyArchetypes(this World world) {
+            foreach (var archetype in world.emptyArchetypes) {
+                if (!archetype.IsEmpty()) {
+                    MLogger.LogTrace($"[WorldExtensions] Archetype {archetype.id} is not empty after complete migration of entities");
+                    continue;
+                }
+                
+                MLogger.LogTrace($"[WorldExtensions] Remove archetype {archetype.id}");
+                
+                world.archetypes.Remove(archetype.id.GetValue(), out _);
+                world.archetypesCount--;
+                
+                world.archetypePool.Return(archetype);
+            }
+            
+            world.emptyArchetypes.Clear();
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void TransientChangeAddComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
-            ref var transient = ref world.transients[entity.entityId.id];
+            ref var entityData = ref world.entities[entity.Id];
             
-            if (world.dirtyEntities.Set(entity.entityId.id)) {
-                TransientUtility.Rebase(ref transient, world.archetypes.GetValueByKey(entity.currentArchetype.GetValue()));
+            if (world.dirtyEntities.Set(entity.Id)) {
+                EntityDataUtility.Rebase(ref entityData);
             }
             
-            TransientUtility.AddComponent(ref transient, ref typeInfo);
+            EntityDataUtility.AddComponent(ref entityData, ref typeInfo);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void TransientChangeRemoveComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
-            ref var transient = ref world.transients[entity.entityId.id];
+            ref var entityData = ref world.entities[entity.Id];
             
-            if (world.dirtyEntities.Set(entity.entityId.id)) {
-                TransientUtility.Rebase(ref transient, world.archetypes.GetValueByKey(entity.currentArchetype.GetValue()));
+            if (world.dirtyEntities.Set(entity.Id)) {
+                EntityDataUtility.Rebase(ref entityData);
             }
             
-            TransientUtility.RemoveComponent(ref transient, ref typeInfo);
+            EntityDataUtility.RemoveComponent(ref entityData, ref typeInfo);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransientChanges(this World world, Entity entity) {
-            ref var transient = ref world.transients[entity.entityId.id];
-
+            ref var entityData = ref world.entities[entity.Id];
+            
+            var currentArchetypeId = entityData.currentArchetype?.id ?? ArchetypeId.Invalid;
+            
             // No changes
             
-            if (transient.nextArchetypeId == entity.currentArchetype) {
+            if (entityData.nextArchetypeId == currentArchetypeId) {
                 MLogger.LogTrace($"[WorldExtensions] No changes for entity {entity}");
                 return;
             }
             
             // Destroy entity if all components have been removed
             
-            if (transient.nextArchetypeId == ArchetypeId.Invalid) {
+            if (entityData.nextArchetypeId == ArchetypeId.Invalid) {
                 MLogger.LogTrace($"[WorldExtensions] Destroying entity {entity} because all components have been removed");
-                entity.Dispose();
+                world.DisposeEntity(entity);
                 return;
             }
             
             // Add to new archetype
+
+            var indexInNextArchetype = 0;
             
-            if (world.archetypes.TryGetValue(transient.nextArchetypeId.GetValue(), out var nextArchetype)) {
+            if (world.archetypes.TryGetValue(entityData.nextArchetypeId.GetValue(), out var nextArchetype)) {
                 MLogger.LogTrace($"[WorldExtensions] Add entity {entity} to EXISTING archetype {nextArchetype.id}");
-                nextArchetype.Add(entity.ID);
+                indexInNextArchetype = nextArchetype.Add(entity);
             } else {
-                MLogger.LogTrace($"[WorldExtensions] Add entity {entity} to NEW archetype {transient.nextArchetypeId}");
-                nextArchetype = world.CreateArchetypeFromTransient(ref transient);
-                nextArchetype.Add(entity.ID);
+                MLogger.LogTrace($"[WorldExtensions] Add entity {entity} to NEW archetype {entityData.nextArchetypeId}");
+                nextArchetype = world.CreateMigratedArchetype(ref entityData);
+                indexInNextArchetype = nextArchetype.Add(entity);
                 
-                world.archetypes.Add(transient.nextArchetypeId.GetValue(), nextArchetype, out _);
+                world.archetypes.Add(entityData.nextArchetypeId.GetValue(), nextArchetype, out _);
                 world.archetypesCount++;
 
-                if (transient.baseArchetype != null) {
-                    AddMatchingPreviousFilters(nextArchetype, ref transient);
+                if (currentArchetypeId != ArchetypeId.Invalid) {
+                    AddMatchingPreviousFilters(nextArchetype, ref entityData);
                 }
                 
-                world.AddMatchingDeltaFilters(nextArchetype, ref transient);
+                world.AddMatchingDeltaFilters(nextArchetype, ref entityData);
                 
                 MLogger.LogTrace($"[WorldExtensions] Filter count for archetype {nextArchetype.id} is {nextArchetype.filters.length}");
             }
             
             // Remove from previous archetype
             
-            if (transient.baseArchetype != null) {
-                transient.baseArchetype.Remove(entity.ID);
-                world.TryScheduleArchetypeForRemoval(transient.baseArchetype);
+            if (currentArchetypeId != ArchetypeId.Invalid) {
+                var index = entityData.indexInCurrentArchetype;
+                entityData.currentArchetype.Remove(index);
+                world.entities[index].indexInCurrentArchetype = index;
+                
+                world.TryScheduleArchetypeForRemoval(entityData.currentArchetype);
             }
             
             // Finalize migration
             MLogger.LogTrace($"[WorldExtensions] Finalize migration for entity {entity} to archetype {nextArchetype.id}");
-            entity.currentArchetype = transient.nextArchetypeId;
+            entityData.currentArchetype = nextArchetype;
+            entityData.indexInCurrentArchetype = indexInNextArchetype;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -624,28 +473,28 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Archetype CreateArchetypeFromTransient(this World world, ref TransientArchetype transient) {
-            var nextArchetype = world.archetypePool.Rent(transient.nextArchetypeId);
+        internal static Archetype CreateMigratedArchetype(this World world, ref EntityData entityData) {
+            var nextArchetype = world.archetypePool.Rent(entityData.nextArchetypeId);
             
-            if (transient.baseArchetype != null) {
-                MLogger.LogTrace($"[WorldExtensions] Copy {transient.baseArchetype.components.count} components from base archetype {transient.baseArchetype.id}");
-                foreach (var offset in transient.baseArchetype.components) {
-                    MLogger.LogTrace($"[WorldExtensions] Copy component {offset} from base archetype {transient.baseArchetype.id}");
+            if (entityData.currentArchetype != null) {
+                MLogger.LogTrace($"[WorldExtensions] Copy {entityData.currentArchetype.components.count} components from base archetype {entityData.currentArchetype.id}");
+                foreach (var offset in entityData.currentArchetype.components) {
+                    MLogger.LogTrace($"[WorldExtensions] Copy component {offset} from base archetype {entityData.currentArchetype.id}");
                     nextArchetype.components.Set(offset);
                 }
             } else {
                 MLogger.LogTrace($"[WorldExtensions] Base archetype is null");
             }
             
-            MLogger.LogTrace($"[WorldExtensions] Add {transient.changesCount} components to archetype {transient.nextArchetypeId}");
-            var changesCount = transient.changesCount;
+            MLogger.LogTrace($"[WorldExtensions] Add {entityData.changesCount} components to archetype {entityData.nextArchetypeId}");
+            var changesCount = entityData.changesCount;
             for (var i = 0; i < changesCount; i++) {
-                ref var structuralChange = ref transient.changes[i];
+                ref var structuralChange = ref entityData.changes[i];
                 if (structuralChange.isAddition) {
-                    MLogger.LogTrace($"[WorldExtensions] Add {structuralChange.typeOffset} to archetype {transient.nextArchetypeId}");
+                    MLogger.LogTrace($"[WorldExtensions] Add {structuralChange.typeOffset} to archetype {entityData.nextArchetypeId}");
                     nextArchetype.components.Set(structuralChange.typeOffset.GetValue());
                 } else {
-                    MLogger.LogTrace($"[WorldExtensions] Remove {structuralChange.typeOffset} from archetype {transient.nextArchetypeId}");
+                    MLogger.LogTrace($"[WorldExtensions] Remove {structuralChange.typeOffset} from archetype {entityData.nextArchetypeId}");
                     nextArchetype.components.Unset(structuralChange.typeOffset.GetValue());
                 }
             }
@@ -654,9 +503,9 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddMatchingPreviousFilters(Archetype archetype, ref TransientArchetype transient) {
-            foreach (var idx in transient.baseArchetype.filters) {
-                var filter = transient.baseArchetype.filters.GetValueByIndex(idx);
+        internal static void AddMatchingPreviousFilters(Archetype archetype, ref EntityData transient) {
+            foreach (var idx in transient.currentArchetype.filters) {
+                var filter = transient.currentArchetype.filters.GetValueByIndex(idx);
                 if (filter.AddArchetypeIfMatches(archetype)) {
                     MLogger.LogTrace($"[WorldExtensions] Add PREVIOUS {filter} to archetype {archetype.id}");
                     archetype.AddFilter(filter);
@@ -667,7 +516,7 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void AddMatchingDeltaFilters(this World world, Archetype archetype, ref TransientArchetype transient) {
+        internal static void AddMatchingDeltaFilters(this World world, Archetype archetype, ref EntityData transient) {
             var changesCount = transient.changesCount;
             for (var i = 0; i < changesCount; i++) {
                 ref var structuralChange = ref transient.changes[i];
@@ -699,24 +548,6 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
             world.archetypePool.WarmUp(count);
-        }
-
-        [PublicAPI]
-        public static void SetFriendlyName(this World world, string friendlyName) {
-            world.ThreadSafetyCheck();
-            
-            world.friendlyName = friendlyName;
-        }
-
-        [PublicAPI]
-        public static string GetFriendlyName(this World world) {
-            world.ThreadSafetyCheck();
-            
-            if (string.IsNullOrEmpty(world.friendlyName)) {
-                return world.ToString() + world.identifier;
-            }
-
-            return world.friendlyName;
         }
 
         [PublicAPI]

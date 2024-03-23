@@ -1,4 +1,5 @@
-﻿using Scellecs.Morpeh;
+﻿/*
+using Scellecs.Morpeh;
 
 namespace Tests;
 
@@ -58,3 +59,4 @@ public class TransientUtilityTests {
         Assert.Null(transient.baseArchetype);
     }
 }
+*/

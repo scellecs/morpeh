@@ -5,12 +5,22 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    internal struct TransientArchetype {
-        internal ArchetypeId nextArchetypeId;
-        internal Archetype baseArchetype;
+    public struct EntityData {
+        internal Archetype currentArchetype;
+        internal int indexInCurrentArchetype;
         
-        internal StructuralChange[] changes;
         internal int changesCount;
+        internal StructuralChange[] changes;
+        
+        internal ArchetypeId nextArchetypeId;
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void Initialize() {
+            this.currentArchetype = null;
+            this.nextArchetypeId = ArchetypeId.Invalid;
+            this.changes = new StructuralChange[16];
+            this.changesCount = 0;
+        }
     }
     
     [Il2CppSetOption(Option.NullChecks, false)]

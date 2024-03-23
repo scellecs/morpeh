@@ -49,8 +49,7 @@ public class FilterMatchTests {
         var entity = this.world.CreateEntity();
         this.world.Commit();
         
-        foreach (var _ in filter)
-        {
+        foreach (var _ in filter) {
             Assert.Fail("Filter should be empty");
         }
         Assert.Equal(0, filter.archetypesLength);
@@ -297,8 +296,7 @@ public class FilterMatchTests {
         var filter = this.world.Filter.With<Test1>().Build();
         
         Assert.Equal(1, filter.GetLengthSlow());
-        foreach (var filterEntity in filter)
-        {
+        foreach (var filterEntity in filter) {
             Assert.Equal(entity, filterEntity);
         }
         Assert.Equal(1, filter.archetypesLength);
@@ -316,8 +314,7 @@ public class FilterMatchTests {
         var filter = this.world.Filter.With<Test1>().With<Test2>().Build();
         
         Assert.Equal(1, filter.GetLengthSlow());
-        foreach (var filterEntity in filter)
-        {
+        foreach (var filterEntity in filter) {
             Assert.Equal(entity, filterEntity);
         }
         Assert.Equal(1, filter.archetypesLength);
@@ -325,21 +322,18 @@ public class FilterMatchTests {
         entity.Dispose();
         this.world.Commit();
         
-        foreach (var _ in filter)
-        {
+        foreach (var _ in filter) {
             Assert.Fail("Filter should be empty");
         }
         Assert.Equal(0, filter.archetypesLength);
     }
     
     [Fact]
-    public void FilterMultipleEntitiesDisposalRemovesMatch()
-    {
+    public void FilterMultipleEntitiesDisposalRemovesMatch() {
         var entitiesCount = 8;
         var entities = new Entity[entitiesCount];
         
-        for (var i = 0; i < entitiesCount; i++)
-        {
+        for (var i = 0; i < entitiesCount; i++) {
             entities[i] = this.world.CreateEntity();
             entities[i].AddComponent<Test1>();
             entities[i].AddComponent<Test2>();
@@ -361,20 +355,17 @@ public class FilterMatchTests {
         
         Assert.Equal(entitiesCount, filter.GetLengthSlow());
         var index = 0;
-        foreach (var filterEntity in filter)
-        {
+        foreach (var filterEntity in filter) {
             Assert.Equal(entities[index++], filterEntity);
         }
         Assert.Equal(1, filter.archetypesLength);
         
-        for (var i = 0; i < entitiesCount; i++)
-        {
+        for (var i = 0; i < entitiesCount; i++) {
             entities[i].Dispose();
             this.world.Commit();
         }
         
-        foreach (var _ in filter)
-        {
+        foreach (var _ in filter) {
             Assert.Fail("Filter should be empty");
         }
         Assert.Equal(0, filter.archetypesLength);
