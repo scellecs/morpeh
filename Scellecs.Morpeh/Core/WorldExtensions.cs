@@ -245,6 +245,7 @@ namespace Scellecs.Morpeh {
             world.DisposeEntity(entity);
         }
 
+        // TODO: Works incorrectly when called inside a filter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void DisposeEntity(this World world, Entity entity) {
             world.ThreadSafetyCheck();
