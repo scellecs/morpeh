@@ -174,7 +174,7 @@ namespace Scellecs.Morpeh {
         [Obsolete("[MORPEH] Use World.IsDisposed() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed([CanBeNull] this Entity entity) {
-            return entity == Entity.Invalid || entity.GetWorld().IsDisposed(entity);
+            return entity == default || entity.GetWorld().IsDisposed(entity);
         }
         
         [Obsolete("[MORPEH] Use World operations instead")]

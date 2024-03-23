@@ -12,8 +12,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public partial struct Entity : IEquatable<Entity> {
-        public static Entity Invalid => default;
-        
         internal long value;
         
         internal Entity(int worldId, int id, int generation) {
@@ -68,7 +66,7 @@ namespace Scellecs.Morpeh {
         }
 
         public override string ToString() {
-            return $"Entity: Id={this.Id}, Generation=({this.Generation}, WorldId={this.WorldId})";
+            return $"Entity: Id={this.Id}, Generation={this.Generation}, WorldId={this.WorldId}";
         }
     }
 }

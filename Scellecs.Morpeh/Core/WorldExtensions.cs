@@ -278,7 +278,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsDisposed(this World world, Entity entity) {
-            return world.entitiesGens[entity.Id] != entity.Generation;
+            return entity == default || world.entitiesGens[entity.Id] != entity.Generation;
         }
 
         [PublicAPI]

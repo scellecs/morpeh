@@ -8,7 +8,7 @@ namespace Scellecs.Morpeh.Editor {
 
     [Serializable]
     internal class EntityViewer {
-        internal Func<Entity> getter = () => Entity.Invalid;
+        internal Func<Entity> getter = () => default;
         private  Entity       entity => this.getter();
 
         private readonly List<ComponentView> componentViews = new List<ComponentView>();

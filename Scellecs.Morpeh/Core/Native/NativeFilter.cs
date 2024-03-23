@@ -27,7 +27,7 @@ namespace Scellecs.Morpeh.Native {
                     totalChunkLength += chunkLength;
                 }
 
-                return Entity.Invalid;
+                return default;
             }
         }
     }
