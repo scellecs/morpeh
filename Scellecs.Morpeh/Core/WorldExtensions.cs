@@ -242,13 +242,6 @@ namespace Scellecs.Morpeh {
                 return;
             }
             
-            world.DisposeEntity(entity);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void DisposeEntity(this World world, Entity entity) {
-            world.ThreadSafetyCheck();
-            
             ref var entityData = ref world.entities[entity.Id];
             
             // Clear new components if entity is transient
