@@ -303,7 +303,6 @@ namespace Scellecs.Morpeh {
         }
 
         [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Commit(this World world) {
             MLogger.LogTrace("[WorldExtensions] Commit");
             
