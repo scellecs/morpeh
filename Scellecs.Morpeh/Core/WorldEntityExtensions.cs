@@ -60,14 +60,11 @@
             world.entitiesCapacity = newCapacity;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Entity GetEntityAtIndex(this World world, int entityId) {
-            return new Entity(world.identifier, entityId, world.entitiesGens[entityId]);
-        }
-
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveEntity(this World world, Entity entity) {
+            world.ThreadSafetyCheck();
+            
             if (world.IsDisposed(entity)) {
 #if MORPEH_DEBUG
                 MLogger.LogError($"You're trying to dispose disposed entity {entity}.");
@@ -112,6 +109,8 @@
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsDisposed(this World world, Entity entity) {
+            world.ThreadSafetyCheck();
+            
             return entity.Id <= 0 ||
                    entity.Id >= world.entitiesCapacity ||
                    world.entitiesGens[entity.Id] != entity.Generation ||
@@ -121,10 +120,17 @@
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has(this World world, Entity entity) {
+            world.ThreadSafetyCheck();
+            
             return entity.Id > 0 &&
                    entity.Id < world.entitiesCapacity &&
                    world.entitiesGens[entity.Id] == entity.Generation &&
                    entity.WorldId == world.identifier;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static Entity GetEntityAtIndex(this World world, int entityId) {
+            return new Entity(world.identifier, entityId, world.entitiesGens[entityId]);
         }
     }
 }

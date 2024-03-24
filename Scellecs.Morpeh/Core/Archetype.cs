@@ -7,7 +7,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    internal sealed class Archetype {
+    public sealed class Archetype {
         internal ArchetypeId id;
         
         internal PinnedArray<Entity> entities;
@@ -35,7 +35,7 @@ namespace Scellecs.Morpeh {
             };
         }
         
-        internal struct Enumerator {
+        public struct Enumerator {
             internal PinnedArray<Entity> entities;
             internal int length;
             internal int index;
