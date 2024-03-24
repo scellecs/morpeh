@@ -370,4 +370,29 @@ public class FilterMatchTests {
         }
         Assert.Equal(0, filter.archetypesLength);
     }
+    
+    [Fact]
+    public void DisposeInsideFilterIterationWorks() {
+        var filter = this.world.Filter.With<Test1>().With<Test2>().Build();
+        
+        for (var i = 0; i < 8; i++) {
+            var entity = this.world.CreateEntity();
+            entity.AddComponent<Test1>();
+            entity.AddComponent<Test2>();
+        }
+        
+        this.world.Commit();
+        
+        Assert.Equal(8, filter.GetLengthSlow());
+        foreach (var entity in filter) {
+            entity.Dispose();
+            Assert.True(this.world.IsDisposed(entity));
+        }
+        this.world.Commit();
+        
+        foreach (var _ in filter) {
+            Assert.Fail("Filter should be empty");
+        }
+        Assert.Equal(0, filter.archetypesLength);
+    }
 }

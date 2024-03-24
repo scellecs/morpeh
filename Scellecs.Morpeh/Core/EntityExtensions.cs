@@ -168,19 +168,26 @@ namespace Scellecs.Morpeh {
         [Obsolete("[MORPEH] Use World.IsDisposed() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsDisposed(this Entity entity) {
-            return entity.GetWorld().IsDisposed(entity);
+            var world = entity.GetWorld();
+            return world == null || world.IsDisposed(entity);
         }
 
         [Obsolete("[MORPEH] Use World.IsDisposed() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed([CanBeNull] this Entity entity) {
-            return entity == default || entity.GetWorld().IsDisposed(entity);
+            return entity == default || entity.IsDisposed();
         }
         
         [Obsolete("[MORPEH] Use World operations instead")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World GetWorld(this Entity entity) {
-            return World.worlds.data[entity.WorldId];
+            var worldId = entity.WorldId;
+            
+            if (worldId < 0 || worldId >= World.worlds.length) {
+                return null;
+            }
+            
+            return World.worlds.data[worldId];
         }
     }
 }
