@@ -115,51 +115,41 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveAtSwap<T>(this FastList<T> list, int index, out FastList<T>.ResultSwap swap) {
             var lastIndex = list.length - 1;
-            
-            if (index < lastIndex) {
-                swap = new FastList<T>.ResultSwap {
-                    oldIndex = index,
-                    newIndex = lastIndex
-                };
-                list.data[index] = list.data[lastIndex];
-                list.data[lastIndex] = default;
-                list.length--;
-                return true;
-            }
-            
-            if (index == lastIndex) {
-                swap = new FastList<T>.ResultSwap {
-                    oldIndex = index,
-                    newIndex = lastIndex
-                };
-                list.data[index] = default;
-                list.length--;
-                return true;
+
+            if (index < 0 || index > lastIndex) {
+                swap = default;
+                return false;
             }
 
-            swap = default;
-            return false;
+            swap = new FastList<T>.ResultSwap {
+                oldIndex = lastIndex,
+                newIndex = index
+            };
+
+            if (index < lastIndex) {
+                list.data[index] = list.data[lastIndex];
+            }
+            
+            list.data[lastIndex] = default;
+            list.length--;
+
+            return true;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveAtSwap<T>(this FastList<T> list, int index, out T newValue) {
             var lastIndex = list.length - 1;
-            
-            if (index < lastIndex) {
-                newValue = list.data[index] = list.data[lastIndex];
-                list.data[lastIndex] = default;
-                list.length--;
-                return true;
+    
+            if (index < 0 || index > lastIndex) {
+                newValue = default;
+                return false;
             }
-            
-            if (index == lastIndex) {
-                newValue = list.data[index] = default;
-                list.length--;
-                return true;
-            }
+    
+            newValue = list.data[index] = index < lastIndex ? list.data[lastIndex] : default;
+            list.data[lastIndex] = default;
+            list.length--;
 
-            newValue = default;
-            return false;
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
