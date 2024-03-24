@@ -135,6 +135,7 @@ namespace Scellecs.Morpeh.Collections {
             if (list.length-- > 1) {
                 var oldIndex = list.length;
                 newValue = list.data[index] = list.data[oldIndex];
+                list.data[oldIndex] = default;
                 list.lastSwappedIndex = index;
                 return true;
             }
