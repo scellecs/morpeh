@@ -151,8 +151,13 @@ namespace Scellecs.Morpeh {
 #endif
             }
             
-            public Entity Current => this.archetypeEnumerator.Current;
-            
+            public Entity Current
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => this.archetypeEnumerator.Current;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext() {
                 while (this.archetypeIndex < this.archetypeCount) {
                     if (this.archetypeEnumerator.MoveNext()) {

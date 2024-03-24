@@ -29,14 +29,17 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             return new Enumerator {
-                entities = this.entities,
+                entities = this.entities.data,
                 length = this.length,
                 index = -1,
             };
         }
         
+        [Il2CppSetOption(Option.NullChecks, false)]
+        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
-            internal PinnedArray<Entity> entities;
+            internal Entity[] entities;
             internal int length;
             internal int index;
             
