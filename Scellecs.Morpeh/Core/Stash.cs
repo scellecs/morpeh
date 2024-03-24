@@ -129,8 +129,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity}");
             }
 
             var previousCapacity = this.map.capacity;
@@ -155,8 +155,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity}");
             }
             
             var previousCapacity = this.map.capacity;
@@ -181,8 +181,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Add on null or disposed entity {entity}");
             }
             
             var previousCapacity = this.map.capacity;
@@ -208,8 +208,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity}");
             }
 
             if (!this.map.Has(entity.Id)) {
@@ -228,8 +228,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Get on null or disposed entity {entity}");
             }
 #endif
             if (this.map.TryGetIndex(entity.Id, out var dataIndex))
@@ -247,8 +247,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity}");
             }
             
             var previousCapacity = this.map.capacity;
@@ -269,8 +269,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Set on null or disposed entity {entity}");
             }
             var previousCapacity = this.map.capacity;
 #endif
@@ -293,8 +293,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Remove on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Remove on null or disposed entity {entity}");
             }
 #endif
 
@@ -340,11 +340,11 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (from.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity");
+            if (world.IsDisposed(from)) {
+                throw new Exception($"[MORPEH] You are trying Migrate FROM null or disposed entity {from}");
             }
-            if (to.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity");
+            if (world.IsDisposed(to)) {
+                throw new Exception($"[MORPEH] You are trying Migrate TO null or disposed entity {to}");
             }
             var previousCapacity = this.map.capacity;
 #endif
@@ -386,8 +386,8 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity");
+            if (world.IsDisposed(entity)) {
+                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity}");
             }
 #endif
 

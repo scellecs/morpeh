@@ -274,16 +274,6 @@ namespace Scellecs.Morpeh {
                     world.GetStash(offset)?.Remove(entity);
                 }
             }
-            
-            // Increment generation so that the entity is considered disposed immediately
-            // Gens can only be 3 bytes long (0xFFFFFF)
-            
-            var newGen = ++world.entitiesGens[entity.Id];
-            if (newGen >= 0xFFFFFF) {
-                world.entitiesGens[entity.Id] = 0;
-            }
-            
-            --world.entitiesCount;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -548,6 +538,14 @@ namespace Scellecs.Morpeh {
                 
                 entityData.currentArchetype = null;
             }
+            
+            // Gens can only be 3 bytes long (0xFFFFFF)
+            
+            if (++world.entitiesGens[entity.Id] >= 0xFFFFFF) {
+                world.entitiesGens[entity.Id] = 0;
+            }
+            
+            --world.entitiesCount;
             
             world.nextFreeEntityIDs.Push(entity.Id);
             world.dirtyEntities.Unset(entity.Id);

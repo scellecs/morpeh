@@ -41,7 +41,7 @@ namespace Scellecs.Morpeh.Providers {
                             
                             if (entityData.currentArchetype != null) {
                                 var entity = new Entity(w.identifier, i, w.entitiesGens[i]);
-                                var view = new EntityView {ID = i, entityViewer = {getter = () => entity}};
+                                var view = new EntityView {Name = entity.ToString(), entityViewer = {getter = () => entity}};
                                 this.entityViews.Add(view);
                             }
                         }
@@ -60,7 +60,7 @@ namespace Scellecs.Morpeh.Providers {
         [Serializable]
         protected internal class EntityView {
             [ReadOnly]
-            public int ID;
+            public string Name;
             
             [ShowInInspector]
             [InlineProperty]

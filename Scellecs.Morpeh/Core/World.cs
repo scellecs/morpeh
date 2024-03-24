@@ -194,6 +194,8 @@ namespace Scellecs.Morpeh {
             this.entitiesLength   = -1;
             this.entitiesCapacity = -1;
 
+            this.entitiesGens     = null;
+
             this.freeEntityIDs.Clear();
             this.freeEntityIDs = null;
             this.nextFreeEntityIDs.Clear();
