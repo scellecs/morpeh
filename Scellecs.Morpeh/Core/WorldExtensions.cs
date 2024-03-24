@@ -172,117 +172,6 @@ namespace Scellecs.Morpeh {
         }
 
         [PublicAPI]
-        public static Entity CreateEntity(this World world) {
-            world.ThreadSafetyCheck();
-            
-            int id;
-            if (world.freeEntityIDs.length > 0) {
-                id = world.freeEntityIDs.Pop();
-            }
-            else {
-                id = ++world.entitiesLength;
-            }
-
-            if (world.entitiesLength >= world.entitiesCapacity) {
-                world.ExpandEntities();
-            }
-
-            ++world.entitiesCount;
-            return new Entity(world.identifier, id, world.entitiesGens[id]);
-        }
-
-        [PublicAPI]
-        public static Entity CreateEntity(this World world, out int id) {
-            world.ThreadSafetyCheck();
-
-            if (world.freeEntityIDs.length > 0) {
-                id = world.freeEntityIDs.Pop();
-            }
-            else {
-                id = ++world.entitiesLength;
-            }
-
-            if (world.entitiesLength >= world.entitiesCapacity) {
-                world.ExpandEntities();
-            }
-            
-            ++world.entitiesCount;
-            return new Entity(world.identifier, id, world.entitiesGens[id]);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ExpandEntities(this World world) {
-            var oldCapacity = world.entitiesCapacity;
-            var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
-            
-            Array.Resize(ref world.entities, newCapacity);
-            for (var i = oldCapacity; i < newCapacity; i++)
-            {
-                world.entities[i].Initialize();
-            }
-            
-            Array.Resize(ref world.entitiesGens, newCapacity);
-
-            world.entitiesCapacity = newCapacity;
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Entity GetEntityAtIndex(this World world, int id) {
-            world.ThreadSafetyCheck();
-            return new Entity(world.identifier, id, world.entitiesGens[id]);
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveEntity(this World world, Entity entity) {
-            if (world.IsDisposed(entity)) {
-#if MORPEH_DEBUG
-                MLogger.LogError($"You're trying to dispose disposed entity {entity}.");
-#endif
-                return;
-            }
-            
-            ref var entityData = ref world.entities[entity.Id];
-            
-            // Clear new components if entity is transient
-            
-            if (world.dirtyEntities.Get(entity.Id)) {
-                var changesCount = entityData.changesCount;
-                
-                for (var i = 0; i < changesCount; i++) {
-                    var structuralChange = entityData.changes[i];
-
-                    if (!structuralChange.isAddition) {
-                        continue;
-                    }
-                    
-                    world.GetStash(structuralChange.typeOffset.GetValue())?.Clean(entity);
-                }
-                
-                world.dirtyEntities.Unset(entity.Id);
-            }
-            
-            // Clear components from existing archetype
-            
-            if (entityData.currentArchetype != null) {
-                foreach (var offset in entityData.currentArchetype.components) {
-                    world.GetStash(offset)?.Clean(entity);
-                }
-            }
-            
-            world.disposedEntities.Set(entity.Id);
-            
-            world.IncrementGeneration(entity.Id);
-            --world.entitiesCount;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsDisposed(this World world, Entity entity) {
-            return entity == default || world.entitiesGens[entity.Id] != entity.Generation;
-        }
-
-        [PublicAPI]
         public static void Commit(this World world) {
             MLogger.LogTrace("[WorldExtensions] Commit");
             
@@ -346,7 +235,7 @@ namespace Scellecs.Morpeh {
                     world.IncrementGeneration(entityId);
                     clearedEntities++;
                 } else {
-                    world.ApplyTransientChanges(new Entity(world.identifier, entityId, world.entitiesGens[entityId]), ref entityData);
+                    world.ApplyTransientChanges(world.GetEntityAtIndex(entityId), ref entityData);
                 }
             }
 
