@@ -80,7 +80,12 @@ namespace Scellecs.Morpeh {
                 return;
             }
             
-            filter.archetypes.RemoveAtSwap(index, out Archetype _);
+            filter.archetypes.RemoveAtSwap(index, out Archetype swappedArchetype);
+            
+            if (swappedArchetype != null) {
+                filter.archetypeIds.Set(swappedArchetype.id.GetValue(), index, out _);
+            }
+            
             filter.archetypesLength--;
         }
 
