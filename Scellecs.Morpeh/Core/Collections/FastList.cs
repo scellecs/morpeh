@@ -13,7 +13,6 @@ namespace Scellecs.Morpeh.Collections {
         public T[] data;
         public int length;
         public int capacity;
-        public int lastSwappedIndex;
 
         public EqualityComparer<T> comparer;
 
@@ -22,7 +21,6 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity = 4;
             this.data     = new T[this.capacity];
             this.length   = 0;
-            this.lastSwappedIndex = -1;
 
             this.comparer = EqualityComparer<T>.Default;
         }
@@ -32,7 +30,6 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity = HashHelpers.GetCapacity(capacity) + 1;
             this.data     = new T[this.capacity];
             this.length   = 0;
-            this.lastSwappedIndex = -1;
 
             this.comparer = EqualityComparer<T>.Default;
         }
@@ -42,7 +39,6 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity = other.capacity;
             this.data     = new T[this.capacity];
             this.length   = other.length;
-            this.lastSwappedIndex = -1;
             Array.Copy(other.data, 0, this.data, 0, this.length);
 
             this.comparer = other.comparer;
@@ -55,7 +51,6 @@ namespace Scellecs.Morpeh.Collections {
             e.list    = this;
             e.current = default;
             e.index   = 0;
-            this.lastSwappedIndex = -1;
             return e;
         }
 
@@ -78,26 +73,13 @@ namespace Scellecs.Morpeh.Collections {
             public int index;
 
             public bool MoveNext() {
-                var lastSwappedIndex = this.list.lastSwappedIndex;
-                if (lastSwappedIndex != -1) {
-                    this.length = this.list.length;
-                    var previousIndex = this.index - 1;
-                    if (lastSwappedIndex == previousIndex) {
-                        this.index--;
-                    }
-                    else if (lastSwappedIndex < previousIndex) {
-#if MORPEH_DEBUG
-                        throw new InvalidOperationException("Earlier collection items have been modified, this is not allowed");
-#endif
-                    }
-                }
+                this.length = this.list.length;
                 
                 if (this.index >= this.length) {
                     return false;
                 }
 
                 this.current = this.list.data[this.index++];
-                this.list.lastSwappedIndex = -1;
 
                 return true;
             }

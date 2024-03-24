@@ -63,7 +63,6 @@ namespace Scellecs.Morpeh.Collections {
         public static void Swap<T>(this FastList<T> list, int source, int destination)
         {
             list.data[destination] = list.data[source];
-            list.lastSwappedIndex = destination;
         } 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -115,32 +114,50 @@ namespace Scellecs.Morpeh.Collections {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveAtSwap<T>(this FastList<T> list, int index, out FastList<T>.ResultSwap swap) {
-            if (list.length-- > 1) {
-                swap.oldIndex = list.length;
-                swap.newIndex = index;
-
-                list.data[swap.newIndex] = list.data[swap.oldIndex];
-                list.data[swap.oldIndex] = default;
-                list.lastSwappedIndex    = index;
+            var lastIndex = list.length - 1;
+            
+            if (index < lastIndex) {
+                swap = new FastList<T>.ResultSwap {
+                    oldIndex = index,
+                    newIndex = lastIndex
+                };
+                list.data[index] = list.data[lastIndex];
+                list.data[lastIndex] = default;
+                list.length--;
+                return true;
+            }
+            
+            if (index == lastIndex) {
+                swap = new FastList<T>.ResultSwap {
+                    oldIndex = index,
+                    newIndex = lastIndex
+                };
+                list.data[index] = default;
+                list.length--;
                 return true;
             }
 
-            list.lastSwappedIndex = -1;
             swap = default;
             return false;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveAtSwap<T>(this FastList<T> list, int index, out T newValue) {
-            if (list.length-- > 1) {
-                var oldIndex = list.length;
-                newValue = list.data[index] = list.data[oldIndex];
-                list.data[oldIndex] = default;
-                list.lastSwappedIndex = index;
+            var lastIndex = list.length - 1;
+            
+            if (index < lastIndex) {
+                newValue = list.data[index] = list.data[lastIndex];
+                list.data[lastIndex] = default;
+                list.length--;
+                return true;
+            }
+            
+            if (index == lastIndex) {
+                newValue = list.data[index] = default;
+                list.length--;
                 return true;
             }
 
-            list.lastSwappedIndex = -1;
             newValue = default;
             return false;
         }
@@ -153,7 +170,6 @@ namespace Scellecs.Morpeh.Collections {
 
             Array.Clear(list.data, 0, list.length);
             list.length = 0;
-            list.lastSwappedIndex = -1;
         }
 
         //todo rework
