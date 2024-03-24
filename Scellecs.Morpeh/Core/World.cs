@@ -85,6 +85,7 @@ namespace Scellecs.Morpeh {
         internal int entitiesCapacity;
 
         internal BitMap dirtyEntities;
+        internal BitMap disposedEntities;
 
         [ShowInInspector]
         internal IntStack freeEntityIDs;

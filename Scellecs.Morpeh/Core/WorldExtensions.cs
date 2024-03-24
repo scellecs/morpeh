@@ -40,6 +40,7 @@ namespace Scellecs.Morpeh {
             world.filters          = new FastList<Filter>();
             world.filtersLookup    = new LongHashMap<LongHashMap<Filter>>();
             world.dirtyEntities    = new BitMap();
+            world.disposedEntities = new BitMap();
             
 #if MORPEH_BURST
             world.tempArrays = new FastList<NativeArray<Entity>>();
@@ -274,6 +275,12 @@ namespace Scellecs.Morpeh {
                     world.GetStash(offset)?.Remove(entity);
                 }
             }
+            
+            world.dirtyEntities.Unset(entity.Id);
+            world.disposedEntities.Set(entity.Id);
+            
+            world.IncrementGeneration(entity.Id);
+            --world.entitiesCount;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -302,6 +309,9 @@ namespace Scellecs.Morpeh {
                 world.JobsComplete();
             }
 #endif
+            if (world.disposedEntities.count > 0) {
+                world.CompleteDisposals();
+            }
             
             if (world.dirtyEntities.count > 0) {
                 world.newMetrics.migrations += world.dirtyEntities.count;
@@ -322,11 +332,31 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void CompleteDisposals(this World world) {
+            foreach (var entityId in world.disposedEntities) {
+                world.CompleteEntityDisposal(entityId, ref world.entities[entityId]);
+            }
+            
+            world.disposedEntities.Clear();
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ApplyTransientChanges(this World world) {
+            var clearedEntities = 0;
+            
             foreach (var entityId in world.dirtyEntities) {
-                world.ApplyTransientChanges(new Entity(world.identifier, entityId, world.entitiesGens[entityId]));
+                ref var entityData = ref world.entities[entityId];
+                
+                if (entityData.nextArchetypeId == ArchetypeId.Invalid) {
+                    world.CompleteEntityDisposal(entityId, ref entityData);
+                    world.IncrementGeneration(entityId);
+                    clearedEntities++;
+                } else {
+                    world.ApplyTransientChanges(new Entity(world.identifier, entityId, world.entitiesGens[entityId]), ref entityData);
+                }
             }
 
+            world.entitiesCount -= clearedEntities;
             world.dirtyEntities.Clear();
         }
 
@@ -378,23 +408,13 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ApplyTransientChanges(this World world, Entity entity) {
-            ref var entityData = ref world.entities[entity.Id];
-            
+        internal static void ApplyTransientChanges(this World world, Entity entity, ref EntityData entityData) {
             var currentArchetypeId = entityData.currentArchetype?.id ?? ArchetypeId.Invalid;
             
             // No changes
             
             if (entityData.nextArchetypeId == currentArchetypeId) {
                 MLogger.LogTrace($"[WorldExtensions] No changes for entity {entity}");
-                return;
-            }
-            
-            // Destroy entity if all components have been removed
-            
-            if (entityData.nextArchetypeId == ArchetypeId.Invalid) {
-                MLogger.LogTrace($"[WorldExtensions] Destroying entity {entity} because all components have been removed");
-                world.CompleteEntityDisposal(entity, ref entityData);
                 return;
             }
             
@@ -522,12 +542,8 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void CompleteEntityDisposal(this World world, Entity entity, ref EntityData entityData) {
-            MLogger.LogTrace($"[WorldExtensions] Complete disposal of entity {entity}");
-            
+        internal static void CompleteEntityDisposal(this World world, int entityId, ref EntityData entityData) {
             if (entityData.currentArchetype != null) {
-                MLogger.LogTrace($"[WorldExtensions] Remove entity {entity} from archetype {entityData.currentArchetype.id}");
-                
                 var index = entityData.indexInCurrentArchetype;
                 entityData.currentArchetype.Remove(index);
                 
@@ -539,18 +555,16 @@ namespace Scellecs.Morpeh {
                 entityData.currentArchetype = null;
             }
             
+            world.nextFreeEntityIDs.Push(entityId);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void IncrementGeneration(this World world, int entityId) {
             // Gens can only be 3 bytes long (0xFFFFFF)
             
-            if (++world.entitiesGens[entity.Id] >= 0xFFFFFF) {
-                world.entitiesGens[entity.Id] = 0;
+            if (++world.entitiesGens[entityId] >= 0xFFFFFF) {
+                world.entitiesGens[entityId] = 0;
             }
-            
-            --world.entitiesCount;
-            
-            world.nextFreeEntityIDs.Push(entity.Id);
-            world.dirtyEntities.Unset(entity.Id);
-            
-            MLogger.LogTrace($"[WorldExtensions] Entity {entity} has been disposed");
         }
         
         [PublicAPI]

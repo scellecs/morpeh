@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+[Collection("Sequential")]
 public class LongHashSetTests {
     [Fact]
     public void SanityTest() {
