@@ -248,35 +248,29 @@ namespace Scellecs.Morpeh {
             // Clear new components if entity is transient
             
             if (world.dirtyEntities.Get(entity.Id)) {
-                // As we clean stashes, changes may be modified, so we need to copy them to stack
-                
-                Span<StructuralChange> changes = stackalloc StructuralChange[entityData.changesCount];
-                for (var i = 0; i < entityData.changesCount; i++) {
-                    changes[i] = entityData.changes[i];
-                }
-                
-                var changesCount = changes.Length;
+                var changesCount = entityData.changesCount;
                 
                 for (var i = 0; i < changesCount; i++) {
-                    var structuralChange = changes[i];
+                    var structuralChange = entityData.changes[i];
 
                     if (!structuralChange.isAddition) {
                         continue;
                     }
                     
-                    world.GetStash(structuralChange.typeOffset.GetValue())?.Remove(entity);
+                    world.GetStash(structuralChange.typeOffset.GetValue())?.Clean(entity);
                 }
+                
+                world.dirtyEntities.Unset(entity.Id);
             }
             
             // Clear components from existing archetype
             
             if (entityData.currentArchetype != null) {
                 foreach (var offset in entityData.currentArchetype.components) {
-                    world.GetStash(offset)?.Remove(entity);
+                    world.GetStash(offset)?.Clean(entity);
                 }
             }
             
-            world.dirtyEntities.Unset(entity.Id);
             world.disposedEntities.Set(entity.Id);
             
             world.IncrementGeneration(entity.Id);
