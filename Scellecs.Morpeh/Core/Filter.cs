@@ -15,14 +15,6 @@ namespace Scellecs.Morpeh {
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
     using System.Text;
-    
-    [Il2CppSetOption(Option.NullChecks, false)]
-    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class FilterNode {
-        public FastList<Filter> filters;
-        public LongHashMap<FilterNode> nodes;
-    }
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
