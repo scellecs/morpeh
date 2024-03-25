@@ -54,27 +54,27 @@ namespace Scellecs.Morpeh.Collections {
             public int current;
 
             public bool MoveNext() {
-                {
-                    var slotsPtr = this.set.slots.ptr;
-                    for (var len = this.set.lastIndex; this.index < len; ++this.index) {
-                        var v = slotsPtr[this.index] - 1;
-                        if (v < 0) {
-                            continue;
-                        }
-
-                        this.current = v;
-                        ++this.index;
-
-                        return true;
+                var slotsPtr = this.set.slots.ptr;
+                for (var len = this.set.lastIndex; this.index < len; this.index += 2) {
+                    var v = slotsPtr[this.index] - 1;
+                    if (v < 0) {
+                        continue;
                     }
 
-                    this.index   = this.set.lastIndex + 1;
-                    this.current = default;
-                    return false;
+                    this.current = v;
+                    this.index += 2;
+                    return true;
                 }
+
+                this.index = this.set.lastIndex + 1;
+                this.current = default;
+                return false;
             }
 
-            public int Current => this.current;
+            public int Current {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => this.current;
+            }
         }
     }
 }
