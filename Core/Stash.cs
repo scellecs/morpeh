@@ -348,6 +348,7 @@ namespace Scellecs.Morpeh {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
 #endif
+                this.data[slotIndex] = default;
                 return true;
             }
             return false;
