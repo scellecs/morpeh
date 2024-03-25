@@ -13,7 +13,7 @@ namespace Scellecs.Morpeh {
         internal PinnedArray<Entity> entities;
         internal int length;
         
-        internal BitMap components;
+        internal IntHashSet components;
         internal IntHashMap<Filter> filters;
        
         internal Archetype(ArchetypeId id) {
@@ -22,17 +22,19 @@ namespace Scellecs.Morpeh {
             this.entities = new PinnedArray<Entity>(16);
             this.length = 0;
             
-            this.components = new BitMap();
+            this.components = new IntHashSet(8);
             this.filters = new IntHashMap<Filter>();
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
-            return new Enumerator {
-                entities = this.entities.data,
-                length = this.length,
-                index = -1,
-            };
+            Enumerator e;
+            
+            e.entities = this.entities.data;
+            e.index = -1;
+            e.length = this.length;
+            
+            return e;
         }
         
         [Il2CppSetOption(Option.NullChecks, false)]
@@ -40,8 +42,8 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
             internal Entity[] entities;
-            internal int length;
             internal int index;
+            internal int length;
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext() {

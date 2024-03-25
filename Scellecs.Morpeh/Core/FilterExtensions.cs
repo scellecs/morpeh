@@ -78,14 +78,14 @@ namespace Scellecs.Morpeh {
 
         internal static bool ArchetypeMatches(this Filter filter, Archetype archetype) {
             foreach (var includedTypeInfo in filter.includedTypes) {
-                if (!archetype.components.Get(includedTypeInfo.offset.GetValue())) {
+                if (!archetype.components.Has(includedTypeInfo.offset.GetValue())) {
                     MLogger.LogTrace($"Archetype {archetype.id} does not match filter {filter} [include]");
                     return false;
                 }
             }
             
             foreach (var excludedTypeInfo in filter.excludedTypes) {
-                if (archetype.components.Get(excludedTypeInfo.offset.GetValue())) {
+                if (archetype.components.Has(excludedTypeInfo.offset.GetValue())) {
                     MLogger.LogTrace($"Archetype {archetype.id} does not match filter {filter} [exclude]");
                     return false;
                 }

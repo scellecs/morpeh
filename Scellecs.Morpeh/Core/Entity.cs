@@ -11,8 +11,8 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public partial struct Entity : IEquatable<Entity> {
-        internal long value;
+    public readonly struct Entity : IEquatable<Entity> {
+        internal readonly long value;
         
         internal Entity(int worldId, int id, int generation) {
             value = ((id & 0xFFFFFFFFL) << 32) | ((generation & 0xFFFFFFL) << 8) | (worldId & 0xFFL);

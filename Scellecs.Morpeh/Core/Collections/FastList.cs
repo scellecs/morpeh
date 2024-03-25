@@ -47,10 +47,11 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             Enumerator e;
+            
+            e.data = this.data;
+            e.index = -1;
             e.length = this.length;
-            e.list    = this;
-            e.current = default;
-            e.index   = 0;
+            
             return e;
         }
 
@@ -66,27 +67,18 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
-            public FastList<T> list;
-
-            public int length;
-            public T   current;
+            public T[] data;
             public int index;
+            public int length;
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext() {
-                this.length = this.list.length;
-                
-                if (this.index >= this.length) {
-                    return false;
-                }
-
-                this.current = this.list.data[this.index++];
-
-                return true;
+                return ++this.index < this.length;
             }
 
             public T Current {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => this.current;
+                get => this.data[this.index];
             }
         }
     }

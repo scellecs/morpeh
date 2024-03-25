@@ -9,13 +9,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class EntityDataUtility {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Rebase(ref EntityData entityData) {
-            entityData.nextArchetypeId = entityData.currentArchetype?.id ?? ArchetypeId.Invalid;
-            entityData.changesCount = 0;
-            MLogger.LogTrace($"[Rebase] migration rebase to {entityData.nextArchetypeId}");
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddComponent(ref EntityData entityData, ref TypeInfo typeInfo) {
             if (!FilterDuplicate(ref entityData, typeInfo.offset)) {
                 EnsureCapacity(ref entityData);
@@ -47,17 +40,13 @@ namespace Scellecs.Morpeh {
                     continue;
                 }
                 
-                RemoveAtSwap(ref entityData, i);
+                entityData.changes[i] = entityData.changes[entityData.changesCount - 1];
+                --entityData.changesCount;
+                
                 return true;
             }
             
             return false;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void RemoveAtSwap(ref EntityData entityData, int index) {
-            entityData.changes[index] = entityData.changes[entityData.changesCount - 1];
-            --entityData.changesCount;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

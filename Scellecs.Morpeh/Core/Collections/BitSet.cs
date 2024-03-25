@@ -1,22 +1,19 @@
-﻿using System.Runtime.CompilerServices;
-using Unity.IL2CPP.CompilerServices;
-
-namespace Scellecs.Morpeh.Collections
-{
-    // TODO: Probably needs to be removed if not used
+﻿namespace Scellecs.Morpeh.Collections {
+    using System;
+    using System.Runtime.CompilerServices;
+    using Unity.IL2CPP.CompilerServices;
+    
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class BitSet {
-        private PinnedArray<ulong> data;
-        internal int length;
+        private ulong[] data;
+        internal int setBitsCount;
+        internal int longsCapacity;
         
         public BitSet(int capacity = 64) {
-            this.data = new PinnedArray<ulong>(GetMinLengthForCapacity(capacity));
-        }
-        
-        ~BitSet() {
-            this.data.Dispose();
+            this.longsCapacity = GetMinLengthForCapacity(capacity);
+            this.data = new ulong[this.longsCapacity];
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,15 +26,17 @@ namespace Scellecs.Morpeh.Collections
             var arrayIndex = index >> 6;
             var bitIndex   = index & 63;
             
-            if (arrayIndex >= this.data.Length) {
-                this.Resize(arrayIndex + 1);
+            if (arrayIndex >= this.longsCapacity) {
+                var newSize = arrayIndex + 1;
+                Array.Resize(ref this.data, newSize);
+                this.longsCapacity = newSize;
             }
             
             var mask = 1UL << bitIndex;
             var value = this.data[arrayIndex];
             var result = (value & mask) == 0;
             
-            this.length += result ? 1 : 0;
+            this.setBitsCount += result ? 1 : 0;
             this.data[arrayIndex] = value | mask;
             
             return result;
@@ -47,7 +46,7 @@ namespace Scellecs.Morpeh.Collections
         public bool Unset(int index) {
             var arrayIndex = index >> 6;
             
-            if (arrayIndex >= this.data.Length) {
+            if (arrayIndex >= this.longsCapacity) {
                 return false;
             }
             
@@ -56,7 +55,7 @@ namespace Scellecs.Morpeh.Collections
             var value = this.data[arrayIndex];
             var result = (value & mask) != 0;
             
-            this.length -= result ? 1 : 0;
+            this.setBitsCount -= result ? 1 : 0;
             this.data[arrayIndex] = value & ~mask;
             
             return result;
@@ -65,9 +64,9 @@ namespace Scellecs.Morpeh.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsSet(int index) {
             var arrayIndex = index >> 6;
-            var bitIndex   = index & 63;
+            var bitIndex = index & 63;
             
-            if (arrayIndex >= this.data.Length) {
+            if (arrayIndex >= this.longsCapacity) {
                 return false;
             }
             
@@ -78,17 +77,15 @@ namespace Scellecs.Morpeh.Collections
         }
         
         public void Clear() {
-            this.data.Clear();
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Resize(int newSize) {
-            this.data.Resize(newSize);
+            Array.Clear(this.data, 0, this.longsCapacity);
+            this.setBitsCount = 0;
         }
         
         public Enumerator GetEnumerator() {
             return new Enumerator {
-                bitSet = this,
+                data = this.data,
+                longIndex = 0,
+                bitIndex = 0,
             };
         }
         
@@ -96,37 +93,34 @@ namespace Scellecs.Morpeh.Collections
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
-            public BitSet bitSet;
-
-            public int longIndex;
-            public int bitIndex;
-            private int current;
+            internal ulong[] data;
+            internal int longIndex;
+            internal int bitIndex;
 
             public bool MoveNext() {
-                var data = this.bitSet.data;
-                var length = data.Length;
+                var length = this.data.Length;
+
                 while (this.longIndex < length) {
-                    var value = data[this.longIndex];
-                    if (value != 0) {
-                        while (this.bitIndex < 64) {
-                            if ((value & (1UL << this.bitIndex)) != 0) {
-                                this.current = (this.longIndex << 6) + this.bitIndex;
-                                this.bitIndex++;
-                                return true;
-                            }
+                    var value = this.data[this.longIndex];
+                    
+                    while (this.bitIndex < 64) {
+                        if ((value & (1UL << this.bitIndex)) != 0) {
                             this.bitIndex++;
+                            return true;
                         }
+                        this.bitIndex++;
                     }
+                    
                     this.longIndex++;
                     this.bitIndex = 0;
                 }
-                this.current = default;
+                
                 return false;
             }
 
-            public int Current { 
+            public int Current {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => this.current;
+                get => (this.longIndex << 6) + this.bitIndex - 1;
             }
         }
     }
