@@ -40,6 +40,10 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AddArchetypeIfMatches(this Filter filter, Archetype archetype) {
+            if (filter.includedTypes.length > archetype.components.length) {
+                return false;
+            }
+            
             if (filter.archetypeIds.Has(archetype.id.GetValue())) {
                 MLogger.LogTrace($"Archetype {archetype.id} already in filter {filter}");
                 return false;
@@ -76,8 +80,7 @@ namespace Scellecs.Morpeh {
             filter.archetypesLength--;
         }
 
-        internal static bool ArchetypeMatches(this Filter filter, Archetype archetype)
-        {
+        internal static bool ArchetypeMatches(this Filter filter, Archetype archetype) {
             var archetypeComponents = archetype.components;
             var includedTypes = filter.includedTypes;
 
