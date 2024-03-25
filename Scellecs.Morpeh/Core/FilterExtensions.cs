@@ -59,19 +59,6 @@ namespace Scellecs.Morpeh {
             
             return true;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void CheckAndAddArchetypes(this Filter filter) {
-            foreach (var archetypeIndex in filter.world.archetypes) {
-                var archetype = filter.world.archetypes.GetValueByIndex(archetypeIndex);
-                if (filter.AddArchetypeIfMatches(archetype)) {
-                    archetype.AddFilter(filter);
-                }
-            }
-            if (filter.chunks.capacity < filter.archetypes.length) {
-                filter.chunks.Resize(filter.archetypes.capacity);
-            }
-        }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
@@ -111,59 +98,48 @@ namespace Scellecs.Morpeh {
         [NotNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this Filter filter, in int id) {
-            // ReSharper disable once GenericEnumeratorNotDisposed
-            var enumerator = filter.GetEnumerator();
-            for (int i = 0, length = id + 1; i < length; i++) {
-                if (enumerator.MoveNext() == false) {
-#if MORPEH_DEBUG
-                    enumerator.Dispose();
-#endif
-                    throw new IndexOutOfRangeException();
+            var accum = 0;
+            
+            var archetypesLength = filter.archetypesLength;
+            
+            for (var i = 0; i < archetypesLength; i++) {
+                var archetype = filter.archetypes.data[i];
+                
+                var length = archetype.length;
+                if (id < accum + length) {
+                    return archetype.entities.data[id - accum];
                 }
+                accum += length;
             }
-#if MORPEH_DEBUG
-            enumerator.Dispose();
-#endif
-            return enumerator.Current;
+            
+            ThrowIndexOutOfRange();
+            return default;
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowIndexOutOfRange() {
+            throw new IndexOutOfRangeException();
         }
 
         [NotNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity First(this Filter filter) {
-            // ReSharper disable once GenericEnumeratorNotDisposed
-            var enumerator = filter.GetEnumerator();
-            if (enumerator.MoveNext()) {
-#if MORPEH_DEBUG
-                enumerator.Dispose();
-#endif
-                return enumerator.Current;
+            if (filter.archetypesLength == 0) {
+                ThrowSourceIsEmpty();
             }
-#if MORPEH_DEBUG
-            enumerator.Dispose();
-#endif
-
+            
+            return filter.archetypes.data[0].entities.data[0];
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowSourceIsEmpty() {
             throw new InvalidOperationException("The source sequence is empty.");
         }
 
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
-            if (filter.archetypesLength == 0) {
-                return default;
-            }
-            // ReSharper disable once GenericEnumeratorNotDisposed
-            var enumerator = filter.GetEnumerator();
-            if (enumerator.MoveNext()) {
-#if MORPEH_DEBUG
-                enumerator.Dispose();
-#endif
-                return enumerator.Current;
-            }
-#if MORPEH_DEBUG
-            enumerator.Dispose();
-#endif
-
-            return default;
+            return filter.archetypesLength != 0 ? filter.archetypes.data[0].entities.data[0] : default;
         }
         
 
@@ -172,10 +148,13 @@ namespace Scellecs.Morpeh {
             filter.world.ThreadSafetyCheck();
             int accum = 0;
 
-            for (int i = 0, length = filter.archetypes.length; i < length; i++) {
+            var archetypesLength = filter.archetypesLength;
+            
+            for (int i = 0; i < archetypesLength; i++) {
                 var archetype = filter.archetypes.data[i];
                 accum += archetype.length;
             }
+            
             return accum;
         }
 
