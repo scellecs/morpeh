@@ -79,7 +79,7 @@
             
             // Clear new components if entity is transient
             
-            if (world.dirtyEntities.Contains(entity.Id)) {
+            if (world.dirtyEntities.Remove(entity.Id)) {
                 var changesCount = entityData.changesCount;
                 
                 for (var i = 0; i < changesCount; i++) {
@@ -91,8 +91,6 @@
                     
                     world.GetStash(structuralChange.typeOffset.GetValue())?.Clean(entity);
                 }
-                
-                world.dirtyEntities.Remove(entity.Id);
             }
             
             // Clear components from existing archetype

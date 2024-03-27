@@ -389,8 +389,10 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddMatchingPreviousFilters(Archetype archetype, ref EntityData transient) {
-            foreach (var idx in transient.currentArchetype.filters) {
-                var filter = transient.currentArchetype.filters.GetValueByIndex(idx);
+            var filters = transient.currentArchetype.filters;
+            
+            foreach (var idx in filters) {
+                var filter = filters.GetValueByIndex(idx);
                 if (filter.AddArchetypeIfMatches(archetype)) {
                     MLogger.LogTrace($"[WorldExtensions] Add PREVIOUS {filter} to archetype {archetype.id}");
                     archetype.AddFilter(filter);

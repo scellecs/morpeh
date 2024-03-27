@@ -18,7 +18,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class Stash : IDisposable {
-        internal StashMap map;
         internal IDisposable typelessStash;
         
         internal TypeId typeId;
@@ -27,6 +26,7 @@ namespace Scellecs.Morpeh {
         private Func<Entity, bool> removeReflection;
         private Func<Entity, bool> cleanReflection;
         private Action<Entity, Entity, bool> migrateReflection;
+        private Func<Entity, bool> hasReflection;
         private Action removeAllReflection;
         
         private Stash() { }
@@ -42,7 +42,6 @@ namespace Scellecs.Morpeh {
             var stash = new Stash<T>(world, info);
             
             return new Stash {
-                map = stash.map,
                 typelessStash = stash,
                 
                 typeId = info.id,
@@ -51,6 +50,7 @@ namespace Scellecs.Morpeh {
                 removeReflection = stash.Remove,
                 cleanReflection = stash.Clean,
                 migrateReflection = stash.Migrate,
+                hasReflection = stash.Has,
                 removeAllReflection = stash.RemoveAll,
             };
         }
@@ -82,7 +82,7 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(Entity entity) {
-            return this.map.Has(entity.Id);
+            return this.hasReflection(entity);
         }
 
         public void Dispose() {

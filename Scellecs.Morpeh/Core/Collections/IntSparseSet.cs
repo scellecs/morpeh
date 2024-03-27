@@ -89,8 +89,7 @@
                 return ++this.index < this.set.count;
             }
             
-            public int Current
-            {
+            public int Current {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => this.set.dense[this.index];
             }

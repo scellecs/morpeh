@@ -17,8 +17,7 @@ namespace Scellecs.Morpeh {
     public static class StashExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool TryAddData<T>(this Stash<T> stash, in int key, in T value, out int slotIndex) where T : struct, IComponent {
-            if (stash.map.IsKeySet(key, out _)) {
-                slotIndex = -1;
+            if (stash.map.IsKeySet(key, out slotIndex)) {
                 return false;
             }
 
