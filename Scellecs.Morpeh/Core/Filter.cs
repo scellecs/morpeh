@@ -58,12 +58,12 @@ namespace Scellecs.Morpeh {
         internal LongHashMap<int> archetypeIds;
         internal FastList<Chunk> chunks;
 
-        internal FastList<TypeInfo> includedTypes;
-        internal FastList<TypeInfo> excludedTypes;
+        internal TypeInfo[] includedTypes;
+        internal TypeInfo[] excludedTypes;
         
         internal int id;
 
-        internal Filter(World world, FastList<TypeInfo> includedTypes, FastList<TypeInfo> excludedTypes) {
+        internal Filter(World world, TypeInfo[] includedTypes, TypeInfo[] excludedTypes) {
             this.world = world;
 
             this.archetypes = new FastList<Archetype>();

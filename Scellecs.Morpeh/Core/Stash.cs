@@ -90,7 +90,6 @@ namespace Scellecs.Morpeh {
         }
     }
 
-    // TODO: Restore Migrate functionality
     [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]

@@ -39,8 +39,6 @@ namespace Scellecs.Morpeh {
             world.Filter           = new FilterBuilder{ world = world };
             world.filters          = new FastList<Filter>();
             world.filtersLookup    = new LongHashMap<LongHashMap<Filter>>();
-            world.dirtyEntities    = new BitMap();
-            world.disposedEntities = new BitMap();
             
 #if MORPEH_BURST
             world.tempArrays = new FastList<NativeArray<Entity>>();
@@ -77,6 +75,8 @@ namespace Scellecs.Morpeh {
                 world.entities[i].Initialize();
             }
             world.entitiesGens = new int[world.entitiesCapacity];
+            world.dirtyEntities    = new IntSparseSet(world.entitiesCapacity);
+            world.disposedEntities = new IntSparseSet(world.entitiesCapacity);
 
             world.archetypes         = new LongHashMap<Archetype>();
             world.archetypesCount    = 1;
@@ -272,7 +272,7 @@ namespace Scellecs.Morpeh {
         internal static void TransientChangeAddComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
             ref var entityData = ref world.entities[entity.Id];
             
-            if (world.dirtyEntities.Set(entity.Id)) {
+            if (world.dirtyEntities.Add(entity.Id)) {
                 entityData.changesCount = 0;
                 entityData.nextArchetypeId = entityData.currentArchetype?.id ?? ArchetypeId.Invalid;
             }
@@ -284,7 +284,7 @@ namespace Scellecs.Morpeh {
         internal static void TransientChangeRemoveComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
             ref var entityData = ref world.entities[entity.Id];
             
-            if (world.dirtyEntities.Set(entity.Id)) {
+            if (world.dirtyEntities.Add(entity.Id)) {
                 entityData.changesCount = 0;
                 entityData.nextArchetypeId = entityData.currentArchetype?.id ?? ArchetypeId.Invalid;
             }

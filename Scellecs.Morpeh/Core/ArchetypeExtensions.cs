@@ -25,7 +25,10 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Add(this Archetype archetype, Entity entity) {
-            archetype.EnsureCapacity();
+            if (archetype.length == archetype.entities.Length) {
+                archetype.entities.Resize(archetype.length << 1);
+            }
+            
             archetype.entities[archetype.length] = entity;
             return archetype.length++;
         }
@@ -34,13 +37,6 @@ namespace Scellecs.Morpeh {
         public static void Remove(this Archetype archetype, int index) {
             archetype.entities[index] = archetype.entities[archetype.length - 1];
             --archetype.length;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void EnsureCapacity(this Archetype archetype) {
-            if (archetype.length == archetype.entities.Length) {
-                archetype.entities.Resize(archetype.length << 1);
-            }
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

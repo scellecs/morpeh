@@ -56,6 +56,9 @@
             }
             
             Array.Resize(ref world.entitiesGens, newCapacity);
+            
+            world.dirtyEntities.Resize(newCapacity);
+            world.disposedEntities.Resize(newCapacity);
 
             world.entitiesCapacity = newCapacity;
         }
@@ -76,7 +79,7 @@
             
             // Clear new components if entity is transient
             
-            if (world.dirtyEntities.Get(entity.Id)) {
+            if (world.dirtyEntities.Contains(entity.Id)) {
                 var changesCount = entityData.changesCount;
                 
                 for (var i = 0; i < changesCount; i++) {
@@ -89,7 +92,7 @@
                     world.GetStash(structuralChange.typeOffset.GetValue())?.Clean(entity);
                 }
                 
-                world.dirtyEntities.Unset(entity.Id);
+                world.dirtyEntities.Remove(entity.Id);
             }
             
             // Clear components from existing archetype
@@ -100,7 +103,7 @@
                 }
             }
             
-            world.disposedEntities.Set(entity.Id);
+            world.disposedEntities.Add(entity.Id);
             
             world.IncrementGeneration(entity.Id);
             --world.entitiesCount;

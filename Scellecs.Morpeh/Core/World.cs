@@ -84,15 +84,14 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         internal int entitiesCapacity;
 
-        internal BitMap dirtyEntities;
-        internal BitMap disposedEntities;
+        internal IntSparseSet dirtyEntities;
+        internal IntSparseSet disposedEntities;
 
         [ShowInInspector]
         internal IntStack freeEntityIDs;
         [ShowInInspector]
         internal IntStack nextFreeEntityIDs;
 
-        // TODO: Make it an array
         [ShowInInspector]
         internal Stash[] stashes;
 

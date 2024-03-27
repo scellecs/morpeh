@@ -32,15 +32,13 @@ namespace Scellecs.Morpeh {
                 filter.archetypesLength = 0;
             }
             
-            filter.includedTypes?.Clear();
             filter.includedTypes = null;
-            filter.excludedTypes?.Clear();
             filter.excludedTypes = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AddArchetypeIfMatches(this Filter filter, Archetype archetype) {
-            if (filter.includedTypes.length > archetype.components.length) {
+            if (filter.includedTypes.Length > archetype.components.length) {
                 return false;
             }
             
@@ -250,8 +248,8 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static Filter CompleteBuild(this FilterBuilder builder) {
-            var includedOffsets = new FastList<TypeInfo>();
-            var excludedOffsets = new FastList<TypeInfo>();
+            var includedOffsets = new FastList<TypeInfo>(builder.level);
+            var excludedOffsets = new FastList<TypeInfo>(builder.level);
             
             var current = builder;
 
@@ -266,7 +264,7 @@ namespace Scellecs.Morpeh {
                 current = current.parent;
             }
 
-            var filter = new Filter(builder.world, includedOffsets, excludedOffsets);
+            var filter = new Filter(builder.world, includedOffsets.ToArray(), excludedOffsets.ToArray());
 
             filter.world.componentsToFiltersRelation.Add(includedOffsets, filter);
             filter.world.componentsToFiltersRelation.Add(excludedOffsets, filter);
