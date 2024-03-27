@@ -341,6 +341,8 @@ namespace Scellecs.Morpeh {
             
             // Finalize migration
             MLogger.LogTrace($"[WorldExtensions] Finalize migration for entity {entity} to archetype {nextArchetype.id}");
+            entityData.changesCount = 0;
+            entityData.nextArchetypeId = ArchetypeId.Invalid;
             entityData.currentArchetype = nextArchetype;
             entityData.indexInCurrentArchetype = indexInNextArchetype;
         }
@@ -439,6 +441,9 @@ namespace Scellecs.Morpeh {
                 
                 entityData.currentArchetype = null;
             }
+
+            entityData.changesCount = 0;
+            entityData.nextArchetypeId = ArchetypeId.Invalid;
             
             world.nextFreeEntityIDs.Push(entityId);
         }
