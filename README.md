@@ -27,6 +27,7 @@
     * [Defines](#%EF%B8%8F-defines)
     * [World Plugins](#%EF%B8%8F-world-plugins)
     * [Metrics](#-metrics)
+    * [Clone a stash](#2%EF%B8%8F⃣-clone-a-stash)
 * [Plugins](#-plugins)
 * [Examples](#-examples)
 * [Games](#-games)
@@ -54,8 +55,8 @@ Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) fo
 </details>
 
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git#stage-2023.1  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2023.1.0  
+&nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git#stage-2024.1  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2024.1.1  
 
 ### .Net Platform
 
@@ -209,6 +210,7 @@ var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
 
 bool filterIsEmpty = filter.IsEmpty();
+bool filterIsNotEmpty = filter.IsNotEmpty();
 int filterLengthCalculatedOnCall = filter.GetLengthSlow();
 
 ```
@@ -232,6 +234,9 @@ bool hasHealthComponent = healthStash.Has(entity);
 
 //delete all components that type from the world
 healthStash.RemoveAll();
+
+bool healthStashIsEmpty = healthStash.IsEmpty();
+bool healthStashIsNotEmpty = healthStash.IsNotEmpty();
 
 var newEntity = this.World.CreateEntity();
 //transfers a component from one entity to another
@@ -832,7 +837,8 @@ Can be set by user:
 * `MORPEH_THREAD_SAFETY` Define that forces the kernel to validate that all calls come from the same thread the world was created on. The binding to a thread can be changed using the `World.GetThreadId()`, `World.SetThreadId()` methods.
 * `MORPEH_DISABLE_SET_ICONS` Define for disabling set icons in Project Window.
 * `MORPEH_DISABLE_AUTOINITIALIZATION` Define for disable default world creation and creating Morpeh Runner GameObject.
-
+* `MORPEH_DISABLE_COMPILATION_REPORT` Define for disable compilation report in Editor Console.
+* `MORPEH_DISABLE_COMPONENT_DISPOSE` Define to disable component disposing feature.
 Will be set by framework:
 * `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
 
@@ -875,6 +881,7 @@ To debug the game, you may need statistics on basic data in the ECS framework, s
 4. Number of systems
 5. Number of commits in the world
 6. Number of entity migrations
+7. Number of stash resizes
 
 You can find all this in the profiler window.  
 To do this, you need to add the official **Unity Profiling Core API** package to your project.  
@@ -894,6 +901,60 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 
 ![metrics.png](Gifs~/metrics.png)
 </details>
+
+####  2️⃣ Clone a stash
+
+If you have **unmanaged** components, you can create clone of stash for saving data for some purpose.  
+
+For example:
+```c#
+[System.Serializable]
+public struct TestComponent0 : IComponent {
+    public int test0;
+    public float test1;
+    public byte test2;
+}
+
+public class FooSystem : ISystem {
+    public World World { get; set; }
+
+    private Filter filter;
+    private Stash<TestComponent0> stash;
+    private Stash<TestComponent0> cloneStash;
+
+    public void OnAwake() {
+        this.filter = this.World.Filter.With<TestComponent0>().Build();
+        this.stash = this.World.GetStash<TestComponent0>();
+        for (int i = 0, length = 1_000; i < length; i++) {
+            var e = this.World.CreateEntity();
+            e.AddComponent<TestComponent0>();
+        }
+
+        //creating clone of the stash
+        this.cloneStash = this.stash.Clone();
+        
+        //or simply create empty stash with optional capacity
+        this.cloneStash = new Stash<TestComponent0>(capacity: 463829);
+    }
+    
+    public void OnUpdate(float deltaTime) {
+        foreach (var entity in this.filter) {
+            this.stash.Get(entity).test0++;
+        }
+        
+        //copy data from origin stash
+        this.cloneStash.CopyFrom(this.stash);
+        
+        foreach (var entity in this.filter) {
+            Debug.Log(this.cloneStash.Get(entity).test0);
+        }
+    }
+    
+    public void Dispose() {
+    }
+}
+```
+
 
 ---
 
