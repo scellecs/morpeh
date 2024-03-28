@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+﻿#if UNITY_EDITOR && !MORPEH_DISABLE_COMPILATION_REPORT
 namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;

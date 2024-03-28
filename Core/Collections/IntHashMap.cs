@@ -43,6 +43,26 @@ namespace Scellecs.Morpeh.Collections {
             this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
             this.data    = new T[this.capacity];
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IntHashMap(IntHashMap<T> other) {
+            this.lastIndex = other.lastIndex;
+            this.length    = other.length;
+            this.freeIndex = other.freeIndex;
+
+            this.capacityMinusOne = other.capacityMinusOne;
+            this.capacity         = other.capacity;
+
+            this.buckets = new IntPinnedArray(this.capacity);
+            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
+            this.data    = new T[this.capacity];
+
+            for (int i = 0, len = this.capacity; i < len; i++) {
+                this.buckets.data[i] = other.buckets.data[i];
+                this.slots.data[i] = other.slots.data[i];
+                this.data[i] = other.data[i];
+            }
+        }
 
         ~IntHashMap() {
             this.buckets.Dispose();

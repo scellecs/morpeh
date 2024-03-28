@@ -304,6 +304,31 @@ namespace Scellecs.Morpeh.Collections {
                 ++num;
             }
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CopyFrom<T>(this IntHashMap<T> hashMap, IntHashMap<T> from) {
+            hashMap.lastIndex = from.lastIndex;
+            hashMap.length    = from.length;
+            hashMap.freeIndex = from.freeIndex;
+
+            var needResize = hashMap.capacity < from.capacity;
+
+            hashMap.capacityMinusOne = from.capacityMinusOne;
+            hashMap.capacity         = from.capacity;
+
+            if (needResize) {
+                hashMap.buckets = new IntPinnedArray(hashMap.capacity);
+                hashMap.slots = new PinnedArray<IntHashMapSlot>(hashMap.capacity);
+                hashMap.data = new T[hashMap.capacity];
+            }
+
+            for (int i = 0, len = hashMap.capacity; i < len; i++) {
+                hashMap.buckets.data[i] = from.buckets.data[i];
+                hashMap.slots.data[i] = from.slots.data[i];
+                hashMap.data[i] = from.data[i];
+            }
+        }
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Clear<T>(this IntHashMap<T> hashMap) {

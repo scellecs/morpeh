@@ -23,6 +23,7 @@ namespace Scellecs.Morpeh {
         private static readonly ProfilerCounterValue<int> systemsCounter = new(ProfilerCategory.Scripts, "Systems", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> commitsCounter = new(ProfilerCategory.Scripts, "Commits", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> migrationsCounter = new(ProfilerCategory.Scripts, "Migrations", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
+        private static readonly ProfilerCounterValue<int> stashResizeCounter = new(ProfilerCategory.Scripts, "Stash Resizes", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
 #endif
         
 
@@ -82,6 +83,7 @@ namespace Scellecs.Morpeh {
                 systemsCounter.Value = w.metrics.systems;
                 commitsCounter.Value = w.metrics.commits;
                 migrationsCounter.Value = w.metrics.migrations;
+                stashResizeCounter.Value = w.metrics.stashResizes;
             }
 #endif
         }

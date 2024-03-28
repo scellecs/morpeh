@@ -14,6 +14,7 @@ public class CreatureBatchesProfilerModule : ProfilerModule
             new("Systems", ProfilerCategory.Scripts), 
             new("Commits", ProfilerCategory.Scripts), 
             new("Migrations", ProfilerCategory.Scripts), 
+            new("Stash Resizes", ProfilerCategory.Scripts), 
         }; 
 
     public CreatureBatchesProfilerModule() : base(counters) { }
