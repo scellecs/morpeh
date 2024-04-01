@@ -14,8 +14,9 @@ namespace Scellecs.Morpeh {
     public readonly struct Entity : IEquatable<Entity> {
         internal readonly long value;
         
-        internal Entity(int worldId, int id, int generation) {
-            value = ((id & 0xFFFFFFFFL) << 32) | ((generation & 0xFFFFFFL) << 8) | (worldId & 0xFFL);
+        // [ Id: 32 bits | Generation: 16 bits | WorldId: 8 bits | Unused: 8 bits ]
+        internal Entity(int worldId, int id, ushort generation) {
+            value = ((id & 0xFFFFFFFFL) << 32) | ((generation & 0xFFFFL) << 16) | ((worldId & 0xFFL) << 8);
         }
 
         [ShowInInspector]
@@ -25,15 +26,15 @@ namespace Scellecs.Morpeh {
         }
 
         [ShowInInspector]
-        public int Generation {
+        public ushort Generation {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (int)((value >> 8) & 0xFFFFFF);
+            get => (ushort)((value >> 16) & 0xFFFF);
         }
 
         [ShowInInspector]
         public int WorldId {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (int)(value & 0xFF);
+            get => (int)((value >> 8) & 0xFF);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

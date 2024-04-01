@@ -72,7 +72,7 @@ namespace Scellecs.Morpeh {
         internal EntityData[] entities;
         
         [ShowInInspector]
-        internal int[] entitiesGens;
+        internal ushort[] entitiesGens;
         
         //real entities count
         [ShowInInspector]

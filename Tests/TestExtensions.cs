@@ -24,8 +24,9 @@ public static class TestExtensions {
     internal static string DumpFilterArchetypes(this Filter filter) {
         var sb = new StringBuilder();
         sb.Append($"Filter {filter} archetypes:");
-        foreach (var archetype in filter.archetypes) {
-            sb.Append($" {archetype.id}");
+        for (var i = 0; i < filter.archetypesLength; i++) {
+            var archetype = filter.archetypes[i];
+            sb.Append($"\n  {archetype}");
         }
         return sb.ToString();
     }
@@ -36,10 +37,10 @@ public static class TestExtensions {
     
     internal static ArchetypeId ArchetypeOf(this World world, Entity entity) {
         if (world.IsDisposed(entity)) {
-            return ArchetypeId.Invalid;
+            return default(ArchetypeId);
         }
 
         var archetype = world.entities[entity.Id].currentArchetype;
-        return archetype?.id ?? ArchetypeId.Invalid;
+        return archetype?.id ?? default(ArchetypeId);
     }
 }

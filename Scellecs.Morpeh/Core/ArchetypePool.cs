@@ -16,7 +16,7 @@
         
         public void WarmUp(int count) {
             for (var i = 0; i < count; i++) {
-                this.archetypes.Add(new Archetype(ArchetypeId.Invalid));
+                this.archetypes.Add(new Archetype(default));
             }
         }
         
@@ -47,7 +47,7 @@
             archetype.ClearFilters();
             archetype.components.Clear();
             
-            archetype.id = ArchetypeId.Invalid;
+            archetype.id = default;
         }
     }
 }

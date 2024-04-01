@@ -10,8 +10,6 @@
     public readonly struct ArchetypeId : IEquatable<ArchetypeId> {
         private readonly long value;
         
-        public static ArchetypeId Invalid => new ArchetypeId(0);
-        
         public ArchetypeId(long value) {
             this.value = value;
         }

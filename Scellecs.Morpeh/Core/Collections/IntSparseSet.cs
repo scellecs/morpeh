@@ -72,8 +72,9 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             var e = default(Enumerator);
-            e.set = this;
+            e.dense = this.dense;
             e.index = -1;
+            e.count = this.count;
             return e;
         }
         
@@ -81,17 +82,18 @@
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
-            internal IntSparseSet set;
+            internal int[] dense;
             internal int index;
+            internal int count;
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext() {
-                return ++this.index < this.set.count;
+                return ++this.index < this.count;
             }
             
             public int Current {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => this.set.dense[this.index];
+                get => this.dense[this.index];
             }
         }
     }

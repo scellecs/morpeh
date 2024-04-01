@@ -52,8 +52,9 @@ namespace Scellecs.Morpeh {
 
         internal World world;
 
-        internal FastList<Archetype> archetypes;
+        internal Archetype[] archetypes;
         internal int archetypesLength;
+        internal int archetypesCapacity;
         
         internal LongHashMap<int> archetypeIds;
         internal FastList<Chunk> chunks;
@@ -64,9 +65,14 @@ namespace Scellecs.Morpeh {
         internal int id;
 
         internal Filter(World world, TypeInfo[] includedTypes, TypeInfo[] excludedTypes) {
+            const int defaultArchetypesCapacity = 8;
+            
             this.world = world;
 
-            this.archetypes = new FastList<Archetype>();
+            this.archetypes = new Archetype[defaultArchetypesCapacity];
+            this.archetypesLength = 0;
+            this.archetypesCapacity = defaultArchetypesCapacity;
+            
             this.archetypeIds = new LongHashMap<int>();
             this.chunks  = new FastList<Chunk>();
 
@@ -101,7 +107,7 @@ namespace Scellecs.Morpeh {
         public EntityEnumerator GetEnumerator() {
             this.world.ThreadSafetyCheck();
 
-            return new EntityEnumerator(this.archetypes.data, this.archetypes.length
+            return new EntityEnumerator(this.archetypes, this.archetypesLength
 #if MORPEH_DEBUG
                 , this.world
 #endif

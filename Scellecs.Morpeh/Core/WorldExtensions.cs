@@ -74,7 +74,7 @@ namespace Scellecs.Morpeh {
             for (var i = 0; i < world.entitiesCapacity; i++) {
                 world.entities[i].Initialize();
             }
-            world.entitiesGens = new int[world.entitiesCapacity];
+            world.entitiesGens = new ushort[world.entitiesCapacity];
             world.dirtyEntities    = new IntSparseSet(world.entitiesCapacity);
             world.disposedEntities = new IntSparseSet(world.entitiesCapacity);
 
@@ -230,7 +230,7 @@ namespace Scellecs.Morpeh {
             foreach (var entityId in world.dirtyEntities) {
                 ref var entityData = ref world.entities[entityId];
                 
-                if (entityData.nextArchetypeId == ArchetypeId.Invalid) {
+                if (entityData.nextArchetypeId == default) {
                     world.CompleteEntityDisposal(entityId, ref entityData);
                     world.IncrementGeneration(entityId);
                     clearedEntities++;
@@ -274,7 +274,7 @@ namespace Scellecs.Morpeh {
             
             if (world.dirtyEntities.Add(entity.Id)) {
                 entityData.changesCount = 0;
-                entityData.nextArchetypeId = entityData.currentArchetype?.id ?? ArchetypeId.Invalid;
+                entityData.nextArchetypeId = entityData.currentArchetype?.id ?? default;
             }
             
             EntityDataUtility.AddComponent(ref entityData, ref typeInfo);
@@ -286,7 +286,7 @@ namespace Scellecs.Morpeh {
             
             if (world.dirtyEntities.Add(entity.Id)) {
                 entityData.changesCount = 0;
-                entityData.nextArchetypeId = entityData.currentArchetype?.id ?? ArchetypeId.Invalid;
+                entityData.nextArchetypeId = entityData.currentArchetype?.id ?? default;
             }
             
             EntityDataUtility.RemoveComponent(ref entityData, ref typeInfo);
@@ -294,7 +294,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransientChanges(this World world, Entity entity, ref EntityData entityData) {
-            var currentArchetypeId = entityData.currentArchetype?.id ?? ArchetypeId.Invalid;
+            var currentArchetypeId = entityData.currentArchetype?.id ?? default;
             
             // No changes
             
@@ -318,7 +318,7 @@ namespace Scellecs.Morpeh {
                 world.archetypes.Add(entityData.nextArchetypeId.GetValue(), nextArchetype, out _);
                 world.archetypesCount++;
 
-                if (currentArchetypeId != ArchetypeId.Invalid) {
+                if (currentArchetypeId != default) {
                     AddMatchingPreviousFilters(nextArchetype, ref entityData);
                 }
                 
@@ -329,7 +329,7 @@ namespace Scellecs.Morpeh {
             
             // Remove from previous archetype
             
-            if (currentArchetypeId != ArchetypeId.Invalid) {
+            if (currentArchetypeId != default) {
                 var index = entityData.indexInCurrentArchetype;
                 entityData.currentArchetype.Remove(index);
                 
@@ -342,7 +342,7 @@ namespace Scellecs.Morpeh {
             // Finalize migration
             MLogger.LogTrace($"[WorldExtensions] Finalize migration for entity {entity} to archetype {nextArchetype.id}");
             entityData.changesCount = 0;
-            entityData.nextArchetypeId = ArchetypeId.Invalid;
+            entityData.nextArchetypeId = default;
             entityData.currentArchetype = nextArchetype;
             entityData.indexInCurrentArchetype = indexInNextArchetype;
         }
@@ -445,17 +445,15 @@ namespace Scellecs.Morpeh {
             }
 
             entityData.changesCount = 0;
-            entityData.nextArchetypeId = ArchetypeId.Invalid;
+            entityData.nextArchetypeId = default;
             
             world.nextFreeEntityIDs.Push(entityId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void IncrementGeneration(this World world, int entityId) {
-            // Gens can only be 3 bytes long (0xFFFFFF)
-            
-            if (++world.entitiesGens[entityId] >= 0xFFFFFF) {
-                world.entitiesGens[entityId] = 0;
+            unchecked {
+                world.entitiesGens[entityId]++;
             }
         }
         

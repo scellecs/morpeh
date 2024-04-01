@@ -6,7 +6,7 @@ namespace Scellecs.Morpeh.Native {
         public int identifier;
         
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* entitiesGens;
+        public unsafe ushort* entitiesGens;
 
         [NativeDisableUnsafePtrRestriction]
         public unsafe int* entitiesCapacity;

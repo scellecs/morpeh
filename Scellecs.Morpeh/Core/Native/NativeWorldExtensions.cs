@@ -10,7 +10,7 @@ namespace Scellecs.Morpeh.Native {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe NativeWorld AsNative(this World world) {
             var nativeWorld = new NativeWorld();
-            fixed (int* entitiesGensPtr = world.entitiesGens)
+            fixed (ushort* entitiesGensPtr = world.entitiesGens)
             fixed (int* entitiesCapacityPtr = &world.entitiesCapacity) {
                 nativeWorld.identifier = world.identifier;
                 nativeWorld.entitiesGens = entitiesGensPtr;

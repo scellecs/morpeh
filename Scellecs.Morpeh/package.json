@@ -4,7 +4,7 @@
   "displayName": "Morpeh",
   "description": "Fast and Simple ECS Framework for Unity Game Engine.",
   "unity": "2020.3",
-  "version": "2024.1.1",
+  "version": "2024.1.0",
   "keywords": [
     "morpeh",
     "ecs"

@@ -54,7 +54,7 @@ public class TransientUtilityTests {
         
         TransientUtility.Rebase(ref transient, null);
         
-        Assert.Equal(ArchetypeId.Invalid, transient.nextArchetypeId);
+        Assert.Equal(default(ArchetypeId), transient.nextArchetypeId);
         Assert.Equal(0, transient.changesCount);
         Assert.Null(transient.baseArchetype);
     }

@@ -8,7 +8,6 @@
 
 namespace Scellecs.Morpeh {
     using System;
-    using System.Linq;
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
@@ -23,13 +22,13 @@ namespace Scellecs.Morpeh {
                 foreach (var archetype in filter.archetypes) {
                     archetype.RemoveFilter(filter);
                 }
-
-                filter.archetypes.Clear();
+                
                 filter.archetypes = null;
+                filter.archetypesLength = 0;
+                filter.archetypesCapacity = 0;
 
                 filter.chunks.Clear();
                 filter.chunks = null;
-                filter.archetypesLength = 0;
             }
             
             filter.includedTypes = null;
@@ -50,16 +49,26 @@ namespace Scellecs.Morpeh {
             if (!filter.ArchetypeMatches(archetype)) {
                 return false;
             }
+
+            var index = filter.archetypesLength++;
+            if (index >= filter.archetypesCapacity) {
+                filter.ResizeArchetypes(filter.archetypesCapacity << 1);
+            }
             
-            var index = filter.archetypes.Add(archetype);
+            filter.archetypes[index] = archetype;
             filter.archetypeIds.Add(archetype.id.GetValue(), index, out _);
-            filter.archetypesLength++;
             
             if (filter.chunks.capacity < filter.archetypesLength) {
-                filter.chunks.Resize(filter.archetypes.capacity);
+                filter.chunks.Resize(filter.archetypesCapacity);
             }
             
             return true;
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ResizeArchetypes(this Filter filter, int newCapacity) {
+            Array.Resize(ref filter.archetypes, newCapacity);
+            filter.archetypesCapacity = newCapacity;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -68,29 +77,35 @@ namespace Scellecs.Morpeh {
                 MLogger.LogTrace($"Archetype {archetype.id} is not in filter {filter}");
                 return;
             }
+    
+            var lastIndex = --filter.archetypesLength;
+            filter.archetypes[index] = filter.archetypes[lastIndex];
             
-            filter.archetypes.RemoveAtSwap(index, out Archetype swappedArchetype);
-            
-            if (swappedArchetype != null) {
-                filter.archetypeIds.Set(swappedArchetype.id.GetValue(), index, out _);
+            if (index < lastIndex) {
+                filter.archetypeIds.Set(filter.archetypes[index].id.GetValue(), index, out _);
             }
             
-            filter.archetypesLength--;
+            filter.archetypes[lastIndex] = default;
         }
 
         internal static bool ArchetypeMatches(this Filter filter, Archetype archetype) {
             var archetypeComponents = archetype.components;
+            
             var includedTypes = filter.includedTypes;
-
-            foreach (var includedTypeInfo in includedTypes) {
-                if (!archetypeComponents.Has(includedTypeInfo.offset.GetValue())) {
+            var includedTypesLength = includedTypes.Length;
+            
+            for (var i = 0; i < includedTypesLength; i++) {
+                if (!archetypeComponents.Has(includedTypes[i].offset.GetValue())) {
                     MLogger.LogTrace($"Archetype {archetype.id} does not match filter {filter} [include]");
                     return false;
                 }
             }
             
-            foreach (var excludedTypeInfo in filter.excludedTypes) {
-                if (archetypeComponents.Has(excludedTypeInfo.offset.GetValue())) {
+            var excludedTypes = filter.excludedTypes;
+            var excludedTypesLength = excludedTypes.Length;
+            
+            for (var i = 0; i < excludedTypesLength; i++) {
+                if (archetypeComponents.Has(excludedTypes[i].offset.GetValue())) {
                     MLogger.LogTrace($"Archetype {archetype.id} does not match filter {filter} [exclude]");
                     return false;
                 }
@@ -108,7 +123,7 @@ namespace Scellecs.Morpeh {
             var archetypesLength = filter.archetypesLength;
             
             for (var i = 0; i < archetypesLength; i++) {
-                var archetype = filter.archetypes.data[i];
+                var archetype = filter.archetypes[i];
                 
                 var length = archetype.length;
                 if (id < accum + length) {
@@ -133,7 +148,7 @@ namespace Scellecs.Morpeh {
                 ThrowSourceIsEmpty();
             }
             
-            return filter.archetypes.data[0].entities.data[0];
+            return filter.archetypes[0].entities.data[0];
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -144,20 +159,19 @@ namespace Scellecs.Morpeh {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
-            return filter.archetypesLength != 0 ? filter.archetypes.data[0].entities.data[0] : default;
+            return filter.archetypesLength != 0 ? filter.archetypes[0].entities.data[0] : default;
         }
         
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetLengthSlow(this Filter filter) {
             filter.world.ThreadSafetyCheck();
-            int accum = 0;
+            var accum = 0;
 
             var archetypesLength = filter.archetypesLength;
             
-            for (int i = 0; i < archetypesLength; i++) {
-                var archetype = filter.archetypes.data[i];
-                accum += archetype.length;
+            for (var i = 0; i < archetypesLength; i++) {
+                accum += filter.archetypes[i].length;
             }
             
             return accum;

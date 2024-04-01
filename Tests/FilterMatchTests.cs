@@ -236,7 +236,7 @@ public class FilterMatchTests {
         entity.AddComponent<Test1>();
         this.world.Commit();
         
-        Assert.Equal(1, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test1>()));
+        Assert.Equal(1, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test1>()));
         foreach (var _ in filter) {
             Assert.Fail("Filter should be empty");
         }
@@ -245,7 +245,7 @@ public class FilterMatchTests {
         entity.AddComponent<Test2>();
         this.world.Commit();
 
-        Assert.Equal(1, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test1>().With<Test2>()));
+        Assert.Equal(1, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test1>().With<Test2>()));
         Assert.Equal(1, filter.GetLengthSlow());
         foreach (var filterEntity in filter) {
             Assert.Equal(entity, filterEntity);
@@ -255,8 +255,8 @@ public class FilterMatchTests {
         entity.RemoveComponent<Test2>();
         this.world.Commit();
 
-        Assert.Equal(1, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test1>()));
-        Assert.Equal(0, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test1>().With<Test2>()));
+        Assert.Equal(1, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test1>()));
+        Assert.Equal(0, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test1>().With<Test2>()));
         filter.DumpFilterArchetypes(this.output);
         Assert.Equal(0, filter.GetLengthSlow());
         foreach (var _ in filter) {
@@ -267,8 +267,8 @@ public class FilterMatchTests {
         entity.AddComponent<Test2>();
         this.world.Commit();
         
-        Assert.Equal(0, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test1>()));
-        Assert.Equal(1, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test1>().With<Test2>()));
+        Assert.Equal(0, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test1>()));
+        Assert.Equal(1, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test1>().With<Test2>()));
         Assert.Equal(1, filter.GetLengthSlow());
         foreach (var filterEntity in filter) {
             Assert.Equal(entity, filterEntity);
@@ -278,9 +278,9 @@ public class FilterMatchTests {
         entity.RemoveComponent<Test1>();
         this.world.Commit();
         
-        Assert.Equal(0, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test1>()));
-        Assert.Equal(0, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test1>().With<Test2>()));
-        Assert.Equal(1, this.world.ArchetypeLengthOf(ArchetypeId.Invalid.With<Test2>()));
+        Assert.Equal(0, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test1>()));
+        Assert.Equal(0, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test1>().With<Test2>()));
+        Assert.Equal(1, this.world.ArchetypeLengthOf(default(ArchetypeId).With<Test2>()));
         foreach (var _ in filter) {
             Assert.Fail("Filter should be empty");
         }

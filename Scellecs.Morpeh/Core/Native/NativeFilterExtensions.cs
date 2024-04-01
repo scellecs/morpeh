@@ -11,8 +11,8 @@ namespace Scellecs.Morpeh.Native {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeFilter AsNative(this Filter filter, int length = -1) {
             filter.chunks.Clear();
-            for (int i = 0, len = filter.archetypes.length; i < len; i++) {
-                filter.chunks.Add(filter.archetypes.data[i].AsChunk(filter.world));
+            for (int i = 0, len = filter.archetypesLength; i < len; i++) {
+                filter.chunks.Add(filter.archetypes[i].AsChunk(filter.world));
             }
             
             var nativeFilter = new NativeFilter {

@@ -15,7 +15,7 @@ public class MigrationTests {
     [Fact]
     public void ArchetypeChanges() {
         var entity = this.world.CreateEntity();
-        var previousArchetype = ArchetypeId.Invalid;
+        var previousArchetype = default(ArchetypeId);
         
         entity.AddComponent<Test1>();
         
@@ -26,7 +26,7 @@ public class MigrationTests {
         
         // Now that we've committed the changes, the archetype should have changed
         Assert.NotEqual(previousArchetype, world.ArchetypeOf(entity));
-        var archetype = this.world.GetArchetype(ArchetypeId.Invalid.With<Test1>());
+        var archetype = this.world.GetArchetype(default(ArchetypeId).With<Test1>());
         Assert.Equal(1, archetype.length);
         
         entity.RemoveComponent<Test1>();
@@ -41,7 +41,7 @@ public class MigrationTests {
     [Fact]
     public void SingleComponentMigrates() {
         var entity = this.world.CreateEntity();
-        var baseArchetype = ArchetypeId.Invalid;
+        var baseArchetype = default(ArchetypeId);
         
         Assert.Equal(baseArchetype, world.ArchetypeOf(entity));
         
@@ -190,7 +190,7 @@ public class MigrationTests {
     [Fact]
     public void DisposeMigrates() {
         var entity = world.CreateEntity();
-        var baseArchetype = ArchetypeId.Invalid;
+        var baseArchetype = default(ArchetypeId);
         
         entity.AddComponent<Test1>();
         entity.AddComponent<Test2>();

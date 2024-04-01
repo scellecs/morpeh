@@ -17,7 +17,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Initialize() {
             this.currentArchetype = null;
-            this.nextArchetypeId = ArchetypeId.Invalid;
+            this.nextArchetypeId = default;
             this.changes = new StructuralChange[16];
             this.changesCount = 0;
         }

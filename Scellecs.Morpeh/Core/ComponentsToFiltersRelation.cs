@@ -1,8 +1,8 @@
-﻿using Scellecs.Morpeh.Collections;
-
-namespace Scellecs.Morpeh {
+﻿namespace Scellecs.Morpeh {
     using System;
     using Unity.IL2CPP.CompilerServices;
+    using System.Runtime.CompilerServices;
+    using Scellecs.Morpeh.Collections;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -14,8 +14,9 @@ namespace Scellecs.Morpeh {
             this.componentsToFilters = new Filter[capacity][];
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Filter[] GetFilters(int offset) {
-            return offset > this.componentsToFilters.Length ? null : this.componentsToFilters[offset];
+            return offset >= this.componentsToFilters.Length ? null : this.componentsToFilters[offset];
         }
 
         public void Add(FastList<TypeInfo> typeInfos, Filter filter) {
