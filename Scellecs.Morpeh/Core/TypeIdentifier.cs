@@ -40,7 +40,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class ExtendedTypeIdentifier {
-        internal static Dictionary<long, InternalTypeDefinition> typeHashAssociation = new Dictionary<long, InternalTypeDefinition>();
+        internal static Dictionary<TypeHash, InternalTypeDefinition> typeHashAssociation = new Dictionary<TypeHash, InternalTypeDefinition>();
         internal static Dictionary<int, InternalTypeDefinition> typeIdAssociation = new Dictionary<int, InternalTypeDefinition>();
         internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
 
@@ -54,7 +54,7 @@ namespace Scellecs.Morpeh {
                 isMarker = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length == 0,
             };
             
-            typeHashAssociation.Add(typeInfo.hash.GetValue(), info);
+            typeHashAssociation.Add(typeInfo.hash, info);
             typeIdAssociation.Add(typeInfo.id, info);
             typeAssociation.Add(typeof(T), info);
         }
