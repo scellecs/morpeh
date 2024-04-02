@@ -19,8 +19,6 @@ namespace Scellecs.Morpeh {
     internal static class TypeIdentifier {
         internal static int counter;
 
-        internal static Dictionary<TypeHash, TypeInfo> typeHashAssociation = new Dictionary<TypeHash, TypeInfo>();
-        internal static Dictionary<int, TypeInfo> typeIdAssociation = new Dictionary<int, TypeInfo>();
         internal static Dictionary<Type, TypeInfo> typeAssociation = new Dictionary<Type, TypeInfo>();
         
         static TypeIdentifier() {
@@ -28,8 +26,6 @@ namespace Scellecs.Morpeh {
         }
 
         internal static void InitializeAssociation<T>(TypeInfo typeInfo) where T : struct, IComponent {
-            typeHashAssociation.Add(typeInfo.hash, typeInfo);
-            typeIdAssociation.Add(typeInfo.id, typeInfo);
             typeAssociation.Add(typeof(T), typeInfo);
         }
     }

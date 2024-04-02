@@ -18,7 +18,7 @@
         internal void Initialize() {
             this.currentArchetype = null;
             this.nextArchetypeHash = default;
-            this.changes = new StructuralChange[16];
+            this.changes = new StructuralChange[8];
             this.changesCount = 0;
         }
     }
