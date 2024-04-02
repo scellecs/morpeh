@@ -25,8 +25,9 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Add(this Archetype archetype, Entity entity) {
-            if (archetype.length == archetype.entities.Length) {
-                archetype.entities.Resize(archetype.length << 1);
+            if (archetype.length == archetype.capacity) {
+                archetype.capacity <<= 1;
+                archetype.entities.Resize(archetype.capacity);
             }
             
             archetype.entities[archetype.length] = entity;

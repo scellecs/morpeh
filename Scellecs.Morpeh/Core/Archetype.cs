@@ -12,6 +12,7 @@ namespace Scellecs.Morpeh {
         
         internal PinnedArray<Entity> entities;
         internal int length;
+        internal int capacity;
         
         internal IntHashSet components;
         internal IntHashMap<Filter> filters;
@@ -21,6 +22,7 @@ namespace Scellecs.Morpeh {
             
             this.entities = new PinnedArray<Entity>(16);
             this.length = 0;
+            this.capacity = this.entities.Length;
             
             this.components = new IntHashSet(8);
             this.filters = new IntHashMap<Filter>();
