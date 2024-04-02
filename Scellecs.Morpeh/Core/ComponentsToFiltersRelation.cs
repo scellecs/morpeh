@@ -65,7 +65,7 @@
                 ref var filters = ref this.componentsToFilters[offsetValue];
                 var position = filters.Length;
                 
-                Array.Resize(ref filters, filters.Length + 1);
+                ArrayHelpers.Grow(ref filters, filters.Length + 1);
                 filters[position] = filter;
             }
         }

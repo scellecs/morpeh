@@ -26,32 +26,30 @@
         public void Resize(int newCapacity) {
             this.capacity = newCapacity;
             
-            Array.Resize(ref this.sparse, this.capacity);
-            Array.Resize(ref this.dense, this.capacity);
+            ArrayHelpers.Grow(ref this.sparse, this.capacity);
+            ArrayHelpers.Grow(ref this.dense, this.capacity);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Add(int value, out int index) {
+        public bool Add(int value) {
             if (this.Contains(value)) {
-                index = -1;
                 return false;
             }
 
             this.dense[this.count] = value;
             this.sparse[value] = this.count;
             
-            index = this.count++;
+            ++this.count;
             return true;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(int value, out int index) {
+        public bool Remove(int value) {
             if (!this.Contains(value)) {
-                index = -1;
                 return false;
             }
             
-            index = this.sparse[value];
+            var index = this.sparse[value];
             
             --this.count;
             this.dense[index] = this.dense[this.count];

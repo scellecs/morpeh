@@ -49,13 +49,13 @@
             var oldCapacity = world.entitiesCapacity;
             var newCapacity = HashHelpers.GetCapacity(world.entitiesCapacity) + 1;
             
-            Array.Resize(ref world.entities, newCapacity);
+            ArrayHelpers.Grow(ref world.entities, newCapacity);
             for (var i = oldCapacity; i < newCapacity; i++)
             {
                 world.entities[i].Initialize();
             }
             
-            Array.Resize(ref world.entitiesGens, newCapacity);
+            ArrayHelpers.Grow(ref world.entitiesGens, newCapacity);
             
             world.dirtyEntities.Resize(newCapacity);
             world.disposedEntities.Resize(newCapacity);
@@ -79,7 +79,7 @@
             
             // Clear new components if entity is transient
             
-            if (world.dirtyEntities.Remove(entity.Id, out _)) {
+            if (world.dirtyEntities.Remove(entity.Id)) {
                 var changesCount = entityData.changesCount;
                 
                 for (var i = 0; i < changesCount; i++) {
@@ -101,7 +101,7 @@
                 }
             }
             
-            world.disposedEntities.Add(entity.Id, out _);
+            world.disposedEntities.Add(entity.Id);
             
             world.IncrementGeneration(entity.Id);
             --world.entitiesCount;

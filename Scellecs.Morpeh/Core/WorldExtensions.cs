@@ -279,24 +279,54 @@ namespace Scellecs.Morpeh {
         internal static void TransientChangeAddComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
             ref var entityData = ref world.entities[entity.Id];
             
-            if (world.dirtyEntities.Add(entity.Id, out _)) {
-                entityData.changesCount = 0;
-                entityData.nextArchetypeHash = entityData.currentArchetype?.hash ?? default;
+            if (!FilterDuplicateOperationType(ref entityData, typeInfo.offset)) {
+                if (entityData.changesCount == entityData.changes.Length) {
+                    ArrayHelpers.Grow(ref entityData.changes, entityData.changesCount << 1);
+                }
+                
+                entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.offset, true);
             }
             
-            EntityDataUtility.AddComponent(ref entityData, ref typeInfo);
+            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.id);
+            MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
+            
+            world.dirtyEntities.Add(entity.Id);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void TransientChangeRemoveComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
             ref var entityData = ref world.entities[entity.Id];
             
-            if (world.dirtyEntities.Add(entity.Id, out _)) {
-                entityData.changesCount = 0;
-                entityData.nextArchetypeHash = entityData.currentArchetype?.hash ?? default;
+            if (!FilterDuplicateOperationType(ref entityData, typeInfo.offset)) {
+                if (entityData.changesCount == entityData.changes.Length) {
+                    ArrayHelpers.Grow(ref entityData.changes, entityData.changesCount << 1);
+                }
+                
+                entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.offset, false);
             }
             
-            EntityDataUtility.RemoveComponent(ref entityData, ref typeInfo);
+            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.id);
+            MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
+            
+            world.dirtyEntities.Add(entity.Id);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool FilterDuplicateOperationType(ref EntityData entityData, TypeOffset typeOffset) {
+            var changesCount = entityData.changesCount;
+            
+            for (var i = 0; i < changesCount; i++) {
+                if (entityData.changes[i].typeOffset != typeOffset) {
+                    continue;
+                }
+                
+                entityData.changes[i] = entityData.changes[entityData.changesCount - 1];
+                --entityData.changesCount;
+                
+                return true;
+            }
+            
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -349,7 +379,7 @@ namespace Scellecs.Morpeh {
             // Finalize migration
             MLogger.LogTrace($"[WorldExtensions] Finalize migration for entity {entity} to archetype {nextArchetype.hash}");
             entityData.changesCount = 0;
-            entityData.nextArchetypeHash = default;
+            entityData.nextArchetypeHash = nextArchetype.hash;
             entityData.currentArchetype = nextArchetype;
             entityData.indexInCurrentArchetype = indexInNextArchetype;
         }

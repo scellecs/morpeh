@@ -67,7 +67,7 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ResizeArchetypes(this Filter filter, int newCapacity) {
-            Array.Resize(ref filter.archetypes, newCapacity);
+            ArrayHelpers.Grow(ref filter.archetypes, newCapacity);
             filter.archetypesCapacity = newCapacity;
         }
         
@@ -279,10 +279,10 @@ namespace Scellecs.Morpeh {
             }
             
             var includedOffsetsSortedArray = includedOffsets.ToArray();
-            Array.Sort(includedOffsetsSortedArray, (a, b) => a.GetValue().CompareTo(b.GetValue()) );
+            Array.Sort(includedOffsetsSortedArray, (a, b) => a.GetValue().CompareTo(b.GetValue()));
             
             var excludedOffsetsSortedArray = excludedOffsets.ToArray();
-            Array.Sort(excludedOffsetsSortedArray, (a, b) => a.GetValue().CompareTo(b.GetValue()) );
+            Array.Sort(excludedOffsetsSortedArray, (a, b) => a.GetValue().CompareTo(b.GetValue()));
 
             var filter = new Filter(builder.world, includedOffsetsSortedArray, excludedOffsetsSortedArray);
 

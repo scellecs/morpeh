@@ -22,20 +22,6 @@ namespace Scellecs.Morpeh.Native {
 
             return nativeIntHashMap;
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeFastList<TNative> AsNative<TNative>(this UnsafeFastList<TNative> fastList) where TNative : unmanaged {
-            var nativeIntHashMap = new NativeFastList<TNative>();
-            
-            fixed (int* lengthPtr = &fastList.length)
-            fixed (int* capacityPtr = &fastList.capacity) {
-                nativeIntHashMap.lengthPtr   = lengthPtr;
-                nativeIntHashMap.capacityPtr = capacityPtr;
-                nativeIntHashMap.data        = fastList.data.ptr;
-            }
-
-            return nativeIntHashMap;
-        }
 
         public static ref TNative GetRef<TNative>(this NativeFastList<TNative> fastList, in int index) where TNative : unmanaged => ref *(fastList.data + index);
     }

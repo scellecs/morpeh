@@ -76,9 +76,9 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             Enumerator e;
-            e.lengthMinusOne = this.data.Length - 1;
-            e.ptr    = this.ptr;
             e.index   = -1;
+            e.length = this.data.Length;
+            e.ptr    = this.ptr;
             return e;
         }
 
@@ -86,17 +86,19 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
-            public int* ptr;
-
-            public int lengthMinusOne;
             public int index;
+            public int length;
+            public int* ptr;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext() {
-                return ++this.index <= this.lengthMinusOne;
+                return ++this.index < this.length;
             }
             
-            public int Current => this.ptr[this.index];
+            public int Current {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => this.ptr[this.index];
+            }
         }
     }
 }

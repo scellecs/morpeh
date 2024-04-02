@@ -2,6 +2,7 @@
     using System;
     using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
+    using Scellecs.Morpeh.Collections;
     
     public static class WorldStashExtensions {
         [CanBeNull]
@@ -63,11 +64,11 @@
         internal static void EnsureStashCapacity(this World world, int capacity) {
             var newSize = world.stashes.Length;
             while (capacity >= newSize) {
-                newSize = newSize << 1;
+                newSize <<= 1;
             }
             
             if (newSize > world.stashes.Length) {
-                Array.Resize(ref world.stashes, newSize);
+                ArrayHelpers.Grow(ref world.stashes, newSize);
             }
         }
     }
