@@ -79,7 +79,7 @@
             
             // Clear new components if entity is transient
             
-            if (world.dirtyEntities.Remove(entity.Id)) {
+            if (world.dirtyEntities.Remove(entity.Id, out _)) {
                 var changesCount = entityData.changesCount;
                 
                 for (var i = 0; i < changesCount; i++) {
@@ -101,7 +101,7 @@
                 }
             }
             
-            world.disposedEntities.Add(entity.Id);
+            world.disposedEntities.Add(entity.Id, out _);
             
             world.IncrementGeneration(entity.Id);
             --world.entitiesCount;

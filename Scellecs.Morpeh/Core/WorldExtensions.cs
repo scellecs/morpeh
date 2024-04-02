@@ -230,7 +230,7 @@ namespace Scellecs.Morpeh {
             foreach (var entityId in world.dirtyEntities) {
                 ref var entityData = ref world.entities[entityId];
                 
-                if (entityData.nextArchetypeId == default) {
+                if (entityData.nextArchetypeHash == default) {
                     world.CompleteEntityDisposal(entityId, ref entityData);
                     world.IncrementGeneration(entityId);
                     clearedEntities++;
@@ -253,15 +253,22 @@ namespace Scellecs.Morpeh {
         internal static void ClearEmptyArchetypes(this World world) {
             foreach (var archetype in world.emptyArchetypes) {
                 if (!archetype.IsEmpty()) {
-                    MLogger.LogTrace($"[WorldExtensions] Archetype {archetype.id} is not empty after complete migration of entities");
+                    MLogger.LogTrace($"[WorldExtensions] Archetype {archetype.hash} is not empty after complete migration of entities");
                     continue;
                 }
                 
-                MLogger.LogTrace($"[WorldExtensions] Remove archetype {archetype.id}");
+                MLogger.LogTrace($"[WorldExtensions] Remove archetype {archetype.hash}");
                 
-                world.archetypes.Remove(archetype.id.GetValue(), out _);
+                foreach (var idx in archetype.filters) {
+                    var filter = archetype.filters.GetValueByIndex(idx);
+                    filter.RemoveArchetype(archetype);
+                }
+                
+                archetype.ClearFilters();
+                archetype.components.Clear();
+                
+                world.archetypes.Remove(archetype.hash.GetValue(), out _);
                 world.archetypesCount--;
-                
                 world.archetypePool.Return(archetype);
             }
             
@@ -272,9 +279,9 @@ namespace Scellecs.Morpeh {
         internal static void TransientChangeAddComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
             ref var entityData = ref world.entities[entity.Id];
             
-            if (world.dirtyEntities.Add(entity.Id)) {
+            if (world.dirtyEntities.Add(entity.Id, out _)) {
                 entityData.changesCount = 0;
-                entityData.nextArchetypeId = entityData.currentArchetype?.id ?? default;
+                entityData.nextArchetypeHash = entityData.currentArchetype?.hash ?? default;
             }
             
             EntityDataUtility.AddComponent(ref entityData, ref typeInfo);
@@ -284,9 +291,9 @@ namespace Scellecs.Morpeh {
         internal static void TransientChangeRemoveComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
             ref var entityData = ref world.entities[entity.Id];
             
-            if (world.dirtyEntities.Add(entity.Id)) {
+            if (world.dirtyEntities.Add(entity.Id, out _)) {
                 entityData.changesCount = 0;
-                entityData.nextArchetypeId = entityData.currentArchetype?.id ?? default;
+                entityData.nextArchetypeHash = entityData.currentArchetype?.hash ?? default;
             }
             
             EntityDataUtility.RemoveComponent(ref entityData, ref typeInfo);
@@ -294,11 +301,11 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransientChanges(this World world, Entity entity, ref EntityData entityData) {
-            var currentArchetypeId = entityData.currentArchetype?.id ?? default;
+            var currentArchetypeId = entityData.currentArchetype?.hash ?? default;
             
             // No changes
             
-            if (entityData.nextArchetypeId == currentArchetypeId) {
+            if (entityData.nextArchetypeHash == currentArchetypeId) {
                 MLogger.LogTrace($"[WorldExtensions] No changes for entity {entity}");
                 return;
             }
@@ -307,15 +314,15 @@ namespace Scellecs.Morpeh {
 
             var indexInNextArchetype = 0;
             
-            if (world.archetypes.TryGetValue(entityData.nextArchetypeId.GetValue(), out var nextArchetype)) {
-                MLogger.LogTrace($"[WorldExtensions] Add entity {entity} to EXISTING archetype {nextArchetype.id}");
+            if (world.archetypes.TryGetValue(entityData.nextArchetypeHash.GetValue(), out var nextArchetype)) {
+                MLogger.LogTrace($"[WorldExtensions] Add entity {entity} to EXISTING archetype {nextArchetype.hash}");
                 indexInNextArchetype = nextArchetype.Add(entity);
             } else {
-                MLogger.LogTrace($"[WorldExtensions] Add entity {entity} to NEW archetype {entityData.nextArchetypeId}");
+                MLogger.LogTrace($"[WorldExtensions] Add entity {entity} to NEW archetype {entityData.nextArchetypeHash}");
                 nextArchetype = world.CreateMigratedArchetype(ref entityData);
                 indexInNextArchetype = nextArchetype.Add(entity);
                 
-                world.archetypes.Add(entityData.nextArchetypeId.GetValue(), nextArchetype, out _);
+                world.archetypes.Add(entityData.nextArchetypeHash.GetValue(), nextArchetype, out _);
                 world.archetypesCount++;
 
                 if (currentArchetypeId != default) {
@@ -324,7 +331,7 @@ namespace Scellecs.Morpeh {
                 
                 world.AddMatchingDeltaFilters(nextArchetype, ref entityData);
                 
-                MLogger.LogTrace($"[WorldExtensions] Filter count for archetype {nextArchetype.id} is {nextArchetype.filters.length}");
+                MLogger.LogTrace($"[WorldExtensions] Filter count for archetype {nextArchetype.hash} is {nextArchetype.filters.length}");
             }
             
             // Remove from previous archetype
@@ -340,9 +347,9 @@ namespace Scellecs.Morpeh {
             }
             
             // Finalize migration
-            MLogger.LogTrace($"[WorldExtensions] Finalize migration for entity {entity} to archetype {nextArchetype.id}");
+            MLogger.LogTrace($"[WorldExtensions] Finalize migration for entity {entity} to archetype {nextArchetype.hash}");
             entityData.changesCount = 0;
-            entityData.nextArchetypeId = default;
+            entityData.nextArchetypeHash = default;
             entityData.currentArchetype = nextArchetype;
             entityData.indexInCurrentArchetype = indexInNextArchetype;
         }
@@ -353,33 +360,33 @@ namespace Scellecs.Morpeh {
                 return;
             }
             
-            MLogger.LogTrace($"[WorldExtensions] Schedule archetype {archetype.id} for removal");
+            MLogger.LogTrace($"[WorldExtensions] Schedule archetype {archetype.hash} for removal");
             world.emptyArchetypes.Add(archetype);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Archetype CreateMigratedArchetype(this World world, ref EntityData entityData) {
-            var nextArchetype = world.archetypePool.Rent(entityData.nextArchetypeId);
+            var nextArchetype = world.archetypePool.Rent(entityData.nextArchetypeHash);
             
             if (entityData.currentArchetype != null) {
-                MLogger.LogTrace($"[WorldExtensions] Copy {entityData.currentArchetype.components.length} components from base archetype {entityData.currentArchetype.id}");
+                MLogger.LogTrace($"[WorldExtensions] Copy {entityData.currentArchetype.components.length} components from base archetype {entityData.currentArchetype.hash}");
                 foreach (var offset in entityData.currentArchetype.components) {
-                    MLogger.LogTrace($"[WorldExtensions] Copy component {offset} from base archetype {entityData.currentArchetype.id}");
+                    MLogger.LogTrace($"[WorldExtensions] Copy component {offset} from base archetype {entityData.currentArchetype.hash}");
                     nextArchetype.components.Add(offset);
                 }
             } else {
                 MLogger.LogTrace($"[WorldExtensions] Base archetype is null");
             }
             
-            MLogger.LogTrace($"[WorldExtensions] Add {entityData.changesCount} components to archetype {entityData.nextArchetypeId}");
+            MLogger.LogTrace($"[WorldExtensions] Add {entityData.changesCount} components to archetype {entityData.nextArchetypeHash}");
             var changesCount = entityData.changesCount;
             for (var i = 0; i < changesCount; i++) {
                 var structuralChange = entityData.changes[i];
                 if (structuralChange.isAddition) {
-                    MLogger.LogTrace($"[WorldExtensions] Add {structuralChange.typeOffset} to archetype {entityData.nextArchetypeId}");
+                    MLogger.LogTrace($"[WorldExtensions] Add {structuralChange.typeOffset} to archetype {entityData.nextArchetypeHash}");
                     nextArchetype.components.Add(structuralChange.typeOffset.GetValue());
                 } else {
-                    MLogger.LogTrace($"[WorldExtensions] Remove {structuralChange.typeOffset} from archetype {entityData.nextArchetypeId}");
+                    MLogger.LogTrace($"[WorldExtensions] Remove {structuralChange.typeOffset} from archetype {entityData.nextArchetypeHash}");
                     nextArchetype.components.Remove(structuralChange.typeOffset.GetValue());
                 }
             }
@@ -394,10 +401,10 @@ namespace Scellecs.Morpeh {
             foreach (var idx in filters) {
                 var filter = filters.GetValueByIndex(idx);
                 if (filter.AddArchetypeIfMatches(archetype)) {
-                    MLogger.LogTrace($"[WorldExtensions] Add PREVIOUS {filter} to archetype {archetype.id}");
+                    MLogger.LogTrace($"[WorldExtensions] Add PREVIOUS {filter} to archetype {archetype.hash}");
                     archetype.AddFilter(filter);
                 } else {
-                    MLogger.LogTrace($"[WorldExtensions] PREVIOUS {filter} does not match archetype {archetype.id}");
+                    MLogger.LogTrace($"[WorldExtensions] PREVIOUS {filter} does not match archetype {archetype.hash}");
                 }
             }
         }
@@ -421,10 +428,10 @@ namespace Scellecs.Morpeh {
                     var filter = filters[j];
                     
                     if (filter.AddArchetypeIfMatches(archetype)) {
-                        MLogger.LogTrace($"[WorldExtensions] Add DELTA filter {filter} to archetype {archetype.id}");
+                        MLogger.LogTrace($"[WorldExtensions] Add DELTA filter {filter} to archetype {archetype.hash}");
                         archetype.AddFilter(filter);
                     } else {
-                        MLogger.LogTrace($"[WorldExtensions] DELTA filter {filter} does not match archetype {archetype.id}");
+                        MLogger.LogTrace($"[WorldExtensions] DELTA filter {filter} does not match archetype {archetype.hash}");
                     }
                 }
             }
@@ -445,7 +452,7 @@ namespace Scellecs.Morpeh {
             }
 
             entityData.changesCount = 0;
-            entityData.nextArchetypeId = default;
+            entityData.nextArchetypeHash = default;
             
             world.nextFreeEntityIDs.Push(entityId);
         }

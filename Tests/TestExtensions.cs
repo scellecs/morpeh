@@ -6,18 +6,18 @@ using Xunit.Abstractions;
 namespace Tests;
 
 public static class TestExtensions {
-    internal static ArchetypeId With<T>(this ArchetypeId archetype) where T : struct, IComponent {
+    internal static ArchetypeHash With<T>(this ArchetypeHash archetype) where T : struct, IComponent {
         var id = TypeIdentifier<T>.info.id;
         return archetype.Combine(id);
     }
     
-    internal static Archetype GetArchetype(this World world, ArchetypeId archetypeId) {
-        world.archetypes.TryGetValue(archetypeId.GetValue(), out var archetype);
+    internal static Archetype GetArchetype(this World world, ArchetypeHash archetypeHash) {
+        world.archetypes.TryGetValue(archetypeHash.GetValue(), out var archetype);
         return archetype;
     }
     
-    internal static int ArchetypeLengthOf(this World world, ArchetypeId archetypeId) {
-        world.archetypes.TryGetValue(archetypeId.GetValue(), out var archetype);
+    internal static int ArchetypeLengthOf(this World world, ArchetypeHash archetypeHash) {
+        world.archetypes.TryGetValue(archetypeHash.GetValue(), out var archetype);
         return archetype?.length ?? 0;
     }
     
@@ -35,12 +35,12 @@ public static class TestExtensions {
         output.WriteLine(DumpFilterArchetypes(filter));
     }
     
-    internal static ArchetypeId ArchetypeOf(this World world, Entity entity) {
+    internal static ArchetypeHash ArchetypeOf(this World world, Entity entity) {
         if (world.IsDisposed(entity)) {
-            return default(ArchetypeId);
+            return default(ArchetypeHash);
         }
 
         var archetype = world.entities[entity.Id].currentArchetype;
-        return archetype?.id ?? default(ArchetypeId);
+        return archetype?.hash ?? default(ArchetypeHash);
     }
 }

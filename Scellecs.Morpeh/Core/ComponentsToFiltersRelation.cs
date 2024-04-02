@@ -19,8 +19,8 @@
             return offset >= this.componentsToFilters.Length ? null : this.componentsToFilters[offset];
         }
 
-        public void Add(FastList<TypeInfo> typeInfos, Filter filter) {
-            var maxTypeOffset = this.GetMaxOffset(typeInfos);
+        public void Add(FastList<TypeOffset> typeOffsets, Filter filter) {
+            var maxTypeOffset = this.GetMaxOffset(typeOffsets);
             
             if (maxTypeOffset.GetValue() >= this.componentsToFilters.Length) {
                 var newLength = this.componentsToFilters.Length;
@@ -31,16 +31,16 @@
                 this.ResizeUpTo(newLength);
             }
             
-            foreach (var typeInfo in typeInfos) {
+            foreach (var typeInfo in typeOffsets) {
                 this.AppendFilter(typeInfo, filter);
             }
         }
         
-        private TypeOffset GetMaxOffset(FastList<TypeInfo> typeInfos) {
+        private TypeOffset GetMaxOffset(FastList<TypeOffset> typeOffsets) {
             var maxTypeOffset = new TypeOffset(-1);
-            foreach (var typeInfo in typeInfos) {
-                if (typeInfo.offset.GetValue() > maxTypeOffset.GetValue()) {
-                    maxTypeOffset = typeInfo.offset;
+            foreach (var typeOffset in typeOffsets) {
+                if (typeOffset.GetValue() > maxTypeOffset.GetValue()) {
+                    maxTypeOffset = typeOffset;
                 }
             }
             return maxTypeOffset;
@@ -54,8 +54,8 @@
             this.componentsToFilters = newComponentsToFilters;
         }
 
-        private void AppendFilter(TypeInfo typeInfo, Filter filter) {
-            var offsetValue = typeInfo.offset.GetValue();
+        private void AppendFilter(TypeOffset typeInfo, Filter filter) {
+            var offsetValue = typeInfo.GetValue();
             
             if (this.componentsToFilters[offsetValue] == null) {
                 this.componentsToFilters[offsetValue] = new Filter[1];

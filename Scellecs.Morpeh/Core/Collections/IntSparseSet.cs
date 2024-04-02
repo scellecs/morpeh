@@ -31,24 +31,28 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Add(int value) {
+        public bool Add(int value, out int index) {
             if (this.Contains(value)) {
+                index = -1;
                 return false;
             }
 
             this.dense[this.count] = value;
             this.sparse[value] = this.count;
-            ++this.count;
+            
+            index = this.count++;
             return true;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(int value) {
+        public bool Remove(int value, out int index) {
             if (!this.Contains(value)) {
+                index = -1;
                 return false;
             }
             
-            var index = this.sparse[value];
+            index = this.sparse[value];
+            
             --this.count;
             this.dense[index] = this.dense[this.count];
             this.sparse[this.dense[index]] = index;

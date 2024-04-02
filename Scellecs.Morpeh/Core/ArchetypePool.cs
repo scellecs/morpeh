@@ -21,9 +21,9 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Archetype Rent(ArchetypeId archetypeId) {
+        public Archetype Rent(ArchetypeHash archetypeHash) {
             if (this.archetypes.length == 0) {
-                return new Archetype(archetypeId);
+                return new Archetype(archetypeHash);
             }
             
             var index = this.archetypes.length - 1;
@@ -31,7 +31,7 @@
             var archetype = this.archetypes.data[index];
             this.archetypes.RemoveAt(index);
             
-            archetype.id = archetypeId;
+            archetype.hash = archetypeHash;
             
             return archetype;
         }
@@ -39,15 +39,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Return(Archetype archetype) {
             this.archetypes.Add(archetype);
-            
-            foreach (var idx in archetype.filters) {
-                var filter = archetype.filters.GetValueByIndex(idx);
-                filter.RemoveArchetype(archetype);
-            }
-            archetype.ClearFilters();
-            archetype.components.Clear();
-            
-            archetype.id = default;
+            archetype.hash = default;
         }
     }
 }

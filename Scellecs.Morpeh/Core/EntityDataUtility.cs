@@ -15,8 +15,8 @@ namespace Scellecs.Morpeh {
                 entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.offset, true);
             }
             
-            entityData.nextArchetypeId = entityData.nextArchetypeId.Combine(typeInfo.id);
-            MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeId}");
+            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.id);
+            MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -26,8 +26,8 @@ namespace Scellecs.Morpeh {
                 entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.offset, false);
             }
             
-            entityData.nextArchetypeId = entityData.nextArchetypeId.Combine(typeInfo.id);
-            MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeId}");
+            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.id);
+            MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
         }
         
         // We use array filtering with swap because we don't expect a lot of changes in one frame for one entity

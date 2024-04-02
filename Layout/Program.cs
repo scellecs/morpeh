@@ -6,7 +6,7 @@ using Scellecs.Morpeh.Collections;
 
 TypeLayout.PrintLayout<Entity>();
 TypeLayout.PrintLayout<EntityData>();
-TypeLayout.PrintLayout<ArchetypeId>();
+TypeLayout.PrintLayout<ArchetypeHash>();
 TypeLayout.PrintLayout<TypeInfo>();
 TypeLayout.PrintLayout<TypeOffset>();
 TypeLayout.PrintLayout<TypeId>();

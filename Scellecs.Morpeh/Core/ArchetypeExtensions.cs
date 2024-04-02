@@ -9,7 +9,7 @@ namespace Scellecs.Morpeh {
     internal static class ArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Dispose(this Archetype archetype) {
-            archetype.id = default;
+            archetype.hash = default;
             
             archetype.length  = 0;
             

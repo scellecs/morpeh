@@ -31,18 +31,18 @@ namespace Scellecs.Morpeh {
                 filter.chunks = null;
             }
             
-            filter.includedTypes = null;
-            filter.excludedTypes = null;
+            filter.includedOffsets = null;
+            filter.excludedOffsets = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AddArchetypeIfMatches(this Filter filter, Archetype archetype) {
-            if (filter.includedTypes.Length > archetype.components.length) {
+            if (filter.includedOffsets.Length > archetype.components.length) {
                 return false;
             }
             
-            if (filter.archetypeIds.Has(archetype.id.GetValue())) {
-                MLogger.LogTrace($"Archetype {archetype.id} already in filter {filter}");
+            if (filter.archetypeHashes.Has(archetype.hash.GetValue())) {
+                MLogger.LogTrace($"Archetype {archetype.hash} already in filter {filter}");
                 return false;
             }
             
@@ -56,7 +56,7 @@ namespace Scellecs.Morpeh {
             }
             
             filter.archetypes[index] = archetype;
-            filter.archetypeIds.Add(archetype.id.GetValue(), index, out _);
+            filter.archetypeHashes.Add(archetype.hash.GetValue(), index, out _);
             
             if (filter.chunks.capacity < filter.archetypesLength) {
                 filter.chunks.Resize(filter.archetypesCapacity);
@@ -73,8 +73,8 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void RemoveArchetype(this Filter filter, Archetype archetype) {
-            if (!filter.archetypeIds.Remove(archetype.id.GetValue(), out var index)) {
-                MLogger.LogTrace($"Archetype {archetype.id} is not in filter {filter}");
+            if (!filter.archetypeHashes.Remove(archetype.hash.GetValue(), out var index)) {
+                MLogger.LogTrace($"Archetype {archetype.hash} is not in filter {filter}");
                 return;
             }
     
@@ -82,7 +82,7 @@ namespace Scellecs.Morpeh {
             filter.archetypes[index] = filter.archetypes[lastIndex];
             
             if (index < lastIndex) {
-                filter.archetypeIds.Set(filter.archetypes[index].id.GetValue(), index, out _);
+                filter.archetypeHashes.Set(filter.archetypes[index].hash.GetValue(), index, out _);
             }
             
             filter.archetypes[lastIndex] = default;
@@ -91,27 +91,27 @@ namespace Scellecs.Morpeh {
         internal static bool ArchetypeMatches(this Filter filter, Archetype archetype) {
             var archetypeComponents = archetype.components;
             
-            var includedTypes = filter.includedTypes;
+            var includedTypes = filter.includedOffsets;
             var includedTypesLength = includedTypes.Length;
             
             for (var i = 0; i < includedTypesLength; i++) {
-                if (!archetypeComponents.Has(includedTypes[i].offset.GetValue())) {
-                    MLogger.LogTrace($"Archetype {archetype.id} does not match filter {filter} [include]");
+                if (!archetypeComponents.Has(includedTypes[i].GetValue())) {
+                    MLogger.LogTrace($"Archetype {archetype.hash} does not match filter {filter} [include]");
                     return false;
                 }
             }
             
-            var excludedTypes = filter.excludedTypes;
+            var excludedTypes = filter.excludedOffsets;
             var excludedTypesLength = excludedTypes.Length;
             
             for (var i = 0; i < excludedTypesLength; i++) {
-                if (archetypeComponents.Has(excludedTypes[i].offset.GetValue())) {
-                    MLogger.LogTrace($"Archetype {archetype.id} does not match filter {filter} [exclude]");
+                if (archetypeComponents.Has(excludedTypes[i].GetValue())) {
+                    MLogger.LogTrace($"Archetype {archetype.hash} does not match filter {filter} [exclude]");
                     return false;
                 }
             }
             
-            MLogger.LogTrace($"Archetype {archetype.id} matches filter {filter}");
+            MLogger.LogTrace($"Archetype {archetype.hash} matches filter {filter}");
             return true;
         }
 
@@ -262,17 +262,17 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static Filter CompleteBuild(this FilterBuilder builder) {
-            var includedOffsets = new FastList<TypeInfo>(builder.level);
-            var excludedOffsets = new FastList<TypeInfo>(builder.level);
+            var includedOffsets = new FastList<TypeOffset>(builder.level);
+            var excludedOffsets = new FastList<TypeOffset>(builder.level);
             
             var current = builder;
 
             while (current.parent != null) {
                 if (current.mode == Filter.Mode.Include) {
-                    includedOffsets.Add(current.typeInfo);
+                    includedOffsets.Add(current.typeInfo.offset);
                 }
                 else if (current.mode == Filter.Mode.Exclude) {
-                    excludedOffsets.Add(current.typeInfo);
+                    excludedOffsets.Add(current.typeInfo.offset);
                 }
                 
                 current = current.parent;

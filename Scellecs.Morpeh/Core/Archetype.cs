@@ -8,7 +8,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class Archetype {
-        internal ArchetypeId id;
+        internal ArchetypeHash hash;
         
         internal PinnedArray<Entity> entities;
         internal int length;
@@ -16,8 +16,8 @@ namespace Scellecs.Morpeh {
         internal IntHashSet components;
         internal IntHashMap<Filter> filters;
        
-        internal Archetype(ArchetypeId id) {
-            this.id = id;
+        internal Archetype(ArchetypeHash hash) {
+            this.hash = hash;
             
             this.entities = new PinnedArray<Entity>(16);
             this.length = 0;

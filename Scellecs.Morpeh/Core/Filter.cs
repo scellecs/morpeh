@@ -56,15 +56,15 @@ namespace Scellecs.Morpeh {
         internal int archetypesLength;
         internal int archetypesCapacity;
         
-        internal LongHashMap<int> archetypeIds;
+        internal LongHashMap<int> archetypeHashes;
         internal FastList<Chunk> chunks;
 
-        internal TypeInfo[] includedTypes;
-        internal TypeInfo[] excludedTypes;
+        internal TypeOffset[] includedOffsets;
+        internal TypeOffset[] excludedOffsets;
         
         internal int id;
 
-        internal Filter(World world, TypeInfo[] includedTypes, TypeInfo[] excludedTypes) {
+        internal Filter(World world, TypeOffset[] includedOffsets, TypeOffset[] excludedOffsets) {
             const int defaultArchetypesCapacity = 8;
             
             this.world = world;
@@ -73,11 +73,11 @@ namespace Scellecs.Morpeh {
             this.archetypesLength = 0;
             this.archetypesCapacity = defaultArchetypesCapacity;
             
-            this.archetypeIds = new LongHashMap<int>();
+            this.archetypeHashes = new LongHashMap<int>();
             this.chunks  = new FastList<Chunk>();
 
-            this.includedTypes = includedTypes;
-            this.excludedTypes = excludedTypes;
+            this.includedOffsets = includedOffsets;
+            this.excludedOffsets = excludedOffsets;
 
             this.id = world.filterCount++;
         }
@@ -88,13 +88,13 @@ namespace Scellecs.Morpeh {
             sb.Append("Filter(");
             
             sb.Append("Include: ");
-            foreach (var type in this.includedTypes) {
+            foreach (var type in this.includedOffsets) {
                 sb.Append(type);
                 sb.Append(", ");
             }
             
             sb.Append("Exclude: ");
-            foreach (var type in this.excludedTypes) {
+            foreach (var type in this.excludedOffsets) {
                 sb.Append(type);
                 sb.Append(", ");
             }
@@ -149,8 +149,7 @@ namespace Scellecs.Morpeh {
 #endif
             }
             
-            public Entity Current
-            {
+            public Entity Current {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => this.archetypeEnumerator.Current;
             }
