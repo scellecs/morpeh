@@ -279,10 +279,10 @@ namespace Scellecs.Morpeh {
             }
             
             var includedOffsetsSortedArray = includedOffsets.ToArray();
-            Array.Sort(includedOffsetsSortedArray);
+            Array.Sort(includedOffsetsSortedArray, (a, b) => a.GetValue().CompareTo(b.GetValue()) );
             
             var excludedOffsetsSortedArray = excludedOffsets.ToArray();
-            Array.Sort(excludedOffsetsSortedArray);
+            Array.Sort(excludedOffsetsSortedArray, (a, b) => a.GetValue().CompareTo(b.GetValue()) );
 
             var filter = new Filter(builder.world, includedOffsetsSortedArray, excludedOffsetsSortedArray);
 
