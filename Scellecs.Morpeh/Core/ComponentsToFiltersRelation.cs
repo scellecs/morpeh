@@ -19,7 +19,7 @@
             return offset >= this.componentsToFilters.Length ? null : this.componentsToFilters[offset];
         }
 
-        public void Add(FastList<TypeOffset> typeOffsets, Filter filter) {
+        public void Add(TypeOffset[] typeOffsets, Filter filter) {
             var maxTypeOffset = this.GetMaxOffset(typeOffsets);
             
             if (maxTypeOffset.GetValue() >= this.componentsToFilters.Length) {
@@ -36,7 +36,7 @@
             }
         }
         
-        private TypeOffset GetMaxOffset(FastList<TypeOffset> typeOffsets) {
+        private TypeOffset GetMaxOffset(TypeOffset[] typeOffsets) {
             var maxTypeOffset = new TypeOffset(-1);
             foreach (var typeOffset in typeOffsets) {
                 if (typeOffset.GetValue() > maxTypeOffset.GetValue()) {

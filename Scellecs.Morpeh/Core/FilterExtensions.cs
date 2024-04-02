@@ -277,11 +277,17 @@ namespace Scellecs.Morpeh {
                 
                 current = current.parent;
             }
+            
+            var includedOffsetsSortedArray = includedOffsets.ToArray();
+            Array.Sort(includedOffsetsSortedArray);
+            
+            var excludedOffsetsSortedArray = excludedOffsets.ToArray();
+            Array.Sort(excludedOffsetsSortedArray);
 
-            var filter = new Filter(builder.world, includedOffsets.ToArray(), excludedOffsets.ToArray());
+            var filter = new Filter(builder.world, includedOffsetsSortedArray, excludedOffsetsSortedArray);
 
-            filter.world.componentsToFiltersRelation.Add(includedOffsets, filter);
-            filter.world.componentsToFiltersRelation.Add(excludedOffsets, filter);
+            filter.world.componentsToFiltersRelation.Add(includedOffsetsSortedArray, filter);
+            filter.world.componentsToFiltersRelation.Add(excludedOffsetsSortedArray, filter);
             
             filter.world.filters.Add(filter);
             

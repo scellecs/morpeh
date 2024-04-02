@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class StashExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool TryAddData<T>(this Stash<T> stash, in int key, in T value, out int slotIndex) where T : struct, IComponent {
+        internal static bool TryAddData<T>(this Stash<T> stash, int key, in T value, out int slotIndex) where T : struct, IComponent {
             if (stash.map.IsKeySet(key, out slotIndex)) {
                 return false;
             }
@@ -32,7 +32,7 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool TrySetData<T>(this Stash<T> stash, in int key, in T value) where T : struct, IComponent {
+        internal static bool TrySetData<T>(this Stash<T> stash, int key, in T value) where T : struct, IComponent {
             if (stash.map.IsKeySet(key, out var slotIndex)) {
                 stash.data[slotIndex] = value;
                 return false;
