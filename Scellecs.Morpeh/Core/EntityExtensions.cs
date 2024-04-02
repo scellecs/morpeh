@@ -119,7 +119,7 @@ namespace Scellecs.Morpeh {
                     continue;
                 }
 
-                world.GetStash(structuralChange.typeOffset.GetValue())?.Migrate(from, to, overwrite);
+                world.GetStash(structuralChange.typeId)?.Migrate(from, to, overwrite);
             }
 
             if (fromEntityData.currentArchetype == null) {
@@ -128,10 +128,10 @@ namespace Scellecs.Morpeh {
             
             // Migrate all components that are not removed from the source entity from current archetype
             
-            foreach (var offset in fromEntityData.currentArchetype.components) {
+            foreach (var typeId in fromEntityData.currentArchetype.components) {
                 var wasRemoved = false;
                 foreach (var structuralChange in changes) {
-                    if (structuralChange.typeOffset.GetValue() != offset || structuralChange.isAddition) {
+                    if (structuralChange.typeId != typeId || structuralChange.isAddition) {
                         continue;
                     }
                     
@@ -143,7 +143,7 @@ namespace Scellecs.Morpeh {
                     continue;
                 }
                 
-                world.GetStash(offset)?.Migrate(from, to, overwrite);
+                world.GetStash(typeId)?.Migrate(from, to, overwrite);
             }
         }
 
@@ -178,7 +178,7 @@ namespace Scellecs.Morpeh {
 
         [Obsolete("[MORPEH] Use World.IsDisposed() instead. This is the same as IsDisposed() but with a different name for compatibility.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsNullOrDisposed([CanBeNull] this Entity entity) {
+        public static bool IsNullOrDisposed(this Entity entity) {
             return entity.IsDisposed();
         }
         

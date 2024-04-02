@@ -14,8 +14,8 @@
             this.value = value;
         }
         
-        public ArchetypeHash(TypeId typeId) {
-            this.value = typeId.GetValue();
+        public ArchetypeHash(TypeHash typeHash) {
+            this.value = typeHash.GetValue();
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,8 +29,8 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ArchetypeHash Combine(TypeId typeId) {
-            return new ArchetypeHash(this.value ^ typeId.GetValue());
+        public ArchetypeHash Combine(TypeHash typeHash) {
+            return new ArchetypeHash(this.value ^ typeHash.GetValue());
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

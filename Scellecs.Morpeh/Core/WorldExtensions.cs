@@ -79,7 +79,7 @@ namespace Scellecs.Morpeh {
             world.disposedEntities = new IntSparseSet(world.entitiesCapacity);
 
             world.archetypes         = new LongHashMap<Archetype>();
-            world.archetypesCount    = 1;
+            world.archetypesCount    = 0;
             
             world.archetypePool = new ArchetypePool(32);
             world.emptyArchetypes = new FastList<Archetype>();
@@ -279,15 +279,15 @@ namespace Scellecs.Morpeh {
         internal static void TransientChangeAddComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
             ref var entityData = ref world.entities[entity.Id];
             
-            if (!FilterDuplicateOperationType(ref entityData, typeInfo.offset)) {
+            if (!FilterDuplicateOperationType(ref entityData, typeInfo.id)) {
                 if (entityData.changesCount == entityData.changes.Length) {
                     ArrayHelpers.Grow(ref entityData.changes, entityData.changesCount << 1);
                 }
                 
-                entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.offset, true);
+                entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.id, true);
             }
             
-            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.id);
+            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
             MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
             
             world.dirtyEntities.Add(entity.Id);
@@ -297,26 +297,26 @@ namespace Scellecs.Morpeh {
         internal static void TransientChangeRemoveComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
             ref var entityData = ref world.entities[entity.Id];
             
-            if (!FilterDuplicateOperationType(ref entityData, typeInfo.offset)) {
+            if (!FilterDuplicateOperationType(ref entityData, typeInfo.id)) {
                 if (entityData.changesCount == entityData.changes.Length) {
                     ArrayHelpers.Grow(ref entityData.changes, entityData.changesCount << 1);
                 }
                 
-                entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.offset, false);
+                entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.id, false);
             }
             
-            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.id);
+            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
             MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
             
             world.dirtyEntities.Add(entity.Id);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool FilterDuplicateOperationType(ref EntityData entityData, TypeOffset typeOffset) {
+        private static bool FilterDuplicateOperationType(ref EntityData entityData, int typeId) {
             var changesCount = entityData.changesCount;
             
             for (var i = 0; i < changesCount; i++) {
-                if (entityData.changes[i].typeOffset != typeOffset) {
+                if (entityData.changes[i].typeId != typeId) {
                     continue;
                 }
                 
@@ -378,9 +378,9 @@ namespace Scellecs.Morpeh {
             
             if (entityData.currentArchetype != null) {
                 MLogger.LogTrace($"[WorldExtensions] Copy {entityData.currentArchetype.components.length} components from base archetype {entityData.currentArchetype.hash}");
-                foreach (var offset in entityData.currentArchetype.components) {
-                    MLogger.LogTrace($"[WorldExtensions] Copy component {offset} from base archetype {entityData.currentArchetype.hash}");
-                    nextArchetype.components.Add(offset);
+                foreach (var typeId in entityData.currentArchetype.components) {
+                    MLogger.LogTrace($"[WorldExtensions] Copy component {typeId} from base archetype {entityData.currentArchetype.hash}");
+                    nextArchetype.components.Add(typeId);
                 }
             } else {
                 MLogger.LogTrace($"[WorldExtensions] Base archetype is null");
@@ -391,11 +391,11 @@ namespace Scellecs.Morpeh {
             for (var i = 0; i < changesCount; i++) {
                 var structuralChange = entityData.changes[i];
                 if (structuralChange.isAddition) {
-                    MLogger.LogTrace($"[WorldExtensions] Add {structuralChange.typeOffset} to archetype {entityData.nextArchetypeHash}");
-                    nextArchetype.components.Add(structuralChange.typeOffset.GetValue());
+                    MLogger.LogTrace($"[WorldExtensions] Add {structuralChange.typeId} to archetype {entityData.nextArchetypeHash}");
+                    nextArchetype.components.Add(structuralChange.typeId);
                 } else {
-                    MLogger.LogTrace($"[WorldExtensions] Remove {structuralChange.typeOffset} from archetype {entityData.nextArchetypeHash}");
-                    nextArchetype.components.Remove(structuralChange.typeOffset.GetValue());
+                    MLogger.LogTrace($"[WorldExtensions] Remove {structuralChange.typeId} from archetype {entityData.nextArchetypeHash}");
+                    nextArchetype.components.Remove(structuralChange.typeId);
                 }
             }
 
@@ -432,13 +432,13 @@ namespace Scellecs.Morpeh {
             for (var i = 0; i < changesCount; i++) {
                 var structuralChange = transient.changes[i];
                 
-                var filters = world.componentsToFiltersRelation.GetFilters(structuralChange.typeOffset.GetValue());
+                var filters = world.componentsToFiltersRelation.GetFilters(structuralChange.typeId);
                 if (filters == null) {
-                    MLogger.LogTrace($"[WorldExtensions] No DELTA filters for component {structuralChange.typeOffset.GetValue()}");
+                    MLogger.LogTrace($"[WorldExtensions] No DELTA filters for component {structuralChange.typeId}");
                     continue;
                 }
                 
-                MLogger.LogTrace($"[WorldExtensions] Found {filters.Length} DELTA filters for component {structuralChange.typeOffset.GetValue()}");
+                MLogger.LogTrace($"[WorldExtensions] Found {filters.Length} DELTA filters for component {structuralChange.typeId}");
                 
                 var filtersCount = filters.Length;
                 for (var j = 0; j < filtersCount; j++) {

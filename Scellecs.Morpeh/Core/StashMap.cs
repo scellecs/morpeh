@@ -51,7 +51,7 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(int key, [CanBeNull] out int slotIndex) {
+        public bool Remove(int key, out int slotIndex) {
             var rem = key & this.capacityMinusOne;
 
             int next;

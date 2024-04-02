@@ -89,15 +89,15 @@
                         continue;
                     }
                     
-                    world.GetStash(structuralChange.typeOffset.GetValue())?.Clean(entity);
+                    world.GetStash(structuralChange.typeId)?.Clean(entity);
                 }
             }
             
             // Clear components from existing archetype
             
             if (entityData.currentArchetype != null) {
-                foreach (var offset in entityData.currentArchetype.components) {
-                    world.GetStash(offset)?.Clean(entity);
+                foreach (var typeId in entityData.currentArchetype.components) {
+                    world.GetStash(typeId)?.Clean(entity);
                 }
             }
             

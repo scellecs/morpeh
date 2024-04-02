@@ -31,13 +31,13 @@ namespace Scellecs.Morpeh {
                 filter.chunks = null;
             }
             
-            filter.includedOffsets = null;
-            filter.excludedOffsets = null;
+            filter.includedTypeIds = null;
+            filter.excludedTypeIds = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AddArchetypeIfMatches(this Filter filter, Archetype archetype) {
-            if (filter.includedOffsets.Length > archetype.components.length) {
+            if (filter.includedTypeIds.Length > archetype.components.length) {
                 return false;
             }
             
@@ -91,21 +91,21 @@ namespace Scellecs.Morpeh {
         internal static bool ArchetypeMatches(this Filter filter, Archetype archetype) {
             var archetypeComponents = archetype.components;
             
-            var includedTypes = filter.includedOffsets;
+            var includedTypes = filter.includedTypeIds;
             var includedTypesLength = includedTypes.Length;
             
             for (var i = 0; i < includedTypesLength; i++) {
-                if (!archetypeComponents.Has(includedTypes[i].GetValue())) {
+                if (!archetypeComponents.Has(includedTypes[i])) {
                     MLogger.LogTrace($"Archetype {archetype.hash} does not match filter {filter} [include]");
                     return false;
                 }
             }
             
-            var excludedTypes = filter.excludedOffsets;
+            var excludedTypes = filter.excludedTypeIds;
             var excludedTypesLength = excludedTypes.Length;
             
             for (var i = 0; i < excludedTypesLength; i++) {
-                if (archetypeComponents.Has(excludedTypes[i].GetValue())) {
+                if (archetypeComponents.Has(excludedTypes[i])) {
                     MLogger.LogTrace($"Archetype {archetype.hash} does not match filter {filter} [exclude]");
                     return false;
                 }
@@ -115,7 +115,6 @@ namespace Scellecs.Morpeh {
             return true;
         }
 
-        [NotNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity GetEntity(this Filter filter, in int id) {
             var accum = 0;
@@ -141,7 +140,6 @@ namespace Scellecs.Morpeh {
             throw new IndexOutOfRangeException();
         }
 
-        [NotNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity First(this Filter filter) {
             if (filter.archetypesLength == 0) {
@@ -156,12 +154,10 @@ namespace Scellecs.Morpeh {
             throw new InvalidOperationException("The source sequence is empty.");
         }
 
-        [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Entity FirstOrDefault(this Filter filter) {
             return filter.archetypesLength != 0 ? filter.archetypes[0].entities.data[0] : default;
         }
-        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetLengthSlow(this Filter filter) {
@@ -196,7 +192,7 @@ namespace Scellecs.Morpeh {
             var current = builder;
 
             while (current.parent != null) {
-                if (current.mode == Filter.Mode.Include && current.typeInfo.offset == typeInfo.offset) {
+                if (current.mode == Filter.Mode.Include && current.typeInfo.id == typeInfo.id) {
                     return builder;
                 }
                 current = current.parent;
@@ -208,7 +204,7 @@ namespace Scellecs.Morpeh {
                 mode = Filter.Mode.Include,
                 typeInfo = typeInfo,
                 level = builder.level + 1,
-                includeHash = builder.includeHash.Combine(typeInfo.id),
+                includeHash = builder.includeHash.Combine(typeInfo.hash),
                 excludeHash = builder.excludeHash,
             };
         }
@@ -218,7 +214,7 @@ namespace Scellecs.Morpeh {
             var current = builder;
 
             while (current.parent != null) {
-                if (current.mode == Filter.Mode.Exclude && current.typeInfo.offset == typeInfo.offset) {
+                if (current.mode == Filter.Mode.Exclude && current.typeInfo.id == typeInfo.id) {
                     return builder;
                 }
                 current = current.parent;
@@ -231,7 +227,7 @@ namespace Scellecs.Morpeh {
                 typeInfo = typeInfo,
                 level = builder.level + 1,
                 includeHash = builder.includeHash,
-                excludeHash = builder.excludeHash.Combine(typeInfo.id),
+                excludeHash = builder.excludeHash.Combine(typeInfo.hash),
             };
         }
 
@@ -262,32 +258,32 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static Filter CompleteBuild(this FilterBuilder builder) {
-            var includedOffsets = new FastList<TypeOffset>(builder.level);
-            var excludedOffsets = new FastList<TypeOffset>(builder.level);
+            var includedTypeIds = new FastList<int>(builder.level);
+            var excludedTypeIds = new FastList<int>(builder.level);
             
             var current = builder;
 
             while (current.parent != null) {
                 if (current.mode == Filter.Mode.Include) {
-                    includedOffsets.Add(current.typeInfo.offset);
+                    includedTypeIds.Add(current.typeInfo.id);
                 }
                 else if (current.mode == Filter.Mode.Exclude) {
-                    excludedOffsets.Add(current.typeInfo.offset);
+                    excludedTypeIds.Add(current.typeInfo.id);
                 }
                 
                 current = current.parent;
             }
             
-            var includedOffsetsSortedArray = includedOffsets.ToArray();
-            Array.Sort(includedOffsetsSortedArray, (a, b) => a.GetValue().CompareTo(b.GetValue()));
+            var includedTypeIdsSorted = includedTypeIds.ToArray();
+            Array.Sort(includedTypeIdsSorted);
             
-            var excludedOffsetsSortedArray = excludedOffsets.ToArray();
-            Array.Sort(excludedOffsetsSortedArray, (a, b) => a.GetValue().CompareTo(b.GetValue()));
+            var excludedTypeIdsSorted = excludedTypeIds.ToArray();
+            Array.Sort(excludedTypeIdsSorted);
 
-            var filter = new Filter(builder.world, includedOffsetsSortedArray, excludedOffsetsSortedArray);
+            var filter = new Filter(builder.world, includedTypeIdsSorted, excludedTypeIdsSorted);
 
-            filter.world.componentsToFiltersRelation.Add(includedOffsetsSortedArray, filter);
-            filter.world.componentsToFiltersRelation.Add(excludedOffsetsSortedArray, filter);
+            filter.world.componentsToFiltersRelation.Add(includedTypeIdsSorted, filter);
+            filter.world.componentsToFiltersRelation.Add(excludedTypeIdsSorted, filter);
             
             filter.world.filters.Add(filter);
             

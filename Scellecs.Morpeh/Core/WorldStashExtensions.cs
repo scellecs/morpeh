@@ -7,14 +7,14 @@
     public static class WorldStashExtensions {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Stash GetStash(this World world, int offset) {
+        internal static Stash GetStash(this World world, int typeId) {
             world.ThreadSafetyCheck();
             
-            if (offset < 0 || offset >= world.stashes.Length) {
+            if (typeId < 0 || typeId >= world.stashes.Length) {
                 return null;
             }
             
-            return world.stashes[offset];
+            return world.stashes[typeId];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -23,7 +23,7 @@
             world.ThreadSafetyCheck();
             
             if (TypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
-                var candidate = world.GetStash(definition.offset.GetValue());
+                var candidate = world.GetStash(definition.id);
                 
                 if (candidate != null) {
                     return candidate;
@@ -33,8 +33,8 @@
             var stash = Stash.CreateReflection(world, type);
             TypeIdentifier.typeAssociation.TryGetValue(type, out definition);
             
-            world.EnsureStashCapacity(definition.offset.GetValue());
-            world.stashes[definition.offset.GetValue()] = stash;
+            world.EnsureStashCapacity(definition.id);
+            world.stashes[definition.id] = stash;
 
             return stash;
         }
@@ -45,17 +45,16 @@
             world.ThreadSafetyCheck();
             
             var info = TypeIdentifier<T>.info;
-            var offset = info.offset.GetValue();
             
-            var candidate = world.GetStash(offset);
+            var candidate = world.GetStash(info.id);
             if (candidate != null) {
                 return (Stash<T>)candidate.typelessStash;
             }
 
             var stash = Stash.Create<T>(world);
             
-            world.EnsureStashCapacity(offset);
-            world.stashes[offset] = stash;
+            world.EnsureStashCapacity(info.id);
+            world.stashes[info.id] = stash;
 
             return (Stash<T>)stash.typelessStash;
         }

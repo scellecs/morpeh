@@ -6,10 +6,10 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public readonly struct TypeId : IEquatable<TypeId> {
+    public readonly struct TypeHash : IEquatable<TypeHash> {
         private readonly long value;
         
-        public TypeId(long value) {
+        public TypeHash(long value) {
             this.value = value;
         }
         
@@ -19,27 +19,27 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TypeId Combine(TypeId other) {
-            return new TypeId(this.value ^ other.value);
+        public TypeHash Combine(TypeHash other) {
+            return new TypeHash(this.value ^ other.value);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(TypeId other) {
+        public bool Equals(TypeHash other) {
             return value == other.value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj) {
-            return obj is TypeId other && Equals(other);
+            return obj is TypeHash other && Equals(other);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(TypeId a, TypeId b) {
+        public static bool operator ==(TypeHash a, TypeHash b) {
             return a.value == b.value;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(TypeId a, TypeId b) {
+        public static bool operator !=(TypeHash a, TypeHash b) {
             return a.value != b.value;
         }
 
@@ -50,7 +50,7 @@
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString() {
-            return $"TypeId({value})";
+            return $"TypeHash({value})";
         }
     }
 }

@@ -25,8 +25,8 @@ namespace Scellecs.Morpeh {
         internal TypeInfo typeInfo;
         internal Filter.Mode mode;
         internal int level;
-        internal TypeId includeHash;
-        internal TypeId excludeHash;
+        internal TypeHash includeHash;
+        internal TypeHash excludeHash;
     }
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -59,12 +59,12 @@ namespace Scellecs.Morpeh {
         internal LongHashMap<int> archetypeHashes;
         internal FastList<Chunk> chunks;
 
-        internal TypeOffset[] includedOffsets;
-        internal TypeOffset[] excludedOffsets;
+        internal int[] includedTypeIds;
+        internal int[] excludedTypeIds;
         
         internal int id;
 
-        internal Filter(World world, TypeOffset[] includedOffsets, TypeOffset[] excludedOffsets) {
+        internal Filter(World world, int[] includedTypeIds, int[] excludedTypeIds) {
             const int defaultArchetypesCapacity = 8;
             
             this.world = world;
@@ -76,8 +76,8 @@ namespace Scellecs.Morpeh {
             this.archetypeHashes = new LongHashMap<int>();
             this.chunks  = new FastList<Chunk>();
 
-            this.includedOffsets = includedOffsets;
-            this.excludedOffsets = excludedOffsets;
+            this.includedTypeIds = includedTypeIds;
+            this.excludedTypeIds = excludedTypeIds;
 
             this.id = world.filterCount++;
         }
@@ -88,13 +88,13 @@ namespace Scellecs.Morpeh {
             sb.Append("Filter(");
             
             sb.Append("Include: ");
-            foreach (var type in this.includedOffsets) {
+            foreach (var type in this.includedTypeIds) {
                 sb.Append(type);
                 sb.Append(", ");
             }
             
             sb.Append("Exclude: ");
-            foreach (var type in this.excludedOffsets) {
+            foreach (var type in this.excludedTypeIds) {
                 sb.Append(type);
                 sb.Append(", ");
             }
@@ -104,50 +104,50 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public EntityEnumerator GetEnumerator() {
+        public Enumerator GetEnumerator() {
             this.world.ThreadSafetyCheck();
-
-            return new EntityEnumerator(this.archetypes, this.archetypesLength
+            var e = default(Enumerator);
+            
+            e.archetypes = this.archetypes;
+            e.archetypeCount = this.archetypesLength;
+            
+            e.archetypeIndex = -1;
+            e.archetypeEnumerator = default;
+            
 #if MORPEH_DEBUG
-                , this.world
+            ++this.world.iteratorLevel;
+            e.world = world;
 #endif
-                );
+            return e;
         }
 
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct EntityEnumerator
+        public struct Enumerator
 #if MORPEH_DEBUG
             : IEnumerator<Entity>
 #endif
         {
-            private Archetype[] archetypes;
-            private int archetypeCount;
+            internal Archetype[] archetypes;
+            internal int archetypeCount;
             
-            private int archetypeIndex;
-            private Archetype.Enumerator archetypeEnumerator;
+            internal int archetypeIndex;
+            internal Archetype.Enumerator archetypeEnumerator;
             
 #if MORPEH_DEBUG
-            private World world;
-#endif
+            internal World world;
             
-            internal EntityEnumerator(Archetype[] archetypes, int archetypesCount
-#if MORPEH_DEBUG
-                , World world
-#endif
-                )
-            {
-                this.archetypes = archetypes;
-                this.archetypeCount = archetypesCount;
-                this.archetypeIndex = -1;
-                
-                this.archetypeEnumerator = default;
-#if MORPEH_DEBUG
-                this.world = world;
-                ++this.world.iteratorLevel;
-#endif
+            public void Dispose() {
+                if (this.world != null) {
+                    --this.world.iteratorLevel;
+                }
             }
+            
+            object IEnumerator.Current => this.Current;
+            
+            public void Reset() { }
+#endif
             
             public Entity Current {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -168,18 +168,6 @@ namespace Scellecs.Morpeh {
                 
                 return false;
             }
-            
-#if MORPEH_DEBUG
-            public void Dispose() {
-                if (this.world != null) {
-                    --this.world.iteratorLevel;
-                }
-            }
-            
-            object IEnumerator.Current => this.Current;
-            
-            public void Reset() { }
-#endif
         }
     }
 }

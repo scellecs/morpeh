@@ -19,8 +19,8 @@ namespace Scellecs.Morpeh {
     internal static class TypeIdentifier {
         internal static int counter;
 
-        internal static Dictionary<TypeId, TypeInfo> idTypeAssociation = new Dictionary<TypeId, TypeInfo>();
-        internal static Dictionary<TypeOffset, TypeInfo> offsetTypeAssociation = new Dictionary<TypeOffset, TypeInfo>();
+        internal static Dictionary<TypeHash, TypeInfo> typeHashAssociation = new Dictionary<TypeHash, TypeInfo>();
+        internal static Dictionary<int, TypeInfo> typeIdAssociation = new Dictionary<int, TypeInfo>();
         internal static Dictionary<Type, TypeInfo> typeAssociation = new Dictionary<Type, TypeInfo>();
         
         static TypeIdentifier() {
@@ -28,8 +28,8 @@ namespace Scellecs.Morpeh {
         }
 
         internal static void InitializeAssociation<T>(TypeInfo typeInfo) where T : struct, IComponent {
-            idTypeAssociation.Add(typeInfo.id, typeInfo);
-            offsetTypeAssociation.Add(typeInfo.offset, typeInfo);
+            typeHashAssociation.Add(typeInfo.hash, typeInfo);
+            typeIdAssociation.Add(typeInfo.id, typeInfo);
             typeAssociation.Add(typeof(T), typeInfo);
         }
     }
@@ -40,8 +40,8 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class ExtendedTypeIdentifier {
-        internal static Dictionary<long, InternalTypeDefinition> idTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
-        internal static Dictionary<long, InternalTypeDefinition> offsetTypeAssociation = new Dictionary<long, InternalTypeDefinition>();
+        internal static Dictionary<long, InternalTypeDefinition> typeHashAssociation = new Dictionary<long, InternalTypeDefinition>();
+        internal static Dictionary<int, InternalTypeDefinition> typeIdAssociation = new Dictionary<int, InternalTypeDefinition>();
         internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
 
         internal static void InitializeAssociation<T>(TypeInfo typeInfo) where T : struct, IComponent {
@@ -54,8 +54,8 @@ namespace Scellecs.Morpeh {
                 isMarker = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length == 0,
             };
             
-            idTypeAssociation.Add(typeInfo.id.GetValue(), info);
-            offsetTypeAssociation.Add(typeInfo.offset.GetValue(), info);
+            typeHashAssociation.Add(typeInfo.hash.GetValue(), info);
+            typeIdAssociation.Add(typeInfo.id, info);
             typeAssociation.Add(typeof(T), info);
         }
 
@@ -89,10 +89,10 @@ namespace Scellecs.Morpeh {
             
             initialized = true;
             
-            var offsetValue = Interlocked.Increment(ref TypeIdentifier.counter);
-            var idValue = Math.Abs(7_777_777_777_777_777_773L * offsetValue);
+            var typeId = Interlocked.Increment(ref TypeIdentifier.counter);
+            var typeHash = Math.Abs(7_777_777_777_777_777_773L * typeId);
             
-            info = new TypeInfo(new TypeOffset(offsetValue), new TypeId(idValue));
+            info = new TypeInfo(new TypeHash(typeHash), typeId);
             
             TypeIdentifier.InitializeAssociation<T>(info);
             

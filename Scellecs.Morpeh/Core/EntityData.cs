@@ -29,9 +29,9 @@
     internal struct StructuralChange {
         private int value;
         
-        internal TypeOffset typeOffset {
+        internal int typeId {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new TypeOffset(this.value >> 1);
+            get => this.value >> 1;
         }
         
         internal bool isAddition {
@@ -40,9 +40,9 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static StructuralChange Create(TypeOffset typeOffset, bool isAddition) {
+        internal static StructuralChange Create(int typeId, bool isAddition) {
             return new StructuralChange {
-                value = (typeOffset.GetValue() << 1) | (isAddition ? 1 : 0)
+                value = (typeId << 1) | (isAddition ? 1 : 0)
             };
         }
     }

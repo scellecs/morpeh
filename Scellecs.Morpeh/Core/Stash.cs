@@ -25,7 +25,7 @@ namespace Scellecs.Morpeh {
     public class Stash : IDisposable {
         internal TypelessStash typelessStash;
         
-        internal TypeId typeId;
+        internal TypeHash typeHash;
         
         private Action<Entity> setReflection;
         private Func<Entity, bool> removeReflection;
@@ -48,7 +48,7 @@ namespace Scellecs.Morpeh {
             return new Stash {
                 typelessStash = stash,
                 
-                typeId = info.id,
+                typeHash = info.hash,
                 
                 setReflection = stash.Set,
                 removeReflection = stash.Remove,

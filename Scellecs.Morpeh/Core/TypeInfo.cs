@@ -5,16 +5,16 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal struct TypeInfo {
-        internal TypeOffset offset;
-        internal TypeId id;
+        internal TypeHash hash;
+        internal int id;
         
-        internal TypeInfo(TypeOffset offset, TypeId id) {
-            this.offset = offset;
+        internal TypeInfo(TypeHash hash, int id) {
             this.id = id;
+            this.hash = hash;
         }
         
         public override string ToString() {
-            return $"TypeInfo({this.offset}, {this.id})";
+            return $"TypeInfo({this.hash}, {this.id})";
         }
     }
 }

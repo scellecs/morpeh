@@ -15,35 +15,35 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Filter[] GetFilters(int offset) {
-            return offset >= this.componentsToFilters.Length ? null : this.componentsToFilters[offset];
+        public Filter[] GetFilters(int typeId) {
+            return typeId >= this.componentsToFilters.Length ? null : this.componentsToFilters[typeId];
         }
 
-        public void Add(TypeOffset[] typeOffsets, Filter filter) {
-            var maxTypeOffset = this.GetMaxOffset(typeOffsets);
+        public void Add(int[] typeIds, Filter filter) {
+            var maxTypeId = this.GetMaxTypeId(typeIds);
             
-            if (maxTypeOffset.GetValue() >= this.componentsToFilters.Length) {
+            if (maxTypeId >= this.componentsToFilters.Length) {
                 var newLength = this.componentsToFilters.Length;
-                while (maxTypeOffset.GetValue() >= newLength) {
+                while (maxTypeId >= newLength) {
                     newLength *= 2;
                 }
                 
                 this.ResizeUpTo(newLength);
             }
             
-            foreach (var typeInfo in typeOffsets) {
+            foreach (var typeInfo in typeIds) {
                 this.AppendFilter(typeInfo, filter);
             }
         }
         
-        private TypeOffset GetMaxOffset(TypeOffset[] typeOffsets) {
-            var maxTypeOffset = new TypeOffset(-1);
-            foreach (var typeOffset in typeOffsets) {
-                if (typeOffset.GetValue() > maxTypeOffset.GetValue()) {
-                    maxTypeOffset = typeOffset;
+        private int GetMaxTypeId(int[] typeIds) {
+            var maxTypeId = 0;
+            foreach (var typeId in typeIds) {
+                if (typeId > maxTypeId) {
+                    maxTypeId = typeId;
                 }
             }
-            return maxTypeOffset;
+            return maxTypeId;
         }
         
         private void ResizeUpTo(int newLength) {
@@ -54,15 +54,12 @@
             this.componentsToFilters = newComponentsToFilters;
         }
 
-        private void AppendFilter(TypeOffset typeInfo, Filter filter) {
-            var offsetValue = typeInfo.GetValue();
-            
-            if (this.componentsToFilters[offsetValue] == null) {
-                this.componentsToFilters[offsetValue] = new Filter[1];
-                this.componentsToFilters[offsetValue][0] = filter;
-            }
-            else {
-                ref var filters = ref this.componentsToFilters[offsetValue];
+        private void AppendFilter(int typeId, Filter filter) {
+            if (this.componentsToFilters[typeId] == null) {
+                this.componentsToFilters[typeId] = new Filter[1];
+                this.componentsToFilters[typeId][0] = filter;
+            } else {
+                ref var filters = ref this.componentsToFilters[typeId];
                 var position = filters.Length;
                 
                 ArrayHelpers.Grow(ref filters, filters.Length + 1);
