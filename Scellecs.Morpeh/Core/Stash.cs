@@ -13,18 +13,22 @@ namespace Scellecs.Morpeh {
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
     
+    public abstract class TypelessStash : IDisposable {
+        internal abstract void Clean(Entity entity);
+        public abstract void Dispose();
+    }
+    
     [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class Stash : IDisposable {
-        internal IDisposable typelessStash;
+        internal TypelessStash typelessStash;
         
         internal TypeId typeId;
         
         private Action<Entity> setReflection;
         private Func<Entity, bool> removeReflection;
-        private Func<Entity, bool> cleanReflection;
         private Action<Entity, Entity, bool> migrateReflection;
         private Func<Entity, bool> hasReflection;
         private Action removeAllReflection;
@@ -48,12 +52,13 @@ namespace Scellecs.Morpeh {
                 
                 setReflection = stash.Set,
                 removeReflection = stash.Remove,
-                cleanReflection = stash.Clean,
                 migrateReflection = stash.Migrate,
                 hasReflection = stash.Has,
                 removeAllReflection = stash.RemoveAll,
             };
         }
+        
+        // Func/Action based funcs for reflection users
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(Entity entity) {
@@ -71,11 +76,6 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool Clean(Entity entity) {
-            return this.cleanReflection(entity);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Migrate(Entity from, Entity to, bool overwrite = true) {
             this.migrateReflection(from, to, overwrite);
         }
@@ -84,7 +84,15 @@ namespace Scellecs.Morpeh {
         public bool Has(Entity entity) {
             return this.hasReflection(entity);
         }
+        
+        // Wrapped methods for internal usage
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void Clean(Entity entity) {
+            this.typelessStash.Clean(entity);
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() {
             this.typelessStash.Dispose();
         }
@@ -94,7 +102,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class Stash<T> : IDisposable where T : struct, IComponent {
+    public sealed class Stash<T> : TypelessStash, IDisposable where T : struct, IComponent {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
         internal delegate void ComponentDispose(ref T component);
 #endif
@@ -341,15 +349,13 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool Clean(Entity entity) {
+        internal override void Clean(Entity entity) {
             if (this.map.Remove(entity.Id, out var slotIndex)) {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
 #endif
                 this.data[slotIndex] = default;
-                return true;
             }
-            return false;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -425,7 +431,7 @@ namespace Scellecs.Morpeh {
             return this.map.length != 0;
         }
 
-        public void Dispose() {
+        public override void Dispose() {
             if (this.IsDisposed) {
                 return;
             }
