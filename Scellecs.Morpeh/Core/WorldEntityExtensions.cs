@@ -89,7 +89,7 @@
                         continue;
                     }
                     
-                    world.GetStash(structuralChange.typeId)?.Clean(entity);
+                    world.GetExistingStash(structuralChange.typeId)?.Clean(entity);
                 }
             }
             
@@ -97,7 +97,7 @@
             
             if (entityData.currentArchetype != null) {
                 foreach (var typeId in entityData.currentArchetype.components) {
-                    world.GetStash(typeId)?.Clean(entity);
+                    world.GetExistingStash(typeId)?.Clean(entity);
                 }
             }
             

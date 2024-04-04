@@ -119,7 +119,7 @@ namespace Scellecs.Morpeh {
                     continue;
                 }
 
-                world.GetStash(structuralChange.typeId)?.Migrate(from, to, overwrite);
+                world.GetExistingStash(structuralChange.typeId)?.Migrate(from, to, overwrite);
             }
 
             if (fromEntityData.currentArchetype == null) {
@@ -143,7 +143,7 @@ namespace Scellecs.Morpeh {
                     continue;
                 }
                 
-                world.GetStash(typeId)?.Migrate(from, to, overwrite);
+                world.GetExistingStash(typeId)?.Migrate(from, to, overwrite);
             }
         }
 
