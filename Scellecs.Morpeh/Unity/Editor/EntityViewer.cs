@@ -21,7 +21,7 @@ namespace Scellecs.Morpeh.Editor {
         private List<ComponentView> ComponentsOnEntity {
             get {
                 this.componentViews.Clear();
-                if (this.entity != null && this.entity.GetWorld() != null) {
+                if (this.entity != default && this.entity.GetWorld() != null) {
 
                     // TODO: This has to be filtered via archetype instead of trying all stashes
                     var stashes = this.entity.GetWorld().stashes;
