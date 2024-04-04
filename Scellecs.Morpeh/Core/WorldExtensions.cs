@@ -397,12 +397,30 @@ namespace Scellecs.Morpeh {
             
             foreach (var idx in filters) {
                 var filter = filters.GetValueByIndex(idx);
-                if (filter.AddArchetypeIfMatches(archetype)) {
-                    MLogger.LogTrace($"[WorldExtensions] Add PREVIOUS {filter} to archetype {archetype.hash}");
-                    archetype.AddFilter(filter);
-                } else {
-                    MLogger.LogTrace($"[WorldExtensions] PREVIOUS {filter} does not match archetype {archetype.hash}");
+
+                var matches = true;
+                for (var i = 0; i < entityData.changesCount; i++) {
+                    var structuralChange = entityData.changes[i];
+                    
+                    if (structuralChange.isAddition && filter.excludedTypeIdsLookup.IsSet(structuralChange.typeId)) {
+                        matches = false;
+                        break;
+                    }
+                    
+                    if (!structuralChange.isAddition && filter.includedTypeIdsLookup.IsSet(structuralChange.typeId)) {
+                        matches = false;
+                        break;
+                    }
                 }
+                
+                if (!matches) {
+                    MLogger.LogTrace($"[WorldExtensions] Previous filter {filter} does not match archetype {archetype.hash}");
+                    continue;
+                }
+
+                filter.AddArchetype(archetype);
+                archetype.AddFilter(filter);
+                MLogger.LogTrace($"[WorldExtensions] Add previous filter {filter} to archetype {archetype.hash}");
             }
         }
         

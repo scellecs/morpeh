@@ -60,7 +60,10 @@ namespace Scellecs.Morpeh {
         internal FastList<Chunk> chunks;
 
         internal int[] includedTypeIds;
+        internal BitSet includedTypeIdsLookup;
+        
         internal int[] excludedTypeIds;
+        internal BitSet excludedTypeIdsLookup;
         
         internal int id;
 
@@ -77,7 +80,10 @@ namespace Scellecs.Morpeh {
             this.chunks  = new FastList<Chunk>();
 
             this.includedTypeIds = includedTypeIds;
+            this.includedTypeIdsLookup = new BitSet(includedTypeIds);
+            
             this.excludedTypeIds = excludedTypeIds;
+            this.excludedTypeIdsLookup = new BitSet(excludedTypeIds);
 
             this.id = world.filterCount++;
         }
