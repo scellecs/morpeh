@@ -63,7 +63,6 @@ namespace Scellecs.Morpeh {
             }
             world.identifier        = added ? id : World.worlds.length - 1;
             world.freeEntityIDs     = new IntStack();
-            world.nextFreeEntityIDs = new IntStack();
             world.stashes           = new Stash[Constants.DEFAULT_WORLD_STASHES_CAPACITY];
 
             world.entitiesCount    = 0;
@@ -200,10 +199,6 @@ namespace Scellecs.Morpeh {
                 world.newMetrics.migrations += world.dirtyEntities.count;
                 world.ApplyTransientChanges();
             }
-            
-            if (world.nextFreeEntityIDs.length > 0) {
-                world.PushFreeIds();
-            }
 
             if (world.emptyArchetypes.length > 0) {
                 world.ClearEmptyArchetypes();
@@ -241,12 +236,6 @@ namespace Scellecs.Morpeh {
 
             world.entitiesCount -= clearedEntities;
             world.dirtyEntities.Clear();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void PushFreeIds(this World world) {
-            world.freeEntityIDs.PushRange(world.nextFreeEntityIDs);
-            world.nextFreeEntityIDs.Clear();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -471,7 +460,7 @@ namespace Scellecs.Morpeh {
             entityData.changesCount = 0;
             entityData.nextArchetypeHash = default;
             
-            world.nextFreeEntityIDs.Push(entityId);
+            world.freeEntityIDs.Push(entityId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

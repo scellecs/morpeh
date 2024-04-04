@@ -89,8 +89,6 @@ namespace Scellecs.Morpeh {
 
         [ShowInInspector]
         internal IntStack freeEntityIDs;
-        [ShowInInspector]
-        internal IntStack nextFreeEntityIDs;
 
         [ShowInInspector]
         internal Stash[] stashes;
@@ -198,8 +196,6 @@ namespace Scellecs.Morpeh {
 
             this.freeEntityIDs.Clear();
             this.freeEntityIDs = null;
-            this.nextFreeEntityIDs.Clear();
-            this.nextFreeEntityIDs = null;
             
             this.Filter = null;
 
