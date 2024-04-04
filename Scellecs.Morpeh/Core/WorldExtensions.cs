@@ -269,8 +269,8 @@ namespace Scellecs.Morpeh {
                 if (entityData.changesCount == entityData.changes.Length) {
                     ArrayHelpers.Grow(ref entityData.changes, entityData.changesCount << 1);
                 }
-                
-                entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.id, true);
+
+                entityData.changes[entityData.changesCount++].value = (typeInfo.id << 1) | 1;
             }
             
             entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
@@ -288,7 +288,7 @@ namespace Scellecs.Morpeh {
                     ArrayHelpers.Grow(ref entityData.changes, entityData.changesCount << 1);
                 }
                 
-                entityData.changes[entityData.changesCount++] = StructuralChange.Create(typeInfo.id, false);
+                entityData.changes[entityData.changesCount++].value = typeInfo.id << 1;
             }
             
             entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);

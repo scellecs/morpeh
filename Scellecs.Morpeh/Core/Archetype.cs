@@ -24,7 +24,7 @@ namespace Scellecs.Morpeh {
             this.length = 0;
             this.capacity = this.entities.Length;
             
-            this.components = new IntHashSet(8);
+            this.components = new IntHashSet(15);
             this.filters = new IntHashMap<Filter>();
         }
         
