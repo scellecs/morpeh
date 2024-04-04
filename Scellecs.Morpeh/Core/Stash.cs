@@ -24,23 +24,6 @@ namespace Scellecs.Morpeh {
         public bool Has(Entity entity);
         internal void Clean(Entity entity);
     }
-    
-    [Il2CppEagerStaticClassConstruction]
-    [Il2CppSetOption(Option.NullChecks, false)]
-    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public static class Stash {
-        public static IStash CreateReflection(World world, Type type) {
-            var createMethod = typeof(Stash).GetMethod("Create", new[] { typeof(World), });
-            var genericMethod = createMethod?.MakeGenericMethod(type);
-            return (IStash)genericMethod?.Invoke(null, new object[] { world, });
-        }
-        
-        [UnityEngine.Scripting.Preserve]
-        public static IStash Create<T>(World world) where T : struct, IComponent {
-            return new Stash<T>(world, TypeIdentifier<T>.info);
-        }
-    }
 
     [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]

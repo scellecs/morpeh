@@ -30,7 +30,10 @@
                 }
             }
 
-            var stash = Stash.CreateReflection(world, type);
+            var createMethod = typeof(WorldStashExtensions).GetMethod("GetStash", new[] { typeof(World), });
+            var genericMethod = createMethod?.MakeGenericMethod(type);
+            var stash = (IStash)genericMethod?.Invoke(null, new object[] { world, });
+            
             TypeIdentifier.typeAssociation.TryGetValue(type, out definition);
             
             world.EnsureStashCapacity(definition.id);
@@ -38,9 +41,10 @@
 
             return stash;
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
+        [UnityEngine.Scripting.Preserve]
         public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
             world.ThreadSafetyCheck();
             
@@ -50,13 +54,12 @@
             if (candidate != null) {
                 return (Stash<T>)candidate;
             }
-
-            var stash = Stash.Create<T>(world);
             
             world.EnsureStashCapacity(info.id);
+            
+            var stash = new Stash<T>(world, info);
             world.stashes[info.id] = stash;
-
-            return (Stash<T>)stash;
+            return stash;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
