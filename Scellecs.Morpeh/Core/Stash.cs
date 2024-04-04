@@ -13,88 +13,32 @@ namespace Scellecs.Morpeh {
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
     
-    public abstract class TypelessStash : IDisposable {
-        internal abstract void Clean(Entity entity);
-        public abstract void Dispose();
+    public interface IStash : IDisposable { 
+        public TypeHash TypeHash { get; }
+        public int Length { get; }
+        
+        public void Set(Entity entity);
+        public bool Remove(Entity entity);
+        public void RemoveAll();
+        public void Migrate(Entity from, Entity to, bool overwrite = true);
+        public bool Has(Entity entity);
+        internal void Clean(Entity entity);
     }
     
     [Il2CppEagerStaticClassConstruction]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public class Stash : IDisposable {
-        internal TypelessStash typelessStash;
-        
-        internal TypeHash typeHash;
-        
-        private Action<Entity> setReflection;
-        private Func<Entity, bool> removeReflection;
-        private Action<Entity, Entity, bool> migrateReflection;
-        private Func<Entity, bool> hasReflection;
-        private Action removeAllReflection;
-        
-        private Stash() { }
-
-        public static Stash CreateReflection(World world, Type type) {
+    public static class Stash {
+        public static IStash CreateReflection(World world, Type type) {
             var createMethod = typeof(Stash).GetMethod("Create", new[] { typeof(World), });
             var genericMethod = createMethod?.MakeGenericMethod(type);
-            return (Stash)genericMethod?.Invoke(null, new object[] { world, });
-        }
-
-        public static Stash Create<T>(World world) where T : struct, IComponent {
-            var info = TypeIdentifier<T>.info;
-            var stash = new Stash<T>(world, info);
-            
-            return new Stash {
-                typelessStash = stash,
-                
-                typeHash = info.hash,
-                
-                setReflection = stash.Set,
-                removeReflection = stash.Remove,
-                migrateReflection = stash.Migrate,
-                hasReflection = stash.Has,
-                removeAllReflection = stash.RemoveAll,
-            };
+            return (IStash)genericMethod?.Invoke(null, new object[] { world, });
         }
         
-        // Func/Action based funcs for reflection users
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(Entity entity) {
-            this.setReflection(entity);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(Entity entity) {
-            return this.removeReflection(entity);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveAll() {
-            this.removeAllReflection();
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Migrate(Entity from, Entity to, bool overwrite = true) {
-            this.migrateReflection(from, to, overwrite);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Has(Entity entity) {
-            return this.hasReflection(entity);
-        }
-        
-        // Wrapped methods for internal usage
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Clean(Entity entity) {
-            this.typelessStash.Clean(entity);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Dispose() {
-            this.typelessStash.Dispose();
+        [UnityEngine.Scripting.Preserve]
+        public static IStash Create<T>(World world) where T : struct, IComponent {
+            return new Stash<T>(world, TypeIdentifier<T>.info);
         }
     }
 
@@ -102,18 +46,10 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class Stash<T> : TypelessStash, IDisposable where T : struct, IComponent {
+    public sealed class Stash<T> : IStash where T : struct, IComponent {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
         internal delegate void ComponentDispose(ref T component);
 #endif
-        [PublicAPI]
-        public bool IsDisposed;
-        
-        [PublicAPI]
-        public int Length {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => this.map.length;
-        }
 
         internal World world;
         private TypeInfo typeInfo;
@@ -125,6 +61,18 @@ namespace Scellecs.Morpeh {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
         internal ComponentDispose componentDispose;
 #endif
+        
+        [PublicAPI]
+        public bool IsDisposed;
+        
+        [PublicAPI]
+        public TypeHash TypeHash => this.typeInfo.hash;
+        
+        [PublicAPI]
+        public int Length {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => this.map.length;
+        }
 
         [UnityEngine.Scripting.Preserve]
         internal Stash(World world, TypeInfo typeInfo, int capacity = -1) {
@@ -349,7 +297,7 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal override void Clean(Entity entity) {
+        void IStash.Clean(Entity entity) {
             if (this.map.Remove(entity.Id, out var slotIndex)) {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
@@ -431,7 +379,7 @@ namespace Scellecs.Morpeh {
             return this.map.length != 0;
         }
 
-        public override void Dispose() {
+        public void Dispose() {
             if (this.IsDisposed) {
                 return;
             }

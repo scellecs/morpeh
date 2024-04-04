@@ -32,7 +32,7 @@ namespace Scellecs.Morpeh.Editor {
                         
                         if (stash.Has(this.entity)) {
                             var view = new ComponentView {
-                                internalTypeDefinition = ExtendedTypeIdentifier.typeHashAssociation[stash.typeHash],
+                                internalTypeDefinition = ExtendedTypeIdentifier.typeHashAssociation[stash.TypeHash],
                                 entity                 = this.entity
                             };
                             this.componentViews.Add(view);

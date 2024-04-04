@@ -91,7 +91,7 @@ namespace Scellecs.Morpeh {
         internal IntStack freeEntityIDs;
 
         [ShowInInspector]
-        internal Stash[] stashes;
+        internal IStash[] stashes;
 
         [ShowInInspector]
         internal LongHashMap<Archetype> archetypes;
@@ -215,7 +215,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose stash with type hash {stash.typeHash}");
+                    MLogger.LogError($"Can not dispose stash with type hash {stash.TypeHash}");
                     MLogger.LogException(e);
                 }
 #endif

@@ -7,7 +7,7 @@
     public static class WorldStashExtensions {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Stash GetStash(this World world, int typeId) {
+        internal static IStash GetStash(this World world, int typeId) {
             world.ThreadSafetyCheck();
             
             if (typeId < 0 || typeId >= world.stashes.Length) {
@@ -19,7 +19,7 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
-        public static Stash GetReflectionStash(this World world, Type type) {
+        public static IStash GetReflectionStash(this World world, Type type) {
             world.ThreadSafetyCheck();
             
             if (TypeIdentifier.typeAssociation.TryGetValue(type, out var definition)) {
@@ -48,7 +48,7 @@
             
             var candidate = world.GetStash(info.id);
             if (candidate != null) {
-                return (Stash<T>)candidate.typelessStash;
+                return (Stash<T>)candidate;
             }
 
             var stash = Stash.Create<T>(world);
@@ -56,7 +56,7 @@
             world.EnsureStashCapacity(info.id);
             world.stashes[info.id] = stash;
 
-            return (Stash<T>)stash.typelessStash;
+            return (Stash<T>)stash;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
