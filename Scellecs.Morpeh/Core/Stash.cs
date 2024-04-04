@@ -149,7 +149,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
             if (this.TryAddData(entity.Id, default, out var slotIndex)) {
-                world.TransientChangeAddComponent(entity, ref this.typeInfo);
+                world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
                     world.newMetrics.stashResizes++;
@@ -175,7 +175,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
             if (this.TryAddData(entity.Id, default, out var slotIndex)) {
-                world.TransientChangeAddComponent(entity, ref this.typeInfo);
+                world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
                 exist = false;
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
@@ -201,7 +201,7 @@ namespace Scellecs.Morpeh {
             var previousCapacity = this.map.capacity;
 #endif
             if (this.TryAddData(entity.Id, value, out _)) {
-                world.TransientChangeAddComponent(entity, ref this.typeInfo);
+                world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
                     world.newMetrics.stashResizes++;
@@ -273,7 +273,7 @@ namespace Scellecs.Morpeh {
                     world.newMetrics.stashResizes++;
                 }
 #endif
-                world.TransientChangeAddComponent(entity, ref this.typeInfo);
+                world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
         }
 
@@ -294,7 +294,7 @@ namespace Scellecs.Morpeh {
                     world.newMetrics.stashResizes++;
                 }
 #endif
-                world.TransientChangeAddComponent(entity, ref this.typeInfo);
+                world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
         }
 
@@ -312,7 +312,7 @@ namespace Scellecs.Morpeh {
 #endif
 
             if (this.map.Remove(entity.Id, out var slotIndex)) {
-                world.TransientChangeRemoveComponent(entity, ref this.typeInfo);
+                world.TransientChangeRemoveComponent(entity.Id, ref this.typeInfo);
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
 #endif
@@ -332,7 +332,7 @@ namespace Scellecs.Morpeh {
                     this.componentDispose.Invoke(ref this.data[slotIndex]);
 
                     var entityId = this.map.GetKeyBySlotIndex(slotIndex);
-                    this.world.TransientChangeRemoveComponent(this.world.GetEntityAtIndex(entityId), ref this.typeInfo);
+                    this.world.TransientChangeRemoveComponent(entityId, ref this.typeInfo);
                 }
             } 
             else 
@@ -340,7 +340,7 @@ namespace Scellecs.Morpeh {
             {
                 foreach (var slotIndex in this.map) {
                     var entityId = this.map.GetKeyBySlotIndex(slotIndex);
-                    this.world.TransientChangeRemoveComponent(this.world.GetEntityAtIndex(entityId), ref this.typeInfo);
+                    this.world.TransientChangeRemoveComponent(entityId, ref this.typeInfo);
                 }
             }
             
@@ -381,20 +381,20 @@ namespace Scellecs.Morpeh {
                     }
                     else {
                         if (this.TryAddData(to.Id, component, out _)) {
-                            this.world.TransientChangeAddComponent(to, ref this.typeInfo);
+                            this.world.TransientChangeAddComponent(to.Id, ref this.typeInfo);
                         }
                     }
                 }
                 else {
                     if (this.map.Has(to.Id) == false) {
                         if (this.TryAddData(to.Id, component, out _)) {
-                            this.world.TransientChangeAddComponent(to, ref this.typeInfo);
+                            this.world.TransientChangeAddComponent(to.Id, ref this.typeInfo);
                         }
                     }
                 }
 
                 if (this.map.Remove(from.Id, out _)) {
-                    this.world.TransientChangeRemoveComponent(from, ref this.typeInfo);
+                    this.world.TransientChangeRemoveComponent(from.Id, ref this.typeInfo);
                 }
             }
 #if MORPEH_DEBUG

@@ -220,21 +220,18 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ApplyTransientChanges(this World world) {
-            var clearedEntities = 0;
-            
             foreach (var entityId in world.dirtyEntities) {
                 ref var entityData = ref world.entities[entityId];
                 
                 if (entityData.nextArchetypeHash == default) {
                     world.CompleteEntityDisposal(entityId, ref entityData);
                     world.IncrementGeneration(entityId);
-                    clearedEntities++;
-                } else {
-                    world.ApplyTransientChanges(world.GetEntityAtIndex(entityId), ref entityData);
+                    --world.entitiesCount;
+                } else if (entityData.changesCount > 0) {
+                    world.ApplyTransientChanges(entityId, ref entityData);
                 }
             }
 
-            world.entitiesCount -= clearedEntities;
             world.dirtyEntities.Clear();
         }
 
@@ -265,8 +262,8 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void TransientChangeAddComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
-            ref var entityData = ref world.entities[entity.Id];
+        internal static void TransientChangeAddComponent(this World world, int entityId, ref TypeInfo typeInfo) {
+            ref var entityData = ref world.entities[entityId];
             
             if (!FilterDuplicateOperationType(ref entityData, typeInfo.id)) {
                 if (entityData.changesCount == entityData.changes.Length) {
@@ -279,12 +276,12 @@ namespace Scellecs.Morpeh {
             entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
             MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
             
-            world.dirtyEntities.Add(entity.Id);
+            world.dirtyEntities.Add(entityId);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void TransientChangeRemoveComponent(this World world, Entity entity, ref TypeInfo typeInfo) {
-            ref var entityData = ref world.entities[entity.Id];
+        internal static void TransientChangeRemoveComponent(this World world, int entityId, ref TypeInfo typeInfo) {
+            ref var entityData = ref world.entities[entityId];
             
             if (!FilterDuplicateOperationType(ref entityData, typeInfo.id)) {
                 if (entityData.changesCount == entityData.changes.Length) {
@@ -297,7 +294,7 @@ namespace Scellecs.Morpeh {
             entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
             MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
             
-            world.dirtyEntities.Add(entity.Id);
+            world.dirtyEntities.Add(entityId);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -319,18 +316,13 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ApplyTransientChanges(this World world, Entity entity, ref EntityData entityData) {
-            // No changes
-            if (entityData.changesCount == 0) {
-                return;
-            }
-            
+        internal static void ApplyTransientChanges(this World world, int entityId, ref EntityData entityData) {
             // Add to new archetype
             if (!world.archetypes.TryGetValue(entityData.nextArchetypeHash.GetValue(), out var nextArchetype)) {
                 nextArchetype = world.CreateMigratedArchetype(ref entityData);
             }
             
-            var indexInNextArchetype = nextArchetype.Add(entity);
+            var indexInNextArchetype = nextArchetype.Add(world.GetEntityAtIndex(entityId));
             
             // Remove from previous archetype
             if (entityData.currentArchetype != null) {
@@ -344,7 +336,6 @@ namespace Scellecs.Morpeh {
             }
             
             // Finalize migration
-            MLogger.LogTrace($"[WorldExtensions] Finalize migration for entity {entity} to archetype {nextArchetype.hash}");
             entityData.currentArchetype = nextArchetype;
             entityData.indexInCurrentArchetype = indexInNextArchetype;
             
@@ -457,6 +448,8 @@ namespace Scellecs.Morpeh {
                 entityData.currentArchetype = null;
             }
 
+            entityData.currentArchetype = null;
+            entityData.indexInCurrentArchetype = -1;
             entityData.changesCount = 0;
             entityData.nextArchetypeHash = default;
             
