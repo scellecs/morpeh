@@ -30,35 +30,8 @@ namespace Scellecs.Morpeh.Collections {
             }
             else {
                 if (hashSet.lastIndex == hashSet.capacity * 2) {
-                    var newCapacityMinusOne = HashHelpers.GetCapacity(hashSet.length);
-                    var newCapacity         = newCapacityMinusOne + 1;
-
-                    hashSet.slots.Resize(newCapacity * 2);
-
-                    var newBuckets = new IntPinnedArray(newCapacity);
-
-                    {
-                        var slotsPtr = hashSet.slots.ptr;
-                        var bucketsPtr = newBuckets.ptr; 
-                        for (int i = 0, len = hashSet.lastIndex; i < len; i += 2) {
-                            var slotPtr = slotsPtr + i;
-
-                            var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
-                            var newCurrentBucket = bucketsPtr + newResizeIndex;
-
-                            *(slotPtr + 1) = *newCurrentBucket - 1;
-
-                            *newCurrentBucket = i + 1;
-                        }
-                    }
-
-                    hashSet.buckets.Dispose();
-                    
-                    hashSet.buckets          = newBuckets;
-                    hashSet.capacityMinusOne = newCapacityMinusOne;
-                    hashSet.capacity         = newCapacity;
-
-                    rem = value & newCapacityMinusOne;
+                    hashSet.Expand();
+                    rem = value & hashSet.capacityMinusOne;
                 }
 
                 newIndex          =  hashSet.lastIndex;
@@ -79,6 +52,37 @@ namespace Scellecs.Morpeh.Collections {
 
             ++hashSet.length;
             return true;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void Expand(this IntHashSet hashSet) {
+            var newCapacityMinusOne = HashHelpers.GetCapacity(hashSet.length);
+            var newCapacity = newCapacityMinusOne + 1;
+
+            hashSet.slots.Resize(newCapacity * 2);
+
+            var newBuckets = new IntPinnedArray(newCapacity);
+
+            {
+                var slotsPtr = hashSet.slots.ptr;
+                var bucketsPtr = newBuckets.ptr; 
+                for (int i = 0, len = hashSet.lastIndex; i < len; i += 2) {
+                    var slotPtr = slotsPtr + i;
+
+                    var newResizeIndex   = (*slotPtr - 1) & newCapacityMinusOne;
+                    var newCurrentBucket = bucketsPtr + newResizeIndex;
+
+                    *(slotPtr + 1) = *newCurrentBucket - 1;
+
+                    *newCurrentBucket = i + 1;
+                }
+            }
+
+            hashSet.buckets.Dispose();
+                    
+            hashSet.buckets = newBuckets;
+            hashSet.capacityMinusOne = newCapacityMinusOne;
+            hashSet.capacity = newCapacity;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -139,6 +143,19 @@ namespace Scellecs.Morpeh.Collections {
                     array[num] = v;
                     ++num;
                 }
+            }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CopyTo(this IntHashSet from, IntHashSet to) {
+            var slotsPtr = from.slots.ptr;
+            for (int i = 0, lastIndex = from.lastIndex; i < lastIndex; i += 2) {
+                var v = *(slotsPtr + i) - 1;
+                if (v < 0) {
+                    continue;
+                }
+
+                to.Add(v);
             }
         }
 

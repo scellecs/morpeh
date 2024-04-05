@@ -107,19 +107,16 @@ namespace Scellecs.Morpeh {
             
             // We have to make a full copy because Migrate would modify the original data
             
-            Span<StructuralChange> changes = stackalloc StructuralChange[fromEntityData.changesCount];
-            for (var i = 0; i < fromEntityData.changesCount; i++) {
-                changes[i] = fromEntityData.changes[i];
-            }
+            Span<int> addedComponents = stackalloc int[fromEntityData.addedComponentsCount];
+            fromEntityData.addedComponents.CopyTo(addedComponents);
+            
+            Span<int> removedComponents = stackalloc int[fromEntityData.removedComponentsCount];
+            fromEntityData.removedComponents.CopyTo(removedComponents);
             
             // Migrate all newly added components from transient archetype
             
-            foreach (var structuralChange in changes) {
-                if (!structuralChange.isAddition) {
-                    continue;
-                }
-
-                world.GetExistingStash(structuralChange.typeId)?.Migrate(from, to, overwrite);
+            foreach (var typeId in addedComponents) {
+                world.GetExistingStash(typeId)?.Migrate(from, to, overwrite);
             }
 
             if (fromEntityData.currentArchetype == null) {
@@ -130,8 +127,9 @@ namespace Scellecs.Morpeh {
             
             foreach (var typeId in fromEntityData.currentArchetype.components) {
                 var wasRemoved = false;
-                foreach (var structuralChange in changes) {
-                    if (structuralChange.typeId != typeId || structuralChange.isAddition) {
+                
+                foreach (var removedTypeId in removedComponents) {
+                    if (typeId != removedTypeId) {
                         continue;
                     }
                     

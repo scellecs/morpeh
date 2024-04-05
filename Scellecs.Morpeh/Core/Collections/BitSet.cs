@@ -77,15 +77,13 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsSet(int index) {
             var arrayIndex = index >> 6;
-            
-            if (arrayIndex >= this.longsCapacity) {
-                return false;
-            }
-            
-            var mask = 1UL << (index & 63);
-            var value = this.data[arrayIndex];
-            
-            return (value & mask) != 0;
+            return arrayIndex < this.longsCapacity && (this.data[arrayIndex] & (1UL << (index & 63))) != 0;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ValueOf(int index) {
+            var arrayIndex = index >> 6;
+            return arrayIndex >= this.longsCapacity ? 0 : (int)(this.data[arrayIndex] & (1UL << (index & 63)));
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

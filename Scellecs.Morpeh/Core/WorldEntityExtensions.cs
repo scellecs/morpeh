@@ -80,16 +80,11 @@
             // Clear new components if entity is transient
             
             if (world.dirtyEntities.Remove(entity.Id)) {
-                var changesCount = entityData.changesCount;
+                var addedComponentsCount = entityData.addedComponentsCount;
                 
-                for (var i = 0; i < changesCount; i++) {
-                    var structuralChange = entityData.changes[i];
-
-                    if (!structuralChange.isAddition) {
-                        continue;
-                    }
-                    
-                    world.GetExistingStash(structuralChange.typeId)?.Clean(entity);
+                for (var i = 0; i < addedComponentsCount; i++) {
+                    var typeId = entityData.addedComponents[i];
+                    world.GetExistingStash(typeId)?.Clean(entity);
                 }
             }
             

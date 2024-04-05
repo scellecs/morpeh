@@ -8,9 +8,7 @@ TypeLayout.PrintLayout<Entity>();
 TypeLayout.PrintLayout<EntityData>();
 TypeLayout.PrintLayout<ArchetypeHash>();
 TypeLayout.PrintLayout<TypeInfo>();
-TypeLayout.PrintLayout<TypeOffset>();
-TypeLayout.PrintLayout<TypeId>();
-TypeLayout.PrintLayout<StructuralChange>();
+TypeLayout.PrintLayout<TypeHash>();
 
 // Collections
 

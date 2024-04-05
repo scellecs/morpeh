@@ -7,7 +7,7 @@ namespace Tests;
 
 public static class TestExtensions {
     internal static ArchetypeHash With<T>(this ArchetypeHash archetype) where T : struct, IComponent {
-        var id = TypeIdentifier<T>.info.id;
+        var id = TypeIdentifier<T>.info.hash;
         return archetype.Combine(id);
     }
     

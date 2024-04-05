@@ -47,7 +47,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddFilter(this Archetype archetype, Filter filter) {
-            archetype.filters.Add(filter.id, filter, out _);
+            archetype.filters.Set(filter.id, filter, out _);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

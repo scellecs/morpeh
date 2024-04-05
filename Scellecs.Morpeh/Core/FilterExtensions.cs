@@ -38,12 +38,7 @@ namespace Scellecs.Morpeh {
             filter.excludedTypeIdsLookup = null;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AddArchetypeIfMatches(this Filter filter, Archetype archetype) {
-            if (filter.includedTypeIds.Length > archetype.components.length) {
-                return false;
-            }
-            
             if (filter.archetypeHashes.Has(archetype.hash.GetValue())) {
                 MLogger.LogTrace($"Archetype {archetype.hash} already in filter {filter}");
                 return false;
@@ -58,7 +53,6 @@ namespace Scellecs.Morpeh {
             return true;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void AddArchetype(this Filter filter, Archetype archetype) {
             var index = filter.archetypesLength++;
             if (index >= filter.archetypesCapacity) {
@@ -290,8 +284,8 @@ namespace Scellecs.Morpeh {
 
             var filter = new Filter(builder.world, includedTypeIdsSorted, excludedTypeIdsSorted);
 
-            filter.world.componentsToFiltersRelation.Add(includedTypeIdsSorted, filter);
-            filter.world.componentsToFiltersRelation.Add(excludedTypeIdsSorted, filter);
+            filter.world.componentsFiltersWith.Add(includedTypeIdsSorted, filter);
+            filter.world.componentsFiltersWithout.Add(excludedTypeIdsSorted, filter);
             
             filter.world.filters.Add(filter);
             

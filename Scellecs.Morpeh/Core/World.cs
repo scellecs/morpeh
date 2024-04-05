@@ -117,7 +117,8 @@ namespace Scellecs.Morpeh {
         public Metrics metrics;
         internal Metrics newMetrics;
         
-        internal ComponentsToFiltersRelation componentsToFiltersRelation;
+        internal ComponentsToFiltersRelation componentsFiltersWith;
+        internal ComponentsToFiltersRelation componentsFiltersWithout;
 
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
