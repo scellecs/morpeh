@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh.Native {
             }
             
             var nativeFilter = new NativeFilter {
-                chunks = filter.chunks.AsNative(),
+                archetypes = filter.chunks.AsNative(),
                 world = filter.world.AsNative(),
                 length = length == -1 ? filter.GetLengthSlow() : length
             };

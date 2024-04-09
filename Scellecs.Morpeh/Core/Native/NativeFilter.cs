@@ -7,24 +7,24 @@ namespace Scellecs.Morpeh.Native {
         public int length;
 
         [ReadOnly]
-        public NativeFastList<Filter.Chunk> chunks;
+        public NativeFastList<Filter.Chunk> archetypes;
         
         [ReadOnly]
         public NativeWorld world;
 
         public Entity this[int index] {
             get {
-                var totalChunkLength = 0;
-                for (int archetypeNum = 0, archetypesCount = *this.chunks.lengthPtr; archetypeNum < archetypesCount; archetypeNum++) {
-                    var chunk       = this.chunks.data[archetypeNum];
-                    var chunkLength = chunk.entitiesLength;
+                var totalArchetypeLength = 0;
+                for (int archetypeNum = 0, archetypesCount = *this.archetypes.lengthPtr; archetypeNum < archetypesCount; archetypeNum++) {
+                    var archetype = this.archetypes.data[archetypeNum];
+                    var archetypeLength = archetype.entitiesLength;
 
-                    if (index >= totalChunkLength && index < totalChunkLength + chunkLength) {
-                        var slotIndex = index - totalChunkLength;
-                        return chunk.entities[slotIndex];
+                    if (index >= totalArchetypeLength && index < totalArchetypeLength + archetypeLength) {
+                        var slotIndex = index - totalArchetypeLength;
+                        return archetype.entities[slotIndex];
                     }
 
-                    totalChunkLength += chunkLength;
+                    totalArchetypeLength += archetypeLength;
                 }
 
                 return default;

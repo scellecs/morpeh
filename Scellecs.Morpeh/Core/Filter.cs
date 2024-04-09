@@ -6,6 +6,7 @@
 #endif
 
 namespace Scellecs.Morpeh {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
@@ -132,7 +133,7 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator
 #if MORPEH_DEBUG
-            : IEnumerator<Entity>
+            : IDisposable
 #endif
         {
             internal Archetype[] archetypes;
@@ -149,10 +150,6 @@ namespace Scellecs.Morpeh {
                     --this.world.iteratorLevel;
                 }
             }
-            
-            object IEnumerator.Current => this.Current;
-            
-            public void Reset() { }
 #endif
             
             public Entity Current {

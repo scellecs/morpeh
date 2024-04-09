@@ -39,10 +39,6 @@ namespace Scellecs.Morpeh {
             world.Filter           = new FilterBuilder{ world = world };
             world.filters          = new FastList<Filter>();
             world.filtersLookup    = new LongHashMap<LongHashMap<Filter>>();
-            
-#if MORPEH_BURST
-            world.tempArrays = new FastList<NativeArray<Entity>>();
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,10 +131,6 @@ namespace Scellecs.Morpeh {
             world.ThreadSafetyCheck();
 #if MORPEH_BURST
             world.JobHandle.Complete();
-            foreach (var array in world.tempArrays) {
-                array.Dispose();
-            }
-            world.tempArrays.Clear();
 #endif
         }
 

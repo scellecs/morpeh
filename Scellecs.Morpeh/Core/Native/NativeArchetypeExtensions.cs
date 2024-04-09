@@ -12,20 +12,10 @@ namespace Scellecs.Morpeh.Native {
     public static unsafe class NativeArchetypeExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Filter.Chunk AsChunk(this Archetype archetype, World world) {
-            var len = archetype.length;
-            var data = new NativeArray<Entity>(len, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-
-            var counter = 0;
-            for (var i = 0; i < archetype.length; i++) {
-                data[counter++] = archetype.entities[i];
-            }
-            
             var chunk = new Filter.Chunk {
-                entities = (Entity*)data.GetUnsafeReadOnlyPtr(),
-                entitiesLength = len,
+                entities = archetype.entities.ptr,
+                entitiesLength = archetype.length,
             };
-
-            world.tempArrays.Add(data);
             
             return chunk;
         }
