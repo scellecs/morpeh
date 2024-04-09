@@ -9,16 +9,20 @@ namespace Scellecs.Morpeh.Native {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class NativeFilterExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeFilter AsNative(this Filter filter, int length = -1) {
+        public static NativeFilter AsNative(this Filter filter) {
             filter.chunks.Clear();
+            
+            var entitiesLength = 0;
+            
             for (int i = 0, len = filter.archetypesLength; i < len; i++) {
+                entitiesLength += filter.archetypes[i].length;
                 filter.chunks.Add(filter.archetypes[i].AsChunk(filter.world));
             }
             
             var nativeFilter = new NativeFilter {
                 archetypes = filter.chunks.AsNative(),
                 world = filter.world.AsNative(),
-                length = length == -1 ? filter.GetLengthSlow() : length
+                length = entitiesLength,
             };
 
             return nativeFilter;
