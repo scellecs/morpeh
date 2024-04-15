@@ -1,3 +1,5 @@
+using System;
+
 namespace Scellecs.Morpeh.Collections {
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
@@ -5,7 +7,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class IntHashSet {
+    public sealed class IntHashSet : IDisposable {
         public int length;
         public int capacity;
         public int capacityMinusOne;
@@ -29,6 +31,16 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity         = this.capacityMinusOne + 1;
             this.buckets          = new IntPinnedArray(this.capacity);
             this.slots            = new IntPinnedArray(this.capacity * 2);
+        }
+
+        public void Dispose() {
+            this.lastIndex = 0;
+            this.length = 0;
+            this.freeIndex = -1;
+            this.capacityMinusOne = 0;
+            this.capacity = 0;
+            this.buckets.Dispose();
+            this.slots.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

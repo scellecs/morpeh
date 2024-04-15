@@ -17,7 +17,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class IntHashMap<T> {
+    public sealed class IntHashMap<T> : IDisposable {
         public int length;
         public int capacity;
         public int capacityMinusOne;
@@ -61,6 +61,17 @@ namespace Scellecs.Morpeh.Collections {
                 this.slots.data[i] = other.slots.data[i];
                 this.data[i] = other.data[i];
             }
+        }
+        
+        public void Dispose() {
+            this.lastIndex = 0;
+            this.length = 0;
+            this.freeIndex = -1;
+            this.capacityMinusOne = 0;
+            this.capacity = 0;
+            this.buckets.Dispose();
+            this.data = null;
+            this.slots.Dispose();
         }
 
         ~IntHashMap() {
