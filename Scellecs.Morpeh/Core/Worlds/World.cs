@@ -229,7 +229,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose stash with type hash {stash.TypeHash}");
+                    MLogger.LogError($"Can not dispose stash with type id {stash.Type}");
                     MLogger.LogException(e);
                 }
 #endif

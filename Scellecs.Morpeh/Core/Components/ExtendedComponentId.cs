@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Reflection;
     using Unity.IL2CPP.CompilerServices;
+    using System.Runtime.CompilerServices;
     
     [Il2CppEagerStaticClassConstruction]
     [UnityEngine.Scripting.Preserve]
@@ -10,13 +11,44 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class ExtendedComponentId {
-        internal static Dictionary<TypeHash, InternalTypeDefinition> typeHashAssociation = new Dictionary<TypeHash, InternalTypeDefinition>();
-        internal static Dictionary<int, InternalTypeDefinition> typeIdAssociation = new Dictionary<int, InternalTypeDefinition>();
-        internal static Dictionary<Type, InternalTypeDefinition> typeAssociation    = new Dictionary<Type, InternalTypeDefinition>();
+        private static Dictionary<Type, InternalTypeDefinition> typeAssociation = new Dictionary<Type, InternalTypeDefinition>();
+        private static Dictionary<int, InternalTypeDefinition> typeIdAssociation = new Dictionary<int, InternalTypeDefinition>();
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static InternalTypeDefinition Get<T>() where T : struct, IComponent {
+            if (!typeAssociation.TryGetValue(typeof(T), out var typeDefinition)) {
+                typeDefinition = Generate<T>();
+            }
+            
+            return typeDefinition;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static InternalTypeDefinition Get(Type type) {
+            if (!typeAssociation.TryGetValue(type, out var typeDefinition)) {
+                ThrowTypeNotFound(type);
+            }
+            
+            return typeDefinition;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static InternalTypeDefinition Get(int typeId) {
+            if (typeIdAssociation.TryGetValue(typeId, out var typeDefinition)) {
+                return typeDefinition;
+            }
+            
+            if (!ComponentId.TryGet(typeId, out var type)) {
+                ThrowTypeIdNotFound(typeId);
+            }
 
-        internal static void Add<T>(TypeInfo typeInfo) where T : struct, IComponent {
-            var info = new InternalTypeDefinition {
-                typeInfo = typeInfo,
+            return Get(type);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static InternalTypeDefinition Generate<T>() where T : struct, IComponent {
+            var typeDefinition = new InternalTypeDefinition {
+                typeInfo = ComponentId<T>.info,
                 type = typeof(T),
                 entityGetComponentBoxed = (entity) => entity.GetWorld().GetStash<T>().Get(entity),
                 entitySetComponentBoxed = (entity, component) => entity.GetWorld().GetStash<T>().Set(entity, (T)component),
@@ -24,9 +56,20 @@
                 isMarker = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length == 0,
             };
             
-            typeHashAssociation.Add(typeInfo.hash, info);
-            typeIdAssociation.Add(typeInfo.id, info);
-            typeAssociation.Add(typeof(T), info);
+            typeAssociation.Add(typeof(T), typeDefinition);
+            typeIdAssociation.Add(typeDefinition.typeInfo.id, typeDefinition);
+            
+            return typeDefinition;
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowTypeNotFound(Type type) {
+            throw new InvalidOperationException($"Type {type} not found. Use ExtendedComponentId.Get<T>() once before trying to get via type.");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowTypeIdNotFound(int typeId) {
+            throw new InvalidOperationException($"Type with id {typeId} not found. Use ExtendedComponentId.Get<T>() once before trying to get via type id.");
         }
 
         internal struct InternalTypeDefinition {

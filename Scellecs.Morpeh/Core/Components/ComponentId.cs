@@ -10,6 +10,7 @@
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class ComponentId {
         private static Dictionary<Type, TypeInfo> typeAssociation = new Dictionary<Type, TypeInfo>();
+        private static Dictionary<int, Type> idAssociation = new Dictionary<int, Type>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Add(Type type, TypeInfo typeInfo) {
@@ -24,6 +25,11 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryGet(Type type, out TypeInfo typeInfo) {
             return typeAssociation.TryGetValue(type, out typeInfo);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryGet(int typeId, out Type type) {
+            return idAssociation.TryGetValue(typeId, out type);
         }
     }
 
@@ -53,9 +59,10 @@
             info = new TypeInfo(new TypeHash(typeHash), typeId);
             
             ComponentId.Add(typeof(T), info);
-            
-            // TODO: Required only for Editor
-            ExtendedComponentId.Add<T>(info);
+
+#if UNITY_EDITOR || MORPEH_GENERATE_ALL_EXTENDED_IDS
+            ExtendedComponentId.Generate<T>();
+#endif
         }
     }
 }

@@ -332,21 +332,10 @@ namespace Scellecs.Morpeh {
         internal static Archetype CreateMigratedArchetype(this World world, ref EntityData entityData) {
             var nextArchetype = world.archetypePool.Rent(entityData.nextArchetypeHash);
             
-            var previousArchetypeExists = entityData.currentArchetype != null;
-            
-            if (previousArchetypeExists) {
-                entityData.currentArchetype.components.CopyTo(nextArchetype.components);
-            }
-            
-            for (var i = 0; i < entityData.addedComponentsCount; ++i) {
-                nextArchetype.components.Add(entityData.addedComponents[i]);
-            }
-            
-            for (var i = 0; i < entityData.removedComponentsCount; ++i) {
-                nextArchetype.components.Remove(entityData.removedComponents[i]);
-            }
-
-            if (previousArchetypeExists) {
+            if (entityData.currentArchetype != null) {
+                // These checks can happen before setting components to new archetype
+                // because we only check for added/removed components
+                
                 var filters = entityData.currentArchetype.filters;
             
                 foreach (var idx in filters) {
@@ -354,14 +343,14 @@ namespace Scellecs.Morpeh {
 
                     var match = true;
                     
-                    for (var i = 0; i < entityData.addedComponentsCount; ++i) {
+                    for (int i = 0, length = entityData.addedComponentsCount; i < length; ++i) {
                         if (filter.excludedTypeIdsLookup.IsSet(entityData.addedComponents[i])) {
                             match = false;
                             break;
                         }
                     }
                     
-                    for (var i = 0; i < entityData.removedComponentsCount; ++i) {
+                    for (int i = 0, length = entityData.removedComponentsCount; i < length; ++i) {
                         if (filter.includedTypeIdsLookup.IsSet(entityData.removedComponents[i])) {
                             match = false;
                             break;
@@ -375,9 +364,22 @@ namespace Scellecs.Morpeh {
                     filter.AddArchetype(nextArchetype);
                     nextArchetype.AddFilter(filter);
                 }
+                
+                entityData.currentArchetype.components.CopyTo(nextArchetype.components);
             }
             
-            for (var i = 0; i < entityData.addedComponentsCount; ++i) {
+            for (int i = 0, length = entityData.addedComponentsCount; i < length; ++i) {
+                nextArchetype.components.Add(entityData.addedComponents[i]);
+            }
+            
+            for (int i = 0, length = entityData.removedComponentsCount; i < length; ++i) {
+                nextArchetype.components.Remove(entityData.removedComponents[i]);
+            }
+            
+            // These checks must happen after setting components to new archetype
+            // because we have to perform full check for filters
+
+            for (int i = 0, length = entityData.addedComponentsCount; i < length; ++i) {
                 var filters = world.componentsFiltersWith.GetFilters(entityData.addedComponents[i]);
                 if (filters == null) {
                     continue;
@@ -386,7 +388,7 @@ namespace Scellecs.Morpeh {
                 ScanFilters(nextArchetype, filters);
             }
             
-            for (var i = 0; i < entityData.removedComponentsCount; ++i) {
+            for (int i = 0, length = entityData.removedComponentsCount; i < length; ++i) {
                 var filters = world.componentsFiltersWithout.GetFilters(entityData.removedComponents[i]);
                 if (filters == null) {
                     continue;
@@ -402,8 +404,7 @@ namespace Scellecs.Morpeh {
         }
 
         internal static void ScanFilters(Archetype archetype, Filter[] filters) {
-            var filtersCount = filters.Length;
-            for (var i = 0; i < filtersCount; i++) {
+            for (int i = 0, length = filters.Length; i < length; i++) {
                 var filter = filters[i];
                 
                 if (filter.includedTypeIds.Length > archetype.components.length) {
@@ -426,8 +427,6 @@ namespace Scellecs.Morpeh {
                 world.entities[entityIndex].indexInCurrentArchetype = index;
                 
                 world.TryScheduleArchetypeForRemoval(entityData.currentArchetype);
-                
-                entityData.currentArchetype = null;
             }
 
             entityData.currentArchetype = null;

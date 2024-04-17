@@ -2,7 +2,7 @@
     using System;
     
     public interface IStash : IDisposable { 
-        public TypeHash TypeHash { get; }
+        public Type Type { get; }
         public int Length { get; }
         
         public void Set(Entity entity);

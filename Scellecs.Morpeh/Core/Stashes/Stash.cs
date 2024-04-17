@@ -26,6 +26,7 @@ namespace Scellecs.Morpeh {
         internal World world;
         private TypeInfo typeInfo;
         
+        
         internal StashMap map;
         public T[] data;
         private T empty;
@@ -34,8 +35,11 @@ namespace Scellecs.Morpeh {
         public bool IsDisposed;
         
         [PublicAPI]
-        public TypeHash TypeHash => this.typeInfo.hash;
-        
+        public Type Type {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => typeof(T);
+        }
+
         [PublicAPI]
         public int Length {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
