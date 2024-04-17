@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="Unity/Utils/Editor/Resources/logo.png" width="260" height="260" alt="Morpeh">
+    <img src="Scellecs.Morpeh/Unity/Utils/Editor/Resources/logo.png" width="260" height="260" alt="Morpeh">
 </p>
 
 # Morpeh [![License](https://img.shields.io/github/license/scellecs/morpeh?color=3750c1&style=flat-square)](LICENSE.md) [![Unity](https://img.shields.io/badge/Unity-2020.3+-2296F3.svg?color=3750c1&style=flat-square)](https://unity.com/) [![Version](https://img.shields.io/github/package-json/v/scellecs/morpeh?color=3750c1&style=flat-square)](package.json)
@@ -54,9 +54,9 @@ Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) fo
 ![installation_step2.png](Gifs~/installation_step2.png)
 </details>
 
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git#stage-2024.1  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2024.1.1  
+&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh  
+&nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#stage-2024.1  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#2024.1.1  
 
 ### .Net Platform
 
