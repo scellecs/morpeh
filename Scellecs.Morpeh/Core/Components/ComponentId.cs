@@ -15,6 +15,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Add(Type type, TypeInfo typeInfo) {
             typeAssociation.Add(type, typeInfo);
+            idAssociation.Add(typeInfo.id, type);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
