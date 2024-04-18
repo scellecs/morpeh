@@ -244,13 +244,12 @@ namespace Scellecs.Morpeh {
             ref var entityData = ref world.entities[entityId];
             entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
             
-            var removedComponentsCount = entityData.removedComponentsCount;
-            for (var i = 0; i < removedComponentsCount; i++) {
+            for (int i = 0, length = entityData.removedComponentsCount; i < length; i++) {
                 if (entityData.removedComponents[i] != typeInfo.id) {
                     continue;
                 }
                 
-                entityData.removedComponents[i] = entityData.removedComponents[--removedComponentsCount];
+                entityData.removedComponents[i] = entityData.removedComponents[--entityData.removedComponentsCount];
                 return;
             }
             
@@ -269,13 +268,12 @@ namespace Scellecs.Morpeh {
             ref var entityData = ref world.entities[entityId];
             entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
             
-            var addedComponentsCount = entityData.addedComponentsCount;
-            for (var i = 0; i < addedComponentsCount; i++) {
+            for (int i = 0, length = entityData.addedComponentsCount; i < length; i++) {
                 if (entityData.addedComponents[i] != typeInfo.id) {
                     continue;
                 }
                 
-                entityData.addedComponents[i] = entityData.addedComponents[--addedComponentsCount];
+                entityData.addedComponents[i] = entityData.addedComponents[--entityData.addedComponentsCount];
                 return;
             }
             

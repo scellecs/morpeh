@@ -180,7 +180,6 @@ namespace Scellecs.Morpeh {
             return entity.IsDisposed();
         }
         
-        [Obsolete("[MORPEH] Store World reference in your code instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World GetWorld(this Entity entity) {
             var worldId = entity.WorldId;
