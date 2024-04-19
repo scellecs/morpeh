@@ -17,6 +17,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class Filter : IDisposable {
+#if MORPEH_BURST
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -27,6 +28,9 @@ namespace Scellecs.Morpeh {
             [ReadOnly]
             public int entitiesLength;
         }
+        
+        internal FastList<Chunk> chunks;
+#endif
         
         internal enum Mode {
             None    = 0,
@@ -41,7 +45,6 @@ namespace Scellecs.Morpeh {
         internal int archetypesCapacity;
         
         internal LongHashMap<int> archetypeHashes;
-        internal FastList<Chunk> chunks;
 
         internal int[] includedTypeIds;
         internal BitSet includedTypeIdsLookup;
@@ -60,8 +63,6 @@ namespace Scellecs.Morpeh {
             
             this.archetypeHashes = new LongHashMap<int>();
             
-            this.chunks = new FastList<Chunk>();
-
             this.includedTypeIds = includedTypeIds;
             this.includedTypeIdsLookup = new BitSet(includedTypeIds);
             
@@ -87,6 +88,8 @@ namespace Scellecs.Morpeh {
                 this.archetypes[i].RemoveFilter(this);
             }
             
+            // TODO: Disposed filters are not removed from world.filters and world.componentsFiltersWith/Without
+            
             this.world = null;
                 
             this.archetypes = null;
@@ -96,8 +99,10 @@ namespace Scellecs.Morpeh {
             this.archetypeHashes.Dispose();
             this.archetypeHashes = null;
             
-            this.chunks.Clear();
+#if MORPEH_BURST
+            this.chunks?.Clear();
             this.chunks = null;
+#endif
             
             this.includedTypeIds = null;
             this.includedTypeIdsLookup = null;
@@ -134,6 +139,8 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Entity First() {
+            this.world.ThreadSafetyCheck();
+            
             if (this.archetypesLength == 0) {
                 ThrowSourceIsEmpty();
             }
@@ -143,6 +150,8 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Entity GetEntity(in int position) {
+            this.world.ThreadSafetyCheck();
+            
             var accum = 0;
             
             for (int i = 0, length = this.archetypesLength; i < length; i++) {
@@ -161,13 +170,12 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Entity FirstOrDefault() {
+            this.world.ThreadSafetyCheck();
             return this.archetypesLength != 0 ? this.archetypes[0].entities.data[0] : default;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(Entity entity) {
-            this.world.ThreadSafetyCheck();
-            
             if (!this.world.Has(entity)) {
                 return false;
             }
@@ -209,10 +217,6 @@ namespace Scellecs.Morpeh {
             
             this.archetypes[index] = archetype;
             this.archetypeHashes.Add(archetype.hash.GetValue(), index, out _);
-            
-            if (this.chunks.capacity < this.archetypesLength) {
-                this.chunks.Resize(this.archetypesCapacity);
-            }
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]

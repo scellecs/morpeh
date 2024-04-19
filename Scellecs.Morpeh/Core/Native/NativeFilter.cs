@@ -2,6 +2,7 @@
 namespace Scellecs.Morpeh.Native {
     using Unity.Collections;
 
+    // TODO: Add Enumerator
     public unsafe struct NativeFilter {
         [ReadOnly]
         public int length;
