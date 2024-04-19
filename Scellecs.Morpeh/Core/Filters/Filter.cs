@@ -164,6 +164,18 @@ namespace Scellecs.Morpeh {
             return this.archetypesLength != 0 ? this.archetypes[0].entities.data[0] : default;
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Has(Entity entity) {
+            this.world.ThreadSafetyCheck();
+            
+            if (!this.world.Has(entity)) {
+                return false;
+            }
+            
+            var archetype = this.world.entities[entity.Id].currentArchetype;
+            return archetype != null && this.archetypeHashes.Has(archetype.hash.GetValue());
+        }
+        
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowIndexOutOfRange() {
             throw new IndexOutOfRangeException();
