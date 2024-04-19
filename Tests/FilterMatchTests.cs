@@ -421,4 +421,53 @@ public class FilterMatchTests {
         }
         Assert.Equal(0, filter.archetypesLength);
     }
+    
+    [Fact]
+    public void AddRemoveSameComponentInsideIterationWorks() {
+        var filter = this.world.Filter.With<Test1>().With<Test2>().Build();
+        
+        for (var i = 0; i < 8; i++) {
+            var entity = this.world.CreateEntity();
+            entity.AddComponent<Test1>();
+            entity.AddComponent<Test2>();
+        }
+        
+        this.world.Commit();
+        Assert.Equal(8, filter.GetLengthSlow());
+        
+        foreach (var entity in filter) {
+            entity.RemoveComponent<Test1>();
+            entity.AddComponent<Test1>();
+            Assert.False(this.world.IsDisposed(entity));
+        }
+        
+        this.world.Commit();
+        Assert.Equal(8, filter.GetLengthSlow());
+    }
+    
+    [Fact]
+    public void RemoveAddSameComponentInsideIterationWorks() {
+        var filter = this.world.Filter.With<Test1>().With<Test2>().Build();
+        var filterWithTest3 = this.world.Filter.With<Test1>().With<Test2>().With<Test3>().Build();
+        
+        for (var i = 0; i < 8; i++) {
+            var entity = this.world.CreateEntity();
+            entity.AddComponent<Test1>();
+            entity.AddComponent<Test2>();
+        }
+        
+        this.world.Commit();
+        Assert.Equal(8, filter.GetLengthSlow());
+        Assert.Equal(0, filterWithTest3.GetLengthSlow());
+        
+        foreach (var entity in filter) {
+            entity.AddComponent<Test3>();
+            entity.RemoveComponent<Test3>();
+            Assert.False(this.world.IsDisposed(entity));
+        }
+        
+        this.world.Commit();
+        Assert.Equal(8, filter.GetLengthSlow());
+        Assert.Equal(0, filterWithTest3.GetLengthSlow());
+    }
 }
