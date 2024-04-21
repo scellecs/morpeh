@@ -17,17 +17,17 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class IntHashMap<T> : IDisposable {
+    public sealed class IntHashMap<T> {
         public int length;
         public int capacity;
         public int capacityMinusOne;
         public int lastIndex;
         public int freeIndex;
 
-        public IntPinnedArray buckets;
+        public int[] buckets;
 
         public T[]    data;
-        public PinnedArray<IntHashMapSlot> slots;
+        public IntHashMapSlot[] slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntHashMap(in int capacity = 0) {
@@ -38,9 +38,9 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
             this.capacity         = this.capacityMinusOne + 1;
 
-            this.buckets = new IntPinnedArray(this.capacity);
-            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
-            this.data    = new T[this.capacity];
+            this.buckets = new int[this.capacity];
+            this.slots = new IntHashMapSlot[this.capacity];
+            this.data = new T[this.capacity];
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,31 +52,15 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = other.capacityMinusOne;
             this.capacity         = other.capacity;
 
-            this.buckets = new IntPinnedArray(this.capacity);
-            this.slots   = new PinnedArray<IntHashMapSlot>(this.capacity);
-            this.data    = new T[this.capacity];
+            this.buckets = new int[this.capacity];
+            this.slots = new IntHashMapSlot[this.capacity];
+            this.data = new T[this.capacity];
 
             for (int i = 0, len = this.capacity; i < len; i++) {
-                this.buckets.data[i] = other.buckets.data[i];
-                this.slots.data[i] = other.slots.data[i];
+                this.buckets[i] = other.buckets[i];
+                this.slots[i] = other.slots[i];
                 this.data[i] = other.data[i];
             }
-        }
-        
-        public void Dispose() {
-            this.lastIndex = 0;
-            this.length = 0;
-            this.freeIndex = -1;
-            this.capacityMinusOne = 0;
-            this.capacity = 0;
-            this.buckets.Dispose();
-            this.data = null;
-            this.slots.Dispose();
-        }
-
-        ~IntHashMap() {
-            this.buckets.Dispose();
-            this.slots.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,7 +83,7 @@ namespace Scellecs.Morpeh.Collections {
 
             public bool MoveNext() {
                 for (; this.index < this.hashMap.lastIndex; ++this.index) {
-                    ref var slot = ref this.hashMap.slots.ptr[this.index];
+                    ref var slot = ref this.hashMap.slots[this.index];
                     if (slot.key - 1 < 0) {
                         continue;
                     }

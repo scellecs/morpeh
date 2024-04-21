@@ -41,5 +41,13 @@
             this.archetypes.Add(archetype);
             archetype.hash = default;
         }
+        
+        public void Dispose() {
+            for (var i = 0; i < this.archetypes.length; i++) {
+                this.archetypes.data[i].Dispose();
+            }
+            
+            this.archetypes = default;
+        }
     }
 }

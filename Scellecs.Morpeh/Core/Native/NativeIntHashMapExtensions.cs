@@ -10,29 +10,6 @@ namespace Scellecs.Morpeh.Native {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static unsafe class NativeIntHashMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static NativeIntHashMap<TNative> AsNative<TNative>(this IntHashMap<TNative> hashMap) where TNative : unmanaged {
-            var nativeIntHashMap = new NativeIntHashMap<TNative>();
-            
-            fixed (int* lengthPtr = &hashMap.length)
-            fixed (int* capacityPtr = &hashMap.capacity)
-            fixed (int* capacityMinusOnePtr = &hashMap.capacityMinusOne)
-            fixed (int* lastIndexPtr = &hashMap.lastIndex)
-            fixed (int* freeIndexPtr = &hashMap.freeIndex)
-            fixed (TNative* dataPtr = &hashMap.data[0]) {
-                nativeIntHashMap.lengthPtr           = lengthPtr;
-                nativeIntHashMap.capacityPtr         = capacityPtr;
-                nativeIntHashMap.capacityMinusOnePtr = capacityMinusOnePtr;
-                nativeIntHashMap.lastIndexPtr        = lastIndexPtr;
-                nativeIntHashMap.freeIndexPtr        = freeIndexPtr;
-                nativeIntHashMap.data                = dataPtr;
-                nativeIntHashMap.buckets             = hashMap.buckets.ptr;
-                nativeIntHashMap.slots               = hashMap.slots.ptr;
-            }
-
-            return nativeIntHashMap;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref TNative GetValueRefByKey<TNative>(this ref NativeIntHashMap<TNative> nativeIntHashMap, int key) where TNative : unmanaged {
             var rem = key & *nativeIntHashMap.capacityMinusOnePtr;
 

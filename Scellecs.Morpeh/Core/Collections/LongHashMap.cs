@@ -14,17 +14,17 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class LongHashMap<T> : IDisposable {
+    public sealed class LongHashMap<T> {
         public int length;
         public int capacity;
         public int capacityMinusOne;
         public int lastIndex;
         public int freeIndex;
 
-        public IntPinnedArray buckets;
+        public int[] buckets;
 
         public T[]    data;
-        public PinnedArray<LongHashMapSlot> slots;
+        public LongHashMapSlot[] slots;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LongHashMap(in int capacity = 0) {
@@ -35,25 +35,9 @@ namespace Scellecs.Morpeh.Collections {
             this.capacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
             this.capacity         = this.capacityMinusOne + 1;
 
-            this.buckets = new IntPinnedArray(this.capacity);
-            this.slots   = new PinnedArray<LongHashMapSlot>(this.capacity);
-            this.data    = new T[this.capacity];
-        }
-        
-        public void Dispose() {
-            this.lastIndex = 0;
-            this.length = 0;
-            this.freeIndex = -1;
-            this.capacityMinusOne = 0;
-            this.capacity = 0;
-            this.buckets.Dispose();
-            this.slots.Dispose();
-            this.data = null;
-        }
-
-        ~LongHashMap() {
-            this.buckets.Dispose();
-            this.slots.Dispose();
+            this.buckets = new int[this.capacity];
+            this.slots = new LongHashMapSlot[this.capacity];
+            this.data = new T[this.capacity];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,7 +60,7 @@ namespace Scellecs.Morpeh.Collections {
 
             public bool MoveNext() {
                 for (; this.index < this.hashMap.lastIndex; ++this.index) {
-                    ref var slot = ref this.hashMap.slots.ptr[this.index];
+                    ref var slot = ref this.hashMap.slots[this.index];
                     if (slot.key - 1 < 0) {
                         continue;
                     }

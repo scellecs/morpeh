@@ -37,10 +37,7 @@ namespace Scellecs.Morpeh {
             this.length = 0;
             this.capacity = 0;
             
-            this.components.Dispose();
             this.components = null;
-            
-            this.filters.Dispose();
             this.filters = null;
         }
         

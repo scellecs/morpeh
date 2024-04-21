@@ -1,5 +1,4 @@
 ﻿namespace Scellecs.Morpeh {
-    using System;
     using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
     using Scellecs.Morpeh.Collections;
@@ -8,12 +7,8 @@
         [PublicAPI]
         public static Entity CreateEntity(this World world) {
             world.ThreadSafetyCheck();
-            
-            int id;
-            if (world.freeEntityIDs.length > 0) {
-                id = world.freeEntityIDs.Pop();
-            }
-            else {
+
+            if (!world.freeEntityIDs.TryPop(out var id)) {
                 id = ++world.entitiesLength;
             }
 

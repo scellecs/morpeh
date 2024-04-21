@@ -96,7 +96,6 @@ namespace Scellecs.Morpeh {
             this.archetypesLength = 0;
             this.archetypesCapacity = 0;
 
-            this.archetypeHashes.Dispose();
             this.archetypeHashes = null;
             
 #if MORPEH_BURST

@@ -255,6 +255,9 @@ namespace Scellecs.Morpeh {
             
             this.emptyArchetypes.Clear();
             this.emptyArchetypes = null;
+            
+            this.archetypePool.Dispose();
+            this.archetypePool = default;
 
             worlds.Remove(this);
             
