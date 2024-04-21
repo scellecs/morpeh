@@ -6,7 +6,6 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [Serializable]
     public readonly struct ArchetypeHash : IEquatable<ArchetypeHash> {
         private readonly long value;
         

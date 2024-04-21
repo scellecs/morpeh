@@ -42,9 +42,7 @@
             var bitIndex = index & 63;
             
             if (arrayIndex >= this.longsCapacity) {
-                var newSize = arrayIndex + 1;
-                ArrayHelpers.Grow(ref this.data, newSize);
-                this.longsCapacity = newSize;
+                this.ExpandTo(arrayIndex);
             }
             
             var mask = 1UL << bitIndex;
@@ -84,6 +82,13 @@
         public int ValueOf(int index) {
             var arrayIndex = index >> 6;
             return arrayIndex >= this.longsCapacity ? 0 : (int)(this.data[arrayIndex] & (1UL << (index & 63)));
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal void ExpandTo(int arrayIndex) {
+            var newSize = arrayIndex + 1;
+            ArrayHelpers.Grow(ref this.data, newSize);
+            this.longsCapacity = newSize;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

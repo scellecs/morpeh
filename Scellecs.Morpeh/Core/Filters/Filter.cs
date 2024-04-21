@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class Filter : IDisposable {
+    public sealed class Filter {
 #if MORPEH_BURST
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -73,7 +73,6 @@ namespace Scellecs.Morpeh {
             
             this.world.componentsFiltersWith.Add(this.includedTypeIds, this);
             this.world.componentsFiltersWithout.Add(this.excludedTypeIds, this);
-            this.world.filters.Add(this);
             
             foreach (var archetypeIndex in this.world.archetypes) {
                 var archetype = this.world.archetypes.GetValueByIndex(archetypeIndex);
@@ -81,35 +80,6 @@ namespace Scellecs.Morpeh {
                     archetype.AddFilter(this);
                 }
             }
-        }
-        
-        public void Dispose() {
-            for (var i = 0; i < this.archetypesLength; i++) {
-                this.archetypes[i].RemoveFilter(this);
-            }
-            
-            // TODO: Disposed filters are not removed from world.filters and world.componentsFiltersWith/Without
-            
-            this.world = null;
-                
-            this.archetypes = null;
-            this.archetypesLength = 0;
-            this.archetypesCapacity = 0;
-
-            this.archetypeHashes = null;
-            
-#if MORPEH_BURST
-            this.chunks?.Clear();
-            this.chunks = null;
-#endif
-            
-            this.includedTypeIds = null;
-            this.includedTypeIdsLookup = null;
-            
-            this.excludedTypeIds = null;
-            this.excludedTypeIdsLookup = null;
-
-            this.id = -1;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

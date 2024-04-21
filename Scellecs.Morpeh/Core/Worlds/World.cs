@@ -47,7 +47,6 @@ namespace Scellecs.Morpeh {
         [PublicAPI]
         public JobHandle JobHandle;
 #endif
-        internal FastList<Filter> filters;
         internal LongHashMap<LongHashMap<Filter>> filtersLookup;
 
         //todo custom collection
@@ -132,7 +131,6 @@ namespace Scellecs.Morpeh {
             this.newPluginSystemsGroups = new FastList<SystemsGroup>();
 
             this.Filter = new FilterBuilder{ world = this };
-            this.filters = new FastList<Filter>();
             this.filtersLookup = new LongHashMap<LongHashMap<Filter>>();
         }
 
@@ -209,16 +207,9 @@ namespace Scellecs.Morpeh {
             this.freeEntityIDs = null;
             
             this.Filter = null;
-
-            foreach (var filter in this.filters) {
-                filter.Dispose();
-            }
-
-            this.filters.Clear();
-            this.filters = null;
+            
             this.filterCount = 0;
             
-            this.filtersLookup.Clear();
             this.filtersLookup = null;
 
             foreach (var stash in this.stashes) {

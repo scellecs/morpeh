@@ -32,36 +32,6 @@ namespace Scellecs.Morpeh.Collections {
             536_870_912,
             1_073_741_823
         };
-            
-        internal static readonly int[] smallCapacitySizes = {
-            3,
-            7,
-            15,
-            31,
-            63,
-            127,
-            255,
-            511,
-            1_023,
-            2_047,
-            4_095,
-            16_383,
-            65_535,
-            131_071,
-            262_143,
-            524_287,
-            1_048_575,
-            2_097_151,
-            4_194_303,
-            8_388_607,
-            16_777_215,
-            33_554_431,
-            67_108_863,
-            134_217_727,
-            268_435_455,
-            536_870_912,
-            1_073_741_823
-        };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetCapacity(int min) {
@@ -72,18 +42,12 @@ namespace Scellecs.Morpeh.Collections {
                 }
             }
 
-            throw new Exception("Capacity is too big");
+            ThrowCapacityIsTooBig();
+            return 0;
         }
-            
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetCapacitySmall(int min) {
-            for (int index = 0, length = smallCapacitySizes.Length; index < length; ++index) {
-                var prime = smallCapacitySizes[index];
-                if (prime >= min) {
-                    return prime;
-                }
-            }
-
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowCapacityIsTooBig() {
             throw new Exception("Capacity is too big");
         }
     }

@@ -119,7 +119,7 @@
             ref var m = ref world.newMetrics;
             m.entities = world.entitiesCount;
             m.archetypes = world.archetypes.length;
-            m.filters = world.filters.length;
+            m.filters = world.filterCount;
             for (int index = 0, length = world.systemsGroups.Values.Count; index < length; index++) {
                 var systemsGroup = world.systemsGroups.Values[index];
                 m.systems += systemsGroup.systems.length;
