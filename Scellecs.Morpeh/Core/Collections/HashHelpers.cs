@@ -1,5 +1,4 @@
 namespace Scellecs.Morpeh.Collections {
-    using System;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
 
@@ -42,13 +41,8 @@ namespace Scellecs.Morpeh.Collections {
                 }
             }
 
-            ThrowCapacityIsTooBig();
+            CapacityTooBigException.Throw(min);
             return 0;
-        }
-        
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowCapacityIsTooBig() {
-            throw new Exception("Capacity is too big");
         }
     }
 }

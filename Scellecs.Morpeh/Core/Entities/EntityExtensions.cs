@@ -23,7 +23,7 @@ namespace Scellecs.Morpeh {
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity}");
+                InvalidAddOperationException.ThrowDisposedEntity(entity);
             }
 #endif
             return ref entity.GetWorld().GetStash<T>().Add(entity);
@@ -34,7 +34,7 @@ namespace Scellecs.Morpeh {
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying AddComponent on null or disposed entity {entity}");
+                InvalidAddOperationException.ThrowDisposedEntity(entity);
             }
 #endif
             return ref entity.GetWorld().GetStash<T>().Add(entity, out exist);
@@ -45,7 +45,7 @@ namespace Scellecs.Morpeh {
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying GetComponent on null or disposed entity {entity}");
+                InvalidGetOperationException.ThrowDisposedEntity(entity);
             }
 #endif
             return ref entity.GetWorld().GetStash<T>().Get(entity);
@@ -56,7 +56,7 @@ namespace Scellecs.Morpeh {
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying GetComponent on null or disposed entity {entity}");
+                InvalidGetOperationException.ThrowDisposedEntity(entity);
             }
 #endif
             return ref entity.GetWorld().GetStash<T>().Get(entity, out exist);
@@ -67,7 +67,7 @@ namespace Scellecs.Morpeh {
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying SetComponent on null or disposed entity {entity}");
+                InvalidSetOperationException.ThrowDisposedEntity(entity);
             }
 #endif
             entity.GetWorld().GetStash<T>().Set(entity, value);
@@ -78,7 +78,7 @@ namespace Scellecs.Morpeh {
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying RemoveComponent on null or disposed entity {entity}");
+                InvalidRemoveOperationException.ThrowDisposedEntity(entity);
             }
 #endif
             return entity.GetWorld().GetStash<T>().Remove(entity);
@@ -87,8 +87,12 @@ namespace Scellecs.Morpeh {
         [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
         public static void Migrate<T>(this Entity from, Entity to, bool overwrite = true) where T : struct, IComponent {
 #if MORPEH_DEBUG
-            if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying MigrateTo on null or disposed entities {from} {to}");
+            if (from.IsNullOrDisposed()) {
+                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from);
+            }
+            
+            if (to.IsNullOrDisposed()) {
+                InvalidMigrateOperationException.ThrowDisposedEntityTo(to);
             }
 #endif
             from.GetWorld().GetStash<T>().Migrate(from, to, overwrite);
@@ -97,8 +101,12 @@ namespace Scellecs.Morpeh {
         [Obsolete("This method is slow and doesn't have a Stash-based alternative. Consider doing manual migration of required components.")]
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
-            if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying MigrateTo on null or disposed entities {from} {to}");
+            if (from.IsNullOrDisposed()) {
+                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from);
+            }
+            
+            if (to.IsNullOrDisposed()) {
+                InvalidMigrateOperationException.ThrowDisposedEntityTo(to);
             }
 #endif
 
@@ -150,7 +158,7 @@ namespace Scellecs.Morpeh {
         public static bool Has<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                throw new Exception($"[MORPEH] You are trying Has on null or disposed entity {entity}");
+                InvalidHasOperationException.ThrowDisposedEntity(entity);
             }
 #endif
             return entity.GetWorld().GetStash<T>().Has(entity);

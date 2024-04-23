@@ -35,7 +35,7 @@ public class EntityDisposalTests {
     public void DisposeNonEmptyEntity() {
         var entity = this.world.CreateEntity();
         
-        this.test1.Add(entity, new Test1());
+        this.test1.Set(entity, new Test1());
         Assert.Equal(1, world.entitiesCount);
         
         this.world.RemoveEntity(entity);
@@ -67,7 +67,7 @@ public class EntityDisposalTests {
         var entity = this.world.CreateEntity();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Add(entity, new Test1());
+        this.test1.Set(entity, new Test1());
         this.world.RemoveEntity(entity);
         this.world.Commit();
         Assert.True(this.world.IsDisposed(entity));
@@ -84,7 +84,7 @@ public class EntityDisposalTests {
         var entity = this.world.CreateEntity();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Add(entity, new Test1());
+        this.test1.Set(entity, new Test1());
         this.world.Commit();
         Assert.False(this.world.IsDisposed(entity));
         Assert.Equal(1, world.entitiesCount);
@@ -107,7 +107,7 @@ public class EntityDisposalTests {
         var entity = this.world.CreateEntity();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Add(entity, new Test1());
+        this.test1.Set(entity, new Test1());
         this.test1.Remove(entity);
         Assert.False(this.world.IsDisposed(entity));
         Assert.Equal(1, world.entitiesCount);
@@ -127,7 +127,7 @@ public class EntityDisposalTests {
         var entity = this.world.CreateEntity();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Add(entity, new Test1());
+        this.test1.Set(entity, new Test1());
         this.world.Commit();
         Assert.Equal(1, world.entitiesCount);
         

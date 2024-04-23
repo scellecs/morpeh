@@ -111,7 +111,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.archetypesLength == 0) {
-                ThrowSourceIsEmpty();
+                FilterSourceSequenceIsEmptyException.Throw();
             }
             
             return this.archetypes[0].entities.data[0];
@@ -133,7 +133,7 @@ namespace Scellecs.Morpeh {
                 accum += archetype.length;
             }
             
-            ThrowIndexOutOfRange();
+            FilterIndexOutOfRangeException.Throw(position);
             return default;
         }
         
@@ -151,16 +151,6 @@ namespace Scellecs.Morpeh {
             
             var archetype = this.world.entities[entity.Id].currentArchetype;
             return archetype != null && this.archetypeHashes.Has(archetype.hash.GetValue());
-        }
-        
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowIndexOutOfRange() {
-            throw new IndexOutOfRangeException();
-        }
-        
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowSourceIsEmpty() {
-            throw new InvalidOperationException("The source sequence is empty.");
         }
         
         internal bool AddArchetypeIfMatches(Archetype archetype) {

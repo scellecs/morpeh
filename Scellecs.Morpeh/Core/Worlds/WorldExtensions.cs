@@ -471,7 +471,7 @@ namespace Scellecs.Morpeh {
 
             var currentThread = Environment.CurrentManagedThreadId;
             if (world.threadIdLock != currentThread) {
-                throw new Exception($"[MORPEH] Thread safety check failed. You are trying touch the world from a thread {currentThread}, but the world associated with the thread {world.threadIdLock}");
+                ThreadSafetyCheckFailedException.Throw(currentThread, world.threadIdLock);
             }
         }
         

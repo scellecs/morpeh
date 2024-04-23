@@ -26,7 +26,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static InternalTypeDefinition Get(Type type) {
             if (!typeAssociation.TryGetValue(type, out var typeDefinition)) {
-                ThrowTypeNotFound(type);
+                ComponentUnknownException.ThrowTypeNotFound(type);
             }
             
             return typeDefinition;
@@ -39,7 +39,7 @@
             }
             
             if (!ComponentId.TryGet(typeId, out var type)) {
-                ThrowTypeIdNotFound(typeId);
+                ComponentUnknownException.ThrowTypeIdNotFound(typeId);
             }
 
             return Get(type);
@@ -60,16 +60,6 @@
             typeIdAssociation.Add(typeDefinition.typeInfo.id, typeDefinition);
             
             return typeDefinition;
-        }
-        
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowTypeNotFound(Type type) {
-            throw new InvalidOperationException($"Type {type} not found. Use ExtendedComponentId.Get<T>() once before trying to get via type.");
-        }
-        
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowTypeIdNotFound(int typeId) {
-            throw new InvalidOperationException($"Type with id {typeId} not found. Use ExtendedComponentId.Get<T>() once before trying to get via type id.");
         }
 
         internal struct InternalTypeDefinition {
