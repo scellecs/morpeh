@@ -234,10 +234,11 @@ namespace Scellecs.Morpeh {
             var e = default(Enumerator);
             
             e.archetypes = this.archetypes;
-            e.archetypeCount = this.archetypesLength;
             
-            e.archetypeIndex = -1;
-            e.archetypeEnumerator = default;
+            e.archetypeIndex = this.archetypesLength - 1;
+            
+            e.archetypeEnumerator       = default;
+            e.archetypeEnumerator.index = -1;
             
 #if MORPEH_DEBUG
             ++this.world.iteratorLevel;
@@ -255,7 +256,6 @@ namespace Scellecs.Morpeh {
 #endif
         {
             internal Archetype[] archetypes;
-            internal int archetypeCount;
             
             internal int archetypeIndex;
             internal Archetype.Enumerator archetypeEnumerator;
@@ -277,12 +277,12 @@ namespace Scellecs.Morpeh {
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext() {
-                while (this.archetypeIndex < this.archetypeCount) {
+                while (this.archetypeIndex >= 0) {
                     if (this.archetypeEnumerator.MoveNext()) {
                         return true;
                     }
                     
-                    if (++this.archetypeIndex < this.archetypeCount) {
+                    if (--this.archetypeIndex >= 0) {
                         this.archetypeEnumerator = this.archetypes[this.archetypeIndex].GetEnumerator();
                     }
                 }

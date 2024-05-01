@@ -83,8 +83,7 @@ namespace Scellecs.Morpeh {
             Enumerator e;
             
             e.entities = this.entities.data;
-            e.index = -1;
-            e.length = this.length;
+            e.index    = this.length - 1;
             
             return e;
         }
@@ -95,11 +94,10 @@ namespace Scellecs.Morpeh {
         public struct Enumerator {
             internal Entity[] entities;
             internal int index;
-            internal int length;
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext() {
-                return ++this.index < this.length;
+                return --this.index >= 0;
             }
             
             public Entity Current {
