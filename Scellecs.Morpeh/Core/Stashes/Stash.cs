@@ -8,6 +8,7 @@
 namespace Scellecs.Morpeh {
     using System;
     using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using Collections;
     using JetBrains.Annotations;
     using Unity.IL2CPP.CompilerServices;
@@ -144,11 +145,42 @@ namespace Scellecs.Morpeh {
                 InvalidGetOperationException.ThrowMissing(entity);
             }
 #endif
+            
             if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
-                return ref this.data[dataIndex];
+                ref var r = ref MemoryMarshal.GetReference(this.data.AsSpan());
+                return ref Unsafe.Add(ref r, dataIndex);
+                //return ref this.data[dataIndex];
             }
             
             return ref this.empty;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T Get(Entity entity, ref T stashRef) {
+            world.ThreadSafetyCheck();
+            
+#if MORPEH_DEBUG
+            if (world.IsDisposed(entity)) {
+                InvalidGetOperationException.ThrowDisposedEntity(entity);
+            }
+
+            if (!this.map.Has(entity.Id)) {
+                InvalidGetOperationException.ThrowMissing(entity);
+            }
+#endif
+            
+            if (this.map.TryGetIndexFast(entity.Id, out var dataIndex)) {
+                return ref Unsafe.Add(ref stashRef, dataIndex);
+            }
+            
+            return ref this.empty;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref T Ref() {
+            world.ThreadSafetyCheck();
+            
+            return ref MemoryMarshal.GetReference(this.data.AsSpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

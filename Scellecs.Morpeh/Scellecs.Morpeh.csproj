@@ -44,4 +44,10 @@
         <Compile Remove="Unity\Utils\SceneReference.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="System.Runtime.CompilerServices.Unsafe">
+        <HintPath>System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

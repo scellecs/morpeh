@@ -4,6 +4,8 @@ using BenchmarkDotNet.Diagnostics.dotTrace;
 using Scellecs.Morpeh;
 namespace Benchmarks;
 
+using System.Runtime.InteropServices;
+
 public class IterationBenchmarks {
     [Params(1_000_000)]
     //[Params(16)]
@@ -40,8 +42,9 @@ public class IterationBenchmarks {
     
     [Benchmark]
     public void ForeachFilterSingle() {
+        ref var test1Ref = ref this.test1.Ref();
         foreach (var entity in this.filter) {
-            this.test1.Get(entity).value++;
+            this.test1.Get(entity, ref test1Ref).value++;
         }
     }
 }

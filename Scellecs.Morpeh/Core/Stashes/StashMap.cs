@@ -123,6 +123,12 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetIndexFast(int key, out int slotIndex) {
+            slotIndex = this.buckets.ptr[key & this.capacityMinusOne] - 1;
+            return true;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsKeySet(int key, out int slotIndex) {
             var rem = key & this.capacityMinusOne;
 
