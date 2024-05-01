@@ -9,6 +9,7 @@ namespace Scellecs.Morpeh {
     using System;
     using System.Runtime.CompilerServices;
     using Collections;
+    using JetBrains.Annotations;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.IL2CPP.CompilerServices;
@@ -54,6 +55,12 @@ namespace Scellecs.Morpeh {
         
         internal int id;
 
+        [PublicAPI]
+        public int ArchetypesCount {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => this.archetypesLength;
+        }
+
         internal Filter(World world, int[] includedTypeIds, int[] excludedTypeIds) {
             this.world = world;
 
@@ -82,6 +89,7 @@ namespace Scellecs.Morpeh {
             }
         }
         
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetLengthSlow() {
             this.world.ThreadSafetyCheck();
@@ -94,18 +102,21 @@ namespace Scellecs.Morpeh {
             return accum;
         }
         
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsEmpty() {
             this.world.ThreadSafetyCheck();
             return this.archetypesLength == 0;
         }
         
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsNotEmpty() {
             this.world.ThreadSafetyCheck();
             return this.archetypesLength != 0;
         }
         
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Entity First() {
             this.world.ThreadSafetyCheck();
@@ -117,8 +128,9 @@ namespace Scellecs.Morpeh {
             return this.archetypes[0].entities.data[0];
         }
         
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Entity GetEntity(in int position) {
+        public Entity GetEntity(int position) {
             this.world.ThreadSafetyCheck();
             
             var accum = 0;
@@ -137,12 +149,14 @@ namespace Scellecs.Morpeh {
             return default;
         }
         
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Entity FirstOrDefault() {
             this.world.ThreadSafetyCheck();
             return this.archetypesLength != 0 ? this.archetypes[0].entities.data[0] : default;
         }
         
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(Entity entity) {
             if (!this.world.Has(entity)) {
@@ -228,6 +242,7 @@ namespace Scellecs.Morpeh {
             return true;
         }
 
+        [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             this.world.ThreadSafetyCheck();
