@@ -57,7 +57,7 @@ public class MigrationsBenchmarks {
         this.world.Commit();
     }
     
-    //[Benchmark]
+    // [Benchmark]
     public void SetRemoveComponentFilterSingle() {
         foreach (var entity in this.filter) {
             this.test2.Set(entity, new Test2());
@@ -72,7 +72,7 @@ public class MigrationsBenchmarks {
         this.world.Commit();
     }
     
-    //[Benchmark]
+    // [Benchmark]
     public void SetRemoveComponentFilterDouble() {
         foreach (var entity in this.filter) {
             this.test2.Set(entity, new Test2());
