@@ -147,9 +147,7 @@ namespace Scellecs.Morpeh {
 #endif
             
             if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
-                ref var r = ref MemoryMarshal.GetReference(this.data.AsSpan());
-                return ref Unsafe.Add(ref r, dataIndex);
-                //return ref this.data[dataIndex];
+                return ref this.data[dataIndex];
             }
             
             return ref this.empty;
