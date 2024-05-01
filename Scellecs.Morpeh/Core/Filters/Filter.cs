@@ -235,10 +235,9 @@ namespace Scellecs.Morpeh {
             
             e.archetypes = this.archetypes;
             
-            e.archetypeIndex = this.archetypesLength - 1;
+            e.archetypeIndex = this.archetypesLength;
             
             e.archetypeEnumerator       = default;
-            e.archetypeEnumerator.index = -1;
             
 #if MORPEH_DEBUG
             ++this.world.iteratorLevel;

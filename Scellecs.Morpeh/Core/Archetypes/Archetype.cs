@@ -83,7 +83,7 @@ namespace Scellecs.Morpeh {
             Enumerator e;
             
             e.entities = this.entities.data;
-            e.index    = this.length - 1;
+            e.index    = this.length;
             
             return e;
         }
