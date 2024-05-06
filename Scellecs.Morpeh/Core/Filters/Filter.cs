@@ -256,7 +256,7 @@ namespace Scellecs.Morpeh {
 
 #if MORPEH_DEBUG
             ++this.world.iteratorLevel;
-            e.world = world;
+            e.world = this.world;
 #endif
             return e;
         }

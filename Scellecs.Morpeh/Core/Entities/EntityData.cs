@@ -6,28 +6,28 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public struct EntityData {
-        internal Archetype currentArchetype;
-        internal int indexInCurrentArchetype;
-        
+        internal Archetype     currentArchetype;
         internal ArchetypeHash nextArchetypeHash;
         
-        internal int[] addedComponents;
+        internal int    indexInCurrentArchetype;
         internal ushort addedComponentsCount;
-        
-        internal int[] removedComponents;
         internal ushort removedComponentsCount;
+        
+        internal int[] addedComponents;
+        internal int[] removedComponents;
+        
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Initialize() {
-            this.currentArchetype = null;
-            this.indexInCurrentArchetype = -1;
+            this.currentArchetype  = null;
             this.nextArchetypeHash = default;
             
-            this.addedComponents = new int[8];
-            this.addedComponentsCount = 0;
+            this.indexInCurrentArchetype = -1;
+            this.addedComponentsCount    = 0;
+            this.removedComponentsCount  = 0;
             
+            this.addedComponents = new int[8];
             this.removedComponents = new int[8];
-            this.removedComponentsCount = 0;
         }
     }
 }
