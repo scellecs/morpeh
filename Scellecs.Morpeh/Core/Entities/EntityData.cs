@@ -12,10 +12,10 @@
         internal ArchetypeHash nextArchetypeHash;
         
         internal int[] addedComponents;
-        internal int addedComponentsCount;
+        internal ushort addedComponentsCount;
         
         internal int[] removedComponents;
-        internal int removedComponentsCount;
+        internal ushort removedComponentsCount;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Initialize() {
