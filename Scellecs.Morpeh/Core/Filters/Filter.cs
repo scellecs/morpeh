@@ -248,12 +248,12 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             var e = default(Enumerator);
             
-            e.archetypes = this.archetypes;
-            e.archetypeCount = this.archetypesLength;
+            e.entityIndex    = 0;
+            e.archetypeIndex = this.archetypesLength;
             
-            e.archetypeIndex = -1;
-            e.archetypeEnumerator = default;
-            
+            e.entities       = null;
+            e.archetypes     = this.archetypes;
+
 #if MORPEH_DEBUG
             ++this.world.iteratorLevel;
             e.world = world;
@@ -269,11 +269,10 @@ namespace Scellecs.Morpeh {
             : IDisposable
 #endif
         {
+            internal int      entityIndex;
+            internal int      archetypeIndex;
+            internal Entity[] entities;
             internal Archetype[] archetypes;
-            internal int archetypeCount;
-            
-            internal int archetypeIndex;
-            internal Archetype.Enumerator archetypeEnumerator;
             
 #if MORPEH_DEBUG
             internal World world;
@@ -287,22 +286,25 @@ namespace Scellecs.Morpeh {
             
             public Entity Current {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => this.archetypeEnumerator.Current;
+                get => this.entities[this.entityIndex];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool MoveNext() {
-                while (this.archetypeIndex < this.archetypeCount) {
-                    if (this.archetypeEnumerator.MoveNext()) {
-                        return true;
-                    }
-                    
-                    if (++this.archetypeIndex < this.archetypeCount) {
-                        this.archetypeEnumerator = this.archetypes[this.archetypeIndex].GetEnumerator();
-                    }
+                if (--this.entityIndex >= 0) {
+                    return true;
                 }
+
+                if (--this.archetypeIndex < 0) {
+                    return false;
+                }
+
+                var archetype = this.archetypes[this.archetypeIndex];
                 
-                return false;
+                this.entities    = archetype.entities.data;
+                this.entityIndex = archetype.length - 1;
+                
+                return true;
             }
         }
     }

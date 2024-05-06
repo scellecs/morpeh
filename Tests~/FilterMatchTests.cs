@@ -354,9 +354,9 @@ public class FilterMatchTests {
         var filter = this.world.Filter.With<Test1>().With<Test2>().Build();
         
         Assert.Equal(entitiesCount, filter.GetLengthSlow());
-        var index = 0;
+        var index = entities.Length;
         foreach (var filterEntity in filter) {
-            Assert.Equal(entities[index++], filterEntity);
+            Assert.Equal(entities[--index], filterEntity);
         }
         Assert.Equal(1, filter.archetypesLength);
         

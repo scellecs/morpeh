@@ -77,35 +77,5 @@ namespace Scellecs.Morpeh {
         public void ClearFilters() {
             this.filters.Clear();
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Enumerator GetEnumerator() {
-            Enumerator e;
-            
-            e.entities = this.entities.data;
-            e.index = -1;
-            e.length = this.length;
-            
-            return e;
-        }
-        
-        [Il2CppSetOption(Option.NullChecks, false)]
-        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator {
-            internal Entity[] entities;
-            internal int index;
-            internal int length;
-            
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool MoveNext() {
-                return ++this.index < this.length;
-            }
-            
-            public Entity Current {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => this.entities[this.index];
-            }
-        }
     }
 }

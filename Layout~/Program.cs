@@ -9,6 +9,7 @@ TypeLayout.PrintLayout<EntityData>();
 TypeLayout.PrintLayout<ArchetypeHash>();
 TypeLayout.PrintLayout<TypeInfo>();
 TypeLayout.PrintLayout<TypeHash>();
+TypeLayout.PrintLayout<Filter.Enumerator>();
 
 // Collections
 
