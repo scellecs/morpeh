@@ -58,14 +58,6 @@ namespace Scellecs.Morpeh.Collections {
         [Il2CppSetOption(Option.NullChecks, false)]
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct ResultSwap {
-            public int oldIndex;
-            public int newIndex;
-        }
-
-        [Il2CppSetOption(Option.NullChecks, false)]
-        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
             public T[] data;
             public int index;
@@ -81,5 +73,13 @@ namespace Scellecs.Morpeh.Collections {
                 get => this.data[this.index];
             }
         }
+    }
+    
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    public struct ResultSwap {
+        public int oldIndex;
+        public int newIndex;
     }
 }

@@ -88,12 +88,12 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveSwap<T>(this FastList<T> list, T value, out FastList<T>.ResultSwap swap) {
+        public static void RemoveSwap<T>(this FastList<T> list, T value, out ResultSwap swap) {
             list.RemoveAtSwap(list.IndexOf(value), out swap);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveSwapSave<T>(this FastList<T> list, T value, out FastList<T>.ResultSwap swap) {
+        public static void RemoveSwapSave<T>(this FastList<T> list, T value, out ResultSwap swap) {
             var index = list.IndexOf(value);
             if (index < 0) {
                 swap = default;
@@ -113,7 +113,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool RemoveAtSwap<T>(this FastList<T> list, int index, out FastList<T>.ResultSwap swap) {
+        public static bool RemoveAtSwap<T>(this FastList<T> list, int index, out ResultSwap swap) {
             var lastIndex = list.length - 1;
 
             if (index < 0 || index > lastIndex) {
@@ -121,7 +121,7 @@ namespace Scellecs.Morpeh.Collections {
                 return false;
             }
 
-            swap = new FastList<T>.ResultSwap {
+            swap = new ResultSwap {
                 oldIndex = lastIndex,
                 newIndex = index
             };
