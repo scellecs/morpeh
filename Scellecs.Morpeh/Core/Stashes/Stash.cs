@@ -185,7 +185,7 @@ namespace Scellecs.Morpeh {
             if (this.TrySetData(entity.Id, default)) {
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
-                    world.newMetrics.stashResizes++;
+                    this.world.newMetrics.stashResizes++;
                 }
 #endif
                 this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
