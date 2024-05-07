@@ -189,16 +189,24 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void CompleteDisposals(this World world) {
-            foreach (var entityId in world.disposedEntities) {
+            var sparseSet = world.disposedEntities;
+            
+            for (var i = sparseSet.count - 1; i >= 0; i--) {
+                var entityId = sparseSet.dense[i];
                 world.CompleteEntityDisposal(entityId, ref world.entities[entityId]);
+                
+                sparseSet.sparse[entityId] = 0;
             }
             
-            world.disposedEntities.Clear();
+            sparseSet.count = 0;
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ApplyTransientChanges(this World world) {
-            foreach (var entityId in world.dirtyEntities) {
+            var sparseSet = world.dirtyEntities;
+            
+            for (var i = sparseSet.count - 1; i >= 0; i--) {
+                var entityId = sparseSet.dense[i];
                 ref var entityData = ref world.entities[entityId];
                 
                 if (entityData.nextArchetypeHash == default) {
@@ -208,14 +216,20 @@ namespace Scellecs.Morpeh {
                 } else if (entityData.addedComponentsCount + entityData.removedComponentsCount > 0) {
                     world.ApplyTransientChanges(entityId, ref entityData);
                 }
+                
+                sparseSet.sparse[entityId] = 0;
             }
 
-            world.dirtyEntities.Clear();
+            sparseSet.count = 0;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ClearEmptyArchetypes(this World world) {
-            foreach (var archetype in world.emptyArchetypes) {
+            var emptyArchetypes = world.emptyArchetypes;
+            
+            for (var i = emptyArchetypes.length - 1; i >= 0; i--) {
+                var archetype = emptyArchetypes.data[i];
+                
                 if (!archetype.IsEmpty()) {
                     MLogger.LogTrace($"[WorldExtensions] Archetype {archetype.hash} is not empty after complete migration of entities");
                     continue;
@@ -234,9 +248,11 @@ namespace Scellecs.Morpeh {
                 world.archetypes.Remove(archetype.hash.GetValue(), out _);
                 world.archetypesCount--;
                 world.archetypePool.Return(archetype);
+
+                emptyArchetypes.data[i] = null;
             }
             
-            world.emptyArchetypes.Clear();
+            emptyArchetypes.length = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -244,7 +260,7 @@ namespace Scellecs.Morpeh {
             ref var entityData = ref world.entities[entityId];
             entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
             
-            for (int i = 0, length = entityData.removedComponentsCount; i < length; i++) {
+            for (var i = entityData.removedComponentsCount - 1; i >= 0; i--) {
                 if (entityData.removedComponents[i] != typeInfo.id) {
                     continue;
                 }
@@ -268,7 +284,7 @@ namespace Scellecs.Morpeh {
             ref var entityData = ref world.entities[entityId];
             entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
             
-            for (int i = 0, length = entityData.addedComponentsCount; i < length; i++) {
+            for (var i = entityData.addedComponentsCount - 1; i >= 0; i--) {
                 if (entityData.addedComponents[i] != typeInfo.id) {
                     continue;
                 }
@@ -341,14 +357,14 @@ namespace Scellecs.Morpeh {
 
                     var match = true;
                     
-                    for (int i = 0, length = entityData.addedComponentsCount; i < length; ++i) {
+                    for (var i = entityData.addedComponentsCount - 1; i >= 0; i--) {
                         if (filter.excludedTypeIdsLookup.IsSet(entityData.addedComponents[i])) {
                             match = false;
                             break;
                         }
                     }
                     
-                    for (int i = 0, length = entityData.removedComponentsCount; i < length; ++i) {
+                    for (var i = entityData.removedComponentsCount - 1; i >= 0; i--) {
                         if (filter.includedTypeIdsLookup.IsSet(entityData.removedComponents[i])) {
                             match = false;
                             break;
@@ -366,18 +382,18 @@ namespace Scellecs.Morpeh {
                 entityData.currentArchetype.components.CopyTo(nextArchetype.components);
             }
             
-            for (int i = 0, length = entityData.addedComponentsCount; i < length; ++i) {
+            for (var i = entityData.addedComponentsCount - 1; i >= 0; i--) {
                 nextArchetype.components.Add(entityData.addedComponents[i]);
             }
             
-            for (int i = 0, length = entityData.removedComponentsCount; i < length; ++i) {
+            for (var i = entityData.removedComponentsCount - 1; i >= 0; i--) {
                 nextArchetype.components.Remove(entityData.removedComponents[i]);
             }
             
             // These checks must happen after setting components to new archetype
             // because we have to perform full check for filters
 
-            for (int i = 0, length = entityData.addedComponentsCount; i < length; ++i) {
+            for (var i = entityData.addedComponentsCount - 1; i >= 0; i--) {
                 var filters = world.componentsFiltersWith.GetFilters(entityData.addedComponents[i]);
                 if (filters == null) {
                     continue;
@@ -386,7 +402,7 @@ namespace Scellecs.Morpeh {
                 ScanFilters(nextArchetype, filters);
             }
             
-            for (int i = 0, length = entityData.removedComponentsCount; i < length; ++i) {
+            for (var i = entityData.removedComponentsCount - 1; i >= 0; i--) {
                 var filters = world.componentsFiltersWithout.GetFilters(entityData.removedComponents[i]);
                 if (filters == null) {
                     continue;
@@ -402,7 +418,7 @@ namespace Scellecs.Morpeh {
         }
 
         internal static void ScanFilters(Archetype archetype, Filter[] filters) {
-            for (int i = 0, length = filters.Length; i < length; i++) {
+            for (var i = filters.Length - 1; i >= 0; i--) {
                 var filter = filters[i];
                 
                 if (filter.includedTypeIds.Length > archetype.components.length) {

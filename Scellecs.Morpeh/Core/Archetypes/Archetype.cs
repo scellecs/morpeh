@@ -1,9 +1,8 @@
-using System;
-using System.Runtime.CompilerServices;
-
 namespace Scellecs.Morpeh {
-    using Collections;
+    using System;
+    using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
+    using Scellecs.Morpeh.Collections;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -44,8 +43,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int AddEntity(Entity entity) {
             if (this.length == this.capacity) {
-                this.capacity <<= 1;
-                this.entities.Resize(this.capacity);
+                this.GrowEntities();
             }
             
             this.entities[this.length] = entity;
@@ -54,23 +52,23 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveEntityAtIndex(int index) {
-            this.entities[index] = this.entities[this.length - 1];
-            --this.length;
+            this.entities[index] = this.entities[--this.length];
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsEmpty() {
             return this.length == 0;
         }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal void GrowEntities() {
+            this.capacity <<= 1;
+            this.entities.Resize(this.capacity);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddFilter(Filter filter) {
             this.filters.Set(filter.id, filter, out _);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveFilter(Filter filter) {
-            this.filters.Remove(filter.id, out _);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
