@@ -59,10 +59,10 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Add(Entity entity) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidAddOperationException.ThrowDisposedEntity(entity);
             }
 
@@ -72,10 +72,10 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowAlreadyExists(entity);
             }
             
-            world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+            this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
 #if MORPEH_DEBUG
             if (previousCapacity != this.map.capacity) {
-                world.newMetrics.stashResizes++;
+                this.world.newMetrics.stashResizes++;
             }
 #endif
             return ref this.data[slotIndex];
@@ -83,21 +83,21 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Add(Entity entity, out bool exist) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidAddOperationException.ThrowDisposedEntity(entity);
             }
             
             var previousCapacity = this.map.capacity;
 #endif
             if (this.TryAddData(entity.Id, default, out var slotIndex)) {
-                world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
                 exist = false;
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
-                    world.newMetrics.stashResizes++;
+                    this.world.newMetrics.stashResizes++;
                 }
 #endif
                 return ref this.data[slotIndex];
@@ -109,10 +109,10 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Add(Entity entity, in T value) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidAddOperationException.ThrowDisposedEntity(entity);
             }
             
@@ -122,10 +122,10 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowAlreadyExists(entity);
             }
             
-            world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+            this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
 #if MORPEH_DEBUG
             if (previousCapacity != this.map.capacity) {
-                world.newMetrics.stashResizes++;
+                this.world.newMetrics.stashResizes++;
             }
 #endif
             return true;
@@ -133,10 +133,10 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Get(Entity entity) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidGetOperationException.ThrowDisposedEntity(entity);
             }
 
@@ -153,10 +153,10 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Get(Entity entity, out bool exist) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidGetOperationException.ThrowDisposedEntity(entity);
             }
 #endif
@@ -172,10 +172,10 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(Entity entity) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidSetOperationException.ThrowDisposedEntity(entity);
             }
             
@@ -188,16 +188,16 @@ namespace Scellecs.Morpeh {
                     world.newMetrics.stashResizes++;
                 }
 #endif
-                world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(Entity entity, in T value) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidSetOperationException.ThrowDisposedEntity(entity);
             }
             var previousCapacity = this.map.capacity;
@@ -206,10 +206,10 @@ namespace Scellecs.Morpeh {
             if (this.TrySetData(entity.Id, value)) {
 #if MORPEH_DEBUG
                 if (previousCapacity != this.map.capacity) {
-                    world.newMetrics.stashResizes++;
+                    this.world.newMetrics.stashResizes++;
                 }
 #endif
-                world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
         }
 
@@ -218,16 +218,16 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove(Entity entity) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidRemoveOperationException.ThrowDisposedEntity(entity);
             }
 #endif
 
             if (this.map.Remove(entity.Id, out var slotIndex)) {
-                world.TransientChangeRemoveComponent(entity.Id, ref this.typeInfo);
+                this.world.TransientChangeRemoveComponent(entity.Id, ref this.typeInfo);
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
 #endif
@@ -239,7 +239,7 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveAll() {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
 
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
             if (this.componentDispose != null) {
@@ -275,14 +275,14 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Migrate(Entity from, Entity to, bool overwrite = true) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(from)) {
+            if (this.world.IsDisposed(from)) {
                 InvalidMigrateOperationException.ThrowDisposedEntityFrom(from);
             }
             
-            if (world.IsDisposed(to)) {
+            if (this.world.IsDisposed(to)) {
                 InvalidMigrateOperationException.ThrowDisposedEntityTo(to);
             }
             
@@ -316,17 +316,17 @@ namespace Scellecs.Morpeh {
             }
 #if MORPEH_DEBUG
             if (previousCapacity != this.map.capacity) {
-                world.newMetrics.stashResizes++;
+                this.world.newMetrics.stashResizes++;
             }
 #endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(Entity entity) {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if MORPEH_DEBUG
-            if (world.IsDisposed(entity)) {
+            if (this.world.IsDisposed(entity)) {
                 InvalidHasOperationException.ThrowDisposedEntity(entity);
             }
 #endif
@@ -336,14 +336,14 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsEmpty() {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
             return this.map.length == 0;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsNotEmpty() {
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
             return this.map.length != 0;
         }
@@ -353,7 +353,7 @@ namespace Scellecs.Morpeh {
                 return;
             }
             
-            world.ThreadSafetyCheck();
+            this.world.ThreadSafetyCheck();
             
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
             if (this.componentDispose != null) {
