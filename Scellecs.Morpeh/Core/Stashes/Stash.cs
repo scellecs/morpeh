@@ -63,13 +63,13 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity);
+                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 
             var previousCapacity = this.map.capacity;
 #endif
             if (!this.TryAddData(entity.Id, default, out var slotIndex)) {
-                InvalidAddOperationException.ThrowAlreadyExists(entity);
+                InvalidAddOperationException.ThrowAlreadyExists(entity, typeof(T));
             }
             
             this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
@@ -87,7 +87,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity);
+                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
             var previousCapacity = this.map.capacity;
@@ -113,13 +113,13 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity);
+                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
             var previousCapacity = this.map.capacity;
 #endif
             if (!this.TryAddData(entity.Id, value, out _)) {
-                InvalidAddOperationException.ThrowAlreadyExists(entity);
+                InvalidAddOperationException.ThrowAlreadyExists(entity, typeof(T));
             }
             
             this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
@@ -137,11 +137,11 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidGetOperationException.ThrowDisposedEntity(entity);
+                InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 
             if (!this.map.Has(entity.Id)) {
-                InvalidGetOperationException.ThrowMissing(entity);
+                InvalidGetOperationException.ThrowMissing(entity, typeof(T));
             }
 #endif
             if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
@@ -157,7 +157,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidGetOperationException.ThrowDisposedEntity(entity);
+                InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
             if (this.map.TryGetIndex(entity.Id, out var dataIndex))
@@ -176,7 +176,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidSetOperationException.ThrowDisposedEntity(entity);
+                InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
             var previousCapacity = this.map.capacity;
@@ -198,7 +198,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidSetOperationException.ThrowDisposedEntity(entity);
+                InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             var previousCapacity = this.map.capacity;
 #endif
@@ -222,7 +222,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidRemoveOperationException.ThrowDisposedEntity(entity);
+                InvalidRemoveOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
 
@@ -279,11 +279,11 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(from)) {
-                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from);
+                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from, typeof(T));
             }
             
             if (this.world.IsDisposed(to)) {
-                InvalidMigrateOperationException.ThrowDisposedEntityTo(to);
+                InvalidMigrateOperationException.ThrowDisposedEntityTo(to, typeof(T));
             }
             
             var previousCapacity = this.map.capacity;
@@ -327,7 +327,7 @@ namespace Scellecs.Morpeh {
             
 #if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
-                InvalidHasOperationException.ThrowDisposedEntity(entity);
+                InvalidHasOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
 

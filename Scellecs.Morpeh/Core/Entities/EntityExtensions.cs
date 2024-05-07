@@ -23,7 +23,7 @@ namespace Scellecs.Morpeh {
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity);
+                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
             return ref entity.GetWorld().GetStash<T>().Add(entity);
@@ -34,7 +34,7 @@ namespace Scellecs.Morpeh {
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity);
+                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
             return ref entity.GetWorld().GetStash<T>().Add(entity, out exist);
@@ -45,7 +45,7 @@ namespace Scellecs.Morpeh {
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                InvalidGetOperationException.ThrowDisposedEntity(entity);
+                InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
             return ref entity.GetWorld().GetStash<T>().Get(entity);
@@ -56,7 +56,7 @@ namespace Scellecs.Morpeh {
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                InvalidGetOperationException.ThrowDisposedEntity(entity);
+                InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
             return ref entity.GetWorld().GetStash<T>().Get(entity, out exist);
@@ -67,7 +67,7 @@ namespace Scellecs.Morpeh {
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                InvalidSetOperationException.ThrowDisposedEntity(entity);
+                InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
             entity.GetWorld().GetStash<T>().Set(entity, value);
@@ -78,7 +78,7 @@ namespace Scellecs.Morpeh {
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                InvalidRemoveOperationException.ThrowDisposedEntity(entity);
+                InvalidRemoveOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
             return entity.GetWorld().GetStash<T>().Remove(entity);
@@ -88,11 +88,11 @@ namespace Scellecs.Morpeh {
         public static void Migrate<T>(this Entity from, Entity to, bool overwrite = true) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed()) {
-                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from);
+                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from, typeof(T));
             }
             
             if (to.IsNullOrDisposed()) {
-                InvalidMigrateOperationException.ThrowDisposedEntityTo(to);
+                InvalidMigrateOperationException.ThrowDisposedEntityTo(to, typeof(T));
             }
 #endif
             from.GetWorld().GetStash<T>().Migrate(from, to, overwrite);
@@ -158,7 +158,7 @@ namespace Scellecs.Morpeh {
         public static bool Has<T>(this Entity entity) where T : struct, IComponent {
 #if MORPEH_DEBUG
             if (entity.IsNullOrDisposed()) {
-                InvalidHasOperationException.ThrowDisposedEntity(entity);
+                InvalidHasOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 #endif
             return entity.GetWorld().GetStash<T>().Has(entity);

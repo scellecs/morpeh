@@ -6,13 +6,13 @@
         private InvalidGetOperationException(string message) : base(message) { }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowDisposedEntity(Entity entity) {
-            throw new InvalidGetOperationException($"[MORPEH] You are trying to get a component from a disposed entity {entity}");
+        public static void ThrowDisposedEntity(Entity entity, Type type) {
+            throw new InvalidGetOperationException($"[MORPEH] You are trying to get '{type}' from a disposed entity {entity}");
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowMissing(Entity entity) {
-            throw new InvalidGetOperationException($"[MORPEH] You are trying to get a missing component from {entity}");
+        public static void ThrowMissing(Entity entity, Type type) {
+            throw new InvalidGetOperationException($"[MORPEH] You are trying to get missing '{type}' from {entity}");
         }
     }
 }

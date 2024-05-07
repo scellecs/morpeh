@@ -6,8 +6,8 @@
         private InvalidHasOperationException(string message) : base(message) { }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowDisposedEntity(Entity entity) {
-            throw new InvalidHasOperationException($"[MORPEH] You are trying to check a component against a disposed entity {entity}");
+        public static void ThrowDisposedEntity(Entity entity, Type type) {
+            throw new InvalidHasOperationException($"[MORPEH] You are trying to check '{type}' against a disposed entity {entity}");
         }
     }
 }

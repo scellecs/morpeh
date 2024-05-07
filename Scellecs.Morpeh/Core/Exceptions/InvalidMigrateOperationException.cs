@@ -7,12 +7,22 @@
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowDisposedEntityFrom(Entity entity) {
-            throw new InvalidMigrateOperationException($"[MORPEH] You are trying to migrate a component from a disposed entity {entity}");
+            throw new InvalidMigrateOperationException($"[MORPEH] You are trying to migrate from a disposed entity {entity}");
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowDisposedEntityTo(Entity entity) {
-            throw new InvalidMigrateOperationException($"[MORPEH] You are trying to migrate a component to a disposed entity {entity}");
+            throw new InvalidMigrateOperationException($"[MORPEH] You are trying to migrate to a disposed entity {entity}");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowDisposedEntityFrom(Entity entity, Type type) {
+            throw new InvalidMigrateOperationException($"[MORPEH] You are trying to migrate '{type}' from a disposed entity {entity}");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowDisposedEntityTo(Entity entity, Type type) {
+            throw new InvalidMigrateOperationException($"[MORPEH] You are trying to migrate '{type}' to a disposed entity {entity}");
         }
     }
 }
