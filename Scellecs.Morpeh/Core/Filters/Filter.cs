@@ -95,7 +95,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             var accum = 0;
             
-            for (int i = 0, length = this.archetypesLength; i < length; i++) {
+            for (var i = this.archetypesLength - 1; i >= 0; i--) {
                 accum += this.archetypes[i].length;
             }
             
@@ -219,9 +219,7 @@ namespace Scellecs.Morpeh {
             var archetypeComponents = archetype.components;
             
             var includedTypes = this.includedTypeIds;
-            var includedTypesLength = includedTypes.Length;
-            
-            for (var i = 0; i < includedTypesLength; i++) {
+            for (var i = includedTypes.Length - 1; i >= 0; i--) {
                 if (!archetypeComponents.Has(includedTypes[i])) {
                     MLogger.LogTrace($"Archetype {archetype.hash} does not match filter {this} [include]");
                     return false;
@@ -229,9 +227,7 @@ namespace Scellecs.Morpeh {
             }
             
             var excludedTypes = this.excludedTypeIds;
-            var excludedTypesLength = excludedTypes.Length;
-            
-            for (var i = 0; i < excludedTypesLength; i++) {
+            for (var i = excludedTypes.Length - 1; i >= 0; i--) {
                 if (archetypeComponents.Has(excludedTypes[i])) {
                     MLogger.LogTrace($"Archetype {archetype.hash} does not match filter {this} [exclude]");
                     return false;
