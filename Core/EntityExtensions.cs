@@ -143,7 +143,7 @@ namespace Scellecs.Morpeh {
 
             var world = from.world;
 
-            var components = stackalloc int[from.components.length];
+            var components = stackalloc int[from.components.count];
             var idx = 0;
             foreach (var offset in from.components) {
                 components[idx++] = offset;
