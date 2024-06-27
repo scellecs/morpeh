@@ -81,7 +81,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ValueOf(int index) {
             var arrayIndex = index >> 6;
-            return arrayIndex >= this.longsCapacity ? 0 : (int)(this.data[arrayIndex] & (1UL << (index & 63)));
+            return arrayIndex < this.longsCapacity ? (int) ((this.data[arrayIndex] >> (index & 63)) & 1) : 0;
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
