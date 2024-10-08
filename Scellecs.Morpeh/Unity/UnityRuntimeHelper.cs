@@ -54,6 +54,7 @@ namespace Scellecs.Morpeh {
                     world?.Dispose();
                 }
 
+                World.worldsCount = 0;
                 World.worlds.Clear();
                 World.worlds.Add(null);
                 

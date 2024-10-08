@@ -28,6 +28,8 @@ namespace Scellecs.Morpeh {
         [NotNull]
         [PublicAPI]
         internal static FastList<World> worlds = new FastList<World>().WithElement(null);
+
+        internal static int worldsCount = 0;
         
         [CanBeNull]
         internal static FastList<IWorldPlugin> plugins;
@@ -119,7 +121,17 @@ namespace Scellecs.Morpeh {
 
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static World Create() => new World().Initialize();
+        public static World Create() {
+            if (worldsCount == WorldConstants.MAX_WORLDS_COUNT) {
+#if MORPEH_DEBUG
+                MLogger.LogError($"Can not create a world, as the number of worlds has reached the limit of {WorldConstants.MAX_WORLDS_COUNT}");
+#endif
+                return null;
+            }
+
+            worldsCount++;
+            return new World().Initialize();
+        }
 
         private World() {
             this.threadIdLock = System.Threading.Thread.CurrentThread.ManagedThreadId;
@@ -251,6 +263,7 @@ namespace Scellecs.Morpeh {
             this.archetypePool = default;
 
             worlds.Remove(this);
+            worldsCount--;
             
             this.IsDisposed = true;
         }

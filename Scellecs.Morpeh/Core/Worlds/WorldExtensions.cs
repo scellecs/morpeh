@@ -96,6 +96,8 @@ namespace Scellecs.Morpeh {
                     world.Dispose();
                 }
             }
+
+            World.worldsCount = 0;
             World.worlds.Clear();
             var defaultWorld = World.Create();
             defaultWorld.UpdateByUnity = true;
