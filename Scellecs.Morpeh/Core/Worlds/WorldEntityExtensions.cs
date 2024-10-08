@@ -85,7 +85,8 @@
             return entity.Id <= 0 ||
                    entity.Id >= world.entitiesCapacity ||
                    world.entitiesGens[entity.Id] != entity.Generation ||
-                   entity.WorldId != world.identifier;
+                   entity.WorldId != world.identifier ||
+                   entity.WorldGeneration != world.generation;
         }
 
         [PublicAPI]
@@ -96,12 +97,13 @@
             return entity.Id > 0 &&
                    entity.Id < world.entitiesCapacity &&
                    world.entitiesGens[entity.Id] == entity.Generation &&
-                   entity.WorldId == world.identifier;
+                   entity.WorldId == world.identifier &&
+                   entity.WorldGeneration == world.generation;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Entity GetEntityAtIndex(this World world, int entityId) {
-            return new Entity(world.identifier, entityId, world.entitiesGens[entityId]);
+            return new Entity(world.identifier, world.generation, entityId, world.entitiesGens[entityId]);
         }
     }
 }

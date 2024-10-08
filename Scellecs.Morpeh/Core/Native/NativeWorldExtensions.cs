@@ -13,6 +13,7 @@ namespace Scellecs.Morpeh.Native {
             fixed (ushort* entitiesGensPtr = world.entitiesGens)
             fixed (int* entitiesCapacityPtr = &world.entitiesCapacity) {
                 nativeWorld.identifier = world.identifier;
+                nativeWorld.generation = world.generation;
                 nativeWorld.entitiesGens = entitiesGensPtr;
                 nativeWorld.entitiesCapacity = entitiesCapacityPtr;
             }

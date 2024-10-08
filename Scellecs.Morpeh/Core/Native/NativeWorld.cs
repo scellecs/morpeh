@@ -4,6 +4,7 @@ namespace Scellecs.Morpeh.Native {
 
     public struct NativeWorld {
         public int identifier;
+        public int generation;
         
         [NativeDisableUnsafePtrRestriction]
         public unsafe ushort* entitiesGens;

@@ -40,7 +40,7 @@ namespace Scellecs.Morpeh.Providers {
                             ref var entityData = ref w.entities[i];
                             
                             if (entityData.currentArchetype != null) {
-                                var entity = new Entity(w.identifier, i, w.entitiesGens[i]);
+                                var entity = new Entity(w.identifier, w.generation, i, w.entitiesGens[i]);
                                 var view = new EntityView {Name = entity.ToString(), entityViewer = {getter = () => entity}};
                                 this.entityViews.Add(view);
                             }

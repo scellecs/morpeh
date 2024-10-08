@@ -191,8 +191,12 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World GetWorld(this Entity entity) {
             var worldId = entity.WorldId;
-            
+
             if (worldId < 0 || worldId >= World.worlds.length) {
+                return null;
+            }
+
+            if (entity.WorldGeneration != World.worldsGens[worldId]) {
                 return null;
             }
             

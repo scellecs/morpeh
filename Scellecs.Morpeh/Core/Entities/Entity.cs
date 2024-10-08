@@ -12,10 +12,10 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public readonly struct Entity : IEquatable<Entity> {
         internal readonly long value;
-        
-        // [ Id: 32 bits | Generation: 16 bits | WorldId: 8 bits | Unused: 8 bits ]
-        internal Entity(int worldId, int id, ushort generation) {
-            value = ((id & 0xFFFFFFFFL) << 32) | ((generation & 0xFFFFL) << 16) | ((worldId & 0xFFL) << 8);
+
+        // [ Id: 32 bits | Generation: 16 bits | WorldId: 8 bits | WorldGeneration: 8 bits ]
+        internal Entity(int worldId, int worldGeneration, int id, ushort generation) {
+            value = ((id & 0xFFFFFFFFL) << 32) | ((generation & 0xFFFFL) << 16) | ((worldId & 0xFFL) << 8) | (worldGeneration & 0xFFL);
         }
 
         [ShowInInspector]
@@ -35,7 +35,13 @@ namespace Scellecs.Morpeh {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => (int)((value >> 8) & 0xFF);
         }
-        
+
+        [ShowInInspector]
+        public int WorldGeneration {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (int)(value & 0xFF);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Entity lhs, Entity rhs) {
             return lhs.value == rhs.value;
@@ -66,7 +72,7 @@ namespace Scellecs.Morpeh {
         }
 
         public override string ToString() {
-            return $"Entity: Id={this.Id}, Generation={this.Generation}, WorldId={this.WorldId}";
+            return $"Entity: Id={this.Id}, Generation={this.Generation}, WorldId={this.WorldId}, WorldGeneration={this.WorldGeneration}";
         }
     }
 }

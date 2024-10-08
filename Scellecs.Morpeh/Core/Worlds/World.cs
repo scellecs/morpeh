@@ -28,6 +28,9 @@ namespace Scellecs.Morpeh {
         [NotNull]
         [PublicAPI]
         internal static FastList<World> worlds = new FastList<World>().WithElement(null);
+        [NotNull]
+        [PublicAPI]
+        internal static byte[] worldsGens = new byte[4];
 
         internal static int worldsCount = 0;
         
@@ -104,6 +107,9 @@ namespace Scellecs.Morpeh {
         
         [ShowInInspector]
         internal int identifier;
+
+        [ShowInInspector]
+        internal int generation;
         
         [ShowInInspector]
         internal int threadIdLock;
@@ -264,6 +270,10 @@ namespace Scellecs.Morpeh {
 
             worlds.Remove(this);
             worldsCount--;
+
+            unchecked {
+                worldsGens[this.identifier]++;
+            }
             
             this.IsDisposed = true;
         }

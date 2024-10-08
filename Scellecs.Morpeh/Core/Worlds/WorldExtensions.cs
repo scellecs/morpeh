@@ -39,10 +39,19 @@ namespace Scellecs.Morpeh {
                     break;
                 }
             }
+
             if (added == false) {
                 World.worlds.Add(world);
+                id = World.worlds.length - 1;
             }
-            world.identifier        = added ? id : World.worlds.length - 1;
+
+            if (id >= World.worldsGens.Length) {
+                var newCapacity = HashHelpers.GetCapacity(id) + 1;
+                ArrayHelpers.Grow(ref World.worldsGens, newCapacity);
+            }
+
+            world.identifier        = id;
+            world.generation        = World.worldsGens[id];
             world.freeEntityIDs     = new IntStack();
             world.stashes           = new IStash[WorldConstants.DEFAULT_STASHES_CAPACITY];
 
