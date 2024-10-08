@@ -35,7 +35,7 @@ namespace Scellecs.Morpeh {
 #endif
             }
             else {
-                Destroy(this);
+                Destroy(this.gameObject);
             }
         }
 
