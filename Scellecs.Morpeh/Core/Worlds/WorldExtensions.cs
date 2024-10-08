@@ -100,7 +100,9 @@ namespace Scellecs.Morpeh {
 #endif
         [PublicAPI]
         public static void InitializationDefaultWorld() {
-            foreach (var world in World.worlds) {
+            var worlds = World.worlds.data;
+            for (int i = World.worlds.length - 1; i >= 0; i--) {
+                var world = worlds[i];
                 if (!world.IsNullOrDisposed()) {
                     world.Dispose();
                 }
