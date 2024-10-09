@@ -24,10 +24,12 @@ namespace Scellecs.Morpeh {
     public sealed partial class World : IDisposable {
         [CanBeNull]
         [PublicAPI]
-        public static World Default => worlds.data[0];
+        public static World Default => defaultWorld;
+        [CanBeNull]
+        internal static World defaultWorld;
         [NotNull]
         [PublicAPI]
-        internal static FastList<World> worlds = new FastList<World>().WithElement(null);
+        internal static FastList<World> worlds = new FastList<World>();
         [NotNull]
         [PublicAPI]
         internal static byte[] worldsGens = new byte[4];
@@ -135,7 +137,6 @@ namespace Scellecs.Morpeh {
                 return null;
             }
 
-            worldsCount++;
             return new World().Initialize();
         }
 
@@ -267,15 +268,10 @@ namespace Scellecs.Morpeh {
             
             this.archetypePool.Dispose();
             this.archetypePool = default;
-
-            worlds.Remove(this);
-            worldsCount--;
-
-            unchecked {
-                worldsGens[this.identifier]++;
-            }
             
             this.IsDisposed = true;
+
+            this.ApplyRemoveWorld();
         }
 
         public struct Metrics {

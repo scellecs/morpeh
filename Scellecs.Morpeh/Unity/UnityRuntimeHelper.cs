@@ -55,9 +55,7 @@ namespace Scellecs.Morpeh {
                 }
 
                 World.worldsCount = 0;
-                World.worlds.Clear();
-                World.worlds.Add(null);
-                
+                World.worlds.Clear();                
                 World.plugins?.Clear();
 
                 if (this != null && this.gameObject != null) {

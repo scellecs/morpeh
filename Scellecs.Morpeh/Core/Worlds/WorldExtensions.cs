@@ -28,23 +28,7 @@ namespace Scellecs.Morpeh {
     public static class WorldExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
-            var added = false;
-            var id    = -1;
-
-            for (int i = 0, length = World.worlds.length; i < length; i++) {
-                if (World.worlds.data[i] == null) {
-                    added                = true;
-                    id                   = i;
-                    World.worlds.data[i] = world;
-                    break;
-                }
-            }
-
-            if (added == false) {
-                World.worlds.Add(world);
-                id = World.worlds.length - 1;
-            }
-
+            var id = World.worlds.length;
             if (id >= World.worldsGens.Length) {
                 var newCapacity = HashHelpers.GetCapacity(id) + 1;
                 ArrayHelpers.Grow(ref World.worldsGens, newCapacity);
@@ -92,7 +76,23 @@ namespace Scellecs.Morpeh {
                 }
             }
 
+            world.ApplyAddWorld();
             return world;
+        }
+
+        internal static void ApplyAddWorld(this World world) {
+            World.worlds.Add(world);
+            World.worldsCount++;
+            World.defaultWorld = World.worlds.data[0];
+        }
+
+        internal static void ApplyRemoveWorld(this World world) {
+            unchecked {
+                World.worldsGens[world.identifier]++;
+            }
+            World.worlds.Remove(world);
+            World.worldsCount--;
+            World.defaultWorld = World.worldsCount > 0 ? World.worlds.data[0] : null;
         }
 
 #if MORPEH_UNITY && !MORPEH_DISABLE_AUTOINITIALIZATION
