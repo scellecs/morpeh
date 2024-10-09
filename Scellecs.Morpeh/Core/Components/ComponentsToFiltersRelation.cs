@@ -2,7 +2,8 @@
     using Unity.IL2CPP.CompilerServices;
     using System.Runtime.CompilerServices;
     using Scellecs.Morpeh.Collections;
-    
+    using System;
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -34,7 +35,15 @@
                 this.AppendFilter(typeInfo, filter);
             }
         }
-        
+
+        public void Remove(int[] typeIds, Filter filter) {
+            foreach (var typeId in typeIds) {
+                if (typeId < this.componentsToFilters.Length && this.componentsToFilters[typeId] != null) {
+                    this.RemoveFilter(typeId, filter);
+                }
+            }
+        }
+
         private int GetMaxTypeId(int[] typeIds) {
             var maxTypeId = 0;
             foreach (var typeId in typeIds) {
@@ -63,6 +72,20 @@
                 
                 ArrayHelpers.Grow(ref filters, filters.Length + 1);
                 filters[position] = filter;
+            }
+        }
+
+        private void RemoveFilter(int typeId, Filter filter) {
+            ref var filters = ref this.componentsToFilters[typeId];
+            var index = Array.IndexOf(filters, filter);
+            if (index != -1) {
+                var last = filters.Length - 1;
+                if (index < last) {
+                    Array.Copy(filters, index + 1, filters, index, last - index);
+                }
+
+                Array.Resize(ref filters, filters.Length - 1);
+                this.componentsToFilters[typeId] = filters;
             }
         }
     }

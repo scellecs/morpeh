@@ -56,6 +56,8 @@ namespace Scellecs.Morpeh {
 #endif
         internal LongHashMap<LongHashMap<Filter>> filtersLookup;
 
+        internal IntStack freeFilterIDs;
+
         //todo custom collection
         [ShowInInspector]
         internal SortedList<int, SystemsGroup> systemsGroups;
@@ -151,6 +153,7 @@ namespace Scellecs.Morpeh {
 
             this.Filter = new FilterBuilder{ world = this };
             this.filtersLookup = new LongHashMap<LongHashMap<Filter>>();
+            this.freeFilterIDs = new IntStack();
         }
 
         [PublicAPI]

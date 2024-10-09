@@ -473,7 +473,7 @@ namespace Scellecs.Morpeh {
                 world.entitiesGens[entityId]++;
             }
         }
-        
+
         [PublicAPI]
         public static void WarmupArchetypes(this World world, int count) {
             world.ThreadSafetyCheck();

@@ -70,7 +70,12 @@ namespace Scellecs.Morpeh {
         public void AddFilter(Filter filter) {
             this.filters.Set(filter.id, filter, out _);
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveFilter(Filter filter) { 
+            this.filters.Remove(filter.id, out _);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClearFilters() {
             this.filters.Clear();
