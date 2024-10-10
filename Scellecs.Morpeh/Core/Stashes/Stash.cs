@@ -51,7 +51,7 @@ namespace Scellecs.Morpeh {
             this.world = world;
             this.typeInfo = typeInfo;
             
-            this.map = new StashMap(capacity < 0 ? StashConstants.DEFAULT_COMPONENTS_CAPACITY : capacity);
+            this.map = new StashMap(typeInfo.stashSize);
             this.data = new T[this.map.capacity];
             
             this.empty = default;

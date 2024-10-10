@@ -55,9 +55,9 @@
                 entityRemoveComponent = (entity) => entity.GetWorld().GetStash<T>().Remove(entity),
                 isMarker = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length == 0,
             };
-            
-            typeAssociation.Add(typeof(T), typeDefinition);
-            typeIdAssociation.Add(typeDefinition.typeInfo.id, typeDefinition);
+
+            typeAssociation[typeof(T)] = typeDefinition;
+            typeIdAssociation[typeDefinition.typeInfo.id] = typeDefinition;
             
             return typeDefinition;
         }

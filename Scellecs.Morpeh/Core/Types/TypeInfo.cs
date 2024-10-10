@@ -7,10 +7,12 @@
     public struct TypeInfo {
         internal TypeHash hash;
         internal int id;
+        internal int stashSize;
         
-        internal TypeInfo(TypeHash hash, int id) {
+        internal TypeInfo(TypeHash hash, int id, int stashSize) {
             this.id = id;
             this.hash = hash;
+            this.stashSize = stashSize;
         }
         
         public override string ToString() {
