@@ -28,6 +28,7 @@
     * [World Plugins](#%EF%B8%8F-world-plugins)
     * [Metrics](#-metrics)
     * [Clone a stash](#2%EF%B8%8F⃣-clone-a-stash)
+    * [Stash size](#-stash-size)
 * [Plugins](#-plugins)
 * [Examples](#-examples)
 * [Games](#-games)
@@ -955,6 +956,15 @@ public class FooSystem : ISystem {
 }
 ```
 
+#### 📏 Stash size
+
+If you know the expected number of components in a stash, you have the option to set a base size to prevent resizing and avoid unnecessary allocations.
+
+```c#
+ComponentId<T>.StashSize = 1024;
+```
+
+This value is not tied to a specific ``World``, so it needs to be set before starting ECS, so that all newly created stashes of this type in any ``World`` have the specified capacity.
 
 ---
 
