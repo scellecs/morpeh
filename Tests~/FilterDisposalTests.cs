@@ -23,6 +23,8 @@ public class FilterDisposalTests {
         this.world.Commit();
 
         var filter = this.world.Filter.With<Test1>().Build();
+
+        Assert.False(filter.IsEmpty());
         foreach (var filterEnt in filter) {
             Assert.Equal(ent, filterEnt);
         }
@@ -49,9 +51,17 @@ public class FilterDisposalTests {
 
         var filter0 = this.world.Filter.With<Test1>().Build();
         var filter1 = this.world.Filter.With<Test1>().Build();
+        Assert.False(filter0.IsEmpty());
         foreach (var filterEnt in filter0) {
             Assert.Equal(ent, filterEnt);
         }
+
+        Assert.False(filter1.IsEmpty());
+        foreach (var filterEnt in filter1) {
+            Assert.Equal(ent, filterEnt);
+        }
+
+        Assert.Equal(filter0, filter1);
 
         filter0.Dispose();
         foreach (var _ in filter0) {
@@ -71,10 +81,10 @@ public class FilterDisposalTests {
         this.world.Commit();
 
         var filterBuilder = this.world.Filter.With<Test1>();
-        var incHash = filterBuilder.includeHash;
-        var excHash = filterBuilder.excludeHash;
         var filter = filterBuilder.Build();
         var filterId = filter.id;
+
+        Assert.False(filter.IsEmpty());
         foreach (var filterEnt in filter) {
             Assert.Equal(ent, filterEnt);
         }
@@ -96,10 +106,9 @@ public class FilterDisposalTests {
             Assert.Equal(filtersWith[0], filter);
 
             var lookup = this.world.filtersLookup;
-            if (lookup.TryGetValue(incHash.GetValue(), out var excludeMap)) {
-                if (excludeMap.TryGetValue(excHash.GetValue(), out var lfilter)) {
-                    Assert.Equal(filter, lfilter);
-                }
+            if (lookup.TryGetValue(filterBuilder.includeHash.GetValue(), out var excludeMap)) {
+                Assert.True(excludeMap.TryGetValue(filterBuilder.excludeHash.GetValue(), out var lfilter));
+                Assert.Equal(filter, lfilter);
             }
         }
 
@@ -109,12 +118,12 @@ public class FilterDisposalTests {
             var filtersWith = world.componentsFiltersWith.GetFilters(typeId);
             Assert.Empty(filtersWith);
             Assert.Null(filter.archetypes);
+
             var lookup = this.world.filtersLookup;
-            if (lookup.TryGetValue(incHash.GetValue(), out var excludeMap)) {
-                if (excludeMap.TryGetValue(excHash.GetValue(), out _)) {
-                    Assert.Fail("Filter should be deleted from lookup");
-                }
+            if (lookup.TryGetValue(filterBuilder.includeHash.GetValue(), out var excludeMap)) {
+                Assert.False(excludeMap.TryGetValue(filterBuilder.excludeHash.GetValue(), out _));
             }
+
             Assert.Equal(0, world.filterCount);
             Assert.Equal(1, world.freeFilterIDs.length);
             Assert.Equal(-1, filter.id);
@@ -164,14 +173,17 @@ public class FilterDisposalTests {
         Assert.Equal(filterId0, filter0.id);
         Assert.Equal(filterId2, filter2.id);
 
+        Assert.False(filter0.IsEmpty());
         foreach (var filterEnt in filter0) {
             Assert.Equal(ent, filterEnt);
         }
 
+        Assert.False(filter2.IsEmpty());
         foreach (var filterEnt in filter2) {
             Assert.Equal(ent, filterEnt);
         }
 
+        Assert.False(filter3.IsEmpty());
         foreach (var filterEnt in filter3) {
             Assert.Equal(ent, filterEnt);
         }
@@ -194,9 +206,12 @@ public class FilterDisposalTests {
         var excHash1 = filterBuilder1.excludeHash;
         var filter1 = filterBuilder1.Build();
 
+        Assert.False(filter0.IsEmpty());
         foreach (var filterEnt in filter0) {
             Assert.Equal(ent, filterEnt);
         }
+
+        Assert.False(filter1.IsEmpty());
         foreach (var filterEnt in filter1) {
             Assert.Equal(ent, filterEnt);
         }
@@ -260,6 +275,7 @@ public class FilterDisposalTests {
             Assert.NotEqual(filter0.id, freeId);
         }
 
+        Assert.False(filter1.IsEmpty());
         foreach (var filterEnt in filter1) {
             Assert.Equal(ent, filterEnt);
         }
@@ -274,19 +290,18 @@ public class FilterDisposalTests {
         this.world.Commit();
 
         var filterBuilder0 = this.world.Filter.With<Test1>();
-        var incHash0 = filterBuilder0.includeHash;
-        var excHash0 = filterBuilder0.excludeHash;
         var filter0 = filterBuilder0.Build();
         var filterId0 = filter0.id;
 
         var filterBuilder1 = this.world.Filter.With<Test1>().With<Test2>();
-        var incHash1 = filterBuilder1.includeHash;
-        var excHash1 = filterBuilder1.excludeHash;
         var filter1 = filterBuilder1.Build();
 
+        Assert.False(filter0.IsEmpty());
         foreach (var filterEnt in filter0) {
             Assert.Equal(ent, filterEnt);
         }
+
+        Assert.False(filter1.IsEmpty());
         foreach (var filterEnt in filter1) {
             Assert.Equal(ent, filterEnt);
         }
@@ -307,13 +322,13 @@ public class FilterDisposalTests {
             Assert.Equal(filtersWith2[0], filter1);
 
             var lookup = this.world.filtersLookup;
-            if (lookup.TryGetValue(incHash0.GetValue(), out var excludeMap0)) {
-                Assert.True(excludeMap0.TryGetValue(excHash0.GetValue(), out var lfilter0));
+            if (lookup.TryGetValue(filterBuilder0.includeHash.GetValue(), out var excludeMap0)) {
+                Assert.True(excludeMap0.TryGetValue(filterBuilder0.excludeHash.GetValue(), out var lfilter0));
                 Assert.Equal(filter0, lfilter0);
             }
 
-            if (lookup.TryGetValue(incHash1.GetValue(), out var excludeMap1)) {
-                Assert.True(excludeMap1.TryGetValue(excHash1.GetValue(), out var lfilter1));
+            if (lookup.TryGetValue(filterBuilder1.includeHash.GetValue(), out var excludeMap1)) {
+                Assert.True(excludeMap1.TryGetValue(filterBuilder1.excludeHash.GetValue(), out var lfilter1));
                 Assert.Equal(filter1, lfilter1);
             }
         }
@@ -332,12 +347,12 @@ public class FilterDisposalTests {
             Assert.Equal(filtersWith2[0], filter1);
 
             var lookup = this.world.filtersLookup;
-            if (lookup.TryGetValue(incHash0.GetValue(), out var excludeMap0)) {
-                Assert.False(excludeMap0.TryGetValue(excHash0.GetValue(), out _));
+            if (lookup.TryGetValue(filterBuilder0.includeHash.GetValue(), out var excludeMap0)) {
+                Assert.False(excludeMap0.TryGetValue(filterBuilder0.excludeHash.GetValue(), out _));
             }
 
-            if (lookup.TryGetValue(incHash1.GetValue(), out var excludeMap1)) {
-                Assert.True(excludeMap1.TryGetValue(excHash1.GetValue(), out var lfilter1));
+            if (lookup.TryGetValue(filterBuilder1.includeHash.GetValue(), out var excludeMap1)) {
+                Assert.True(excludeMap1.TryGetValue(filterBuilder1.excludeHash.GetValue(), out var lfilter1));
                 Assert.Equal(filter1, lfilter1);
             }
 
@@ -350,6 +365,7 @@ public class FilterDisposalTests {
             Assert.NotEqual(filter0.id, freeId);
         }
 
+        Assert.False(filter1.IsEmpty());
         foreach (var filterEnt in filter1) { 
             Assert.Equal(ent, filterEnt);
         }
@@ -380,6 +396,7 @@ public class FilterDisposalTests {
 
         this.world.Commit();
 
+        Assert.False(filter.IsEmpty());
         foreach (var filterEnt in filter) {
             Assert.Equal(ent, filterEnt);
         }
@@ -438,12 +455,17 @@ public class FilterDisposalTests {
         var filterBuilder2 = this.world.Filter.With<Test2>().With<Test3>();
         var filter2 = filterBuilder2.Build();
 
+        Assert.False(filter0.IsEmpty());
         foreach (var filterEnt in filter0) {
             Assert.Equal(ent, filterEnt);
         }
+
+        Assert.False(filter1.IsEmpty());
         foreach (var filterEnt in filter1) {
             Assert.Equal(ent, filterEnt);
         }
+
+        Assert.False(filter2.IsEmpty());
         foreach (var filterEnt in filter2) {
             Assert.Equal(ent, filterEnt);
         }
@@ -452,12 +474,17 @@ public class FilterDisposalTests {
 
         this.world.Commit();
 
+        Assert.False(filter0.IsEmpty());
         foreach (var filterEnt in filter0) {
             Assert.Equal(ent, filterEnt);
         }
+
+        Assert.False(filter1.IsEmpty());
         foreach (var filterEnt in filter1) {
             Assert.Equal(ent, filterEnt);
         }
+
+        Assert.False(filter2.IsEmpty());
         foreach (var filterEnt in filter2) {
             Assert.Equal(ent, filterEnt);
         }
@@ -468,9 +495,12 @@ public class FilterDisposalTests {
         foreach (var _ in filter0) {
             Assert.Fail("Filter0 should be empty");
         }
+
+        Assert.False(filter1.IsEmpty());
         foreach (var filterEnt in filter1) {
             Assert.Equal(ent, filterEnt);
         }
+
         foreach (var _ in filter2) {
             Assert.Fail("Filter2 should be empty");
         }
@@ -490,6 +520,7 @@ public class FilterDisposalTests {
 
         this.world.Commit();
 
+        Assert.False(filter0.IsEmpty());
         foreach (var filterEnt in filter0) {
             Assert.Equal(ent, filterEnt);
         }
