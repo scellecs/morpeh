@@ -56,6 +56,8 @@
             
             initialized = true;
 
+            StashSize = StashConstants.DEFAULT_COMPONENTS_CAPACITY;
+
             var typeId = ComponentsCounter.Increment();
             var typeHash = Math.Abs(7_777_777_777_777_777_773L * typeId);
             
