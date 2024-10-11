@@ -49,7 +49,8 @@
             world.ThreadSafetyCheck();
             
             var info = ComponentId<T>.info;
-            
+            var capacity = ComponentId<T>.StashSize;
+
             var candidate = world.GetExistingStash(info.id);
             if (candidate != null) {
                 return (Stash<T>)candidate;
@@ -57,7 +58,7 @@
             
             world.EnsureStashCapacity(info.id);
             
-            var stash = new Stash<T>(world, info);
+            var stash = new Stash<T>(world, info, capacity);
             world.stashes[info.id] = stash;
             return stash;
         }

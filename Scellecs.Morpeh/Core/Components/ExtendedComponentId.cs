@@ -56,8 +56,8 @@
                 isMarker = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length == 0,
             };
 
-            typeAssociation[typeof(T)] = typeDefinition;
-            typeIdAssociation[typeDefinition.typeInfo.id] = typeDefinition;
+            typeAssociation.Add(typeof(T), typeDefinition);
+            typeIdAssociation.Add(typeDefinition.typeInfo.id, typeDefinition);
             
             return typeDefinition;
         }

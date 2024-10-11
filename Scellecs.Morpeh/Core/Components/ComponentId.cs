@@ -14,8 +14,8 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Add(Type type, TypeInfo typeInfo) {
-            typeAssociation[type] = typeInfo;
-            idAssociation[typeInfo.id] = type;
+            typeAssociation.Add(type, typeInfo);
+            idAssociation.Add(typeInfo.id, type);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -42,6 +42,8 @@
     public static class ComponentId<T> where T : struct, IComponent {
         internal static TypeInfo info;
         internal static bool initialized;
+
+        public static int StashSize;
         
         static ComponentId() {
             Warmup();
@@ -57,18 +59,8 @@
             var typeId = ComponentsCounter.Increment();
             var typeHash = Math.Abs(7_777_777_777_777_777_773L * typeId);
             
-            info = new TypeInfo(new TypeHash(typeHash), typeId, StashConstants.DEFAULT_COMPONENTS_CAPACITY);
+            info = new TypeInfo(new TypeHash(typeHash), typeId);
             
-            ComponentId.Add(typeof(T), info);
-
-#if UNITY_EDITOR || MORPEH_GENERATE_ALL_EXTENDED_IDS
-            ExtendedComponentId.Generate<T>();
-#endif
-        }
-
-        public static void SetStashSize(int size) { 
-            size = size > 0 ? size : StashConstants.DEFAULT_COMPONENTS_CAPACITY;
-            info.stashSize = size;
             ComponentId.Add(typeof(T), info);
 
 #if UNITY_EDITOR || MORPEH_GENERATE_ALL_EXTENDED_IDS
