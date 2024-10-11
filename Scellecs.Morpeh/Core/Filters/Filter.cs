@@ -91,7 +91,6 @@ namespace Scellecs.Morpeh {
         }
 
         [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() {
             this.world.ThreadSafetyCheck();
             if (this.id >= 0) {
