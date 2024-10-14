@@ -44,4 +44,16 @@ public class IterationBenchmarks {
             this.test1.Get(entity).value++;
         }
     }
+    
+    [Benchmark]
+    public void ForeachFilterSingleManual() {
+        for (var archetype = this.filter.archetypesLength - 1; archetype >= 0; archetype--) {
+            var arch = this.filter.archetypes[archetype];
+            var entities = arch.entities;
+            
+            for (var i = arch.length - 1; i >= 0; i--) {
+                this.test1.Get(entities[i]).value++;
+            }
+        }
+    }
 }
