@@ -12,7 +12,6 @@
         internal FilterBuilder parent;
         internal TypeInfo      typeInfo;
         internal Filter.Mode   mode;
-        internal int           level;
         internal int           includeCount;
         internal int           excludeCount;
         internal TypeHash      includeHash;
@@ -34,7 +33,6 @@
                 world = this.world,
                 mode = Filter.Mode.Include,
                 typeInfo = info,
-                level = this.level + 1,
                 includeCount = this.includeCount + 1,
                 excludeCount = this.excludeCount,
                 includeHash = this.includeHash.Combine(info.hash),
@@ -58,7 +56,6 @@
                 world = this.world,
                 mode = Filter.Mode.Exclude,
                 typeInfo = info,
-                level = this.level + 1,
                 includeCount = this.includeCount,
                 excludeCount = this.excludeCount + 1,
                 includeHash = this.includeHash,
