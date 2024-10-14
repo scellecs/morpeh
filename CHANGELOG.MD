@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed ``MigrateTo`` broken enumerator.
 - Fixed ``World.CleanupUpdate`` small allocation.
 ### Added
-- Added ``IBoxedAspectFactory``, to allow aspects to be created via DI by @vanifatovvlad.
+- Added ``IBoxedAspectFactory`` to allow aspects to be created via DI by @vanifatovvlad.
 - Added ``MORPEH_DISABLE_COMPILATION_REPORT`` and ``MORPEH_DISABLE_COMPONENT_DISPOSE`` defines.
 - Added ``Length`` property to ``Stash``.
 - Added ``Enumerator`` for ``Stash``.
