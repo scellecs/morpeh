@@ -76,7 +76,8 @@ namespace Scellecs.Morpeh {
             this.excludedTypeIds = excludedTypeIds;
             this.excludedTypeIdsLookup = new BitSet(excludedTypeIds);
 
-            this.id = world.filterCount++;
+            this.id = this.world.freeFilterIDs.TryPop(out var freeID) ? freeID : this.world.filterCount;
+            this.world.filterCount++;
             
             this.world.componentsFiltersWith.Add(this.includedTypeIds, this);
             this.world.componentsFiltersWithout.Add(this.excludedTypeIds, this);
@@ -88,7 +89,78 @@ namespace Scellecs.Morpeh {
                 }
             }
         }
-        
+
+        [PublicAPI]
+        public void Dispose() {
+            this.world.ThreadSafetyCheck();
+            if (this.id >= 0) {
+                if (this.archetypes != null) {
+                    for (int i = 0; i < this.archetypesLength; i++) {
+                        var archetype = this.archetypes[i];
+                        archetype.RemoveFilter(this);
+                    }
+#if MORPEH_BURST
+#if MORPEH_DEBUG
+                    if (this.chunks != null && this.chunks.length > 0) {
+                        MLogger.LogWarning("The filter you're trying to dispose of was used in the Native API. Ensure you dispose of it only after all jobs that used it have completed.");
+                    }
+#endif
+                    this.chunks?.Clear();
+                    this.chunks = null;
+#endif
+                    Array.Clear(this.archetypes, 0, this.archetypes.Length);
+                    this.archetypes = null;
+                    this.archetypesLength = 0;
+                    this.archetypesCapacity = 0;
+                }
+
+                var incHash = default(TypeHash);
+                var excHash = default(TypeHash);
+
+                if (this.includedTypeIds != null) {
+                    for (int i = 0; i < this.includedTypeIds.Length; i++) {
+                        var typeId = this.includedTypeIds[i];
+                        if (ComponentId.TryGet(typeId, out var type)) {
+                            ComponentId.TryGet(type, out var info);
+                            incHash = incHash.Combine(info.hash);
+                        }
+                    }
+                    this.world.componentsFiltersWith.Remove(this.includedTypeIds, this);
+                    Array.Clear(this.includedTypeIds, 0, this.includedTypeIds.Length);
+                    this.includedTypeIds = null;
+                }
+
+                if (this.excludedTypeIds != null) {
+                    for (int i = 0; i < this.excludedTypeIds.Length; i++) {
+                        var typeId = this.excludedTypeIds[i];
+                        if (ComponentId.TryGet(typeId, out var type)) {
+                            ComponentId.TryGet(type, out var info);
+                            excHash = excHash.Combine(info.hash);
+                        }
+                    }
+                    this.world.componentsFiltersWithout.Remove(this.excludedTypeIds, this);
+                    Array.Clear(this.excludedTypeIds, 0, this.excludedTypeIds.Length);
+                    this.excludedTypeIds = null;
+                }
+
+                var lookup = this.world.filtersLookup;
+                if (lookup.TryGetValue(incHash.GetValue(), out var excludeMap)) {
+                    if (excludeMap.TryGetValue(excHash.GetValue(), out _)) {
+                        excludeMap.Remove(excHash.GetValue(), out _);
+                    }
+                }
+
+                this.includedTypeIdsLookup?.Clear();
+                this.includedTypeIdsLookup = null;
+                this.excludedTypeIdsLookup?.Clear();
+                this.excludedTypeIdsLookup = null;
+
+                this.world.freeFilterIDs.Push(this.id);
+                this.world.filterCount--;
+                this.id = -1;
+            }
+        }
+      
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetLengthSlow() {

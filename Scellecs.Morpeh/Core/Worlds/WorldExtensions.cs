@@ -28,21 +28,14 @@ namespace Scellecs.Morpeh {
     public static class WorldExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
-            var added = false;
-            var id    = -1;
+            var id = World.worlds.length;
+            if (id >= World.worldsGens.Length) {
+                var newCapacity = HashHelpers.GetCapacity(id) + 1;
+                ArrayHelpers.Grow(ref World.worldsGens, newCapacity);
+            }
 
-            for (int i = 0, length = World.worlds.length; i < length; i++) {
-                if (World.worlds.data[i] == null) {
-                    added                = true;
-                    id                   = i;
-                    World.worlds.data[i] = world;
-                    break;
-                }
-            }
-            if (added == false) {
-                World.worlds.Add(world);
-            }
-            world.identifier        = added ? id : World.worlds.length - 1;
+            world.identifier        = id;
+            world.generation        = World.worldsGens[id];
             world.freeEntityIDs     = new IntStack();
             world.stashes           = new IStash[WorldConstants.DEFAULT_STASHES_CAPACITY];
 
@@ -83,7 +76,23 @@ namespace Scellecs.Morpeh {
                 }
             }
 
+            world.ApplyAddWorld();
             return world;
+        }
+
+        internal static void ApplyAddWorld(this World world) {
+            World.worlds.Add(world);
+            World.worldsCount++;
+            World.defaultWorld = World.worlds.data[0];
+        }
+
+        internal static void ApplyRemoveWorld(this World world) {
+            unchecked {
+                World.worldsGens[world.identifier]++;
+            }
+            World.worlds.Remove(world);
+            World.worldsCount--;
+            World.defaultWorld = World.worldsCount > 0 ? World.worlds.data[0] : null;
         }
 
 #if MORPEH_UNITY && !MORPEH_DISABLE_AUTOINITIALIZATION
@@ -91,11 +100,15 @@ namespace Scellecs.Morpeh {
 #endif
         [PublicAPI]
         public static void InitializationDefaultWorld() {
-            foreach (var world in World.worlds) {
+            var worlds = World.worlds.data;
+            for (int i = World.worlds.length - 1; i >= 0; i--) {
+                var world = worlds[i];
                 if (!world.IsNullOrDisposed()) {
                     world.Dispose();
                 }
             }
+
+            World.worldsCount = 0;
             World.worlds.Clear();
             var defaultWorld = World.Create();
             defaultWorld.UpdateByUnity = true;
@@ -460,7 +473,7 @@ namespace Scellecs.Morpeh {
                 world.entitiesGens[entityId]++;
             }
         }
-        
+
         [PublicAPI]
         public static void WarmupArchetypes(this World world, int count) {
             world.ThreadSafetyCheck();

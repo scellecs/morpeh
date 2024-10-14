@@ -39,9 +39,11 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    internal static class ComponentId<T> where T : struct, IComponent {
+    public static class ComponentId<T> where T : struct, IComponent {
         internal static TypeInfo info;
         internal static bool initialized;
+
+        public static int StashSize;
         
         static ComponentId() {
             Warmup();
@@ -53,6 +55,8 @@
             }
             
             initialized = true;
+
+            StashSize = StashConstants.DEFAULT_COMPONENTS_CAPACITY;
 
             var typeId = ComponentsCounter.Increment();
             var typeHash = Math.Abs(7_777_777_777_777_777_773L * typeId);

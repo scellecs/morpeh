@@ -35,7 +35,7 @@ namespace Scellecs.Morpeh {
 #endif
             }
             else {
-                Destroy(this);
+                Destroy(this.gameObject);
             }
         }
 
@@ -54,9 +54,8 @@ namespace Scellecs.Morpeh {
                     world?.Dispose();
                 }
 
-                World.worlds.Clear();
-                World.worlds.Add(null);
-                
+                World.worldsCount = 0;
+                World.worlds.Clear();                
                 World.plugins?.Clear();
 
                 if (this != null && this.gameObject != null) {

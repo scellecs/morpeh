@@ -24,10 +24,17 @@ namespace Scellecs.Morpeh {
     public sealed partial class World : IDisposable {
         [CanBeNull]
         [PublicAPI]
-        public static World Default => worlds.data[0];
+        public static World Default => defaultWorld;
+        [CanBeNull]
+        internal static World defaultWorld;
         [NotNull]
         [PublicAPI]
-        internal static FastList<World> worlds = new FastList<World>().WithElement(null);
+        internal static FastList<World> worlds = new FastList<World>();
+        [NotNull]
+        [PublicAPI]
+        internal static byte[] worldsGens = new byte[4];
+
+        internal static int worldsCount = 0;
         
         [CanBeNull]
         internal static FastList<IWorldPlugin> plugins;
@@ -48,6 +55,8 @@ namespace Scellecs.Morpeh {
         public JobHandle JobHandle;
 #endif
         internal LongHashMap<LongHashMap<Filter>> filtersLookup;
+
+        internal IntStack freeFilterIDs;
 
         //todo custom collection
         [ShowInInspector]
@@ -102,6 +111,9 @@ namespace Scellecs.Morpeh {
         
         [ShowInInspector]
         internal int identifier;
+
+        [ShowInInspector]
+        internal int generation;
         
         [ShowInInspector]
         internal int threadIdLock;
@@ -119,7 +131,16 @@ namespace Scellecs.Morpeh {
 
         [PublicAPI]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static World Create() => new World().Initialize();
+        public static World Create() {
+            if (worldsCount == WorldConstants.MAX_WORLDS_COUNT) {
+#if MORPEH_DEBUG
+                MLogger.LogError($"Can not create a world, as the number of worlds has reached the limit of {WorldConstants.MAX_WORLDS_COUNT}");
+#endif
+                return null;
+            }
+
+            return new World().Initialize();
+        }
 
         private World() {
             this.threadIdLock = System.Threading.Thread.CurrentThread.ManagedThreadId;
@@ -132,6 +153,7 @@ namespace Scellecs.Morpeh {
 
             this.Filter = new FilterBuilder{ world = this };
             this.filtersLookup = new LongHashMap<LongHashMap<Filter>>();
+            this.freeFilterIDs = new IntStack();
         }
 
         [PublicAPI]
@@ -249,10 +271,10 @@ namespace Scellecs.Morpeh {
             
             this.archetypePool.Dispose();
             this.archetypePool = default;
-
-            worlds.Remove(this);
             
             this.IsDisposed = true;
+
+            this.ApplyRemoveWorld();
         }
 
         public struct Metrics {
