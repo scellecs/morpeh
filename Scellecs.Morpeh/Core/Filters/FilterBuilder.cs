@@ -10,19 +10,20 @@
     public sealed class FilterBuilder {
         internal World         world;
         internal FilterBuilder parent;
-        internal TypeInfo      typeInfo;
-        internal Filter.Mode   mode;
-        internal int           includeCount;
-        internal int           excludeCount;
         internal TypeHash      includeHash;
         internal TypeHash      excludeHash;
+        internal Filter.Mode   mode;
+        internal int           typeId;
+        internal int           includeCount;
+        internal int           excludeCount;
+        
         
         public FilterBuilder With<T>() where T : struct, IComponent {
             var info = ComponentId<T>.info;
             
             var current = this;
             while (current.parent != null) {
-                if (current.typeInfo.id == info.id && current.mode == Filter.Mode.Include) {
+                if (current.typeId == info.id && current.mode == Filter.Mode.Include) {
                     return this;
                 }
                 current = current.parent;
@@ -32,7 +33,7 @@
                 parent = this,
                 world = this.world,
                 mode = Filter.Mode.Include,
-                typeInfo = info,
+                typeId = info.id,
                 includeCount = this.includeCount + 1,
                 excludeCount = this.excludeCount,
                 includeHash = this.includeHash.Combine(info.hash),
@@ -45,7 +46,7 @@
             
             var current = this;
             while (current.parent != null) {
-                if (current.typeInfo.id == info.id && current.mode == Filter.Mode.Exclude) {
+                if (current.typeId == info.id && current.mode == Filter.Mode.Exclude) {
                     return this;
                 }
                 current = current.parent;
@@ -55,7 +56,7 @@
                 parent = this,
                 world = this.world,
                 mode = Filter.Mode.Exclude,
-                typeInfo = info,
+                typeId = info.id,
                 includeCount = this.includeCount,
                 excludeCount = this.excludeCount + 1,
                 includeHash = this.includeHash,
@@ -99,9 +100,9 @@
 
             while (current.parent != null) {
                 if (current.mode == Filter.Mode.Include) {
-                    includedTypeIds[includedTypeIdsIndex++] = current.typeInfo.id;
+                    includedTypeIds[includedTypeIdsIndex++] = current.typeId;
                 } else if (current.mode == Filter.Mode.Exclude) {
-                    excludedTypeIds[excludedTypeIdsIndex++] = current.typeInfo.id;
+                    excludedTypeIds[excludedTypeIdsIndex++] = current.typeId;
                 }
                 
                 current = current.parent;
