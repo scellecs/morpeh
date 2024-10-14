@@ -310,6 +310,7 @@ namespace Scellecs.Morpeh {
 #if !MORPEH_DISABLE_COMPONENT_DISPOSE
                 this.componentDispose?.Invoke(ref this.data[slotIndex]);
 #endif
+                this.data[slotIndex] = default;
                 return true;
             }
             
@@ -324,7 +325,8 @@ namespace Scellecs.Morpeh {
             if (this.componentDispose != null) {
                 foreach (var slotIndex in this.map) {
                     this.componentDispose.Invoke(ref this.data[slotIndex]);
-
+                    this.data[slotIndex] = default;
+                    
                     var entityId = this.map.GetKeyBySlotIndex(slotIndex);
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
                 }
@@ -333,12 +335,13 @@ namespace Scellecs.Morpeh {
 #endif
             {
                 foreach (var slotIndex in this.map) {
+                    this.data[slotIndex] = default;
+                    
                     var entityId = this.map.GetKeyBySlotIndex(slotIndex);
                     this.world.GetEntity(entityId).RemoveTransfer(this.typeId, this.offset);
                 }
             }
             
-            Array.Clear(this.data, 0, this.map.capacity);
             this.map.Clear();
         }
 
@@ -403,6 +406,7 @@ namespace Scellecs.Morpeh {
                 }
 
                 if (this.map.Remove(from.entityId.id, out _)) {
+                    this.data[slotIndex] = default;
                     from.RemoveTransfer(this.typeId, this.offset);
                 }
             }
