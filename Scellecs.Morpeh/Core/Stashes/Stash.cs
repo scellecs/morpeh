@@ -214,9 +214,6 @@ namespace Scellecs.Morpeh {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ref T Empty() => ref this.empty;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove(Entity entity) {
             this.world.ThreadSafetyCheck();
             
