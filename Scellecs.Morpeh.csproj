@@ -8,7 +8,7 @@
         <Title>Scellecs.Morpeh</Title>
         <Authors>Oleg Morozov, Igor Boyko</Authors>
         <Description>ECS Framework for Unity Game Engine and .Net Platform</Description>
-        <Copyright>Copyright (c) 2023 Oleg Morozov, Igor Boyko</Copyright>
+        <Copyright>Copyright (c) 2024 Oleg Morozov, Igor Boyko</Copyright>
         <PackageLicenseUrl>https://github.com/scellecs/morpeh/blob/master/LICENSE.md</PackageLicenseUrl>
         <PackageIcon>logo.png</PackageIcon>
         <PackageReadmeFile>README_NUGET.md</PackageReadmeFile>
@@ -121,6 +121,7 @@
       <None Remove="Core\MLogger.cs.meta" />
       <None Remove="Core\Native.meta" />
       <None Remove="Core\Stash.cs.meta" />
+      <None Remove="Core\StashMap.cs.meta" />
       <None Remove="Unity\BaseInstaller.cs.meta" />
       <None Remove="Unity\Editor.meta" />
       <None Remove="Unity\Installer.cs.meta" />
