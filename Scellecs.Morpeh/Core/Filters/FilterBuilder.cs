@@ -8,13 +8,15 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed class FilterBuilder {
-        internal World world;
+        internal World         world;
         internal FilterBuilder parent;
-        internal TypeInfo typeInfo;
-        internal Filter.Mode mode;
-        internal int level;
-        internal TypeHash includeHash;
-        internal TypeHash excludeHash;
+        internal TypeInfo      typeInfo;
+        internal Filter.Mode   mode;
+        internal int           level;
+        internal int           includeCount;
+        internal int           excludeCount;
+        internal TypeHash      includeHash;
+        internal TypeHash      excludeHash;
         
         public FilterBuilder With<T>() where T : struct, IComponent {
             var info = ComponentId<T>.info;
@@ -33,6 +35,8 @@
                 mode = Filter.Mode.Include,
                 typeInfo = info,
                 level = this.level + 1,
+                includeCount = this.includeCount + 1,
+                excludeCount = this.excludeCount,
                 includeHash = this.includeHash.Combine(info.hash),
                 excludeHash = this.excludeHash,
             };
@@ -55,6 +59,8 @@
                 mode = Filter.Mode.Exclude,
                 typeInfo = info,
                 level = this.level + 1,
+                includeCount = this.includeCount,
+                excludeCount = this.excludeCount + 1,
                 includeHash = this.includeHash,
                 excludeHash = this.excludeHash.Combine(info.hash),
             };
@@ -86,28 +92,28 @@
         
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal Filter CompleteBuild() {
-            var includedTypeIds = new FastList<int>(this.level);
-            var excludedTypeIds = new FastList<int>(this.level);
+            var includedTypeIds = new int[this.includeCount];
+            var includedTypeIdsIndex = 0;
+            
+            var excludedTypeIds = new int[this.excludeCount];
+            var excludedTypeIdsIndex = 0;
             
             var current = this;
 
             while (current.parent != null) {
                 if (current.mode == Filter.Mode.Include) {
-                    includedTypeIds.Add(current.typeInfo.id);
+                    includedTypeIds[includedTypeIdsIndex++] = current.typeInfo.id;
                 } else if (current.mode == Filter.Mode.Exclude) {
-                    excludedTypeIds.Add(current.typeInfo.id);
+                    excludedTypeIds[excludedTypeIdsIndex++] = current.typeInfo.id;
                 }
                 
                 current = current.parent;
             }
             
-            var includedTypeIdsSorted = includedTypeIds.ToArray();
-            Array.Sort(includedTypeIdsSorted);
+            Array.Sort(includedTypeIds);
+            Array.Sort(excludedTypeIds);
             
-            var excludedTypeIdsSorted = excludedTypeIds.ToArray();
-            Array.Sort(excludedTypeIdsSorted);
-            
-            return new Filter(this.world, includedTypeIdsSorted, excludedTypeIdsSorted);
+            return new Filter(this.world, includedTypeIds, excludedTypeIds);
         }
     }
 }
