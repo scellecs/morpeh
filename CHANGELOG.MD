@@ -19,9 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added ``Enumerator`` for ``Stash``.
 - Added ``Stash.Create<T>`` and ``Stash.CreateReflection`` methods to allow stash creation in user code.
 ### Changed
-- [Devirtualize stashes](https://github.com/scellecs/morpeh/pull/221)
+- [Devirtualize stashes](https://github.com/scellecs/morpeh/pull/221).
 - Changed method signature for ``GetValueRefByKey`` in ``NativeIntHashMap<TNative>``, added ``ref`` keyword to the first parameter.
-- Changed methods signatures for ``Get`` in ``NativeStash<TNative>``, added ``ref`` keyword to the first parameter."
+- Changed methods signatures for ``Get`` in ``NativeStash<TNative>``, added ``ref`` keyword to the first parameter.
 
 ## [2023.1.0] - 09.10.2023
 ### Fixed
