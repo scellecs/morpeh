@@ -42,16 +42,16 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetKeyBySlotIndex(int slotIndex) {
-            return slots.ptr[slotIndex].key - 1;
+            return this.slots.ptr[slotIndex].key - 1;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(int key) {
-            var rem = key & capacityMinusOne;
+            var rem = key & this.capacityMinusOne;
 
             int next;
-            for (var i = buckets.ptr[rem] - 1; i >= 0; i = next) {
-                var slot = slots.ptr[i];
+            for (var i = this.buckets.ptr[rem] - 1; i >= 0; i = next) {
+                var slot = this.slots.ptr[i];
                 if (slot.key - 1 == key) {
                     return true;
                 }
