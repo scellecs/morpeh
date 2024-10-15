@@ -55,7 +55,7 @@ Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) fo
 
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
 &nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git#stage-2023.1  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2023.1.0  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2023.1.1  
 
 ### .Net Platform
 
@@ -209,6 +209,7 @@ var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
 
 bool filterIsEmpty = filter.IsEmpty();
+bool filterIsNotEmpty = filter.IsNotEmpty();
 int filterLengthCalculatedOnCall = filter.GetLengthSlow();
 
 ```
@@ -232,6 +233,9 @@ bool hasHealthComponent = healthStash.Has(entity);
 
 //delete all components that type from the world
 healthStash.RemoveAll();
+
+bool healthStashIsEmpty = healthStash.IsEmpty();
+bool healthStashIsNotEmpty = healthStash.IsNotEmpty();
 
 var newEntity = this.World.CreateEntity();
 //transfers a component from one entity to another
@@ -832,7 +836,8 @@ Can be set by user:
 * `MORPEH_THREAD_SAFETY` Define that forces the kernel to validate that all calls come from the same thread the world was created on. The binding to a thread can be changed using the `World.GetThreadId()`, `World.SetThreadId()` methods.
 * `MORPEH_DISABLE_SET_ICONS` Define for disabling set icons in Project Window.
 * `MORPEH_DISABLE_AUTOINITIALIZATION` Define for disable default world creation and creating Morpeh Runner GameObject.
-
+* `MORPEH_DISABLE_COMPILATION_REPORT` Define for disable compilation report in Editor Console.
+* `MORPEH_DISABLE_COMPONENT_DISPOSE` Define to disable component disposing feature.
 Will be set by framework:
 * `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
 
@@ -875,6 +880,7 @@ To debug the game, you may need statistics on basic data in the ECS framework, s
 4. Number of systems
 5. Number of commits in the world
 6. Number of entity migrations
+7. Number of stash resizes
 
 You can find all this in the profiler window.  
 To do this, you need to add the official **Unity Profiling Core API** package to your project.  

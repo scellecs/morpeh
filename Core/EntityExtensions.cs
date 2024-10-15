@@ -134,7 +134,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
 #endif
-        public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
+        public static unsafe void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed() || to.IsNullOrDisposed()) {
                 throw new Exception("[MORPEH] You are trying MigrateTo on null or disposed entities");
@@ -143,9 +143,15 @@ namespace Scellecs.Morpeh {
 
             var world = from.world;
 
+            var components = stackalloc int[from.components.count];
+            var idx = 0;
             foreach (var offset in from.components) {
-                var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
-                var stash = Stash.stashes.data[world.stashes.GetValueByKey(id)];
+                components[idx++] = offset;
+            }
+
+            for (int i = 0; i < idx; i++) {
+                var id = CommonTypeIdentifier.offsetTypeAssociation[components[i]].id;
+                var stash = world.stashes.GetValueByKey(id);
                 stash.Migrate(from, to, overwrite);
             }
         }
@@ -271,7 +277,7 @@ namespace Scellecs.Morpeh {
             if (entity.currentArchetypeLength > 0) {
                 foreach (var offset in entity.components) {
                     var id = CommonTypeIdentifier.offsetTypeAssociation[offset].id;
-                    var stash = Stash.stashes.data[entity.world.stashes.GetValueByKey(id)];
+                    var stash = entity.world.stashes.GetValueByKey(id);
                     stash.Clean(entity);
                 }
             }

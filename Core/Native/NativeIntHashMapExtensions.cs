@@ -32,9 +32,8 @@ namespace Scellecs.Morpeh.Native {
             return nativeIntHashMap;
         }
         
-        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref TNative GetValueRefByKey<TNative>(this NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
+        public static ref TNative GetValueRefByKey<TNative>(this ref NativeIntHashMap<TNative> nativeIntHashMap, in int key) where TNative : unmanaged {
             var rem = key & *nativeIntHashMap.capacityMinusOnePtr;
 
             int next;
@@ -47,7 +46,7 @@ namespace Scellecs.Morpeh.Native {
                 next = slot.next;
             }
 
-            return ref UnsafeUtility.ArrayElementAsRef<TNative>(nativeIntHashMap.data, 0);
+            return ref nativeIntHashMap.empty;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

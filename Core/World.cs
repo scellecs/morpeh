@@ -91,9 +91,7 @@ namespace Scellecs.Morpeh {
         internal IntStack nextFreeEntityIDs;
 
         [ShowInInspector]
-        internal LongHashMap<int> stashes;
-        [ShowInInspector]
-        internal LongHashMap<int> typedStashes;
+        internal LongHashMap<Stash> stashes;
 
         [ShowInInspector]
         internal LongHashMap<Archetype> archetypes;
@@ -112,7 +110,7 @@ namespace Scellecs.Morpeh {
 
         [ShowInInspector]
         internal string friendlyName;
-
+        
         [ShowInInspector]
         internal int threadIdLock;
         
@@ -137,9 +135,12 @@ namespace Scellecs.Morpeh {
 
         private World() => this.Ctor();
 
-        //todo rework defines to conditionals
         [PublicAPI]
         public void Dispose() {
+            if (this.IsDisposed) {
+                return;
+            }
+            
             if (plugins != null) {
                 foreach (var plugin in plugins) {
 #if MORPEH_DEBUG
@@ -234,7 +235,7 @@ namespace Scellecs.Morpeh {
             var tempStashes = new FastList<Stash>();
 
             foreach (var stashId in this.stashes) {
-                var stash = Stash.stashes.data[this.stashes.GetValueByIndex(stashId)];
+                var stash = this.stashes.GetValueByIndex(stashId);
                 tempStashes.Add(stash);
             }
 
@@ -246,7 +247,7 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose stash with id {stash.commonStashId}");
+                    MLogger.LogError($"Can not dispose stash with type id {stash.typeId}");
                     MLogger.LogException(e);
                 }
 #endif
@@ -254,8 +255,6 @@ namespace Scellecs.Morpeh {
 
             this.stashes.Clear();
             this.stashes = null;
-            this.typedStashes.Clear();
-            this.typedStashes = null;
 
             foreach (var archetype in this.archetypes) {
 #if MORPEH_DEBUG
@@ -292,6 +291,7 @@ namespace Scellecs.Morpeh {
             public int systems;
             public int commits;
             public int migrations;
+            public int stashResizes;
         }
     }
 }
