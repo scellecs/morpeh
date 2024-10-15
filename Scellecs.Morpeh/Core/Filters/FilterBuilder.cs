@@ -97,6 +97,10 @@
         }
         
         public FilterBuilder Copy() {
+            if (this.contextVersion != this.context.version) {
+                FilterBuilderReuseException.Throw();
+            }
+            
             var ctx = ContextPool.Get();
             
             if (this.context.withCount > ctx.with.Length) {
@@ -126,6 +130,10 @@
         }
 
         public Filter Build() {
+            if (this.contextVersion != this.context.version) {
+                FilterBuilderReuseException.Throw();
+            }
+            
             Filter filter;
             
             var lookup = this.world.filtersLookup;
