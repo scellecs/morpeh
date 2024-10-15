@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="Unity/Utils/Editor/Resources/logo.png" width="260" height="260" alt="Morpeh">
+    <img src="Scellecs.Morpeh/Unity/Utils/Editor/Resources/logo.png" width="260" height="260" alt="Morpeh">
 </p>
 
 # Morpeh [![License](https://img.shields.io/github/license/scellecs/morpeh?color=3750c1&style=flat-square)](LICENSE.md) [![Unity](https://img.shields.io/badge/Unity-2020.3+-2296F3.svg?color=3750c1&style=flat-square)](https://unity.com/) [![Version](https://img.shields.io/github/package-json/v/scellecs/morpeh?color=3750c1&style=flat-square)](package.json)
@@ -27,6 +27,8 @@
     * [Defines](#%EF%B8%8F-defines)
     * [World Plugins](#%EF%B8%8F-world-plugins)
     * [Metrics](#-metrics)
+    * [Clone a stash](#2%EF%B8%8F⃣-clone-a-stash)
+    * [Stash size](#-stash-size)
 * [Plugins](#-plugins)
 * [Examples](#-examples)
 * [Games](#-games)
@@ -53,9 +55,9 @@ Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) fo
 ![installation_step2.png](Gifs~/installation_step2.png)
 </details>
 
-&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git  
-&nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git#stage-2023.1  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git#2023.1.1  
+&nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh  
+&nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#stage-2024.1  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#2024.1.1  
 
 ### .Net Platform
 
@@ -900,6 +902,69 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 
 ![metrics.png](Gifs~/metrics.png)
 </details>
+
+####  2️⃣ Clone a stash
+
+If you have **unmanaged** components, you can create clone of stash for saving data for some purpose.  
+
+For example:
+```c#
+[System.Serializable]
+public struct TestComponent0 : IComponent {
+    public int test0;
+    public float test1;
+    public byte test2;
+}
+
+public class FooSystem : ISystem {
+    public World World { get; set; }
+
+    private Filter filter;
+    private Stash<TestComponent0> stash;
+    private Stash<TestComponent0> cloneStash;
+
+    public void OnAwake() {
+        this.filter = this.World.Filter.With<TestComponent0>().Build();
+        this.stash = this.World.GetStash<TestComponent0>();
+        for (int i = 0, length = 1_000; i < length; i++) {
+            var e = this.World.CreateEntity();
+            e.AddComponent<TestComponent0>();
+        }
+
+        //creating clone of the stash
+        this.cloneStash = this.stash.Clone();
+        
+        //or simply create empty stash with optional capacity
+        this.cloneStash = new Stash<TestComponent0>(capacity: 463829);
+    }
+    
+    public void OnUpdate(float deltaTime) {
+        foreach (var entity in this.filter) {
+            this.stash.Get(entity).test0++;
+        }
+        
+        //copy data from origin stash
+        this.cloneStash.CopyFrom(this.stash);
+        
+        foreach (var entity in this.filter) {
+            Debug.Log(this.cloneStash.Get(entity).test0);
+        }
+    }
+    
+    public void Dispose() {
+    }
+}
+```
+
+#### 📏 Stash size
+
+If you know the expected number of components in a stash, you have the option to set a base size to prevent resizing and avoid unnecessary allocations.
+
+```c#
+ComponentId<T>.StashSize = 1024;
+```
+
+This value is not tied to a specific ``World``, so it needs to be set before starting ECS, so that all newly created stashes of this type in any ``World`` have the specified capacity.
 
 ---
 
