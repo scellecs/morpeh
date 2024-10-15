@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added ``MORPEH_DISABLE_COMPILATION_REPORT`` and ``MORPEH_DISABLE_COMPONENT_DISPOSE`` defines.
 - Added ``Length`` property to ``Stash``.
 - Added ``Enumerator`` for ``Stash``.
-- Added ``Stash.Create<T>`` and ``Stash.CreateReflection`` methods to allow stash creation in user code.
 ### Changed
 - [Devirtualize stashes](https://github.com/scellecs/morpeh/pull/221).
 - Changed method signature for ``GetValueRefByKey`` in ``NativeIntHashMap<TNative>``, added ``ref`` keyword to the first parameter.
