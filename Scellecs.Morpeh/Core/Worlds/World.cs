@@ -43,11 +43,14 @@ namespace Scellecs.Morpeh {
 
         [PublicAPI]
         [NotNull]
-        public FilterBuilder Filter;
+        public FilterBuilder Filter => FilterBuilder.Create(this);
+        
         [PublicAPI]
         public bool UpdateByUnity;
+        
         [PublicAPI]
         public bool DoNotDisableSystemOnException;
+        
         [PublicAPI]
         public bool IsDisposed;
 #if MORPEH_BURST
@@ -151,7 +154,6 @@ namespace Scellecs.Morpeh {
             this.pluginSystemsGroups = new FastList<SystemsGroup>();
             this.newPluginSystemsGroups = new FastList<SystemsGroup>();
 
-            this.Filter = new FilterBuilder{ world = this };
             this.filtersLookup = new LongHashMap<LongHashMap<Filter>>();
             this.freeFilterIDs = new IntStack();
         }
@@ -227,8 +229,6 @@ namespace Scellecs.Morpeh {
 
             this.freeEntityIDs.Clear();
             this.freeEntityIDs = null;
-            
-            this.Filter = null;
             
             this.filterCount = 0;
             
