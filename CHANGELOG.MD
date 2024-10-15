@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2023.1.1] - 15.10.2024
+### Fixed
+- Fixed ``Stash.IsEmpty`` never being true.
+- Fixed ``Stash.RemoveAll`` breaking the stash.
+- Fixed ``World.Dispose`` throwing on multiple calls.
+- Fixed ``WorldBrowser`` inability to update world view list by @skelitheprogrammer.
+- Fixed ``MigrateTo`` broken enumerator.
+- Fixed ``World.CleanupUpdate`` small allocation.
+### Added
+- Added ``IBoxedAspectFactory`` to allow aspects to be created via DI by @vanifatovvlad.
+- Added ``MORPEH_DISABLE_COMPILATION_REPORT`` and ``MORPEH_DISABLE_COMPONENT_DISPOSE`` defines.
+- Added ``Length`` property to ``Stash``.
+- Added ``Enumerator`` for ``Stash``.
+### Changed
+- [Devirtualize stashes](https://github.com/scellecs/morpeh/pull/221).
+- Changed method signature for ``GetValueRefByKey`` in ``NativeIntHashMap<TNative>``, added ``ref`` keyword to the first parameter.
+- Changed methods signatures for ``Get`` in ``NativeStash<TNative>``, added ``ref`` keyword to the first parameter.
+
 ## [2023.1.0] - 09.10.2023
 ### Fixed
 - Fix `NativeFilter` allocations.
