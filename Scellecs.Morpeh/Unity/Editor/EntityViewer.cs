@@ -8,8 +8,8 @@ namespace Scellecs.Morpeh.Editor {
 
     [Serializable]
     internal class EntityViewer {
-        internal Func<Entity> getter = () => default;
-        private  Entity       entity => this.getter();
+        internal World world;
+        internal Entity entity;
 
         private readonly List<ComponentView> componentViews = new List<ComponentView>();
 
@@ -21,25 +21,24 @@ namespace Scellecs.Morpeh.Editor {
         private List<ComponentView> ComponentsOnEntity {
             get {
                 this.componentViews.Clear();
-                if (this.entity != default && this.entity.GetWorld() != null) {
-
-                    // TODO: This has to be filtered via archetype instead of trying all stashes
-                    var stashes = this.entity.GetWorld().stashes;
-                    foreach (var stash in stashes) {
-                        if (stash == null) {
-                            continue;
-                        }
-                        
-                        if (stash.Has(this.entity)) {
-                            var view = new ComponentView {
-                                internalTypeDefinition = ExtendedComponentId.Get(stash.Type),
-                                entity = this.entity,
-                            };
-                            this.componentViews.Add(view);
-                        }
-                    }
+                
+                if (this.world == null || this.world.IsDisposed || !this.world.Has(entity)) {
+                    return this.componentViews;
                 }
 
+                var archetype = this.world.entities[entity.Id].currentArchetype;
+                if (archetype == null) {
+                    return this.componentViews;
+                }
+                
+                foreach (var typeId in archetype.components) {
+                    var view = new ComponentView {
+                        internalTypeDefinition = ExtendedComponentId.Get(this.world.stashes[typeId].Type),
+                        entity = this.entity,
+                    };
+                    this.componentViews.Add(view);
+                }
+                
                 return this.componentViews;
             }
             set { }

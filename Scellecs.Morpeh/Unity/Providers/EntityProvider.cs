@@ -74,9 +74,6 @@ namespace Scellecs.Morpeh.Providers {
         }
 
         protected virtual void OnEnable() {
-#if UNITY_EDITOR
-            this.entityViewer.getter = () => this.Entity;
-#endif
             if (this.IsEditmodeOrPrefab()) {
                 return;
             }
@@ -85,6 +82,11 @@ namespace Scellecs.Morpeh.Providers {
             
             this.PreInitialize();
             this.Initialize();
+            
+#if UNITY_EDITOR
+            this.entityViewer.world = World.Default;
+            this.entityViewer.entity = this.Entity;
+#endif
         }
 
         protected virtual void OnDisable() {
@@ -105,6 +107,11 @@ namespace Scellecs.Morpeh.Providers {
                     map.Set(instanceId, item, out _);
                 }
             }
+            
+#if UNITY_EDITOR
+            this.entityViewer.world = default;
+            this.entityViewer.entity = default;
+#endif
         }
 
         private bool IsPrefab() => this.gameObject.scene.rootCount == 0;
