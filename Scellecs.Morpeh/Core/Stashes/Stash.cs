@@ -61,11 +61,11 @@ namespace Scellecs.Morpeh {
         public ref T Add(Entity entity) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
-
+            
+#if MORPEH_DEBUG
             var previousCapacity = this.map.capacity;
 #endif
             if (!this.TryAddData(entity.Id, default, out var slotIndex)) {
@@ -85,11 +85,11 @@ namespace Scellecs.Morpeh {
         public ref T Add(Entity entity, out bool exist) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
+#if MORPEH_DEBUG
             var previousCapacity = this.map.capacity;
 #endif
             if (this.TryAddData(entity.Id, default, out var slotIndex)) {
@@ -111,11 +111,11 @@ namespace Scellecs.Morpeh {
         public bool Add(Entity entity, in T value) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
+#if MORPEH_DEBUG
             var previousCapacity = this.map.capacity;
 #endif
             if (!this.TryAddData(entity.Id, value, out _)) {
@@ -135,19 +135,15 @@ namespace Scellecs.Morpeh {
         public ref T Get(Entity entity) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 
-            if (!this.map.Has(entity.Id)) {
-                InvalidGetOperationException.ThrowMissing(entity, typeof(T));
-            }
-#endif
             if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
                 return ref this.data[dataIndex];
             }
-            
+
+            InvalidGetOperationException.ThrowMissing(entity, typeof(T));
             return ref this.empty;
         }
 
@@ -155,11 +151,10 @@ namespace Scellecs.Morpeh {
         public ref T Get(Entity entity, out bool exist) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
-#endif
+
             if (this.map.TryGetIndex(entity.Id, out var dataIndex))
             {
                 exist = true;
@@ -174,11 +169,11 @@ namespace Scellecs.Morpeh {
         public void Set(Entity entity) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
+#if MORPEH_DEBUG
             var previousCapacity = this.map.capacity;
 #endif
 
@@ -196,10 +191,11 @@ namespace Scellecs.Morpeh {
         public void Set(Entity entity, in T value) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
+            
+#if MORPEH_DEBUG
             var previousCapacity = this.map.capacity;
 #endif
 
@@ -217,11 +213,9 @@ namespace Scellecs.Morpeh {
         public bool Remove(Entity entity) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidRemoveOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
-#endif
 
             if (this.map.Remove(entity.Id, out var slotIndex)) {
                 this.world.TransientChangeRemoveComponent(entity.Id, ref this.typeInfo);
@@ -277,7 +271,6 @@ namespace Scellecs.Morpeh {
         public void Migrate(Entity from, Entity to, bool overwrite = true) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(from)) {
                 InvalidMigrateOperationException.ThrowDisposedEntityFrom(from, typeof(T));
             }
@@ -286,6 +279,7 @@ namespace Scellecs.Morpeh {
                 InvalidMigrateOperationException.ThrowDisposedEntityTo(to, typeof(T));
             }
             
+#if MORPEH_DEBUG
             var previousCapacity = this.map.capacity;
 #endif
 
@@ -326,11 +320,9 @@ namespace Scellecs.Morpeh {
         public bool Has(Entity entity) {
             this.world.ThreadSafetyCheck();
             
-#if MORPEH_DEBUG
             if (this.world.IsDisposed(entity)) {
                 InvalidHasOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
-#endif
 
             return this.map.Has(entity.Id);
         }
