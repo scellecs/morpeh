@@ -24,7 +24,10 @@ namespace Scellecs.Morpeh {
     public sealed partial class World : IDisposable {
         [CanBeNull]
         [PublicAPI]
-        public static World Default => defaultWorld;
+        public static World Default {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => defaultWorld;
+        }
         [CanBeNull]
         internal static World defaultWorld;
         [NotNull]
