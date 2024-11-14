@@ -32,6 +32,9 @@ namespace Scellecs.Morpeh {
         internal static FastList<World> worlds = new FastList<World>();
         [NotNull]
         [PublicAPI]
+        internal static IntStack freeWorldIDs = new IntStack();
+        [NotNull]
+        [PublicAPI]
         internal static byte[] worldsGens = new byte[4];
 
         internal static int worldsCount = 0;
