@@ -233,9 +233,9 @@ namespace Scellecs.Morpeh {
             this.freeEntityIDs.Clear();
             this.freeEntityIDs = null;
             
-            this.filterCount = 0;
-            
+            this.filterCount = 0;            
             this.filtersLookup = null;
+            this.freeFilterIDs.Clear();
 
             foreach (var stash in this.stashes) {
 #if MORPEH_DEBUG
