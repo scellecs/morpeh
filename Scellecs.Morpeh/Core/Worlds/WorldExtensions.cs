@@ -28,7 +28,7 @@ namespace Scellecs.Morpeh {
     public static class WorldExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
-            var id = World.worlds.length;
+            var id = World.freeWorldIDs.TryPop(out var freeID) ? freeID : World.worlds.length;
             if (id >= World.worldsGens.Length) {
                 var newCapacity = HashHelpers.GetCapacity(id) + 1;
                 ArrayHelpers.Grow(ref World.worldsGens, newCapacity);
@@ -90,6 +90,7 @@ namespace Scellecs.Morpeh {
             unchecked {
                 World.worldsGens[world.identifier]++;
             }
+            World.freeWorldIDs.Push(world.identifier);
             World.worlds.Remove(world);
             World.worldsCount--;
             World.defaultWorld = World.worldsCount > 0 ? World.worlds.data[0] : null;

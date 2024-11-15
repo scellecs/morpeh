@@ -24,12 +24,18 @@ namespace Scellecs.Morpeh {
     public sealed partial class World : IDisposable {
         [CanBeNull]
         [PublicAPI]
-        public static World Default => defaultWorld;
+        public static World Default {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => defaultWorld;
+        }
         [CanBeNull]
         internal static World defaultWorld;
         [NotNull]
         [PublicAPI]
         internal static FastList<World> worlds = new FastList<World>();
+        [NotNull]
+        [PublicAPI]
+        internal static IntStack freeWorldIDs = new IntStack();
         [NotNull]
         [PublicAPI]
         internal static byte[] worldsGens = new byte[4];
@@ -230,9 +236,9 @@ namespace Scellecs.Morpeh {
             this.freeEntityIDs.Clear();
             this.freeEntityIDs = null;
             
-            this.filterCount = 0;
-            
+            this.filterCount = 0;            
             this.filtersLookup = null;
+            this.freeFilterIDs.Clear();
 
             foreach (var stash in this.stashes) {
 #if MORPEH_DEBUG
