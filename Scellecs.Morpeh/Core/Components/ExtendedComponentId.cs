@@ -50,7 +50,10 @@
             var typeDefinition = new InternalTypeDefinition {
                 typeInfo = ComponentId<T>.info,
                 type = typeof(T),
-                entityGetComponentBoxed = (entity) => entity.GetWorld().GetStash<T>().Get(entity),
+                entityGetComponentBoxed = (entity) => {
+                    var stash = entity.GetWorld().GetStash<T>();
+                    return stash.Has(entity) ? stash.Get(entity) : default;
+                },
                 entitySetComponentBoxed = (entity, component) => entity.GetWorld().GetStash<T>().Set(entity, (T)component),
                 entityRemoveComponent = (entity) => entity.GetWorld().GetStash<T>().Remove(entity),
                 isMarker = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length == 0,

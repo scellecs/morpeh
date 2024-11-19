@@ -9,8 +9,8 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal static class ComponentId {
-        private static Dictionary<Type, TypeInfo> typeAssociation = new Dictionary<Type, TypeInfo>();
-        private static Dictionary<int, Type> idAssociation = new Dictionary<int, Type>();
+        internal static Dictionary<Type, TypeInfo> typeAssociation = new Dictionary<Type, TypeInfo>();
+        internal static Dictionary<int, Type> idAssociation = new Dictionary<int, Type>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Add(Type type, TypeInfo typeInfo) {
