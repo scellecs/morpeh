@@ -38,11 +38,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
                     this.SetExpandedAll(false);
                 }
 
-                if (!this.currentHandle.ArchetypesEqual(handle)) {
-                    this.UpdateComponentsList(handle);
-                }
-
                 this.currentHandle = handle;
+                this.UpdateComponentsList();
                 this.IncrementVersion();
             }
         }
@@ -84,9 +81,9 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.IncrementVersion();
         }
 
-        private void UpdateComponentsList(EntityHandle handle) {
+        private void UpdateComponentsList() {
             this.components.Clear();
-            var archetypeComponents = handle.Archetype.components;
+            var archetypeComponents = this.currentHandle.Archetype.components;
 
             foreach(var typeId in archetypeComponents) {
                 this.components.Add(new ComponentData() {

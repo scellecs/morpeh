@@ -88,24 +88,17 @@ namespace Scellecs.Morpeh.Utils.Editor {
             if (inc.Count == 0) {
                 this.filteredArchetypes.UnionWith(archetypesHashes);
             }
-            else {
-                var firstIncluded = inc[0];
-                if (this.componentsToArchetypes.TryGetValue(firstIncluded, out var initialArchetypes)) {
-                    this.filteredArchetypes.UnionWith(initialArchetypes.value);
-                }
-                else {
-                    return;
-                }
+            else if(this.componentsToArchetypes.TryGetValue(inc[0], out var initialArchetypes)) {
+                this.filteredArchetypes.UnionWith(initialArchetypes.value);
 
                 for (int i = 1; i < inc.Count; i++) {
                     var included = inc[i];
-                    if (this.componentsToArchetypes.TryGetValue(included, out var archetypes)) {
-                        this.filteredArchetypes.IntersectWith(archetypes.value);
-                    }
-                    else {
+                    if (!this.componentsToArchetypes.TryGetValue(included, out var archetypes)) {
                         this.filteredArchetypes.Clear();
                         return;
                     }
+
+                    this.filteredArchetypes.IntersectWith(archetypes.value);
                 }
             }
 

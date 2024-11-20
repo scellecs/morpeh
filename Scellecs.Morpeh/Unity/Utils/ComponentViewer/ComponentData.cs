@@ -29,7 +29,6 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 if (!IsValid) {
                     return null;
                 }
-
                 return this.internalTypeDefinition.entityGetComponentBoxed(this.entity);
             }
             set {
