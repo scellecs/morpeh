@@ -72,7 +72,6 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
         internal void SetSelectedEntityHandle(int index) {
             this.selectedHandle = index >= 0 ? this.filter.searchResult[index] : default;
-            this.selectedEntityIndex = index;
         }
 
         internal void SetSelectedWorldId(int id, bool state) {

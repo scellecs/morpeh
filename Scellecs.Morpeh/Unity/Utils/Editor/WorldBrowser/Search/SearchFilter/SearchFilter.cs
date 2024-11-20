@@ -17,12 +17,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         internal void Update(SearchFilterData input, List<World> worlds) {
-            this.UpdateWorldsList(worlds);
-
             if (!input.isValid) {
                 this.searchResult.Clear();
                 return;
             }
+
+            this.UpdateWorldsList(worlds);
 
             if (input.ids.Count > 0) {
                 this.FilterWorldsIds(input.ids);
