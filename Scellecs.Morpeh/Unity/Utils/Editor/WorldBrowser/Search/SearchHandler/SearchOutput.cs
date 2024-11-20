@@ -35,12 +35,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
             }
 
             foreach (var componentId in with.usedIds) {
-                var typeId = this.componentsStorage.componentTypeIds[componentId];
+                var typeId = this.componentsStorage.GetTypeIdByComponentId(componentId);
                 searchData.inc.Add(typeId);
             }
 
             foreach (var componentId in without.usedIds) {
-                var typeId = this.componentsStorage.componentTypeIds[componentId];
+                var typeId = this.componentsStorage.GetTypeIdByComponentId(componentId);
                 searchData.exc.Add(typeId);
             }
         }
@@ -82,7 +82,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         internal IList GetSource() {
-            return isValid ? this.componentsStorage.componentIds : this.suggestions;
+            return isValid ? this.componentsStorage.GetComponentIds() : this.suggestions;
         }
 
         internal bool Has(int componentId) { 
@@ -102,7 +102,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
         internal void UpdateSuggestions(ReadOnlySpan<char> invalidName) {
             this.isValid = invalidName.IsEmpty;
             if (!this.isValid) {
-                var suggestionsIndices = this.componentsStorage.componentsSearchTree.GetWordIndicesWithPrefix(invalidName, this.indicesBuffer);
+                var suggestionsIndices = this.componentsStorage.GetComponentIdsMatchesWithPrefix(invalidName, this.indicesBuffer);
                 this.suggestions.Clear();
                 this.suggestions.AddRange(suggestionsIndices.Where(idx => !this.usedIds.Contains(idx)));
             }

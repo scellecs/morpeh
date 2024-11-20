@@ -71,11 +71,11 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         private void ParseQueryParam(ReadOnlySpan<char> text, int tokenIndex, List<ParsedToken> target) { 
-            var indices = this.componentsStorage.componentsSearchTree.GetWordIndicesWithPrefix(text, this.indicesBuffer);
+            var indices = this.componentsStorage.GetComponentIdsMatchesWithPrefix(text, this.indicesBuffer);
             int componentId = SearchHelpers.INVALID_COMPONENT_ID;
 
             foreach (var idx in indices) {
-                if (this.componentsStorage.componentNames[idx].AsSpan().SequenceEqual(text)) {
+                if (this.componentsStorage.GetComponentNameById(idx).AsSpan().SequenceEqual(text)) {
                     componentId = idx;
                     break;
                 }

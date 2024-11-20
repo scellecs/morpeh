@@ -6,17 +6,19 @@ namespace Scellecs.Morpeh.Utils.Editor {
         private readonly SearchHandler searchHandler;
         private readonly SearchOutput searchOutput;
 
+        private long storageVersion;
         private long version;
 
-        internal HierarchySearch() {
-            this.componentsStorage = new ComponentsStorage();
+        internal HierarchySearch(ComponentsStorage componentsStorage) {
+            this.componentsStorage = componentsStorage;
             this.searchHandler = new SearchHandler(this.componentsStorage);
             this.searchOutput = new SearchOutput(this.componentsStorage);
+            this.storageVersion = -1u;
             this.version = 0u;
         }
 
         internal void Update() {
-            if (this.componentsStorage.ValidateUpdateCache()) {
+            if(this.storageVersion != this.componentsStorage.GetVersion()) {
                 this.searchHandler.Refresh();
                 this.Fetch();
             }
@@ -24,14 +26,6 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
         internal void FillSearchFilterData(SearchFilterData filterData) {
             this.searchOutput.FillFilterData(filterData);
-        }
-
-        internal string GetComponentName(int id) {
-            return this.componentsStorage.componentNames[id];
-        }
-
-        internal string GetComponentNameByTypeId(int typeId) {
-            return this.componentsStorage.componentNames[this.componentsStorage.typeIdToInternalId[typeId]];
         }
 
         internal string GetSearchString() {

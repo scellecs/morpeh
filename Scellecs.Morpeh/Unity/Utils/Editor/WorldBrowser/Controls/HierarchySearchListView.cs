@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine.UIElements;
 namespace Scellecs.Morpeh.Utils.Editor {
     internal sealed class HierarchySearchListView : ListView {
+        private readonly ComponentsStorage componentsStorage;
         private readonly HierarchySearch model;
         private readonly QueryParam queryParam;
         private readonly Stack<HierarchySearchListViewItem> pool;
 
-        internal HierarchySearchListView(HierarchySearch model, QueryParam param) {
+        internal HierarchySearchListView(HierarchySearch model, ComponentsStorage componentsStorage, QueryParam param) {
             this.model = model;
+            this.componentsStorage = componentsStorage;
             this.queryParam = param;
             this.pool = new Stack<HierarchySearchListViewItem>();
 
@@ -38,7 +40,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         private HierarchySearchListViewItem Rent() {
-            return this.pool.Count > 0 ? this.pool.Pop() : new HierarchySearchListViewItem(this.model, this.queryParam);
+            return this.pool.Count > 0 ? this.pool.Pop() : new HierarchySearchListViewItem(this.model, this.componentsStorage, this.queryParam);
         }
 
         private void Return(HierarchySearchListViewItem item) {

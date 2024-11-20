@@ -9,6 +9,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
         private const string HIERARCHY_STYLE_SHEET = "c411609523402cd49b3745cc501de47e";
         private const string INSPECTOR_STYLE_SHEET = "7a3a1c07f894eed4eb993bfae61a441a";
 
+        private ComponentsStorage componentsStorage;
         private HierarchySearch hierarchySearch;
         private Hierarchy hierarchy;
         private Inspector inspector;
@@ -48,9 +49,10 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             this.rootVisualElement.Clear();
 
-            this.hierarchySearch = new HierarchySearch();
+            this.componentsStorage = new ComponentsStorage();
+            this.hierarchySearch = new HierarchySearch(this.componentsStorage);
             this.hierarchy = new Hierarchy(this.hierarchySearch);
-            this.inspector = new Inspector(this.hierarchy, this.hierarchySearch);
+            this.inspector = new Inspector(this.hierarchy, this.componentsStorage);
 
             this.viewContainerStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(VIEW_CONTAINER_STYLE_SHEET);
             this.hierarchySearchStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(HIERARCHY_SEARCH_STYLE_SHEET);
@@ -58,7 +60,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.inspectorStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(INSPECTOR_STYLE_SHEET);
 
             this.splitterView = new SplitterView(250, 300);
-            this.hierarchySearchView = new HierarchySearchView(this.hierarchySearch);
+            this.hierarchySearchView = new HierarchySearchView(this.hierarchySearch, this.componentsStorage);
             this.hierarchyView = new HierarchyView(this.hierarchy);
             this.inspectorView = new InspectorView(this.inspector);
 
@@ -80,6 +82,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 return;
             }
 
+            this.componentsStorage.ValidateUpdateCache();
             this.hierarchySearch.Update();
             this.hierarchy.Update();
             this.inspector.Update();

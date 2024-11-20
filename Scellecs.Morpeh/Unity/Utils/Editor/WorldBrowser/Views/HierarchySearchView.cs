@@ -23,11 +23,13 @@ namespace Scellecs.Morpeh.Utils.Editor {
         private readonly HierarchySearchListView withListView;
         private readonly HierarchySearchListView withoutListView;
 
+        private readonly ComponentsStorage componentsStorage;
         private readonly HierarchySearch model;
         private long modelVersion;
 
-        internal HierarchySearchView(HierarchySearch model) {
+        internal HierarchySearchView(HierarchySearch model, ComponentsStorage componentsStorage) {
             this.model = model;
+            this.componentsStorage = componentsStorage;
             this.AddToClassList(HIERARCHY_SEARCH);
 
             this.inputFieldContainer = new VisualElement();
@@ -55,8 +57,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.searchInfoContainer.Add(this.withoutLabel);
             this.searchInfoContainer.Add(this.searchInfoTooltip);
 
-            this.withListView = new HierarchySearchListView(model, QueryParam.With);
-            this.withoutListView = new HierarchySearchListView(model, QueryParam.Without);
+            this.withListView = new HierarchySearchListView(this.model, this.componentsStorage, QueryParam.With);
+            this.withoutListView = new HierarchySearchListView(this.model, this.componentsStorage, QueryParam.Without);
             this.withListView.AddToClassList(SEARCH_LIST);
             this.withoutListView.AddToClassList(SEARCH_LIST);
 

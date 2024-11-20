@@ -76,14 +76,14 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         internal void RebuildWithReplacement(int index, int componentId) {
-            var name = this.componentsStorage.componentNames[componentId];
+            var name = this.componentsStorage.GetComponentNameById(componentId);
             var newValue = this.searchStringBuilder.BuildWithReplacement(this.tokens, this.SpanValue, index, name);
             this.SetValue(newValue);
         }
 
         internal void RebuildWithAddition(QueryParam param, int componentId) {
             var prefix = param.GetPrefix();
-            var name = this.componentsStorage.componentNames[componentId];
+            var name = this.componentsStorage.GetComponentNameById(componentId);
             var newValue = this.searchStringBuilder.BuildWithAddition(this.tokens, this.SpanValue, name, prefix);
             this.SetValue(newValue);
         }

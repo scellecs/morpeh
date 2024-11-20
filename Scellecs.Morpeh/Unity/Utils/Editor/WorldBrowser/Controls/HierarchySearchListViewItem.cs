@@ -7,14 +7,16 @@ namespace Scellecs.Morpeh.Utils.Editor {
         private const string LABEL = "hierarchy-search-components-list-item__label";
 
         private readonly HierarchySearch model;
+        private readonly ComponentsStorage componentsStorage;
         private readonly QueryParam queryParam;
         private readonly Label label;
         private readonly VisualElement checkmark;
 
         private int id;
 
-        internal HierarchySearchListViewItem(HierarchySearch model, QueryParam param) {
+        internal HierarchySearchListViewItem(HierarchySearch model, ComponentsStorage componentsStorage, QueryParam param) {
             this.model = model;
+            this.componentsStorage = componentsStorage;
             this.queryParam = param;
             this.id = -1;
 
@@ -33,7 +35,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
         internal void Bind(int id) {
             this.id = id;
-            this.label.text = this.model.GetComponentName(this.id);
+            this.label.text = this.componentsStorage.GetComponentNameById(this.id);
             this.UpdateVisualState(this.model.GetComponentIncluded(this.id, this.queryParam));
         }
 
