@@ -30,6 +30,10 @@ namespace Scellecs.Morpeh.Utils.Editor {
             return this.componentsStorage.componentNames[id];
         }
 
+        internal string GetComponentNameByTypeId(int typeId) {
+            return this.componentsStorage.componentNames[this.componentsStorage.typeIdToInternalId[typeId]];
+        }
+
         internal string GetSearchString() {
             return this.searchHandler.StringValue;
         }

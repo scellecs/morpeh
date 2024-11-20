@@ -4,14 +4,16 @@ using System.Collections.Generic;
 namespace Scellecs.Morpeh.Utils.Editor {
     internal sealed class Inspector {
         private readonly Hierarchy hierarchy;
+        private readonly HierarchySearch hierarchySearch;
         private readonly List<ComponentData> components;
         private readonly HashSet<int> expandedStates;
 
         private EntityHandle currentHandle;
         private long version;
 
-        internal Inspector(Hierarchy hierarchy) {
+        internal Inspector(Hierarchy hierarchy, HierarchySearch hierarchySearch) {
             this.hierarchy = hierarchy;
+            this.hierarchySearch = hierarchySearch;
             this.components = new List<ComponentData>();
             this.expandedStates = new HashSet<int>();
             this.currentHandle = default;
@@ -87,6 +89,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
             foreach(var typeId in archetypeComponents) {
                 this.components.Add(new ComponentData() {
                     internalTypeDefinition = ExtendedComponentId.Get(typeId),
+                    niceName = this.hierarchySearch.GetComponentNameByTypeId(typeId),
                     entity = this.currentHandle.entity
                 });
             }

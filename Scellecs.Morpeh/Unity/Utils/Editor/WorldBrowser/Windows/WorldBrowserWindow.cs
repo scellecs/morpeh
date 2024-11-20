@@ -50,7 +50,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             this.hierarchySearch = new HierarchySearch();
             this.hierarchy = new Hierarchy(this.hierarchySearch);
-            this.inspector = new Inspector(this.hierarchy);
+            this.inspector = new Inspector(this.hierarchy, this.hierarchySearch);
 
             this.viewContainerStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(VIEW_CONTAINER_STYLE_SHEET);
             this.hierarchySearchStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(HIERARCHY_SEARCH_STYLE_SHEET);

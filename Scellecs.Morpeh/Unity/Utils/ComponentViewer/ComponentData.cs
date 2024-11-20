@@ -6,11 +6,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
     [Serializable]
     internal struct ComponentData {
         internal ExtendedComponentId.InternalTypeDefinition internalTypeDefinition;
+        internal string niceName;
         internal Entity entity;
 
         internal bool IsMarker => this.internalTypeDefinition.isMarker;
         internal string FullName => this.internalTypeDefinition.type.FullName;
-        internal string Name => this.internalTypeDefinition.type.Name;
+        internal string Name => this.niceName;
         internal bool IsValid => !this.entity.GetWorld().IsNullOrDisposed() && !this.entity.GetWorld().IsDisposed(this.entity);
         internal int TypeId => this.internalTypeDefinition.typeInfo.id;
 
