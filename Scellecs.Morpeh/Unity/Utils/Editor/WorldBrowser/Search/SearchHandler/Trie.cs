@@ -5,24 +5,18 @@ using System.Linq;
 namespace Scellecs.Morpeh.Utils.Editor {
     internal sealed class Trie {
         internal struct Node {
-            internal int[] children; //TODO To Dictionary?
+            internal Dictionary<int, int> children;
             internal List<int> endOfWordsIndices;
 
             internal static Node Create() {
-                var node = new Node() {
-                    children = new int[ALPHABET_SIZE],
-                    endOfWordsIndices = new List<int>(),
+                return new Node() {
+                    children = new Dictionary<int, int>(),
+                    endOfWordsIndices = new List<int>()
                 };
-
-                Array.Fill(node.children, NULL);
-                return node;
             }
         }
 
-        private const int ALPHABET_SIZE = 128;
-        private const int NULL = -1;
-
-        internal readonly List<Node> nodes;
+        private readonly List<Node> nodes;
 
         internal Trie() {
             this.nodes = new List<Node> { Node.Create() };
@@ -32,10 +26,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
             var currentNodeIndex = 0;
 
             foreach (var ch in word) {
-                var charIndex = ch;
-                var nextNodeIndex = this.nodes[currentNodeIndex].children[charIndex];
-
-                if (nextNodeIndex == NULL) {
+                var charIndex = char.ToLower(ch);
+                if (!this.nodes[currentNodeIndex].children.TryGetValue(charIndex, out var nextNodeIndex)) {
                     nextNodeIndex = this.nodes.Count;
                     this.nodes.Add(Node.Create());
                     this.nodes[currentNodeIndex].children[charIndex] = nextNodeIndex;
@@ -52,19 +44,15 @@ namespace Scellecs.Morpeh.Utils.Editor {
             var currentNodeIndex = 0;
 
             foreach (var ch in prefix) {
-                var charIndex = ch;
-                if (charIndex > ALPHABET_SIZE) {
+                var charIndex = char.ToLower(ch);
+                if (!this.nodes[currentNodeIndex].children.TryGetValue(charIndex, out var nextNodeIndex)) {
                     return result;
                 }
 
-                var nextNodeIndex = this.nodes[currentNodeIndex].children[charIndex];
-                if (nextNodeIndex == NULL) {
-                    return result;
-                }
                 currentNodeIndex = nextNodeIndex;
             }
 
-            CollectIndices(currentNodeIndex, result);
+            this.CollectIndices(currentNodeIndex, result);
             return result;
         }
 
@@ -73,12 +61,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
             if (node.endOfWordsIndices.Any()) {
                 result.AddRange(node.endOfWordsIndices);
             }
-
-            for (int i = 0; i < node.children.Length; i++) {
-                var childIndex = node.children[i];
-                if (childIndex != NULL) {
-                    CollectIndices(childIndex, result);
-                }
+            foreach (var childIndex in node.children.Values) {
+                this.CollectIndices(childIndex, result);
             }
         }
     }
