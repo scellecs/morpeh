@@ -51,9 +51,9 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.searchInfoTooltip = new SearchInfoTooltip();
             this.searchInfoTooltip.AddTooltipHandler("Write id: to search for entities by ID.\nSearching by ID overrides any query request.");
 
-            this.searchInfoContainer.Add(withLabel);
-            this.searchInfoContainer.Add(withoutLabel);
-            this.searchInfoContainer.Add(searchInfoTooltip);
+            this.searchInfoContainer.Add(this.withLabel);
+            this.searchInfoContainer.Add(this.withoutLabel);
+            this.searchInfoContainer.Add(this.searchInfoTooltip);
 
             this.withListView = new HierarchySearchListView(model, QueryParam.With);
             this.withoutListView = new HierarchySearchListView(model, QueryParam.Without);

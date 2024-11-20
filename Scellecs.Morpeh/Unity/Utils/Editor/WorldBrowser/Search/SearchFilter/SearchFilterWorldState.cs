@@ -32,29 +32,28 @@ namespace Scellecs.Morpeh.Utils.Editor {
         internal void FetchArchetypes() {
             deletedArchetypes.Clear();
             var worldArchetypes = world.archetypes;
-            foreach (var archetypeHash in archetypesHashes)
-            {
+            foreach (var archetypeHash in this.archetypesHashes) {
                 if (!worldArchetypes.Has(archetypeHash)) {
-                    deletedArchetypes.Add(archetypeHash);
+                    this.deletedArchetypes.Add(archetypeHash);
                     RemoveArchetypeFromComponents(archetypeHash);
                 }
             }
 
-            archetypesHashes.ExceptWith(deletedArchetypes);
+            this.archetypesHashes.ExceptWith(deletedArchetypes);
 
             foreach (var idx in worldArchetypes) {
                 var archetype = worldArchetypes.GetValueByIndex(idx);
                 var archetypeHash = archetype.hash.GetValue();
 
-                if (archetypesHashes.Add(archetypeHash)) { 
+                if (this.archetypesHashes.Add(archetypeHash)) { 
                     UpdateComponentsForArchetype(archetype, archetypeHash);
                 }
             }
 
             void RemoveArchetypeFromComponents(long archetypeHash) {
-                if (archetypesToComponents.TryGetValue(archetypeHash, out var components)) {
+                if (this.archetypesToComponents.TryGetValue(archetypeHash, out var components)) {
                     foreach (var typeId in components.value) {
-                        if (componentsToArchetypes.TryGetValue(typeId, out var archetypes)) {
+                        if (this.componentsToArchetypes.TryGetValue(typeId, out var archetypes)) {
                             archetypes.value.Remove(archetypeHash);
                         }
                     }
@@ -66,13 +65,13 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 var index = 0;
                 foreach (var typeId in archetype.components) {
                     components.value[index++] = typeId;
-                    if (!componentsToArchetypes.TryGetValue(typeId, out var archetypes)) {
+                    if (!this.componentsToArchetypes.TryGetValue(typeId, out var archetypes)) {
                         archetypes = new ComponentToArchetypes { value = new HashSet<long>() }; //TODO
-                        componentsToArchetypes.Add(typeId, archetypes, out _);
+                        this.componentsToArchetypes.Add(typeId, archetypes, out _);
                     }
                     archetypes.value.Add(archetypeHash);
                 }
-                archetypesToComponents.Add(archetypeHash, components, out _);
+                this.archetypesToComponents.Add(archetypeHash, components, out _);
             }
         }
 
@@ -80,11 +79,11 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.filteredArchetypes.Clear();
 
             if (inc.Count == 0) {
-                filteredArchetypes.UnionWith(archetypesHashes);
+                this.filteredArchetypes.UnionWith(archetypesHashes);
             }
             else {
                 var firstIncluded = inc[0];
-                if (componentsToArchetypes.TryGetValue(firstIncluded, out var initialArchetypes)) {
+                if (this.componentsToArchetypes.TryGetValue(firstIncluded, out var initialArchetypes)) {
                     this.filteredArchetypes.UnionWith(initialArchetypes.value);
                 }
                 else {
@@ -93,7 +92,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
                 for (int i = 1; i < inc.Count; i++) {
                     var included = inc[i];
-                    if (componentsToArchetypes.TryGetValue(included, out var archetypes)) {
+                    if (this.componentsToArchetypes.TryGetValue(included, out var archetypes)) {
                         this.filteredArchetypes.IntersectWith(archetypes.value);
                     }
                     else {
@@ -104,8 +103,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
             }
 
             foreach (var excluded in exc) {
-                if (componentsToArchetypes.TryGetValue(excluded, out var archetypes)) {
-                    filteredArchetypes.ExceptWith(archetypes.value);
+                if (this.componentsToArchetypes.TryGetValue(excluded, out var archetypes)) {
+                    this.filteredArchetypes.ExceptWith(archetypes.value);
                 }
             }
         }

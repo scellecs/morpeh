@@ -69,7 +69,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.splitterView.hierarchyRoot.Add(this.hierarchyView);
             this.splitterView.inspectorRoot.Add(this.inspectorView);
 
-            this.rootVisualElement.Add(splitterView.root);
+            this.rootVisualElement.Add(this.splitterView.root);
         }
 
         private void Update() {
