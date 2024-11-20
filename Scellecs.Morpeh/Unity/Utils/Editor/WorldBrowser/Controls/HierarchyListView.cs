@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.UIElements;
 using HierarchyModel = Scellecs.Morpeh.Utils.Editor.Hierarchy;
 namespace Scellecs.Morpeh.Utils.Editor {
@@ -28,7 +29,23 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 this.Return(item);
             };
 
+            this.selectedIndicesChanged += (indices) => this.model.SetSelectedEntityHandle(indices.Any() ? indices.First() : -1);
             this.itemsSource = this.model.GetEntitiesSource();
+        }
+
+        internal void UpdateItems() {
+            this.RefreshItems();
+
+            var selection = this.model.GetSelectedEntityIndex();
+            if (selection >= 0 && selection < this.itemsSource.Count) {
+                this.selectedIndex = selection;
+            }
+
+            if (!this.model.GetSelectedEntityHandle().IsValid) {
+                if (this.selectedIndices.Any()) {
+                    this.ClearSelection();
+                }
+            }
         }
 
         protected override CollectionViewController CreateViewController() {

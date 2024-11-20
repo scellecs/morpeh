@@ -25,6 +25,10 @@ namespace Scellecs.Morpeh.Utils.Editor {
         public bool Equals(EntityHandle other) {
             return this.entity.Equals(other.entity) && this.archetypeHash.Equals(other.archetypeHash);
         }
+
+        public override string ToString() {
+            return $"{entity.Id}:{entity.Generation}, IsValid:{IsValid}, archetypeHash:{archetypeHash}";
+        }
     }
 }
 #endif

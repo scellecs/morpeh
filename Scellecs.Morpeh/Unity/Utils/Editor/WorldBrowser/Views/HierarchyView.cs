@@ -15,9 +15,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
         internal HierarchyView(HierarchyModel model) {
             this.model = model;
             this.toolbar = new HierarchyToolbar(this.model);
-
             this.listView = new HierarchyListView(this.model);
-            this.listView.selectedIndicesChanged += (index) => this.model.SetSelectedEntityHandle(index.First());
 
             this.viewContainer = new ViewContainer();
             this.viewContainer.SetToolbar(this.toolbar);
@@ -35,13 +33,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
         internal void SyncWithModel() {
             this.toolbar.Update();
-            this.listView.RefreshItems();
+            this.listView.UpdateItems();
             this.modelVersion = this.model.GetVersion();
-
-            var selection = this.model.GetSelectedEntityIndex();
-            if (selection >= 0 && selection < this.listView.itemsSource.Count) {
-                this.listView.selectedIndex = selection;
-            }
         }
     }
 }
