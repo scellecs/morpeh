@@ -24,6 +24,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
         private StyleSheet hierarchyStyleSheet;
         private StyleSheet inspectorStyleSheet;
 
+        private bool initialized;
+
         [MenuItem("Tools/Morpeh/WorldBrowser")]
         private static void OpenWindow() {
             GetWindow<WorldBrowserWindow>();
@@ -40,7 +42,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         private void CreateGUI() {
-            if (!Application.isPlaying) {
+            if (!Application.isPlaying || this.initialized) {
                 return;
             }
 
@@ -70,10 +72,11 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.splitterView.inspectorRoot.Add(this.inspectorView);
 
             this.rootVisualElement.Add(this.splitterView.root);
+            this.initialized = true;
         }
 
         private void Update() {
-            if (!Application.isPlaying) {
+            if (!this.initialized) {
                 return;
             }
 
@@ -90,6 +93,10 @@ namespace Scellecs.Morpeh.Utils.Editor {
             if (state == PlayModeStateChange.ExitingPlayMode) {
                 this.inspectorView?.Dispose();
                 this.rootVisualElement.Clear();
+                this.initialized = false;
+            }
+            else if (state == PlayModeStateChange.EnteredPlayMode) {
+                this.CreateGUI();
             }
         }
     }
