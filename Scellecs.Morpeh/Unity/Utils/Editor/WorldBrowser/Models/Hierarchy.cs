@@ -40,10 +40,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.RemapWorlds();
             this.filter.Update(this.searchData, this.worlds);
             this.selectedEntityIndex = this.filter.searchResult[this.selectedHandle];
-
-            unchecked {
-                this.version++;
-            }
+            this.IncrementVersion();
         }
 
         internal EntityHandle GetSelectedEntityHandle() {
@@ -54,7 +51,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
             return this.filter.searchResult;
         }
 
-        internal List<int> GetWorldsSource() {
+        internal IList GetWorldsSource() {
             return this.worldIdentifiers;
         }
 
@@ -71,7 +68,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         internal void SetSelectedEntityHandle(int index) {
-            this.selectedHandle = index >= 0 ? this.filter.searchResult[index] : default;
+            this.selectedHandle = this.filter.searchResult[index];
+            this.selectedEntityIndex = index;
         }
 
         internal void SetSelectedWorldId(int id, bool state) {
@@ -100,6 +98,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 if (this.worldsMap.TryGetValue(identifier, out var world)) {
                     this.worlds.Add(world);
                 }
+            }
+        }
+
+        private void IncrementVersion() {
+            unchecked {
+                this.version++;
             }
         }
     }

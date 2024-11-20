@@ -22,6 +22,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
         internal void Update() {
             var handle = this.hierarchy.GetSelectedEntityHandle();
+
             if (!this.currentHandle.IsValid && !handle.IsValid) {
                 if (this.components.Count > 0) {
                     this.components.Clear();
@@ -32,15 +33,15 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 return;
             }
 
-            if (!this.currentHandle.EntitiesEqual(handle)) {
-                this.SetExpandedAll(false);
-            }
-
-            if (!this.currentHandle.ArchetypesEqual(handle)) {
-                this.UpdateComponentsList(handle);
-            }
-
             if (!this.currentHandle.Equals(handle)) {
+                if (!this.currentHandle.EntitiesEqual(handle)) {
+                    this.SetExpandedAll(false);
+                }
+
+                if (!this.currentHandle.ArchetypesEqual(handle)) {
+                    this.UpdateComponentsList(handle);
+                }
+
                 this.currentHandle = handle;
                 this.IncrementVersion();
             }
@@ -72,13 +73,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         internal void SetExpandedAll(bool value) {
+            this.expandedStates.Clear();
+
             if (value) {
                 foreach (var componentData in this.components) {
                     this.expandedStates.Add(componentData.TypeId);
                 }
-            }
-            else {
-                this.expandedStates.Clear();
             }
 
             this.IncrementVersion();
@@ -87,6 +87,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
         private void UpdateComponentsList(EntityHandle handle) {
             this.components.Clear();
             var archetypeComponents = handle.Archetype.components;
+
             foreach(var typeId in archetypeComponents) {
                 this.components.Add(new ComponentData() {
                     internalTypeDefinition = ExtendedComponentId.Get(typeId),

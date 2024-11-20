@@ -28,8 +28,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 item.Reset();
                 this.Return(item);
             };
+            this.selectedIndicesChanged += (indices) => {
+                if (indices.Any()) {
+                    this.model.SetSelectedEntityHandle(indices.First());
+                }
+            };
 
-            this.selectedIndicesChanged += (indices) => this.model.SetSelectedEntityHandle(indices.Any() ? indices.First() : -1);
             this.itemsSource = this.model.GetEntitiesSource();
         }
 
@@ -40,11 +44,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
             if (selection >= 0 && selection < this.itemsSource.Count) {
                 this.selectedIndex = selection;
             }
-
-            if (!this.model.GetSelectedEntityHandle().IsValid) {
-                if (this.selectedIndices.Any()) {
-                    this.ClearSelection();
-                }
+            else if(this.selectedIndices.Any()) {
+                this.ClearSelection();
             }
         }
 

@@ -1,5 +1,4 @@
 ﻿#if UNITY_EDITOR
-using System.Linq;
 using UnityEngine.UIElements;
 using HierarchyModel = Scellecs.Morpeh.Utils.Editor.Hierarchy;
 namespace Scellecs.Morpeh.Utils.Editor {
