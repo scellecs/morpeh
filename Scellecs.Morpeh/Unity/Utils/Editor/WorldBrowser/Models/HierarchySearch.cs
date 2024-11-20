@@ -19,6 +19,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
         internal void Update() {
             if(this.storageVersion != this.componentsStorage.GetVersion()) {
+                this.storageVersion = this.componentsStorage.GetVersion();
                 this.searchHandler.Refresh();
                 this.Fetch();
             }
