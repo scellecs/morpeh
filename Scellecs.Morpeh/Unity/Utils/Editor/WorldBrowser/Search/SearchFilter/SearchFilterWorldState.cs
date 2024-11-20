@@ -2,11 +2,9 @@
 using Scellecs.Morpeh.Collections;
 using System.Buffers;
 using System.Collections.Generic;
-using UnityEngine.Pool;
 namespace Scellecs.Morpeh.Utils.Editor {
     internal sealed class SearchFilterWorldState {
         internal readonly ArrayPool<int> arrayPool;
-        internal readonly HashSetPool<long> hashSetPool;
         internal readonly HashSet<long> archetypesHashes;
         internal readonly HashSet<long> deletedArchetypes;
         internal readonly HashSet<long> filteredArchetypes;
@@ -16,7 +14,6 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
         internal SearchFilterWorldState() {
             this.arrayPool = ArrayPool<int>.Create();
-            //this.hashSetPool = HashSetP
             this.archetypesHashes = new HashSet<long>();
             this.deletedArchetypes = new HashSet<long>();
             this.filteredArchetypes = new HashSet<long>();
