@@ -89,7 +89,7 @@
     flex-shrink: 0;
     width: 16px;
     height: 16px;
-    background-image: resource("_Help");
+    background-image: resource("d__Help");
 }
 
 .hierarchy-search-tooltip-label {
