@@ -55,12 +55,16 @@ namespace Scellecs.Morpeh.Utils.Editor {
             return this.worldIdentifiers;
         }
 
-        internal long GetVersion() {
-            return this.version;
-        }
-
         internal int GetSelectedEntityIndex() {
             return this.selectedEntityIndex;
+        }
+
+        internal int GetTotalEntitiesFound() {
+            return this.filter.searchResult.Count;
+        }
+
+        internal long GetVersion() {
+            return this.version;
         }
 
         internal bool IsSelectedWorldId(int id) {

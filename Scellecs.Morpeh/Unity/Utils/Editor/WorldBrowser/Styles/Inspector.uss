@@ -46,8 +46,8 @@
 }
 
 .expand-all-toggle__checkmark {
-    width: 13px;
-    height: 13px;
+    width: 10px;
+    height: 10px;
     margin-right: 4px;
     background-image: resource("d_forward@2x");
     -unity-background-image-tint-color: rgb(200, 200, 200);

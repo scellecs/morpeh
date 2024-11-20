@@ -5,10 +5,13 @@ namespace Scellecs.Morpeh.Utils.Editor {
     internal sealed class HierarchyToolbar : VisualElement {
         private const string TOOLBAR = "hierarchy-toolbar";
         private const string DROPDOWN = "hierarchy-world-selector-dropdown";
+        private const string WORLDS_LABEL = "hierarchy-world-selector-dropdown-world-label";
 
         private readonly WorldSelectorListView listView;
         private readonly HierarchyModel model;
         private readonly VisualElement dropdownButton;
+        private readonly Label entitiesLabel;
+        private readonly Label worldsLabel;
 
         private bool isExpanded;
 
@@ -18,11 +21,15 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             this.dropdownButton = new VisualElement();
             this.dropdownButton.AddToClassList(DROPDOWN);
-
-            var buttonText = new Label("Select Worlds");
-            this.dropdownButton.Add(buttonText);
-
             this.dropdownButton.AddManipulator(new Clickable(ToggleDropdown));
+
+            this.entitiesLabel = new Label();
+            this.dropdownButton.Add(entitiesLabel);
+
+            this.worldsLabel = new Label("W");
+            this.worldsLabel.AddToClassList(WORLDS_LABEL);
+            this.dropdownButton.Add(this.worldsLabel);
+
 
             this.listView = new WorldSelectorListView(this.model);
             this.listView.style.display = DisplayStyle.None;
@@ -40,6 +47,8 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         internal void Update() {
+            this.entitiesLabel.text = $"Entities Found: {this.model.GetTotalEntitiesFound()}";
+
             if (this.isExpanded) {
                 this.listView.UpdateItemsSource();
             }
