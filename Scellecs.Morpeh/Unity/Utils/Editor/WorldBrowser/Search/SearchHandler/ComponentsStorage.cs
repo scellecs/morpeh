@@ -65,8 +65,9 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             for (int i = 0; i < genericArgs.Length; i++) {
                 totalLength += GetComponentName(genericArgs[i]).Length;
-                if (i < genericArgs.Length - 1)
+                if (i < genericArgs.Length - 1) {
                     totalLength += 1;
+                }
             }
 
             return string.Create(totalLength, (type, backTickIndex), (span, state) => {
