@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.UIElements;
 namespace Scellecs.Morpeh.Utils.Editor {
     public class WorldBrowserWindow : EditorWindow {
-        private const string VIEW_CONTAINER_STYLE_SHEET = "Packages/com.scellecs.morpeh/Unity/Utils/Editor/WorldBrowser/Styles/ViewContainer.uss";
-        private const string HIERARCHY_SEARCH_STYLE_SHEET = "Packages/com.scellecs.morpeh/Unity/Utils/Editor/WorldBrowser/Styles/HierarchySearch.uss";
-        private const string HIERARCHY_STYLE_SHEET = "Packages/com.scellecs.morpeh/Unity/Utils/Editor/WorldBrowser/Styles/Hierarchy.uss";
-        private const string INSPECTOR_STYLE_SHEET = "Packages/com.scellecs.morpeh/Unity/Utils/Editor/WorldBrowser/Styles/Inspector.uss";
+        private const string VIEW_CONTAINER_STYLE_SHEET = "b573552224b286f448bfede0ca7ea76e";
+        private const string HIERARCHY_SEARCH_STYLE_SHEET = "aa36bbbd296c0d749b070ca4ed146576";
+        private const string HIERARCHY_STYLE_SHEET = "c411609523402cd49b3745cc501de47e";
+        private const string INSPECTOR_STYLE_SHEET = "7a3a1c07f894eed4eb993bfae61a441a";
 
         private HierarchySearch hierarchySearch;
         private Hierarchy hierarchy;
@@ -50,10 +50,10 @@ namespace Scellecs.Morpeh.Utils.Editor {
             this.hierarchy = new Hierarchy(this.hierarchySearch);
             this.inspector = new Inspector(this.hierarchy);
 
-            this.viewContainerStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(VIEW_CONTAINER_STYLE_SHEET);
-            this.hierarchySearchStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(HIERARCHY_SEARCH_STYLE_SHEET);
-            this.hierarchyStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(HIERARCHY_STYLE_SHEET);
-            this.inspectorStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(INSPECTOR_STYLE_SHEET);
+            this.viewContainerStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(VIEW_CONTAINER_STYLE_SHEET);
+            this.hierarchySearchStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(HIERARCHY_SEARCH_STYLE_SHEET);
+            this.hierarchyStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(HIERARCHY_STYLE_SHEET);
+            this.inspectorStyleSheet = AssetDatabaseUtility.LoadAssetWithGUID<StyleSheet>(INSPECTOR_STYLE_SHEET);
 
             this.splitterView = new SplitterView(250, 300);
             this.hierarchySearchView = new HierarchySearchView(this.hierarchySearch);
