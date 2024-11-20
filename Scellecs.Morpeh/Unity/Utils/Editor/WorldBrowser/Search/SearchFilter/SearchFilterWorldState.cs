@@ -1,17 +1,22 @@
 ﻿#if UNITY_EDITOR
 using Scellecs.Morpeh.Collections;
+using System.Buffers;
 using System.Collections.Generic;
+using UnityEngine.Pool;
 namespace Scellecs.Morpeh.Utils.Editor {
     internal sealed class SearchFilterWorldState {
+        internal readonly ArrayPool<int> arrayPool;
+        internal readonly HashSetPool<long> hashSetPool;
         internal readonly HashSet<long> archetypesHashes;
         internal readonly HashSet<long> deletedArchetypes;
         internal readonly HashSet<long> filteredArchetypes;
         internal readonly IntHashMap<ComponentToArchetypes> componentsToArchetypes;
         internal readonly LongHashMap<ArchetypeToComponents> archetypesToComponents;
-
         internal World world;
 
         internal SearchFilterWorldState() {
+            this.arrayPool = ArrayPool<int>.Create();
+            //this.hashSetPool = HashSetP
             this.archetypesHashes = new HashSet<long>();
             this.deletedArchetypes = new HashSet<long>();
             this.filteredArchetypes = new HashSet<long>();
@@ -21,6 +26,11 @@ namespace Scellecs.Morpeh.Utils.Editor {
         }
 
         internal void Reset() {
+            foreach (var idx in this.archetypesToComponents) {
+                var components = archetypesToComponents.GetValueByIndex(idx);
+                this.arrayPool.Return(components.value);
+            }
+
             this.archetypesHashes.Clear();
             this.deletedArchetypes.Clear();
             this.filteredArchetypes.Clear();
@@ -61,12 +71,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
             }
 
             void UpdateComponentsForArchetype(Archetype archetype, long archetypeHash) {
-                var components = new ArchetypeToComponents() { value = new int[archetype.components.length] }; //TODO
+                var components = new ArchetypeToComponents() { value = this.arrayPool.Rent(archetype.components.length) };
                 var index = 0;
                 foreach (var typeId in archetype.components) {
                     components.value[index++] = typeId;
                     if (!this.componentsToArchetypes.TryGetValue(typeId, out var archetypes)) {
-                        archetypes = new ComponentToArchetypes { value = new HashSet<long>() }; //TODO
+                        archetypes = new ComponentToArchetypes { value = new HashSet<long>() };
                         this.componentsToArchetypes.Add(typeId, archetypes, out _);
                     }
                     archetypes.value.Add(archetypeHash);
