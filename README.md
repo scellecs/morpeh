@@ -280,8 +280,10 @@ At the time of calling `Initialize()`, the entity is definitely created.
 
 #### 🌐 World Browser
 
-The WorldBrowser tool enables real-time tracking and searching of entities and their components. Access it via Tools -> Morpeh -> WorldBrowser.
+The WorldBrowser tool enables real-time tracking and searching of entities and their components.
 Supports the same filtering logic as the core ``Filter``, allowing complex queries using ``With`` and ``Without`` conditions.
+
+Access it via Tools -> Morpeh -> WorldBrowser.
 
 **To declare a query:**
 - Enter the full component name in the search bar for ``With`` conditions.
