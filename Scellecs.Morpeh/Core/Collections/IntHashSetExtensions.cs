@@ -117,7 +117,7 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo(this IntHashSet hashSet, int[] array) {
             var num = 0;
-            for (int i = 0, li = hashSet.lastIndex, len = hashSet.length; i < li && num < len; ++i) {
+            for (int i = 0, li = hashSet.lastIndex, len = hashSet.length; i < li && num < len; i+=2) {
                 var v = hashSet.slots[i] - 1;
                 if (v < 0) {
                     continue;

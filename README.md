@@ -278,6 +278,33 @@ Providers can be inherited and logic can be overridden in the `Initialize()` and
 We do not use methods like `Awake()`, `Start()` and others, because the provider needs to control the creation of the entity and synchronize with other providers.  
 At the time of calling `Initialize()`, the entity is definitely created.  
 
+#### 🌐 World Browser
+
+The WorldBrowser tool enables real-time tracking and searching of entities and their components.
+Supports the same filtering logic as the core ``Filter``, allowing complex queries using ``With`` and ``Without`` conditions.
+
+Access it via Tools -> Morpeh -> WorldBrowser.
+
+**To declare a query:**
+- Enter the full component name in the search bar for ``With`` conditions.
+- Use ``!`` before the component name for ``Without`` conditions (e.g. ``!ComponentName``).
+- You can paste a complete regular expression directly into the search bar, and it will automatically synchronize with the list of available components.
+
+**Alternatively:**
+- Choose from a synchronized list of available components instead of typing them manually.
+- Suggestions appear as you type in the search bar. When you start typing a component name, a list of available components is displayed. You can click on a suggestion to automatically complete the name.
+
+**ID search:**
+- Search by one or multiple entity IDs by entering ``id:`` (e.g. ``id:25 id:145``).
+- ID-based search overrides any component-based query.
+
+> [!NOTE]
+> ``Entity`` with ID 0 cannot exist, as it's reserved as an invalid entity in the framework.
+
+**World Selection:**
+- Use the top toolbar (with the **W** icon) to choose worlds to search.
+- By default, ``World.Default`` is pre-selected.
+
 API:
 ```c#
 var entityProvider = someGameObject.GetComponent<EntityProvider>();
