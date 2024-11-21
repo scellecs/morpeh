@@ -278,6 +278,28 @@ Providers can be inherited and logic can be overridden in the `Initialize()` and
 We do not use methods like `Awake()`, `Start()` and others, because the provider needs to control the creation of the entity and synchronize with other providers.  
 At the time of calling `Initialize()`, the entity is definitely created.  
 
+API:
+```c#
+var entityProvider = someGameObject.GetComponent<EntityProvider>();
+var entity = entityProvider.Entity;
+```
+
+```c#
+var monoProvider = someGameObject.GetComponent<MyCustomMonoProvider>();
+
+var entity = monoProvider.Entity;
+//returns serialized data or direct value of component
+ref var data = ref monoProvider.GetData();
+ref var data = ref monoProvider.GetData(out bool existOnEntity);
+ref var serializedData = ref monoProvider.GetSerializedData();
+
+var stash = monoProvider.Stash;
+```
+
+We also have one additional provider that allows you to destroy an entity when a GameObject is removed from the scene.  
+You can simply hang it on a GameObject and no matter how many components are left on the entity, it will be deleted.  
+The provider is called `RemoveEntityOnDestroy`.  
+
 #### 🌐 World Browser
 
 The WorldBrowser tool enables real-time tracking and searching of entities and their components.
@@ -304,28 +326,6 @@ Access it via Tools -> Morpeh -> WorldBrowser.
 **World Selection:**
 - Use the top toolbar (with the **W** icon) to choose worlds to search.
 - By default, ``World.Default`` is pre-selected.
-
-API:
-```c#
-var entityProvider = someGameObject.GetComponent<EntityProvider>();
-var entity = entityProvider.Entity;
-```
-
-```c#
-var monoProvider = someGameObject.GetComponent<MyCustomMonoProvider>();
-
-var entity = monoProvider.Entity;
-//returns serialized data or direct value of component
-ref var data = ref monoProvider.GetData();
-ref var data = ref monoProvider.GetData(out bool existOnEntity);
-ref var serializedData = ref monoProvider.GetSerializedData();
-
-var stash = monoProvider.Stash;
-```
-
-We also have one additional provider that allows you to destroy an entity when a GameObject is removed from the scene.  
-You can simply hang it on a GameObject and no matter how many components are left on the entity, it will be deleted.  
-The provider is called `RemoveEntityOnDestroy`.  
 
 ---
 
