@@ -1,6 +1,5 @@
 namespace Scellecs.Morpeh.Collections {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
@@ -15,6 +14,30 @@ namespace Scellecs.Morpeh.Collections {
         public int capacity;
 
         public EqualityComparer<T> comparer;
+
+        /// <summary>
+        /// Gets the element at the specified index in the list.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the index is out of range.</exception>
+        /// <remarks>To avoid bounds checking, use <c>data[index]</c> directly.</remarks>
+        public T this[int index] {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get {
+                if (index < 0 || index >= this.length) {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
+                return data[index];
+            }
+
+            set {
+                if (index < 0 || index >= this.length) {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
+                this.data[index] = value;
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FastList() {
@@ -73,13 +96,5 @@ namespace Scellecs.Morpeh.Collections {
                 get => this.data[this.index];
             }
         }
-    }
-    
-    [Il2CppSetOption(Option.NullChecks, false)]
-    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public struct ResultSwap {
-        public int oldIndex;
-        public int newIndex;
     }
 }

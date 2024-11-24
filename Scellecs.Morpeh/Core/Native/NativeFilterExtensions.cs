@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh.Native {
                 filter.chunks.Clear();
                 
                 if (filter.chunks.capacity < filter.archetypesLength) {
-                    filter.chunks.Resize(filter.archetypesCapacity);
+                    filter.chunks.Grow(filter.archetypesCapacity);
                 }
             }
             
