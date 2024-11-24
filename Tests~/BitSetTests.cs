@@ -1,7 +1,7 @@
-﻿namespace Tests;
-
-using Scellecs.Morpeh.Collections;
+﻿using Scellecs.Morpeh.Collections;
 using Xunit.Abstractions;
+
+namespace Tests;
 
 [Collection("Sequential")]
 public class BitSetTests {

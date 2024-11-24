@@ -51,7 +51,6 @@ namespace Scellecs.Morpeh.Collections {
             return true;
         }
 
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void Expand(this IntHashSet hashSet) {
             var newCapacityMinusOne = HashHelpers.GetCapacity(hashSet.length);
