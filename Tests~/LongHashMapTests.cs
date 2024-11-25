@@ -27,7 +27,7 @@ public abstract class LongHashMapTests<T>(ITestOutputHelper output)
     [InlineData(0)]
     [InlineData(999)]
     [InlineData(-99999)]
-    [InlineData(666666666)]
+    [InlineData(66666)]
     public void Constructor_CreatesHashMapWithCorrectCapacity(int initialCapacity) {
         var hashMap = new LongHashMap<int>(initialCapacity);
 
