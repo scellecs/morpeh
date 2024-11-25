@@ -249,6 +249,40 @@ public class StashTests {
 
         this.world.Commit();
     }
+    
+    [Fact]
+    public void Migrate_DoesNotOverwriteUnlessSpecified() {
+        var fromEntity = this.world.CreateEntity();
+        var toEntity   = this.world.CreateEntity();
+        var stash      = this.world.GetStash<IntTest1>();
+
+        stash.Set(fromEntity, new IntTest1 { value = 42 });
+        stash.Set(toEntity, new IntTest1 { value = 100 });
+        stash.Migrate(fromEntity, toEntity, overwrite: false);
+
+        Assert.False(stash.Has(fromEntity));
+        Assert.True(stash.Has(toEntity));
+        Assert.Equal(100, stash.Get(toEntity).value);
+
+        this.world.Commit();
+    }
+    
+    [Fact]
+    public void Migrate_OverwritesIfSpecified() {
+        var fromEntity = this.world.CreateEntity();
+        var toEntity   = this.world.CreateEntity();
+        var stash      = this.world.GetStash<IntTest1>();
+
+        stash.Set(fromEntity, new IntTest1 { value = 42 });
+        stash.Set(toEntity, new IntTest1 { value   = 100 });
+        stash.Migrate(fromEntity, toEntity, overwrite: true);
+
+        Assert.False(stash.Has(fromEntity));
+        Assert.True(stash.Has(toEntity));
+        Assert.Equal(42, stash.Get(toEntity).value);
+
+        this.world.Commit();
+    }
 
     [Fact]
     public void RemoveAll_ClearsAllComponents() {

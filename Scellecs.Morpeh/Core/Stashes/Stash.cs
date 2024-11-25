@@ -65,19 +65,22 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
-#if MORPEH_DEBUG
-            var previousCapacity = this.map.capacity;
-#endif
-            if (!this.TryAddData(entity.Id, default, out var slotIndex)) {
+            if (this.map.IsKeySet(entity.Id, out var slotIndex)) {
                 InvalidAddOperationException.ThrowAlreadyExists(entity, typeof(T));
-            }
+            } else {
+                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
             
-            this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+                if (resized) {
+                    ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
-            if (previousCapacity != this.map.capacity) {
-                this.world.newMetrics.stashResizes++;
-            }
+                    this.world.newMetrics.stashResizes++;
 #endif
+                }
+            
+                this.data[slotIndex] = default;
+                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+            }
+
             return ref this.data[slotIndex];
         }
 
@@ -89,17 +92,20 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
+            if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
+                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
+            
+                if (resized) {
+                    ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
-            var previousCapacity = this.map.capacity;
-#endif
-            if (this.TryAddData(entity.Id, default, out var slotIndex)) {
-                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
-                exist = false;
-#if MORPEH_DEBUG
-                if (previousCapacity != this.map.capacity) {
                     this.world.newMetrics.stashResizes++;
-                }
 #endif
+                }
+            
+                this.data[slotIndex] = default;
+                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+                
+                exist = false;
                 return ref this.data[slotIndex];
             }
 
@@ -115,19 +121,22 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
-#if MORPEH_DEBUG
-            var previousCapacity = this.map.capacity;
-#endif
-            if (!this.TryAddData(entity.Id, value, out _)) {
+            if (this.map.IsKeySet(entity.Id, out var slotIndex)) {
                 InvalidAddOperationException.ThrowAlreadyExists(entity, typeof(T));
+            } else {
+                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
+            
+                if (resized) {
+                    ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
+#if MORPEH_DEBUG
+                    this.world.newMetrics.stashResizes++;
+#endif
+                }
+            
+                this.data[slotIndex] = value;
+                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
             
-            this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
-#if MORPEH_DEBUG
-            if (previousCapacity != this.map.capacity) {
-                this.world.newMetrics.stashResizes++;
-            }
-#endif
             return true;
         }
 
@@ -155,8 +164,7 @@ namespace Scellecs.Morpeh {
                 InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
 
-            if (this.map.TryGetIndex(entity.Id, out var dataIndex))
-            {
+            if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
                 exist = true;
                 return ref this.data[dataIndex];
             }
@@ -172,19 +180,21 @@ namespace Scellecs.Morpeh {
             if (this.world.IsDisposed(entity)) {
                 InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
-            
-#if MORPEH_DEBUG
-            var previousCapacity = this.map.capacity;
-#endif
 
-            if (this.TrySetData(entity.Id, default)) {
+            if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
+                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
+            
+                if (resized) {
+                    ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
-                if (previousCapacity != this.map.capacity) {
                     this.world.newMetrics.stashResizes++;
-                }
 #endif
+                }
+                
                 this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
+            
+            this.data[slotIndex] = default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -195,18 +205,20 @@ namespace Scellecs.Morpeh {
                 InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
             }
             
+            if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
+                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
+            
+                if (resized) {
+                    ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
-            var previousCapacity = this.map.capacity;
-#endif
-
-            if (this.TrySetData(entity.Id, value)) {
-#if MORPEH_DEBUG
-                if (previousCapacity != this.map.capacity) {
                     this.world.newMetrics.stashResizes++;
-                }
 #endif
+                }
+                
                 this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
+            
+            this.data[slotIndex] = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -278,42 +290,31 @@ namespace Scellecs.Morpeh {
             if (this.world.IsDisposed(to)) {
                 InvalidMigrateOperationException.ThrowDisposedEntityTo(to, typeof(T));
             }
-            
-#if MORPEH_DEBUG
-            var previousCapacity = this.map.capacity;
-#endif
 
-            if (this.map.TryGetIndex(from.Id, out var slotIndex)) {
-                var component = this.data[slotIndex];
+            if (this.map.TryGetIndex(from.Id, out var fromSlotIndex)) {
+                ref var component = ref this.data[fromSlotIndex];
                 
-                if (overwrite) {
-                    if (this.map.Has(to.Id)) {
-                        this.TrySetData(to.Id, component);
+                if (!this.map.IsKeySet(to.Id, out var toSlotIndex)) {
+                    toSlotIndex = this.map.TakeSlot(to.Id, out var resized);
+            
+                    if (resized) {
+                        ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
+#if MORPEH_DEBUG
+                        this.world.newMetrics.stashResizes++;
+#endif
                     }
-                    else {
-                        if (this.TryAddData(to.Id, component, out _)) {
-                            this.world.TransientChangeAddComponent(to.Id, ref this.typeInfo);
-                        }
-                    }
-                }
-                else {
-                    if (this.map.Has(to.Id) == false) {
-                        if (this.TryAddData(to.Id, component, out _)) {
-                            this.world.TransientChangeAddComponent(to.Id, ref this.typeInfo);
-                        }
-                    }
+                        
+                    this.data[toSlotIndex] = component;
+                    this.world.TransientChangeAddComponent(to.Id, ref this.typeInfo);
+                } else if (overwrite) {
+                    this.data[toSlotIndex] = component;
                 }
 
                 if (this.map.Remove(from.Id, out _)) {
-                    this.data[slotIndex] = default;
+                    this.data[fromSlotIndex] = default;
                     this.world.TransientChangeRemoveComponent(from.Id, ref this.typeInfo);
                 }
             }
-#if MORPEH_DEBUG
-            if (previousCapacity != this.map.capacity) {
-                this.world.newMetrics.stashResizes++;
-            }
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
