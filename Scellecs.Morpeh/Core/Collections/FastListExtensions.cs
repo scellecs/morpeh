@@ -117,7 +117,7 @@ namespace Scellecs.Morpeh.Collections {
             var index = list.IndexOf(value);
             var shouldRemove = index >= 0;
             if (shouldRemove) {
-                list.RemoveAtSwapBack(index);
+                list.RemoveAtSwapBackFast(index);
             }
 
             return shouldRemove;
@@ -133,6 +133,18 @@ namespace Scellecs.Morpeh.Collections {
                 SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(index));
             }
 
+            var lastIndex = list.length - 1;
+            list.data[index] = list.data[lastIndex];
+            list.data[lastIndex] = default;
+            list.length--;
+        }
+
+        /// <summary>
+        /// Removes the element at the specified index by overwriting it with the last element in the list, and decrements the size of the list.
+        /// Does not perform bounds checking.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void RemoveAtSwapBackFast<T>(this FastList<T> list, int index) {
             var lastIndex = list.length - 1;
             list.data[index] = list.data[lastIndex];
             list.data[lastIndex] = default;

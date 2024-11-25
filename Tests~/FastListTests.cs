@@ -290,6 +290,24 @@ public abstract class FastListTests<T>(ITestOutputHelper output) {
     }
 
     [Fact]
+    public void RemoveAtSwapBackFast_SwapsWithLastElement() {
+        var list = new FastList<T> { comparer = GetEqualityComparer() };
+        var value1 = CreateValue();
+        var value2 = CreateValue();
+        var value3 = CreateValue();
+
+        list.Add(value1);
+        list.Add(value2);
+        list.Add(value3);
+
+        list.RemoveAtSwapBackFast(1);
+
+        Assert.Equal(2, list.length);
+        Assert.Equal(value1, list[0]);
+        Assert.Equal(value3, list[1]);
+    }
+
+    [Fact]
     public void RemoveRange_ThrowsOnInvalidIndex() {
         var list = new FastList<T> { comparer = GetEqualityComparer() };
         list.Add(CreateValue());
