@@ -284,7 +284,7 @@ namespace Scellecs.Morpeh {
             }
             
             if (entityData.addedComponentsCount == entityData.addedComponents.Length) {
-                ArrayHelpers.Grow(ref entityData.addedComponents, entityData.addedComponentsCount << 1);
+                ArrayHelpers.GrowNonInlined(ref entityData.addedComponents, entityData.addedComponentsCount << 1);
             }
 
             entityData.addedComponents[entityData.addedComponentsCount++] = typeInfo.id;
@@ -308,7 +308,7 @@ namespace Scellecs.Morpeh {
             }
             
             if (entityData.removedComponentsCount == entityData.removedComponents.Length) {
-                ArrayHelpers.Grow(ref entityData.removedComponents, entityData.removedComponentsCount << 1);
+                ArrayHelpers.GrowNonInlined(ref entityData.removedComponents, entityData.removedComponentsCount << 1);
             }
             
             entityData.removedComponents[entityData.removedComponentsCount++] = typeInfo.id;
