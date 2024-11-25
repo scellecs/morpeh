@@ -49,6 +49,47 @@ public class ArrayHelpersTests(ITestOutputHelper output) {
     }
 
     [Fact]
+    public void GrowNonInlined_IncreasesArraySize() {
+        var array   = new int[] { 1, 2, 3 };
+        var newSize = 6;
+
+        ArrayHelpers.GrowNonInlined(ref array, newSize);
+        Assert.Equal(newSize, array.Length);
+        Assert.Equal(1, array[0]);
+        Assert.Equal(2, array[1]);
+        Assert.Equal(3, array[2]);
+        Assert.Equal(0, array[3]);
+    }
+
+    [Fact]
+    public void GrowNonInlined_PreservesOriginalElements() {
+        var array   = new string[] { "a", "b", "c" };
+        var newSize = 5;
+
+        ArrayHelpers.GrowNonInlined(ref array, newSize);
+        Assert.Equal("a", array[0]);
+        Assert.Equal("b", array[1]);
+        Assert.Equal("c", array[2]);
+        Assert.Null(array[3]);
+        Assert.Null(array[4]);
+    }
+
+    [Theory]
+    [InlineData(10)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    public void GrowNonInlined_HandlesVariousSizes(int newSize) {
+        var array          = new int[] { 1, 2, 3, 4, 5 };
+        var originalLength = array.Length;
+
+        ArrayHelpers.GrowNonInlined(ref array, newSize);
+        Assert.Equal(newSize, array.Length);
+        for (int i = 0; i < originalLength; i++) {
+            Assert.Equal(i + 1, array[i]);
+        }
+    }
+
+    [Fact]
     public void IndexOf_FindsExistingElement() {
         var array = new int[] { 1, 2, 3, 4, 5 };
         var comparer = EqualityComparer<int>.Default;

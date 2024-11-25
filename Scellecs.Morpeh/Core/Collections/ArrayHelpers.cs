@@ -14,6 +14,13 @@ namespace Scellecs.Morpeh.Collections {
             Array.Copy(array, 0, newArray, 0, array.Length);
             array = newArray;
         }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void GrowNonInlined<T>(ref T[] array, int newSize) {
+            var newArray = new T[newSize];
+            Array.Copy(array, 0, newArray, 0, array.Length);
+            array = newArray;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf<T>(T[] array, T value, EqualityComparer<T> comparer) {
