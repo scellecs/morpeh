@@ -88,7 +88,7 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveAt<T>(this FastList<T> list, int index) {
             if (index < 0 || index >= list.length) {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(index));
             }
 
             --list.length;
@@ -130,7 +130,7 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveAtSwapBack<T>(this FastList<T> list, int index) {
             if (index < 0 || index >= list.length) {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(index));
             }
 
             var lastIndex = list.length - 1;
@@ -153,16 +153,16 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveRange<T>(this FastList<T> list, int index, int count) {
             if (index < 0 || index >= list.length) {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(index));
             }
 
             if (count < 0) {
-                throw new ArgumentOutOfRangeException(nameof(count), "Non-negative number required");
+                SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(count), "Non-negative number required");
             }
 
             var elementsToMove = list.length - (index + count);
             if (elementsToMove < 0) {
-                throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.", nameof(count));
+                SystemExceptionUtility.ThrowArgumentException(nameof(count), "Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
             }
 
             if (elementsToMove > 0) {
@@ -248,15 +248,15 @@ namespace Scellecs.Morpeh.Collections {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T>(this FastList<T> list, int index, int count, IComparer<T> comparer = null) {
             if (index < 0 || index >= list.length) {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(index));
             }
 
             if (count < 0) {
-                throw new ArgumentOutOfRangeException(nameof(count), "Non-negative number required.");
+                SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(count), "Non-negative number required.");
             }
 
             if (index + count > list.length) {
-                throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+                SystemExceptionUtility.ThrowArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
             }
 
             Array.Sort(list.data, index, count, comparer ?? Comparer<T>.Default);

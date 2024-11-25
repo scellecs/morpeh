@@ -24,7 +24,7 @@ namespace Scellecs.Morpeh.Collections {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get {
                 if (index < 0 || index >= this.length) {
-                    throw new ArgumentOutOfRangeException(nameof(index));
+                    SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(index));
                 }
 
                 return data[index];
@@ -33,7 +33,7 @@ namespace Scellecs.Morpeh.Collections {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set {
                 if (index < 0 || index >= this.length) {
-                    throw new ArgumentOutOfRangeException(nameof(index));
+                    SystemExceptionUtility.ThrowArgumentOutOfRangeException(nameof(index));
                 }
 
                 this.data[index] = value;
