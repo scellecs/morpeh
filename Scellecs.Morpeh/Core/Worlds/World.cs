@@ -116,7 +116,10 @@ namespace Scellecs.Morpeh {
         internal ArchetypePool archetypePool;
         
         [ShowInInspector]
-        internal FastList<Archetype> emptyArchetypes;
+        internal Archetype[] emptyArchetypes;
+        
+        [ShowInInspector]
+        internal int emptyArchetypesCount;
         
         [ShowInInspector]
         internal int identifier;
@@ -272,8 +275,8 @@ namespace Scellecs.Morpeh {
             this.archetypes.Clear();
             this.archetypes = null;
             
-            this.emptyArchetypes.Clear();
-            this.emptyArchetypes = null;
+            this.emptyArchetypes      = null;
+            this.emptyArchetypesCount = 0;
             
             this.archetypePool.Dispose();
             this.archetypePool = default;

@@ -54,8 +54,9 @@ namespace Scellecs.Morpeh {
             world.archetypes         = new LongHashMap<Archetype>();
             world.archetypesCount    = 0;
             
-            world.archetypePool = new ArchetypePool(32);
-            world.emptyArchetypes = new FastList<Archetype>();
+            world.archetypePool        = new ArchetypePool(32);
+            world.emptyArchetypes      = new Archetype[32];
+            world.emptyArchetypesCount = 0;
 
             world.componentsFiltersWith = new ComponentsToFiltersRelation(128);
             world.componentsFiltersWithout = new ComponentsToFiltersRelation(128);
@@ -192,7 +193,7 @@ namespace Scellecs.Morpeh {
                 world.ApplyTransientChanges();
             }
 
-            if (world.emptyArchetypes.length > 0) {
+            if (world.emptyArchetypesCount > 0) {
                 world.ClearEmptyArchetypes();
             }
 
@@ -241,8 +242,8 @@ namespace Scellecs.Morpeh {
         internal static void ClearEmptyArchetypes(this World world) {
             var emptyArchetypes = world.emptyArchetypes;
             
-            for (var i = emptyArchetypes.length - 1; i >= 0; i--) {
-                var archetype = emptyArchetypes.data[i];
+            for (var i = world.emptyArchetypesCount - 1; i >= 0; i--) {
+                var archetype = emptyArchetypes[i];
                 
                 if (!archetype.IsEmpty()) {
                     MLogger.LogTrace($"[WorldExtensions] Archetype {archetype.hash} is not empty after complete migration of entities");
@@ -263,10 +264,10 @@ namespace Scellecs.Morpeh {
                 world.archetypesCount--;
                 world.archetypePool.Return(archetype);
 
-                emptyArchetypes.data[i] = null;
+                emptyArchetypes[i] = null;
             }
             
-            emptyArchetypes.length = 0;
+            world.emptyArchetypesCount = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -354,7 +355,11 @@ namespace Scellecs.Morpeh {
             }
             
             MLogger.LogTrace($"[WorldExtensions] Schedule archetype {archetype.hash} for removal");
-            world.emptyArchetypes.Add(archetype);
+            if (world.emptyArchetypesCount == world.emptyArchetypes.Length) {
+                ArrayHelpers.GrowNonInlined(ref world.emptyArchetypes, world.emptyArchetypesCount << 1);
+            }
+            
+            world.emptyArchetypes[world.emptyArchetypesCount++] = archetype;
         }
         
         internal static Archetype CreateMigratedArchetype(this World world, ref EntityData entityData) {
