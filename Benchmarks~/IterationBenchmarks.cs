@@ -38,14 +38,14 @@ public class IterationBenchmarks {
         this.world.Commit();
     }
     
-    [Benchmark]
+    // [Benchmark]
     public void ForeachFilterSingle() {
         foreach (var entity in this.filter) {
             this.test1.Get(entity).value++;
         }
     }
     
-    [Benchmark]
+    // [Benchmark]
     public void ForeachFilterSingleManual() {
         for (var archetype = this.filter.archetypesLength - 1; archetype >= 0; archetype--) {
             var arch = this.filter.archetypes[archetype];
