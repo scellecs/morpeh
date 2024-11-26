@@ -277,12 +277,12 @@ namespace Scellecs.Morpeh {
         public static void RemoveInitializer<T>(this SystemsGroup systemsGroup, T initializer) where T : class, IInitializer {
             var index = systemsGroup.newInitializers.IndexOf(initializer);
             if (index >= 0) {
-                systemsGroup.newInitializers.RemoveAt(index);
+                systemsGroup.newInitializers.RemoveAtFast(index);
             }
 
             index = systemsGroup.initializers.IndexOf(initializer);
             if (index >= 0) {
-                systemsGroup.initializers.RemoveAt(index);
+                systemsGroup.initializers.RemoveAtFast(index);
             }
         }
 
@@ -338,7 +338,7 @@ namespace Scellecs.Morpeh {
             var index = disabledCollection.IndexOf(system);
             if (index >= 0) {
                 collection.Add(system);
-                disabledCollection.RemoveAt(index);
+                disabledCollection.RemoveAtFast(index);
                 return true;
             }
 
@@ -365,7 +365,7 @@ namespace Scellecs.Morpeh {
             var index = collection.IndexOf(system);
             if (index >= 0) {
                 disabledCollection.Add(system);
-                collection.RemoveAt(index);
+                collection.RemoveAtFast(index);
                 return true;
             }
 
@@ -391,7 +391,7 @@ namespace Scellecs.Morpeh {
 
             var index = collection.IndexOf(system);
             if (index >= 0) {
-                collection.RemoveAt(index);
+                collection.RemoveAtFast(index);
                 systemsGroup.disposables.Add(system);
                 systemsGroup.RemoveInitializer(system);
                 return true;
@@ -399,7 +399,7 @@ namespace Scellecs.Morpeh {
 
             index = disabledCollection.IndexOf(system);
             if (index >= 0) {
-                disabledCollection.RemoveAt(index);
+                disabledCollection.RemoveAtFast(index);
                 systemsGroup.disposables.Add(system);
                 systemsGroup.RemoveInitializer(system);
                 return true;

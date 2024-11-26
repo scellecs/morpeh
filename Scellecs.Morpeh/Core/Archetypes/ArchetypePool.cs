@@ -29,7 +29,7 @@
             var index = this.archetypes.length - 1;
             
             var archetype = this.archetypes.data[index];
-            this.archetypes.RemoveAt(index);
+            this.archetypes.RemoveAtFast(index);
             
             archetype.hash = archetypeHash;
             
