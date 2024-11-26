@@ -10,7 +10,7 @@ namespace Scellecs.Morpeh {
     public sealed class Archetype : IDisposable {
         internal ArchetypeHash hash;
         
-        internal PinnedArray<Entity> entities;
+        internal EntityPinnedArray entities;
         internal int length;
         internal int capacity;
         
@@ -20,8 +20,8 @@ namespace Scellecs.Morpeh {
         internal Archetype(ArchetypeHash hash) {
             this.hash = hash;
             
-            this.entities = new PinnedArray<Entity>(16);
-            this.length = 0;
+            this.entities = new EntityPinnedArray(16);
+            this.length   = 0;
             this.capacity = this.entities.Length;
             
             this.components = new IntHashSet(15);

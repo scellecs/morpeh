@@ -21,16 +21,16 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public unsafe struct IntPinnedArray : IDisposable {
-        public int[] data;
-        public int* ptr;
+    public unsafe struct EntityPinnedArray : IDisposable {
+        public Entity[] data;
+        public Entity* ptr;
 #if MORPEH_UNITY
         public ulong handle;
 #else
         public GCHandle handle;
 #endif
         
-        public int this[int index] {
+        public Entity this[int index] {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => this.data[index];
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -40,13 +40,13 @@ namespace Scellecs.Morpeh.Collections {
         public int Length => this.data.Length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IntPinnedArray(int size) {
-            this.data = new int[size];
+        public EntityPinnedArray(int size) {
+            this.data = new Entity[size];
 #if MORPEH_UNITY
-            this.ptr = (int*)UnsafeUtility.PinGCArrayAndGetDataAddress(this.data, out this.handle);
+            this.ptr = (Entity*)UnsafeUtility.PinGCArrayAndGetDataAddress(this.data, out this.handle);
 #else
             this.handle = GCHandle.Alloc(this.data, GCHandleType.Pinned);
-            this.ptr = (int*)this.handle.AddrOfPinnedObject();
+            this.ptr = (Entity*)this.handle.AddrOfPinnedObject();
 #endif
         }
 
@@ -57,15 +57,15 @@ namespace Scellecs.Morpeh.Collections {
 #else
             this.handle.Free();
 #endif
-            var newArray = new int[newSize];
+            var newArray = new Entity[newSize];
             var len = this.data.Length;
             Array.Copy(this.data, 0, newArray, 0, newSize >= len ? len : newSize);
             this.data = newArray;
 #if MORPEH_UNITY
-            this.ptr = (int*)UnsafeUtility.PinGCArrayAndGetDataAddress(this.data, out this.handle);
+            this.ptr = (Entity*)UnsafeUtility.PinGCArrayAndGetDataAddress(this.data, out this.handle);
 #else
             this.handle = GCHandle.Alloc(newArray, GCHandleType.Pinned);
-            this.ptr = (int*)this.handle.AddrOfPinnedObject();
+            this.ptr = (Entity*)this.handle.AddrOfPinnedObject();
 #endif
         }
 
@@ -78,45 +78,19 @@ namespace Scellecs.Morpeh.Collections {
         public void Dispose() {
 #if MORPEH_UNITY
             UnsafeUtility.ReleaseGCObject(this.handle);
-            this.ptr = (int*)IntPtr.Zero;
+            this.ptr = (Entity*)IntPtr.Zero;
             this.data = null;
 #else
             if (this.handle.IsAllocated) {
                 this.handle.Free();
-                this.ptr = (int*)IntPtr.Zero;
+                this.ptr = (Entity*)IntPtr.Zero;
                 this.data = null;
             }
 #endif
         }
 
         // START: Enumerator
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Enumerator GetEnumerator() {
-            Enumerator e;
-            e.index  = -1;
-            e.length = this.data.Length;
-            e.ptr = this.ptr;
-            return e;
-        }
-        
-        [Il2CppSetOption(Option.NullChecks, false)]
-        [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
-        [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-        public struct Enumerator {
-            public int index;
-            public int length;
-            public int* ptr;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool MoveNext() {
-                return ++this.index < this.length;
-            }
-
-            public int Current {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => this.ptr[this.index];
-            }
-        }
         // END: Enumerator
     }
 }
