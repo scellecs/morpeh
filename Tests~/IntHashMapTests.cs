@@ -274,6 +274,18 @@ public abstract class IntHashMapTests<T>(ITestOutputHelper output) {
     }
 
     [Fact]
+    public void GetValueRefByKey_CannotModifySourceCollectionByNotExistantKey() {
+        var hashMap = new IntHashMap<T>();
+        var value = CreateValue();
+        hashMap.Add(42, value, out _);
+        ref T valueRef = ref hashMap.GetValueRefByKey(666);
+        valueRef = default;
+
+        ref T valueRefThatExists = ref hashMap.GetValueRefByKey(42);
+        Assert.Equal(value, valueRefThatExists);
+    }
+
+    [Fact]
     public void GetValueRefByIndex_ReturnsCorrectReference() {
         var hashMap = new IntHashMap<T>();
         var value = CreateValue();

@@ -242,6 +242,18 @@ public abstract class LongHashMapTests<T>(ITestOutputHelper output)
     }
 
     [Fact]
+    public void GetValueRefByKey_CannotModifySourceCollectionByNotExistantKey() {
+        var hashMap = new LongHashMap<T>();
+        var value = CreateValue();
+        hashMap.Add(42L, value, out _);
+        ref T valueRef = ref hashMap.GetValueRefByKey(666L);
+        valueRef = default;
+
+        ref T valueRefThatExists = ref hashMap.GetValueRefByKey(42L);
+        Assert.Equal(value, valueRefThatExists);
+    }
+
+    [Fact]
     public void GetValueRefByIndex_ReturnsCorrectReference() {
         var hashMap = new LongHashMap<T>();
         var value = CreateValue();
