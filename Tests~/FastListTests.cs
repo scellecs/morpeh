@@ -13,6 +13,72 @@ public abstract class FastListTests<T>(ITestOutputHelper output) {
     protected virtual EqualityComparer<T> GetEqualityComparer() => EqualityComparer<T>.Default;
 
     [Fact]
+    public void Constructor_CreatesEmptyList() {
+        var list = new FastList<T>();
+
+        Assert.Equal(0, list.length);
+        Assert.True(list.capacity > 0);
+        Assert.NotNull(list.data);
+        Assert.Equal(EqualityComparer<T>.Default, list.comparer);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(10)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    public void Constructor_CreatesListWithCorrectCapacity(int initialCapacity) {
+        var list = new FastList<T>(initialCapacity);
+
+        Assert.Equal(0, list.length);
+        Assert.True(list.capacity >= initialCapacity);
+        Assert.NotNull(list.data);
+        Assert.Equal(list.data.Length, list.capacity);
+        Assert.Equal(EqualityComparer<T>.Default, list.comparer);
+    }
+
+    [Fact]
+    public void Constructor_CreatesExactCopyOfOriginalList() {
+        var originalList = new FastList<T> { comparer = GetEqualityComparer() };
+        var value1 = CreateValue();
+        var value2 = CreateValue();
+
+        originalList.Add(value1);
+        originalList.Add(value2);
+
+        var copiedList = new FastList<T>(originalList);
+
+        Assert.Equal(originalList.length, copiedList.length);
+        Assert.Equal(originalList.capacity, copiedList.capacity);
+        Assert.Equal(originalList.comparer, copiedList.comparer);
+
+        Assert.Equal(value1, copiedList[0]);
+        Assert.Equal(value2, copiedList[1]);
+
+        copiedList.Add(CreateValue());
+        Assert.Equal(2, originalList.length);
+        Assert.Equal(3, copiedList.length);
+    }
+
+    [Fact]
+    public void Constructor_CopyConstructorPreservesOriginalDataIntegrity() {
+        var originalList = new FastList<T> { comparer = GetEqualityComparer() };
+        var value1 = CreateValue();
+        var value2 = CreateValue();
+
+        originalList.Add(value1);
+        originalList.Add(value2);
+
+        var copiedList = new FastList<T>(originalList);
+
+        originalList.Add(CreateValue());
+
+        Assert.Equal(2, copiedList.length);
+        Assert.Equal(value1, copiedList[0]);
+        Assert.Equal(value2, copiedList[1]);
+    }
+
+    [Fact]
     public void Add_AddsElementCorrectly() {
         var list = new FastList<T> { comparer = GetEqualityComparer() };
         var value = CreateValue();
