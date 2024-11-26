@@ -231,9 +231,9 @@ public abstract class IntHashMapTests<T>(ITestOutputHelper output) {
     }
 
     [Fact]
-    public void GetValueByKey_ReturnsDefaultForNonExistentKey() {
+    public void GetValueByKey_ThrowsNonExistentKey() {
         var hashMap = new IntHashMap<T>();
-        Assert.Equal(default, hashMap.GetValueByKey(42));
+        Assert.Throws<ArgumentException>(() => hashMap.GetValueByKey(42));
     }
 
     [Fact]

@@ -199,9 +199,9 @@ public abstract class LongHashMapTests<T>(ITestOutputHelper output)
     }
 
     [Fact]
-    public void GetValueByKey_ReturnsDefaultForNonExistentKey() {
+    public void GetValueByKey_ThrowsNonExistentKey() {
         var hashMap = new LongHashMap<T>();
-        Assert.Equal(default, hashMap.GetValueByKey(42L));
+        Assert.Throws<ArgumentException>(() => hashMap.GetValueByKey(42L));
     }
 
     [Fact]

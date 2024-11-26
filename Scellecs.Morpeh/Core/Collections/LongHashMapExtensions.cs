@@ -201,6 +201,7 @@ namespace Scellecs.Morpeh.Collections {
                 next = slot.next;
             }
 
+            SystemExceptionUtility.ThrowArgumentException();
             return default;
         }
 
