@@ -8,6 +8,35 @@ public class IntHashSetTests(ITestOutputHelper output) {
     private readonly ITestOutputHelper output = output;
 
     [Fact]
+    public void Constructor_CreatesEmptyHashSet() {
+        var hashSet = new IntHashSet();
+
+        Assert.Equal(0, hashSet.length);
+        Assert.Equal(0, hashSet.lastIndex);
+        Assert.Equal(-1, hashSet.freeIndex);
+        Assert.True(hashSet.capacity > 0);
+        Assert.NotNull(hashSet.buckets);
+        Assert.NotNull(hashSet.slots);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(10)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    public void Constructor_CreatesHashSetWithCorrectCapacity(int initialCapacity) {
+        var hashSet = new IntHashSet(initialCapacity);
+
+        Assert.Equal(0, hashSet.length);
+        Assert.Equal(0, hashSet.lastIndex);
+        Assert.Equal(-1, hashSet.freeIndex);
+        Assert.True(hashSet.capacity >= initialCapacity);
+        Assert.Equal(hashSet.buckets.Length, hashSet.capacity);
+        Assert.Equal(hashSet.slots.Length, hashSet.capacity * 2);
+        Assert.Equal(hashSet.capacityMinusOne, hashSet.capacity - 1);
+    }
+
+    [Fact]
     public void Add_AddsElementCorrectly() {
         var set = new IntHashSet();
         var result = set.Add(42);
