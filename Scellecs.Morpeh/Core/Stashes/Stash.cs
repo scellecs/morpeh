@@ -352,9 +352,16 @@ namespace Scellecs.Morpeh {
             if (this.componentDispose != null) {
                 foreach (var slotIndex in this.map) {
                     this.componentDispose.Invoke(ref this.data[slotIndex]);
+                    this.data[slotIndex] = default;
                 }
             }
+            else
 #endif
+            {
+                foreach (var slotIndex in this.map) {
+                    this.data[slotIndex] = default;
+                }
+            }
             this.world = null;
             this.typeInfo = default;
             
