@@ -3,6 +3,11 @@ using System.Runtime.CompilerServices;
 namespace Scellecs.Morpeh {
     public static class SystemExceptionUtility {
         [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowArgumentException() {
+            throw new ArgumentException();
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowArgumentException(string message) {
             throw new ArgumentException(message);
         }
