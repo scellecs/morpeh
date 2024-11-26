@@ -143,7 +143,7 @@ namespace {this.parameters.Namespace} {{
             return string.Empty;
         }
 
-        return $@"      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        return $@"        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {{
             Enumerator e;
             e.index  = -1;

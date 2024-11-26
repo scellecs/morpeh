@@ -90,7 +90,7 @@ namespace Scellecs.Morpeh.Collections {
         }
 
         // START: Enumerator
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             Enumerator e;
             e.index  = -1;
