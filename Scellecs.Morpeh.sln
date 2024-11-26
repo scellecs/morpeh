@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks~\B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layout", "Layout~\Layout.csproj", "{2CFC092F-05C3-43C5-982A-0C819F7627BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StaticGenerators", "StaticGenerators\StaticGenerators.csproj", "{8DB198DD-4193-481E-9731-2F30DD80BB1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{2CFC092F-05C3-43C5-982A-0C819F7627BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CFC092F-05C3-43C5-982A-0C819F7627BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CFC092F-05C3-43C5-982A-0C819F7627BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DB198DD-4193-481E-9731-2F30DD80BB1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DB198DD-4193-481E-9731-2F30DD80BB1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DB198DD-4193-481E-9731-2F30DD80BB1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DB198DD-4193-481E-9731-2F30DD80BB1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
