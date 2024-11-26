@@ -88,6 +88,18 @@ public unsafe abstract class UnmanagedArrayTests<T>(ITestOutputHelper output) wh
         for (int i = 0; i < 5; i++) {
             Assert.Equal(originalValues[i], array[i]);
         }
+
+        array.Resize(4);
+
+        Assert.Equal(4, array.Length);
+        for (int i = 0; i < 4; i++) {
+            Assert.Equal(originalValues[i], array[i]);
+        }
+
+        array.Resize(0);
+
+        Assert.Equal(0, array.Length);
+        Assert.True(array.IsCreated);
     }
 
     [Fact]
@@ -97,7 +109,7 @@ public unsafe abstract class UnmanagedArrayTests<T>(ITestOutputHelper output) wh
     }
 
     [Fact]
-    public void Enumerator_WorksCorrectly() {
+    public void ForEach_WorksCorrectly() {
         var array = UnmanagedArray<T>.Create(5);
         var testValues = new T[5];
         for (int i = 0; i < 5; i++) {
@@ -115,7 +127,7 @@ public unsafe abstract class UnmanagedArrayTests<T>(ITestOutputHelper output) wh
     }
 
     [Fact]
-    public void Enumerator_ThrowsOnUncreatedArray() {
+    public void ForEach_ThrowsOnUncreatedArray() {
         var array = new UnmanagedArray<T>();
 
         Assert.Throws<Exception>(() => {
@@ -131,6 +143,7 @@ public unsafe abstract class UnmanagedArrayTests<T>(ITestOutputHelper output) wh
         Assert.True(array.Length >= 0);
 
         array.Dispose();
+
         Assert.False(array.IsCreated);
         Assert.False(array.Length >= 0);
     }
