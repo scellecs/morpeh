@@ -246,8 +246,11 @@ public abstract class LongHashMapTests<T>(ITestOutputHelper output)
         var hashMap = new LongHashMap<T>();
         var value = CreateValue();
         hashMap.Add(42L, value, out _);
-        ref T valueRef = ref hashMap.GetValueRefByKey(666L);
-        valueRef = default;
+        
+        Assert.Throws<ArgumentException>(() => {
+            ref T valueRef = ref hashMap.GetValueRefByKey(666);
+            valueRef = default;
+        });
 
         ref T valueRefThatExists = ref hashMap.GetValueRefByKey(42L);
         Assert.Equal(value, valueRefThatExists);
