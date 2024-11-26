@@ -17,7 +17,4 @@ new PinnedArrayGenerator(config => {
     config.ClassName = "IntHashMapSlotPinnedArray";
     config.DataType  = "IntHashMapSlot";
     config.Namespace = "Scellecs.Morpeh.Collections";
-    config.ExtraUsings = [
-        "Scellecs.Morpeh.Collections",
-    ];
 }).Run("Scellecs.Morpeh/Core/Collections/Generated/IntHashMapSlotPinnedArray.cs");

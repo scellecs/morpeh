@@ -15,7 +15,6 @@ namespace Scellecs.Morpeh.Collections {
     using Unity.IL2CPP.CompilerServices;
 
     // START: Extra usings
-	using Scellecs.Morpeh.Collections;
 
     // END: Extra usings
 
