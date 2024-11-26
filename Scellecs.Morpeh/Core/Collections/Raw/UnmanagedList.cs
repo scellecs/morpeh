@@ -73,7 +73,7 @@ namespace Scellecs.Morpeh.Collections {
         public void RemoveAt(int index) {
             --this.ptr->Length;
             if (index < this.ptr->Length) {
-                UnmanagedUtils.MemCpy<T>((IntPtr)this.ptr+index, (IntPtr)this.ptr+index+1, this.ptr->Length - index);
+                UnmanagedUtils.MemCpy<T>((T*)this.ptr->Ptr.ToPointer() + index, (T*)this.ptr->Ptr.ToPointer() + index + 1, this.ptr->Length - index);
             }
 
             *(T*)this.ptr->Ptr.ToPointer() = default;

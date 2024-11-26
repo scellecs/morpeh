@@ -32,5 +32,13 @@ namespace Scellecs.Morpeh.Collections {
             System.Buffer.MemoryCopy((void*) src, (void*) dst, length * SizeOf<T>(), length * SizeOf<T>());
 #endif
         }
+
+        public static unsafe void MemCpy<T>(void* dst, void* src, int length) where T : unmanaged {
+#if MORPEH_BURST
+            Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpy((void*) dst, (void*) src, length * SizeOf<T>());
+#else
+            System.Buffer.MemoryCopy(src, dst, length * SizeOf<T>(), length * SizeOf<T>());
+#endif
+        }
     }
 }
