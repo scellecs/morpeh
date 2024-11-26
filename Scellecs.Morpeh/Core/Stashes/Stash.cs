@@ -29,14 +29,15 @@ namespace Scellecs.Morpeh {
         internal StashMap map;
         public T[] data;
         private T empty;
+        private Type type;
         
         [PublicAPI]
         public bool IsDisposed;
-        
+
         [PublicAPI]
         public Type Type {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => typeof(T);
+            get => this.type;
         }
         
         [PublicAPI]
@@ -54,6 +55,8 @@ namespace Scellecs.Morpeh {
             this.data = new T[this.map.capacity];
             
             this.empty = default;
+            
+            this.type = typeof(T);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -61,11 +64,11 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidAddOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             if (this.map.IsKeySet(entity.Id, out var slotIndex)) {
-                InvalidAddOperationException.ThrowAlreadyExists(entity, typeof(T));
+                InvalidAddOperationException.ThrowAlreadyExists(entity, this.type);
             } else {
                 slotIndex = this.map.TakeSlot(entity.Id, out var resized);
                 
@@ -88,7 +91,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidAddOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
@@ -117,11 +120,11 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidAddOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             if (this.map.IsKeySet(entity.Id, out var slotIndex)) {
-                InvalidAddOperationException.ThrowAlreadyExists(entity, typeof(T));
+                InvalidAddOperationException.ThrowAlreadyExists(entity, this.type);
             } else {
                 slotIndex = this.map.TakeSlot(entity.Id, out var resized);
                 
@@ -144,14 +147,14 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidGetOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
                 return ref this.data[dataIndex];
             }
             
-            InvalidGetOperationException.ThrowMissing(entity, typeof(T));
+            InvalidGetOperationException.ThrowMissing(entity, this.type);
             return ref this.empty;
         }
         
@@ -160,7 +163,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidGetOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
@@ -177,7 +180,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidSetOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
@@ -201,7 +204,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidSetOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
@@ -225,7 +228,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidRemoveOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidRemoveOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             if (this.map.Remove(entity.Id, out var slotIndex)) {
@@ -283,11 +286,11 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(from)) {
-                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from, typeof(T));
+                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from, this.type);
             }
             
             if (this.world.IsDisposed(to)) {
-                InvalidMigrateOperationException.ThrowDisposedEntityTo(to, typeof(T));
+                InvalidMigrateOperationException.ThrowDisposedEntityTo(to, this.type);
             }
             
             if (this.map.TryGetIndex(from.Id, out var fromSlotIndex)) {
@@ -321,7 +324,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
-                InvalidHasOperationException.ThrowDisposedEntity(entity, typeof(T));
+                InvalidHasOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
             return this.map.Has(entity.Id);
