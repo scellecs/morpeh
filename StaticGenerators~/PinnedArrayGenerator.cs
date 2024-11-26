@@ -6,6 +6,7 @@ public class PinnedArrayGeneratorParameters {
     public string ClassName;
     public string DataType;
     public string Namespace;
+    public string Modifier = "public";
     
     public string[] ExtraUsings;
     
@@ -50,7 +51,7 @@ namespace {this.parameters.Namespace} {{
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public unsafe struct {this.parameters.ClassName} : IDisposable {{
+    {this.parameters.Modifier} unsafe struct {this.parameters.ClassName} : IDisposable {{
         public {this.parameters.DataType}[] data;
         public {this.parameters.DataType}* ptr;
 #if MORPEH_UNITY

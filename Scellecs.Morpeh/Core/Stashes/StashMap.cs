@@ -10,13 +10,13 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public unsafe class StashMap : IDisposable {
-        internal int length;
-        internal int capacity;
-        internal int capacityMinusOne;
-        internal int lastIndex;
-        internal int freeIndex;
-        internal IntPinnedArray buckets;
-        internal PinnedArray<IntHashMapSlot> slots;
+        internal int                       length;
+        internal int                       capacity;
+        internal int                       capacityMinusOne;
+        internal int                       lastIndex;
+        internal int                       freeIndex;
+        internal IntPinnedArray            buckets;
+        internal IntHashMapSlotPinnedArray slots;
 
         public StashMap(int capacity) {
             this.lastIndex = 0;
@@ -27,7 +27,7 @@ namespace Scellecs.Morpeh {
             this.capacity = this.capacityMinusOne + 1;
 
             this.buckets = new IntPinnedArray(this.capacity);
-            this.slots = new PinnedArray<IntHashMapSlot>(this.capacity);
+            this.slots = new IntHashMapSlotPinnedArray(this.capacity);
         }
         
         public void Dispose() {
