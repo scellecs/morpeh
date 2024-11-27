@@ -5,6 +5,8 @@ namespace Tests;
 
 [Collection("Sequential")]
 public class StashTests {
+    private struct StashSizeCheck : IComponent { }
+
     private readonly World world;
     private readonly World world2;
     private readonly ITestOutputHelper output;
@@ -14,6 +16,17 @@ public class StashTests {
         world2 = World.Create();
         MLogger.SetInstance(new XUnitLogger(output));
         this.output = output;
+    }
+
+    [Fact]
+    public void StashSize_WorksCorrectly() {
+        ComponentId<StashSizeCheck>.StashSize = 512;
+
+        var w1Stash = world.GetStash<StashSizeCheck>();
+        var w2Stash = world2.GetStash<StashSizeCheck>();
+
+        Assert.True(w1Stash.map.capacity >= 512);
+        Assert.True(w2Stash.map.capacity >= 512);
     }
 
     [Fact]
