@@ -4,6 +4,7 @@ using Xunit.Abstractions;
 
 namespace Tests;
 
+[Collection("Sequential")]
 public unsafe abstract class PinnedArrayTests<T>(ITestOutputHelper output) where T : unmanaged {
     private readonly ITestOutputHelper output = output;
 
