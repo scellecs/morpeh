@@ -10,22 +10,26 @@ namespace Scellecs.Morpeh {
     public sealed class Archetype : IDisposable {
         internal ArchetypeHash hash;
         
-        internal PinnedArray<Entity> entities;
+        internal EntityPinnedArray entities;
         internal int length;
         internal int capacity;
         
         internal IntHashSet components;
-        internal IntHashMap<Filter> filters;
+
+        internal IntSlotMap filtersMap;
+        internal Filter[]   filters;
        
         internal Archetype(ArchetypeHash hash) {
             this.hash = hash;
             
-            this.entities = new PinnedArray<Entity>(16);
-            this.length = 0;
+            this.entities = new EntityPinnedArray(16);
+            this.length   = 0;
             this.capacity = this.entities.Length;
             
             this.components = new IntHashSet(15);
-            this.filters = new IntHashMap<Filter>();
+            
+            this.filtersMap = new IntSlotMap(3);
+            this.filters    = new Filter[this.filtersMap.capacity];
         }
         
         public void Dispose() {
@@ -37,6 +41,8 @@ namespace Scellecs.Morpeh {
             this.capacity = 0;
             
             this.components = null;
+            
+            this.filtersMap = null;
             this.filters = null;
         }
         
@@ -68,17 +74,32 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddFilter(Filter filter) {
-            this.filters.Set(filter.id, filter, out _);
+            if (!this.filtersMap.IsKeySet(filter.id, out var slotIndex)) {
+                slotIndex = this.filtersMap.TakeSlot(filter.id, out var resized);
+                if (resized) {
+                    this.GrowFilters();
+                }
+            }
+            
+            this.filters[slotIndex] = filter;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveFilter(Filter filter) { 
-            this.filters.Remove(filter.id, out _);
+            if (this.filtersMap.Remove(filter.id, out var slotIndex)) {
+                this.filters[slotIndex] = default;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClearFilters() {
-            this.filters.Clear();
+            Array.Clear(this.filters, 0, this.filtersMap.lastIndex);
+            this.filtersMap.Clear();
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal void GrowFilters() {
+            ArrayHelpers.Grow(ref this.filters, this.filtersMap.capacity);
         }
     }
 }

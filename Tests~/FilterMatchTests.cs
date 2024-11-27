@@ -470,4 +470,42 @@ public class FilterMatchTests {
         Assert.Equal(8, filter.GetLengthSlow());
         Assert.Equal(0, filterWithTest3.GetLengthSlow());
     }
+
+    [Fact]
+    public void LotsOfFiltersMatchCorrectly() {
+        var f1 = this.world.Filter.With<Test1>().Build();
+        var f2 = this.world.Filter.With<Test1>().Without<Test2>().Build();
+        var f3 = this.world.Filter.With<Test1>().Without<Test2>().Without<Test3>().Build();
+        var f4 = this.world.Filter.With<Test1>().Without<Test2>().Without<Test3>().Without<Test4>().Build();
+        var f5 = this.world.Filter.With<Test1>().Without<Test2>().Without<Test3>().Without<Test4>().Without<Test5>().Build();
+        var f6 = this.world.Filter.With<Test1>().Without<Test2>().Without<Test3>().Without<Test4>().Without<Test5>().Without<Test6>().Build();
+        var f7 = this.world.Filter.With<Test1>().Without<Test2>().Without<Test3>().Without<Test4>().Without<Test5>().Without<Test6>().Without<Test7>().Build();
+        var f8 = this.world.Filter.With<Test1>().Without<Test2>().Without<Test3>().Without<Test4>().Without<Test5>().Without<Test6>().Without<Test7>().Without<Test8>().Build();
+        
+        var entity = this.world.CreateEntity();
+        entity.AddComponent<Test1>();
+        
+        this.world.Commit();
+        
+        Assert.Equal(1, f1.GetLengthSlow());
+        Assert.Equal(1, f2.GetLengthSlow());
+        Assert.Equal(1, f3.GetLengthSlow());
+        Assert.Equal(1, f4.GetLengthSlow());
+        Assert.Equal(1, f5.GetLengthSlow());
+        Assert.Equal(1, f6.GetLengthSlow());
+        Assert.Equal(1, f7.GetLengthSlow());
+        Assert.Equal(1, f8.GetLengthSlow());
+        
+        entity.RemoveComponent<Test1>();
+        this.world.Commit();
+        
+        Assert.Equal(0, f1.GetLengthSlow());
+        Assert.Equal(0, f2.GetLengthSlow());
+        Assert.Equal(0, f3.GetLengthSlow());
+        Assert.Equal(0, f4.GetLengthSlow());
+        Assert.Equal(0, f5.GetLengthSlow());
+        Assert.Equal(0, f6.GetLengthSlow());
+        Assert.Equal(0, f7.GetLengthSlow());
+        Assert.Equal(0, f8.GetLengthSlow());
+    }
 }

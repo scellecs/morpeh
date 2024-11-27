@@ -9,16 +9,16 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public unsafe class StashMap : IDisposable {
-        internal int length;
-        internal int capacity;
-        internal int capacityMinusOne;
-        internal int lastIndex;
-        internal int freeIndex;
-        internal IntPinnedArray buckets;
-        internal PinnedArray<IntHashMapSlot> slots;
+    public unsafe class IntSlotMap : IDisposable {
+        internal int                       length;
+        internal int                       capacity;
+        internal int                       capacityMinusOne;
+        internal int                       lastIndex;
+        internal int                       freeIndex;
+        internal IntPinnedArray            buckets;
+        internal IntHashMapSlotPinnedArray slots;
 
-        public StashMap(int capacity) {
+        public IntSlotMap(int capacity) {
             this.lastIndex = 0;
             this.length = 0;
             this.freeIndex = -1;
@@ -27,7 +27,7 @@ namespace Scellecs.Morpeh {
             this.capacity = this.capacityMinusOne + 1;
 
             this.buckets = new IntPinnedArray(this.capacity);
-            this.slots = new PinnedArray<IntHashMapSlot>(this.capacity);
+            this.slots = new IntHashMapSlotPinnedArray(this.capacity);
         }
         
         public void Dispose() {
@@ -226,7 +226,7 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
-            public StashMap map;
+            public IntSlotMap map;
 
             public int index;
             public int current;

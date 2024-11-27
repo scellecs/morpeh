@@ -252,9 +252,12 @@ namespace Scellecs.Morpeh {
                 
                 MLogger.LogTrace($"[WorldExtensions] Remove archetype {archetype.hash}");
                 
-                foreach (var idx in archetype.filters) {
-                    var filter = archetype.filters.GetValueByIndex(idx);
-                    filter.RemoveArchetype(archetype);
+                for (int slotIndex = 0, lastIndex = archetype.filtersMap.lastIndex; slotIndex < lastIndex; slotIndex++) {
+                    if (archetype.filtersMap.slots[slotIndex].key < 0) {
+                        continue;
+                    }
+                    
+                    archetype.filters[slotIndex].RemoveArchetype(archetype);
                 }
                 
                 archetype.ClearFilters();
@@ -285,13 +288,18 @@ namespace Scellecs.Morpeh {
             }
             
             if (entityData.addedComponentsCount == entityData.addedComponents.Length) {
-                ArrayHelpers.GrowNonInlined(ref entityData.addedComponents, entityData.addedComponentsCount << 1);
+                ExpandAddedComponents(ref entityData);
             }
 
             entityData.addedComponents[entityData.addedComponentsCount++] = typeInfo.id;
             world.dirtyEntities.Add(entityId);
             
             MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ExpandAddedComponents(ref EntityData entityData) {
+            ArrayHelpers.Grow(ref entityData.addedComponents, entityData.addedComponentsCount << 1);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -309,13 +317,18 @@ namespace Scellecs.Morpeh {
             }
             
             if (entityData.removedComponentsCount == entityData.removedComponents.Length) {
-                ArrayHelpers.GrowNonInlined(ref entityData.removedComponents, entityData.removedComponentsCount << 1);
+                ExpandRemovedComponents(ref entityData);
             }
             
             entityData.removedComponents[entityData.removedComponentsCount++] = typeInfo.id;
             world.dirtyEntities.Add(entityId);
             
             MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ExpandRemovedComponents(ref EntityData entityData) {
+            ArrayHelpers.Grow(ref entityData.removedComponents, entityData.removedComponentsCount << 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -356,10 +369,15 @@ namespace Scellecs.Morpeh {
             
             MLogger.LogTrace($"[WorldExtensions] Schedule archetype {archetype.hash} for removal");
             if (world.emptyArchetypesCount == world.emptyArchetypes.Length) {
-                ArrayHelpers.GrowNonInlined(ref world.emptyArchetypes, world.emptyArchetypesCount << 1);
+                world.GrowEmptyArchetypes();
             }
             
             world.emptyArchetypes[world.emptyArchetypesCount++] = archetype;
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void GrowEmptyArchetypes(this World world) {
+            ArrayHelpers.Grow(ref world.emptyArchetypes, world.emptyArchetypesCount << 1);
         }
         
         internal static Archetype CreateMigratedArchetype(this World world, ref EntityData entityData) {
@@ -368,11 +386,16 @@ namespace Scellecs.Morpeh {
             if (entityData.currentArchetype != null) {
                 // These checks can happen before setting components to new archetype
                 // because we only check for added/removed components
-                
-                var filters = entityData.currentArchetype.filters;
+
+                var filtersMap = entityData.currentArchetype.filtersMap;
+                var filters= entityData.currentArchetype.filters;
             
-                foreach (var idx in filters) {
-                    var filter = filters.GetValueByIndex(idx);
+                for (int slotIndex = 0, lastIndex = filtersMap.lastIndex; slotIndex < lastIndex; slotIndex++) {
+                    if (filtersMap.slots[slotIndex].key < 0) {
+                        continue;
+                    }
+
+                    var filter = filters[slotIndex];
 
                     var match = true;
                     

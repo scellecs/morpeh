@@ -26,7 +26,7 @@ namespace Scellecs.Morpeh {
         private TypeInfo typeInfo;
         
         
-        internal StashMap map;
+        internal IntSlotMap map;
         public T[] data;
         private T empty;
         private Type type;
@@ -51,7 +51,7 @@ namespace Scellecs.Morpeh {
             this.world = world;
             this.typeInfo = typeInfo;
             
-            this.map = new StashMap(capacity < 0 ? StashConstants.DEFAULT_COMPONENTS_CAPACITY : capacity);
+            this.map = new IntSlotMap(capacity < 0 ? StashConstants.DEFAULT_COMPONENTS_CAPACITY : capacity);
             this.data = new T[this.map.capacity];
             
             this.empty = default;
@@ -392,7 +392,7 @@ namespace Scellecs.Morpeh {
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
-            internal StashMap.Enumerator mapEnumerator;
+            internal IntSlotMap.Enumerator mapEnumerator;
             internal T[] data;
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
