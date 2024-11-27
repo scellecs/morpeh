@@ -285,13 +285,18 @@ namespace Scellecs.Morpeh {
             }
             
             if (entityData.addedComponentsCount == entityData.addedComponents.Length) {
-                ArrayHelpers.GrowNonInlined(ref entityData.addedComponents, entityData.addedComponentsCount << 1);
+                ExpandAddedComponents(ref entityData);
             }
 
             entityData.addedComponents[entityData.addedComponentsCount++] = typeInfo.id;
             world.dirtyEntities.Add(entityId);
             
             MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ExpandAddedComponents(ref EntityData entityData) {
+            ArrayHelpers.Grow(ref entityData.addedComponents, entityData.addedComponentsCount << 1);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -309,13 +314,18 @@ namespace Scellecs.Morpeh {
             }
             
             if (entityData.removedComponentsCount == entityData.removedComponents.Length) {
-                ArrayHelpers.GrowNonInlined(ref entityData.removedComponents, entityData.removedComponentsCount << 1);
+                ExpandRemovedComponents(ref entityData);
             }
             
             entityData.removedComponents[entityData.removedComponentsCount++] = typeInfo.id;
             world.dirtyEntities.Add(entityId);
             
             MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ExpandRemovedComponents(ref EntityData entityData) {
+            ArrayHelpers.Grow(ref entityData.removedComponents, entityData.removedComponentsCount << 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
