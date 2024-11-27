@@ -34,7 +34,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Archetype Rent(ArchetypeHash archetypeHash) {
             if (this.count == 0) {
-                this.NewArchetype(archetypeHash);
+                return this.NewArchetype(archetypeHash);
             }
             
             this.count--;
