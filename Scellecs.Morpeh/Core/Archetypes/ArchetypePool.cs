@@ -34,7 +34,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Archetype Rent(ArchetypeHash archetypeHash) {
             if (this.count == 0) {
-                return new Archetype(archetypeHash);
+                this.NewArchetype(archetypeHash);
             }
             
             this.count--;
@@ -64,6 +64,9 @@
             this.archetypes = default;
         }
         
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private Archetype NewArchetype(ArchetypeHash hash) => new Archetype(hash);
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void GrowArchetypes(int newSize) {
             ArrayHelpers.Grow(ref this.archetypes, newSize);
