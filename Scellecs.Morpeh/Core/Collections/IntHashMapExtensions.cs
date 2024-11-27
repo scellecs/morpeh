@@ -201,8 +201,7 @@ namespace Scellecs.Morpeh.Collections {
                 next = slot.next;
             }
 
-            SystemExceptionUtility.ThrowArgumentException();
-            return default;
+            throw new ArgumentException(nameof(key));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -238,8 +237,7 @@ namespace Scellecs.Morpeh.Collections {
                 next = slot.next;
             }
 
-            SystemExceptionUtility.ThrowArgumentException();
-            return ref hashMap.data[0];
+            throw new ArgumentException(nameof(key));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
