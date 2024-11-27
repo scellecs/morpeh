@@ -366,10 +366,15 @@ namespace Scellecs.Morpeh {
             
             MLogger.LogTrace($"[WorldExtensions] Schedule archetype {archetype.hash} for removal");
             if (world.emptyArchetypesCount == world.emptyArchetypes.Length) {
-                ArrayHelpers.GrowNonInlined(ref world.emptyArchetypes, world.emptyArchetypesCount << 1);
+                world.GrowEmptyArchetypes();
             }
             
             world.emptyArchetypes[world.emptyArchetypesCount++] = archetype;
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void GrowEmptyArchetypes(this World world) {
+            ArrayHelpers.Grow(ref world.emptyArchetypes, world.emptyArchetypesCount << 1);
         }
         
         internal static Archetype CreateMigratedArchetype(this World world, ref EntityData entityData) {
