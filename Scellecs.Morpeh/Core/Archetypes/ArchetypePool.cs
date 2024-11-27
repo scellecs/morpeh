@@ -7,47 +7,66 @@
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal struct ArchetypePool {
-        private FastList<Archetype> archetypes;
+        internal Archetype[] archetypes;
+        internal int         count;
         
         public ArchetypePool(int initialCapacity) {
-            this.archetypes = new FastList<Archetype>(initialCapacity);
-            WarmUp(initialCapacity);
+            this.archetypes = new Archetype[initialCapacity];
+            this.count      = 0;
+            
+            this.WarmUp(initialCapacity);
         }
         
-        public void WarmUp(int count) {
-            for (var i = 0; i < count; i++) {
-                this.archetypes.Add(new Archetype(default));
+        public void WarmUp(int value) {
+            var newCount = this.count + value;
+            
+            if (newCount > this.archetypes.Length) {
+                this.GrowArchetypes(newCount);
             }
+            
+            for (var i = this.count; i < newCount; i++) {
+                this.archetypes[i] = new Archetype(default);
+            }
+            
+            this.count = newCount;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Archetype Rent(ArchetypeHash archetypeHash) {
-            if (this.archetypes.length == 0) {
+            if (this.count == 0) {
                 return new Archetype(archetypeHash);
             }
             
-            var index = this.archetypes.length - 1;
+            this.count--;
             
-            var archetype = this.archetypes.data[index];
-            this.archetypes.RemoveAtFast(index);
+            var archetype = this.archetypes[this.count];
+            this.archetypes[this.count] = default;
             
             archetype.hash = archetypeHash;
-            
             return archetype;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Return(Archetype archetype) {
-            this.archetypes.Add(archetype);
+            if (this.count == this.archetypes.Length) {
+                this.GrowArchetypes(this.count << 1);
+            }
+            
+            this.archetypes[this.count++] = archetype;
             archetype.hash = default;
         }
         
         public void Dispose() {
-            for (var i = 0; i < this.archetypes.length; i++) {
-                this.archetypes.data[i].Dispose();
+            for (var i = 0; i < this.count; i++) {
+                this.archetypes[i].Dispose();
             }
             
             this.archetypes = default;
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void GrowArchetypes(int newSize) {
+            ArrayHelpers.Grow(ref this.archetypes, newSize);
         }
     }
 }
