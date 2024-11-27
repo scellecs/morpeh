@@ -62,6 +62,7 @@
             }
             
             this.archetypes = default;
+            this.count      = 0;
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
