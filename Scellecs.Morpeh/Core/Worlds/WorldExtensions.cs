@@ -252,9 +252,12 @@ namespace Scellecs.Morpeh {
                 
                 MLogger.LogTrace($"[WorldExtensions] Remove archetype {archetype.hash}");
                 
-                foreach (var idx in archetype.filters) {
-                    var filter = archetype.filters.GetValueByIndex(idx);
-                    filter.RemoveArchetype(archetype);
+                for (int slotIndex = 0, lastIndex = archetype.filtersMap.lastIndex; slotIndex < lastIndex; slotIndex++) {
+                    if (archetype.filtersMap.slots[slotIndex].key < 0) {
+                        continue;
+                    }
+                    
+                    archetype.filters[slotIndex].RemoveArchetype(archetype);
                 }
                 
                 archetype.ClearFilters();
@@ -383,11 +386,16 @@ namespace Scellecs.Morpeh {
             if (entityData.currentArchetype != null) {
                 // These checks can happen before setting components to new archetype
                 // because we only check for added/removed components
-                
-                var filters = entityData.currentArchetype.filters;
+
+                var filtersMap = entityData.currentArchetype.filtersMap;
+                var filters= entityData.currentArchetype.filters;
             
-                foreach (var idx in filters) {
-                    var filter = filters.GetValueByIndex(idx);
+                for (int slotIndex = 0, lastIndex = filtersMap.lastIndex; slotIndex < lastIndex; slotIndex++) {
+                    if (filtersMap.slots[slotIndex].key < 0) {
+                        continue;
+                    }
+
+                    var filter = filters[slotIndex];
 
                     var match = true;
                     
