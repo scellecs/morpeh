@@ -41,6 +41,8 @@ namespace Scellecs.Morpeh {
             this.capacity = 0;
             
             this.components = null;
+            
+            this.filtersMap = null;
             this.filters = null;
         }
         
