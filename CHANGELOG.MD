@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reduced debug builds overhead in general.
 - Reduced overall generic type count to reduce IL2CPP metadata size.
 - Fixed code formatting in multiple files.
-- 
+- Incorrect `IntHashSet` enumerator implementation for positive values.
 
 ### Added
 - Added Entity ID and components search to the World Browser.
@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Stash<T>` initial size functionality is now a part of `ComponentId`.
 - `StashMap` -> `IntSlotMap`.
 - `Filter` chunks (used for `AsNative()` calls) are now allocated only if necessary.
+- Restored multiple collections' internal storage to managed arrays to make debugging memory easier.
 
 ### Removed
 - Removed `UniversalProvider`.
