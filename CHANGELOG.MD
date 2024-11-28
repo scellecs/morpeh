@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `StashMap` -> `IntSlotMap`.
 - `Filter` chunks (used for `AsNative()` calls) are now allocated only if necessary.
 - Restored multiple collections' internal storage to managed arrays to make debugging memory easier.
+- `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh.
 
 ### Removed
 - Removed `UniversalProvider`.
