@@ -10,43 +10,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `FastList<T>.RemoveAtSwap()` incorrect logic & managed pointers memory leak.
 - Fixed multiple IL2CPP static guards and extra setup code in different methods.
 - Fixed Disposable components not being disposed when its `Stash`'s World is disposed.
+- Fixed code formatting in multiple files.
+- Fixed Incorrect `IntHashSet` enumerator implementation for positive values.
 - Reduced GC allocation count in `FilterBuilder`.
 - Reduced debug builds overhead in general.
 - Reduced overall generic type count to reduce IL2CPP metadata size.
-- Fixed code formatting in multiple files.
-- Incorrect `IntHashSet` enumerator implementation for positive values.
 
 ### Added
+- **[Breaking]** Added `World` ID limit (256).
 - Added Entity ID and components search to the World Browser.
 - Added tests for the most part of the codebase.
 - Added very basic benchmarks for iterations, structural changes, etc.
 - Added `Filter.Dispose()` method.
-- Added `World` ID limit (256).
 - Added generations to worlds.
-- Exceptions for typical runtime errors like InvalidSetOperationException both in Debug and Release mode.
+- Added exceptions for typical runtime errors like InvalidSetOperationException both in Debug and Release mode.
 - Added meaningful exception messages for common errors with an actual component type and entity ID where applicable.
 - Added `World.Has(Entity entity)` method as a faster alternative to `Entity.IsDisposed()`.
 - Added `Filter.ArchetypesCount` property.
 - Added `Filter.Has(Entity entity)` method.
 
-
 ### Changed
+- **[Breaking]** `Entity` is now a struct instead of a class.
+- **[Breaking]** `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh.
+- **[Breaking]** `Stash<T>` initial size functionality is now a part of `ComponentId`.
+- **[Breaking]** `ComponentId` and `ExtendedComponentId` are now split into different use cases to reduce IL2CPP metadata size. `ExtendedComponentId` is now stripped out of non-UnityEditor runtimes unless `MORPEH_GENERATE_ALL_EXTENDED_IDS` is specified.
 - Reworked World Browser window to be more performant.
 - Reworked the entire repo structure to allow for extra projects like tests and benchmarks.
 - Reworked archetypes and filter matching to be much more efficient without recursive calls, Stash checks, etc.
-- `Entity` is now a struct instead of a class.
 - Simplified `Filter` enumeration.
+- Restored multiple collections' internal storage to managed arrays to make debugging memory easier.
 - `FastList<T>` implementation is now less error-prone and has a more consistent API.
-- `ComponentId` and `ExtendedComponentId` are now split into different use cases to reduce IL2CPP metadata size.
 - `World.Default` access does not require an array access anymore.
-- `Stash<T>` initial size functionality is now a part of `ComponentId`.
 - `StashMap` -> `IntSlotMap`.
 - `Filter` chunks (used for `AsNative()` calls) are now allocated only if necessary.
-- Restored multiple collections' internal storage to managed arrays to make debugging memory easier.
-- `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh.
 
 ### Removed
-- Removed `UniversalProvider`.
+- **[Breaking]** Removed `UniversalProvider`.
 - Removed `BitMap<T>`.
 - Removed `UnmanagedList<T>`.
 - Removed `UnmanagedArray<T>`.
