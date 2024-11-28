@@ -22,6 +22,45 @@
 
 * Refer to the [Changelog](CHANGELOG.MD) for the full list of changes.
 
+### Next Major Version remarks
+
+We are evaluating a possibility of heavy usage of Source Generators in future
+versions of Morpeh, potentially even in 2025 release. 
+This may pose more restrictions on what we may or may not support in the future.
+
+One likely change is potential introduction of tag stashes (non-generic) for tag
+components, which would reduce IL2CPP overhead, memory overhead, and increase
+general performance. We are willing to make it user-agnostic so that the user
+does not have to worry about the specific implementation of the stash, if possible.
+If that's the case, you may want to avoid iterating over stashes with tag components
+as this operation may slow down due to necessity to count trailing zeroes if bitset
+is chosen as an underlying storage type. This may or not be a bitset after all
+(e.g. if we use a hashset or something else), but the general idea is to be
+cautious about iterating over large stashes.
+
+One of the most likely changes is the removal of `EntityExtensions` API in favor
+of `Stash` API, if it becomes possible to make a convenient replacement for it. We
+do acknowledge that `EntityExtensions` is a very convenient API, but it has
+a large overhead (both CPU and IL2CPP metadata amount) and is not very flexible,
+especially if we want to implement tag stashes for tag components
+described above.
+
+We have been using a completely separate system runner in our projects for a while now,
+and it has been working quite well, allowing us to avoid interface/virtual calls
+to system update methods, improving overall performance due to lower idle systems
+cost (systems that do not have any entities to process, but the update method is still
+called). This may lead to a complete removal of ScriptableObject-based systems in
+favor of source-generated systems, as well as source-generated "features" which
+would replace `SystemGroup`. For an easier migration later on, we recommend
+sticking to pure-C# systems implementing `ISystem` interface instead of 
+ScriptableObject-based systems.
+
+All the changes described above will definitely affect external plugins, workarounds,
+extensions and other code that relies on Morpeh internals or even some public APIs.
+
+Please note that these are just plans and may be or may not be implemented in the future.
+The list may also be incomplete and may not cover all the changes that are planned.
+
 ## Migration from version 2022.2 to 2023.1
 
 ### Breaking changes
