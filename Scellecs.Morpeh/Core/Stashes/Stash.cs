@@ -382,10 +382,10 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
-            return new Enumerator {
-                mapEnumerator = this.map.GetEnumerator(),
-                data = this.data,
-            };
+            Enumerator e;
+            e.mapEnumerator = this.map.GetEnumerator();
+            e.data = this.data;
+            return e;
         }
         
         [Il2CppSetOption(Option.NullChecks, false)]
