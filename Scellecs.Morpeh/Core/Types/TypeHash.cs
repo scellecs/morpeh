@@ -6,8 +6,8 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public readonly struct TypeHash : IEquatable<TypeHash> {
-        private readonly long value;
+    public struct TypeHash : IEquatable<TypeHash> {
+        private long value;
         
         public TypeHash(long value) {
             this.value = value;
@@ -20,7 +20,9 @@
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TypeHash Combine(TypeHash other) {
-            return new TypeHash(this.value ^ other.value);
+            TypeHash hash;
+            hash.value = this.value ^ other.value;
+            return hash;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

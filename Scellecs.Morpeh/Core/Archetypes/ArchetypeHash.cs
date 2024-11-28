@@ -6,8 +6,8 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public readonly struct ArchetypeHash : IEquatable<ArchetypeHash> {
-        private readonly long value;
+    public struct ArchetypeHash : IEquatable<ArchetypeHash> {
+        private long value;
         
         public ArchetypeHash(long value) {
             this.value = value;
@@ -24,12 +24,16 @@
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ArchetypeHash Combine(ArchetypeHash otherArchetype) {
-            return new ArchetypeHash(this.value ^ otherArchetype.value);
+            ArchetypeHash hash;
+            hash.value = this.value ^ otherArchetype.value;
+            return hash;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ArchetypeHash Combine(TypeHash typeHash) {
-            return new ArchetypeHash(this.value ^ typeHash.GetValue());
+            ArchetypeHash hash;
+            hash.value = this.value ^ typeHash.GetValue();
+            return hash;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
