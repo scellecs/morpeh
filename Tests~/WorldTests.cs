@@ -263,7 +263,12 @@ public class WorldTests : IDisposable {
         Assert.Equal(0, lateSystem.updateCount);
         Assert.Equal(0, cleanupSystem.updateCount);
         Assert.Equal(0, pluginSystem.updateCount);
-
+#if RELEASE
+        Assert.Throws<ArgumentException>(() => world.FixedUpdate(1f));
+        Assert.Throws<ArgumentException>(() => world.Update(1f));
+        Assert.Throws<ArgumentException>(() => world.LateUpdate(1f));
+        Assert.Throws<ArgumentException>(() => world.CleanupUpdate(1f));
+#else
         world.FixedUpdate(1f);
         world.Update(1f);
         world.LateUpdate(1f);
@@ -297,7 +302,7 @@ public class WorldTests : IDisposable {
         Assert.Contains(lateSystem, systemsGroup.disabledLateSystems.data);
         Assert.Contains(cleanupSystem, systemsGroup.disabledCleanupSystems.data);
         Assert.Contains(pluginSystem, pluginGroup.disabledSystems.data);
-
+#endif
         Assert.False(updateSystem.isDisposed);
         Assert.False(fixedSystem.isDisposed);
         Assert.False(lateSystem.isDisposed);
@@ -315,6 +320,7 @@ public class WorldTests : IDisposable {
 
     [Fact]
     public void SystemsGroup_ExceptionHandlingDoNotDisable() {
+#if !RELEASE
         var world = World.Create();
         var systemsGroup = world.CreateSystemsGroup();
         var pluginGroup = world.CreateSystemsGroup();
@@ -391,6 +397,7 @@ public class WorldTests : IDisposable {
         Assert.True(lateSystem.isDisposed);
         Assert.True(cleanupSystem.isDisposed);
         Assert.True(pluginSystem.isDisposed);
+#endif
     }
 #pragma warning disable 0618
     [Fact]
