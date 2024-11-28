@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **[Breaking]** `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh.
 - **[Breaking]** `Stash<T>` initial size functionality is now a part of `ComponentId`.
 - **[Breaking]** `ComponentId` and `ExtendedComponentId` are now split into different use cases to reduce IL2CPP metadata size. `ExtendedComponentId` is now stripped out of non-UnityEditor runtimes unless `MORPEH_GENERATE_ALL_EXTENDED_IDS` is specified.
+- **[Breaking]** `bool Stash<T>.Add(Entity entity)` now throws an exception if the entity already has the component. Refer to the [Migration Guide](MIGRATION.MD) for more detailed explanation.
 - Reworked World Browser window to be more performant.
 - Reworked the entire repo structure to allow for extra projects like tests and benchmarks.
 - Reworked archetypes and filter matching to be much more efficient without recursive calls, Stash checks, etc.
