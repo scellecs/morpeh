@@ -314,7 +314,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator GetEnumerator() {
             this.world.ThreadSafetyCheck();
-            var e = default(Enumerator);
+            Enumerator e;
             
             e.entityIndex    = 0;
             e.archetypeIndex = this.archetypesLength;
