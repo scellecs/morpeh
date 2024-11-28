@@ -21,25 +21,25 @@ namespace Scellecs.Morpeh {
         [ShowInInspector]
         public int Id {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (int)((value >> 32) & 0xFFFFFFFF);
+            get => (int)((this.value >> 32) & 0xFFFFFFFF);
         }
 
         [ShowInInspector]
         public ushort Generation {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (ushort)((value >> 16) & 0xFFFF);
+            get => (ushort)((this.value >> 16) & 0xFFFF);
         }
 
         [ShowInInspector]
         public int WorldId {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (int)((value >> 8) & 0xFF);
+            get => (int)((this.value >> 8) & 0xFF);
         }
 
         [ShowInInspector]
         public int WorldGeneration {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (int)(value & 0xFF);
+            get => (int)(this.value & 0xFF);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
