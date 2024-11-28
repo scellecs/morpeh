@@ -4,6 +4,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2024.1.0] - WIP
+### Fixed
+- Fixed archetype recreation when an archetype becomes empty in the same Commit call when the archetype has to become active again.
+- Fixed `FastList<T>.RemoveAtSwap()` incorrect logic & managed pointers memory leak.
+- Fixed multiple IL2CPP static guards and extra setup code in different methods.
+- Fixed Disposable components not being disposed when its `Stash`'s World is disposed.
+- Reduced GC allocation count in `FilterBuilder`.
+- Reduced debug builds overhead in general.
+- Reduced overall generic type count to reduce IL2CPP metadata size.
+- Fixed code formatting in multiple files.
+- 
+
+### Added
+- Added Entity ID and components search to the World Browser.
+- Added tests for the most part of the codebase.
+- Added very basic benchmarks for iterations, structural changes, etc.
+- Added `Filter.Dispose()` method.
+- Added `World` ID limit (256).
+- Added generations to worlds.
+- Exceptions for typical runtime errors like InvalidSetOperationException both in Debug and Release mode.
+- Added meaningful exception messages for common errors with an actual component type and entity ID where applicable.
+- Added `World.Has(Entity entity)` method as a faster alternative to `Entity.IsDisposed()`.
+- Added `Filter.ArchetypesCount` property.
+- Added `Filter.Has(Entity entity)` method.
+
+
+### Changed
+- Reworked World Browser window to be more performant.
+- Reworked the entire repo structure to allow for extra projects like tests and benchmarks.
+- Reworked archetypes and filter matching to be much more efficient without recursive calls, Stash checks, etc.
+- `Entity` is now a struct instead of a class.
+- Simplified `Filter` enumeration.
+- `FastList<T>` implementation is now less error-prone and has a more consistent API.
+- `ComponentId` and `ExtendedComponentId` are now split into different use cases to reduce IL2CPP metadata size.
+- `World.Default` access does not require an array access anymore.
+- `Stash<T>` initial size functionality is now a part of `ComponentId`.
+- `StashMap` -> `IntSlotMap`.
+- `Filter` chunks (used for `AsNative()` calls) are now allocated only if necessary.
+
+### Removed
+- Removed `UniversalProvider`.
+- Removed `BitMap<T>`.
+- Removed `UnmanagedList<T>`.
+- Removed `UnmanagedArray<T>`.
+- Removed `Stash<T>.Empty()`.
+
 ## [2023.1.1] - 15.10.2024
 ### Fixed
 - Fixed ``Stash.IsEmpty`` never being true.
