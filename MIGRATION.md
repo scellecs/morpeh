@@ -5,7 +5,7 @@
 ### Breaking Changes
 
 * Active `World` count is now limited to 256. If you have more than 256 worlds active at the same time, consider merging them into one world.
-* `Entity` is now a struct instead of a class. In case you have some external plugins or code that relies on no more existing data, you may need to update it. Pooling `Entity` may also make no sense anymore.
+* `Entity` is now a struct instead of a class. In case you have some external plugins or code that relies on no more existing data, you may need to update it. Some data you may need (e.g. for plugins, workarounds, extensions, etc.) could still be available through the internal data (like `EntityData` in the `World`, or `Archetype` class in general). Pooling `Entity` may also make no sense anymore.
 * `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh. It will still be available throughout the entire current major Morpeh version (2024) but *may* be removed in Morpeh 2025 release. Prefer using `Stash` API which is guaranteed to stay and is faster anyway.
 * `Stash<T>` initial size functionality is now a part of `ComponentId`. Use `ComponentId<T>.StashSize` to modify the initial size of the stash before the first call to `World.GetStash<T>()` (which includes `EntityExtensions` API and different providers / external code).
 * `ComponentId` and `ExtendedComponentId` are now split into different use cases to reduce IL2CPP metadata size. `ExtendedComponentId` is now stripped out of non-UnityEditor runtimes unless `MORPEH_GENERATE_ALL_EXTENDED_IDS` is specified. `ExtendedComponentId` may be required for reflection-based code where `IStash` interface is not enough.
