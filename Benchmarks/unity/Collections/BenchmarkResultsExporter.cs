@@ -41,7 +41,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
             var names = GetBenchmarkNames(runData.Results[0].ClassName);
 
             sb.AppendLine($"\n### *{testName}*\n");
-            sb.AppendLine($"| Functionality | {names.Morpeh} (Morpeh) | *{names.BCL} (BCL)* |");
+            sb.AppendLine($"| Functionality | {names.Morpeh} (Morpeh) | {names.BCL} (BCL) |");
             sb.AppendLine("|---|--:|--:|");
 
             var groups = runData.Results
@@ -57,11 +57,12 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
                 var bclMedian = bclResult.SampleGroups[0].Median;
                 var morpehMedian = morpehResult.SampleGroups[0].Median;
                 var ratio = bclMedian / morpehMedian;
-                var speedupColor = ratio > 1 ? "green" : (ratio < 1 ? "red" : "grey");
-                var speedupMark = ratio > 1 ? "🟢" : (ratio < 1 ? "🟠" : "");
+                var morpehFaster = ratio > 1;
 
                 sb.AppendLine(
-                    $"| `{group.Key.MethodName}({group.Key.Param})` | {morpehMedian:F3}ms <span style=\"color:{speedupColor}\">({ratio:F1}x)</span>&nbsp;{speedupMark} | *{bclMedian:F3}ms <span style=\"color:grey\">(1.0x)</span>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |"
+                    $"| `{group.Key.MethodName}({group.Key.Param})` | " +
+                    $"{morpehMedian:F3}ms <span style=\"color:{(morpehFaster ? "green" : "red")}\">({ratio:F1}x)</span>&nbsp;{(morpehFaster ? "🟢" : "🟠")} | " +
+                    $"*{bclMedian:F3}ms <span style=\"color:{(morpehFaster ? "red" : "green")}\">({(morpehFaster ? "1.0x" : $"{1 / ratio:F1}x")})</span>*&nbsp;{(morpehFaster ? "🟠" : "🟢")} |"
                 );
             }
 

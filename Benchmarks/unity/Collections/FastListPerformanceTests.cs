@@ -12,19 +12,34 @@ using Unity.PerformanceTesting;
 using static Scellecs.Morpeh.Benchmarks.Collections.FastListBenchmarkUtility;
 
 namespace Scellecs.Morpeh.Benchmarks.Collections {
-    [BenchmarkName("List<int>", "FastList<int>")]
+    [BenchmarkName("List", "FastList")]
     internal sealed class FastListBenchmark {
         [Test, Performance]
+        [Category("Performance")]
         public void IndexerRead([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner<IndexerRead>.Run(count, type);
         }
 
         [Test, Performance]
+        [Category("Performance")]
         public void IndexerWrite([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner<IndexerWrite>.Run(count, type);
         }
 
         [Test, Performance]
+        [Category("Performance")]
+        public void IndexerReadDirect([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner<IndexerReadDirect>.Run(count, type);
+        }
+
+        [Test, Performance]
+        [Category("Performance")]
+        public void IndexerWriteDirect([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner<IndexerWriteDirect>.Run(count, type);
+        }
+
+        [Test, Performance]
+        [Category("Performance")]
         public void Remove([Values(10_000, 100_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner<Remove>.Run(count, type);
         }
@@ -81,20 +96,20 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
         }
 
         public void MeasureBCL() {
-            var count = values.Count;
+            var count = this.values.Count;
             var value = 0;
 
             for (int i = 0; i < count; i++) {
-                Volatile.Write(ref value, bclList[values[i]]);
+                Volatile.Write(ref value, this.bclList[this.values[i]]);
             }
         }
 
         public void MeasureMorpeh() {
-            var count = values.Count;
+            var count = this.values.Count;
             var value = 0;
 
             for (int i = 0; i < count; i++) {
-                Volatile.Write(ref value, fastList[values[i]]);
+                Volatile.Write(ref value, this.fastList[this.values[i]]);
             }
         }
     }
@@ -115,18 +130,85 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
         }
 
         public void MeasureBCL() {
-            var count = values.Count;
+            var count = this.values.Count;
 
             for (int i = 0; i < count; i++) {
-                bclList[values[i]] = i;
+                this.bclList[this.values[i]] = i;
             }
         }
 
         public void MeasureMorpeh() {
-            var count = values.Count;
+            var count = this.values.Count;
 
             for (int i = 0; i < count; i++) {
-                fastList[values[i]] = i;
+                this.fastList[this.values[i]] = i;
+            }
+        }
+    }
+
+    internal sealed class IndexerReadDirect : IBenchmarkContainer {
+        private FastList<int> fastList;
+        private List<int> bclList;
+        private List<int> values;
+
+        public void AllocBCL(int capacity) {
+            this.bclList = InitBCL(capacity, true);
+            this.values = InitRandomValues(capacity);
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.fastList = InitMorpeh(capacity, true);
+            this.values = InitRandomValues(capacity);
+        }
+
+        public void MeasureBCL() {
+            var count = this.values.Count;
+            var value = 0;
+
+            for (int i = 0; i < count; i++) {
+                Volatile.Write(ref value, this.bclList[this.values[i]]);
+            }
+        }
+
+        public void MeasureMorpeh() {
+            var count = this.values.Count;
+            var value = 0;
+
+            for (int i = 0; i < count; i++) {
+                Volatile.Write(ref value, this.fastList.data[this.values[i]]);
+            }
+        }
+    }
+
+    internal sealed class IndexerWriteDirect : IBenchmarkContainer {
+        private FastList<int> fastList;
+        private List<int> bclList;
+        private List<int> values;
+
+        public void AllocBCL(int capacity) {
+            this.bclList = InitBCL(capacity, true);
+            this.values = InitRandomValues(capacity);
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.fastList = InitMorpeh(capacity, true);
+            this.values = InitRandomValues(capacity);
+        }
+
+        public void MeasureBCL() {
+            var count = this.values.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                this.bclList[this.values[i]] = i;
+            }
+        }
+
+        public void MeasureMorpeh() {
+            var count = this.values.Count;
+
+            for (int i = 0; i < count; i++) {
+                this.fastList.data[this.values[i]] = i;
             }
         }
     }
@@ -158,7 +240,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
             var count = values.Count;
 
             for (int i = 0; i < count; i++) {
-                bclList.Remove(values[i]);
+                this.bclList.Remove(this.values[i]);
             }
         }
 
@@ -166,7 +248,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
             var count = values.Count;
 
             for (int i = 0; i < count; i++) {
-                fastList.Remove(values[i]);
+                this.fastList.Remove(this.values[i]);
             }
         }
     }
