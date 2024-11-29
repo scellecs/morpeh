@@ -493,28 +493,29 @@ public sealed class HealthSystem : UpdateSystem {
 ```
 We will focus on a simplified version, because even in this version entity.GetComponent is very fast.
 
-Let's create ScriptableObject for HealthSystem.  
-This will allow the system to have its inspector and we can refer to it in the scene.
-<details>
-    <summary>Right click in project window and select <code>Create/ECS/Systems/HealthSystem</code>.  </summary>
+Now we need to add our newly created system to the world. We can do it by creating a `SystemGroup` and adding the system to it,
+and then adding the `SystemGroup` to the world.
 
-![create_system_scriptableobject.gif](Gifs~/create_system_scriptableobject.gif)
-</details>
+World.Default is created for you by default, but you can create your own worlds if you need to separate the logic.
+Beware that World.Default is updated automatically by the game engine, but you can disable it and update it manually.
+Custom worlds are not updated automatically, so you need to update them manually.
 
-Next step: create `Installer` on the scene.  
-This will help us choose which systems should work and in which order.
+```c#
+public class Startup : MonoBehaviour {
+    private World world;
+    
+    private void Start() {
+        this.world = World.Default;
+        
+        var systemsGroup = this.world.CreateSystemsGroup();
+        systemsGroup.AddSystem(new HealthSystem());
+        
+        this.world.AddSystemsGroup(order: 0, systemsGroup);
+    }
+}
+```
 
-<details>
-    <summary>Right click in hierarchy window and select <code>ECS/Installer</code>.  </summary>
-
-![create_installer.gif](Gifs~/create_installer.gif)
-</details>
-
-<details>
-    <summary>Add system to the installer and run project.  </summary>
-
-![add_system_to_installer.gif](Gifs~/add_system_to_installer.gif)
-</details>
+Attach the script to any GameObject and press play.
 
 Nothing happened because we did not create our entities.  
 I will show the creation of entities directly related to GameObject, because to create them from the code it is enough to write `world.CreateEntity()`.  
