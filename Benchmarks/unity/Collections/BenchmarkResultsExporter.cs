@@ -26,7 +26,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
                 .FirstOrDefault(t => t.FullName == className);
 
             if (type == null) return (null, null);
-            var attr = type.GetCustomAttribute<BenchmarkNameAttribute>();
+            var attr = type.GetCustomAttribute<BenchmarkAttribute>();
             return attr != null ? (attr.BCL, attr.Morpeh) : (null, null);
         }
 
@@ -35,7 +35,8 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
             var sb = new StringBuilder();
             sb.AppendLine($"# Performance Comparison: Collection Benchmarks");
             sb.AppendLine($"\nBenchmark run on {runData.Hardware.ProcessorType} with {runData.Hardware.ProcessorCount} logical cores.");
-            sb.AppendLine($"Unity Editor version: {runData.Editor.Version}");
+            sb.AppendLine($"\nUnity Editor version: {runData.Editor.Version}");
+            sb.AppendLine($"\nScripting Backend: {runData.Player.ScriptingBackend}");
 
             var testName = runData.Results[0].ClassName.Split('.')[^1].Replace("Benchmark", "");
             var names = GetBenchmarkNames(runData.Results[0].ClassName);
