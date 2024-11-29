@@ -23,6 +23,11 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
         public void IndexerWrite([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner<IndexerWrite>.Run(count, type);
         }
+
+        [Test, Performance]
+        public void Remove([Values(10_000, 100_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner<Remove>.Run(count, type);
+        }
     }
 
     internal static class FastListBenchmarkUtility {
@@ -122,6 +127,46 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
 
             for (int i = 0; i < count; i++) {
                 fastList[values[i]] = i;
+            }
+        }
+    }
+
+    internal sealed class Remove : IBenchmarkContainer {
+        private FastList<int> fastList;
+        private List<int> bclList;
+        private List<int> values;
+
+        public void AllocBCL(int capacity) {
+            this.bclList = InitBCL(capacity, false);
+            this.values = InitRandomValues(capacity);
+
+            foreach (var value in values) {
+                this.bclList.Add(value);
+            }
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.fastList = InitMorpeh(capacity, false);
+            this.values = InitRandomValues(capacity);
+
+            foreach (var value in values) {
+                this.fastList.Add(value);
+            }
+        }
+
+        public void MeasureBCL() {
+            var count = values.Count;
+
+            for (int i = 0; i < count; i++) {
+                bclList.Remove(values[i]);
+            }
+        }
+
+        public void MeasureMorpeh() {
+            var count = values.Count;
+
+            for (int i = 0; i < count; i++) {
+                fastList.Remove(values[i]);
             }
         }
     }
