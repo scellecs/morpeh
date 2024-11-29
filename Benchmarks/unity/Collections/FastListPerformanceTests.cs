@@ -37,6 +37,16 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
 
         [Test, Performance]
+        public void Add([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner<Add>.Run(count, type);
+        }
+
+        [Test, Performance]
+        public void AddGrow([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner<AddGrow>.Run(count, type);
+        }
+
+        [Test, Performance]
         [Category("Performance")]
         public void Remove([Values(10_000, 100_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner<Remove>.Run(count, type);
@@ -518,6 +528,34 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         public void AllocMorpeh(int capacity) {
             this.fastList = InitMorpeh(capacity, false);
             this.capacity = capacity;
+        }
+
+        public void MeasureBCL() {
+            for (int i = 0; i < capacity; i++) {
+                this.bclList.Add(i);
+            }
+        }
+
+        public void MeasureMorpeh() {
+            for (int i = 0; i < capacity; i++) {
+                this.fastList.Add(i);
+            }
+        }
+    }
+
+    internal sealed class AddGrow : IBenchmarkContainer {
+        private FastList<int> fastList;
+        private List<int> bclList;
+        private int capacity;
+
+        public void AllocBCL(int capacity) {
+            this.capacity = capacity;
+            this.bclList = new List<int>(4);
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.capacity = capacity;
+            this.fastList = new FastList<int>(4);
         }
 
         public void MeasureBCL() {

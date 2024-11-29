@@ -10,28 +10,34 @@ Scripting Backend: IL2CPP
 
 | Functionality | FastList (Morpeh) | List (BCL) |
 |---|--:|--:|
-| `ForEach(10000)` | 0.106ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *0.110ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `ForEach(100000)` | 1.010ms <span style="color:green">(1.1x)</span>&nbsp;🟢 | *1.115ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `ForEach(1000000)` | 9.361ms <span style="color:green">(1.2x)</span>&nbsp;🟢 | *11.073ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `IndexerRead(100000)` | 1.043ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *1.074ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `IndexerRead(1000000)` | 9.861ms <span style="color:green">(1.2x)</span>&nbsp;🟢 | *12.148ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `IndexerReadDirect(100000)` | 1.001ms <span style="color:green">(1.1x)</span>&nbsp;🟢 | *1.054ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `IndexerReadDirect(1000000)` | 10.471ms <span style="color:green">(1.2x)</span>&nbsp;🟢 | *12.211ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `IndexerWrite(100000)` | 0.361ms <span style="color:green">(1.6x)</span>&nbsp;🟢 | *0.578ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `IndexerWrite(1000000)` | 5.344ms <span style="color:green">(1.6x)</span>&nbsp;🟢 | *8.398ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `IndexerWriteDirect(100000)` | 0.269ms <span style="color:green">(2.2x)</span>&nbsp;🟢 | *0.584ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `IndexerWriteDirect(1000000)` | 4.321ms <span style="color:green">(1.8x)</span>&nbsp;🟢 | *7.582ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `Remove(10000)` | 4.363ms <span style="color:red">(1.0x)</span>&nbsp;🟠 | *4.197ms <span style="color:green">(1.0x)</span>*&nbsp;🟢 |
-| `Remove(100000)` | 476.970ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *484.376ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `RemoveAt(10000)` | 1.512ms <span style="color:red">(0.9x)</span>&nbsp;🟠 | *1.429ms <span style="color:green">(1.1x)</span>*&nbsp;🟢 |
-| `RemoveAt(100000)` | 153.895ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *154.698ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `RemoveAtFast(10000)` | 1.981ms <span style="color:red">(0.7x)</span>&nbsp;🟠 | *1.374ms <span style="color:green">(1.4x)</span>*&nbsp;🟢 |
-| `RemoveAtFast(100000)` | 153.781ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *156.327ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `RemoveAtSwapBack(10000)` | 0.057ms <span style="color:green">(1.4x)</span>&nbsp;🟢 | *0.079ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `RemoveAtSwapBack(100000)` | 0.452ms <span style="color:green">(1.8x)</span>&nbsp;🟢 | *0.831ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `RemoveAtSwapBackFast(10000)` | 0.041ms <span style="color:green">(2.1x)</span>&nbsp;🟢 | *0.087ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `RemoveAtSwapBackFast(100000)` | 0.419ms <span style="color:green">(2.0x)</span>&nbsp;🟢 | *0.856ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
-| `RemoveRange(10000)` | 0.004ms <span style="color:red">(1.0x)</span>&nbsp;🟠 | *0.004ms <span style="color:green">(1.0x)</span>*&nbsp;🟢 |
-| `RemoveRange(100000)` | 0.034ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *0.035ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `Add(10000)` | 0.024ms <span style="color:green">(1.1x)</span>&nbsp;🟢 | *0.027ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `Add(100000)` | 0.237ms <span style="color:green">(1.1x)</span>&nbsp;🟢 | *0.272ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `Add(1000000)` | 3.028ms <span style="color:green">(1.2x)</span>&nbsp;🟢 | *3.578ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `AddGrow(10000)` | 0.032ms <span style="color:green">(2.9x)</span>&nbsp;🟢 | *0.093ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `AddGrow(100000)` | 0.706ms <span style="color:red">(0.8x)</span>&nbsp;🟠 | *0.550ms <span style="color:green">(1.3x)</span>*&nbsp;🟢 |
+| `AddGrow(1000000)` | 6.015ms <span style="color:red">(0.9x)</span>&nbsp;🟠 | *5.229ms <span style="color:green">(1.2x)</span>*&nbsp;🟢 |
+| `ForEach(10000)` | 0.108ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *0.111ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `ForEach(100000)` | 1.010ms <span style="color:green">(1.1x)</span>&nbsp;🟢 | *1.127ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `ForEach(1000000)` | 9.796ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *9.975ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `IndexerRead(100000)` | 1.070ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *1.096ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `IndexerRead(1000000)` | 10.614ms <span style="color:green">(1.1x)</span>&nbsp;🟢 | *12.166ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `IndexerReadDirect(100000)` | 1.055ms <span style="color:green">(1.1x)</span>&nbsp;🟢 | *1.167ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `IndexerReadDirect(1000000)` | 9.849ms <span style="color:green">(1.2x)</span>&nbsp;🟢 | *12.220ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `IndexerWrite(100000)` | 0.425ms <span style="color:green">(1.3x)</span>&nbsp;🟢 | *0.563ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `IndexerWrite(1000000)` | 5.472ms <span style="color:green">(1.4x)</span>&nbsp;🟢 | *7.792ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `IndexerWriteDirect(100000)` | 0.299ms <span style="color:green">(2.0x)</span>&nbsp;🟢 | *0.590ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `IndexerWriteDirect(1000000)` | 4.678ms <span style="color:green">(1.6x)</span>&nbsp;🟢 | *7.561ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `Remove(10000)` | 3.998ms <span style="color:green">(1.1x)</span>&nbsp;🟢 | *4.446ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `Remove(100000)` | 497.765ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *508.927ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `RemoveAt(10000)` | 1.383ms <span style="color:red">(1.0x)</span>&nbsp;🟠 | *1.353ms <span style="color:green">(1.0x)</span>*&nbsp;🟢 |
+| `RemoveAt(100000)` | 157.028ms <span style="color:green">(1.0x)</span>&nbsp;🟢 | *163.958ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `RemoveAtFast(10000)` | 1.339ms <span style="color:red">(1.0x)</span>&nbsp;🟠 | *1.338ms <span style="color:green">(1.0x)</span>*&nbsp;🟢 |
+| `RemoveAtFast(100000)` | 158.549ms <span style="color:red">(1.0x)</span>&nbsp;🟠 | *153.902ms <span style="color:green">(1.0x)</span>*&nbsp;🟢 |
+| `RemoveAtSwapBack(10000)` | 0.043ms <span style="color:green">(2.0x)</span>&nbsp;🟢 | *0.087ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `RemoveAtSwapBack(100000)` | 0.441ms <span style="color:green">(2.0x)</span>&nbsp;🟢 | *0.864ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `RemoveAtSwapBackFast(10000)` | 0.041ms <span style="color:green">(3.2x)</span>&nbsp;🟢 | *0.130ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `RemoveAtSwapBackFast(100000)` | 0.401ms <span style="color:green">(2.1x)</span>&nbsp;🟢 | *0.857ms <span style="color:red">(1.0x)</span>*&nbsp;🟠 |
+| `RemoveRange(10000)` | 0.006ms <span style="color:red">(1.0x)</span>&nbsp;🟠 | *0.006ms <span style="color:green">(1.0x)</span>*&nbsp;🟢 |
+| `RemoveRange(100000)` | 0.034ms <span style="color:red">(1.0x)</span>&nbsp;🟠 | *0.033ms <span style="color:green">(1.0x)</span>*&nbsp;🟢 |
 
 ---
