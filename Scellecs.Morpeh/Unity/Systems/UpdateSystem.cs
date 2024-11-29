@@ -1,7 +1,9 @@
 ﻿namespace Scellecs.Morpeh.Systems {
+    using System;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
+    [Obsolete("Use ISystem instead.")]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
