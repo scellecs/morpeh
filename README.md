@@ -131,16 +131,17 @@ public class HealthSystem : ISystem {
 ```
 
 All systems types:  
-* `IInitializer` & `Initializer` - have only OnAwake and Dispose methods, convenient for executing startup logic
-* `ISystem` & `UpdateSystem`
-* `IFixedSystem` & `FixedUpdateSystem`
-* `ILateSystem` & `LateUpdateSystem`
-* `ICleanupSystem` & `CleanupSystem`
+* `IInitializer` - has only OnAwake and Dispose methods, convenient for executing startup logic
+* `ISystem`
+* `IFixedSystem`
+* `ILateSystem`
+* `ICleanupSystem`
+
+Beware that ScriptableObject-based systems do still exist in 2024 version, but they are deprecated and will be removed in the future.
 
 #### 🔖 SystemsGroup
 
-The type that contains the systems.  
-There is an `Installer` wrapper to work in the inspector, but if you want to control everything from code, you can use the systems group directly.  
+The type that contains the systems. Consider them as "a feature" to group the systems by their common purpose.
 
 ```c#
 var newWorld = World.Create();
@@ -379,46 +380,53 @@ public struct HealthComponent : IComponent {
 
 It is okay.
 
-Now let's create first system.
-<details>
-    <summary>Right click in project window and select <code>Create/ECS/System</code>.  </summary>
+Now let's create our first system.
 
-![create_system.gif](Gifs~/create_system.gif)
-</details>
+Create a new C# class somewhere in your project and give it a name.
 
-> [!NOTE]  
-> Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem, CleanupSystem.  
-> They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate. CleanupSystem called the most recent in LateUpdate.
+> [!NOTE]
+> You can also create IFixedSystem, ILateSystem and ICleanupSystem.  
+> They are similar to MonoBehaviour's Update, FixedUpdate, LateUpdate. 
+> ICleanupSystem is called after all ILateSystem.
 
-System looks like this.
+A system looks like this:
 ```c#  
-using Scellecs.Morpeh.Systems;
+using Scellecs.Morpeh;
 using UnityEngine;
 using Unity.IL2CPP.CompilerServices;
 
 [Il2CppSetOption(Option.NullChecks, false)]
 [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
 [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-[CreateAssetMenu(menuName = "ECS/Systems/" + nameof(HealthSystem))]
-public sealed class HealthSystem : UpdateSystem {
-    public override void OnAwake() {
+public sealed class HealthSystem : ISystem {
+    public World World { get; set; }
+    
+    public void OnAwake() {
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
+    }
+    
+    public void Dispose() {
     }
 }
 ```
 
 We have to add a filter to find all the entities with `HealthComponent`.
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
+public sealed class HealthSystem : ISystem {
     private Filter filter;
     
-    public override void OnAwake() {
+    public World World { get; set; }
+    
+    public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -431,17 +439,21 @@ They do not store entities directly, so if you like, you can declare them direct
 For example:
 
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
+public sealed class HealthSystem : ISystem {
+    public World World { get; set; }
     
-    public override void OnAwake() {
+    public void OnAwake() {
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         var filter = this.World.Filter.With<HealthComponent>().Build();
         
         //Or just iterate without variable
         foreach (var entity in this.World.Filter.With<HealthComponent>().Build()) {
         }
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -450,18 +462,23 @@ But we will focus on the option with caching to a variable, because we believe t
 
 Now we can iterate all needed entities.
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
+public sealed class HealthSystem : ISystem {
     private Filter filter;
     
-    public override void OnAwake() {
+    public World World { get; set; }
+    
+    public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
             ref var healthComponent = ref entity.GetComponent<HealthComponent>();
             Debug.Log(healthComponent.healthPoints);
         }
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -474,20 +491,26 @@ No need to do GetComponent from entity every time, which trying to find suitable
 However, we use such code only in very hot areas, because it is quite difficult to read it.
 
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
+public sealed class HealthSystem : ISystem {
     private Filter filter;
     private Stash<HealthComponent> healthStash;
     
-    public override void OnAwake() {
+    public World World { get; set; }
+    
+    public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
         this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
             ref var healthComponent = ref healthStash.Get(entity);
             Debug.Log(healthComponent.healthPoints);
         }
+    }
+    
+    public void Dispose() {
+        
     }
 }
 ```
