@@ -105,8 +105,7 @@ public struct HealthComponent : IComponent {
 Types that process entities with a specific set of components.  
 Entities are selected using a filter.
 
-All systems are represented by interfaces, but for convenience, there are ScriptableObject classes that make it easier to work with the inspector and `Installer`.  
-Such classes are the default tool, but you can write pure classes that implement the interface, but then you need to use the `SystemsGroup` API instead of the `Installer`.
+All systems are represented by interfaces.
 
 ```c#
 public class HealthSystem : ISystem {
