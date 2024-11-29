@@ -761,9 +761,12 @@ public struct PlayerView : IComponent, IDisposable {
 The initializer or system needs to mark the stash as disposable. For example:
 
 ```c# 
-public class PlayerViewDisposeInitializer : Initializer {
-    public override void OnAwake() {
+public class PlayerViewDisposeInitializer : IInitializer {
+    public void OnAwake() {
         this.World.GetStash<PlayerView>().AsDisposable();
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -771,13 +774,16 @@ public class PlayerViewDisposeInitializer : Initializer {
 or
 
 ```c# 
-public class PlayerViewSystem : UpdateSystem {
-    public override void OnAwake() {
+public class PlayerViewSystem : ISystem {
+    public void OnAwake() {
         this.World.GetStash<PlayerView>().AsDisposable();
     }
     
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         ...
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -798,11 +804,11 @@ Current limitations:
 
 Example job scheduling:
 ```c#  
-public sealed class SomeSystem : UpdateSystem {
+public sealed class SomeSystem : ISystem {
     private Filter filter;
     private Stash<HealthComponent> stash;
     ...
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         var nativeFilter = this.filter.AsNative();
         var parallelJob = new ExampleParallelJob {
             entities = nativeFilter,
@@ -847,11 +853,11 @@ Planning between SystemsGroup is impossible because in Morpeh, unlike Entities o
 
 Example scheduling:
 ```c#  
-public sealed class SomeSystem : UpdateSystem {
+public sealed class SomeSystem : ISystem {
     private Filter filter;
     private Stash<HealthComponent> stash;
     ...
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         var nativeFilter = this.filter.AsNative();
         var parallelJob = new ExampleParallelJob {
             entities = nativeFilter,
