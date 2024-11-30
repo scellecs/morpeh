@@ -3,7 +3,7 @@
 #endif
 #if MORPEH_UNITY && MORPEH_BENCHMARK_COLLECTIONS
 namespace Scellecs.Morpeh.Benchmarks.Collections {
-    internal static class BenchmarkContainerRunner<T> where T : IBenchmarkContainer, new() {
+    internal static class BenchmarkContainerRunner<T> where T : IBenchmarkComparisonContainer, new() {
         public static void Run(int capacity, BenchmarkContainerType type) {
             var container = new T();
 

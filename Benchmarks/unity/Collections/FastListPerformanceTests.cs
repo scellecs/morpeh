@@ -10,8 +10,8 @@ using System.Threading;
 using Unity.PerformanceTesting;
 using static Scellecs.Morpeh.Benchmarks.Collections.FastList.FastListBenchmarkUtility;
 namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
-    [Benchmark("List", "FastList")]
-    internal sealed class FastListBenchmark {
+    [BenchmarkComparison("List", "FastList")]
+    internal sealed class FastListPerformanceTests {
         [Test, Performance]
         [Category("Performance")]
         public void IndexerRead([Values(100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
@@ -123,7 +123,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class IndexerRead : IBenchmarkContainer {
+    internal sealed class IndexerRead : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -157,7 +157,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class IndexerWrite : IBenchmarkContainer {
+    internal sealed class IndexerWrite : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -189,7 +189,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class IndexerReadDirect : IBenchmarkContainer {
+    internal sealed class IndexerReadDirect : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -223,7 +223,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class IndexerWriteDirect : IBenchmarkContainer {
+    internal sealed class IndexerWriteDirect : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -255,7 +255,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class Remove : IBenchmarkContainer {
+    internal sealed class Remove : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -295,7 +295,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class RemoveAt : IBenchmarkContainer {
+    internal sealed class RemoveAt : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -338,7 +338,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class RemoveAtFast : IBenchmarkContainer {
+    internal sealed class RemoveAtFast : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -381,7 +381,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class RemoveRange : IBenchmarkContainer {
+    internal sealed class RemoveRange : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -423,7 +423,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class RemoveAtSwapBack : IBenchmarkContainer {
+    internal sealed class RemoveAtSwapBack : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -469,7 +469,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class RemoveAtSwapBackFast : IBenchmarkContainer {
+    internal sealed class RemoveAtSwapBackFast : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private List<int> values;
@@ -515,7 +515,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class Add : IBenchmarkContainer {
+    internal sealed class Add : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private int capacity;
@@ -543,7 +543,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class AddGrow : IBenchmarkContainer {
+    internal sealed class AddGrow : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
         private int capacity;
@@ -571,7 +571,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
     }
 
-    internal sealed class ForEach : IBenchmarkContainer {
+    internal sealed class ForEach : IBenchmarkComparisonContainer {
         private FastList<int> fastList;
         private List<int> bclList;
 

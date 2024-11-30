@@ -3,7 +3,7 @@
 #endif
 #if MORPEH_UNITY && MORPEH_BENCHMARK_COLLECTIONS
 namespace Scellecs.Morpeh.Benchmarks.Collections {
-    internal interface IBenchmarkContainer {
+    internal interface IBenchmarkComparisonContainer {
         public void AllocMorpeh(int capacity);
         public void AllocBCL(int capacity);
         public void MeasureMorpeh();

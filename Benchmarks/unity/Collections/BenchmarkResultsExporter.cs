@@ -13,7 +13,6 @@ using System.Text;
 using UnityEditor;
 using System.Reflection;
 namespace Scellecs.Morpeh.Benchmarks.Collections {
-    [CreateAssetMenu(fileName = "BenchmarkResults", menuName = "Benchmarks/Results Exporter")]
     public class BenchmarkResultsExporter : ScriptableObject
     {
         public TextAsset benchmarkTemplate;
@@ -24,9 +23,8 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
             var type = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a => a.GetTypes())
                 .FirstOrDefault(t => t.FullName == className);
-
             if (type == null) return (null, null);
-            var attr = type.GetCustomAttribute<BenchmarkAttribute>();
+            var attr = type.GetCustomAttribute<BenchmarkComparisonAttribute>();
             return attr != null ? (attr.BCL, attr.Morpeh) : (null, null);
         }
 
@@ -38,40 +36,47 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
             sb.AppendLine($"\nUnity Editor version: {runData.Editor.Version}");
             sb.AppendLine($"\nScripting Backend: {runData.Player.ScriptingBackend}");
 
-            var testName = runData.Results[0].ClassName.Split('.')[^1].Replace("Benchmark", "");
-            var names = GetBenchmarkNames(runData.Results[0].ClassName);
+            var testsByClass = runData.Results
+                .GroupBy(r => r.ClassName)
+                .OrderBy(g => g.Key);
 
-            sb.AppendLine($"\n### *{testName}*\n");
-            sb.AppendLine($"| Functionality | {names.Morpeh} (Morpeh) | {names.BCL} (BCL) |");
-            sb.AppendLine("|---|--:|--:|");
-
-            var groups = runData.Results
-                .GroupBy(r => (r.MethodName, Param: int.Parse(r.Name.Split('(')[1].Split(',')[0])))
-                .OrderBy(g => g.Key.MethodName)
-                .ThenBy(g => g.Key.Param);
-
-            foreach (var group in groups)
+            foreach (var classGroup in testsByClass)
             {
-                var bclResult = group.First(r => r.Name.EndsWith("BCL)"));
-                var morpehResult = group.First(r => r.Name.EndsWith("Morpeh)"));
+                var testName = classGroup.Key.Split('.')[^1].Replace("Benchmark", "");
+                var names = GetBenchmarkNames(classGroup.Key);
 
-                var bclMedian = bclResult.SampleGroups[0].Median;
-                var morpehMedian = morpehResult.SampleGroups[0].Median;
-                var ratio = bclMedian / morpehMedian;
-                var morpehFaster = ratio > 1;
+                sb.AppendLine($"\n### *{testName}*\n");
+                sb.AppendLine($"| Functionality | {names.Morpeh} (Morpeh) | {names.BCL} (BCL) |");
+                sb.AppendLine("|---|--:|--:|");
 
-                sb.AppendLine(
-                    $"| `{group.Key.MethodName}({group.Key.Param})` | " +
-                    $"{morpehMedian:F3}ms <span style=\"color:{(morpehFaster ? "green" : "red")}\">({ratio:F1}x)</span>&nbsp;{(morpehFaster ? "🟢" : "🟠")} | " +
-                    $"*{bclMedian:F3}ms <span style=\"color:{(morpehFaster ? "red" : "green")}\">({(morpehFaster ? "1.0x" : $"{1 / ratio:F1}x")})</span>*&nbsp;{(morpehFaster ? "🟠" : "🟢")} |"
-                );
+                var methodGroups = classGroup
+                    .GroupBy(r => (r.MethodName, Param: int.Parse(r.Name.Split('(')[1].Split(',')[0])))
+                    .OrderBy(g => g.Key.MethodName)
+                    .ThenBy(g => g.Key.Param);
+
+                foreach (var group in methodGroups)
+                {
+                    var bclResult = group.First(r => r.Name.EndsWith("BCL)"));
+                    var morpehResult = group.First(r => r.Name.EndsWith("Morpeh)"));
+
+                    var bclMedian = bclResult.SampleGroups[0].Median;
+                    var morpehMedian = morpehResult.SampleGroups[0].Median;
+                    var ratio = bclMedian / morpehMedian;
+                    var morpehFaster = ratio > 1;
+
+                    sb.AppendLine(
+                        $"| `{group.Key.MethodName}({group.Key.Param})` | " +
+                        $"{morpehMedian:F3}ms <span style=\"color:{(morpehFaster ? "green" : "red")}\">({ratio:F1}x)</span>&nbsp;{(morpehFaster ? "🟢" : "🟠")} | " +
+                        $"*{bclMedian:F3}ms <span style=\"color:{(morpehFaster ? "red" : "green")}\">({(morpehFaster ? "1.0x" : $"{1 / ratio:F1}x")})</span>*&nbsp;{(morpehFaster ? "🟠" : "🟢")} |"
+                    );
+                }
+                sb.AppendLine("\n---");
             }
 
-            sb.AppendLine("\n---");
             return sb.ToString();
         }
 
-        [ContextMenu("111")]
+        [ContextMenu("Export Results")]
         public void ExportPerformanceTestsResult()
         {
             if (benchmarkTemplate == null)

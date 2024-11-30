@@ -4,12 +4,12 @@
 #if MORPEH_UNITY && MORPEH_BENCHMARK_COLLECTIONS
 using System;
 namespace Scellecs.Morpeh.Benchmarks.Collections {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class BenchmarkAttribute : Attribute {
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class BenchmarkComparisonAttribute : Attribute {
         public string BCL { get; }
         public string Morpeh { get; }
 
-        public BenchmarkAttribute(string bcl, string morpeh) {
+        public BenchmarkComparisonAttribute(string bcl, string morpeh) {
             BCL = bcl;
             Morpeh = morpeh;
         }

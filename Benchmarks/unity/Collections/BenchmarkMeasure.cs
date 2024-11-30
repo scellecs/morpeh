@@ -5,13 +5,13 @@
 using System;
 namespace Scellecs.Morpeh.Benchmarks.Collections {
     internal static class BenchmarkMeasure {
-        public static void Measure(Type type, int warmupCount, int measurementsCount, Action method, Action setup) {
+        public static void Measure(Type type, int warmupCount, int measurementCount, Action method, Action setup) {
             Unity.PerformanceTesting.Measure
                 .Method(method)
                 .SampleGroup(type.Name)
                 .SetUp(setup)
                 .WarmupCount(warmupCount)
-                .MeasurementCount(measurementsCount)
+                .MeasurementCount(measurementCount)
                 .Run();
         }
     }
