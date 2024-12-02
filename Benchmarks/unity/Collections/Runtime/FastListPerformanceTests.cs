@@ -91,6 +91,12 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         public void ForEach([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<ForEach>(count, type);
         }
+
+        [Test, Performance]
+        [Category("Performance")]
+        public void Clear([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner.RunComparison<Clear>(count, type);
+        }
     }
 
     internal static class FastListBenchmarkUtility {
@@ -600,6 +606,27 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
             foreach (var element in fastList) {
                 Volatile.Write(ref value, element);
             }
+        }
+    }
+
+    internal sealed class Clear : IBenchmarkComparisonContainer {
+        private FastList<int> fastList;
+        private List<int> bclList;
+
+        public void AllocBCL(int capacity) {
+            this.bclList = InitBCL(capacity, true);
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.fastList = InitMorpeh(capacity, true);
+        }
+
+        public void MeasureBCL() {
+            this.bclList.Clear();
+        }
+
+        public void MeasureMorpeh() {
+            this.fastList.Clear();
         }
     }
 }

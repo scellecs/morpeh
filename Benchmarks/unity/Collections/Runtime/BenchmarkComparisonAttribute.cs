@@ -7,9 +7,9 @@ using System;
 
 namespace Scellecs.Morpeh.Benchmarks.Collections {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    internal sealed class BenchmarkComparisonAttribute : Attribute {
-        internal Type EnumType { get; }
-        internal string[] Names { get; }
+    public sealed class BenchmarkComparisonAttribute : Attribute {
+        public Type EnumType { get; }
+        public string[] Names { get; }
 
         internal BenchmarkComparisonAttribute(Type enumType, params string[] names) {
             if (!enumType.IsEnum) {

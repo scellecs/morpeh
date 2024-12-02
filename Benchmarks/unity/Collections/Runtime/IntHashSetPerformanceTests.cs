@@ -45,6 +45,12 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashSet {
         public void ForEach([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<ForEach>(count, type);
         }
+
+        [Test, Performance]
+        [Category("Performance")]
+        public void Clear([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner.RunComparison<Clear>(count, type);
+        }
     }
 
     internal static class IntHashSetTestsUtility {
@@ -249,6 +255,27 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashSet {
             foreach (var value in values) {
                 this.morpehSet.Add(value);
             }
+        }
+    }
+
+    internal sealed class Clear : IBenchmarkComparisonContainer {
+        private HashSet<int> bclSet;
+        private IntHashSet morpehSet;
+
+        public void AllocBCL(int capacity) {
+            this.bclSet = InitBCL(capacity, true, out _);
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.morpehSet = InitMorpeh(capacity, true, out _);
+        }
+
+        public void MeasureBCL() {
+            this.bclSet.Clear();
+        }
+
+        public void MeasureMorpeh() {
+            this.morpehSet.Clear();
         }
     }
 }

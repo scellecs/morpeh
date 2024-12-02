@@ -37,6 +37,18 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.BitSet {
         public void Unset([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Unset>(count, type);
         }
+
+        [Test, Performance]
+        [Category("Performance")]
+        public void Clear([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner.RunComparison<Clear>(count, type);
+        }
+
+        [Test, Performance]
+        [Category("Performance")]
+        public void ClearManually([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner.RunComparison<ClearManually>(count, type);
+        }
     }
 
     internal static class BitSetTestsUtility {
@@ -222,6 +234,53 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.BitSet {
         public void MeasureMorpeh() {
             foreach (var index in indices) {
                 this.morpehSet.Set(index);
+            }
+        }
+    }
+
+    internal sealed class Clear : IBenchmarkComparisonContainer {
+        private BitArray bclSet;
+        private BitSet morpehSet;
+
+        public void AllocBCL(int capacity) {
+            this.bclSet = InitBCL(capacity, true, out _);
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.morpehSet = InitMorpeh(capacity, true, out _);
+        }
+
+        public void MeasureBCL() {
+            this.bclSet.SetAll(false);
+        }
+
+        public void MeasureMorpeh() {
+            this.morpehSet.Clear();
+        }
+    }
+
+    internal sealed class ClearManually : IBenchmarkComparisonContainer {
+        private BitArray bclSet;
+        private BitSet morpehSet;
+        private List<int> indices;
+
+        public void AllocBCL(int capacity) {
+            this.bclSet = InitBCL(capacity, true, out this.indices);
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.morpehSet = InitMorpeh(capacity, true, out this.indices);
+        }
+
+        public void MeasureBCL() {
+            foreach (var index in indices) {
+                this.bclSet.Set(index, false);
+            }
+        }
+
+        public void MeasureMorpeh() {
+            foreach (var index in indices) {
+                this.morpehSet.Unset(index);
             }
         }
     }
