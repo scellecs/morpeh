@@ -116,15 +116,21 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
                         results.Add(result.SampleGroups[0].Median);
                     }
 
+                    var worstResult = results.Max();
                     var bestResult = results.Min();
                     sb.Append($"| `{group.Key.MethodName}({group.Key.Param})` |");
 
                     for (int i = 0; i < results.Count; i++) {
-                        var ratio = results[i] / bestResult;
                         var isBest = Math.Abs(results[i] - bestResult) < 0.001d;
 
                         sb.Append($" {results[i]:F3}ms ");
-                        sb.Append($"<span style=\"color:{(isBest ? "green" : "red")}\">({ratio:F1}x)</span>");
+                        if (isBest) {
+                            var speedup = worstResult / bestResult;
+                            sb.Append($"<span style=\"color:green\">({speedup:F1}x)</span>");
+                        }
+                        else {
+                            sb.Append("<span style=\"color:red\">(1.0x)</span>");
+                        }
                         sb.Append($"&nbsp;{(isBest ? "🟢" : "🟠")} |");
                     }
                     sb.AppendLine();
