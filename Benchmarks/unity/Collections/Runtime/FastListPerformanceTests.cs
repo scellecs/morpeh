@@ -39,11 +39,13 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
 
         [Test, Performance]
+        [Category("Performance")]
         public void Add([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Add>(count, type);
         }
 
         [Test, Performance]
+        [Category("Performance")]
         public void AddGrow([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<AddGrow>(count, type);
         }
@@ -85,6 +87,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.FastList {
         }
 
         [Test, Performance]
+        [Category("Performance")]
         public void ForEach([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<ForEach>(count, type);
         }
