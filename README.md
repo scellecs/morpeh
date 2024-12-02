@@ -67,9 +67,13 @@ NuGet package URL: https://www.nuget.org/packages/Scellecs.Morpeh
 ### 📘 Base concept of ECS pattern
 
 #### 🔖 Entity
-Container of components.  
-Has a set of methods for add, get, set, remove components.  
-It is reference type. Each entity is unique and not pooled. Only entity IDs are reused.  
+An identifier for components, which does not store any data but can be used to
+access components. Logically, it is similar to a GameObject in Unity, but
+an Entity does not store any data itself.
+
+It is a value type, and is trivially copyable. Underlying identifiers (IDs) are
+reused, but each reused ID is guaranteed to have a new generation, making each new
+Entity unique.
 
 ```c#
 var entity = this.World.CreateEntity();
