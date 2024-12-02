@@ -52,7 +52,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntStack {
         }
         
         public static IntStack InitMorpeh(int capacity, bool addValues) {
-            var stack = new IntStack();
+            var stack = new IntStack(capacity);
             
             if (!addValues) {
                 return stack;
@@ -104,7 +104,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntStack {
         }
 
         public void AllocMorpeh(int capacity) {
-            this.morpehStack = new IntStack();
+            this.morpehStack = new IntStack(4);
             this.count = capacity;
         }
 

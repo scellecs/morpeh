@@ -17,7 +17,14 @@ namespace Scellecs.Morpeh.Collections {
             this.data = new int[this.capacity];
             this.length = 0;
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IntStack(int capacity) {
+            this.capacity = capacity;
+            this.data = new int[this.capacity];
+            this.length = 0;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Push(in int value) {
             if (this.length == this.capacity) {
