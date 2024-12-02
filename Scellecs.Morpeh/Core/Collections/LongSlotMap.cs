@@ -1,23 +1,22 @@
 ﻿namespace Scellecs.Morpeh {
     using System;
     using System.Runtime.CompilerServices;
-    using JetBrains.Annotations;
     using Scellecs.Morpeh.Collections;
     using Unity.IL2CPP.CompilerServices;
     
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public unsafe class IntSlotMap : IDisposable {
-        internal int                       length;
-        internal int                       capacity;
-        internal int                       capacityMinusOne;
-        internal int                       lastIndex;
-        internal int                       freeIndex;
-        internal IntPinnedArray            buckets;
-        internal IntHashMapSlotPinnedArray slots;
+    public unsafe class LongSlotMap : IDisposable {
+        internal int                        length;
+        internal int                        capacity;
+        internal int                        capacityMinusOne;
+        internal int                        lastIndex;
+        internal int                        freeIndex;
+        internal IntPinnedArray             buckets;
+        internal LongHashMapSlotPinnedArray slots;
 
-        public IntSlotMap(int capacity) {
+        public LongSlotMap(int capacity) {
             this.lastIndex = 0;
             this.length = 0;
             this.freeIndex = -1;
@@ -26,7 +25,7 @@
             this.capacity = this.capacityMinusOne + 1;
 
             this.buckets = new IntPinnedArray(this.capacity);
-            this.slots = new IntHashMapSlotPinnedArray(this.capacity);
+            this.slots = new LongHashMapSlotPinnedArray(this.capacity);
         }
         
         public void Dispose() {
@@ -36,16 +35,15 @@
             this.capacityMinusOne = 0;
             this.capacity = 0;
             this.buckets.Dispose();
-            this.slots.Dispose();
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetKeyBySlotIndex(int slotIndex) {
+        public long GetKeyBySlotIndex(int slotIndex) {
             return this.slots.ptr[slotIndex].key - 1;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Has(int key) {
+        public bool Has(long key) {
             var rem = key & this.capacityMinusOne;
 
             int next;
@@ -62,7 +60,7 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Remove(int key, out int slotIndex) {
+        public bool Remove(long key, out int slotIndex) {
             var rem = key & this.capacityMinusOne;
 
             int next;
@@ -103,7 +101,7 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetIndex(int key, out int slotIndex) {
+        public bool TryGetIndex(long key, out int slotIndex) {
             var rem = key & this.capacityMinusOne;
 
             int next;
@@ -122,7 +120,7 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsKeySet(int key, out int slotIndex) {
+        public bool IsKeySet(long key, out int slotIndex) {
             var rem = key & this.capacityMinusOne;
 
             for (var i = this.buckets.ptr[rem] - 1; i >= 0; i = this.slots.ptr[i].next) {
@@ -147,7 +145,7 @@
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int TakeSlot(int key, out bool resized) {
+        public int TakeSlot(long key, out bool resized) {
             resized = false;
             
             int slotIndex;
@@ -225,7 +223,7 @@
         [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
         [Il2CppSetOption(Option.DivideByZeroChecks, false)]
         public struct Enumerator {
-            public IntSlotMap map;
+            public LongSlotMap map;
 
             public int index;
             public int current;
