@@ -36,3 +36,5 @@ obj.meta
 project.lock.json
 .DS_Store
 nupkg/
+benchmark_settings.cfg
+benchmark_settings.cfg.meta
