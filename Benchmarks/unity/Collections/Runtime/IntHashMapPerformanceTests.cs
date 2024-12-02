@@ -1,6 +1,7 @@
 ﻿#if ENABLE_MONO || ENABLE_IL2CPP
 #define MORPEH_UNITY
 #endif
+
 #if MORPEH_UNITY && MORPEH_BENCHMARK_COLLECTIONS
 using NUnit.Framework;
 using Scellecs.Morpeh.Collections;
@@ -9,44 +10,96 @@ using System.Collections.Generic;
 using System.Threading;
 using Unity.PerformanceTesting;
 using static Scellecs.Morpeh.Benchmarks.Collections.IntHashMap.IntHashMapTestsUtility;
+
 namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
-    [BenchmarkComparison("Dictionary", "IntHashMap")]
+    [BenchmarkComparison(typeof(BenchmarkContainerType), "IntHashMap", "Dictionary")]
     internal sealed class IntHashMapPerformanceTests {
         [Test, Performance]
         [Category("Performance")]
         public void IndexerRead([Values(10_000, 100_000, 1_000_000)] int capacity, [Values] BenchmarkContainerType type) {
-            BenchmarkContainerRunner<IndexerRead>.Run(capacity, type);
+            BenchmarkContainerRunner.RunComparison<IndexerRead>(capacity, type);
         }
 
         [Test, Performance]
+        [Category("Performance")]
         public void Add([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
-            BenchmarkContainerRunner<Add>.Run(count, type);
+            BenchmarkContainerRunner.RunComparison<Add>(count, type);
         }
 
         [Test, Performance]
+        [Category("Performance")]
         public void AddGrow([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
-            BenchmarkContainerRunner<AddGrow>.Run(count, type);
+            BenchmarkContainerRunner.RunComparison<AddGrow>(count, type);
         }
 
         [Test, Performance]
         [Category("Performance")]
         public void TryGetValue([Values(10_000, 100_000, 1_000_000)] int capacity, [Values] BenchmarkContainerType type) {
-            BenchmarkContainerRunner<TryGetValue>.Run(capacity, type);
+            BenchmarkContainerRunner.RunComparison<TryGetValue>(capacity, type);
+        }
+
+        [Test, Performance]
+        [Category("Performance")]
+        public void ContainsKey([Values(10_000, 100_000, 1_000_000)] int capacity, [Values] BenchmarkContainerType type) {
+            BenchmarkContainerRunner.RunComparison<ContainsKey>(capacity, type);
         }
 
         [Test, Performance]
         [Category("Performance")]
         public void Remove([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
-            BenchmarkContainerRunner<Remove>.Run(count, type);
+            BenchmarkContainerRunner.RunComparison<Remove>(count, type);
         }
 
         [Test, Performance]
+        [Category("Performance")]
         public void ForEach([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
-            BenchmarkContainerRunner<ForEach>.Run(count, type);
+            BenchmarkContainerRunner.RunComparison<ForEach>(count, type);
         }
     }
 
     internal static class IntHashMapTestsUtility {
+        public static Dictionary<int, int> InitBCL(int capacity, bool addValues, out List<int> keys) {
+            var map = new Dictionary<int, int>(capacity);
+            keys = new List<int>(capacity);
+            
+            if (!addValues) {
+                return map;
+            }
+                
+            var random = new Random(52);
+            int added = 0;
+            while (added < capacity) {
+                var key = random.Next();
+                if (map.TryAdd(key, added)) {
+                    keys.Add(key);
+                    added++;
+                }
+            }
+            Shuffle(keys);
+            return map;
+        }
+        
+        public static IntHashMap<int> InitMorpeh(int capacity, bool addValues, out List<int> keys) {
+            var map = new IntHashMap<int>(capacity);
+            keys = new List<int>(capacity);
+            
+            if (!addValues) {
+                return map;
+            }
+                
+            var random = new Random(52);
+            int added = 0;
+            while (added < capacity) {
+                var key = random.Next();
+                if (map.Add(key, added, out _)) {
+                    keys.Add(key);
+                    added++;
+                }
+            }
+            Shuffle(keys);
+            return map;
+        }
+
         public static List<int> CreateRandomUniqueKeys(int capacity) {
             var values = new List<int>(capacity);
             var set = new HashSet<int>();
@@ -78,33 +131,11 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
         private List<int> keys;
 
         public void AllocBCL(int capacity) {
-            this.bclMap = new Dictionary<int, int>(capacity);
-            this.keys = new List<int>(capacity);
-            var random = new Random(52);
-            int added = 0;
-            while (added < capacity) {
-                var key = random.Next();
-                if (this.bclMap.TryAdd(key, added)) {
-                    this.keys.Add(key);
-                    added++;
-                }
-            }
-            Shuffle(this.keys);
+            this.bclMap = InitBCL(capacity, true, out this.keys);
         }
 
         public void AllocMorpeh(int capacity) {
-            this.morpehMap = new IntHashMap<int>(capacity);
-            this.keys = new List<int>(capacity);
-            var random = new Random(52);
-            int added = 0;
-            while (added < capacity) {
-                var key = random.Next();
-                if (this.morpehMap.Add(key, added, out _)) {
-                    this.keys.Add(key);
-                    added++;
-                }
-            }
-            Shuffle(this.keys);
+            this.morpehMap = InitMorpeh(capacity, true, out this.keys);
         }
 
         public void MeasureBCL() {
@@ -122,39 +153,45 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
         }
     }
 
+    internal sealed class ContainsKey : IBenchmarkComparisonContainer {
+        private Dictionary<int, int> bclMap;
+        private IntHashMap<int> morpehMap;
+        private List<int> keys;
+
+        public void AllocBCL(int capacity) {
+            this.bclMap = InitBCL(capacity, true, out this.keys);
+        }
+
+        public void AllocMorpeh(int capacity) {
+            this.morpehMap = InitMorpeh(capacity, true, out this.keys);
+        }
+
+        public void MeasureBCL() {
+            var result = false;
+            for (int i = 0; i < keys.Count; i++) {
+                Volatile.Write(ref result, this.bclMap.ContainsKey(this.keys[i]));
+            }
+        }
+
+        public void MeasureMorpeh() {
+            var result = false;
+            for (int i = 0; i < keys.Count; i++) {
+                Volatile.Write(ref result, this.morpehMap.Has(this.keys[i]));
+            }
+        }
+    }
+
     internal sealed class TryGetValue : IBenchmarkComparisonContainer {
         private Dictionary<int, int> bclMap;
         private IntHashMap<int> morpehMap;
         private List<int> keys;
 
         public void AllocBCL(int capacity) {
-            this.bclMap = new Dictionary<int, int>(capacity);
-            this.keys = new List<int>(capacity);
-            var random = new Random(52);
-            int added = 0;
-            while (added < capacity) {
-                var key = random.Next();
-                if (this.bclMap.TryAdd(key, added)) {
-                    this.keys.Add(key);
-                    added++;
-                }
-            }
-            Shuffle(this.keys);
+            this.bclMap = InitBCL(capacity, true, out this.keys);
         }
 
         public void AllocMorpeh(int capacity) {
-            this.morpehMap = new IntHashMap<int>(capacity);
-            this.keys = new List<int>(capacity);
-            var random = new Random(52);
-            int added = 0;
-            while (added < capacity) {
-                var key = random.Next();
-                if (this.morpehMap.Add(key, added, out _)) {
-                    this.keys.Add(key);
-                    added++;
-                }
-            }
-            Shuffle(this.keys);
+            this.morpehMap = InitMorpeh(capacity, true, out this.keys);
         }
 
         public void MeasureBCL() {
@@ -165,8 +202,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
         }
 
         public void MeasureMorpeh() {
-            for (int i = 0; i < keys.Count; i++)
-            {
+            for (int i = 0; i < keys.Count; i++) {
                 this.morpehMap.TryGetValue(this.keys[i], out var value);
                 Volatile.Read(ref value);
             }
@@ -179,33 +215,11 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
         private List<int> keys;
 
         public void AllocBCL(int capacity) {
-            this.bclMap = new Dictionary<int, int>(capacity);
-            this.keys = new List<int>(capacity);
-            var random = new Random(52);
-            int added = 0;
-            while (added < capacity) {
-                var key = random.Next();
-                if (this.bclMap.TryAdd(key, added)) {
-                    this.keys.Add(key);
-                    added++;
-                }
-            }
-            Shuffle(this.keys);
+            this.bclMap = InitBCL(capacity, true, out this.keys);
         }
 
         public void AllocMorpeh(int capacity) {
-            this.morpehMap = new IntHashMap<int>(capacity);
-            this.keys = new List<int>(capacity);
-            var random = new Random(52);
-            int added = 0;
-            while (added < capacity) {
-                var key = random.Next();
-                if (this.morpehMap.Add(key, added, out _)) {
-                    this.keys.Add(key);
-                    added++;
-                }
-            }
-            Shuffle(this.keys);
+            this.morpehMap = InitMorpeh(capacity, true, out this.keys);
         }
 
         public void MeasureBCL() {
@@ -226,17 +240,11 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
         private IntHashMap<int> morpehMap;
 
         public void AllocBCL(int capacity) {
-            this.bclMap = new Dictionary<int, int>(capacity);
-            for (int i = 0; i < capacity; i++) {
-                this.bclMap.Add(i, i);
-            }
+            this.bclMap = InitBCL(capacity, true, out _);
         }
 
         public void AllocMorpeh(int capacity) {
-            this.morpehMap = new IntHashMap<int>(capacity);
-            for (int i = 0; i < capacity; i++) {
-                this.morpehMap.Add(i, i, out _);
-            }
+            this.morpehMap = InitMorpeh(capacity, true, out _);
         }
 
         public void MeasureBCL() {
@@ -259,12 +267,12 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
         private List<int> keys;
 
         public void AllocBCL(int capacity) {
-            this.bclMap = new Dictionary<int, int>(capacity);
+            this.bclMap = InitBCL(capacity, false, out _);
             this.keys = CreateRandomUniqueKeys(capacity);
         }
 
         public void AllocMorpeh(int capacity) {
-            this.morpehMap = new IntHashMap<int>(capacity);
+            this.morpehMap = InitMorpeh(capacity, false, out _);
             this.keys = CreateRandomUniqueKeys(capacity);
         }
 
