@@ -76,13 +76,11 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.Editor {
 
         private static string GenerateMarkdown(Run runData) {
             var sb = new StringBuilder();
-            GenerateSetupInstructions(sb);
             sb.AppendLine($"# Performance Comparison: Collection Benchmarks");
             sb.AppendLine($"\n## Environment");
             sb.AppendLine($"\nBenchmark run on {runData.Hardware.ProcessorType} with {runData.Hardware.ProcessorCount} logical cores.");
             sb.AppendLine($"\nUnity Editor version: {runData.Editor.Version}");
             sb.AppendLine($"\nScripting Backend: {runData.Player.ScriptingBackend}");
-
             sb.AppendLine($"\n## Results");
 
             var testsByClass = runData.Results
@@ -149,38 +147,6 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.Editor {
             }
 
             return sb.ToString();
-        }
-
-        private static void GenerateSetupInstructions(StringBuilder sb) {
-            sb.AppendLine("## Setup Instructions");
-            sb.AppendLine("\nBefore running the benchmarks, complete these steps:");
-            sb.AppendLine("\n1. Project Setup:");
-            sb.AppendLine("   - Create a clean Unity project");
-            sb.AppendLine("   - Clone Morpeh into the Assets folder");
-            sb.AppendLine("   - Install package: ``com.unity.test-framework.performance``");
-            sb.AppendLine("\n2. Project Settings Configuration:");
-            sb.AppendLine("   - Disable VSync");
-            sb.AppendLine("   - Remove all Quality Settings except one");
-            sb.AppendLine("   - Set Scripting Backend to IL2CPP");
-            sb.AppendLine("   - Remove the camera from the scene");
-            sb.AppendLine("   - Close Unity Editor (not needed anymore)");
-            sb.AppendLine("\n3. Running Benchmarks (Windows Example):");
-            sb.AppendLine("   - Open terminal");
-            sb.AppendLine("   - Navigate to Unity Editor folder, e.g.:");
-            sb.AppendLine("     ```");
-            sb.AppendLine("     cd \"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.49f1\\Editor\"");
-            sb.AppendLine("     ```");
-            sb.AppendLine("   - Run build and tests command:");
-            sb.AppendLine("     ```");
-            sb.AppendLine("     ./Unity.exe -runTests -batchMode -projectPath PROJECT_PATH -testPlatform StandaloneWindows64 -buildTarget StandaloneWindows64 -mtRendering -scriptingbackend=il2cpp");
-            sb.AppendLine("     ```");
-            sb.AppendLine("     Replace PROJECT_PATH with your path (e.g., M:/morpeh-2024)");
-            sb.AppendLine("\n4. Export Results:");
-            sb.AppendLine("   - After tests complete and Unity application closes, run:");
-            sb.AppendLine("     ```");
-            sb.AppendLine("     ./Unity.exe -batchmode -projectPath PROJECT_PATH -executeMethod Scellecs.Morpeh.Benchmarks.Collections.Editor.BenchmarkExporter.RunExport -quit");
-            sb.AppendLine("     ```");
-            sb.AppendLine("     Again, replace PROJECT_PATH with your actual project path");
         }
     }
 }
