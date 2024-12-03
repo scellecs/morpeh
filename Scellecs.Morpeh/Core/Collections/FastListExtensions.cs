@@ -8,7 +8,6 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class FastListExtensions {
-        private const int MaxArrayLength = 0X7FEFFFFF;
         /// <summary>
         /// Ensures the capacity of the list is at least the specified value.
         /// </summary>
