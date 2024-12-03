@@ -253,7 +253,7 @@ namespace Scellecs.Morpeh {
                 MLogger.LogTrace($"[WorldExtensions] Remove archetype {archetype.hash}");
                 
                 for (int slotIndex = 0, lastIndex = archetype.filtersMap.lastIndex; slotIndex < lastIndex; slotIndex++) {
-                    if (archetype.filtersMap.slots[slotIndex].key < 0) {
+                    if (archetype.filtersMap.slots[slotIndex].key - 1 < 0) {
                         continue;
                     }
                     
@@ -391,7 +391,7 @@ namespace Scellecs.Morpeh {
                 var filters= entityData.currentArchetype.filters;
             
                 for (int slotIndex = 0, lastIndex = filtersMap.lastIndex; slotIndex < lastIndex; slotIndex++) {
-                    if (filtersMap.slots[slotIndex].key < 0) {
+                    if (filtersMap.slots[slotIndex].key - 1 < 0) {
                         continue;
                     }
 
