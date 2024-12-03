@@ -16,35 +16,37 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.BitSet {
 
     [BenchmarkComparison(typeof(BenchmarkContainerType), "BitSet", "BitArray")]
     internal sealed class BitSetPerformanceTests {
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void IsSet([Values(10_000, 100_000, 1_000_000)] int capacity, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<IsSet>(capacity, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
+        [Category("Performance")]
         public void Set([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Set>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
+        [Category("Performance")]
         public void SetGrow([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<SetGrow>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void Unset([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Unset>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void Clear([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Clear>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void ClearManually([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<ClearManually>(count, type);

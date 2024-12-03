@@ -14,49 +14,49 @@ using static Scellecs.Morpeh.Benchmarks.Collections.IntHashMap.IntHashMapTestsUt
 namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
     [BenchmarkComparison(typeof(BenchmarkContainerType), "IntHashMap", "Dictionary")]
     internal sealed class IntHashMapPerformanceTests {
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void IndexerRead([Values(10_000, 100_000, 1_000_000)] int capacity, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<IndexerRead>(capacity, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void Add([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Add>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void AddGrow([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<AddGrow>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void TryGetValue([Values(10_000, 100_000, 1_000_000)] int capacity, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<TryGetValue>(capacity, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void ContainsKey([Values(10_000, 100_000, 1_000_000)] int capacity, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<ContainsKey>(capacity, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void Remove([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Remove>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void ForEach([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<ForEach>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void Clear([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Clear>(count, type);

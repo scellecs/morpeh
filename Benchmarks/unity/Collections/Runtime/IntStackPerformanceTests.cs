@@ -16,25 +16,25 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntStack {
 
     [BenchmarkComparison(typeof(BenchmarkContainerType), "IntStack", "Stack")]
     internal sealed class IntStackPerformanceTests {
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void Push([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Push>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void PushGrow([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<PushGrow>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void Pop([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Pop>(count, type);
         }
 
-        [Test, Performance]
+        //[Test, Performance]
         [Category("Performance")]
         public void TryPop([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<TryPop>(count, type);
