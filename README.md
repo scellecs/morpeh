@@ -67,9 +67,13 @@ NuGet package URL: https://www.nuget.org/packages/Scellecs.Morpeh
 ### 📘 Base concept of ECS pattern
 
 #### 🔖 Entity
-Container of components.  
-Has a set of methods for add, get, set, remove components.  
-It is reference type. Each entity is unique and not pooled. Only entity IDs are reused.  
+An identifier for components, which does not store any data but can be used to
+access components. Logically, it is similar to a GameObject in Unity, but
+an Entity does not store any data itself.
+
+It is a value type, and is trivially copyable. Underlying identifiers (IDs) are
+reused, but each reused ID is guaranteed to have a new generation, making each new
+Entity unique.
 
 ```c#
 var entity = this.World.CreateEntity();
@@ -105,8 +109,7 @@ public struct HealthComponent : IComponent {
 Types that process entities with a specific set of components.  
 Entities are selected using a filter.
 
-All systems are represented by interfaces, but for convenience, there are ScriptableObject classes that make it easier to work with the inspector and `Installer`.  
-Such classes are the default tool, but you can write pure classes that implement the interface, but then you need to use the `SystemsGroup` API instead of the `Installer`.
+All systems are represented by interfaces.
 
 ```c#
 public class HealthSystem : ISystem {
@@ -131,16 +134,17 @@ public class HealthSystem : ISystem {
 ```
 
 All systems types:  
-* `IInitializer` & `Initializer` - have only OnAwake and Dispose methods, convenient for executing startup logic
-* `ISystem` & `UpdateSystem`
-* `IFixedSystem` & `FixedUpdateSystem`
-* `ILateSystem` & `LateUpdateSystem`
-* `ICleanupSystem` & `CleanupSystem`
+* `IInitializer` - has only OnAwake and Dispose methods, convenient for executing startup logic
+* `ISystem`
+* `IFixedSystem`
+* `ILateSystem`
+* `ICleanupSystem`
+
+Beware that ScriptableObject-based systems do still exist in 2024 version, but they are deprecated and will be removed in the future.
 
 #### 🔖 SystemsGroup
 
-The type that contains the systems.  
-There is an `Installer` wrapper to work in the inspector, but if you want to control everything from code, you can use the systems group directly.  
+The type that contains the systems. Consider them as "a feature" to group the systems by their common purpose.
 
 ```c#
 var newWorld = World.Create();
@@ -379,46 +383,53 @@ public struct HealthComponent : IComponent {
 
 It is okay.
 
-Now let's create first system.
-<details>
-    <summary>Right click in project window and select <code>Create/ECS/System</code>.  </summary>
+Now let's create our first system.
 
-![create_system.gif](Gifs~/create_system.gif)
-</details>
+Create a new C# class somewhere in your project and give it a name.
 
-> [!NOTE]  
-> Icon U means UpdateSystem. Also you can create FixedUpdateSystem and LateUpdateSystem, CleanupSystem.  
-> They are similar as MonoBehaviour's Update, FixedUpdate, LateUpdate. CleanupSystem called the most recent in LateUpdate.
+> [!NOTE]
+> You can also create IFixedSystem, ILateSystem and ICleanupSystem.  
+> They are similar to MonoBehaviour's Update, FixedUpdate, LateUpdate. 
+> ICleanupSystem is called after all ILateSystem.
 
-System looks like this.
+A system looks like this:
 ```c#  
-using Scellecs.Morpeh.Systems;
+using Scellecs.Morpeh;
 using UnityEngine;
 using Unity.IL2CPP.CompilerServices;
 
 [Il2CppSetOption(Option.NullChecks, false)]
 [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
 [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-[CreateAssetMenu(menuName = "ECS/Systems/" + nameof(HealthSystem))]
-public sealed class HealthSystem : UpdateSystem {
-    public override void OnAwake() {
+public sealed class HealthSystem : ISystem {
+    public World World { get; set; }
+    
+    public void OnAwake() {
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
+    }
+    
+    public void Dispose() {
     }
 }
 ```
 
 We have to add a filter to find all the entities with `HealthComponent`.
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
+public sealed class HealthSystem : ISystem {
     private Filter filter;
     
-    public override void OnAwake() {
+    public World World { get; set; }
+    
+    public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -431,17 +442,21 @@ They do not store entities directly, so if you like, you can declare them direct
 For example:
 
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
+public sealed class HealthSystem : ISystem {
+    public World World { get; set; }
     
-    public override void OnAwake() {
+    public void OnAwake() {
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         var filter = this.World.Filter.With<HealthComponent>().Build();
         
         //Or just iterate without variable
         foreach (var entity in this.World.Filter.With<HealthComponent>().Build()) {
         }
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -450,18 +465,23 @@ But we will focus on the option with caching to a variable, because we believe t
 
 Now we can iterate all needed entities.
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
+public sealed class HealthSystem : ISystem {
     private Filter filter;
     
-    public override void OnAwake() {
+    public World World { get; set; }
+    
+    public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
             ref var healthComponent = ref entity.GetComponent<HealthComponent>();
             Debug.Log(healthComponent.healthPoints);
         }
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -474,47 +494,54 @@ No need to do GetComponent from entity every time, which trying to find suitable
 However, we use such code only in very hot areas, because it is quite difficult to read it.
 
 ```c#  
-public sealed class HealthSystem : UpdateSystem {
+public sealed class HealthSystem : ISystem {
     private Filter filter;
     private Stash<HealthComponent> healthStash;
     
-    public override void OnAwake() {
+    public World World { get; set; }
+    
+    public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
         this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
             ref var healthComponent = ref healthStash.Get(entity);
             Debug.Log(healthComponent.healthPoints);
         }
     }
+    
+    public void Dispose() {
+        
+    }
 }
 ```
 We will focus on a simplified version, because even in this version entity.GetComponent is very fast.
 
-Let's create ScriptableObject for HealthSystem.  
-This will allow the system to have its inspector and we can refer to it in the scene.
-<details>
-    <summary>Right click in project window and select <code>Create/ECS/Systems/HealthSystem</code>.  </summary>
+Now we need to add our newly created system to the world. We can do it by creating a `SystemGroup` and adding the system to it,
+and then adding the `SystemGroup` to the world.
 
-![create_system_scriptableobject.gif](Gifs~/create_system_scriptableobject.gif)
-</details>
+World.Default is created for you by default, but you can create your own worlds if you need to separate the logic.
+Beware that World.Default is updated automatically by the game engine, but you can disable it and update it manually.
+Custom worlds are not updated automatically, so you need to update them manually.
 
-Next step: create `Installer` on the scene.  
-This will help us choose which systems should work and in which order.
+```c#
+public class Startup : MonoBehaviour {
+    private World world;
+    
+    private void Start() {
+        this.world = World.Default;
+        
+        var systemsGroup = this.world.CreateSystemsGroup();
+        systemsGroup.AddSystem(new HealthSystem());
+        
+        this.world.AddSystemsGroup(order: 0, systemsGroup);
+    }
+}
+```
 
-<details>
-    <summary>Right click in hierarchy window and select <code>ECS/Installer</code>.  </summary>
-
-![create_installer.gif](Gifs~/create_installer.gif)
-</details>
-
-<details>
-    <summary>Add system to the installer and run project.  </summary>
-
-![add_system_to_installer.gif](Gifs~/add_system_to_installer.gif)
-</details>
+Attach the script to any GameObject and press play.
 
 Nothing happened because we did not create our entities.  
 I will show the creation of entities directly related to GameObject, because to create them from the code it is enough to write `world.CreateEntity()`.  
@@ -737,9 +764,12 @@ public struct PlayerView : IComponent, IDisposable {
 The initializer or system needs to mark the stash as disposable. For example:
 
 ```c# 
-public class PlayerViewDisposeInitializer : Initializer {
-    public override void OnAwake() {
+public class PlayerViewDisposeInitializer : IInitializer {
+    public void OnAwake() {
         this.World.GetStash<PlayerView>().AsDisposable();
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -747,13 +777,16 @@ public class PlayerViewDisposeInitializer : Initializer {
 or
 
 ```c# 
-public class PlayerViewSystem : UpdateSystem {
-    public override void OnAwake() {
+public class PlayerViewSystem : ISystem {
+    public void OnAwake() {
         this.World.GetStash<PlayerView>().AsDisposable();
     }
     
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         ...
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -774,11 +807,11 @@ Current limitations:
 
 Example job scheduling:
 ```c#  
-public sealed class SomeSystem : UpdateSystem {
+public sealed class SomeSystem : ISystem {
     private Filter filter;
     private Stash<HealthComponent> stash;
     ...
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         var nativeFilter = this.filter.AsNative();
         var parallelJob = new ExampleParallelJob {
             entities = nativeFilter,
@@ -823,11 +856,11 @@ Planning between SystemsGroup is impossible because in Morpeh, unlike Entities o
 
 Example scheduling:
 ```c#  
-public sealed class SomeSystem : UpdateSystem {
+public sealed class SomeSystem : ISystem {
     private Filter filter;
     private Stash<HealthComponent> stash;
     ...
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         var nativeFilter = this.filter.AsNative();
         var parallelJob = new ExampleParallelJob {
             entities = nativeFilter,
