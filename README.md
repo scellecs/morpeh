@@ -29,6 +29,7 @@
     * [Metrics](#-metrics)
     * [Clone a stash](#2%EF%B8%8F⃣-clone-a-stash)
     * [Stash size](#-stash-size)
+    * [Collections](#-collections)
 * [Plugins](#-plugins)
 * [Examples](#-examples)
 * [Games](#-games)
@@ -1025,6 +1026,26 @@ ComponentId<T>.StashSize = 1024;
 ```
 
 This value is not tied to a specific ``World``, so it needs to be set before starting ECS, so that all newly created stashes of this type in any ``World`` have the specified capacity.
+
+#### ⚙️ Collections
+
+Morpeh provides a small set of custom lightweight collections that perform faster under IL2CPP compared to standard library collections.
+
+**FastList**
+
+Identical to List<T>, additionally supports RemoveSwapBack operations and provides more control over the internal list structure. Also includes methods that allow bypassing array bounds checking.
+
+**IntHashMap & LongHashMap**
+
+Identical to Dictionary<int, T> and Dictionary<long, T> respectively, but only supports positive range of keys. Significantly outperforms the dictionary in terms of performance. Allows getting elements by ref.
+
+**IntHashSet**
+
+Lightweight version of HashSet<int>. Has similar optimizations to IntHashMap but without value storage overhead. Supports only positive range of keys.
+
+**BitSet**
+
+Optimized lightweight implementation of a bit array, resizes significantly faster.
 
 ---
 
