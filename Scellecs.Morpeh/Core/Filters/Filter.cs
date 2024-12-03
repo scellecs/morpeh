@@ -41,11 +41,9 @@ namespace Scellecs.Morpeh {
 
         internal World world;
 
+        internal SwappableLongSlotMap archetypeHashesMap;
         internal Archetype[] archetypes;
-        internal int archetypesLength;
-        internal int archetypesCapacity;
-        
-        internal LongHashMap<int> archetypeHashes;
+        internal int         archetypesLength;
 
         internal int[] includedTypeIds;
         internal BitSet includedTypeIdsLookup;
@@ -64,11 +62,9 @@ namespace Scellecs.Morpeh {
         internal Filter(World world, int[] includedTypeIds, int[] excludedTypeIds) {
             this.world = world;
 
-            this.archetypes = new Archetype[FilterConstants.DEFAULT_ARCHETYPES_CAPACITY];
-            this.archetypesLength = 0;
-            this.archetypesCapacity = this.archetypes.Length;
-            
-            this.archetypeHashes = new LongHashMap<int>();
+            this.archetypeHashesMap = new SwappableLongSlotMap(FilterConstants.DEFAULT_ARCHETYPES_CAPACITY);
+            this.archetypes         = new Archetype[archetypeHashesMap.capacity];
+            this.archetypesLength    = 0;
             
             this.includedTypeIds = includedTypeIds;
             this.includedTypeIdsLookup = new BitSet(includedTypeIds);
@@ -108,10 +104,10 @@ namespace Scellecs.Morpeh {
                     this.chunks?.Clear();
                     this.chunks = null;
 #endif
-                    Array.Clear(this.archetypes, 0, this.archetypes.Length);
-                    this.archetypes = null;
-                    this.archetypesLength = 0;
-                    this.archetypesCapacity = 0;
+                    Array.Clear(this.archetypes, 0, this.archetypesLength);
+                    this.archetypeHashesMap = null;
+                    this.archetypes         = null;
+                    this.archetypesLength   = 0;
                 }
 
                 var incHash = default(TypeHash);
@@ -236,11 +232,11 @@ namespace Scellecs.Morpeh {
             }
             
             var archetype = this.world.entities[entity.Id].currentArchetype;
-            return archetype != null && this.archetypeHashes.Has(archetype.hash.GetValue());
+            return archetype != null && this.archetypeHashesMap.Has(archetype.hash.GetValue());
         }
         
         internal bool AddArchetypeIfMatches(Archetype archetype) {
-            if (this.archetypeHashes.Has(archetype.hash.GetValue())) {
+            if (this.archetypeHashesMap.Has(archetype.hash.GetValue())) {
                 MLogger.LogTrace($"Archetype {archetype.hash} already in filter {this}");
                 return false;
             }
@@ -255,36 +251,36 @@ namespace Scellecs.Morpeh {
         }
         
         internal void AddArchetype(Archetype archetype) {
-            var index = this.archetypesLength++;
-            if (index >= this.archetypesCapacity) {
-                this.ResizeArchetypes(this.archetypesCapacity << 1);
+            var slotIndex = this.archetypeHashesMap.TakeSlot(archetype.hash.GetValue(), out var resized);
+            
+            if (resized) {
+                this.ResizeArchetypeHashes(this.archetypeHashesMap.capacity);
             }
             
-            this.archetypes[index] = archetype;
-            this.archetypeHashes.Add(archetype.hash.GetValue(), index, out _);
+            this.archetypes[slotIndex] = archetype;
+            this.archetypesLength++;
         }
         
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal void ResizeArchetypes(int newCapacity) {
+        internal void ResizeArchetypeHashes(int newCapacity) {
             ArrayHelpers.Grow(ref this.archetypes, newCapacity);
-            this.archetypesCapacity = newCapacity;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void RemoveArchetype(Archetype archetype) {
-            if (!this.archetypeHashes.Remove(archetype.hash.GetValue(), out var index)) {
+            if (!this.archetypeHashesMap.Remove(archetype.hash.GetValue(), out var slotIndex, out var swappedFromSlotIndex)) {
                 MLogger.LogTrace($"Archetype {archetype.hash} is not in filter {this}");
                 return;
             }
-    
-            var lastIndex = --this.archetypesLength;
-            this.archetypes[index] = this.archetypes[lastIndex];
             
-            if (index < lastIndex) {
-                this.archetypeHashes.Set(this.archetypes[index].hash.GetValue(), index, out _);
+            if (swappedFromSlotIndex == -1) {
+                this.archetypes[slotIndex] = default;
+            } else {
+                this.archetypes[slotIndex]            = this.archetypes[swappedFromSlotIndex];
+                this.archetypes[swappedFromSlotIndex] = default;
             }
             
-            this.archetypes[lastIndex] = default;
+            this.archetypesLength--;
         }
 
         internal bool ArchetypeMatches(Archetype archetype) {

@@ -11,12 +11,12 @@ namespace Scellecs.Morpeh.Native {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeFilter AsNative(this Filter filter) {
             if (filter.chunks == null) {
-                filter.chunks = new FastList<Filter.Chunk>(filter.archetypesLength);
+                filter.chunks = new FastList<Filter.Chunk>(filter.archetypes.Length);
             } else {
                 filter.chunks.Clear();
                 
-                if (filter.chunks.capacity < filter.archetypesLength) {
-                    filter.chunks.Grow(filter.archetypesCapacity);
+                if (filter.chunks.capacity < filter.archetypes.Length) {
+                    filter.chunks.Grow(filter.archetypes.Length);
                 }
             }
             
