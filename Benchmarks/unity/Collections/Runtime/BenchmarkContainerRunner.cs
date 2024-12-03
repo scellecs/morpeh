@@ -6,8 +6,8 @@ using System;
 
 namespace Scellecs.Morpeh.Benchmarks.Collections {
     internal static class BenchmarkContainerRunner {
-        private const int WARMUP_COUNT = 5;
-        private const int MEASURE_COUNT = 30;
+        private const int WARMUP_COUNT = 25;
+        private const int MEASURE_COUNT = 50;
 
         public static void RunComparison<T>(int capacity, BenchmarkContainerType type) where T : IBenchmarkComparisonContainer, new() {
             var container = new T();
@@ -30,6 +30,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections {
                 .SetUp(setup)
                 .WarmupCount(warmupCount)
                 .MeasurementCount(measurementCount)
+                .CleanUp(() => GC.Collect())
                 .Run();
         }
     }
