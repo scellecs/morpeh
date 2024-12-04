@@ -45,15 +45,14 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity = 4;
             this.data     = new T[this.capacity];
             this.length   = 0;
-
             this.comparer = EqualityComparer<T>.Default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FastList(int capacity) {
-            this.capacity = HashHelpers.GetCapacity(capacity) + 1;
-            this.data     = new T[this.capacity];
-            this.length   = 0;
+            this.capacity = HashHelpers.GetCapacitySmall(capacity) + 1;
+            this.data = new T[this.capacity];
+            this.length = 0;
 
             this.comparer = EqualityComparer<T>.Default;
         }
@@ -63,9 +62,8 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity = other.capacity;
             this.data     = new T[this.capacity];
             this.length   = other.length;
-            Array.Copy(other.data, 0, this.data, 0, this.length);
-
             this.comparer = other.comparer;
+            Array.Copy(other.data, 0, this.data, 0, this.length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

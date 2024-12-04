@@ -9,11 +9,11 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class FastListExtensions {
         /// <summary>
-        /// Increases the capacity of the list to the nearest power-of-two step, if the current capacity is insufficient.
+        /// Ensures the capacity of the list is at least the specified value.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Grow<T>(this FastList<T> list, int newCapacity) {
-            var capacity = HashHelpers.GetCapacity(newCapacity - 1) + 1;
+            var capacity = HashHelpers.GetCapacitySmall(newCapacity - 1) + 1;
             if (capacity > list.capacity) {
                 list.capacity = capacity;
                 ArrayHelpers.Grow(ref list.data, list.capacity);
@@ -28,7 +28,7 @@ namespace Scellecs.Morpeh.Collections {
         public static int Add<T>(this FastList<T> list, T value) {
             var index = list.length;
             if (++list.length == list.capacity) {
-                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(list.capacity) + 1);
+                ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacitySmall(list.capacity) + 1);
             }
 
             list.data[index] = value;
@@ -44,7 +44,7 @@ namespace Scellecs.Morpeh.Collections {
                 var newSize = list.length + other.length;
 
                 if (newSize > list.capacity) {
-                    ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacity(newSize - 1) + 1);
+                    ArrayHelpers.Grow(ref list.data, list.capacity = HashHelpers.GetCapacitySmall(newSize - 1) + 1);
                 }
 
                 Array.Copy(other.data, 0, list.data, list.length, other.length);
