@@ -1037,7 +1037,7 @@ Identical to List<T>, additionally supports RemoveSwapBack operations and provid
 
 **IntHashMap & LongHashMap**
 
-Identical to Dictionary<int, T> and Dictionary<long, T> respectively, but only supports positive range of keys. Significantly outperforms the dictionary in terms of performance. Allows getting elements by ref.
+Identical to Dictionary<int, T> and Dictionary<long, T> respectively, but only supports positive range of keys. Significantly outperforms the dictionary in terms of performance. Allows getting elements by ref. Use combination of ``foreach`` and ``GetValueByIndex/GetValueRefByIndex`` to iterate over the map.
 
 **IntHashSet**
 
