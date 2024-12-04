@@ -37,7 +37,7 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.Editor {
                 var runData = JsonUtility.FromJson<Run>(jsonData);
                 var markdownData = GenerateMarkdown(runData);
 
-                File.WriteAllText(templatePath, markdownData);
+                File.AppendAllText(templatePath, markdownData);
                 AssetDatabase.Refresh();
 
                 Debug.Log("Export completed successfully");
@@ -81,7 +81,6 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.Editor {
             sb.AppendLine($"\nBenchmark run on {runData.Hardware.ProcessorType} with {runData.Hardware.ProcessorCount} logical cores.");
             sb.AppendLine($"\nUnity Editor version: {runData.Editor.Version}");
             sb.AppendLine($"\nScripting Backend: {runData.Player.ScriptingBackend}");
-            sb.AppendLine($"\n## Results");
 
             var testsByClass = runData.Results
                 .GroupBy(r => r.ClassName)
