@@ -40,7 +40,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
             deletedArchetypes.Clear();
             var worldArchetypes = world.archetypes;
             foreach (var archetypeHash in this.archetypesHashes) {
-                if (!worldArchetypes.Has(archetypeHash)) {
+                if (!worldArchetypes.Has(new ArchetypeHash(archetypeHash))) {
                     this.deletedArchetypes.Add(archetypeHash);
                     RemoveArchetypeFromComponents(archetypeHash);
                 }
@@ -48,8 +48,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             this.archetypesHashes.ExceptWith(deletedArchetypes);
 
-            foreach (var idx in worldArchetypes) {
-                var archetype = worldArchetypes.GetValueByIndex(idx);
+            foreach (var archetype in worldArchetypes) {
                 var archetypeHash = archetype.hash.GetValue();
 
                 if (this.archetypesHashes.Add(archetypeHash)) { 

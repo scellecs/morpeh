@@ -78,8 +78,7 @@ namespace Scellecs.Morpeh {
             this.world.componentsFiltersWith.Add(this.includedTypeIds, this);
             this.world.componentsFiltersWithout.Add(this.excludedTypeIds, this);
             
-            foreach (var archetypeIndex in this.world.archetypes) {
-                var archetype = this.world.archetypes.GetValueByIndex(archetypeIndex);
+            foreach (var archetype in this.world.archetypes) {
                 if (this.AddArchetypeIfMatches(archetype)) {
                     archetype.AddFilter(this);
                 }

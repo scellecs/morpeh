@@ -12,13 +12,19 @@ public static class TestExtensions {
     }
     
     internal static Archetype GetArchetype(this World world, ArchetypeHash archetypeHash) {
-        world.archetypes.TryGetValue(archetypeHash.GetValue(), out var archetype);
-        return archetype;
+        if (world.archetypes.TryGet(archetypeHash, out var archetype)) {
+            return archetype;
+        }
+        
+        return null;
     }
     
     internal static int ArchetypeLengthOf(this World world, ArchetypeHash archetypeHash) {
-        world.archetypes.TryGetValue(archetypeHash.GetValue(), out var archetype);
-        return archetype?.length ?? 0;
+        if (world.archetypes.TryGet(archetypeHash, out var archetype)) {
+            return archetype.length;
+        }
+        
+        return 0;
     }
     
     internal static string DumpFilterArchetypes(this Filter filter) {

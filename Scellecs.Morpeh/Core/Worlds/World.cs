@@ -109,7 +109,7 @@ namespace Scellecs.Morpeh {
         internal IStash[] stashes;
 
         [ShowInInspector]
-        internal LongHashMap<Archetype> archetypes;
+        internal ArchetypeStore archetypes;
         [ShowInInspector]
         internal int archetypesCount;
         
@@ -262,17 +262,15 @@ namespace Scellecs.Morpeh {
 #if MORPEH_DEBUG
                 try {
 #endif
-                    this.archetypes.GetValueByIndex(archetype).Dispose();
+                    archetype.Dispose();
 #if MORPEH_DEBUG
                 }
                 catch (Exception e) {
-                    MLogger.LogError($"Can not dispose archetype id {archetype}");
+                    MLogger.LogError($"Cannot dispose archetype with hash {archetype.hash}");
                     MLogger.LogException(e);
                 }
 #endif
             }
-
-            this.archetypes.Clear();
             this.archetypes = null;
             
             this.emptyArchetypes      = null;

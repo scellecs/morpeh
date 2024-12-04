@@ -51,8 +51,8 @@ namespace Scellecs.Morpeh {
             world.dirtyEntities    = new IntSparseSet(world.entitiesCapacity);
             world.disposedEntities = new IntSparseSet(world.entitiesCapacity);
 
-            world.archetypes         = new LongHashMap<Archetype>();
-            world.archetypesCount    = 0;
+            world.archetypes      = new ArchetypeStore();
+            world.archetypesCount = 0;
             
             world.archetypePool        = new ArchetypePool(32);
             world.emptyArchetypes      = new Archetype[32];
@@ -263,7 +263,7 @@ namespace Scellecs.Morpeh {
                 archetype.ClearFilters();
                 archetype.components.Clear();
                 
-                world.archetypes.Remove(archetype.hash.GetValue(), out _);
+                world.archetypes.Remove(archetype);
                 world.archetypesCount--;
                 world.archetypePool.Return(archetype);
 
@@ -334,7 +334,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ApplyTransientChanges(this World world, int entityId, ref EntityData entityData) {
             // Add to new archetype
-            if (!world.archetypes.TryGetValue(entityData.nextArchetypeHash.GetValue(), out var nextArchetype)) {
+            if (!world.archetypes.TryGet(entityData.nextArchetypeHash, out var nextArchetype)) {
                 nextArchetype = world.CreateMigratedArchetype(ref entityData);
             }
             
@@ -453,7 +453,7 @@ namespace Scellecs.Morpeh {
                 ScanFilters(nextArchetype, filters);
             }
             
-            world.archetypes.Add(nextArchetype.hash.GetValue(), nextArchetype, out _);
+            world.archetypes.Add(nextArchetype);
             world.archetypesCount++;
             
             return nextArchetype;

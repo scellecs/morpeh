@@ -97,7 +97,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 state.FilterArchetypes(inc, exc);
 
                 foreach (var stateArchetypeHash in state.filteredArchetypes) {
-                    if (state.world.archetypes.TryGetValue(stateArchetypeHash, out var archetype)) {
+                    if (state.world.archetypes.TryGet(new ArchetypeHash(stateArchetypeHash), out var archetype)) {
                         this.searchResult.Add(archetype);
                     }
                 }
