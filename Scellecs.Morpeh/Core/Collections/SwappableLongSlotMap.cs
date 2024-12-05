@@ -29,7 +29,7 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(long key) {
-            var rem = key & this.capacityMinusOne;
+            var rem = (int)(key & this.capacityMinusOne);
 
             int next;
             for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -113,7 +113,7 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetIndex(long key, out int slotIndex) {
-            var rem = key & this.capacityMinusOne;
+            var rem = (int)(key & this.capacityMinusOne);
 
             int next;
             for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -132,7 +132,7 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsKeySet(long key, out int slotIndex) {
-            var rem = key & this.capacityMinusOne;
+            var rem = (int)(key & this.capacityMinusOne);
 
             for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
                 if (this.slots[i].key - 1 == key) {
@@ -158,7 +158,7 @@
             }
 
             var     slotIndex = this.length++;
-            var     rem       = key & this.capacityMinusOne;
+            var     rem       = (int)(key & this.capacityMinusOne);
             ref var newSlot   = ref this.slots[slotIndex];
 
             newSlot.key  = key + 1;
