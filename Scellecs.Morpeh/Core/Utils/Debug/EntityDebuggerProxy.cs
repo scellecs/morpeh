@@ -1,4 +1,6 @@
 ﻿#if DEBUG && !DEVELOPMENT_BUILD
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 namespace Scellecs.Morpeh {
     public sealed class EntityDebuggerProxy {
@@ -16,18 +18,36 @@ namespace Scellecs.Morpeh {
             if (world != null && !world.IsDisposed(this.entity)) {
                 var entityData = world.entities[this.entity.Id];
                 var archetype = entityData.currentArchetype;
+                var addedComponents = entityData.addedComponents;
+                var removedComponents = entityData.removedComponents;
+                var removedComponentsCount = entityData.removedComponentsCount;
+                var components = new List<IComponent>();
+
+                for (int i = 0; i < entityData.addedComponentsCount; i++) {
+                    var typeId = addedComponents[i];
+                    var definition = ExtendedComponentId.Get(typeId);
+                    components.Add((IComponent)definition.entityGetComponentBoxed.Invoke(this.entity));
+                }
+
                 if (archetype != null) {
                     var componentIds = archetype.components;
-                    var components = new IComponent[componentIds.length];
-                    var index = 0;
                     foreach (var typeId in componentIds) {
-                        var definition = ExtendedComponentId.Get(typeId);
-                        var component = definition.entityGetComponentBoxed.Invoke(this.entity);
-                        components[index++] = (IComponent)component;
-                    }
+                        var isRemoved = false;
+                        for (int i = 0; i < removedComponentsCount; i++) {
+                            if (removedComponents[i] == typeId) {
+                                isRemoved = true;
+                                break;
+                            }
+                        }
 
-                    return components;
+                        if (!isRemoved) {
+                            var definition = ExtendedComponentId.Get(typeId);
+                            components.Add((IComponent)definition.entityGetComponentBoxed.Invoke(this.entity));
+                        }
+                    }
                 }
+
+                return components.ToArray();
             }
 
             return default;
