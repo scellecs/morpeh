@@ -21,12 +21,10 @@ namespace Scellecs.Morpeh {
                 var addedComponents = entityData.addedComponents;
                 var removedComponents = entityData.removedComponents;
                 var removedComponentsCount = entityData.removedComponentsCount;
-                var components = new List<IComponent>();
-
+                Span<int> typeIds = stackalloc int[entityData.addedComponentsCount + (archetype != null ? archetype.components.length : 0)];
+                var counter = 0;
                 for (int i = 0; i < entityData.addedComponentsCount; i++) {
-                    var typeId = addedComponents[i];
-                    var definition = ExtendedComponentId.Get(typeId);
-                    components.Add((IComponent)definition.entityGetComponentBoxed.Invoke(this.entity));
+                    typeIds[counter++] = addedComponents[i];
                 }
 
                 if (archetype != null) {
@@ -41,13 +39,21 @@ namespace Scellecs.Morpeh {
                         }
 
                         if (!isRemoved) {
-                            var definition = ExtendedComponentId.Get(typeId);
-                            components.Add((IComponent)definition.entityGetComponentBoxed.Invoke(this.entity));
+                            typeIds[counter++] = typeId;
                         }
                     }
                 }
 
-                return components.ToArray();
+                if (counter > 0) {
+                    var components = new IComponent[counter];
+                    for (int i = 0; i < counter; i++) {
+                        var typeId = typeIds[i];
+                        var definition = ExtendedComponentId.Get(typeId);
+                        components[i] = (IComponent)definition.entityGetComponentBoxed.Invoke(this.entity);
+                    }
+
+                    return components;
+                }
             }
 
             return default;
