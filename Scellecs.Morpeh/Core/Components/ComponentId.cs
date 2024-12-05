@@ -65,7 +65,7 @@
             
             ComponentId.Add(typeof(T), info);
 
-#if UNITY_EDITOR || MORPEH_GENERATE_ALL_EXTENDED_IDS
+#if UNITY_EDITOR || MORPEH_GENERATE_ALL_EXTENDED_IDS || (DEBUG && !DEVELOPMENT_BUILD)
             ExtendedComponentId.Generate<T>();
 #endif
         }
