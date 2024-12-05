@@ -90,14 +90,12 @@ namespace Scellecs.Morpeh {
         internal void OnApplicationPause(bool pauseStatus) {
             if (pauseStatus) {
                 onApplicationFocusLost.Invoke();
-                GC.Collect();
             }
         }
 
         internal void OnApplicationFocus(bool hasFocus) {
             if (!hasFocus) {
                 onApplicationFocusLost.Invoke();
-                GC.Collect();
             }
         }
 
