@@ -10,15 +10,15 @@
     public class SwappableLongSlotMap {
         internal int               length;
         internal int               capacity;
-        internal int               capacityMinusOne;
+        internal long              capacityMinusOne;
         internal int[]             buckets;
         internal LongHashMapSlot[] slots;
 
         public SwappableLongSlotMap(int capacity) {
             this.length = 0;
 
-            this.capacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
-            this.capacity         = this.capacityMinusOne + 1;
+            this.capacity         = HashHelpers.GetCapacity(capacity - 1) + 1;
+            this.capacityMinusOne = this.capacity - 1;
 
             this.buckets = new int[this.capacity];
             this.slots   = new LongHashMapSlot[this.capacity];
@@ -29,7 +29,7 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(long key) {
-            var rem = key & this.capacityMinusOne;
+            var rem = (int)(key & this.capacityMinusOne);
 
             int next;
             for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -54,7 +54,7 @@
 
             ref var removedSlot = ref this.slots[slotIndex];
 
-            var     rem    = key & this.capacityMinusOne;
+            var     rem    = (int)(key & this.capacityMinusOne);
             ref var bucket = ref this.buckets[rem];
 
             if (bucket - 1 == slotIndex) {
@@ -83,7 +83,7 @@
             ref var lastSlot = ref this.slots[lastSlotIndex];
 
             var     lastSlotKey    = lastSlot.key;
-            var     lastSlotRem    = (lastSlotKey - 1) & this.capacityMinusOne;
+            var     lastSlotRem    = (int)((lastSlotKey - 1) & this.capacityMinusOne);
             ref var lastSlotBucket = ref this.buckets[lastSlotRem];
 
             if (lastSlotBucket - 1 == lastSlotIndex) {
@@ -113,7 +113,7 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetIndex(long key, out int slotIndex) {
-            var rem = key & this.capacityMinusOne;
+            var rem = (int)(key & this.capacityMinusOne);
 
             int next;
             for (var i = this.buckets[rem] - 1; i >= 0; i = next) {
@@ -132,7 +132,7 @@
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsKeySet(long key, out int slotIndex) {
-            var rem = key & this.capacityMinusOne;
+            var rem = (int)(key & this.capacityMinusOne);
 
             for (var i = this.buckets[rem] - 1; i >= 0; i = this.slots[i].next) {
                 if (this.slots[i].key - 1 == key) {
@@ -158,7 +158,7 @@
             }
 
             var     slotIndex = this.length++;
-            var     rem       = key & this.capacityMinusOne;
+            var     rem       = (int)(key & this.capacityMinusOne);
             ref var newSlot   = ref this.slots[slotIndex];
 
             newSlot.key  = key + 1;

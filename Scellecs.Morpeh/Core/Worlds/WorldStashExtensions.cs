@@ -3,7 +3,11 @@
     using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
     using Scellecs.Morpeh.Collections;
-    
+    using Unity.IL2CPP.CompilerServices;
+
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class WorldStashExtensions {
         [CanBeNull]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,8 +75,13 @@
             }
             
             if (newSize > world.stashes.Length) {
-                ArrayHelpers.Grow(ref world.stashes, newSize);
+                world.GrowStashCapacity(newSize);
             }
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void GrowStashCapacity(this World world, int newCapacity) {
+            ArrayHelpers.Grow(ref world.stashes, newCapacity);
         }
     }
 }
