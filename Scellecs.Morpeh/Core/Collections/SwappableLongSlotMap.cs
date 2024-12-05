@@ -54,7 +54,7 @@
 
             ref var removedSlot = ref this.slots[slotIndex];
 
-            var     rem    = key & this.capacityMinusOne;
+            var     rem    = (int)(key & this.capacityMinusOne);
             ref var bucket = ref this.buckets[rem];
 
             if (bucket - 1 == slotIndex) {
@@ -83,7 +83,7 @@
             ref var lastSlot = ref this.slots[lastSlotIndex];
 
             var     lastSlotKey    = lastSlot.key;
-            var     lastSlotRem    = (lastSlotKey - 1) & this.capacityMinusOne;
+            var     lastSlotRem    = (int)((lastSlotKey - 1) & this.capacityMinusOne);
             ref var lastSlotBucket = ref this.buckets[lastSlotRem];
 
             if (lastSlotBucket - 1 == lastSlotIndex) {
