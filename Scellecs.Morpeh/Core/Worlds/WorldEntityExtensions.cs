@@ -2,7 +2,11 @@
     using System.Runtime.CompilerServices;
     using JetBrains.Annotations;
     using Scellecs.Morpeh.Collections;
-    
+    using Unity.IL2CPP.CompilerServices;
+
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public static class WorldEntityExtensions {
         [PublicAPI]
         public static Entity CreateEntity(this World world) {
