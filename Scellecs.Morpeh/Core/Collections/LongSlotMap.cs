@@ -10,9 +10,9 @@
     public class LongSlotMap {
         internal int               length;
         internal int               capacity;
-        internal int               capacityMinusOne;
         internal int               lastIndex;
         internal int               freeIndex;
+        internal long              capacityMinusOne;
         internal int[]             buckets;
         internal LongHashMapSlot[] slots;
 
@@ -21,8 +21,8 @@
             this.length = 0;
             this.freeIndex = -1;
 
-            this.capacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
-            this.capacity = this.capacityMinusOne + 1;
+            this.capacity = HashHelpers.GetCapacity(capacity - 1) + 1;
+            this.capacityMinusOne = this.capacity - 1;
 
             this.buckets = new int[this.capacity];
             this.slots = new LongHashMapSlot[this.capacity];

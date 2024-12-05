@@ -10,15 +10,15 @@
     public class SwappableLongSlotMap {
         internal int               length;
         internal int               capacity;
-        internal int               capacityMinusOne;
+        internal long              capacityMinusOne;
         internal int[]             buckets;
         internal LongHashMapSlot[] slots;
 
         public SwappableLongSlotMap(int capacity) {
             this.length = 0;
 
-            this.capacityMinusOne = HashHelpers.GetCapacity(capacity - 1);
-            this.capacity         = this.capacityMinusOne + 1;
+            this.capacity         = HashHelpers.GetCapacity(capacity - 1) + 1;
+            this.capacityMinusOne = this.capacity - 1;
 
             this.buckets = new int[this.capacity];
             this.slots   = new LongHashMapSlot[this.capacity];
