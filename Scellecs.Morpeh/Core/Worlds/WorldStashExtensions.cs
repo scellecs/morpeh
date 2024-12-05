@@ -75,8 +75,13 @@
             }
             
             if (newSize > world.stashes.Length) {
-                ArrayHelpers.Grow(ref world.stashes, newSize);
+                world.GrowStashCapacity(newSize);
             }
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void GrowStashCapacity(this World world, int newCapacity) {
+            ArrayHelpers.Grow(ref world.stashes, newCapacity);
         }
     }
 }
