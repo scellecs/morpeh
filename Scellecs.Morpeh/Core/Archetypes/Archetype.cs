@@ -74,11 +74,9 @@ namespace Scellecs.Morpeh {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddFilter(Filter filter) {
-            if (!this.filtersMap.IsKeySet(filter.id, out var slotIndex)) {
-                slotIndex = this.filtersMap.TakeSlot(filter.id, out var resized);
-                if (resized) {
-                    this.GrowFilters();
-                }
+            var slotIndex = this.filtersMap.TakeSlot(filter.id, out var resized);
+            if (resized) {
+                this.GrowFilters();
             }
             
             this.filters[slotIndex] = filter;
