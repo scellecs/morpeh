@@ -56,6 +56,17 @@ would replace `SystemGroup`. For an easier migration later on, we recommend
 sticking to pure-C# systems implementing `ISystem` interface instead of 
 ScriptableObject-based systems.
 
+Providers (`EntityProvider`/`MonoProvider`) are also subject to possible changes in
+future versions. We are considering a possibility of merging them into one
+source-generated class, which would allow defining multiple components in one
+place. This would also allow us to create a well-defined functionality for
+entity disposal process, as currently `EntityProvider` does not *actually*
+remove entities from the world, but just removes its component from the entity,
+and entity disposal is handled by removing the last component from the entity during
+the next `World.Commit()` call. This sometimes leads to confusion and unexpected behaviour
+when the entity has components set from the outside of the providers,
+potentially leaking unused entities.
+
 All the changes described above will definitely affect external plugins, workarounds,
 extensions and other code that relies on Morpeh internals or even some public APIs.
 
