@@ -7,7 +7,7 @@
 
 * Simple Syntax.  
 * Plug & Play Installation.  
-* No code generation.  
+* No code generation (*yet*).  
 * Structure-Based and Cache-Friendly.
 
 Key points for people familiar with other ECS frameworks:
