@@ -515,13 +515,14 @@ public class Startup : MonoBehaviour {
 Attach the script to any GameObject and press play.
 
 Nothing happened because we did not create our entities.  
-I will show the creation of entities directly related to GameObject, because to create them from the code it is enough to write `world.CreateEntity()`.  
-To do this, we need a provider that associates GameObject with an entity.
+
+We will focus on `GameObject`-based API because otherwise all you need to do is create an entity with `World.CreateEntity()`.
+To do this, we need a provider that associates a `GameObject` with an entity.
 
 Create a new provider.
 
 <details>
-    <summary>Right click in project window and select <code>Create/ECS/Provider</code>.  </summary>
+    <summary>Right click the project window and select <code>Create/ECS/Provider</code>.  </summary>
 
 ![create_provider.gif](Gifs~/create_provider.gif)
 </details>
@@ -549,7 +550,7 @@ public sealed class HealthProvider : MonoProvider<HealthComponent> {
 ![add_provider.gif](Gifs~/add_provider.gif)
 </details>
 
-Now press the play button, and you will see Debug.Log with healthPoints.  
+Now press play button, and you will see Debug.Log with healthPoints.  
 Nice!
 
 ---
@@ -558,10 +559,10 @@ Nice!
 
 #### 🧩 Filter Extensions
 
-Filter extensions required for easy reuse of filter queries.  
+Filter extensions are a way to reuse queries or their parts.
 Let's look at an example:  
 
-We need to implement the IFilterExtension interface and the type must be a struct.  
+Create a struct and implement the IFilterExtension interface.
 
 ```c#  
 public struct SomeExtension : IFilterExtension {
@@ -584,11 +585,13 @@ public void OnAwake() {
 ```
 
 #### 🔍 Aspects
-An aspect is an object-like wrapper that you can use to group together a subset of an entity's components into a single C# struct. Aspects are useful for organizing component code and simplifying queries in your systems.  
+An aspect is an object-like wrapper that you can use to group a subset of an entity's components together into a single C# struct.
+Aspects are useful for organizing components code and simplifying queries in your systems.  
 
-For example, the Transform groups together the individual position, rotation, and scale of components and enables you to access these components from a query that includes the Transform. You can also define your own aspects with the IAspect interface.  
+For example, the Transform aspect groups together the position, rotation, and scale of components and enables you to access these components from a query that includes the Transform.
+You can also define your own aspects with the IAspect interface.  
 
-Our components:
+Components:
 ```c#  
     public struct Translation : IComponent {
         public float x;
@@ -610,7 +613,7 @@ Our components:
     }
 ```
 
-Let's group them in aspect:
+Let's group them in an aspect:
 
 ```c#  
 public struct Transform : IAspect {
@@ -666,7 +669,6 @@ public class TransformAspectSystem : ISystem {
     private Filter filter;
     private AspectFactory<Transform> transform;
     
-    // Stashes for demonstration purposes only (used for entity setup).
     private Stash<Translation> translation;
     private Stash<Rotation> rotation;
     private Stash<Scale> scale;
@@ -674,7 +676,7 @@ public class TransformAspectSystem : ISystem {
     public void OnAwake() {
         //Extend filter with ready query from Transform
         this.filter = this.World.Filter.Extend<Transform>().Build();
-        //Getting aspect factory AspectFactory<Transform>
+        //Get aspect factory AspectFactory<Transform>
         this.transform = this.World.GetAspectFactory<Transform>();
 
         
@@ -709,8 +711,11 @@ public class TransformAspectSystem : ISystem {
 
 #### 🧹 Component Disposing
 
+> [!IMPORTANT]  
+> Make sure you don't have the `MORPEH_DISABLE_COMPONENT_DISPOSE` define enabled.  
+
 Sometimes it becomes necessary to clear component values.
-For this, it is enough that the component implements `IDisposable`. For example:
+For this, it is enough that a component implements `IDisposable`. For example:
 
 ```c#  
 public struct PlayerView : IComponent, IDisposable {
@@ -722,7 +727,7 @@ public struct PlayerView : IComponent, IDisposable {
 }
 ```
 
-The initializer or system needs to mark the stash as disposable. For example:
+An initializer or a system needs to mark the stash as disposable. For example:
 
 ```c# 
 public class PlayerViewDisposeInitializer : IInitializer {
@@ -752,7 +757,8 @@ public class PlayerViewSystem : ISystem {
 }
 ```
 
-Now, when the component is removed from the entity, the `Dispose()` method will be called on the `PlayerView` component.  
+Now, when the component is removed from an entity, the `Dispose()` method
+will be called on the `PlayerView` component.  
 
 ####  🧨 Unity Jobs And Burst
 
@@ -863,11 +869,12 @@ Can be set by user:
 * `MORPEH_DISABLE_COMPONENT_DISPOSE` Define to disable component disposing feature.
 Will be set by framework:
 * `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
+* `MORPEH_GENERATE_ALL_EXTENDED_IDS` to generate `ExtendedComponentId` for all components even outside of Unity Editor.
 
 ####  🌍️ World Plugins
 
 Sometimes you need to make an automatic plugin for the world.  
-Add some systems, make a custom game loop, or automatic serialization.  
+Add some systems, make a custom game loop, or create your own automatic serialization.  
 World plugins are great for this.  
 
 To do this, you need to declare a class that implements the IWorldPlugin interface.  
