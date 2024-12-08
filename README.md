@@ -260,7 +260,7 @@ healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
 
-//delete all components that type from the world
+//delete all HealthComponent from the world (affects all entities)
 healthStash.RemoveAll();
 
 bool healthStashIsEmpty = healthStash.IsEmpty();
