@@ -765,9 +765,13 @@ public class StashTests {
 
             if (operation < 0.5f) {
                 var component = new IntTest1 { value = random.Next() };
-                var wasAddedToStash = stash.Add(entity, component);
+                
+                var wasAddedToStash = !stash.Has(entity);
+                if (wasAddedToStash) {
+                    stash.Add(entity, component);
+                }
+                
                 var wasAddedToTracker = !tracker.ContainsKey(entity);
-
                 if (wasAddedToTracker) {
                     tracker[entity] = component;
                 }

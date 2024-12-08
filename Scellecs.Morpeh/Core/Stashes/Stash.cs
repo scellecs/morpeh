@@ -116,7 +116,7 @@ namespace Scellecs.Morpeh {
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Add(Entity entity, in T value) {
+        public void Add(Entity entity, in T value) {
             this.world.ThreadSafetyCheck();
             
             if (this.world.IsDisposed(entity)) {
@@ -138,8 +138,6 @@ namespace Scellecs.Morpeh {
                 this.data[slotIndex] = value;
                 this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
-            
-            return true;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
