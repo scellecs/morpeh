@@ -104,14 +104,14 @@ var entity = this.World.CreateEntity();
 ref var addedHealthComponent  = ref healthStash.Add(entity);
 ref var gottenHealthComponent = ref healthStash.Get(entity);
 
-//if you remove the last entity componentm it will be destroyd during the next world.Commit() call
+//if you remove the last entity component, it will be destroyed during the next world.Commit() call
 bool removed = healthStash.Remove(entity);
 healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
 
 var newEntity = this.World.CreateEntity();
-//after migration entity has no components, so it will be destroyd during the next world.Commit() call
+//after migration entity has no components, so it will be destroyed during the next world.Commit() call
 entity.MigrateTo(newEntity);
 var debugString = entity.ToString();
 ```
@@ -456,74 +456,22 @@ public sealed class HealthSystem : ISystem {
     }
 }
 ```
+
 > [!NOTE]  
-> You can chain filters by two operators `With<>` and `Without<>`.  
+> You can chain filters by using `With<>` and `Without<>` in any order.  
 > For example `this.World.Filter.With<FooComponent>().With<BarComponent>().Without<BeeComponent>().Build();`
 
-The filters themselves are very lightweight and are free to create.  
-They do not store entities directly, so if you like, you can declare them directly in hot methods like `OnUpdate()`.  
-For example:
-
-```c#  
-public sealed class HealthSystem : ISystem {
-    public World World { get; set; }
-    
-    public void OnAwake() {
-    }
-
-    public void OnUpdate(float deltaTime) {
-        var filter = this.World.Filter.With<HealthComponent>().Build();
-        
-        //Or just iterate without variable
-        foreach (var entity in this.World.Filter.With<HealthComponent>().Build()) {
-        }
-    }
-    
-    public void Dispose() {
-    }
-}
-```
-
-But we will focus on the option with caching to a variable, because we believe that the filters declared in the header of system increase the readability of the code.
-
-Now we can iterate all needed entities.
-```c#  
-public sealed class HealthSystem : ISystem {
-    public World World { get; set; }
-    
-    private Filter filter;
-    private Stash<HealthComponent> healthStash;
-    
-    public void OnAwake() {
-        this.filter = this.World.Filter.With<HealthComponent>().Build();
-        this.healthStash = this.World.GetStash<HealthComponent>();
-    }
-
-    public void OnUpdate(float deltaTime) {
-        foreach (var entity in this.filter) {
-            ref var healthComponent = ref healthStash.Get(entity);
-            Debug.Log(healthComponent.healthPoints);
-        }
-    }
-    
-    public void Dispose() {
-    }
-}
-```
 > [!IMPORTANT]  
-> Don't forget about `ref` operator.  
-> Components are struct and if you want to change them directly, then you must use reference operator.
+> Components are structs and if you want to change their values, then you must use `ref`.
+> It is recommended to always use `ref` unless you specifically need a copy of the component.
 
-For high performance, you can use stash directly.  
-No need to do GetComponent from entity every time, which trying to find suitable stash.  
-However, we use such code only in very hot areas, because it is quite difficult to read it.
-
+Now we can iterate over our entities.
 ```c#  
 public sealed class HealthSystem : ISystem {
+    public World World { get; set; }
+    
     private Filter filter;
     private Stash<HealthComponent> healthStash;
-    
-    public World World { get; set; }
     
     public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
@@ -538,7 +486,6 @@ public sealed class HealthSystem : ISystem {
     }
     
     public void Dispose() {
-        
     }
 }
 ```
