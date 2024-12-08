@@ -77,16 +77,17 @@ reused, but each reused ID is guaranteed to have a new generation, making each n
 Entity unique.
 
 ```c#
+var healthStash = this.World.GetStash<HealthComponent>();
 var entity = this.World.CreateEntity();
 
-ref var addedHealthComponent  = ref entity.AddComponent<HealthComponent>();
-ref var gottenHealthComponent = ref entity.GetComponent<HealthComponent>();
+ref var addedHealthComponent  = ref healthStash.Add(entity);
+ref var gottenHealthComponent = ref healthStash.Get(entity);
 
 //if you remove last component on entity it will be destroyd on next world.Commit()
-bool removed = entity.RemoveComponent<HealthComponent>();
-entity.SetComponent(new HealthComponent {healthPoints = 100});
+bool removed = healthStash.Remove(entity);
+healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
-bool hasHealthComponent = entity.Has<HealthComponent>();
+bool hasHealthComponent = healthStash.Has(entity);
 
 var newEntity = this.World.CreateEntity();
 //after migration entity has no components, so it will be destroyd on next world.Commit()
@@ -117,14 +118,16 @@ public class HealthSystem : ISystem {
     public World World { get; set; }
 
     private Filter filter;
+    private Stash<HealthComponent> healthStash;
 
     public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
+        this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
     public void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
-            ref var healthComponent = ref entity.GetComponent<HealthComponent>();
+            ref var healthComponent = ref healthStash.Get(entity);
             healthComponent.healthPoints += 1;
         }
     }
@@ -188,8 +191,8 @@ newWorld.RemoveSystemsGroup(systemsGroup);
 
 var filter = newWorld.Filter.With<HealthComponent>();
 
-var healthCache = newWorld.GetStash<HealthComponent>();
-var reflectionHealthCache = newWorld.GetReflectionStash(typeof(HealthComponent));
+var healthStash = newWorld.GetStash<HealthComponent>();
+var reflectionHealthStash = newWorld.GetReflectionStash(typeof(HealthComponent));
 
 //manually world updates
 newWorld.Update(Time.deltaTime);
@@ -222,9 +225,8 @@ int filterLengthCalculatedOnCall = filter.GetLengthSlow();
 ```
 
 #### 🔖 Stash
-A type that contains components.  
-You can get components and do other operations directly from the stash, because entity methods look up the stash each time on call.  
-However, such code is harder to read.
+A type that contains components data.
+
 ```c#
 var healthStash = this.World.GetStash<HealthComponent>();
 var entity = this.World.CreateEntity();
@@ -467,17 +469,19 @@ But we will focus on the option with caching to a variable, because we believe t
 Now we can iterate all needed entities.
 ```c#  
 public sealed class HealthSystem : ISystem {
-    private Filter filter;
-    
     public World World { get; set; }
+    
+    private Filter filter;
+    private Stash<HealthComponent> healthStash;
     
     public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
+        this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
     public void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
-            ref var healthComponent = ref entity.GetComponent<HealthComponent>();
+            ref var healthComponent = ref healthStash.Get(entity);
             Debug.Log(healthComponent.healthPoints);
         }
     }
@@ -518,7 +522,6 @@ public sealed class HealthSystem : ISystem {
     }
 }
 ```
-We will focus on a simplified version, because even in this version entity.GetComponent is very fast.
 
 Now we need to add our newly created system to the world. We can do it by creating a `SystemGroup` and adding the system to it,
 and then adding the `SystemGroup` to the world.
@@ -640,39 +643,22 @@ Our components:
     }
 ```
 
-Let's group them in aspect.  
-Simple entity version:
+Let's group them in aspect:
 
 ```c#  
 public struct Transform : IAspect {
     //Set on each call of AspectFactory.Get(Entity entity)
-    public Entity Entity { get; set;}
-    
-    public ref Translation Translation => ref this.Entity.GetComponent<Translation>();
-    public ref Rotation Rotation => ref this.Entity.GetComponent<Rotation>();
-    public ref Scale Scale => ref this.Entity.GetComponent<Scale>();
-
-    //Called once on world.GetAspectFactory<T>
-    public void OnGetAspectFactory(World world) {
-    }
-}
-```
-
-In an aspect, you can write any combination of properties and methods to work with components on an entity.  
-Let's write a variation with stashes to make it work faster.
-
-```c#  
-public struct Transform : IAspect {
-    public Entity Entity { get; set;}
-    
-    public ref Translation Translation => ref this.translation.Get(this.Entity);
-    public ref Rotation Rotation => ref this.rotation.Get(this.Entity);
-    public ref Scale Scale => ref this.scale.Get(this.Entity);
+    public Entity Entity { get; set; }
     
     private Stash<Translation> translation;
     private Stash<Rotation> rotation;
     private Stash<Scale> scale;
+    
+    public ref Translation Translation => ref this.translation.Get(this.Entity);
+    public ref Rotation Rotation => ref this.rotation.Get(this.Entity);
+    public ref Scale Scale => ref this.scale.Get(this.Entity);
 
+    //Called once on world.GetAspectFactory<T>
     public void OnGetAspectFactory(World world) {
         this.translation = world.GetStash<Translation>();
         this.rotation = world.GetStash<Rotation>();
@@ -680,6 +666,7 @@ public struct Transform : IAspect {
     }
 }
 ```
+
 Let's add an IFilterExtension implementation to always have a query.
 
 ```c#  
@@ -712,18 +699,24 @@ public class TransformAspectSystem : ISystem {
     private Filter filter;
     private AspectFactory<Transform> transform;
     
+    // Stashes for demonstration purposes only (used for entity setup).
+    private Stash<Translation> translation;
+    private Stash<Rotation> rotation;
+    private Stash<Scale> scale;
+    
     public void OnAwake() {
         //Extend filter with ready query from Transform
         this.filter = this.World.Filter.Extend<Transform>().Build();
         //Getting aspect factory AspectFactory<Transform>
         this.transform = this.World.GetAspectFactory<Transform>();
 
+        
         for (int i = 0, length = 100; i < length; i++) {
             var entity = this.World.CreateEntity();
             
-            entity.AddComponent<Translation>();
-            entity.AddComponent<Rotation>();
-            entity.AddComponent<Scale>();
+            ref var translationComponent = ref this.translation.Set(entity);
+            ref var rotationComponent = ref this.rotation.Set(entity);
+            ref var scaleComponent = ref this.scale.Set(entity);
         }
     }
     public void OnUpdate(float deltaTime) {
