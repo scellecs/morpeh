@@ -8,7 +8,28 @@
 * Simple Syntax.  
 * Plug & Play Installation.  
 * No code generation.  
-* Structure-Based and Cache-Friendly.  
+* Structure-Based and Cache-Friendly.
+
+Key points for people familiar with other ECS frameworks:
+
+* Archetype-based, but stores data separately from archetypes.
+ Archetypes are used only for filtering, and there's no archetype transition graph,
+ which means you should not worry about performance degradation over time for lots of 
+ chaotically changing entities.
+* Components are stored in "stashes", which are also known as "pools" in other frameworks.
+* Filters are used to select entities based on component types, but unlike
+ other frameworks they should not be used in-place, and should rather be declared
+ in the system OnAwake and stored in a variable.
+* Filters directly store archetypes, and you can know if the filter is empty
+ or not without iterating over it, possibly reducing systems idle time, especially
+ in the case of a large number of systems, which is generally useful for Unity's IL2CPP.
+* Designed to work well with a large quantity of different component types
+ and systems in a single world (several thousands of component types and systems), but
+ not necessarily with a large number of entities.
+* Designed to work well in a large team with a large codebase, reducing the amount
+ of things a typical developer should remember and account for. You are free
+ to migrate entities by doing structural changes even if an entity contains tens of
+ different components without a significant performance impact.
 
 ## 📖 Table of Contents
 
@@ -45,9 +66,9 @@ Russian version: [Гайд по миграции](MIGRATION_RU.md)
 
 ### Unity Engine 
 
-Minimal Unity Version is 2020.3.*  
-Require [Git](https://git-scm.com/) for installing package.  
-Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) for drawing in inspector.
+Minimal required Unity Version is 2020.3.*  
+Requires [Git](https://git-scm.com/) for installing package.  
+Requires [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) for drawing the inspector.
 
 <details>
     <summary>Open Unity Package Manager and add Morpeh URL.  </summary>
@@ -83,23 +104,22 @@ var entity = this.World.CreateEntity();
 ref var addedHealthComponent  = ref healthStash.Add(entity);
 ref var gottenHealthComponent = ref healthStash.Get(entity);
 
-//if you remove last component on entity it will be destroyd on next world.Commit()
+//if you remove the last entity componentm it will be destroyd during the next world.Commit() call
 bool removed = healthStash.Remove(entity);
 healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
 
 var newEntity = this.World.CreateEntity();
-//after migration entity has no components, so it will be destroyd on next world.Commit()
+//after migration entity has no components, so it will be destroyd during the next world.Commit() call
 entity.MigrateTo(newEntity);
-//get string with entity ID
 var debugString = entity.ToString();
 ```
 
 
 #### 🔖 Component
-Components are types which include only data.  
-In Morpeh components are value types for performance purposes.
+Components are types which store components data.
+In Morpeh, components are value types for performance purposes.
 ```c#
 public struct HealthComponent : IComponent {
     public int healthPoints;
@@ -138,7 +158,7 @@ public class HealthSystem : ISystem {
 ```
 
 All systems types:  
-* `IInitializer` - has only OnAwake and Dispose methods, convenient for executing startup logic
+* `IInitializer` - has OnAwake and Dispose methods only, which is convenient for executing startup logic
 * `ISystem`
 * `IFixedSystem`
 * `ILateSystem`
@@ -148,7 +168,7 @@ Beware that ScriptableObject-based systems do still exist in 2024 version, but t
 
 #### 🔖 SystemsGroup
 
-The type that contains the systems. Consider them as "a feature" to group the systems by their common purpose.
+The type that contains the systems. Consider them as a "feature" to group the systems by their common purpose.
 
 ```c#
 var newWorld = World.Create();
@@ -160,7 +180,7 @@ var systemsGroup = newWorld.CreateSystemsGroup();
 systemsGroup.AddSystem(newSystem);
 systemsGroup.AddInitializer(newInitializer);
 
-//it is bad practice to turn systems off and on, but sometimes it is very necessary for debugging
+//it is a bad practice to turn systems off and on, but sometimes it is very necessary for debugging
 systemsGroup.DisableSystem(newSystem);
 systemsGroup.EnableSystem(newSystem);
 
@@ -206,9 +226,9 @@ newWorld.Commit();
 ```
 
 #### 🔖 Filter
-A type that contains entities constrained by conditions With and/or Without.  
+A type that allows filtering entities constrained by conditions With and/or Without.  
 You can chain them in any order and quantity.  
-After compose all constrains you should call Build() method.
+Call `Build()` to finalize the filter for further use.
 ```c#
 var filter = this.World.Filter.With<HealthComponent>()
                               .With<BooComponent>()
@@ -225,7 +245,7 @@ int filterLengthCalculatedOnCall = filter.GetLengthSlow();
 ```
 
 #### 🔖 Stash
-A type that contains components data.
+A type that stores components data.
 
 ```c#
 var healthStash = this.World.GetStash<HealthComponent>();
@@ -263,7 +283,7 @@ bool hasHealthComponent = reflectionHealthCache.Has(entity);
 
 #### 🅿️ Providers
 
-Morpeh has providers for integration with the game engine.  
+Morpeh has providers for integration with Unity game engine.  
 This is a `MonoBehaviour` that allows you to create associations between GameObject and Entity.  
 For each ECS component, you can create a provider; it will allow you to change the component values directly through the inspector, use prefabs and use the workflow as close as possible to classic Unity development.  
 
