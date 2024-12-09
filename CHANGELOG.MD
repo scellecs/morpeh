@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `World.Has(Entity entity)` method as a faster alternative to `Entity.IsDisposed()`.
 - Added `Filter.ArchetypesCount` property.
 - Added `Filter.Has(Entity entity)` method.
+- Added entity debugger proxy with component visualization during breakpoint debugging - components are now displayed directly on entities when paused.
 
 ### Changed
 - **[Breaking]** `Entity` is now a struct instead of a class.
