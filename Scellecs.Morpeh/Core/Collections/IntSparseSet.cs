@@ -5,7 +5,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    internal sealed class IntSparseSet {
+    public sealed class IntSparseSet {
         internal int[] sparse;
         internal int[] dense;
 
