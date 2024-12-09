@@ -6,7 +6,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public class BitSet {
+    public sealed class BitSet {
         private ulong[] data;
         internal int longsCapacity;
         

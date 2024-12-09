@@ -14,6 +14,9 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    /// <summary>
+    /// Similar to Dictionary<long, T></long>. Fully supports only positive range of keys.
+    /// </summary>
     public sealed class LongHashMap<T> {
         public int length;
         public int capacity;

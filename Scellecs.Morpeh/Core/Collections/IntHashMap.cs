@@ -1,7 +1,5 @@
 namespace Scellecs.Morpeh.Collections {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
 
@@ -17,6 +15,9 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    /// <summary>
+    /// Similar to Dictionary<int, T></int>. Fully supports only positive range of keys.
+    /// </summary>
     public sealed class IntHashMap<T> {
         public int length;
         public int capacity;

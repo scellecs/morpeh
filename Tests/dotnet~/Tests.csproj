@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Scellecs.Morpeh\Scellecs.Morpeh.csproj" />
+      <ProjectReference Include="..\..\Scellecs.Morpeh\Scellecs.Morpeh.csproj" />
     </ItemGroup>
 
 </Project>

@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `World.Has(Entity entity)` method as a faster alternative to `Entity.IsDisposed()`.
 - Added `Filter.ArchetypesCount` property.
 - Added `Filter.Has(Entity entity)` method.
+- Added entity debugger proxy with component visualization during breakpoint debugging - components are now displayed directly on entities when paused.
 
 ### Changed
 - **[Breaking]** `Entity` is now a struct instead of a class.
@@ -45,6 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `World.Default` access does not require an array access anymore.
 - `StashMap` -> `IntSlotMap`.
 - `Filter` chunks (used for `AsNative()` calls) are now allocated only if necessary.
+- `NativeStash` uses `NativeIntSlotMap` instead of removed `NativeIntHashMap<T>`.
+- Made `HashHelpers` public.
 
 ### Removed
 - **[Breaking]** Removed `UniversalProvider`.
@@ -52,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `UnmanagedList<T>`.
 - Removed `UnmanagedArray<T>`.
 - Removed `Stash<T>.Empty()`.
+- Removed `NativeIntHashMap<T>`.
 - Removed `GC.Collect()` calls in the pause/focus events in Unity.
 
 ## [2023.1.1] - 15.10.2024

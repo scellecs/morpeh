@@ -7,7 +7,7 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    internal static class HashHelpers {
+    public static class HashHelpers {
         internal static readonly int[] capacitySizes = {
             3,
             15,
@@ -73,8 +73,7 @@ namespace Scellecs.Morpeh.Collections {
                 }
             }
 
-            CapacityTooBigException.Throw(min);
-            return 0;
+            throw new Exception($"[MORPEH] Capacity is too big");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

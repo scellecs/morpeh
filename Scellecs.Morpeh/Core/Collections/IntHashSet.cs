@@ -5,6 +5,9 @@ namespace Scellecs.Morpeh.Collections {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
+    /// <summary>
+    /// Similar to HashSet<int></int>. Fully supports only positive range of keys.
+    /// </summary>
     public sealed class IntHashSet {
         public int length;
         public int capacity;

@@ -28,7 +28,7 @@ namespace Scellecs.Morpeh {
         
         internal IntSlotMap map;
         public T[] data;
-        private T empty;
+        internal T empty;
         private Type type;
         
         [PublicAPI]

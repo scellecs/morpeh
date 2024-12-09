@@ -8,7 +8,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public unsafe class IntSlotMap : IDisposable {
+    internal unsafe sealed class IntSlotMap : IDisposable {
         internal int                       length;
         internal int                       capacity;
         internal int                       capacityMinusOne;
