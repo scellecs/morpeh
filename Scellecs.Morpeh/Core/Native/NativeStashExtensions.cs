@@ -38,17 +38,21 @@ namespace Scellecs.Morpeh.Native {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref TNative Get<TNative>(this ref NativeStash<TNative> nativeStash, Entity entity) where TNative : unmanaged, IComponent {
             var idx = nativeStash.map.IndexOf(entity.Id);
-            return ref nativeStash.data[idx];
+            if (Hint.Likely(idx >= 0)) {
+                return ref nativeStash.data[idx];
+            }
+
+            return ref *nativeStash.empty;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref TNative Get<TNative>(this ref NativeStash<TNative> nativeStash, Entity entity, out bool exists) where TNative : unmanaged, IComponent {
             var idx = nativeStash.map.IndexOf(entity.Id);
-            if (Hint.Likely(nativeStash.world.Has(entity) && idx >= 0)) {
-                exists = true;
+            exists = idx >= 0 && nativeStash.world.Has(entity);
+            if (exists) {
                 return ref nativeStash.data[idx];
             }
-            exists = false;
+
             return ref *nativeStash.empty;
         }
     }

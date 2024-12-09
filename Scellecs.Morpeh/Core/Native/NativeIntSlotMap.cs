@@ -7,7 +7,6 @@ namespace Scellecs.Morpeh.Native {
     /// <summary>
     /// Reduced version to fit NativeStash into cache line size
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
     public struct NativeIntSlotMap {
         [NativeDisableUnsafePtrRestriction]
         public unsafe int* capacityMinusOnePtr;
