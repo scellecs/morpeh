@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `World.Default` access does not require an array access anymore.
 - `StashMap` -> `IntSlotMap`.
 - `Filter` chunks (used for `AsNative()` calls) are now allocated only if necessary.
+- `NativeStash` use `NativeIntSlotMap` instead of removed `NativeIntHashMap<T>`.
+- Made `HashHelpers` public.
 
 ### Removed
 - **[Breaking]** Removed `UniversalProvider`.
@@ -52,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `UnmanagedList<T>`.
 - Removed `UnmanagedArray<T>`.
 - Removed `Stash<T>.Empty()`.
+- Removed `NativeIntHashMap<T>`.
 - Removed `GC.Collect()` calls in the pause/focus events in Unity.
 
 ## [2023.1.1] - 15.10.2024
