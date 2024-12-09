@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `World.Default` access does not require an array access anymore.
 - `StashMap` -> `IntSlotMap`.
 - `Filter` chunks (used for `AsNative()` calls) are now allocated only if necessary.
-- `NativeStash` use `NativeIntSlotMap` instead of removed `NativeIntHashMap<T>`.
+- `NativeStash` uses `NativeIntSlotMap` instead of removed `NativeIntHashMap<T>`.
 - Made `HashHelpers` public.
 
 ### Removed
