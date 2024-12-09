@@ -174,9 +174,10 @@ namespace Scellecs.Morpeh {
                 MLogger.LogError("You can not call world.Commit() inside Filter foreach loop. Place it outside of foreach block. ");
                 return;
             }
-#endif
             
             world.newMetrics.commits++;
+#endif
+            
             MLogger.BeginSample("World.Commit()");
 #if MORPEH_DEBUG && MORPEH_BURST
             if (world.dirtyEntities.count > 0 && (world.JobHandle.IsCompleted == false)) {
@@ -189,7 +190,9 @@ namespace Scellecs.Morpeh {
             }
             
             if (world.dirtyEntities.count > 0) {
+#if MORPEH_DEBUG
                 world.newMetrics.migrations += world.dirtyEntities.count;
+#endif
                 world.ApplyTransientChanges();
             }
 
