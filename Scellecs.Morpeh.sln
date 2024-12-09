@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scellecs.Morpeh", "Scellecs.Morpeh\Scellecs.Morpeh.csproj", "{F56518AB-CD6E-4295-BA40-403D3006699D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests~\Tests.csproj", "{8FB12ACE-CEA0-48EC-A32D-198866C4920C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\dotnet~\Tests.csproj", "{8FB12ACE-CEA0-48EC-A32D-198866C4920C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\dotnet~\Benchmarks.csproj", "{D8740D4C-6049-4C49-AFE8-68463B0E2D3B}"
 EndProject

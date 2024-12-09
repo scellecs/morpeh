@@ -4,6 +4,7 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Globals")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Native")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Workaround")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Scellecs.Morpeh.Tests.Unity")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Benchmarks")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Layout")]
