@@ -63,7 +63,7 @@ namespace Scellecs.Morpeh {
             this.world = world;
 
             this.archetypeHashesMap = new SwappableLongSlotMap(FilterConstants.DEFAULT_ARCHETYPES_CAPACITY);
-            this.archetypes         = new Archetype[archetypeHashesMap.capacity];
+            this.archetypes         = new Archetype[this.archetypeHashesMap.capacity];
             this.archetypesLength    = 0;
             
             this.includedTypeIds = includedTypeIds;

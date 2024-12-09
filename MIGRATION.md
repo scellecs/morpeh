@@ -16,7 +16,7 @@
 * Removed `UnmanagedArray<T>`. As it was broken anyway, this should not affect any projects.
 * Removed `Stash<T>.Empty()`. This was used for internal purposes and should not affect any projects. In case it was used somewhere, just use `default(T)` for the same effect.
 * `FastList<T>` and multiple other collections were fixed to be more reliable and less error-prone. This may affect some projects that relied on the previous behaviour of these collections. Please refer to the source code and adapt your usage to the renamed methods or new overloads. Beware that HashMaps in general still don't work with negative values as keys inside `foreach` calls.
-* `bool Stash<T>.Add(Entity entity)` now throws an exception if the entity already has the component. This is to prevent accidental retaining of old data if the component already exists where logic expects `Add` to always restore data to the defaulted state. This decision has been made due to lots of projects using `Add` and discarding the return value, leading to potentially super-hard-to-find bugs.
+* `bool Stash<T>.Add(Entity entity, in T value)` is now a `void` method and throws an exception if the entity already has the component. This is to prevent accidental retaining of old data if the component already exists where logic expects `Add` to always restore data to the defaulted state. This decision has been made due to lots of projects using `Add` and discarding the return value, leading to potentially super-hard-to-find bugs.
 * All `Stash<T>` methods always throw an exception if an entity is invalid or the operation makes no sense to make (e.g. `Get` if an entity has no such component), both in Debug and Release mode. This may increase exception rate in your project instead of silently ignoring them as it was before. These exceptions have to be addressed and fixed in the project code.
 
 ### New API
@@ -55,6 +55,17 @@ favor of source-generated systems, as well as source-generated "features" which
 would replace `SystemGroup`. For an easier migration later on, we recommend
 sticking to pure-C# systems implementing `ISystem` interface instead of 
 ScriptableObject-based systems.
+
+Providers (`EntityProvider`/`MonoProvider`) are also subject to possible changes in
+future versions. We are considering a possibility of merging them into one
+source-generated class, which would allow defining multiple components in one
+place. This would also allow us to create a well-defined functionality for
+entity disposal process, as currently `EntityProvider` does not *actually*
+remove entities from the world, but just removes its component from the entity,
+and entity disposal is handled by removing the last component from the entity during
+the next `World.Commit()` call. This sometimes leads to confusion and unexpected behaviour
+when the entity has components set from the outside of the providers,
+potentially leaking unused entities.
 
 All the changes described above will definitely affect external plugins, workarounds,
 extensions and other code that relies on Morpeh internals or even some public APIs.

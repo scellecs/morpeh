@@ -7,8 +7,29 @@
 
 * Simple Syntax.  
 * Plug & Play Installation.  
-* No code generation.  
-* Structure-Based and Cache-Friendly.  
+* No code generation (*yet*).  
+* Structure-Based and Cache-Friendly.
+
+Key points for people familiar with other ECS frameworks:
+
+* Archetype-based, but stores data separately from archetypes.
+ Archetypes are used only for filtering, and there's no archetype transition graph,
+ which means you should not worry about performance degradation over time for lots of 
+ chaotically changing entities.
+* Components are stored in "stashes", which are also known as "pools" in other frameworks.
+* Filters are used to select entities based on component types, but unlike
+ other frameworks they should not be used in-place, and should rather be declared
+ in the system OnAwake and stored in a variable.
+* Filters directly store archetypes, and you can know if the filter is empty
+ or not without iterating over it, possibly reducing systems idle time, especially
+ in the case of a large number of systems, which is generally useful for Unity's IL2CPP.
+* Designed to work well with a large quantity of different component types
+ and systems in a single world (several thousands of component types and systems), but
+ not necessarily with a large number of entities.
+* Designed to work well in a large team with a large codebase, reducing the amount
+ of things a typical developer should remember and account for. You are free
+ to migrate entities by doing structural changes even if an entity contains tens of
+ different components without a significant performance impact.
 
 ## 📖 Table of Contents
 
@@ -45,9 +66,9 @@ Russian version: [Гайд по миграции](MIGRATION_RU.md)
 
 ### Unity Engine 
 
-Minimal Unity Version is 2020.3.*  
-Require [Git](https://git-scm.com/) for installing package.  
-Require [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) for drawing in inspector.
+Minimal required Unity Version is 2020.3.*  
+Requires [Git](https://git-scm.com/) for installing package.  
+Requires [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) for drawing the inspector.
 
 <details>
     <summary>Open Unity Package Manager and add Morpeh URL.  </summary>
@@ -77,28 +98,28 @@ reused, but each reused ID is guaranteed to have a new generation, making each n
 Entity unique.
 
 ```c#
+var healthStash = this.World.GetStash<HealthComponent>();
 var entity = this.World.CreateEntity();
 
-ref var addedHealthComponent  = ref entity.AddComponent<HealthComponent>();
-ref var gottenHealthComponent = ref entity.GetComponent<HealthComponent>();
+ref var addedHealthComponent  = ref healthStash.Add(entity);
+ref var gottenHealthComponent = ref healthStash.Get(entity);
 
-//if you remove last component on entity it will be destroyd on next world.Commit()
-bool removed = entity.RemoveComponent<HealthComponent>();
-entity.SetComponent(new HealthComponent {healthPoints = 100});
+//if you remove the last entity component, it will be destroyed during the next world.Commit() call
+bool removed = healthStash.Remove(entity);
+healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
-bool hasHealthComponent = entity.Has<HealthComponent>();
+bool hasHealthComponent = healthStash.Has(entity);
 
 var newEntity = this.World.CreateEntity();
-//after migration entity has no components, so it will be destroyd on next world.Commit()
+//after migration entity has no components, so it will be destroyed during the next world.Commit() call
 entity.MigrateTo(newEntity);
-//get string with entity ID
 var debugString = entity.ToString();
 ```
 
 
 #### 🔖 Component
-Components are types which include only data.  
-In Morpeh components are value types for performance purposes.
+Components are types which store components data.
+In Morpeh, components are value types for performance purposes.
 ```c#
 public struct HealthComponent : IComponent {
     public int healthPoints;
@@ -117,14 +138,16 @@ public class HealthSystem : ISystem {
     public World World { get; set; }
 
     private Filter filter;
+    private Stash<HealthComponent> healthStash;
 
     public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
+        this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
     public void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
-            ref var healthComponent = ref entity.GetComponent<HealthComponent>();
+            ref var healthComponent = ref healthStash.Get(entity);
             healthComponent.healthPoints += 1;
         }
     }
@@ -135,7 +158,7 @@ public class HealthSystem : ISystem {
 ```
 
 All systems types:  
-* `IInitializer` - has only OnAwake and Dispose methods, convenient for executing startup logic
+* `IInitializer` - has OnAwake and Dispose methods only, which is convenient for executing startup logic
 * `ISystem`
 * `IFixedSystem`
 * `ILateSystem`
@@ -145,7 +168,7 @@ Beware that ScriptableObject-based systems do still exist in 2024 version, but t
 
 #### 🔖 SystemsGroup
 
-The type that contains the systems. Consider them as "a feature" to group the systems by their common purpose.
+The type that contains the systems. Consider them as a "feature" to group the systems by their common purpose.
 
 ```c#
 var newWorld = World.Create();
@@ -157,7 +180,7 @@ var systemsGroup = newWorld.CreateSystemsGroup();
 systemsGroup.AddSystem(newSystem);
 systemsGroup.AddInitializer(newInitializer);
 
-//it is bad practice to turn systems off and on, but sometimes it is very necessary for debugging
+//it is a bad practice to turn systems off and on, but sometimes it is very necessary for debugging
 systemsGroup.DisableSystem(newSystem);
 systemsGroup.EnableSystem(newSystem);
 
@@ -188,8 +211,8 @@ newWorld.RemoveSystemsGroup(systemsGroup);
 
 var filter = newWorld.Filter.With<HealthComponent>();
 
-var healthCache = newWorld.GetStash<HealthComponent>();
-var reflectionHealthCache = newWorld.GetReflectionStash(typeof(HealthComponent));
+var healthStash = newWorld.GetStash<HealthComponent>();
+var reflectionHealthStash = newWorld.GetReflectionStash(typeof(HealthComponent));
 
 //manually world updates
 newWorld.Update(Time.deltaTime);
@@ -203,9 +226,9 @@ newWorld.Commit();
 ```
 
 #### 🔖 Filter
-A type that contains entities constrained by conditions With and/or Without.  
+A type that allows filtering entities constrained by conditions With and/or Without.  
 You can chain them in any order and quantity.  
-After compose all constrains you should call Build() method.
+Call `Build()` to finalize the filter for further use.
 ```c#
 var filter = this.World.Filter.With<HealthComponent>()
                               .With<BooComponent>()
@@ -222,9 +245,8 @@ int filterLengthCalculatedOnCall = filter.GetLengthSlow();
 ```
 
 #### 🔖 Stash
-A type that contains components.  
-You can get components and do other operations directly from the stash, because entity methods look up the stash each time on call.  
-However, such code is harder to read.
+A type that stores components data.
+
 ```c#
 var healthStash = this.World.GetStash<HealthComponent>();
 var entity = this.World.CreateEntity();
@@ -238,7 +260,7 @@ healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
 
-//delete all components that type from the world
+//delete all HealthComponent from the world (affects all entities)
 healthStash.RemoveAll();
 
 bool healthStashIsEmpty = healthStash.IsEmpty();
@@ -261,7 +283,7 @@ bool hasHealthComponent = reflectionHealthCache.Has(entity);
 
 #### 🅿️ Providers
 
-Morpeh has providers for integration with the game engine.  
+Morpeh has providers for integration with Unity game engine.  
 This is a `MonoBehaviour` that allows you to create associations between GameObject and Entity.  
 For each ECS component, you can create a provider; it will allow you to change the component values directly through the inspector, use prefabs and use the workflow as close as possible to classic Unity development.  
 
@@ -434,72 +456,22 @@ public sealed class HealthSystem : ISystem {
     }
 }
 ```
+
 > [!NOTE]  
-> You can chain filters by two operators `With<>` and `Without<>`.  
+> You can chain filters by using `With<>` and `Without<>` in any order.  
 > For example `this.World.Filter.With<FooComponent>().With<BarComponent>().Without<BeeComponent>().Build();`
 
-The filters themselves are very lightweight and are free to create.  
-They do not store entities directly, so if you like, you can declare them directly in hot methods like `OnUpdate()`.  
-For example:
-
-```c#  
-public sealed class HealthSystem : ISystem {
-    public World World { get; set; }
-    
-    public void OnAwake() {
-    }
-
-    public void OnUpdate(float deltaTime) {
-        var filter = this.World.Filter.With<HealthComponent>().Build();
-        
-        //Or just iterate without variable
-        foreach (var entity in this.World.Filter.With<HealthComponent>().Build()) {
-        }
-    }
-    
-    public void Dispose() {
-    }
-}
-```
-
-But we will focus on the option with caching to a variable, because we believe that the filters declared in the header of system increase the readability of the code.
-
-Now we can iterate all needed entities.
-```c#  
-public sealed class HealthSystem : ISystem {
-    private Filter filter;
-    
-    public World World { get; set; }
-    
-    public void OnAwake() {
-        this.filter = this.World.Filter.With<HealthComponent>().Build();
-    }
-
-    public void OnUpdate(float deltaTime) {
-        foreach (var entity in this.filter) {
-            ref var healthComponent = ref entity.GetComponent<HealthComponent>();
-            Debug.Log(healthComponent.healthPoints);
-        }
-    }
-    
-    public void Dispose() {
-    }
-}
-```
 > [!IMPORTANT]  
-> Don't forget about `ref` operator.  
-> Components are struct and if you want to change them directly, then you must use reference operator.
+> Components are structs and if you want to change their values, then you must use `ref`.
+> It is recommended to always use `ref` unless you specifically need a copy of the component.
 
-For high performance, you can use stash directly.  
-No need to do GetComponent from entity every time, which trying to find suitable stash.  
-However, we use such code only in very hot areas, because it is quite difficult to read it.
-
+Now we can iterate over our entities.
 ```c#  
 public sealed class HealthSystem : ISystem {
+    public World World { get; set; }
+    
     private Filter filter;
     private Stash<HealthComponent> healthStash;
-    
-    public World World { get; set; }
     
     public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
@@ -514,11 +486,9 @@ public sealed class HealthSystem : ISystem {
     }
     
     public void Dispose() {
-        
     }
 }
 ```
-We will focus on a simplified version, because even in this version entity.GetComponent is very fast.
 
 Now we need to add our newly created system to the world. We can do it by creating a `SystemGroup` and adding the system to it,
 and then adding the `SystemGroup` to the world.
@@ -545,13 +515,14 @@ public class Startup : MonoBehaviour {
 Attach the script to any GameObject and press play.
 
 Nothing happened because we did not create our entities.  
-I will show the creation of entities directly related to GameObject, because to create them from the code it is enough to write `world.CreateEntity()`.  
-To do this, we need a provider that associates GameObject with an entity.
+
+We will focus on `GameObject`-based API because otherwise all you need to do is create an entity with `World.CreateEntity()`.
+To do this, we need a provider that associates a `GameObject` with an entity.
 
 Create a new provider.
 
 <details>
-    <summary>Right click in project window and select <code>Create/ECS/Provider</code>.  </summary>
+    <summary>Right click the project window and select <code>Create/ECS/Provider</code>.  </summary>
 
 ![create_provider.gif](Gifs~/create_provider.gif)
 </details>
@@ -579,7 +550,7 @@ public sealed class HealthProvider : MonoProvider<HealthComponent> {
 ![add_provider.gif](Gifs~/add_provider.gif)
 </details>
 
-Now press the play button, and you will see Debug.Log with healthPoints.  
+Now press play button, and you will see Debug.Log with healthPoints.  
 Nice!
 
 ---
@@ -588,10 +559,10 @@ Nice!
 
 #### 🧩 Filter Extensions
 
-Filter extensions required for easy reuse of filter queries.  
+Filter extensions are a way to reuse queries or their parts.
 Let's look at an example:  
 
-We need to implement the IFilterExtension interface and the type must be a struct.  
+Create a struct and implement the IFilterExtension interface.
 
 ```c#  
 public struct SomeExtension : IFilterExtension {
@@ -614,11 +585,13 @@ public void OnAwake() {
 ```
 
 #### 🔍 Aspects
-An aspect is an object-like wrapper that you can use to group together a subset of an entity's components into a single C# struct. Aspects are useful for organizing component code and simplifying queries in your systems.  
+An aspect is an object-like wrapper that you can use to group a subset of an entity's components together into a single C# struct.
+Aspects are useful for organizing components code and simplifying queries in your systems.  
 
-For example, the Transform groups together the individual position, rotation, and scale of components and enables you to access these components from a query that includes the Transform. You can also define your own aspects with the IAspect interface.  
+For example, the Transform aspect groups together the position, rotation, and scale of components and enables you to access these components from a query that includes the Transform.
+You can also define your own aspects with the IAspect interface.  
 
-Our components:
+Components:
 ```c#  
     public struct Translation : IComponent {
         public float x;
@@ -640,39 +613,22 @@ Our components:
     }
 ```
 
-Let's group them in aspect.  
-Simple entity version:
+Let's group them in an aspect:
 
 ```c#  
 public struct Transform : IAspect {
     //Set on each call of AspectFactory.Get(Entity entity)
-    public Entity Entity { get; set;}
-    
-    public ref Translation Translation => ref this.Entity.GetComponent<Translation>();
-    public ref Rotation Rotation => ref this.Entity.GetComponent<Rotation>();
-    public ref Scale Scale => ref this.Entity.GetComponent<Scale>();
-
-    //Called once on world.GetAspectFactory<T>
-    public void OnGetAspectFactory(World world) {
-    }
-}
-```
-
-In an aspect, you can write any combination of properties and methods to work with components on an entity.  
-Let's write a variation with stashes to make it work faster.
-
-```c#  
-public struct Transform : IAspect {
-    public Entity Entity { get; set;}
-    
-    public ref Translation Translation => ref this.translation.Get(this.Entity);
-    public ref Rotation Rotation => ref this.rotation.Get(this.Entity);
-    public ref Scale Scale => ref this.scale.Get(this.Entity);
+    public Entity Entity { get; set; }
     
     private Stash<Translation> translation;
     private Stash<Rotation> rotation;
     private Stash<Scale> scale;
+    
+    public ref Translation Translation => ref this.translation.Get(this.Entity);
+    public ref Rotation Rotation => ref this.rotation.Get(this.Entity);
+    public ref Scale Scale => ref this.scale.Get(this.Entity);
 
+    //Called once on world.GetAspectFactory<T>
     public void OnGetAspectFactory(World world) {
         this.translation = world.GetStash<Translation>();
         this.rotation = world.GetStash<Rotation>();
@@ -680,6 +636,7 @@ public struct Transform : IAspect {
     }
 }
 ```
+
 Let's add an IFilterExtension implementation to always have a query.
 
 ```c#  
@@ -712,18 +669,23 @@ public class TransformAspectSystem : ISystem {
     private Filter filter;
     private AspectFactory<Transform> transform;
     
+    private Stash<Translation> translation;
+    private Stash<Rotation> rotation;
+    private Stash<Scale> scale;
+    
     public void OnAwake() {
         //Extend filter with ready query from Transform
         this.filter = this.World.Filter.Extend<Transform>().Build();
-        //Getting aspect factory AspectFactory<Transform>
+        //Get aspect factory AspectFactory<Transform>
         this.transform = this.World.GetAspectFactory<Transform>();
 
+        
         for (int i = 0, length = 100; i < length; i++) {
             var entity = this.World.CreateEntity();
             
-            entity.AddComponent<Translation>();
-            entity.AddComponent<Rotation>();
-            entity.AddComponent<Scale>();
+            ref var translationComponent = ref this.translation.Set(entity);
+            ref var rotationComponent = ref this.rotation.Set(entity);
+            ref var scaleComponent = ref this.scale.Set(entity);
         }
     }
     public void OnUpdate(float deltaTime) {
@@ -749,8 +711,11 @@ public class TransformAspectSystem : ISystem {
 
 #### 🧹 Component Disposing
 
+> [!IMPORTANT]  
+> Make sure you don't have the `MORPEH_DISABLE_COMPONENT_DISPOSE` define enabled.  
+
 Sometimes it becomes necessary to clear component values.
-For this, it is enough that the component implements `IDisposable`. For example:
+For this, it is enough that a component implements `IDisposable`. For example:
 
 ```c#  
 public struct PlayerView : IComponent, IDisposable {
@@ -762,7 +727,7 @@ public struct PlayerView : IComponent, IDisposable {
 }
 ```
 
-The initializer or system needs to mark the stash as disposable. For example:
+An initializer or a system needs to mark the stash as disposable. For example:
 
 ```c# 
 public class PlayerViewDisposeInitializer : IInitializer {
@@ -792,7 +757,8 @@ public class PlayerViewSystem : ISystem {
 }
 ```
 
-Now, when the component is removed from the entity, the `Dispose()` method will be called on the `PlayerView` component.  
+Now, when the component is removed from an entity, the `Dispose()` method
+will be called on the `PlayerView` component.  
 
 ####  🧨 Unity Jobs And Burst
 
@@ -903,11 +869,12 @@ Can be set by user:
 * `MORPEH_DISABLE_COMPONENT_DISPOSE` Define to disable component disposing feature.
 Will be set by framework:
 * `MORPEH_BURST` Determine if Burst is enabled, and framework has enabled Native API.
+* `MORPEH_GENERATE_ALL_EXTENDED_IDS` to generate `ExtendedComponentId` for all components even outside of Unity Editor.
 
 ####  🌍️ World Plugins
 
 Sometimes you need to make an automatic plugin for the world.  
-Add some systems, make a custom game loop, or automatic serialization.  
+Add some systems, make a custom game loop, or create your own automatic serialization.  
 World plugins are great for this.  
 
 To do this, you need to declare a class that implements the IWorldPlugin interface.  

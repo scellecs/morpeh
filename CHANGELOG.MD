@@ -52,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `UnmanagedList<T>`.
 - Removed `UnmanagedArray<T>`.
 - Removed `Stash<T>.Empty()`.
+- Removed `GC.Collect()` calls in the pause/focus events in Unity.
 
 ## [2023.1.1] - 15.10.2024
 ### Fixed
