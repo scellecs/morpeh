@@ -1,8 +1,18 @@
 ﻿#if MORPEH_BURST
-namespace Scellecs.Morpeh.Native {
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Collections;
 
+namespace Scellecs.Morpeh.Native {
     public struct NativeStash<TNative> where TNative : unmanaged, IComponent {
-        public NativeIntHashMap<TNative> components;
+        [NativeDisableParallelForRestriction]
+        [NativeDisableUnsafePtrRestriction]
+        public unsafe TNative* data;
+
+        [NativeDisableParallelForRestriction]
+        [NativeDisableUnsafePtrRestriction]
+        public unsafe TNative* empty;
+
+        public NativeIntSlotMap map;
         public NativeWorld world;
     }
 }
