@@ -7,7 +7,7 @@
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public class SwappableLongSlotMap {
+    internal sealed class SwappableLongSlotMap {
         internal int               length;
         internal int               capacity;
         internal long              capacityMinusOne;

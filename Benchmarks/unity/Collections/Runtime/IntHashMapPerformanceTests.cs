@@ -22,13 +22,13 @@ namespace Scellecs.Morpeh.Benchmarks.Collections.IntHashMap {
 
         //[Test, Performance]
         [Category("Performance")]
-        public void Add([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+        public void Add([Values(10_000, 100_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<Add>(count, type);
         }
 
         //[Test, Performance]
         [Category("Performance")]
-        public void AddGrow([Values(10_000, 100_000, 1_000_000)] int count, [Values] BenchmarkContainerType type) {
+        public void AddGrow([Values(10_000, 100_000)] int count, [Values] BenchmarkContainerType type) {
             BenchmarkContainerRunner.RunComparison<AddGrow>(count, type);
         }
 
