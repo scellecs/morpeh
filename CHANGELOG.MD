@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed code formatting in multiple files.
 - Fixed Incorrect `IntHashSet` enumerator implementation for positive values.
 - Fixed data cleanup in multiple places to avoid memory leaks if `World`/specific things are disposed.
+- Fixed `World.Commit()` updating metrics even in release builds.
 - Reduced GC allocation count in `FilterBuilder`.
 - Reduced debug builds overhead in general.
 - Reduced overall generic type count to reduce IL2CPP metadata size.
