@@ -42,15 +42,15 @@ Key points for people familiar with other ECS frameworks:
   * [Getting Started](#-getting-started)
   * [Advanced](#-advanced)
     * [Filter Extensions](#-filter-extensions)
+    * [Filter Disposing](#-filter-disposing)
     * [Aspects](#-aspects)
     * [Component Disposing](#-component-disposing)
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
     * [Defines](#%EF%B8%8F-defines)
     * [World Plugins](#%EF%B8%8F-world-plugins)
     * [Metrics](#-metrics)
-    * [Clone a stash](#2%EF%B8%8F⃣-clone-a-stash)
     * [Stash size](#-stash-size)
-    * [Collections](#-collections)
+    * [Collections](#%EF%B8%8F-collections)
 * [Plugins](#-plugins)
 * [Examples](#-examples)
 * [Games](#-games)
@@ -79,7 +79,7 @@ Requires [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) f
 
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh  
 &nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#stage-2024.1  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#2024.1.1  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#2024.1.0  
 
 ### .Net Platform
 
@@ -110,10 +110,16 @@ healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
 
-var newEntity = this.World.CreateEntity();
-//after migration entity has no components, so it will be destroyed during the next world.Commit() call
-entity.MigrateTo(newEntity);
 var debugString = entity.ToString();
+
+//remove entity
+this.World.RemoveEntity(entity);
+
+//check disposal
+bool isDisposed = this.World.IsDisposed(entity);
+
+//alternatively
+bool has = this.World.Has(entity);
 ```
 
 
@@ -584,6 +590,12 @@ public void OnAwake() {
 }
 ```
 
+#### 🧹 Filter Disposing
+`Filter.Dispose` allows you to completely remove the filter from the world, as if it never existed there.
+
+> [!IMPORTANT]
+> `Filter.Dispose` removes all filter instances across all systems where it was used, not just the instance on which `Dispose` was called.
+
 #### 🔍 Aspects
 An aspect is an object-like wrapper that you can use to group a subset of an entity's components together into a single C# struct.
 Aspects are useful for organizing components code and simplifying queries in your systems.  
@@ -765,7 +777,7 @@ will be called on the `PlayerView` component.
 > [!IMPORTANT]  
 > Supported only in Unity. Subjected to further improvements and modifications.
 
-You can convert `Filter<T>` to `NativeFilter<TNative>` which allows you to do component-based manipulations inside a Job.  
+You can convert `Filter` to `NativeFilter` which allows you to do component-based manipulations inside a Job.  
 Conversion of `Stash<T>` to `NativeStash<TNative>` allows you to operate on components based on entity ids.  
 
 Current limitations:
@@ -800,9 +812,9 @@ public struct TestParallelJobReference : IJobParallelFor {
     public NativeStash<HealthComponent> healthComponents;
         
     public void Execute(int index) {
-        var entityId = this.entities[index];
+        var entity = this.entities[index];
         
-        ref var component = ref this.healthComponents.Get(entityId, out var exists);
+        ref var component = ref this.healthComponents.Get(entity, out var exists);
         if (exists) {
             component.Value += 1;
         }
@@ -810,7 +822,7 @@ public struct TestParallelJobReference : IJobParallelFor {
         // Alternatively, you can avoid checking existance of the component
         // if the filter includes said component anyway
         
-        ref var component = ref this.healthComponents.Get(entityId);
+        ref var component = ref this.healthComponents.Get(entity);
         component.Value += 1;
     }
 }
@@ -931,58 +943,6 @@ Metrics work the same way in debug builds, so you can see the whole picture dire
 ![metrics.png](Gifs~/metrics.png)
 </details>
 
-####  2️⃣ Clone a stash
-
-If you have **unmanaged** components, you can create clone of stash for saving data for some purpose.  
-
-For example:
-```c#
-[System.Serializable]
-public struct TestComponent0 : IComponent {
-    public int test0;
-    public float test1;
-    public byte test2;
-}
-
-public class FooSystem : ISystem {
-    public World World { get; set; }
-
-    private Filter filter;
-    private Stash<TestComponent0> stash;
-    private Stash<TestComponent0> cloneStash;
-
-    public void OnAwake() {
-        this.filter = this.World.Filter.With<TestComponent0>().Build();
-        this.stash = this.World.GetStash<TestComponent0>();
-        for (int i = 0, length = 1_000; i < length; i++) {
-            var e = this.World.CreateEntity();
-            e.AddComponent<TestComponent0>();
-        }
-
-        //creating clone of the stash
-        this.cloneStash = this.stash.Clone();
-        
-        //or simply create empty stash with optional capacity
-        this.cloneStash = new Stash<TestComponent0>(capacity: 463829);
-    }
-    
-    public void OnUpdate(float deltaTime) {
-        foreach (var entity in this.filter) {
-            this.stash.Get(entity).test0++;
-        }
-        
-        //copy data from origin stash
-        this.cloneStash.CopyFrom(this.stash);
-        
-        foreach (var entity in this.filter) {
-            Debug.Log(this.cloneStash.Get(entity).test0);
-        }
-    }
-    
-    public void Dispose() {
-    }
-}
-```
 
 #### 📏 Stash size
 
