@@ -4,23 +4,69 @@
 
 ### Breaking Changes
 
-* When installing package in Unity via package manager or manifest.json, you now need to additionally specify ?path=Scellecs.Morpeh. Installation link has been updated in the `README.md`.
-* Active `World` count is now limited to 256. If you have more than 256 worlds active at the same time, consider merging them into one world.
-* `Entity` is now a struct instead of a class and no longer has the partial modifier. `default(Entity)` is reserved as an invalid entity. In case you have some external plugins or code that relies on no more existing data, you may need to update it. Some data you may need (e.g. for plugins, workarounds, extensions, etc.) could still be available through the internal data (like `EntityData` in the `World`, or `Archetype` class in general). Pooling `Entity` may also make no sense anymore.
-* Since `Entity` is now a struct and can be used in jobs, `EntityId` and `World.TryGetEntity` have been removed - native APIs now use `Entity` directly.
-* `Entity` archetype transfer is deferred until `World.Commit` when adding or removing components.
-* `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh. It will still be available throughout the entire current major Morpeh version (2024) but *may* be removed in Morpeh 2025 release. Prefer using `Stash` API which is guaranteed to stay and is faster anyway.
-* `Installer`, `UpdateSystem`, `FixedSystem` and other ScriptableObject-based systems are now marked as Obsolete because of a potential removal in future versions of Morpeh. It will still be available throughout the entire current major Morpeh version (2024) but *may* be removed in Morpeh 2025 release. Prefer using `SystemGroup` + `ISystem` (`IFixedSystem`, etc.) API for easier migration later on.
-* `Stash<T>` initial size functionality is now a part of `ComponentId`. Use `ComponentId<T>.StashSize` to modify the initial size of the stash before the first call to `World.GetStash<T>()` (which includes `EntityExtensions` API and different providers / external code).
-* `ComponentId` and `ExtendedComponentId` are now split into different use cases to reduce IL2CPP metadata size. `ExtendedComponentId` is now stripped out of non-UnityEditor runtimes unless `MORPEH_GENERATE_ALL_EXTENDED_IDS` is specified. `ExtendedComponentId` may be required for reflection-based code where `IStash` interface is not enough.
-* Removed `UniversalProvider`. Consider using `MonoProvider` instead. `UniversalProvider` *may* return in a form of source-generated class with defined-in-code components in future versions (aka "`MonoProvider` but with multiple components").
-* Removed `BitMap<T>`. If applicable, use `IntHashMap<T>` or backport `BitMap<T>` from Morpeh 2023.1 to your project.
+* When installing Morpeh as a package in Unity (via package manager or manifest.json),
+you now need to additionally specify `?path=Scellecs.Morpeh`.
+Installation link has been updated in the `README.md`.
+* Active `World` count is now limited to 256. If you have more than
+256 worlds active at the same time, consider merging them into one world.
+* `Entity` is now a struct instead of a class and no longer has `partial` modifier.
+`default(Entity)` is reserved as an invalid entity.
+In case you have some external plugins or code that relies on no
+more existing data, you may need to update it. Some data
+you may need (e.g. for plugins, workarounds, extensions, etc.)
+could still be available through the internal data (like `EntityData`
+in the `World`, or `Archetype` class in general).
+Pooling `Entity` may also make no sense anymore.
+* Since `Entity` is now a struct and can be used in jobs,
+`EntityId` and `World.TryGetEntity` have been removed - native APIs
+can use `Entity` directly.
+* `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked
+as Obsolete because of a potential removal in future versions of Morpeh.
+It will still be available throughout the entire current major Morpeh version
+(2024) but *may* be removed in Morpeh 2025 release. Prefer using
+`Stash` API which is guaranteed to stay and is faster anyway.
+* `Installer`, `UpdateSystem`, `FixedSystem` and other ScriptableObject-based
+systems are now marked as Obsolete because of a potential removal
+in future versions of Morpeh. It will still be available throughout
+the entire current major Morpeh version (2024) but *may* be removed in
+Morpeh 2025 release. Prefer using `SystemGroup` + `ISystem`
+(`IFixedSystem`, etc.) API for easier migration later on.
+* `Stash<T>` initial size functionality is now a part of
+`ComponentId`. Use `ComponentId<T>.StashSize` to modify the initial size
+of the stash before the first call to `World.GetStash<T>()`
+(which includes `EntityExtensions` API and different providers / external code).
+* `ComponentId` and `ExtendedComponentId` are now split into
+different use cases to reduce IL2CPP metadata size. `ExtendedComponentId`
+is now stripped out of non-UnityEditor runtimes unless
+`MORPEH_GENERATE_ALL_EXTENDED_IDS` is specified. `ExtendedComponentId` may
+be required for reflection-based code where `IStash` interface is not enough.
+* Removed `UniversalProvider`. Consider using `MonoProvider` instead.
+`UniversalProvider` *may* return in a form of source-generated class
+with defined-in-code components in future versions (aka "`MonoProvider`
+but with multiple components").
+* Removed `BitMap<T>`. If applicable, use `IntHashMap<T>` or backport
+`BitMap<T>` from Morpeh 2023.1 to your project.
 * Removed `UnmanagedList<T>`. As it was broken anyway, this should not affect any projects.
 * Removed `UnmanagedArray<T>`. As it was broken anyway, this should not affect any projects.
-* Removed `Stash<T>.Empty()`. This was used for internal purposes and should not affect any projects. In case it was used somewhere, just use `default(T)` for the same effect.
-* `FastList<T>` and multiple other collections were fixed to be more reliable and less error-prone. This may affect some projects that relied on the previous behaviour of these collections. Please refer to the source code and adapt your usage to the renamed methods or new overloads. Beware that HashMaps in general still don't work with negative values as keys inside `foreach` calls.
-* `bool Stash<T>.Add(Entity entity, in T value)` is now a `void` method and throws an exception if the entity already has the component. This is to prevent accidental retaining of old data if the component already exists where logic expects `Add` to always restore data to the defaulted state. This decision has been made due to lots of projects using `Add` and discarding the return value, leading to potentially super-hard-to-find bugs.
-* All `Stash<T>` methods always throw an exception if an entity is invalid or the operation makes no sense to make (e.g. `Get` if an entity has no such component), both in Debug and Release mode. This may increase exception rate in your project instead of silently ignoring them as it was before. These exceptions have to be addressed and fixed in the project code.
+* Removed `Stash<T>.Empty()`. This was used for internal purposes and should
+not affect any projects. In case it was used somewhere, just use `default(T)`
+for the same effect.
+* `FastList<T>` and multiple other collections were fixed to be more
+reliable and less error-prone. This may affect some projects that relied
+on the previous behaviour of these collections. Please refer to the
+source code and adapt your usage to the renamed methods or new overloads.
+Beware that HashMaps in general still don't work with negative
+values as keys inside `foreach` calls.
+* `bool Stash<T>.Add(Entity entity, in T value)` is now a `void` method
+and throws an exception if the entity already has the component.
+This is to prevent accidental retaining of old data if the component
+already exists where logic expects `Add` to always restore data to the defaulted state. This decision has been made due to lots of projects using `Add` and discarding the return value, leading to potentially super-hard-to-find bugs.
+* All `Stash<T>` methods always throw an exception if an entity
+is invalid or the operation makes no sense to make (e.g. `Get` if
+an entity has no such component), both in Debug and Release mode.
+This may increase exception rate in your project instead of silently
+ignoring them as it was before. These exceptions have to be addressed
+and fixed in the project code.
 
 ### New API
 
