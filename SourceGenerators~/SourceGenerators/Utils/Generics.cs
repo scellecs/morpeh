@@ -13,5 +13,12 @@
 
             return sb;
         }
+        
+        public static StringBuilder AppendGenericConstraints(this StringBuilder sb, TypeDeclarationSyntax typeDeclaration) {
+            foreach (var constraintClause in typeDeclaration.ConstraintClauses) {
+                sb.Append(" ").Append(constraintClause.ToFullString());
+            }
+            return sb;
+        }
     }
 }

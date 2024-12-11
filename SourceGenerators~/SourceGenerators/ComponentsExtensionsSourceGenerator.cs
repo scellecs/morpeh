@@ -28,8 +28,10 @@
                     return;
                 }
 
-                var typeName      = structDeclaration.Identifier.ToString();
-                var genericParams = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
+                var typeName = structDeclaration.Identifier.ToString();
+
+                var genericParams      = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
+                var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
             
                 var sb = new StringBuilder();
             
@@ -37,7 +39,7 @@
             
                 // TODO: Choose correct Stash specialization based on the component information (fields count, types, etc.)
                 sb.AppendLine(@$"using Scellecs.Morpeh;
-public static class {typeName}__Generated{genericParams} {{
+public static class {typeName}__Generated{genericParams} {genericConstraints} {{
     public static Stash<{typeName}{genericParams}> GetStash(World world) => world.GetStash<{typeName}{genericParams}>();
 }}");
                 sb.AppendEndNamespace(structDeclaration).AppendLine();

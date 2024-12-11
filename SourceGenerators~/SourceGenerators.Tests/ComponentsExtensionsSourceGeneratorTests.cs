@@ -96,6 +96,34 @@ public class ComponentsExtensionsSourceGeneratorTests(ITestOutputHelper output) 
     }
     
     [Fact]
+    public void DataComponent_GenericWorks() { 
+        const string source = """
+                              namespace Test.Namespace;
+                              
+                              using Scellecs.Morpeh;
+                              
+                              public struct TestComponent<T> : IComponent where T : struct {
+                                  public T value;
+                              }
+                              """;
+        
+        const string target = """
+                              namespace Test.Namespace {
+                              using Scellecs.Morpeh;
+                              public static class TestComponent__Generated<T>  where T : struct  {
+                                  public static Stash<TestComponent<T>> GetStash(World world) => world.GetStash<TestComponent<T>>();
+                              }
+                              }
+                              
+                              """;
+        
+        var result     = Generate(source);
+        var syntaxTree = GetGeneratedTree(result, FILE_NAME);
+
+        Assert.Equal(target, syntaxTree.GetText().ToString(), ignoreLineEndingDifferences: true, ignoreWhiteSpaceDifferences: true);
+    }
+    
+    [Fact]
     public void WrongInterface_DoesNotGenerate() { 
         const string source = """
                               namespace Test.Namespace;
