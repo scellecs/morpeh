@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2024.1.0] - WIP
+## [2024.1.0] - 11.12.2024
 ### Fixed
 - Fixed archetype recreation when an archetype becomes empty in the same Commit call when the archetype has to become active again.
 - Fixed `FastList<T>.RemoveAtSwap()` incorrect logic & managed pointers memory leak.
@@ -12,11 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Disposable components not being disposed when its `Stash`'s World is disposed.
 - Fixed code formatting in multiple files.
 - Fixed Incorrect `IntHashSet` enumerator implementation for positive values.
+- Fixed `IntHashSet` broken `CopyTo`.
 - Fixed data cleanup in multiple places to avoid memory leaks if `World`/specific things are disposed.
 - Fixed `World.Commit()` updating metrics even in release builds.
+- Fixed `InitializationDefaultWorld` incorrectly disposed existing worlds.
+- Fixed incorrect `World` id assignment - in some cases, it was possible to get two worlds with the same id. Now worlds reuse ids.
 - Reduced GC allocation count in `FilterBuilder`.
 - Reduced debug builds overhead in general.
 - Reduced overall generic type count to reduce IL2CPP metadata size.
+- Improved performance of `Filter.First()`, `Filter.FirstOrDefault()`, `Filter.GetEntity()`.
+- Significantly improved performance of `World.Commit()`, `Stash.Set()`, `Stash.Add()`, `Stash.Remove()`.
+- `Entity` copying is no longer performed during `filter.AsNative()`. Entities are read directly from the archetypes.
 
 ### Added
 - **[Breaking]** Added `World` ID limit (256).
@@ -27,31 +33,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added generations to worlds.
 - Added exceptions for typical runtime errors like InvalidSetOperationException both in Debug and Release mode.
 - Added meaningful exception messages for common errors with an actual component type and entity ID where applicable.
-- Added `World.Has(Entity entity)` method as a faster alternative to `Entity.IsDisposed()`.
+- Added `World.Has(Entity entity)` & `World.IsDisposed(Entity entity)` methods as a faster alternative to `Entity.IsDisposed()`.
 - Added `Filter.ArchetypesCount` property.
 - Added `Filter.Has(Entity entity)` method.
 - Added entity debugger proxy with component visualization during breakpoint debugging - components are now displayed directly on entities when paused.
 
 ### Changed
-- **[Breaking]** `Entity` is now a struct instead of a class.
+- **[Breaking]** `Entity` is now a struct instead of a class and no longer has the partial modifier.
+- **[Breaking]** `Entity.Invalid` -> `default(Entity)`.
+- **[Breaking]** Native API now uses `Entity` directly instead of removed `EntityId`.
 - **[Breaking]** `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh.
+- **[Breaking]** Now `Entity` archetype transfer is deferred until `World.Commit` when adding or removing components.
 - **[Breaking]** `Stash<T>` initial size functionality is now a part of `ComponentId`.
 - **[Breaking]** `ComponentId` and `ExtendedComponentId` are now split into different use cases to reduce IL2CPP metadata size. `ExtendedComponentId` is now stripped out of non-UnityEditor runtimes unless `MORPEH_GENERATE_ALL_EXTENDED_IDS` is specified.
 - **[Breaking]** `bool Stash<T>.Add(Entity entity)` now throws an exception if the entity already has the component. Refer to the [Migration Guide](MIGRATION.md) for more detailed explanation.
+- **[Breaking]** Base `Stash` class changed to `IStash` interface.
+- **[Breaking]** `FilterBuilder` is now a struct instead of a class.
 - Reworked World Browser window to be more performant.
 - Reworked the entire repo structure to allow for extra projects like tests and benchmarks.
 - Reworked archetypes and filter matching to be much more efficient without recursive calls, Stash checks, etc.
 - Simplified `Filter` enumeration.
 - Restored multiple collections' internal storage to managed arrays to make debugging memory easier.
+- `IntHashMap` & `LongHashMap` - `GetValueByKey` and `GetValueRefByKey` methods now throw exceptions when attempting to get a value using an invalid key.
 - `FastList<T>` implementation is now less error-prone and has a more consistent API.
 - `World.Default` access does not require an array access anymore.
 - `StashMap` -> `IntSlotMap`.
 - `Filter` chunks (used for `AsNative()` calls) are now allocated only if necessary.
 - `NativeStash` uses `NativeIntSlotMap` instead of removed `NativeIntHashMap<T>`.
-- Made `HashHelpers` public.
+- Class `HashHelpers` is now public.
+- `Archetype` class is now public, while its structure remains internal. This allows for less painful development of extensions for the internal part of Morpeh, and enables interaction with the `Archetype` type in user code.
+- The entity's components set is now stored in its `Archetype` rather than directly in the `Entity`.
+- *internal TypeInfo* typeOffset has been renamed to typeId, and what was previously typeId is now typeHash.
 
 ### Removed
 - **[Breaking]** Removed `UniversalProvider`.
+- **[Breaking]** Removed `EntityId`, `World.TryGetEntity` and `World.GetEntity`.
 - Removed `BitMap<T>`.
 - Removed `UnmanagedList<T>`.
 - Removed `UnmanagedArray<T>`.
