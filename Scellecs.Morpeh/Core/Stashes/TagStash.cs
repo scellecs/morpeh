@@ -21,7 +21,7 @@ namespace Scellecs.Morpeh {
         private  Type     type;
         private  TypeInfo typeInfo;
         
-        private IntHashSet map;
+        private IntHashSet set;
         
         [PublicAPI]
         public bool IsDisposed;
@@ -35,7 +35,7 @@ namespace Scellecs.Morpeh {
         [PublicAPI]
         public int Length {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => this.map.length;
+            get => this.set.length;
         }
         
         [UnityEngine.Scripting.Preserve]
@@ -44,7 +44,7 @@ namespace Scellecs.Morpeh {
             this.type = type;
             this.typeInfo = typeInfo;
             
-            this.map = new IntHashSet(capacity < 0 ? StashConstants.DEFAULT_COMPONENTS_CAPACITY : capacity);
+            this.set = new IntHashSet(capacity < 0 ? StashConstants.DEFAULT_COMPONENTS_CAPACITY : capacity);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -55,11 +55,10 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
-            if (this.map.Has(entity.Id)) {
-                InvalidAddOperationException.ThrowAlreadyExists(entity, this.type);
-            } else {
-                this.map.Add(entity.Id);
+            if (this.set.Add(entity.Id)) {
                 this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+            } else {
+                InvalidAddOperationException.ThrowAlreadyExists(entity, this.type);
             }
         }
         
@@ -71,8 +70,7 @@ namespace Scellecs.Morpeh {
                 InvalidSetOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
-            if (!this.map.Has(entity.Id)) {
-                this.map.Add(entity.Id);
+            if (this.set.Add(entity.Id)) {
                 this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
         }
@@ -85,7 +83,7 @@ namespace Scellecs.Morpeh {
                 InvalidRemoveOperationException.ThrowDisposedEntity(entity, this.type);
             }
 
-            if (!this.map.Remove(entity.Id)) {
+            if (!this.set.Remove(entity.Id)) {
                 return false;
             }
 
@@ -97,16 +95,16 @@ namespace Scellecs.Morpeh {
         public void RemoveAll() {
             this.world.ThreadSafetyCheck();
             
-            foreach (var entityId in this.map) {
+            foreach (var entityId in this.set) {
                 this.world.TransientChangeRemoveComponent(entityId, ref this.typeInfo);
             }
             
-            this.map.Clear();
+            this.set.Clear();
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IStash.Clean(Entity entity) {
-            this.map.Remove(entity.Id);
+            this.set.Remove(entity.Id);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,16 +119,15 @@ namespace Scellecs.Morpeh {
                 InvalidMigrateOperationException.ThrowDisposedEntityTo(to, this.type);
             }
 
-            if (!this.map.Has(from.Id)) {
+            if (!this.set.Has(from.Id)) {
                 return;
             }
 
-            if (!this.map.Has(to.Id)) {
-                this.map.Add(to.Id);
+            if (this.set.Add(to.Id)) {
                 this.world.TransientChangeAddComponent(to.Id, ref this.typeInfo);
             }
                 
-            if (this.map.Remove(from.Id)) {
+            if (this.set.Remove(from.Id)) {
                 this.world.TransientChangeRemoveComponent(from.Id, ref this.typeInfo);
             }
         }
@@ -143,21 +140,21 @@ namespace Scellecs.Morpeh {
                 InvalidHasOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
-            return this.map.Has(entity.Id);
+            return this.set.Has(entity.Id);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsEmpty() {
             this.world.ThreadSafetyCheck();
             
-            return this.map.length == 0;
+            return this.set.length == 0;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsNotEmpty() {
             this.world.ThreadSafetyCheck();
             
-            return this.map.length != 0;
+            return this.set.length != 0;
         }
         
         public void Dispose() {
@@ -170,7 +167,7 @@ namespace Scellecs.Morpeh {
             this.world = null;
             this.typeInfo = default;
             
-            this.map = null;
+            this.set = null;
             
             this.IsDisposed = true;
         }
