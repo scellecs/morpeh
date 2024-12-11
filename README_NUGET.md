@@ -10,7 +10,10 @@
 * [Introduction](#-introduction)
   * [Base concept of ECS pattern](#-base-concept-of-ecs-pattern)
   * [Advanced](#-advanced)
+    * [Filter Extensions](#-filter-extensions)
+    * [Filter Disposing](#-filter-disposing)
     * [Component Disposing](#-component-disposing)
+    * [Stash size](#-stash-size)
 * [Examples](#-examples)
 * [Games](#-games)
 * [License](#-license)
@@ -20,27 +23,35 @@
 ### 📘 Base concept of ECS pattern
 
 #### 🔖 Entity
-Container of components.  
-Has a set of methods for add, get, set, remove components.  
-It is reference type. Each entity is unique and not pooled. Only entity IDs are reused.
+An identifier for components, which does not store any data but can be used to
+access components.
+It is a value type, and is trivially copyable. Underlying identifiers (IDs) are
+reused, but each reused ID is guaranteed to have a new generation, making each new
+Entity unique.
 
 ```c#
+var healthStash = this.World.GetStash<HealthComponent>();
 var entity = this.World.CreateEntity();
 
-ref var addedHealthComponent  = ref entity.AddComponent<HealthComponent>();
-ref var gottenHealthComponent = ref entity.GetComponent<HealthComponent>();
+ref var addedHealthComponent  = ref healthStash.Add(entity);
+ref var gottenHealthComponent = ref healthStash.Get(entity);
 
-//if you remove last component on entity it will be destroyd on next world.Commit()
-bool removed = entity.RemoveComponent<HealthComponent>();
-entity.SetComponent(new HealthComponent {healthPoints = 100});
+//if you remove the last entity component, it will be destroyed during the next world.Commit() call
+bool removed = healthStash.Remove(entity);
+healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
-bool hasHealthComponent = entity.Has<HealthComponent>();
+bool hasHealthComponent = healthStash.Has(entity);
 
-var newEntity = this.World.CreateEntity();
-//after migration entity has no components, so it will be destroyd on next world.Commit()
-entity.MigrateTo(newEntity);
-//get string with entity ID
 var debugString = entity.ToString();
+
+//remove entity
+this.World.RemoveEntity(entity);
+
+//check disposal
+bool isDisposed = this.World.IsDisposed(entity);
+
+//alternatively
+bool has = this.World.Has(entity);
 ```
 
 
@@ -58,22 +69,23 @@ public struct HealthComponent : IComponent {
 Types that process entities with a specific set of components.  
 Entities are selected using a filter.
 
-All systems are represented by interfaces, but for convenience, there are ScriptableObject classes that make it easier to work with the inspector and `Installer`.  
-Such classes are the default tool, but you can write pure classes that implement the interface, but then you need to use the `SystemsGroup` API instead of the `Installer`.
+All systems are represented by interfaces.
 
 ```c#
 public class HealthSystem : ISystem {
     public World World { get; set; }
 
     private Filter filter;
+    private Stash<HealthComponent> healthStash;
 
     public void OnAwake() {
         this.filter = this.World.Filter.With<HealthComponent>().Build();
+        this.healthStash = this.World.GetStash<HealthComponent>();
     }
 
     public void OnUpdate(float deltaTime) {
         foreach (var entity in this.filter) {
-            ref var healthComponent = ref entity.GetComponent<HealthComponent>();
+            ref var healthComponent = ref healthStash.Get(entity);
             healthComponent.healthPoints += 1;
         }
     }
@@ -84,16 +96,17 @@ public class HealthSystem : ISystem {
 ```
 
 All systems types:
-* `IInitializer` & `Initializer` - have only OnAwake and Dispose methods, convenient for executing startup logic
-* `ISystem` & `UpdateSystem`
-* `IFixedSystem` & `FixedUpdateSystem`
-* `ILateSystem` & `LateUpdateSystem`
-* `ICleanupSystem` & `CleanupSystem`
+* `IInitializer` - have only OnAwake and Dispose methods, convenient for executing startup logic
+* `ISystem` - main system that executes every frame in Update. Used for main game logic and data processing
+* `IFixedSystem` - system that executes in FixedUpdate with fixed time step
+* `ILateSystem` - system that executes in LateUpdate, after all Updates. Useful for logic that should run after main updates
+* `ICleanupSystem` - system that executes after ILateUpdateSystem. Designed for cleanup operations, resetting states, and handling end-of-frame tasks
+
+Beware that ScriptableObject-based systems do still exist in 2024 version, but they are deprecated and will be removed in the future.
 
 #### 🔖 SystemsGroup
 
-The type that contains the systems.  
-There is an `Installer` wrapper to work in the inspector, but if you want to control everything from code, you can use the systems group directly.
+The type that contains the systems. Consider them as a "feature" to group the systems by their common purpose.
 
 ```c#
 var newWorld = World.Create();
@@ -105,7 +118,7 @@ var systemsGroup = newWorld.CreateSystemsGroup();
 systemsGroup.AddSystem(newSystem);
 systemsGroup.AddInitializer(newInitializer);
 
-//it is bad practice to turn systems off and on, but sometimes it is very necessary for debugging
+//it is a bad practice to turn systems off and on, but sometimes it is very necessary for debugging
 systemsGroup.DisableSystem(newSystem);
 systemsGroup.EnableSystem(newSystem);
 
@@ -117,6 +130,7 @@ newWorld.RemoveSystemsGroup(systemsGroup);
 ```
 
 #### 🔖 World
+
 A type that contains entities, components stashes, systems and root filter.
 ```c#
 var newWorld = World.Create();
@@ -151,9 +165,10 @@ newWorld.Commit();
 ```
 
 #### 🔖 Filter
-A type that contains entities constrained by conditions With and/or Without.  
+
+A type that allows filtering entities constrained by conditions With and/or Without.  
 You can chain them in any order and quantity.  
-After compose all constrains you should call Build() method.
+Call `Build()` to finalize the filter for further use.
 ```c#
 var filter = this.World.Filter.With<HealthComponent>()
                               .With<BooComponent>()
@@ -164,14 +179,14 @@ var firstEntityOrException = filter.First();
 var firstEntityOrNull = filter.FirstOrDefault();
 
 bool filterIsEmpty = filter.IsEmpty();
+bool filterIsNotEmpty = filter.IsNotEmpty();
 int filterLengthCalculatedOnCall = filter.GetLengthSlow();
-
 ```
 
 #### 🔖 Stash
-A type that contains components.  
-You can get components and do other operations directly from the stash, because entity methods look up the stash each time on call.  
-However, such code is harder to read.
+
+A type that stores components data.
+
 ```c#
 var healthStash = this.World.GetStash<HealthComponent>();
 var entity = this.World.CreateEntity();
@@ -185,8 +200,11 @@ healthStash.Set(entity, new HealthComponent {healthPoints = 100});
 
 bool hasHealthComponent = healthStash.Has(entity);
 
-//delete all components that type from the world
+//delete all HealthComponent from the world (affects all entities)
 healthStash.RemoveAll();
+
+bool healthStashIsEmpty = healthStash.IsEmpty();
+bool healthStashIsNotEmpty = healthStash.IsNotEmpty();
 
 var newEntity = this.World.CreateEntity();
 //transfers a component from one entity to another
@@ -206,13 +224,48 @@ bool hasHealthComponent = reflectionHealthCache.Has(entity);
 ---
 
 
-
 ### 📖 Advanced
+
+#### 🧩 Filter Extensions
+
+Filter extensions are a way to reuse queries or their parts.
+Let's look at an example:  
+
+Create a struct and implement the IFilterExtension interface.
+
+```c#  
+public struct SomeExtension : IFilterExtension {
+    public FilterBuilder Extend(FilterBuilder rootFilter) => rootFilter.With<Translation>().With<Rotation>();
+}
+```
+
+The next step is to call the Extend method in any order when requesting a filter.  
+The Extend method continues query.
+
+```c#  
+private Filter filter;
+
+public void OnAwake() {
+    this.filter = this.World.Filter.With<TestA>()
+                                   .Extend<SomeExtension>()
+                                   .With<TestC>()
+                                   .Build();
+}
+```
+
+#### 🧹 Filter Disposing
+`Filter.Dispose` allows you to completely remove the filter from the world, as if it never existed there.
+
+> [!IMPORTANT]
+> `Filter.Dispose` removes all filter instances across all systems where it was used, not just the instance on which `Dispose` was called.
 
 #### 🧹 Component Disposing
 
+> [!IMPORTANT]  
+> Make sure you don't have the `MORPEH_DISABLE_COMPONENT_DISPOSE` define enabled.  
+
 Sometimes it becomes necessary to clear component values.
-For this, it is enough that the component implements `IDisposable`. For example:
+For this, it is enough that a component implements `IDisposable`. For example:
 
 ```c#  
 public struct PlayerView : IComponent, IDisposable {
@@ -224,12 +277,15 @@ public struct PlayerView : IComponent, IDisposable {
 }
 ```
 
-The initializer or system needs to mark the stash as disposable. For example:
+An initializer or a system needs to mark the stash as disposable. For example:
 
 ```c# 
-public class PlayerViewDisposeInitializer : Initializer {
-    public override void OnAwake() {
+public class PlayerViewDisposeInitializer : IInitializer {
+    public void OnAwake() {
         this.World.GetStash<PlayerView>().AsDisposable();
+    }
+    
+    public void Dispose() {
     }
 }
 ```
@@ -237,18 +293,31 @@ public class PlayerViewDisposeInitializer : Initializer {
 or
 
 ```c# 
-public class PlayerViewSystem : UpdateSystem {
-    public override void OnAwake() {
+public class PlayerViewSystem : ISystem {
+    public void OnAwake() {
         this.World.GetStash<PlayerView>().AsDisposable();
     }
     
-    public override void OnUpdate(float deltaTime) {
+    public void OnUpdate(float deltaTime) {
         ...
+    }
+    
+    public void Dispose() {
     }
 }
 ```
 
-Now, when the component is removed from the entity, the `Dispose()` method will be called on the `PlayerView` component.  
+Now, when the component is removed from an entity, the `Dispose()` method will be called on the `PlayerView` component.  
+
+#### 📏 Stash size
+
+If you know the expected number of components in a stash, you have the option to set a base size to prevent resizing and avoid unnecessary allocations.
+
+```c#
+ComponentId<T>.StashSize = 1024;
+```
+
+This value is not tied to a specific ``World``, so it needs to be set before starting ECS, so that all newly created stashes of this type in any ``World`` have the specified capacity.
 
 ---
 

@@ -1,4 +1,127 @@
 # 🚀 Migration Guide  
+
+## Migration from version 2023.1 to 2024.1
+
+### Breaking Changes
+
+* When installing Morpeh as a package in Unity (via package manager or manifest.json),
+you now need to additionally specify `?path=Scellecs.Morpeh`.
+Installation link has been updated in the `README.md`.
+* Active `World` count is now limited to 256. If you have more than
+256 worlds active at the same time, consider merging them into one world.
+* `Entity` is now a struct instead of a class and no longer has `partial` modifier.
+`default(Entity)` is reserved as an invalid entity.
+In case you have some external plugins or code that relies on no
+more existing data, you may need to update it. Some data
+you may need (e.g. for plugins, workarounds, extensions, etc.)
+could still be available through the internal data (like `EntityData`
+in the `World`, or `Archetype` class in general).
+Pooling `Entity` may also make no sense anymore.
+* Since `Entity` is now a struct and can be used in jobs,
+`EntityId` and `World.TryGetEntity` have been removed - native APIs
+can use `Entity` directly.
+* `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked
+as Obsolete because of a potential removal in future versions of Morpeh.
+It will still be available throughout the entire current major Morpeh version
+(2024) but *may* be removed in Morpeh 2025 release. Prefer using
+`Stash` API which is guaranteed to stay and is faster anyway.
+* `Installer`, `UpdateSystem`, `FixedSystem` and other ScriptableObject-based
+systems are now marked as Obsolete because of a potential removal
+in future versions of Morpeh. It will still be available throughout
+the entire current major Morpeh version (2024) but *may* be removed in
+Morpeh 2025 release. Prefer using `SystemGroup` + `ISystem`
+(`IFixedSystem`, etc.) API for easier migration later on.
+* `Stash<T>` initial size functionality is now a part of
+`ComponentId`. Use `ComponentId<T>.StashSize` to modify the initial size
+of the stash before the first call to `World.GetStash<T>()`
+(which includes `EntityExtensions` API and different providers / external code).
+* `ComponentId` and `ExtendedComponentId` are now split into
+different use cases to reduce IL2CPP metadata size. `ExtendedComponentId`
+is now stripped out of non-UnityEditor runtimes unless
+`MORPEH_GENERATE_ALL_EXTENDED_IDS` is specified. `ExtendedComponentId` may
+be required for reflection-based code where `IStash` interface is not enough.
+* Removed `UniversalProvider`. Consider using `MonoProvider` instead.
+`UniversalProvider` *may* return in a form of source-generated class
+with defined-in-code components in future versions (aka "`MonoProvider`
+but with multiple components").
+* Removed `BitMap<T>`. If applicable, use `IntHashMap<T>` or backport
+`BitMap<T>` from Morpeh 2023.1 to your project.
+* Removed `UnmanagedList<T>`. As it was broken anyway, this should not affect any projects.
+* Removed `UnmanagedArray<T>`. As it was broken anyway, this should not affect any projects.
+* Removed `Stash<T>.Empty()`. This was used for internal purposes and should
+not affect any projects. In case it was used somewhere, just use `default(T)`
+for the same effect.
+* `FastList<T>` and multiple other collections were fixed to be more
+reliable and less error-prone. This may affect some projects that relied
+on the previous behaviour of these collections. Please refer to the
+source code and adapt your usage to the renamed methods or new overloads.
+Beware that HashMaps in general still don't work with negative
+values as keys inside `foreach` calls.
+* `bool Stash<T>.Add(Entity entity, in T value)` is now a `void` method
+and throws an exception if the entity already has the component.
+This is to prevent accidental retaining of old data if the component
+already exists where logic expects `Add` to always restore data to the defaulted state. This decision has been made due to lots of projects using `Add` and discarding the return value, leading to potentially super-hard-to-find bugs.
+* All `Stash<T>` methods always throw an exception if an entity
+is invalid or the operation makes no sense to make (e.g. `Get` if
+an entity has no such component), both in Debug and Release mode.
+This may increase exception rate in your project instead of silently
+ignoring them as it was before. These exceptions have to be addressed
+and fixed in the project code.
+
+### New API
+
+* Refer to the [Changelog](CHANGELOG.MD) for the full list of changes.
+
+### Next Major Version remarks
+
+We are evaluating a possibility of heavy usage of Source Generators in future
+versions of Morpeh, potentially even in 2025 release. 
+This may pose more restrictions on what we may or may not support in the future.
+
+One likely change is potential introduction of tag stashes (non-generic) for tag
+components, which would reduce IL2CPP overhead, memory overhead, and increase
+general performance. We are willing to make it user-agnostic so that the user
+does not have to worry about the specific implementation of the stash, if possible.
+If that's the case, you may want to avoid iterating over stashes with tag components
+as this operation may slow down due to necessity to count trailing zeroes if bitset
+is chosen as an underlying storage type. This may or not be a bitset after all
+(e.g. if we use a hashset or something else), but the general idea is to be
+cautious about iterating over large stashes.
+
+One of the most likely changes is the removal of `EntityExtensions` API in favor
+of `Stash` API, if it becomes possible to make a convenient replacement for it. We
+do acknowledge that `EntityExtensions` is a very convenient API, but it has
+a large overhead (both CPU and IL2CPP metadata amount) and is not very flexible,
+especially if we want to implement tag stashes for tag components
+described above.
+
+We have been using a completely separate system runner in our projects for a while now,
+and it has been working quite well, allowing us to avoid interface/virtual calls
+to system update methods, improving overall performance due to lower idle systems
+cost (systems that do not have any entities to process, but the update method is still
+called). This may lead to a complete removal of ScriptableObject-based systems in
+favor of source-generated systems, as well as source-generated "features" which
+would replace `SystemGroup`. For an easier migration later on, we recommend
+sticking to pure-C# systems implementing `ISystem` interface instead of 
+ScriptableObject-based systems.
+
+Providers (`EntityProvider`/`MonoProvider`) are also subject to possible changes in
+future versions. We are considering a possibility of merging them into one
+source-generated class, which would allow defining multiple components in one
+place. This would also allow us to create a well-defined functionality for
+entity disposal process, as currently `EntityProvider` does not *actually*
+remove entities from the world, but just removes its component from the entity,
+and entity disposal is handled by removing the last component from the entity during
+the next `World.Commit()` call. This sometimes leads to confusion and unexpected behaviour
+when the entity has components set from the outside of the providers,
+potentially leaking unused entities.
+
+All the changes described above will definitely affect external plugins, workarounds,
+extensions and other code that relies on Morpeh internals or even some public APIs.
+
+Please note that these are just plans and may be or may not be implemented in the future.
+The list may also be incomplete and may not cover all the changes that are planned.
+
 ## Migration from version 2022.2 to 2023.1
 
 ### Breaking changes

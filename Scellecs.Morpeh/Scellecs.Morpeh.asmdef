@@ -1,0 +1,31 @@
+{
+    "name": "Scellecs.Morpeh",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b46779583a009f04ba9f5f31d0e7e6ac",
+        "GUID:324caed91501a9c47a04ebfd87b68794",
+        "GUID:2665a8d13d1b3f18800f46e256720795"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_2020_1_OR_NEWER"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.profiling.core",
+            "expression": "",
+            "define": "MORPEH_METRICS"
+        },
+        {
+            "name": "com.codewriter.triinspector",
+            "expression": "1.10.0",
+            "define": "TRI_INSPECTOR"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,9 @@
+.view-container-toolbar-container {
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.view-container-list-container {
+    flex-grow: 1;
+    overflow: visible;
+}
