@@ -10,6 +10,8 @@
         <Description>ECS Framework for Unity Game Engine and .Net Platform</Description>
         <Copyright>Copyright (c) 2024 Oleg Morozov, Igor Boyko</Copyright>
         <PackageLicenseUrl>https://github.com/scellecs/morpeh/blob/master/LICENSE.md</PackageLicenseUrl>
+        <PackageIcon>logo.png</PackageIcon>
+        <PackageReadmeFile>README_NUGET.md</PackageReadmeFile>
         <RepositoryUrl>https://github.com/scellecs/morpeh</RepositoryUrl>
         <PackageTags>ecs, unity, gamedev</PackageTags>
         <Company>Scellecs</Company>
@@ -28,11 +30,8 @@
         <Compile Remove="Unity\Editor\**" />
         <Compile Remove="Unity\Providers\**" />
         <Compile Remove="Unity\Systems\**" />
-        <Compile Remove="Unity\Utils\Discover\**" />
-        <Compile Remove="Unity\Utils\Editor\Discover\**" />
-        <Compile Remove="Unity\Utils\Editor\Resources\Discover\**" />
+        <Compile Remove="Unity\Utils\ComponentViewer\**" />
         <Compile Remove="Unity\Utils\Editor\Resources\MaterialIcons\**" />
-        <Compile Remove="Unity\Utils\Editor\Resources\Fonts\**" />
         <Compile Remove="Unity\Utils\Editor\Resources\MorpehIcons\**" />
         <Compile Remove="Unity\Utils\Editor\CompilationTime.cs" />
         <Compile Remove="Unity\Utils\Editor\DefineAsset.cs" />
@@ -40,8 +39,29 @@
         <Compile Remove="Unity\Utils\Editor\EditorSceneSetup.cs" />
         <Compile Remove="Unity\Utils\Editor\IconsSetter.cs" />
         <Compile Remove="Unity\Utils\Editor\OpenAssetProcessor.cs" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser.cs" />
+        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Controls\**" />
+        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Models\**" />
+        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Search\SearchFilter\**" />
+        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Search\SearchHandler\**" />
+        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Styles\**" />
+        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Utils\**" />
+        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Views\**" />
+        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Windows\**" />
         <Compile Remove="Unity\Utils\SceneReference.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Remove="**\*.meta" />
+        <None Remove="**\*.png" />
+        <None Remove="**\*.asset" />
+        <None Remove="**\*.uss" />
+        <None Remove="**\*.asmdef" />
+        <None Remove="**\*.unitypackage" />
+        <None Include="Unity\Utils\Editor\Resources\logo.png" Pack="true" PackagePath="" />
+        <None Include="..\README_NUGET.md" Pack="true" PackagePath="" />
+        <None Include="..\MIGRATION.md" Pack="true" PackagePath="" />
+        <None Include="..\MIGRATION_RU.md" Pack="true" PackagePath="" />
+        <None Include="..\LICENSE.md" Pack="true" PackagePath="" />
+        <None Include="..\CHANGELOG.md" Pack="true" PackagePath="" />
+    </ItemGroup>
 </Project>
