@@ -27,14 +27,13 @@
                 if (semanticModel.GetDeclaredSymbol(structDeclaration) is not ITypeSymbol structSymbol || !structSymbol.AllInterfaces.Contains(iComponent)) {
                     return;
                 }
-
-                var typeName = structDeclaration.Identifier.ToString();
                 
                 if (structDeclaration.IsDeclaredInsideAnotherType()) {
                     Errors.ReportNestedDeclaration(spc, structDeclaration);
                     return;
                 }
 
+                var typeName           = structDeclaration.Identifier.ToString();
                 var genericParams      = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
                 var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
             

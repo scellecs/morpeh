@@ -480,51 +480,6 @@ public class StashTests {
     }
 
     [Fact]
-    public void EntityDispose_DisposableComponent() {
-        var entity = this.world.CreateEntity();
-        var stash = this.world.GetStash<DisposableTest>().AsDisposable();
-        var handle = new DisposableTest.Handle();
-        stash.Set(entity, new DisposableTest {
-            value = handle,
-        });
-
-        Assert.True(handle.value);
-        Assert.True(stash.Get(entity).value.value);
-        Assert.Equal(handle, stash.Get(entity).value);
-
-        ref var data = ref stash.Get(entity);
-        this.world.RemoveEntity(entity);
-        this.world.Commit();
-
-        Assert.False(handle.value);
-        Assert.Equal(default, data.value);
-    }
-
-    [Fact]
-    public void WorldDispose_DisposableComponent() {
-        var world = World.Create();
-        world.Commit();
-
-        var entity = world.CreateEntity();
-        var stash = world.GetStash<DisposableTest>().AsDisposable();
-        var handle = new DisposableTest.Handle();
-        stash.Set(entity, new DisposableTest {
-            value = handle,
-        });
-
-        Assert.True(handle.value);
-        Assert.True(stash.Get(entity).value.value);
-        Assert.Equal(handle, stash.Get(entity).value);
-
-        ref var data = ref stash.Get(entity);
-        world.Commit();
-        world.Dispose();
-
-        Assert.False(handle.value);
-        Assert.Equal(default, data.value);
-    }
-
-    [Fact]
     public void StashOperations_ThrowOnDisposedEntityWithoutWorldCommit() {
         var stash = this.world.GetStash<Test1>();
         var stash2 = this.world.GetStash<Test2>();

@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 #define MORPEH_DEBUG
 #endif
 #if !MORPEH_DEBUG
@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class Stash<T> : IStash where T : struct, IComponent {
+    public sealed class StashD<T> : IStash where T : struct, IComponent, IDisposable {
         internal World world;
         private TypeInfo typeInfo;
         
@@ -41,7 +41,7 @@ namespace Scellecs.Morpeh {
         }
         
         [UnityEngine.Scripting.Preserve]
-        internal Stash(World world, TypeInfo typeInfo, int capacity = -1) {
+        internal StashD(World world, TypeInfo typeInfo, int capacity = -1) {
             this.world = world;
             this.typeInfo = typeInfo;
             
@@ -225,6 +225,7 @@ namespace Scellecs.Morpeh {
             
             if (this.map.Remove(entity.Id, out var slotIndex)) {
                 this.world.TransientChangeRemoveComponent(entity.Id, ref this.typeInfo);
+                this.data[slotIndex].Dispose();
                 this.data[slotIndex] = default;
                 return true;
             }
@@ -237,6 +238,7 @@ namespace Scellecs.Morpeh {
             this.world.ThreadSafetyCheck();
             
             foreach (var slotIndex in this.map) {
+                this.data[slotIndex].Dispose();
                 this.data[slotIndex] = default;
                     
                 var entityId = this.map.GetKeyBySlotIndex(slotIndex);
@@ -249,6 +251,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IStash.Clean(Entity entity) {
             if (this.map.Remove(entity.Id, out var slotIndex)) {
+                this.data[slotIndex].Dispose();
                 this.data[slotIndex] = default;
             }
         }
@@ -322,11 +325,12 @@ namespace Scellecs.Morpeh {
             }
             
             this.world.ThreadSafetyCheck();
-
+            
             foreach (var slotIndex in this.map) {
+                this.data[slotIndex].Dispose();
                 this.data[slotIndex] = default;
             }
-            
+
             this.world = null;
             this.typeInfo = default;
             
