@@ -1,18 +1,19 @@
 ﻿namespace SourceGenerators {
     using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     public static class Errors {
-        private static readonly DiagnosticDescriptor NAMESPACE_MISSING = new(
+        private static readonly DiagnosticDescriptor NESTED_DECLARATION = new(
             "MORPEH_ERR_001",
-            "Component {0} is missing namespace",
-            "Component {0} is missing namespace",
+            "Component {0} is declared inside another type.",
+            "Component {0} is declared inside another type.",
             "Morpeh",
             DiagnosticSeverity.Error,
             true,
-            "Component {0} is missing namespace.");
+            "Component {0} is declared inside another type.");
         
-        public static void ReportMissingNamespace(SourceProductionContext ctx, Location location, string componentName) {
-            ctx.ReportDiagnostic(Diagnostic.Create(NAMESPACE_MISSING, location, componentName));
+        public static void ReportNestedDeclaration(SourceProductionContext ctx, TypeDeclarationSyntax typeDeclarationSyntax) {
+            ctx.ReportDiagnostic(Diagnostic.Create(NESTED_DECLARATION, typeDeclarationSyntax.GetLocation(), typeDeclarationSyntax.Identifier.Text));
         }
     }
 }

@@ -13,5 +13,7 @@
             
             return false;
         }
+
+        public static bool IsDeclaredInsideAnotherType(this TypeDeclarationSyntax type) => type.Parent is TypeDeclarationSyntax;
     }
 }
