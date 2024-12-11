@@ -4,8 +4,11 @@
 
 ### Breaking Changes
 
+* When installing package in Unity via package manager or manifest.json, you now need to additionally specify ?path=Scellecs.Morpeh. Installation link has been updated in the `README.md`.
 * Active `World` count is now limited to 256. If you have more than 256 worlds active at the same time, consider merging them into one world.
-* `Entity` is now a struct instead of a class. In case you have some external plugins or code that relies on no more existing data, you may need to update it. Some data you may need (e.g. for plugins, workarounds, extensions, etc.) could still be available through the internal data (like `EntityData` in the `World`, or `Archetype` class in general). Pooling `Entity` may also make no sense anymore.
+* `Entity` is now a struct instead of a class and no longer has the partial modifier. `default(Entity)` is reserved as an invalid entity. In case you have some external plugins or code that relies on no more existing data, you may need to update it. Some data you may need (e.g. for plugins, workarounds, extensions, etc.) could still be available through the internal data (like `EntityData` in the `World`, or `Archetype` class in general). Pooling `Entity` may also make no sense anymore.
+* Since `Entity` is now a struct and can be used in jobs, `EntityId` and `World.TryGetEntity` have been removed - native APIs now use `Entity` directly.
+* `Entity` archetype transfer is deferred until `World.Commit` when adding or removing components.
 * `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh. It will still be available throughout the entire current major Morpeh version (2024) but *may* be removed in Morpeh 2025 release. Prefer using `Stash` API which is guaranteed to stay and is faster anyway.
 * `Installer`, `UpdateSystem`, `FixedSystem` and other ScriptableObject-based systems are now marked as Obsolete because of a potential removal in future versions of Morpeh. It will still be available throughout the entire current major Morpeh version (2024) but *may* be removed in Morpeh 2025 release. Prefer using `SystemGroup` + `ISystem` (`IFixedSystem`, etc.) API for easier migration later on.
 * `Stash<T>` initial size functionality is now a part of `ComponentId`. Use `ComponentId<T>.StashSize` to modify the initial size of the stash before the first call to `World.GetStash<T>()` (which includes `EntityExtensions` API and different providers / external code).
