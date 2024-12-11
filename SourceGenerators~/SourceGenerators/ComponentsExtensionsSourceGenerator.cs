@@ -1,4 +1,6 @@
 ﻿namespace SourceGenerators {
+    using System;
+    using System.Linq;
     using System.Text;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -36,16 +38,49 @@
                 var typeName           = structDeclaration.Identifier.ToString();
                 var genericParams      = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
                 var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
+
+                var isTag = !structDeclaration.HasAnyDataField();
+                var isDisposable = structDeclaration.BaseList?.Types.Any(t => t.Type.ToString().EndsWith("IDisposable")) ?? false;
             
                 var sb = new StringBuilder();
             
                 sb.AppendBeginNamespace(structDeclaration).AppendLine();
             
                 // TODO: Choose correct Stash specialization based on the component information (fields count, types, etc.)
-                sb.AppendLine(@$"using Scellecs.Morpeh;
-public static class {typeName}__Generated{genericParams} {genericConstraints} {{
-    public static Stash<{typeName}{genericParams}> GetStash(World world) => world.GetStash<{typeName}{genericParams}>();
-}}");
+                sb.AppendLine("using Scellecs.Morpeh;");
+                sb.AppendLine($"public static class {typeName}__Generated{genericParams} {genericConstraints} {{");
+
+                if (isTag) {
+                    if (isDisposable) {
+                        // TODO: Throw an error if the component is both disposable and a tag.
+                        return;
+                    }
+                    
+                    sb.AppendLine($"public static TagStash GetStash(World world) => world.GetTagStash<{typeName}{genericParams}>();");
+                } else if (isDisposable) {
+                    // TODO: Choose either unmanaged or managed stash based on the component information.
+                    // TODO: Or we can just make all of them pinned with GetNativeHandle() method.
+                    /*
+                    if (typeSymbol.IsUnmanagedType) {
+                        sb.AppendLine($"public static StashUD<{typeName}{genericParams}> GetStash(World world) => world.GetStashUD<{typeName}{genericParams}>();");
+                    } else {
+                        sb.AppendLine($"public static StashD<{typeName}{genericParams}> GetStash(World world) => world.GetStashD<{typeName}{genericParams}>();");
+                    }
+                    */
+                    sb.AppendLine($"public static StashD<{typeName}{genericParams}> GetStash(World world) => world.GetStashD<{typeName}{genericParams}>();");
+                } else {
+                    // TODO: Choose either unmanaged or managed stash based on the component information.
+                    /*
+                    if (typeSymbol.IsUnmanagedType) {
+                        sb.AppendLine($"public static StashU<{typeName}{genericParams}> GetStash(World world) => world.GetStashUD<{typeName}{genericParams}>();");
+                    } else {
+                        sb.AppendLine($"public static Stash<{typeName}{genericParams}> GetStash(World world) => world.GetStashD<{typeName}{genericParams}>();");
+                    }
+                    */
+                    sb.AppendLine($"public static Stash<{typeName}{genericParams}> GetStash(World world) => world.GetStash<{typeName}{genericParams}>();");
+                }
+
+                sb.AppendLine("}");
                 sb.AppendEndNamespace(structDeclaration).AppendLine();
                 
                 spc.AddSource($"{structDeclaration.Identifier.Text}.component_extensions.g.cs", sb.ToString());
