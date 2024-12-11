@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>2024.1.1</Version>
+        <Version>2024.1.0</Version>
         <Title>Scellecs.Morpeh</Title>
         <Authors>Oleg Morozov, Igor Boyko</Authors>
         <Description>ECS Framework for Unity Game Engine and .Net Platform</Description>
