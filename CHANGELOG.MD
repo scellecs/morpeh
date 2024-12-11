@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Disposable components not being disposed when its `Stash`'s World is disposed.
 - Fixed code formatting in multiple files.
 - Fixed Incorrect `IntHashSet` enumerator implementation for positive values.
-- Fixed `IntHashSet` broken `CopyTo`.
+- Fixed broken `IntHashSet.CopyTo()` method.
 - Fixed data cleanup in multiple places to avoid memory leaks if `World`/specific things are disposed.
 - Fixed `World.Commit()` updating metrics even in release builds.
-- Fixed `InitializationDefaultWorld` incorrectly disposed existing worlds.
-- Fixed incorrect `World` id assignment - in some cases, it was possible to get two worlds with the same id. Now worlds reuse ids.
+- Fixed `InitializationDefaultWorld` disposing existing worlds when it should not.
+- Fixed incorrect `World` id assignment - in some cases, it was possible to get two worlds with the same id. Now worlds reuse ids correctly.
 - Reduced GC allocation count in `FilterBuilder`.
 - Reduced debug builds overhead in general.
 - Reduced overall generic type count to reduce IL2CPP metadata size.
@@ -39,11 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added entity debugger proxy with component visualization during breakpoint debugging - components are now displayed directly on entities when paused.
 
 ### Changed
-- **[Breaking]** `Entity` is now a struct instead of a class and no longer has the partial modifier.
+- **[Breaking]** `Entity` is now a struct instead of a class and no longer has `partial` modifier.
 - **[Breaking]** `Entity.Invalid` -> `default(Entity)`.
 - **[Breaking]** Native API now uses `Entity` directly instead of removed `EntityId`.
 - **[Breaking]** `EntityExtensions` (`Entity.Add<T>()`, etc.) methods are now marked as Obsolete because of a potential removal in future versions of Morpeh.
-- **[Breaking]** Now `Entity` archetype transfer is deferred until `World.Commit` when adding or removing components.
 - **[Breaking]** `Stash<T>` initial size functionality is now a part of `ComponentId`.
 - **[Breaking]** `ComponentId` and `ExtendedComponentId` are now split into different use cases to reduce IL2CPP metadata size. `ExtendedComponentId` is now stripped out of non-UnityEditor runtimes unless `MORPEH_GENERATE_ALL_EXTENDED_IDS` is specified.
 - **[Breaking]** `bool Stash<T>.Add(Entity entity)` now throws an exception if the entity already has the component. Refer to the [Migration Guide](MIGRATION.md) for more detailed explanation.
