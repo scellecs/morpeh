@@ -20,5 +20,7 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.1"/>
     </ItemGroup>
 
-
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="..\..\Scellecs.Morpeh\Unity\Plugins" />
+    </Target>
 </Project>
