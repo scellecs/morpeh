@@ -54,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reworked archetypes and filter matching to be much more efficient without recursive calls, Stash checks, etc.
 - Simplified `Filter` enumeration.
 - Restored multiple collections' internal storage to managed arrays to make debugging memory easier.
+- `Stash<T>` initial size functionality is now a part of `ComponentId`. Use `ComponentId<T>.StashSize` to modify the initial size of the stash before the first call to `World.GetStash<T>()`.
 - `IntHashMap` & `LongHashMap` - `GetValueByKey` and `GetValueRefByKey` methods now throw exceptions when attempting to get a value using an invalid key.
 - `FastList<T>` implementation is now less error-prone and has a more consistent API.
 - `World.Default` access does not require an array access anymore.
