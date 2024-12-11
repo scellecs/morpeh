@@ -164,11 +164,11 @@ public class HealthSystem : ISystem {
 ```
 
 All systems types:  
-* `IInitializer` - has OnAwake and Dispose methods only, which is convenient for executing startup logic
-* `ISystem`
-* `IFixedSystem`
-* `ILateSystem`
-* `ICleanupSystem`
+* `IInitializer` - have only OnAwake and Dispose methods, convenient for executing startup logic
+* `ISystem` - main system that executes every frame in Update. Used for main game logic and data processing
+* `IFixedSystem` - system that executes in FixedUpdate with fixed time step
+* `ILateSystem` - system that executes in LateUpdate, after all Updates. Useful for logic that should run after main updates
+* `ICleanupSystem` - system that executes after ILateSystem. Designed for cleanup operations, resetting states, and handling end-of-frame tasks
 
 Beware that ScriptableObject-based systems do still exist in 2024 version, but they are deprecated and will be removed in the future.
 
