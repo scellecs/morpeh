@@ -67,6 +67,7 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
+                    // TODO: IsEnabled() check.
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
                     using (indent.Scope()) {
