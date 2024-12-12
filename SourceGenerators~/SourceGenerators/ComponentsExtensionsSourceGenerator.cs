@@ -52,7 +52,7 @@
 
                 if (isTag) {
                     if (isDisposable) {
-                        // TODO: Throw an error if the component is both disposable and a tag.
+                        Errors.ReportTagDisposable(spc, structDeclaration);
                         return;
                     }
                     
