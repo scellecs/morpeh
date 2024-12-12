@@ -8,7 +8,6 @@
 
     // TODO: Systems disable mechanism for exceptions.
     // TODO: IsEnabled() method to check system enter condition.
-    // TODO: Support struct systems?
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_NAME = "System";
@@ -32,7 +31,10 @@
                 sb.AppendUsings(typeDeclaration).AppendLine();
                 sb.AppendBeginNamespace(typeDeclaration).AppendLine();
                 
-                sb.Append("public partial class ")
+                sb.AppendVisibility(typeDeclaration)
+                    .Append(" partial ")
+                    .AppendTypeDeclarationType(typeDeclaration)
+                    .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
                     .Append(" : ISystem ")

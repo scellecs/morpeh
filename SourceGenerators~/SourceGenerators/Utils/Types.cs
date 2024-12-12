@@ -1,5 +1,7 @@
 ﻿namespace SourceGenerators.Utils {
+    using System.Linq;
     using System.Text;
+    using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     public static class Types {
@@ -26,6 +28,36 @@
             }
             
             return sb.ToString().GetHashCode().ToString("X");
+        }
+        
+        public static StringBuilder AppendVisibility(this StringBuilder sb, TypeDeclarationSyntax type) {
+            if (type.Modifiers.Any(x => x.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword))) {
+                sb.Append("public");
+            } else if (type.Modifiers.Any(x => x.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.InternalKeyword))) {
+                sb.Append("internal");
+            } else if (type.Modifiers.Any(x => x.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.ProtectedKeyword))) {
+                sb.Append("protected");
+            } else if (type.Modifiers.Any(x => x.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PrivateKeyword))) {
+                sb.Append("private");
+            }
+            
+            return sb;
+        }
+        
+        public static StringBuilder AppendTypeDeclarationType(this StringBuilder sb, TypeDeclarationSyntax type) {
+            switch (type) {
+                case ClassDeclarationSyntax _:
+                    sb.Append("class");
+                    break;
+                case StructDeclarationSyntax _:
+                    sb.Append("struct");
+                    break;
+                case InterfaceDeclarationSyntax _:
+                    sb.Append("interface");
+                    break;
+            }
+            
+            return sb;
         }
     }
 }

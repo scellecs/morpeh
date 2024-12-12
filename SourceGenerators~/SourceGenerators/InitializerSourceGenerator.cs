@@ -6,7 +6,6 @@
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Utils;
 
-    // TODO: Support struct initializers?
     [Generator]
     public class InitializerSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_NAME = "Initializer";
@@ -30,7 +29,10 @@
                 sb.AppendUsings(typeDeclaration).AppendLine();
                 sb.AppendBeginNamespace(typeDeclaration).AppendLine();
                 
-                sb.Append("public partial class ")
+                sb.AppendVisibility(typeDeclaration)
+                    .Append(" partial ")
+                    .AppendTypeDeclarationType(typeDeclaration)
+                    .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
                     .Append(" : IInitializer ")
