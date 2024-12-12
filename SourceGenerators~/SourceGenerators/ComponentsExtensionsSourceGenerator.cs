@@ -39,7 +39,7 @@
                 var genericParams      = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
                 var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
 
-                var isTag = !structDeclaration.HasAnyDataField();
+                var isTag = structDeclaration.Members.Count == 0;
                 var isDisposable = structDeclaration.BaseList?.Types.Any(t => t.Type.ToString().EndsWith("IDisposable")) ?? false;
             
                 var sb = new StringBuilder();
