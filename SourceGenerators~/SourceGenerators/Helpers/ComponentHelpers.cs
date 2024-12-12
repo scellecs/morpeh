@@ -22,14 +22,14 @@
             var componentDecl = new StringBuilder().Append(structDeclaration.Identifier).AppendGenericParams(structDeclaration).ToString();
             
             if (isTag) {
-                return new StashSpecialization("TagStash", $"GetTagStash<{componentDecl}>", isTag, isDisposable);
+                return new StashSpecialization("TagStash", $"GetTagStash<{componentDecl}>");
             }
 
             if (isDisposable) {
-                return new StashSpecialization($"StashD<{componentDecl}>", $"GetStashD<{componentDecl}>", isTag, isDisposable);
+                return new StashSpecialization($"StashD<{componentDecl}>", $"GetStashD<{componentDecl}>");
             }
 
-            return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>", isTag, isDisposable);
+            return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>");
         }
     }
 }
