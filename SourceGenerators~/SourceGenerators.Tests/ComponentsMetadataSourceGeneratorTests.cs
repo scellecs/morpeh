@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 namespace SourceGenerators.Tests;
 
 [Collection("Sequential")]
-public class ComponentsExtensionsSourceGeneratorTests(ITestOutputHelper output) {
+public class ComponentsMetadataSourceGeneratorTests(ITestOutputHelper output) {
     private readonly ITestOutputHelper output = output;
 
     private const string FILE_NAME = "TestComponent.component_extensions.g.cs";
@@ -149,10 +149,10 @@ public class ComponentsExtensionsSourceGeneratorTests(ITestOutputHelper output) 
     }
     
     private static GeneratorDriverRunResult Generate(string source) {
-        var generator = new ComponentsExtensionsSourceGenerator();
+        var generator = new ComponentsMetadataSourceGenerator();
         var driver    = CSharpGeneratorDriver.Create(generator);
 
-        var compilation = CSharpCompilation.Create(nameof(ComponentsExtensionsSourceGeneratorTests),
+        var compilation = CSharpCompilation.Create(nameof(ComponentsMetadataSourceGeneratorTests),
             [
                 CSharpSyntaxTree.ParseText(source)
             ],

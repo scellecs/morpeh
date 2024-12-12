@@ -1,6 +1,4 @@
 ﻿namespace SourceGenerators {
-    using System;
-    using System.Linq;
     using System.Text;
     using Helpers;
     using Microsoft.CodeAnalysis;
@@ -8,7 +6,7 @@
     using Utils;
 
     [Generator]
-    public class ComponentsExtensionsSourceGenerator : IIncrementalGenerator {
+    public class ComponentsMetadataSourceGenerator : IIncrementalGenerator {
         private const string COMPONENT_INTERFACE_NAME = "Scellecs.Morpeh.IComponent";
 
         public void Initialize(IncrementalGeneratorInitializationContext context) {
