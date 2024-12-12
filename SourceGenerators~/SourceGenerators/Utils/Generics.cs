@@ -8,8 +8,16 @@
                 return sb;
             }
 
-            var parameters = string.Join(", ", typeDeclarationSyntax.TypeParameterList.Parameters);
-            sb.Append($"<{parameters}>");
+            sb.Append("<");
+            
+            for (int i = 0, length = typeDeclarationSyntax.TypeParameterList.Parameters.Count; i < length; i++) {
+                sb.Append(typeDeclarationSyntax.TypeParameterList.Parameters[i].Identifier.Text);
+                if (i < length - 1) {
+                    sb.Append(", ");
+                }
+            }
+            
+            sb.Append(">");
 
             return sb;
         }
