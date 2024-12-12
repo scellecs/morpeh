@@ -8,6 +8,7 @@
 
     // TODO: Systems disable mechanism for exceptions.
     // TODO: IsEnabled() method to check system enter condition.
+    // TODO: Support struct systems?
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_NAME = "System";
@@ -17,13 +18,11 @@
                 .CreateSyntaxProvider(
                     predicate: static (s, _) => s is TypeDeclarationSyntax typeDeclaration &&
                                                 typeDeclaration.AttributeLists.Any(x => x.Attributes.Any(y => y?.Name.ToString() == ATTRIBUTE_NAME)),
-                    transform: static (ctx, _) => (declaration: (TypeDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
-                .Where(static pair => pair.declaration is not null);
+                    transform: static (ctx, _) => (TypeDeclarationSyntax)ctx.Node)
+                .Where(static typeDeclaration => typeDeclaration is not null);
             
-            context.RegisterSourceOutput(classes, static (spc, pair) =>
+            context.RegisterSourceOutput(classes, static (spc, typeDeclaration) =>
             {
-                var (typeDeclaration, semanticModel) = pair;
-
                 var typeName = typeDeclaration.Identifier.ToString();
 
                 var sb     = new StringBuilder();
