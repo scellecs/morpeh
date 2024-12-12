@@ -1,5 +1,6 @@
 ﻿namespace SourceGenerators.Utils {
     using System.Text;
+    using Helpers;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     public static class Namespaces {
@@ -32,7 +33,7 @@
             var ns = GetNamespace(typeDeclarationSyntax);
             
             if (ns != null) {
-                sb.Append(' ', indent).Append("namespace ").Append(ns.Name).Append(" {");
+                sb.AppendIndent(indent).Append("namespace ").Append(ns.Name).Append(" {");
             }
             
             return sb;
@@ -42,7 +43,7 @@
             var ns = GetNamespace(typeDeclarationSyntax);
             
             if (ns != null) {
-                sb.Append(' ', indent).Append("}");
+                sb.AppendIndent(indent).Append("}");
             }
             
             return sb;
@@ -53,7 +54,7 @@
 
             if (ns != null) {
                 foreach (var usingDirective in ns.Usings) {
-                    sb.Append(' ', indent).Append(usingDirective).AppendLine();
+                    sb.AppendIndent(indent).Append(usingDirective).AppendLine();
                 }
             }
 
