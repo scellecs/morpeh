@@ -1,4 +1,4 @@
-﻿namespace SourceGenerators {
+﻿namespace SourceGenerators.Helpers {
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 

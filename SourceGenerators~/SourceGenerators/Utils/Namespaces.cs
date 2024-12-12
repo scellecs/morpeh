@@ -47,5 +47,17 @@
             
             return sb;
         }
+
+        public static StringBuilder AppendUsings(this StringBuilder sb, TypeDeclarationSyntax typeDeclarationSyntax, int indent = 0) {
+            var ns = GetNamespace(typeDeclarationSyntax);
+
+            if (ns != null) {
+                foreach (var usingDirective in ns.Usings) {
+                    sb.Append(' ', indent).Append(usingDirective).AppendLine();
+                }
+            }
+
+            return sb;
+        }
     }
 }

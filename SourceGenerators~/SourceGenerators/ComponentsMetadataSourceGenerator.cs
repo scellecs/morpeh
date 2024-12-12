@@ -35,7 +35,6 @@
                 }
 
                 var typeName           = structDeclaration.Identifier.ToString();
-                var typeHash     = structDeclaration.GetStableFileCompliantHash();
                 var genericParams      = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
                 var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
 
@@ -49,9 +48,10 @@
                 sb.AppendLine($"public static class {typeName}__Metadata{genericParams} {genericConstraints} {{");
                 sb.Append(' ', 2).AppendLine($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}();");
                 sb.AppendLine("}");
+                
                 sb.AppendEndNamespace(structDeclaration).AppendLine();
                 
-                spc.AddSource($"{structDeclaration.Identifier.Text}.component_extensions_{typeHash}.g.cs", sb.ToString());
+                spc.AddSource($"{structDeclaration.Identifier.Text}.component_extensions_{structDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
             });
         }
     }
