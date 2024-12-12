@@ -27,8 +27,11 @@
                 sb.AppendBeginNamespace(typeDeclaration).AppendLine();
                 
                 sb.Append("public partial class ")
-                    .Append(typeDeclaration.Identifier).AppendGenericParams(typeDeclaration).AppendGenericConstraints(typeDeclaration)
-                    .Append(" {").AppendLine();
+                    .Append(typeDeclaration.Identifier)
+                    .AppendGenericParams(typeDeclaration)
+                    .Append(" : ISystem ")
+                    .AppendGenericConstraints(typeDeclaration)
+                    .AppendLine(" {");
                 
                 sb.AppendLine("}");
                 sb.AppendEndNamespace(typeDeclaration);
