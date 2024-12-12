@@ -42,11 +42,6 @@
                 var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
 
                 var specialization = ComponentHelpers.GetStashSpecialization(structDeclaration);
-
-                if (specialization is { isTag: true, isDisposable: true }) {
-                    Errors.ReportTagDisposable(spc, structDeclaration);
-                    return;
-                }
             
                 var sb = new StringBuilder();
             
