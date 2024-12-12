@@ -26,7 +26,9 @@
                 sb.AppendUsings(typeDeclaration).AppendLine();
                 sb.AppendBeginNamespace(typeDeclaration).AppendLine();
                 
-                sb.Append("public partial class ").Append(typeDeclaration.Identifier).Append(" {").AppendLine();
+                sb.Append("public partial class ")
+                    .Append(typeDeclaration.Identifier).AppendGenericParams(typeDeclaration).AppendGenericConstraints(typeDeclaration)
+                    .Append(" {").AppendLine();
                 
                 sb.AppendLine("}");
                 sb.AppendEndNamespace(typeDeclaration);
