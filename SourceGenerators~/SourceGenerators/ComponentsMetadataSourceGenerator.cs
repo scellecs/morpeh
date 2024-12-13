@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators {
+    using System.Runtime.CompilerServices;
     using System.Text;
     using Helpers;
     using Microsoft.CodeAnalysis;
@@ -48,6 +49,7 @@
                 sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 sb.AppendIndent(indent).AppendLine($"public static class {typeName}__Metadata{genericParams} {genericConstraints} {{");
                 using (indent.Scope()) {
+                    sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).AppendLine($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}();");
                 }
                 sb.AppendIndent(indent).AppendLine("}");
