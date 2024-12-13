@@ -64,6 +64,7 @@
                         sb.AppendLine("#else");
                         sb.AppendIndent(indent).AppendLine("OnAwake();");
                         sb.AppendLine("#endif");
+                        sb.AppendIndent(indent).AppendLine("World.Commit();");
                         sb.AppendLine("#if MORPEH_PROFILING");
                         sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
                         sb.AppendLine("#endif");
@@ -91,6 +92,7 @@
                         sb.AppendLine("#else");
                         sb.AppendIndent(indent).AppendLine("OnUpdate(deltaTime);");
                         sb.AppendLine("#endif");
+                        sb.AppendIndent(indent).AppendLine("World.Commit();");
                         sb.AppendLine("#if MORPEH_PROFILING");
                         sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
                         sb.AppendLine("#endif");
@@ -117,6 +119,7 @@
                         sb.AppendLine("#else");
                         sb.AppendIndent(indent).AppendLine("Dispose();");
                         sb.AppendLine("#endif");
+                        sb.AppendIndent(indent).AppendLine("World.Commit();");
                         sb.AppendLine("#if MORPEH_PROFILING");
                         sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
                         sb.AppendLine("#endif");
