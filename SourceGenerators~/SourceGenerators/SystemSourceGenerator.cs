@@ -48,10 +48,11 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                     using (indent.Scope()) {
-                        sb.AppendLine("#if MORPEH_PROFILING");
+                        sb.AppendIfDefine(Defines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_Awake\");");
-                        sb.AppendLine("#endif");
-                        sb.AppendLine("#if MORPEH_DEBUG");
+                        sb.AppendEndIfDefine();
+                        
+                        sb.AppendIfDefine(Defines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("OnAwake();");
@@ -62,13 +63,15 @@
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
-                        sb.AppendLine("#else");
+                        sb.AppendElseDefine();
                         sb.AppendIndent(indent).AppendLine("OnAwake();");
-                        sb.AppendLine("#endif");
+                        sb.AppendEndIfDefine();
+                        
                         sb.AppendIndent(indent).AppendLine("World.Commit();");
-                        sb.AppendLine("#if MORPEH_PROFILING");
+                        
+                        sb.AppendIfDefine(Defines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
-                        sb.AppendLine("#endif");
+                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
@@ -76,10 +79,11 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
                     using (indent.Scope()) {
-                        sb.AppendLine("#if MORPEH_PROFILING");
+                        sb.AppendIfDefine(Defines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_OnUpdate\");");
-                        sb.AppendLine("#endif");
-                        sb.AppendLine("#if MORPEH_DEBUG");
+                        sb.AppendEndIfDefine();
+                        
+                        sb.AppendIfDefine(Defines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("OnUpdate(float deltaTime);");
@@ -90,23 +94,26 @@
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
-                        sb.AppendLine("#else");
+                        sb.AppendElseDefine();
                         sb.AppendIndent(indent).AppendLine("OnUpdate(deltaTime);");
-                        sb.AppendLine("#endif");
+                        sb.AppendEndIfDefine();
+                        
                         sb.AppendIndent(indent).AppendLine("World.Commit();");
-                        sb.AppendLine("#if MORPEH_PROFILING");
+                        
+                        sb.AppendIfDefine(Defines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
-                        sb.AppendLine("#endif");
+                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
 
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                     using (indent.Scope()) {
-                        sb.AppendLine("#if MORPEH_PROFILING");
+                        sb.AppendIfDefine(Defines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_Dispose\");");
-                        sb.AppendLine("#endif");
-                        sb.AppendLine("#if MORPEH_DEBUG");
+                        sb.AppendEndIfDefine();
+                        
+                        sb.AppendIfDefine(Defines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("Dispose();");
@@ -117,13 +124,15 @@
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
-                        sb.AppendLine("#else");
+                        sb.AppendElseDefine();
                         sb.AppendIndent(indent).AppendLine("Dispose();");
-                        sb.AppendLine("#endif");
+                        sb.AppendEndIfDefine();
+                        
                         sb.AppendIndent(indent).AppendLine("World.Commit();");
-                        sb.AppendLine("#if MORPEH_PROFILING");
+                        
+                        sb.AppendIfDefine(Defines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
-                        sb.AppendLine("#endif");
+                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                 }
