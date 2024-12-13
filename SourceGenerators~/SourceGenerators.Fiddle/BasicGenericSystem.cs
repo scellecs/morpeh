@@ -6,6 +6,8 @@ using Scellecs.Morpeh;
 public partial class BasicGenericSystem<T> where T : struct {
     public World World { get; set; }
 
+    public bool IsEnabled() => throw new NotImplementedException();
+
     public void OnAwake() {
         throw new NotImplementedException();
     }

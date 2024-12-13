@@ -11,6 +11,7 @@
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_NAME = "System";
+        private const string ALWAYS_ENABLED_ATTRIBUTE_NAME = "AlwaysEnabled";
         private const string SKIP_COMMIT_ATTRIBUTE_NAME = "SkipCommit";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
@@ -24,8 +25,9 @@
             context.RegisterSourceOutput(classes, static (spc, typeDeclaration) =>
             {
                 var typeName = typeDeclaration.Identifier.ToString();
+                var alwaysEnabled = typeDeclaration.AttributeLists.SelectMany(a => a.Attributes).Any(a => a.Name.ToString() == ALWAYS_ENABLED_ATTRIBUTE_NAME);
                 var skipCommit = typeDeclaration.AttributeLists.SelectMany(a => a.Attributes).Any(a => a.Name.ToString() == SKIP_COMMIT_ATTRIBUTE_NAME);
-
+                
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSource.GetThreadSingleton();
 
@@ -77,10 +79,17 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
-                    // TODO: IsEnabled() check.
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
                     using (indent.Scope()) {
+                        if (!alwaysEnabled) {
+                            sb.AppendIndent(indent).AppendLine("if (!IsEnabled()) {");
+                            using (indent.Scope()) {
+                                sb.AppendIndent(indent).AppendLine("return;");
+                            }
+                            sb.AppendIndent(indent).AppendLine("}");
+                        }
+                        
                         sb.AppendIfDefine(Defines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_OnUpdate\");");
                         sb.AppendEndIfDefine();
