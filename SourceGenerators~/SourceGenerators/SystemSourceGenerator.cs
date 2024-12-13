@@ -11,6 +11,7 @@
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_NAME = "System";
+        private const string SKIP_COMMIT_ATTRIBUTE_NAME = "SkipCommit";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider
@@ -23,6 +24,7 @@
             context.RegisterSourceOutput(classes, static (spc, typeDeclaration) =>
             {
                 var typeName = typeDeclaration.Identifier.ToString();
+                var skipCommit = typeDeclaration.AttributeLists.SelectMany(a => a.Attributes).Any(a => a.Name.ToString() == SKIP_COMMIT_ATTRIBUTE_NAME);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSource.GetThreadSingleton();
@@ -97,8 +99,10 @@
                         sb.AppendElseDefine();
                         sb.AppendIndent(indent).AppendLine("OnUpdate(deltaTime);");
                         sb.AppendEndIfDefine();
-                        
-                        sb.AppendIndent(indent).AppendLine("World.Commit();");
+
+                        if (!skipCommit) {
+                            sb.AppendIndent(indent).AppendLine("World.Commit();");
+                        }
                         
                         sb.AppendIfDefine(Defines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
