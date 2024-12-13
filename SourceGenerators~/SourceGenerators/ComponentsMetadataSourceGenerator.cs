@@ -42,7 +42,7 @@
                 var specialization = ComponentHelpers.GetStashSpecialization(structDeclaration);
             
                 var sb     = new StringBuilder();
-                var indent = new IndentSource();
+                var indent = IndentSource.GetThreadSingleton();
             
                 sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
             

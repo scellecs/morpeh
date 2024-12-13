@@ -23,7 +23,7 @@
                 var typeName = typeDeclaration.Identifier.ToString();
 
                 var sb     = new StringBuilder();
-                var indent = new IndentSource();
+                var indent = IndentSource.GetThreadSingleton();
                 
                 sb.AppendMorpehDebugDefines();
                 sb.AppendUsings(typeDeclaration, indent).AppendLine();

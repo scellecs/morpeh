@@ -22,8 +22,8 @@
             {
                 var (classDeclaration, semanticModel) = pair;
 
-                var sb = new StringBuilder();
-                var indent = new IndentSource();
+                var sb     = new StringBuilder();
+                var indent = IndentSource.GetThreadSingleton();
                 
                 sb.AppendUsings(classDeclaration).AppendLine();
                 sb.AppendBeginNamespace(classDeclaration, indent).AppendLine();
