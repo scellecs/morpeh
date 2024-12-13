@@ -40,16 +40,19 @@
 
                 var specialization = ComponentHelpers.GetStashSpecialization(structDeclaration);
             
-                var sb = new StringBuilder();
+                var sb     = new StringBuilder();
+                var indent = new IndentSource();
             
-                sb.AppendBeginNamespace(structDeclaration).AppendLine();
+                sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
             
-                sb.AppendLine("using Scellecs.Morpeh;");
-                sb.AppendLine($"public static class {typeName}__Metadata{genericParams} {genericConstraints} {{");
-                sb.Append(' ', 2).AppendLine($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}();");
-                sb.AppendLine("}");
+                sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
+                sb.AppendIndent(indent).AppendLine($"public static class {typeName}__Metadata{genericParams} {genericConstraints} {{");
+                using (indent.Scope()) {
+                    sb.AppendIndent(indent).AppendLine($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}();");
+                }
+                sb.AppendIndent(indent).AppendLine("}");
                 
-                sb.AppendEndNamespace(structDeclaration).AppendLine();
+                sb.AppendEndNamespace(structDeclaration, indent).AppendLine();
                 
                 spc.AddSource($"{structDeclaration.Identifier.Text}.component_extensions_{structDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
             });

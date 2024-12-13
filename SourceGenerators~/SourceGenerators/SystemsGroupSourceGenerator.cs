@@ -1,6 +1,7 @@
 ﻿namespace SourceGenerators {
     using System.Linq;
     using System.Text;
+    using Helpers;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Utils;
@@ -22,11 +23,12 @@
                 var (typeDeclaration, semanticModel) = pair;
 
                 var sb = new StringBuilder();
+                var indent = new IndentSource();
                 
                 sb.AppendUsings(typeDeclaration).AppendLine();
-                sb.AppendBeginNamespace(typeDeclaration).AppendLine();
+                sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
-                sb.Append("public partial class ").Append(typeDeclaration.Identifier).Append(" {").AppendLine();
+                sb.AppendIndent(indent).Append("public partial class ").Append(typeDeclaration.Identifier).Append(" {").AppendLine();
 
                 for (int i = 0, length = typeDeclaration.Members.Count; i < length; i++) {
                     if (typeDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
@@ -36,8 +38,8 @@
                     // TODO: Generate systems call for each field
                 }
                 
-                sb.AppendLine("}");
-                sb.AppendEndNamespace(typeDeclaration);
+                sb.AppendIndent(indent).AppendLine("}");
+                sb.AppendEndNamespace(typeDeclaration, indent);
                 
                 spc.AddSource($"{typeDeclaration.Identifier.Text}.systemsgroup_{typeDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
             });

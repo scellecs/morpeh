@@ -28,10 +28,11 @@
                 var indent = new IndentSource();
 
                 sb.AppendMorpehDebugDefines();
-                sb.AppendUsings(typeDeclaration).AppendLine();
-                sb.AppendBeginNamespace(typeDeclaration).AppendLine();
+                sb.AppendUsings(typeDeclaration, indent).AppendLine();
+                sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
-                sb.AppendVisibility(typeDeclaration)
+                sb.AppendIndent(indent)
+                    .AppendVisibility(typeDeclaration)
                     .Append(" partial ")
                     .AppendTypeDeclarationType(typeDeclaration)
                     .Append(' ')
@@ -123,8 +124,8 @@
                     sb.AppendIndent(indent).AppendLine("}");
                 }
                 
-                sb.AppendLine("}");
-                sb.AppendEndNamespace(typeDeclaration);
+                sb.AppendIndent(indent).AppendLine("}");
+                sb.AppendEndNamespace(typeDeclaration, indent);
                 
                 spc.AddSource($"{typeDeclaration.Identifier.Text}.system_{typeDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
             });
