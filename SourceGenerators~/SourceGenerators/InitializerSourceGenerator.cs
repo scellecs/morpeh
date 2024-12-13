@@ -22,7 +22,7 @@
             {
                 var typeName = typeDeclaration.Identifier.ToString();
 
-                var sb     = new StringBuilder();
+                var sb     = StringBuilderPool.Get();
                 var indent = IndentSource.GetThreadSingleton();
                 
                 sb.AppendMorpehDebugDefines();
@@ -99,6 +99,8 @@
                 sb.AppendEndNamespace(typeDeclaration, indent);
                 
                 spc.AddSource($"{typeDeclaration.Identifier.Text}.initializer_{typeDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                
+                StringBuilderPool.Return(sb);
             });
         }
     }

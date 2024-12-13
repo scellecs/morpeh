@@ -22,7 +22,7 @@
             {
                 var (classDeclaration, semanticModel) = pair;
 
-                var sb     = new StringBuilder();
+                var sb     = StringBuilderPool.Get();
                 var indent = IndentSource.GetThreadSingleton();
                 
                 sb.AppendUsings(classDeclaration).AppendLine();
@@ -42,6 +42,8 @@
                 sb.AppendEndNamespace(classDeclaration, indent);
                 
                 spc.AddSource($"{classDeclaration.Identifier.Text}.systemsgrouprunner_{classDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                
+                StringBuilderPool.Return(sb);
             });
         }
     }

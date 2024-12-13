@@ -41,7 +41,7 @@
 
                 var specialization = ComponentHelpers.GetStashSpecialization(structDeclaration);
             
-                var sb     = new StringBuilder();
+                var sb     = StringBuilderPool.Get();
                 var indent = IndentSource.GetThreadSingleton();
             
                 sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
@@ -57,6 +57,8 @@
                 sb.AppendEndNamespace(structDeclaration, indent).AppendLine();
                 
                 spc.AddSource($"{structDeclaration.Identifier.Text}.component_extensions_{structDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                
+                StringBuilderPool.Return(sb);
             });
         }
     }
