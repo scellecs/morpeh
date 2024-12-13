@@ -28,7 +28,8 @@
                 sb.AppendMorpehDebugDefines();
                 sb.AppendUsings(typeDeclaration, indent).AppendLine();
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
-                
+
+                sb.AppendIl2CppAttributes(indent);
                 sb.AppendIndent(indent)
                     .AppendVisibility(typeDeclaration)
                     .Append(" partial ")
