@@ -9,13 +9,6 @@
     public static class ComponentHelpers {
         private const string REQUIRE_ATTRIBUTE = "Require";
         
-        public static StringBuilder AppendMetadataClassName(this StringBuilder sb, StructDeclarationSyntax structDeclaration) {
-            return sb
-                .Append(structDeclaration.Identifier)
-                .Append("__Metadata")
-                .AppendGenericParams(structDeclaration);
-        }
-        
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
             if (semanticModel.GetDeclaredSymbol(structDeclaration) is not ITypeSymbol structSymbol) {
                 return new StashSpecialization("Stash<?>", "GetStash<?>");
