@@ -21,6 +21,7 @@
             context.RegisterSourceOutput(classes, static (spc, typeDeclaration) =>
             {
                 var typeName = typeDeclaration.Identifier.ToString();
+                var stashes  = ComponentHelpers.GetStashRequirements(typeDeclaration);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSource.GetThreadSingleton();
@@ -43,6 +44,25 @@
                 
                 
                 using (indent.Scope()) {
+                    sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
+                    
+                    sb.AppendLine().AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void SetupRequirements() {");
+                    using (indent.Scope()) {
+                        sb.AppendIfDefine(Defines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_SetupRequirements\");");
+                        sb.AppendEndIfDefine();
+                        
+                        foreach (var stash in stashes) {
+                            sb.AppendIndent(indent).Append(stash.fieldName).Append(" = ").Append(stash.metadataClass).AppendLine(".GetStash(World);");
+                        }
+                        
+                        sb.AppendIfDefine(Defines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
+                        sb.AppendEndIfDefine();
+                    }
+                    sb.AppendIndent(indent).AppendLine("}");
+                    
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                     using (indent.Scope()) {

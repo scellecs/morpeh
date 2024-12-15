@@ -1,10 +1,21 @@
 ﻿namespace SourceGenerators.Fiddle;
 
 using Scellecs.Morpeh;
+using Test.Namespace;
 
 [System]
 public partial class BasicSystem1 {
-    public World World { get; set; }
+    [Require(typeof(TagComponent))]
+    private TagStash _tag;
+    
+    [Require(typeof(GenericComponent<int>))]
+    private Stash<GenericComponent<int>> _generic;
+    
+    [Require(typeof(GlobalNamespaceComponent))]
+    private TagStash _globalNamespace;
+    
+    [Require(typeof(DisposableComponent))]
+    private StashD<DisposableComponent> _disposable;
     
     public bool IsEnabled() => throw new NotImplementedException();
 

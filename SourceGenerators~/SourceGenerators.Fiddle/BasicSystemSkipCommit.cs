@@ -6,8 +6,6 @@ using Scellecs.Morpeh;
 [SkipCommit]
 [AlwaysEnabled]
 public partial class BasicSystemSkipCommit {
-    public World World { get; set; }
-    
     public void OnAwake() {
         throw new NotImplementedException();
     }
