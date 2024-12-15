@@ -2,7 +2,7 @@
 
 using Scellecs.Morpeh;
 
-public struct DisposableComponent : IComponent, IDisposable {
+public struct DisposableComponent : IComponent, System.IDisposable {
     public int value;
     
     public void Dispose() {

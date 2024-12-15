@@ -17,7 +17,8 @@
                     static (ctx, _) => (declaration: (StructDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
                 .Where(static pair => pair.declaration is not null);
 
-            var componentInterface = context.CompilationProvider.Select(static (compilation, _) => compilation.GetTypeByMetadataName(COMPONENT_INTERFACE_NAME));
+            var componentInterface = context.CompilationProvider
+                .Select(static (compilation, _) => compilation.GetTypeByMetadataName(COMPONENT_INTERFACE_NAME));
 
             context.RegisterSourceOutput(structs.Combine(componentInterface), static (spc, pair) => {
                 var ((structDeclaration, semanticModel), iComponent) = pair;
@@ -39,7 +40,7 @@
                 var genericParams      = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
                 var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
 
-                var specialization = ComponentHelpers.GetStashSpecialization(structDeclaration);
+                var specialization = ComponentHelpers.GetStashSpecialization(semanticModel, structDeclaration);
             
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSource.GetThreadSingleton();

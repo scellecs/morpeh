@@ -16,44 +16,39 @@
                 .AppendGenericParams(structDeclaration);
         }
         
-        public static StringBuilder AppendStashSpecializationType(this StringBuilder sb, StructDeclarationSyntax structDeclaration) {
-            return sb.Append(GetStashSpecialization(structDeclaration).type);
-        }
-        
-        public static StashSpecialization GetStashSpecialization(StructDeclarationSyntax structDeclaration) {
-            var isTag         = structDeclaration.Members.Count == 0;
-            var isDisposable  = structDeclaration.BaseList?.Types.Any(t => t.Type.ToString().EndsWith("IDisposable")) ?? false;
-            var componentDecl = new StringBuilder().Append(structDeclaration.Identifier).AppendGenericParams(structDeclaration).ToString();
-            
-            if (isTag) {
-                return new StashSpecialization("TagStash", $"GetTagStash<{componentDecl}>");
+        public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
+            if (semanticModel.GetDeclaredSymbol(structDeclaration) is not ITypeSymbol structSymbol) {
+                return new StashSpecialization("Stash<?>", "GetStash<?>");
             }
 
-            if (isDisposable) {
-                return new StashSpecialization($"StashD<{componentDecl}>", $"GetStashD<{componentDecl}>");
-            }
+            var componentDecl = new StringBuilder()
+                .Append(structDeclaration.Identifier)
+                .AppendGenericParams(structDeclaration)
+                .ToString();
 
-            return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>");
+            return GetStashSpecializationInternal(semanticModel, structSymbol, componentDecl);
         }
-        
-        public static StashSpecialization GetStashSpecialization(TypeOfExpressionSyntax typeOfExpression, SemanticModel semanticModel) {
-            var typeInfo   = semanticModel.GetTypeInfo(typeOfExpression.Type);
-            var typeSymbol = typeInfo.Type;
 
+        public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, TypeOfExpressionSyntax typeOfExpression) {
+            var typeInfo      = semanticModel.GetTypeInfo(typeOfExpression.Type);
+            var typeSymbol    = typeInfo.Type;
+            var componentDecl = typeOfExpression.Type.ToString();
+
+            return GetStashSpecializationInternal(semanticModel, typeSymbol, componentDecl);
+        }
+
+        private static StashSpecialization GetStashSpecializationInternal(SemanticModel semanticModel, ITypeSymbol? typeSymbol, string componentDecl) {
             if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
                 return new StashSpecialization("Stash<?>", "GetStash<?>");
             }
             
-            // TODO: Not synced with the method above.
-            var instanceFields = typeSymbol.GetMembers()
-                .OfType<IFieldSymbol>()
-                .Where(f => !f.IsStatic && f.DeclaredAccessibility == Accessibility.Public);
+            var isTag        = typeSymbol.GetMembers()
+                .Where(m => m.Kind is SymbolKind.Field or SymbolKind.Property)
+                .All(f => f.IsStatic);
             
-            var isTag = !instanceFields.Any();
-
-            var iDisposable  = semanticModel.Compilation.GetTypeByMetadataName("System.IDisposable");
-            var isDisposable = iDisposable != null && typeSymbol.AllInterfaces.Contains(iDisposable);
-            var componentDecl = typeOfExpression.Type.ToString();
+            var disposable = semanticModel.Compilation.GetTypeByMetadataName("System.IDisposable");
+            var isDisposable = disposable != null && typeSymbol.AllInterfaces
+                .Contains(disposable);
 
             if (isTag) {
                 return new StashSpecialization("TagStash", $"GetTagStash<{componentDecl}>");
@@ -65,6 +60,7 @@
 
             return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>");
         }
+
         
         public static string ComponentNameToMetadataClassName(string componentName) {
             var index = componentName.IndexOf('<');
@@ -102,7 +98,7 @@
                 
                     stashes.Add(new StashRequirement {
                         fieldName         = fieldName,
-                        fieldTypeName     = GetStashSpecialization(typeOfExpression, semanticModel).type,
+                        fieldTypeName     = GetStashSpecialization(semanticModel, typeOfExpression).type,
                         metadataClassName = ComponentNameToMetadataClassName(typeOfExpression.Type.ToString()),
                     });
                 }
