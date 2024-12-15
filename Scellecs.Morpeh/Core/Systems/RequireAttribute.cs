@@ -1,7 +1,8 @@
 ﻿namespace Scellecs.Morpeh {
     using System;
-
-    public class RequireAttribute : System.Attribute {
+    
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    public class RequireAttribute : Attribute {
         public RequireAttribute(Type type) {
             
         }

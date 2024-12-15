@@ -15,13 +15,14 @@
                 .CreateSyntaxProvider(
                     predicate: static (s, _) => s is TypeDeclarationSyntax typeDeclaration &&
                                                 typeDeclaration.AttributeLists.Any(x => x.Attributes.Any(y => y?.Name.ToString() == ATTRIBUTE_NAME)),
-                    transform: static (ctx, _) => (TypeDeclarationSyntax)ctx.Node)
-                .Where(static typeDeclaration => typeDeclaration is not null);
+                    transform: static (ctx, _) => ((TypeDeclarationSyntax)ctx.Node, ctx.SemanticModel))
+                .Where(static typeDeclaration => typeDeclaration.Item1 is not null);
             
-            context.RegisterSourceOutput(classes, static (spc, typeDeclaration) =>
+            context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
+                var (typeDeclaration, semanticModel) = pair;
                 var typeName = typeDeclaration.Identifier.ToString();
-                var stashes  = ComponentHelpers.GetStashRequirements(typeDeclaration);
+                var stashes  = ComponentHelpers.GetStashRequirements(typeDeclaration, semanticModel);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSource.GetThreadSingleton();
@@ -47,6 +48,11 @@
                     sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
                     
                     sb.AppendLine().AppendLine();
+                    foreach (var stash in stashes) {
+                        sb.AppendIndent(indent).Append("private ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
+                    }
+                    
+                    sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void SetupRequirements() {");
                     using (indent.Scope()) {
                         sb.AppendIfDefine(Defines.MORPEH_PROFILING);
@@ -54,7 +60,7 @@
                         sb.AppendEndIfDefine();
                         
                         foreach (var stash in stashes) {
-                            sb.AppendIndent(indent).Append(stash.fieldName).Append(" = ").Append(stash.metadataClass).AppendLine(".GetStash(World);");
+                            sb.AppendIndent(indent).Append(stash.fieldName).Append(" = ").Append(stash.metadataClassName).AppendLine(".GetStash(World);");
                         }
                         
                         sb.AppendIfDefine(Defines.MORPEH_PROFILING);
