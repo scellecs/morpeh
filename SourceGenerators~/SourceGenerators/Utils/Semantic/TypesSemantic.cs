@@ -32,7 +32,7 @@
                     }
                 }
 
-                currentSymbol  = typeSymbol.BaseType;
+                currentSymbol  = currentSymbol.BaseType;
                 includePrivate = false;
             }
 
