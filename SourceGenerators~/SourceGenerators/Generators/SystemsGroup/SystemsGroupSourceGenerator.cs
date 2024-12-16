@@ -40,6 +40,7 @@
                     .OfType<FieldDeclarationSyntax>()
                     .ToArray();
                 
+                // TODO: Store as a thread-static to avoid reallocation
                 var fieldDefinitions = new FieldDefinitionCollection();
                 
                 for (int i = 0, length = fields.Length; i < length; i++) {
@@ -52,6 +53,7 @@
 
                     var typeAttributes = fieldSymbol.Type.GetAttributes();
                     
+                    // TODO: Use thread-static pool?
                     var fieldDefinition = new FieldDefinition {
                         fieldDeclaration = fieldDeclaration,
                         fieldSymbol      = fieldSymbol,
