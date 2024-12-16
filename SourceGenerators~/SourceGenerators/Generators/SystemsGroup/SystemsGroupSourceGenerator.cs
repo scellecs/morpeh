@@ -147,6 +147,7 @@
                             if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name}.CallDispose();");
                             } else if (fieldDefinition.isDisposable) {
+                                // TODO: Should we wrap it into a try-catch block for MORPEH_DEBUG?
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name}.Dispose();");
                             }
                         }
