@@ -1,4 +1,4 @@
-﻿namespace SourceGenerators.Helpers {
+﻿namespace SourceGenerators.Utils.Pools {
     using System;
     using System.Collections.Generic;
     using System.Text;

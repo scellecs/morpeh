@@ -1,19 +1,7 @@
-﻿namespace SourceGenerators.Helpers {
+﻿namespace SourceGenerators.Utils.NonSemantic {
     using System;
 
     public class IndentSource {
-        [ThreadStatic] private static IndentSource? source;
-        
-        public static IndentSource GetThreadSingleton() {
-            if (source == null) {
-                source = new IndentSource();
-            } else {
-                source.value = 0;
-            }
-
-            return source;
-        }
-        
         public           int value;
         private readonly int step;
 
@@ -24,6 +12,7 @@
 
         public void Right() => this.value += this.step;
         public void Left()  => this.value -= this.step;
+        public void Reset() => this.value = 0;
         
         public IndentScope Scope() {
             this.Right();

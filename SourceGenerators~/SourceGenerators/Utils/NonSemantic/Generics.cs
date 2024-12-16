@@ -1,4 +1,4 @@
-﻿namespace SourceGenerators.Utils {
+﻿namespace SourceGenerators.Utils.NonSemantic {
     using System.Text;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 

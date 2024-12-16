@@ -1,4 +1,4 @@
-﻿namespace SourceGenerators.Helpers {
+﻿namespace SourceGenerators.Utils.NonSemantic {
     using System.Text;
 
     public static class StringBuilderExtensions {

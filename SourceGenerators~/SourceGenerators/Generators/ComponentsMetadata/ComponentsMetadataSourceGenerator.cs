@@ -1,10 +1,13 @@
-﻿namespace SourceGenerators {
+﻿namespace SourceGenerators.Generators.ComponentsMetadata {
     using System.Runtime.CompilerServices;
     using System.Text;
-    using Helpers;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Utils;
+    using Diagnostics;
+    using MorpehHelpers.NonSemantic;
+    using MorpehHelpers.Semantic;
+    using Utils.NonSemantic;
+    using Utils.Pools;
 
     [Generator]
     public class ComponentsMetadataSourceGenerator : IIncrementalGenerator {
@@ -40,10 +43,10 @@
                 var genericParams      = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
                 var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
 
-                var specialization = ComponentHelpers.GetStashSpecialization(semanticModel, structDeclaration);
+                var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(semanticModel, structDeclaration);
             
                 var sb     = StringBuilderPool.Get();
-                var indent = IndentSource.GetThreadSingleton();
+                var indent = IndentSourcePool.Get();
             
                 sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
             
@@ -60,6 +63,7 @@
                 spc.AddSource($"{structDeclaration.Identifier.Text}.component_extensions_{structDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
                 
                 StringBuilderPool.Return(sb);
+                IndentSourcePool.Return(indent);
             });
         }
     }

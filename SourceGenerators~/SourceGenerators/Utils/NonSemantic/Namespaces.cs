@@ -1,6 +1,5 @@
-﻿namespace SourceGenerators.Utils {
+﻿namespace SourceGenerators.Utils.NonSemantic {
     using System.Text;
-    using Helpers;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     public static class Namespaces {

@@ -1,10 +1,9 @@
-﻿namespace SourceGenerators {
+﻿namespace SourceGenerators.Generators.SystemsGroupRunner {
     using System.Linq;
-    using System.Text;
-    using Helpers;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Utils;
+    using Utils.NonSemantic;
+    using Utils.Pools;
 
     [Generator]
     public class SystemsGroupRunnerSourceGenerator : IIncrementalGenerator {
@@ -23,7 +22,7 @@
                 var (classDeclaration, semanticModel) = pair;
 
                 var sb     = StringBuilderPool.Get();
-                var indent = IndentSource.GetThreadSingleton();
+                var indent = IndentSourcePool.Get();
                 
                 sb.AppendUsings(classDeclaration).AppendLine();
                 sb.AppendBeginNamespace(classDeclaration, indent).AppendLine();
@@ -44,6 +43,7 @@
                 spc.AddSource($"{classDeclaration.Identifier.Text}.systemsgrouprunner_{classDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
                 
                 StringBuilderPool.Return(sb);
+                IndentSourcePool.Return(indent);
             });
         }
     }

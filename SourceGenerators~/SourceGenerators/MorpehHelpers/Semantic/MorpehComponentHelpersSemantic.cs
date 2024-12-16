@@ -1,14 +1,13 @@
-﻿namespace SourceGenerators.Helpers {
+﻿namespace SourceGenerators.MorpehHelpers.Semantic {
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Utils;
+    using NonSemantic;
+    using SourceGenerators.Utils.NonSemantic;
 
-    public static class ComponentHelpers {
-        private const string REQUIRE_ATTRIBUTE = "Require";
-        
+    public static class MorpehComponentHelpersSemantic {
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
             if (semanticModel.GetDeclaredSymbol(structDeclaration) is not ITypeSymbol structSymbol) {
                 return new StashSpecialization("Stash<?>", "GetStash<?>");
@@ -53,12 +52,6 @@
 
             return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>");
         }
-
-        
-        public static string ComponentNameToMetadataClassName(string componentName) {
-            var index = componentName.IndexOf('<');
-            return index > 0 ? componentName.Insert(index, "__Metadata") : $"{componentName}__Metadata";
-        }
         
         public static List<StashRequirement> GetStashRequirements(TypeDeclarationSyntax typeDeclaration, SemanticModel semanticModel) {
             var stashes = new List<StashRequirement>();
@@ -67,7 +60,7 @@
                 for (int j = 0, attributesLength = typeDeclaration.AttributeLists[i].Attributes.Count; j < attributesLength; j++) {
                     var attribute = typeDeclaration.AttributeLists[i].Attributes[j];
                     
-                    if (attribute.Name.ToString() != REQUIRE_ATTRIBUTE) {
+                    if (attribute.Name.ToString() != "Require") {
                         continue;
                     }
                     
@@ -92,12 +85,22 @@
                     stashes.Add(new StashRequirement {
                         fieldName         = fieldName,
                         fieldTypeName     = GetStashSpecialization(semanticModel, typeOfExpression).type,
-                        metadataClassName = ComponentNameToMetadataClassName(typeOfExpression.Type.ToString()),
+                        metadataClassName = MorpehComponentHelpers.ComponentNameToMetadataClassName(typeOfExpression.Type.ToString()),
                     });
                 }
             }
             
             return stashes;
+        }
+        
+        public readonly struct StashSpecialization {
+            public readonly string type;
+            public readonly string getStashMethod;
+            
+            public StashSpecialization(string type, string getStashMethod) {
+                this.type           = type;
+                this.getStashMethod = getStashMethod;
+            }
         }
         
         public struct StashRequirement {
