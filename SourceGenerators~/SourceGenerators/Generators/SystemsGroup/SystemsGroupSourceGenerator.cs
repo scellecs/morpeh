@@ -32,10 +32,6 @@
                     return;
                 }
                 
-                if (semanticModel.GetDeclaredSymbol(typeDeclaration) is not INamedTypeSymbol typeSymbol) {
-                    return;
-                }
-                
                 var fields = typeDeclaration.Members
                     .OfType<FieldDeclarationSyntax>()
                     .ToArray();
@@ -54,6 +50,7 @@
                     var typeAttributes = fieldSymbol.Type.GetAttributes();
                     
                     // TODO: Use thread-static pool?
+                    // TODO: Move constants
                     var fieldDefinition = new FieldDefinition {
                         fieldDeclaration = fieldDeclaration,
                         fieldSymbol      = fieldSymbol,
@@ -79,6 +76,7 @@
                 sb.AppendUsings(typeDeclaration).AppendLine();
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
+                // TODO: Could be something than public and class? Maybe we should throw a diagnostic if it's otherwise
                 sb.AppendIl2CppAttributes(indent);
                 sb.AppendIndent(indent).Append("public partial class ").Append(typeName).AppendLine(" {");
 
@@ -99,6 +97,7 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
+                    // TODO: Possibly move to constructor?
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void SetupRequirements() {");
                     using (indent.Scope()) {
