@@ -51,6 +51,8 @@
                 sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
             
                 sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
+
+                sb.AppendIl2CppAttributes(indent);
                 sb.AppendIndent(indent).AppendLine($"public static class {typeName}__Metadata{genericParams} {genericConstraints} {{");
                 using (indent.Scope()) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
