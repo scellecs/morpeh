@@ -40,7 +40,7 @@
                     .OfType<FieldDeclarationSyntax>()
                     .ToArray();
                 
-                using var scopedFieldDefinitionCollection = FieldDefinitionCache.GetScoped();
+                using var scopedFieldDefinitionCollection = SystemsGroupFieldDefinitionCache.GetScoped();
                 
                 for (int i = 0, length = fields.Length; i < length; i++) {
                     var fieldDeclaration = fields[i];
@@ -184,11 +184,11 @@
             });
         }
 
-        private static bool RunDiagnostics(SourceProductionContext ctx, ScopedFieldDefinitionCollection scopedFieldDefinitionCollection) {
+        private static bool RunDiagnostics(SourceProductionContext ctx, ScopedSystemsGroupFieldDefinitionCollection scopedSystemsGroupFieldDefinitionCollection) {
             var success = true;
             
-            for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
-                var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
+            for (int i = 0, length = scopedSystemsGroupFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                var fieldDefinition = scopedSystemsGroupFieldDefinitionCollection.Collection.ordered[i];
 
                 if (fieldDefinition.isSystem && fieldDefinition.loopType is null) {
                     if (fieldDefinition.fieldDeclaration != null) {

@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.Generators.SystemsGroupRunner {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
@@ -24,15 +25,18 @@
                 var (classDeclaration, semanticModel) = pair;
 
                 var typeName = classDeclaration.Identifier.ToString();
-                
-                var fields = new List<FieldDeclarationSyntax>(classDeclaration.Members.Count);
+
+                var fields = RunnerFieldDefinitionCache.GetList();
                 
                 for (int i = 0, length = classDeclaration.Members.Count; i < length; i++) {
                     if (classDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
                         continue;
                     }
 
-                    fields.Add(fieldDeclaration);
+                    fields.Add(new RunnerFieldDefinition(
+                        fieldDeclaration: fieldDeclaration, 
+                        typeName: fieldDeclaration.Declaration.Type.ToString(), 
+                        fieldName: fieldDeclaration.Declaration.Variables[0].Identifier.Text));
                 }
 
                 var sb     = StringBuilderPool.Get();
@@ -52,7 +56,7 @@
                         sb.AppendIndent(indent).AppendLine("_world = world;");
                         
                         for (int i = 0, length = fields.Count; i < length; i++) {
-                            sb.AppendIndent(indent).Append(fields[i].Declaration.Variables[0].Identifier.Text).Append(" = ").Append("new ").Append(fields[i].Declaration.Type).AppendLine("(world);");
+                            sb.AppendIndent(indent).Append(fields[i].fieldName).Append(" = ").Append("new ").Append(fields[i].typeName).AppendLine("(world);");
                         }
                     }
                     sb.AppendIndent(indent).AppendLine("}");
@@ -72,12 +76,8 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("_world.Commit();");
                             
-                            for (int i = 0, length = classDeclaration.Members.Count; i < length; i++) {
-                                if (classDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
-                                    continue;
-                                }
-                            
-                                sb.AppendIndent(indent).Append(fieldDeclaration.Declaration.Variables[0].Identifier.Text).Append('.').Append(methodName).AppendLine("(deltaTime);");
+                            for (int i = 0, length = fields.Count; i < length; i++) {
+                                sb.AppendIndent(indent).Append(fields[i].fieldName).Append('.').Append(methodName).AppendLine("(deltaTime);");
                             }
                         }
                     

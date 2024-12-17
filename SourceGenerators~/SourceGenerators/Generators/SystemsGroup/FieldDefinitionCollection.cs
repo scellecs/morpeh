@@ -2,15 +2,15 @@
     using System.Collections.Generic;
 
     public class FieldDefinitionCollection {
-        internal readonly List<FieldDefinition>                     ordered;
-        internal readonly Dictionary<string, List<FieldDefinition>> byLoopType;
+        internal readonly List<SystemsGroupFieldDefinition>                     ordered;
+        internal readonly Dictionary<string, List<SystemsGroupFieldDefinition>> byLoopType;
             
         public FieldDefinitionCollection() {
-            this.ordered    = new List<FieldDefinition>();
-            this.byLoopType = new Dictionary<string, List<FieldDefinition>>();
+            this.ordered    = new List<SystemsGroupFieldDefinition>();
+            this.byLoopType = new Dictionary<string, List<SystemsGroupFieldDefinition>>();
             
             for (int i = 0, length = LoopTypeHelpers.loopMethodNames.Length; i < length; i++) {
-                this.byLoopType[LoopTypeHelpers.loopMethodNames[i]] = new List<FieldDefinition>();
+                this.byLoopType[LoopTypeHelpers.loopMethodNames[i]] = new List<SystemsGroupFieldDefinition>();
             }
         }
 
@@ -22,16 +22,16 @@
             }
         }
             
-        public void AddOrdered(FieldDefinition fieldDefinition) {
-            this.ordered.Add(fieldDefinition);
+        public void AddOrdered(SystemsGroupFieldDefinition systemsGroupFieldDefinition) {
+            this.ordered.Add(systemsGroupFieldDefinition);
         }
         
-        public void AddToMapping(FieldDefinition fieldDefinition) {
-            if (fieldDefinition.loopType == null) {
+        public void AddToMapping(SystemsGroupFieldDefinition systemsGroupFieldDefinition) {
+            if (systemsGroupFieldDefinition.loopType == null) {
                 return;
             }
             
-            this.byLoopType[LoopTypeHelpers.loopMethodNames[(int)fieldDefinition.loopType]].Add(fieldDefinition);
+            this.byLoopType[LoopTypeHelpers.loopMethodNames[(int)systemsGroupFieldDefinition.loopType]].Add(systemsGroupFieldDefinition);
         }
     }
 }

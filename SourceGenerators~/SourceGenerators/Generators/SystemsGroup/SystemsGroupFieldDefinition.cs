@@ -2,7 +2,7 @@
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-    public class FieldDefinition {
+    public class SystemsGroupFieldDefinition {
         public FieldDeclarationSyntax? fieldDeclaration;
         public IFieldSymbol?           fieldSymbol;
         public LoopType?               loopType;
