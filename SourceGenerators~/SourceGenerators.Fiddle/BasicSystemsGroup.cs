@@ -17,6 +17,6 @@ public partial class BasicSystemsGroup {
     [Loop(LoopType.Update)]
     private BasicSystem1 _basicSystem1;
     
-    [Loop(LoopType.Update)]
+    [Loop(LoopType.Tick)]
     private BasicGenericSystem<int> _basicGenericSystem;
 }

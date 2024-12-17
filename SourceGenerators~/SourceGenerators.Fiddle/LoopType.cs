@@ -5,12 +5,6 @@
         LateUpdate         = 2,
         CleanupUpdate      = 3,
         
-        EarlyNetworkUpdate = 4,
-        LateNetworkUpdate  = 5,
-        NetworkUpdate      = 6,
-        
-        UpdateEverySec     = 7,
-        
-        OnTick             = 8,
+        Tick = 4, // Custom1
     }
 }

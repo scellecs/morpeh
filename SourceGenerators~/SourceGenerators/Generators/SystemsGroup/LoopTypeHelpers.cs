@@ -11,13 +11,14 @@
             "OnLateUpdate",    // 2
             "OnCleanupUpdate", // 3
             
-            "OnEarlyNetworkUpdate", // 4
-            "OnLateNetworkUpdate",  // 5
-            "OnNetworkUpdate",      // 6
-            
-            "OnUpdateEverySec",     // 7
-            
-            "OnTick", // 8
+            "OnCustom1", // 4
+            "OnCustom2", // 5
+            "OnCustom3", // 6
+            "OnCustom4", // 7
+            "OnCustom5", // 8
+            "OnCustom6", // 9
+            "OnCustom7", // 10
+            "OnCustom8", // 11
         };
 
         public static int? GetLoopMethodNameFromField(IFieldSymbol fieldSymbol) {

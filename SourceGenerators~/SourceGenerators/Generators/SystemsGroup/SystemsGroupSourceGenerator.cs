@@ -206,7 +206,7 @@
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
                         using (indent.Scope()) {
                             foreach (var fieldDefinition in loopMethods) {
-                                sb.AppendIndent(indent).Append(fieldDefinition.fieldSymbol?.Name).Append('.').Append(methodName).AppendLine("(deltaTime);");
+                                sb.AppendIndent(indent).Append(fieldDefinition.fieldSymbol?.Name).AppendLine(".CallUpdate(deltaTime);");
                             }
                         }
                         sb.AppendIndent(indent).AppendLine("}");
