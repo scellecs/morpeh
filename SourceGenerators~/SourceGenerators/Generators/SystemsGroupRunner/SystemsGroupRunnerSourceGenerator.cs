@@ -121,8 +121,6 @@
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     foreach (var methodName in LoopTypeHelpers.loopMethodNames) {
-                        // TODO: Check if system group has such loop
-
                         sb.AppendLine().AppendLine();
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
 
