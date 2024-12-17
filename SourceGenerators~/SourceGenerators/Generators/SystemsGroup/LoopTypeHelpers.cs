@@ -2,6 +2,8 @@
     using Microsoft.CodeAnalysis;
 
     public static class LoopTypeHelpers {
+        private const string LOOP_ATTRIBUTE = "LoopAttribute";
+        
         public static readonly string[] loopMethodNames = {
             "OnEarlyNetworkUpdate",
             "OnFixedUpdate",
@@ -19,7 +21,7 @@
             for (int i = 0, length = attributes.Length; i < length; i++) {
                 var attribute = attributes[i];
                 
-                if (attribute.AttributeClass?.Name != "LoopAttribute") {
+                if (attribute.AttributeClass?.Name != LOOP_ATTRIBUTE) {
                     continue;
                 }
                 
