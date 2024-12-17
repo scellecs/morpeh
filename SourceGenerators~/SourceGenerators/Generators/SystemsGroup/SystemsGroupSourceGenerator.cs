@@ -117,9 +117,13 @@
                     .AppendLine(" {");
 
                 using (indent.Scope()) {
+                    sb.AppendIndent(indent).AppendLine("private readonly Scellecs.Morpeh.InjectionTable _injectionTable;");
+                    
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable) {");
                     using (indent.Scope()) {
+                        sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
+                        
                         for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                             var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
 
@@ -190,9 +194,11 @@
                                 sb.AppendIndent(indent).AppendLine("}");
                                 sb.AppendEndIfDefine();
                             }
+                            
+                            if (fieldDefinition.register) {
+                                sb.AppendIndent(indent).Append("_injectionTable.UnRegister(typeof(").Append(fieldDefinition.registerAs).AppendLine("));");
+                            }
                         }
-                        
-                        // TODO: Remove registrations if they were registered in constructor
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
