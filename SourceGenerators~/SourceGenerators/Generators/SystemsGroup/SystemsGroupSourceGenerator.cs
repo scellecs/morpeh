@@ -77,9 +77,16 @@
                 sb.AppendUsings(typeDeclaration).AppendLine();
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
-                // TODO: Could be something than public and class? Maybe we should throw a diagnostic if it's otherwise
                 sb.AppendIl2CppAttributes(indent);
-                sb.AppendIndent(indent).Append("public partial class ").Append(typeName).AppendLine(" {");
+                sb.AppendIndent(indent)
+                    .AppendVisibility(typeDeclaration)
+                    .Append(" partial ")
+                    .AppendTypeDeclarationType(typeDeclaration)
+                    .Append(' ')
+                    .Append(typeName)
+                    .AppendGenericParams(typeDeclaration)
+                    .AppendGenericConstraints(typeDeclaration)
+                    .AppendLine(" {");
 
                 using (indent.Scope()) {
                     sb.AppendLine().AppendLine();

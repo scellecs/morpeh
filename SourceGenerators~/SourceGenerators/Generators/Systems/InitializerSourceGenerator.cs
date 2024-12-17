@@ -40,7 +40,7 @@
                     .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
-                    .Append(" : IInitializer ")
+                    .Append(" : Scellecs.Morpeh.IInitializer ")
                     .AppendGenericConstraints(typeDeclaration)
                     .AppendLine(" {");
                 

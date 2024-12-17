@@ -4,6 +4,7 @@
     using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using MorpehHelpers.NonSemantic;
     using SystemsGroup;
     using Utils.NonSemantic;
     using Utils.Pools;
@@ -22,14 +23,14 @@
             
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
-                var (classDeclaration, semanticModel) = pair;
+                var (typeDeclaration, semanticModel) = pair;
 
-                var typeName = classDeclaration.Identifier.ToString();
+                var typeName = typeDeclaration.Identifier.ToString();
 
                 var fields = RunnerFieldDefinitionCache.GetList();
                 
-                for (int i = 0, length = classDeclaration.Members.Count; i < length; i++) {
-                    if (classDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
+                for (int i = 0, length = typeDeclaration.Members.Count; i < length; i++) {
+                    if (typeDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
                         continue;
                     }
 
@@ -42,10 +43,20 @@
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
                 
-                sb.AppendUsings(classDeclaration).AppendLine();
-                sb.AppendBeginNamespace(classDeclaration, indent).AppendLine();
+                sb.AppendUsings(typeDeclaration).AppendLine();
+                sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
-                sb.AppendIndent(indent).Append("public partial class ").Append(typeName).AppendLine(" : System.IDisposable {");
+                sb.AppendIl2CppAttributes(indent);
+                sb.AppendIndent(indent)
+                    .AppendVisibility(typeDeclaration)
+                    .Append(" partial ")
+                    .AppendTypeDeclarationType(typeDeclaration)
+                    .Append(' ')
+                    .Append(typeName)
+                    .AppendGenericParams(typeDeclaration)
+                    .Append(" : System.IDisposable ")
+                    .AppendGenericConstraints(typeDeclaration)
+                    .AppendLine(" {");
 
                 using (indent.Scope()) {
                     sb.AppendIndent(indent).Append("private readonly World _world;").AppendLine();
@@ -107,9 +118,9 @@
                 }
                 
                 sb.AppendIndent(indent).AppendLine("}");
-                sb.AppendEndNamespace(classDeclaration, indent);
+                sb.AppendEndNamespace(typeDeclaration, indent);
                 
-                spc.AddSource($"{classDeclaration.Identifier.Text}.systemsgrouprunner_{classDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                spc.AddSource($"{typeDeclaration.Identifier.Text}.systemsgrouprunner_{typeDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
                 
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);
