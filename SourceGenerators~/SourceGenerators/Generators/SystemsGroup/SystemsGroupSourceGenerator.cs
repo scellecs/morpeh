@@ -128,9 +128,13 @@
                             } else {
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name} = new {fieldDefinition.fieldDeclaration?.Declaration.Type}();");
                             }
-                            
+
                             if (fieldDefinition.register) {
-                                sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).Append(", typeof(").Append(fieldDefinition.registerAs).AppendLine("));");
+                                if (SymbolEqualityComparer.Default.Equals(fieldDefinition.fieldSymbol?.Type, fieldDefinition.registerAs)) {
+                                    sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).AppendLine(");");
+                                } else {
+                                    sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).Append(", typeof(").Append(fieldDefinition.registerAs).AppendLine("));");
+                                }
                             }
                         }
                     }
