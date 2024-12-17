@@ -1,5 +1,6 @@
 ﻿namespace SourceGenerators.Generators.SystemsGroup {
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using Diagnostics;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,6 +12,8 @@
     [Generator]
     public class SystemsGroupSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_NAME = "SystemsGroup";
+        private const string INLINE_UPDATE_METHODS_ATTRIBUTE_NAME = "SystemGroupInlineUpdateMethods";
+        
         private const string DISPOSABLE_INTERFACE_NAME = "System.IDisposable";
         
         private const string SYSTEM_ATTRIBUTE_NAME = "SystemAttribute";
@@ -70,6 +73,9 @@
                 }
 
                 var typeName = typeDeclaration.Identifier.ToString();
+                var inlineUpdateMethods = typeDeclaration.AttributeLists
+                    .SelectMany(x => x.Attributes)
+                    .Any(x => x.Name.ToString() == INLINE_UPDATE_METHODS_ATTRIBUTE_NAME);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
@@ -171,6 +177,9 @@
                         }
                         
                         sb.AppendLine().AppendLine();
+                        if (inlineUpdateMethods) {
+                            sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                        }
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
                         using (indent.Scope()) {
                             foreach (var fieldDefinition in loopMethods) {
