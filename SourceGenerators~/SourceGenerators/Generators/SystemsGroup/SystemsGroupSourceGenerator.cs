@@ -136,7 +136,6 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
-                    // TODO: Implement Inject generation in a separate sourcegen
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {");
                     using (indent.Scope()) {
