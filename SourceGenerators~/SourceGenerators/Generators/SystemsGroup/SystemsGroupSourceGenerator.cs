@@ -19,6 +19,7 @@
         private const string SYSTEM_ATTRIBUTE_NAME = "SystemAttribute";
         private const string INITIALIZER_ATTRIBUTE_NAME = "InitializerAttribute";
         private const string INJECTABLE_ATTRIBUTE_NAME = "InjectableAttribute";
+        private const string REGISTER_ATTRIBUTE_NAME = "RegisterAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider
@@ -65,6 +66,28 @@
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
                     fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, INJECTABLE_ATTRIBUTE_NAME);
                     
+                    for (int j = 0, jlength = typeAttributes.Length; j < jlength; j++) {
+                        var attribute = typeAttributes[j];
+                        
+                        if (attribute.AttributeClass?.Name != REGISTER_ATTRIBUTE_NAME) {
+                            continue;
+                        }
+
+                        fieldDefinition.inject   = true;
+                        fieldDefinition.injectAs = fieldSymbol.Type as INamedTypeSymbol;
+
+                        if (attribute.ConstructorArguments.Length > 0)
+                        {
+                            var firstArg = attribute.ConstructorArguments[0];
+                            if (firstArg is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol injectAsTypeSymbol })
+                            {
+                                fieldDefinition.injectAs = injectAsTypeSymbol;
+                            }
+                        }
+
+                        break;
+                    }
+                    
                     scopedFieldDefinitionCollection.Add(fieldDefinition);
                 }
                 
@@ -96,7 +119,7 @@
 
                 using (indent.Scope()) {
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(World world) {");
+                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable) {");
                     using (indent.Scope()) {
                         for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                             var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
@@ -107,7 +130,9 @@
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name} = new {fieldDefinition.fieldDeclaration?.Declaration.Type}();");
                             }
                             
-                            // TODO: Check Register attribute, add to injection table if needed
+                            if (fieldDefinition.inject) {
+                                sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).Append(", typeof(").Append(fieldDefinition.injectAs).AppendLine("));");
+                            }
                         }
                     }
                     sb.AppendIndent(indent).AppendLine("}");
@@ -120,7 +145,7 @@
                             var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
                             
                             if (fieldDefinition.isInjectable) {
-                                sb.AppendIndent(indent).AppendLine($"injectionTable.Inject({fieldDefinition.fieldSymbol?.Name});");
+                                sb.AppendIndent(indent).Append(fieldDefinition.fieldSymbol?.Name).AppendLine(".Inject(injectionTable);");
                             }
                         }
                     }

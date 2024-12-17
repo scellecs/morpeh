@@ -6,7 +6,10 @@ using Scellecs.Morpeh;
 [SystemGroupInlineUpdateMethods]
 public partial class BasicSystemsGroup {
     [Register]
-    private BasicDisposableClass _basicDisposableClass;
+    private BasicDisposableClass _basicDisposableClass1;
+    
+    [Register(typeof(IDisposable))]
+    private BasicDisposableClass _basicDisposableClass2;
     
     private BasicInitializer1 _basicInitializer1;
     
