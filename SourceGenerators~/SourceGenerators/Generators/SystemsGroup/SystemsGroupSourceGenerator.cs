@@ -131,8 +131,20 @@
                             if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.CallDispose();");
                             } else if (fieldDefinition.isDisposable) {
-                                // TODO: Should we wrap it into a try-catch block for MORPEH_DEBUG?
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.Dispose();");
+                                sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
+                                sb.AppendIndent(indent).AppendLine("try {");
+                                sb.AppendEndIfDefine();
+                                using (indent.Scope()) {
+                                    sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.Dispose();");
+                                }
+                                sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
+                                sb.AppendIndent(indent).AppendLine("} catch (Exception exception) {");
+                                using (indent.Scope()) {
+                                    sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" (Dispose)\");");
+                                    sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
+                                }
+                                sb.AppendIndent(indent).AppendLine("}");
+                                sb.AppendEndIfDefine();
                             }
                         }
                         
