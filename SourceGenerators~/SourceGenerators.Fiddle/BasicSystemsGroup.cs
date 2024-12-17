@@ -9,6 +9,7 @@ public partial class BasicSystemsGroup {
     private BasicDisposableClass _basicDisposableClass1;
     
     [Register(typeof(IDisposable))]
+    // [Register(typeof(IntPtr))]
     private BasicDisposableClass _basicDisposableClass2;
     
     private BasicInitializer1 _basicInitializer1;

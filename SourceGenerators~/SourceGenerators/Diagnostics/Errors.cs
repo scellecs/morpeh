@@ -32,5 +32,20 @@
         public static void ReportMissingLoopType(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration) {
             ctx.ReportDiagnostic(Diagnostic.Create(MISSING_LOOP_TYPE, fieldDeclaration.GetLocation()));
         }
+        
+        // MORPEH_ERR_003
+        
+        private static readonly DiagnosticDescriptor INVALID_INJECTION_TYPE = new(
+            "MORPEH_ERR_003",
+            "Cannot inject {0} as {1} because it cannot be casted to the type.",
+            "Cannot inject {0} as {1} because it cannot be casted to the type.",
+            "Morpeh",
+            DiagnosticSeverity.Error,
+            true,
+            "Cannot inject {0} as {1} because it cannot be casted to the type.");
+        
+        public static void ReportInvalidInjectionType(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration, string typeName, string injectionType) {
+            ctx.ReportDiagnostic(Diagnostic.Create(INVALID_INJECTION_TYPE, fieldDeclaration.GetLocation(), typeName, injectionType));
+        }
     }
 }

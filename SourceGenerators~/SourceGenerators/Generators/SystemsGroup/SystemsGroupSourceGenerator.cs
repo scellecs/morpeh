@@ -3,6 +3,7 @@
     using System.Runtime.CompilerServices;
     using Diagnostics;
     using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using Utils.NonSemantic;
@@ -54,6 +55,7 @@
                         continue;
                     }
                     
+                    var fieldAttributes = fieldSymbol.GetAttributes();
                     var typeAttributes  = fieldSymbol.Type.GetAttributes();
                     
                     var fieldDefinition = scopedFieldDefinitionCollection.Create();
@@ -66,23 +68,20 @@
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
                     fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, INJECTABLE_ATTRIBUTE_NAME);
                     
-                    for (int j = 0, jlength = typeAttributes.Length; j < jlength; j++) {
-                        var attribute = typeAttributes[j];
+                    for (int j = 0, jlength = fieldAttributes.Length; j < jlength; j++) {
+                        var attribute = fieldAttributes[j];
                         
                         if (attribute.AttributeClass?.Name != REGISTER_ATTRIBUTE_NAME) {
                             continue;
                         }
 
-                        fieldDefinition.inject   = true;
-                        fieldDefinition.injectAs = fieldSymbol.Type as INamedTypeSymbol;
+                        fieldDefinition.register   = true;
+                        fieldDefinition.registerAs = fieldSymbol.Type as INamedTypeSymbol;
 
-                        if (attribute.ConstructorArguments.Length > 0)
-                        {
-                            var firstArg = attribute.ConstructorArguments[0];
-                            if (firstArg is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol injectAsTypeSymbol })
-                            {
-                                fieldDefinition.injectAs = injectAsTypeSymbol;
-                            }
+                        if (attribute.ConstructorArguments.Length > 0 && attribute.ConstructorArguments[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol injectAsPositionalSymbol }) {
+                            fieldDefinition.registerAs = injectAsPositionalSymbol;
+                        } else if (attribute.NamedArguments.Length > 0 && attribute.NamedArguments[0].Value is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol injectAsNamedSymbol }) {
+                            fieldDefinition.registerAs = injectAsNamedSymbol;
                         }
 
                         break;
@@ -91,7 +90,7 @@
                     scopedFieldDefinitionCollection.Add(fieldDefinition);
                 }
                 
-                if (!RunDiagnostics(spc, scopedFieldDefinitionCollection)) {
+                if (!RunDiagnostics(spc, semanticModel, scopedFieldDefinitionCollection)) {
                     return;
                 }
 
@@ -130,8 +129,8 @@
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name} = new {fieldDefinition.fieldDeclaration?.Declaration.Type}();");
                             }
                             
-                            if (fieldDefinition.inject) {
-                                sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).Append(", typeof(").Append(fieldDefinition.injectAs).AppendLine("));");
+                            if (fieldDefinition.register) {
+                                sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).Append(", typeof(").Append(fieldDefinition.registerAs).AppendLine("));");
                             }
                         }
                     }
@@ -225,7 +224,7 @@
             });
         }
 
-        private static bool RunDiagnostics(SourceProductionContext ctx, ScopedSystemsGroupFieldDefinitionCollection scopedSystemsGroupFieldDefinitionCollection) {
+        private static bool RunDiagnostics(SourceProductionContext ctx, SemanticModel semanticModel, ScopedSystemsGroupFieldDefinitionCollection scopedSystemsGroupFieldDefinitionCollection) {
             var success = true;
             
             for (int i = 0, length = scopedSystemsGroupFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
@@ -236,6 +235,16 @@
                         Errors.ReportMissingLoopType(ctx, fieldDefinition.fieldDeclaration);
                     }
 
+                    success = false;
+                }
+                
+                if (fieldDefinition is { register: true }) {
+                    var conversionKind = semanticModel.Compilation.ClassifyConversion(fieldDefinition.fieldSymbol.Type, fieldDefinition.registerAs);
+                    if (conversionKind.IsImplicit || conversionKind.IsExplicit) {
+                        continue;
+                    }
+
+                    Errors.ReportInvalidInjectionType(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name, fieldDefinition.registerAs.Name);
                     success = false;
                 }
             }

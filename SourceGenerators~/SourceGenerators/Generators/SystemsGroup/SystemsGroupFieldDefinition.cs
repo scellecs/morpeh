@@ -10,8 +10,8 @@
         public bool                    isInitializer;
         public bool                    isDisposable;
         public bool                    isInjectable;
-        public bool                    inject;
-        public INamedTypeSymbol?       injectAs;
+        public bool                    register;
+        public INamedTypeSymbol?       registerAs;
         
         public void Reset() {
             this.fieldDeclaration = null;
@@ -21,8 +21,8 @@
             this.isInitializer    = false;
             this.isDisposable     = false;
             this.isInjectable     = false;
-            this.inject           = false;
-            this.injectAs         = null;
+            this.register           = false;
+            this.registerAs         = null;
         }
     }
 }
