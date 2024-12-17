@@ -154,15 +154,17 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
-                    foreach (var methodName in LoopTypeHelpers.loopMethodNames) {
-                        if (scopedFieldDefinitionCollection.Collection.byLoopType[methodName].Count == 0) {
+                    for (int i = 0, length = LoopTypeHelpers.loopMethodNames.Length; i < length; i++) {
+                        var methodName  = LoopTypeHelpers.loopMethodNames[i];
+                        
+                        if (!scopedFieldDefinitionCollection.Collection.byLoopType.TryGetValue(methodName, out var loopMethods) || loopMethods.Count == 0) {
                             continue;
                         }
                         
                         sb.AppendLine().AppendLine();
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
                         using (indent.Scope()) {
-                            foreach (var fieldDefinition in scopedFieldDefinitionCollection.Collection.byLoopType[methodName]) {
+                            foreach (var fieldDefinition in loopMethods) {
                                 sb.AppendIndent(indent).Append(fieldDefinition.fieldSymbol?.Name).Append('.').Append(methodName).AppendLine("(deltaTime);");
                             }
                         }
