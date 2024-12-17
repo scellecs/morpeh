@@ -106,6 +106,8 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void OnAwake() {");
                     using (indent.Scope()) {
+                        sb.AppendIndent(indent).AppendLine("_world.Commit();");
+                        
                         for (int i = 0, length = fields.Count; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".CallAwake();");
                         }
@@ -115,6 +117,8 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void Dispose() {");
                     using (indent.Scope()) {
+                        sb.AppendIndent(indent).AppendLine("_world.Commit();");
+                        
                         for (int i = 0, length = fields.Count; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".CallDispose();");
                         }
