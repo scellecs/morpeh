@@ -121,6 +121,7 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
+                    // TODO: Scan existing loops once, instead of checking all fields to find loops
                     foreach (var methodName in LoopTypeHelpers.loopMethodNames) {
                         var count = 0;
                         
