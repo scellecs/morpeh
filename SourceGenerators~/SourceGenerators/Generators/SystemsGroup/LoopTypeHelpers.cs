@@ -4,15 +4,20 @@
     public static class LoopTypeHelpers {
         private const string LOOP_ATTRIBUTE = "LoopAttribute";
         
+        // Predefined names. Change them if you need to and keep your enum mapping updated.
         public static readonly string[] loopMethodNames = {
-            "OnEarlyNetworkUpdate",
-            "OnFixedUpdate",
-            "OnUpdateEverySec",
-            "OnNetworkUpdate",
-            "OnUpdate",
-            "OnLateUpdate",
-            "OnCleanupUpdate",
-            "OnLateNetworkUpdate",
+            "OnUpdate",        // 0
+            "OnFixedUpdate",   // 1
+            "OnLateUpdate",    // 2
+            "OnCleanupUpdate", // 3
+            
+            "OnEarlyNetworkUpdate", // 4
+            "OnLateNetworkUpdate",  // 5
+            "OnNetworkUpdate",      // 6
+            
+            "OnUpdateEverySec",     // 7
+            
+            "OnTick", // 8
         };
 
         public static int? GetLoopMethodNameFromField(IFieldSymbol fieldSymbol) {

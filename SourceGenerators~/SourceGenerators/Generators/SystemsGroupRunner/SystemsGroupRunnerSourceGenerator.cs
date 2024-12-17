@@ -122,6 +122,20 @@
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     foreach (var methodName in LoopTypeHelpers.loopMethodNames) {
+                        var count = 0;
+                        
+                        for (int i = 0, length = fields.Count; i < length; i++) {
+                            if (!fields[i].loops.Contains(methodName)) {
+                                continue;
+                            }
+
+                            count++;
+                        }
+                        
+                        if (count == 0) {
+                            continue;
+                        }
+
                         sb.AppendLine().AppendLine();
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
 
