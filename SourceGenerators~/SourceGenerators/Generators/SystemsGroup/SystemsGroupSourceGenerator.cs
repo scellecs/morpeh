@@ -61,6 +61,8 @@
                     fieldDefinition.isInitializer    = typeAttributes.Any(x => x.AttributeClass?.Name == INITIALIZER_ATTRIBUTE_NAME);
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
                     fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, INJECTABLE_ATTRIBUTE_NAME);
+                    
+                    scopedFieldDefinitionCollection.AddToMapping(fieldDefinition);
                 }
                 
                 if (!RunDiagnostics(spc, scopedFieldDefinitionCollection)) {
@@ -152,7 +154,20 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
-                    // TODO: Update loops
+                    foreach (var methodName in LoopTypeHelpers.loopMethodNames) {
+                        if (scopedFieldDefinitionCollection.Collection.byLoopType[methodName].Count == 0) {
+                            continue;
+                        }
+                        
+                        sb.AppendLine().AppendLine();
+                        sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
+                        using (indent.Scope()) {
+                            foreach (var fieldDefinition in scopedFieldDefinitionCollection.Collection.byLoopType[methodName]) {
+                                sb.AppendIndent(indent).Append(fieldDefinition.fieldSymbol?.Name).Append('.').Append(methodName).AppendLine("(deltaTime);");
+                            }
+                        }
+                        sb.AppendIndent(indent).AppendLine("}");
+                    }
                 }
                 
                 sb.AppendIndent(indent).AppendLine("}");

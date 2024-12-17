@@ -35,8 +35,12 @@
 
         public FieldDefinition Emplace() {
             var fieldDefinition = this.cache.pool.Rent();
-            this.cache.collection.Add(fieldDefinition);
+            this.cache.collection.AddOrdered(fieldDefinition);
             return fieldDefinition;
+        }
+        
+        public void AddToMapping(FieldDefinition fieldDefinition) {
+            this.cache.collection.AddToMapping(fieldDefinition);
         }
             
         public void Dispose() {

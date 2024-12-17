@@ -22,12 +22,16 @@
             }
         }
             
-        public void Add(FieldDefinition fieldDefinition) {
+        public void AddOrdered(FieldDefinition fieldDefinition) {
             this.ordered.Add(fieldDefinition);
-                
-            if (fieldDefinition.loopType is not null) {
-                this.byLoopType[LoopTypeHelpers.loopMethodNames[(int)fieldDefinition.loopType]].Add(fieldDefinition);
+        }
+        
+        public void AddToMapping(FieldDefinition fieldDefinition) {
+            if (fieldDefinition.loopType == null) {
+                return;
             }
+            
+            this.byLoopType[LoopTypeHelpers.loopMethodNames[(int)fieldDefinition.loopType]].Add(fieldDefinition);
         }
     }
 }

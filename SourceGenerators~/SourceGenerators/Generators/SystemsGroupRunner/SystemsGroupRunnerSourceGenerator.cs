@@ -1,7 +1,9 @@
 ﻿namespace SourceGenerators.Generators.SystemsGroupRunner {
+    using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using SystemsGroup;
     using Utils.NonSemantic;
     using Utils.Pools;
 
@@ -21,20 +23,66 @@
             {
                 var (classDeclaration, semanticModel) = pair;
 
+                var typeName = classDeclaration.Identifier.ToString();
+                
+                var fields = new List<FieldDeclarationSyntax>(classDeclaration.Members.Count);
+                
+                for (int i = 0, length = classDeclaration.Members.Count; i < length; i++) {
+                    if (classDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
+                        continue;
+                    }
+
+                    fields.Add(fieldDeclaration);
+                }
+
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
                 
                 sb.AppendUsings(classDeclaration).AppendLine();
                 sb.AppendBeginNamespace(classDeclaration, indent).AppendLine();
                 
-                sb.AppendIndent(indent).Append("public partial class ").Append(classDeclaration.Identifier).Append(" {").AppendLine();
+                sb.AppendIndent(indent).Append("public partial class ").Append(typeName).AppendLine(" {");
 
-                for (int i = 0, length = classDeclaration.Members.Count; i < length; i++) {
-                    if (classDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
-                        continue;
-                    }
+                using (indent.Scope()) {
+                    sb.AppendIndent(indent).Append("private readonly World _world;").AppendLine();
                     
-                    // TODO: Generate systems group call for each field
+                    sb.AppendLine().AppendLine();
+                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(World world) {");
+                    using (indent.Scope()) {
+                        sb.AppendIndent(indent).AppendLine("_world = world;");
+                        
+                        for (int i = 0, length = fields.Count; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].Declaration.Variables[0].Identifier.Text).Append(" = ").Append("new ").Append(fields[i].Declaration.Type).AppendLine("(world);");
+                        }
+                    }
+                    sb.AppendIndent(indent).AppendLine("}");
+                    
+                    // TODO: Inject
+                    
+                    // TODO: OnAwake
+                    
+                    // TODO: Dispose
+                    
+                    foreach (var methodName in LoopTypeHelpers.loopMethodNames) {
+                        // TODO: Check if system group has such loop
+
+                        sb.AppendLine().AppendLine();
+                        sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
+
+                        using (indent.Scope()) {
+                            sb.AppendIndent(indent).AppendLine("_world.Commit();");
+                            
+                            for (int i = 0, length = classDeclaration.Members.Count; i < length; i++) {
+                                if (classDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
+                                    continue;
+                                }
+                            
+                                sb.AppendIndent(indent).Append(fieldDeclaration.Declaration.Variables[0].Identifier.Text).Append('.').Append(methodName).AppendLine("(deltaTime);");
+                            }
+                        }
+                    
+                        sb.AppendIndent(indent).AppendLine("}");
+                    }
                 }
                 
                 sb.AppendIndent(indent).AppendLine("}");
