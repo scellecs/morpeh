@@ -12,11 +12,7 @@
             var currentSymbol = typeSymbol;
 
             while (currentSymbol != null) {
-                if (currentSymbol is not INamedTypeSymbol namedTypeSymbol) {
-                    break;
-                }
-                
-                if (namedTypeSymbol.TypeKind != TypeKind.Class && namedTypeSymbol.TypeKind != TypeKind.Struct) {
+                if (currentSymbol.TypeKind != TypeKind.Class && currentSymbol.TypeKind != TypeKind.Struct) {
                     break;
                 }
                 
