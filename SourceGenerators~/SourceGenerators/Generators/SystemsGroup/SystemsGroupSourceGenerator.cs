@@ -86,26 +86,11 @@
                     using (indent.Scope()) {
                         for (int i = 0, length = fieldDefinitions.ordered.Count; i < length; i++) {
                             var fieldDefinition = fieldDefinitions.ordered[i];
-                            
-                            // TODO: Inplace register before awake calls
-                            sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name} = new {fieldDefinition.fieldDeclaration.Declaration.Type}();");
+
                             if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
-                                // TODO: Possibly move to constructor
-                                sb.AppendIndent(indent).Append($"{fieldDefinition.fieldSymbol.Name}.World = world;").AppendLine();
-                            }
-                        }
-                    }
-                    sb.AppendIndent(indent).AppendLine("}");
-                    
-                    // TODO: Possibly move to constructor?
-                    sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).AppendLine("public void SetupRequirements() {");
-                    using (indent.Scope()) {
-                        for (int i = 0, length = fieldDefinitions.ordered.Count; i < length; i++) {
-                            var fieldDefinition = fieldDefinitions.ordered[i];
-                            
-                            if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name}.SetupRequirements();");
+                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name} = new {fieldDefinition.fieldDeclaration.Declaration.Type}(world);");
+                            } else {
+                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name} = new {fieldDefinition.fieldDeclaration.Declaration.Type}();");
                             }
                         }
                     }

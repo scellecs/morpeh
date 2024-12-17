@@ -54,14 +54,16 @@
                     }
                     
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).AppendLine("public void SetupRequirements() {");
+                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(World world) {");
                     using (indent.Scope()) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_SetupRequirements\");");
+                        sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_Constructor\");");
                         sb.AppendEndIfDefine();
                         
+                        sb.AppendIndent(indent).AppendLine("World = world;");
+                        
                         foreach (var stash in stashes) {
-                            sb.AppendIndent(indent).Append(stash.fieldName).Append(" = ").Append(stash.metadataClassName).AppendLine(".GetStash(World);");
+                            sb.AppendIndent(indent).Append(stash.fieldName).Append(" = ").Append(stash.metadataClassName).AppendLine(".GetStash(world);");
                         }
                         
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
