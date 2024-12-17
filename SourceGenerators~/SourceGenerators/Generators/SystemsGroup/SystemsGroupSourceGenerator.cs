@@ -36,8 +36,7 @@
                     .OfType<FieldDeclarationSyntax>()
                     .ToArray();
                 
-                // TODO: Store as a thread-static to avoid reallocation
-                var fieldDefinitions = new FieldDefinitionCollection();
+                using var scopedFieldDefinitionCollection = FieldDefinitionCache.GetScoped();
                 
                 for (int i = 0, length = fields.Length; i < length; i++) {
                     var fieldDeclaration = fields[i];
@@ -46,25 +45,21 @@
                     if (fieldSymbol is null) {
                         continue;
                     }
-
-                    var typeAttributes = fieldSymbol.Type.GetAttributes();
                     
-                    // TODO: Use thread-static pool?
-                    // TODO: Move constants
-                    var fieldDefinition = new FieldDefinition {
-                        fieldDeclaration = fieldDeclaration,
-                        fieldSymbol      = fieldSymbol,
-                        loopType         = LoopTypeHelpers.GetLoopMethodNameFromField(fieldSymbol),
-                        isSystem         = typeAttributes.Any(x => x.AttributeClass?.Name == "SystemAttribute"),
-                        isInitializer    = typeAttributes.Any(x => x.AttributeClass?.Name == "InitializerAttribute"),
-                        isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol),
-                        isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, "InjectableAttribute"),
-                    };
+                    var typeAttributes  = fieldSymbol.Type.GetAttributes();
                     
-                    fieldDefinitions.Add(fieldDefinition);
+                    var fieldDefinition = scopedFieldDefinitionCollection.Emplace();
+                    
+                    fieldDefinition.fieldDeclaration = fieldDeclaration;
+                    fieldDefinition.fieldSymbol      = fieldSymbol;
+                    fieldDefinition.loopType         = LoopTypeHelpers.GetLoopMethodNameFromField(fieldSymbol);
+                    fieldDefinition.isSystem         = typeAttributes.Any(x => x.AttributeClass?.Name == "SystemAttribute");
+                    fieldDefinition.isInitializer    = typeAttributes.Any(x => x.AttributeClass?.Name == "InitializerAttribute");
+                    fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
+                    fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, "InjectableAttribute");
                 }
                 
-                if (!RunDiagnostics(spc, fieldDefinitions)) {
+                if (!RunDiagnostics(spc, scopedFieldDefinitionCollection)) {
                     return;
                 }
 
@@ -84,13 +79,13 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(World world) {");
                     using (indent.Scope()) {
-                        for (int i = 0, length = fieldDefinitions.ordered.Count; i < length; i++) {
-                            var fieldDefinition = fieldDefinitions.ordered[i];
+                        for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                            var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
 
                             if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name} = new {fieldDefinition.fieldDeclaration.Declaration.Type}(world);");
+                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name} = new {fieldDefinition.fieldDeclaration?.Declaration.Type}(world);");
                             } else {
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name} = new {fieldDefinition.fieldDeclaration.Declaration.Type}();");
+                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name} = new {fieldDefinition.fieldDeclaration?.Declaration.Type}();");
                             }
                         }
                     }
@@ -100,11 +95,11 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {");
                     using (indent.Scope()) {
-                        for (int i = 0, length = fieldDefinitions.ordered.Count; i < length; i++) {
-                            var fieldDefinition = fieldDefinitions.ordered[i];
+                        for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                            var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
                             
                             if (fieldDefinition.isInjectable) {
-                                sb.AppendIndent(indent).AppendLine($"injectionTable.Inject({fieldDefinition.fieldSymbol.Name});");
+                                sb.AppendIndent(indent).AppendLine($"injectionTable.Inject({fieldDefinition.fieldSymbol?.Name});");
                             }
                         }
                     }
@@ -113,11 +108,11 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                     using (indent.Scope()) {
-                        for (int i = 0, length = fieldDefinitions.ordered.Count; i < length; i++) {
-                            var fieldDefinition = fieldDefinitions.ordered[i];
+                        for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                            var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
                             
                             if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name}.CallAwake();");
+                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.CallAwake();");
                             }
                         }
                     }
@@ -126,14 +121,14 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                     using (indent.Scope()) {
-                        for (int i = 0, length = fieldDefinitions.ordered.Count; i < length; i++) {
-                            var fieldDefinition = fieldDefinitions.ordered[i];
+                        for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                            var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
                             
                             if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name}.CallDispose();");
+                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.CallDispose();");
                             } else if (fieldDefinition.isDisposable) {
                                 // TODO: Should we wrap it into a try-catch block for MORPEH_DEBUG?
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol.Name}.Dispose();");
+                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.Dispose();");
                             }
                         }
                         
@@ -154,14 +149,17 @@
             });
         }
 
-        private static bool RunDiagnostics(SourceProductionContext ctx, FieldDefinitionCollection fieldDefinitionCollection) {
+        private static bool RunDiagnostics(SourceProductionContext ctx, ScopedFieldDefinitionCollection scopedFieldDefinitionCollection) {
             var success = true;
             
-            for (int i = 0, length = fieldDefinitionCollection.ordered.Count; i < length; i++) {
-                var fieldDefinition = fieldDefinitionCollection.ordered[i];
+            for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
 
                 if (fieldDefinition.isSystem && fieldDefinition.loopType is null) {
-                    Errors.ReportMissingLoopType(ctx, fieldDefinition.fieldDeclaration);
+                    if (fieldDefinition.fieldDeclaration != null) {
+                        Errors.ReportMissingLoopType(ctx, fieldDefinition.fieldDeclaration);
+                    }
+
                     success = false;
                 }
             }
