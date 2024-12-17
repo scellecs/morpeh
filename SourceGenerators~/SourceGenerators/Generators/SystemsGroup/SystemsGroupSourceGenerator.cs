@@ -13,6 +13,10 @@
         private const string ATTRIBUTE_NAME = "SystemsGroup";
         private const string DISPOSABLE_INTERFACE_NAME = "System.IDisposable";
         
+        private const string SYSTEM_ATTRIBUTE_NAME = "SystemAttribute";
+        private const string INITIALIZER_ATTRIBUTE_NAME = "InitializerAttribute";
+        private const string INJECTABLE_ATTRIBUTE_NAME = "InjectableAttribute";
+        
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider
                 .CreateSyntaxProvider(
@@ -53,10 +57,10 @@
                     fieldDefinition.fieldDeclaration = fieldDeclaration;
                     fieldDefinition.fieldSymbol      = fieldSymbol;
                     fieldDefinition.loopType         = LoopTypeHelpers.GetLoopMethodNameFromField(fieldSymbol);
-                    fieldDefinition.isSystem         = typeAttributes.Any(x => x.AttributeClass?.Name == "SystemAttribute");
-                    fieldDefinition.isInitializer    = typeAttributes.Any(x => x.AttributeClass?.Name == "InitializerAttribute");
+                    fieldDefinition.isSystem         = typeAttributes.Any(x => x.AttributeClass?.Name == SYSTEM_ATTRIBUTE_NAME);
+                    fieldDefinition.isInitializer    = typeAttributes.Any(x => x.AttributeClass?.Name == INITIALIZER_ATTRIBUTE_NAME);
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
-                    fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, "InjectableAttribute");
+                    fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, INJECTABLE_ATTRIBUTE_NAME);
                 }
                 
                 if (!RunDiagnostics(spc, scopedFieldDefinitionCollection)) {
