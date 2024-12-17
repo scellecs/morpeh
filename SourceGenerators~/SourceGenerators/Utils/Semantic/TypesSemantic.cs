@@ -12,6 +12,14 @@
             var currentSymbol = typeSymbol;
 
             while (currentSymbol != null) {
+                if (currentSymbol is not INamedTypeSymbol namedTypeSymbol) {
+                    break;
+                }
+                
+                if (namedTypeSymbol.TypeKind != TypeKind.Class && namedTypeSymbol.TypeKind != TypeKind.Struct) {
+                    break;
+                }
+                
                 var members = currentSymbol.GetMembers();
                 
                 for (int i = 0, length = members.Length; i < length; i++) {
