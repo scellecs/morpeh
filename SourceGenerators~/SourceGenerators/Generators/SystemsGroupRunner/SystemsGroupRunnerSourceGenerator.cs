@@ -38,6 +38,7 @@
                         continue;
                     }
 
+                    // TODO: Pool reference types
                     var loops   = new HashSet<string>();
                     var members = typeSymbol.GetMembers();
                     for (int j = 0, jlength = members.Length; j < jlength; j++) {
