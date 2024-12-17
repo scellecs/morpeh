@@ -19,17 +19,6 @@ public class StashTests {
     }
 
     [Fact]
-    public void StashSize_WorksCorrectly() {
-        ComponentId<StashSizeCheck>.StashSize = 512;
-
-        var w1Stash = world.GetStash<StashSizeCheck>();
-        var w2Stash = world2.GetStash<StashSizeCheck>();
-
-        Assert.True(w1Stash.map.capacity >= 512);
-        Assert.True(w2Stash.map.capacity >= 512);
-    }
-
-    [Fact]
     public void WorldGetStash_WorksCorretly() {
         var stash = this.world.GetStash<Test1>();
         Assert.NotNull(stash);

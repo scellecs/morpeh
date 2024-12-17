@@ -2,6 +2,7 @@
 
 using Scellecs.Morpeh;
 
+[StashInitialCapacity(32)]
 public struct DisposableComponent : IComponent, System.IDisposable {
     public int value;
     

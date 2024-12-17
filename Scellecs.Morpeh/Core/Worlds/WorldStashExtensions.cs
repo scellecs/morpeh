@@ -49,7 +49,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
-        public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
+        public static Stash<T> GetStash<T>(this World world, int capacity = -1) where T : struct, IComponent {
             world.ThreadSafetyCheck();
             
             var info = ComponentId<T>.info;
@@ -61,7 +61,6 @@
             
             world.EnsureStashCapacity(info.id);
             
-            var capacity = ComponentId<T>.StashSize;
             var stash = new Stash<T>(world, info, capacity);
             world.stashes[info.id] = stash;
             return stash;

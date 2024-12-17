@@ -12,6 +12,8 @@
     [Generator]
     public class ComponentsMetadataSourceGenerator : IIncrementalGenerator {
         private const string COMPONENT_INTERFACE_NAME = "Scellecs.Morpeh.IComponent";
+        private const string STASH_INITIAL_CAPACITY_ATTRIBUTE_NAME = "StashInitialCapacity";
+        private const int DEFAULT_STASH_CAPACITY = 16;
 
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var structs = context.SyntaxProvider
@@ -39,9 +41,37 @@
                     return;
                 }
 
-                var typeName           = structDeclaration.Identifier.ToString();
-                var genericParams      = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
-                var genericConstraints = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
+                var typeName             = structDeclaration.Identifier.ToString();
+                var genericParams        = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
+                var genericConstraints   = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
+                
+                var stashInitialCapacity = DEFAULT_STASH_CAPACITY;
+                
+                if (structDeclaration.AttributeLists.Count > 0) {
+                    for (int i = 0, length = structDeclaration.AttributeLists.Count; i < length; i++) {
+                        for (int j = 0, attributesCount = structDeclaration.AttributeLists[i].Attributes.Count; j < attributesCount; j++) {
+                            var attribute = structDeclaration.AttributeLists[i].Attributes[j];
+                            
+                            if (attribute.Name.ToString() != STASH_INITIAL_CAPACITY_ATTRIBUTE_NAME) {
+                                continue;
+                            }
+
+                            if (attribute.ArgumentList?.Arguments.Count == 0) {
+                                continue;
+                            }
+
+                            var argument = attribute.ArgumentList?.Arguments[0];
+                            if (argument?.Expression is not LiteralExpressionSyntax literalExpressionSyntax) {
+                                continue;
+                            }
+
+                            if (int.TryParse(literalExpressionSyntax.Token.ValueText, out var value)) {
+                                stashInitialCapacity = value;
+                            }
+                        }
+                    }
+                }
+                
 
                 var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(semanticModel, structDeclaration);
             
@@ -56,7 +86,9 @@
                 sb.AppendIndent(indent).AppendLine($"public static class {typeName}__Metadata{genericParams} {genericConstraints} {{");
                 using (indent.Scope()) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
-                    sb.AppendIndent(indent).AppendLine($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}();");
+                    sb.AppendIndent(indent).Append($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}(")
+                        .Append("capacity: ").Append(stashInitialCapacity)
+                        .AppendLine(");");
                 }
                 sb.AppendIndent(indent).AppendLine("}");
                 
