@@ -55,7 +55,7 @@
                     
                     var typeAttributes  = fieldSymbol.Type.GetAttributes();
                     
-                    var fieldDefinition = scopedFieldDefinitionCollection.Emplace();
+                    var fieldDefinition = scopedFieldDefinitionCollection.Create();
                     
                     fieldDefinition.fieldDeclaration = fieldDeclaration;
                     fieldDefinition.fieldSymbol      = fieldSymbol;
@@ -65,7 +65,7 @@
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
                     fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, INJECTABLE_ATTRIBUTE_NAME);
                     
-                    scopedFieldDefinitionCollection.AddToMapping(fieldDefinition);
+                    scopedFieldDefinitionCollection.Add(fieldDefinition);
                 }
                 
                 if (!RunDiagnostics(spc, scopedFieldDefinitionCollection)) {

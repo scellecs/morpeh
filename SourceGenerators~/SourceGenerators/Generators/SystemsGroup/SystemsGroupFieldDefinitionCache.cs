@@ -33,14 +33,10 @@
             
         public FieldDefinitionCollection Collection => this.cache.collection;
 
-        public SystemsGroupFieldDefinition Emplace() {
-            var fieldDefinition = this.cache.pool.Rent();
-            this.cache.collection.AddOrdered(fieldDefinition);
-            return fieldDefinition;
-        }
+        public SystemsGroupFieldDefinition Create() => this.cache.pool.Rent();
         
-        public void AddToMapping(SystemsGroupFieldDefinition systemsGroupFieldDefinition) {
-            this.cache.collection.AddToMapping(systemsGroupFieldDefinition);
+        public void Add(SystemsGroupFieldDefinition systemsGroupFieldDefinition) {
+            this.cache.collection.Add(systemsGroupFieldDefinition);
         }
             
         public void Dispose() {

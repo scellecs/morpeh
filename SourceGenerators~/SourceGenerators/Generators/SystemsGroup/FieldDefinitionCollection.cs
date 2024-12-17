@@ -21,12 +21,10 @@
                 this.byLoopType[LoopTypeHelpers.loopMethodNames[i]].Clear();
             }
         }
-            
-        public void AddOrdered(SystemsGroupFieldDefinition systemsGroupFieldDefinition) {
-            this.ordered.Add(systemsGroupFieldDefinition);
-        }
         
-        public void AddToMapping(SystemsGroupFieldDefinition systemsGroupFieldDefinition) {
+        public void Add(SystemsGroupFieldDefinition systemsGroupFieldDefinition) {
+            this.ordered.Add(systemsGroupFieldDefinition);
+            
             if (systemsGroupFieldDefinition.loopType == null) {
                 return;
             }
