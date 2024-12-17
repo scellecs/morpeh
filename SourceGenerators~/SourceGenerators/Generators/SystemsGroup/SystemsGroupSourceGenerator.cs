@@ -93,6 +93,8 @@
                             } else {
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name} = new {fieldDefinition.fieldDeclaration?.Declaration.Type}();");
                             }
+                            
+                            // TODO: Check Register attribute, add to injection table if needed
                         }
                     }
                     sb.AppendIndent(indent).AppendLine("}");
