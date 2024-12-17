@@ -26,6 +26,7 @@
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
                 var (typeDeclaration, semanticModel) = pair;
+                
                 var typeName = typeDeclaration.Identifier.ToString();
                 var alwaysEnabled = typeDeclaration.AttributeLists.SelectMany(a => a.Attributes).Any(a => a.Name.ToString() == ALWAYS_ENABLED_ATTRIBUTE_NAME);
                 var skipCommit = typeDeclaration.AttributeLists.SelectMany(a => a.Attributes).Any(a => a.Name.ToString() == SKIP_COMMIT_ATTRIBUTE_NAME);

@@ -22,6 +22,7 @@
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
                 var (typeDeclaration, semanticModel) = pair;
+                
                 var typeName = typeDeclaration.Identifier.ToString();
                 var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeDeclaration, semanticModel);
 

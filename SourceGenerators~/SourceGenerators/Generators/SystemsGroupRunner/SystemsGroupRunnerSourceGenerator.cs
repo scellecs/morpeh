@@ -55,7 +55,6 @@
                     }
 
                     fields.Add(new RunnerFieldDefinition(
-                        fieldDeclaration: fieldDeclaration, 
                         typeName: fieldDeclaration.Declaration.Type.ToString(), 
                         fieldName: fieldDeclaration.Declaration.Variables[0].Identifier.Text,
                         loops: loops));
