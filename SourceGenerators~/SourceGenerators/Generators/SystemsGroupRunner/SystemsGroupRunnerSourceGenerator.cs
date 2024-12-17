@@ -73,7 +73,7 @@
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).AppendLine("public void Inject(InjectionTable injectionTable) {");
+                    sb.AppendIndent(indent).AppendLine("public void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {");
                     using (indent.Scope()) {
                         for (int i = 0, length = fields.Count; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".Inject(injectionTable);");
