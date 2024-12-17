@@ -45,7 +45,7 @@
                 sb.AppendUsings(classDeclaration).AppendLine();
                 sb.AppendBeginNamespace(classDeclaration, indent).AppendLine();
                 
-                sb.AppendIndent(indent).Append("public partial class ").Append(typeName).AppendLine(" {");
+                sb.AppendIndent(indent).Append("public partial class ").Append(typeName).AppendLine(" : System.IDisposable {");
 
                 using (indent.Scope()) {
                     sb.AppendIndent(indent).Append("private readonly World _world;").AppendLine();
@@ -61,11 +61,32 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
-                    // TODO: Inject
+                    sb.AppendLine().AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void Inject(InjectionTable injectionTable) {");
+                    using (indent.Scope()) {
+                        for (int i = 0, length = fields.Count; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".Inject(injectionTable);");
+                        }
+                    }
+                    sb.AppendIndent(indent).AppendLine("}");
                     
-                    // TODO: OnAwake
+                    sb.AppendLine().AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void OnAwake() {");
+                    using (indent.Scope()) {
+                        for (int i = 0, length = fields.Count; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".CallAwake();");
+                        }
+                    }
+                    sb.AppendIndent(indent).AppendLine("}");
                     
-                    // TODO: Dispose
+                    sb.AppendLine().AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void Dispose() {");
+                    using (indent.Scope()) {
+                        for (int i = 0, length = fields.Count; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".CallDispose();");
+                        }
+                    }
+                    sb.AppendIndent(indent).AppendLine("}");
                     
                     foreach (var methodName in LoopTypeHelpers.loopMethodNames) {
                         // TODO: Check if system group has such loop
