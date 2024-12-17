@@ -60,7 +60,7 @@
                     sb.AppendIndent(indent).AppendLine("public void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {");
                     using (indent.Scope()) {
                         foreach (var field in fields) {
-                            sb.AppendIndent(indent).Append("this.").Append(field.Name).Append(" = (").Append(field.Type).Append(")injectionTable.Get(typeof(").Append(field.Type).AppendLine("));");
+                            sb.AppendIndent(indent).Append(field.Name).Append(" = (").Append(field.Type).Append(")injectionTable.Get(typeof(").Append(field.Type).AppendLine("));");
                         }
                     }
                     sb.AppendIndent(indent).AppendLine("}");
