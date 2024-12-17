@@ -5,7 +5,7 @@
     public class SystemsGroupFieldDefinition {
         public FieldDeclarationSyntax? fieldDeclaration;
         public IFieldSymbol?           fieldSymbol;
-        public LoopType?               loopType;
+        public int?                    loopType;
         public bool                    isSystem;
         public bool                    isInitializer;
         public bool                    isDisposable;
@@ -21,8 +21,8 @@
             this.isInitializer    = false;
             this.isDisposable     = false;
             this.isInjectable     = false;
-            this.register           = false;
-            this.registerAs         = null;
+            this.register         = false;
+            this.registerAs       = null;
         }
     }
 }

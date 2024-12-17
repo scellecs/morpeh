@@ -15,7 +15,7 @@
             "OnLateNetworkUpdate",
         };
 
-        public static LoopType? GetLoopMethodNameFromField(IFieldSymbol fieldSymbol) {
+        public static int? GetLoopMethodNameFromField(IFieldSymbol fieldSymbol) {
             var attributes = fieldSymbol.GetAttributes();
 
             for (int i = 0, length = attributes.Length; i < length; i++) {
@@ -34,7 +34,7 @@
                     continue;
                 }
                 
-                return (LoopType)loopType;
+                return (int)loopType;
             }
 
             return null;

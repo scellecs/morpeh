@@ -25,11 +25,11 @@
         public void Add(SystemsGroupFieldDefinition systemsGroupFieldDefinition) {
             this.ordered.Add(systemsGroupFieldDefinition);
             
-            if (systemsGroupFieldDefinition.loopType == null) {
+            if (!systemsGroupFieldDefinition.loopType.HasValue) {
                 return;
             }
             
-            this.byLoopType[LoopTypeHelpers.loopMethodNames[(int)systemsGroupFieldDefinition.loopType]].Add(systemsGroupFieldDefinition);
+            this.byLoopType[LoopTypeHelpers.loopMethodNames[systemsGroupFieldDefinition.loopType.Value]].Add(systemsGroupFieldDefinition);
         }
     }
 }
