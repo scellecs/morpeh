@@ -15,6 +15,12 @@ public partial class BasicInitializer1 {
     [Injectable]
     private IDisposable _basicDisposableClass2;
     
+    [Injectable]
+    private SomeGenericClass<int> _someGenericClass;
+    
+    [Injectable]
+    private SomeComplexGenericClass<int, string> _someComplexGenericClass;
+    
     public void OnAwake() {
         throw new NotImplementedException();
     }
