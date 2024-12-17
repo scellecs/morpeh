@@ -34,10 +34,30 @@
                         continue;
                     }
 
+                    if (semanticModel.GetSymbolInfo(fieldDeclaration.Declaration.Type).Symbol is not ITypeSymbol typeSymbol) {
+                        continue;
+                    }
+
+                    var loops   = new HashSet<string>();
+                    var members = typeSymbol.GetMembers();
+                    for (int j = 0, jlength = members.Length; j < jlength; j++) {
+                        if (members[j] is not IFieldSymbol fieldSymbol) {
+                            continue;
+                        }
+
+                        var loopType = LoopTypeHelpers.GetLoopMethodNameFromField(fieldSymbol);
+                        if (loopType == null) {
+                            continue;
+                        }
+
+                        loops.Add(LoopTypeHelpers.loopMethodNames[(int)loopType]);
+                    }
+
                     fields.Add(new RunnerFieldDefinition(
                         fieldDeclaration: fieldDeclaration, 
                         typeName: fieldDeclaration.Declaration.Type.ToString(), 
-                        fieldName: fieldDeclaration.Declaration.Variables[0].Identifier.Text));
+                        fieldName: fieldDeclaration.Declaration.Variables[0].Identifier.Text,
+                        loops: loops));
                 }
 
                 var sb     = StringBuilderPool.Get();
@@ -109,6 +129,10 @@
                             sb.AppendIndent(indent).AppendLine("_world.Commit();");
                             
                             for (int i = 0, length = fields.Count; i < length; i++) {
+                                if (!fields[i].loops.Contains(methodName)) {
+                                    continue;
+                                }
+                                
                                 sb.AppendIndent(indent).Append(fields[i].fieldName).Append('.').Append(methodName).AppendLine("(deltaTime);");
                             }
                         }
