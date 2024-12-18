@@ -28,7 +28,7 @@
                     static (ctx, _) => 
                     {
                         var typeSymbol = (INamedTypeSymbol)ctx.TargetSymbol;
-                        var attribute  = ctx.Attributes.FirstOrDefault(attr => attr.AttributeClass?.Name == GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME);
+                        var attribute  = ctx.Attributes.FirstOrDefault();
                         if (attribute is null) {
                             return null;
                         }
