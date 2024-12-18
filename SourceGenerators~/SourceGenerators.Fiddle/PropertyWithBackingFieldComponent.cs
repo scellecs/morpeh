@@ -2,6 +2,7 @@
 
 using Scellecs.Morpeh;
 
-public struct PropertyWithBackingFieldComponent : IComponent {
+[Component]
+public partial struct PropertyWithBackingFieldComponent {
     public int Value { get; set; }
 }

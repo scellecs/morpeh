@@ -85,7 +85,7 @@
                     stashes.Add(new StashRequirement {
                         fieldName         = fieldName,
                         fieldTypeName     = GetStashSpecialization(semanticModel, typeOfExpression).type,
-                        metadataClassName = MorpehComponentHelpers.ComponentNameToMetadataClassName(typeOfExpression.Type.ToString()),
+                        metadataClassName = typeOfExpression.Type.ToString(),
                     });
                 }
             }

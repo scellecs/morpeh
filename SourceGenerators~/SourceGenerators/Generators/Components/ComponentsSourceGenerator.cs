@@ -10,29 +10,26 @@
     using Utils.Pools;
 
     [Generator]
-    public class ComponentsMetadataSourceGenerator : IIncrementalGenerator {
+    public class ComponentsSourceGenerator : IIncrementalGenerator {
+        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.ComponentAttribute";
         private const string COMPONENT_INTERFACE_NAME = "Scellecs.Morpeh.IComponent";
+        
         private const string STASH_INITIAL_CAPACITY_ATTRIBUTE_NAME = "StashInitialCapacity";
         private const int DEFAULT_STASH_CAPACITY = 16;
 
         public void Initialize(IncrementalGeneratorInitializationContext context) {
-            var structs = context.SyntaxProvider
-                .CreateSyntaxProvider(
-                    static (syntaxNode, _) => syntaxNode is StructDeclarationSyntax,
-                    static (ctx, _) => (declaration: (StructDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
-                .Where(static pair => pair.declaration is not null);
+            var structs = context.SyntaxProvider.ForAttributeWithMetadataName(
+                ATTRIBUTE_NAME,
+                (s, _) => s is StructDeclarationSyntax,
+                (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
 
             var componentInterface = context.CompilationProvider
                 .Select(static (compilation, _) => compilation.GetTypeByMetadataName(COMPONENT_INTERFACE_NAME));
 
             context.RegisterSourceOutput(structs.Combine(componentInterface), static (spc, pair) => {
-                var ((structDeclaration, semanticModel), iComponent) = pair;
+                var ((structDeclaration, typeSymbol, semanticModel), iComponent) = pair;
                 
-                if (iComponent is null) {
-                    return;
-                }
-
-                if (semanticModel.GetDeclaredSymbol(structDeclaration) is not ITypeSymbol structSymbol || !structSymbol.AllInterfaces.Contains(iComponent)) {
+                if (structDeclaration is null || iComponent is null) {
                     return;
                 }
                 
@@ -78,12 +75,12 @@
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
             
-                sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
-            
                 sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
-
+                
+                sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
+                
                 sb.AppendIl2CppAttributes(indent);
-                sb.AppendIndent(indent).AppendLine($"public static class {typeName}__Metadata{genericParams} {genericConstraints} {{");
+                sb.AppendIndent(indent).AppendLine($"public partial struct {typeName}{genericParams} : IComponent {genericConstraints} {{");
                 using (indent.Scope()) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).Append($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}(")
@@ -94,7 +91,7 @@
                 
                 sb.AppendEndNamespace(structDeclaration, indent).AppendLine();
                 
-                spc.AddSource($"{structDeclaration.Identifier.Text}.component_extensions_{structDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                spc.AddSource($"{structDeclaration.Identifier.Text}.component_{structDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
                 
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);

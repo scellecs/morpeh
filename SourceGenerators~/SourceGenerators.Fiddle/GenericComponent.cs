@@ -2,6 +2,7 @@
 
 using Scellecs.Morpeh;
 
-public struct GenericComponent<T> : IComponent where T : struct {
+[Component]
+public partial struct GenericComponent<T> where T : struct {
     public T value;
 }

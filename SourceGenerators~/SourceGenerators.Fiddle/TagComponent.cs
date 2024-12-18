@@ -2,6 +2,7 @@
 
 using Scellecs.Morpeh;
 
-public struct TagComponent : IComponent {
+[Component]
+public partial struct TagComponent {
     
 }

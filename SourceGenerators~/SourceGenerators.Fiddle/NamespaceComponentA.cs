@@ -2,6 +2,7 @@
 
 using Scellecs.Morpeh;
 
-public struct NamespaceComponent : IComponent {
+[Component]
+public partial struct NamespaceComponent {
     
 }

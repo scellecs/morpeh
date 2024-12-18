@@ -1,6 +1,7 @@
 ﻿using Scellecs.Morpeh;
 
+[Component]
 // ReSharper disable once CheckNamespace
-public struct GlobalNamespaceComponent : IComponent {
+public partial struct GlobalNamespaceComponent {
     
 }
