@@ -8,29 +8,31 @@
     using Utils.Pools;
 
     // TODO: Systems disable mechanism for exceptions.
-    // TODO: IsEnabled() method to check system enter condition.
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "System";
-        private const string ALWAYS_ENABLED_ATTRIBUTE_NAME = "AlwaysEnabled";
-        private const string SKIP_COMMIT_ATTRIBUTE_NAME = "SkipCommit";
+        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemAttribute";
+        private const string ALWAYS_ENABLED_ATTRIBUTE_NAME = "Scellecs.Morpeh.AlwaysEnabledAttribute";
+        private const string SKIP_COMMIT_ATTRIBUTE_NAME = "Scellecs.Morpeh.SkipCommitAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
-            var classes = context.SyntaxProvider
-                .CreateSyntaxProvider(
-                    predicate: static (s, _) => s is TypeDeclarationSyntax typeDeclaration &&
-                                                typeDeclaration.AttributeLists.Any(x => x.Attributes.Any(y => y?.Name.ToString() == ATTRIBUTE_NAME)),
-                    transform: static (ctx, _) => ((TypeDeclarationSyntax)ctx.Node, ctx.SemanticModel))
-                .Where(static typeDeclaration => typeDeclaration.Item1 is not null);
+            var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
+                ATTRIBUTE_NAME,
+                (s, _) => s is TypeDeclarationSyntax,
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
             
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
-                var (typeDeclaration, semanticModel) = pair;
+                var (typeDeclaration, typeSymbol, semanticModel) = pair;
+                if (typeDeclaration is null) {
+                    return;
+                }
+                
+                var attributes = typeSymbol.GetAttributes();
+                var alwaysEnabled = attributes.Any(a => a.AttributeClass?.Name == ALWAYS_ENABLED_ATTRIBUTE_NAME);
+                var skipCommit    = attributes.Any(a => a.AttributeClass?.Name == SKIP_COMMIT_ATTRIBUTE_NAME);
                 
                 var typeName = typeDeclaration.Identifier.ToString();
-                var alwaysEnabled = typeDeclaration.AttributeLists.SelectMany(a => a.Attributes).Any(a => a.Name.ToString() == ALWAYS_ENABLED_ATTRIBUTE_NAME);
-                var skipCommit = typeDeclaration.AttributeLists.SelectMany(a => a.Attributes).Any(a => a.Name.ToString() == SKIP_COMMIT_ATTRIBUTE_NAME);
-                var stashes = MorpehComponentHelpersSemantic.GetStashRequirements(typeDeclaration, semanticModel);
+                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeDeclaration, semanticModel);
                 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

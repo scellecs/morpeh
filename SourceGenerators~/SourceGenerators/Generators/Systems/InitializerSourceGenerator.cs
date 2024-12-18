@@ -1,5 +1,4 @@
 ﻿namespace SourceGenerators.Generators.Systems {
-    using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
@@ -9,19 +8,20 @@
 
     [Generator]
     public class InitializerSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "Initializer";
+        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.InitializerAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
-            var classes = context.SyntaxProvider
-                .CreateSyntaxProvider(
-                    predicate: static (s, _) => s is TypeDeclarationSyntax typeDeclaration &&
-                                                typeDeclaration.AttributeLists.Any(x => x.Attributes.Any(y => y?.Name.ToString() == ATTRIBUTE_NAME)),
-                    transform: static (ctx, _) => ((TypeDeclarationSyntax)ctx.Node, ctx.SemanticModel))
-                .Where(static typeDeclaration => typeDeclaration.Item1 is not null);
+            var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
+                ATTRIBUTE_NAME,
+                (s, _) => s is TypeDeclarationSyntax,
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.SemanticModel));
             
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
                 var (typeDeclaration, semanticModel) = pair;
+                if (typeDeclaration is null) {
+                    return;
+                }
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeDeclaration, semanticModel);
