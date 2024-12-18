@@ -24,7 +24,7 @@
             var genericInjectionProviders = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                     GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME,
-                    static (node, _) => node is TypeDeclarationSyntax tds && tds.Kind() == SyntaxKind.ClassDeclaration,
+                    static (node, _) => node is ClassDeclarationSyntax,
                     static (ctx, _) => 
                     {
                         var typeSymbol = (INamedTypeSymbol)ctx.TargetSymbol;
