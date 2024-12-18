@@ -12,8 +12,8 @@
 
     [Generator]
     public class SystemsGroupSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "SystemsGroup";
-        private const string INLINE_UPDATE_METHODS_ATTRIBUTE_NAME = "SystemGroupInlineUpdateMethods";
+        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemsGroupAttribute";
+        private const string INLINE_UPDATE_METHODS_ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemGroupInlineUpdateMethodsAttribute";
         
         private const string DISPOSABLE_INTERFACE_NAME = "System.IDisposable";
         
@@ -23,19 +23,20 @@
         private const string REGISTER_ATTRIBUTE_NAME = "RegisterAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
-            var classes = context.SyntaxProvider
-                .CreateSyntaxProvider(
-                    predicate: static (s, _) => s is TypeDeclarationSyntax typeDeclaration &&
-                                                typeDeclaration.AttributeLists.Any(x => x.Attributes.Any(y => y?.Name.ToString() == ATTRIBUTE_NAME)),
-                    transform: static (ctx, _) => (declaration: (TypeDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
-                .Where(static pair => pair.declaration is not null);
+            var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
+                ATTRIBUTE_NAME,
+                (s, _) => s is TypeDeclarationSyntax,
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
             
             var disposableInterface = context.CompilationProvider
                 .Select(static (compilation, _) => compilation.GetTypeByMetadataName(DISPOSABLE_INTERFACE_NAME));
             
             context.RegisterSourceOutput(classes.Combine(disposableInterface), static (spc, pair) =>
             {
-                var ((typeDeclaration, semanticModel), disposableSymbol) = pair;
+                var ((typeDeclaration, typeSymbol, semanticModel), disposableSymbol) = pair;
+                if (typeDeclaration is null) {
+                    return;
+                }
                 
                 if (disposableSymbol is null) {
                     return;
@@ -95,9 +96,9 @@
                 }
 
                 var typeName = typeDeclaration.Identifier.ToString();
-                var inlineUpdateMethods = typeDeclaration.AttributeLists
-                    .SelectMany(x => x.Attributes)
-                    .Any(x => x.Name.ToString() == INLINE_UPDATE_METHODS_ATTRIBUTE_NAME);
+                
+                var attributes = typeSymbol.GetAttributes();
+                var inlineUpdateMethods = attributes.Any(x => x.AttributeClass?.Name == INLINE_UPDATE_METHODS_ATTRIBUTE_NAME);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

@@ -1,7 +1,5 @@
 ﻿namespace SourceGenerators.Generators.SystemsGroupRunner {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
@@ -11,19 +9,20 @@
 
     [Generator]
     public class SystemsGroupRunnerSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "SystemsGroupRunner";
+        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemsGroupRunnerAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
-            var classes = context.SyntaxProvider
-                .CreateSyntaxProvider(
-                    predicate: static (s, _) => s is ClassDeclarationSyntax classDeclaration &&
-                                                classDeclaration.AttributeLists.Any(x => x.Attributes.Any(y => y?.Name.ToString() == ATTRIBUTE_NAME)),
-                    transform: static (ctx, _) => (declaration: (ClassDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
-                .Where(static pair => pair.declaration is not null);
+            var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
+                ATTRIBUTE_NAME,
+                (s, _) => s is ClassDeclarationSyntax,
+                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.SemanticModel));
             
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
                 var (typeDeclaration, semanticModel) = pair;
+                if (typeDeclaration is null) {
+                    return;
+                }
 
                 var typeName = typeDeclaration.Identifier.ToString();
 
