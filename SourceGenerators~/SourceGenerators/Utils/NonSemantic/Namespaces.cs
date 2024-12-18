@@ -1,10 +1,11 @@
 ﻿namespace SourceGenerators.Utils.NonSemantic {
     using System.Text;
+    using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     public static class Namespaces {
         public static BaseNamespaceDeclarationSyntax? GetNamespace(this TypeDeclarationSyntax typeDeclarationSyntax) {
-            var current = typeDeclarationSyntax.Parent;
+            SyntaxNode? current = typeDeclarationSyntax;
 
             while (current != null) {
                 if (current is BaseNamespaceDeclarationSyntax baseNamespaceDeclaration) {
@@ -71,24 +72,54 @@
         }
 
         public static StringBuilder AppendUsings(this StringBuilder sb, TypeDeclarationSyntax typeDeclarationSyntax, int indent = 0) {
-            var ns = GetNamespace(typeDeclarationSyntax);
+            SyntaxNode? current = typeDeclarationSyntax;
 
-            if (ns != null) {
-                foreach (var usingDirective in ns.Usings) {
-                    sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+            while (current != null) {
+                switch (current) {
+                    case BaseNamespaceDeclarationSyntax baseNamespaceDeclaration: {
+                        foreach (var usingDirective in baseNamespaceDeclaration.Usings) {
+                            sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+                        }
+
+                        break;
+                    }
+                    case CompilationUnitSyntax compilationUnitSyntax: {
+                        foreach (var usingDirective in compilationUnitSyntax.Usings) {
+                            sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+                        }
+
+                        break;
+                    }
                 }
+
+                current = current.Parent;
             }
 
             return sb;
         }
         
         public static StringBuilder AppendUsings(this StringBuilder sb, TypeDeclarationSyntax typeDeclarationSyntax, IndentSource indent) {
-            var ns = GetNamespace(typeDeclarationSyntax);
+            SyntaxNode? current = typeDeclarationSyntax;
 
-            if (ns != null) {
-                foreach (var usingDirective in ns.Usings) {
-                    sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+            while (current != null) {
+                switch (current) {
+                    case BaseNamespaceDeclarationSyntax baseNamespaceDeclaration: {
+                        foreach (var usingDirective in baseNamespaceDeclaration.Usings) {
+                            sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+                        }
+
+                        break;
+                    }
+                    case CompilationUnitSyntax compilationUnitSyntax: {
+                        foreach (var usingDirective in compilationUnitSyntax.Usings) {
+                            sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+                        }
+
+                        break;
+                    }
                 }
+
+                current = current.Parent;
             }
 
             return sb;

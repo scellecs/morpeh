@@ -85,7 +85,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("OnAwake();");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" initializer (OnAwake)\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
@@ -115,7 +115,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("Dispose();");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" initializer (Dispose)\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");

@@ -91,7 +91,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("OnAwake();");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (OnAwake), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
@@ -127,9 +127,9 @@
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).AppendLine("OnUpdate(float deltaTime);");
+                            sb.AppendIndent(indent).AppendLine("OnUpdate(deltaTime);");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (OnUpdate), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
@@ -161,7 +161,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("Dispose();");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (Dispose), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
