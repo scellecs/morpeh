@@ -1,5 +1,4 @@
 ﻿namespace SourceGenerators.Generators.Injection {
-    using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
@@ -12,7 +11,7 @@
     public class InjectionSourceGenerator : IIncrementalGenerator {
         private const string INJECTABLE_ATTRIBUTE_NAME = "InjectableAttribute";
         
-        private const string GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME = "GenericInjectionProviderAttribute";
+        private const string GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME = "Scellecs.Morpeh.GenericInjectionProviderAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -22,55 +21,36 @@
                     static (ctx, _) => (declaration: (ClassDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
                 .Where(static pair => pair.declaration is not null);
 
-            var genericInjectionProviders = context.CompilationProvider.Select(static (compilation, _) => {
-                var genericInjectionProviders = new List<GenericResolver>();
-                WalkTree(compilation.Assembly.GlobalNamespace);
-                return genericInjectionProviders;
-
-                // TODO: There might be a faster way, but it works for now.
-                void WalkTree(INamespaceSymbol namespaceSymbol)
-                {
-                    foreach (var member in namespaceSymbol.GetMembers())
+            var genericInjectionProviders = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                    GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME,
+                    static (node, _) => node is TypeDeclarationSyntax tds && tds.Kind() == SyntaxKind.ClassDeclaration,
+                    static (ctx, _) => 
                     {
-                        switch (member)
-                        {
-                            case INamedTypeSymbol typeSymbol: {
-                                if (typeSymbol.TypeKind != TypeKind.Class && typeSymbol.TypeKind != TypeKind.Struct) {
-                                    break;
-                                }
-                                
-                                foreach (var attribute in typeSymbol.GetAttributes()) {
-                                    if (attribute.AttributeClass?.Name != GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME) {
-                                        continue;
-                                    }
-
-                                    if (attribute.ConstructorArguments.Length != 1) {
-                                        continue;
-                                    }
-                    
-                                    if (attribute.ConstructorArguments[0].Value is not INamedTypeSymbol baseType) {
-                                        continue;
-                                    }
-                    
-                                    genericInjectionProviders.Add(new GenericResolver
-                                    {
-                                        BaseType     = baseType,
-                                        ResolverType = typeSymbol,
-                                    });
-                                }
-                                break;
-                            }
-
-                            case INamespaceSymbol nestedNamespace: {
-                                WalkTree(nestedNamespace);
-                                break;
-                            }
+                        var typeSymbol = (INamedTypeSymbol)ctx.TargetSymbol;
+                        var attribute  = ctx.Attributes.FirstOrDefault(attr => attr.AttributeClass?.Name == GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME);
+                        if (attribute is null) {
+                            return null;
                         }
+                        
+                        var args       = attribute.ConstructorArguments;
+
+                        if (args.Length != 1 || args[0].Value is not INamedTypeSymbol baseType) {
+                            return null;
+                        }
+
+                        return new GenericResolver
+                        {
+                            BaseType     = baseType,
+                            ResolverType = typeSymbol
+                        };
                     }
-                }
-            });
+                )
+                .Where(static resolver => resolver is not null)
+                .Select(static (resolver, _) => resolver!);
             
-            context.RegisterSourceOutput(classes.Combine(genericInjectionProviders), static (spc, pair) =>
+            
+            context.RegisterSourceOutput(classes.Combine(genericInjectionProviders.Collect()), static (spc, pair) =>
             {
                 var ((typeDeclaration, semanticModel), genericProviders) = pair;
                 
@@ -115,7 +95,7 @@
                             if (field.Type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol) {
                                 var unboundType = namedTypeSymbol.ConstructUnboundGenericType();
                                 
-                                for (int j = 0, jlength = genericProviders.Count; j < jlength; j++) {
+                                for (int j = 0, jlength = genericProviders.Length; j < jlength; j++) {
                                     var provider = genericProviders[j];
                                     
                                     if (!SymbolEqualityComparer.Default.Equals(unboundType, provider.BaseType)) {
