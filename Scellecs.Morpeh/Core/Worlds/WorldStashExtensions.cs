@@ -56,12 +56,64 @@
 
             var candidate = world.GetExistingStash(info.id);
             if (candidate != null) {
-                return (Stash<T>)candidate;
+                if (candidate is Stash<T> typeStash) {
+                    return typeStash;
+                } else {
+                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
+                }
             }
             
             world.EnsureStashCapacity(info.id);
             
             var stash = new Stash<T>(world, info, capacity);
+            world.stashes[info.id] = stash;
+            return stash;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
+        [UnityEngine.Scripting.Preserve]
+        public static StashD<T> GetStashD<T>(this World world, int capacity = -1) where T : struct, IComponent, IDisposable {
+            world.ThreadSafetyCheck();
+            
+            var info = ComponentId<T>.info;
+
+            var candidate = world.GetExistingStash(info.id);
+            if (candidate != null) {
+                if (candidate is StashD<T> typeStash) {
+                    return typeStash;
+                } else {
+                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
+                }
+            }
+            
+            world.EnsureStashCapacity(info.id);
+            
+            var stash = new StashD<T>(world, info, capacity);
+            world.stashes[info.id] = stash;
+            return stash;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
+        [UnityEngine.Scripting.Preserve]
+        public static TagStash GetTagStash<T>(this World world, int capacity = -1) where T : struct, IComponent {
+            world.ThreadSafetyCheck();
+            
+            var info = ComponentId<T>.info;
+
+            var candidate = world.GetExistingStash(info.id);
+            if (candidate != null) {
+                if (candidate is TagStash typeStash) {
+                    return typeStash;
+                } else {
+                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
+                }
+            }
+            
+            world.EnsureStashCapacity(info.id);
+            
+            var stash = new TagStash(world, typeof(T), info, capacity);
             world.stashes[info.id] = stash;
             return stash;
         }
