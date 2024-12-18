@@ -33,8 +33,7 @@
                             return null;
                         }
                         
-                        var args       = attribute.ConstructorArguments;
-
+                        var args = attribute.ConstructorArguments;
                         if (args.Length != 1 || args[0].Value is not INamedTypeSymbol baseType) {
                             return null;
                         }
