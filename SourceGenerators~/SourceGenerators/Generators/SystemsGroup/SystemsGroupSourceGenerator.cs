@@ -16,14 +16,14 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel, ctx.Attributes));
             
             var disposableInterface = context.CompilationProvider
                 .Select(static (compilation, _) => compilation.GetTypeByMetadataName(KnownTypes.DISPOSABLE_FULL_NAME));
             
             context.RegisterSourceOutput(classes.Combine(disposableInterface), static (spc, pair) =>
             {
-                var ((typeDeclaration, typeSymbol, semanticModel), disposableSymbol) = pair;
+                var ((typeDeclaration, typeSymbol, semanticModel, systemsGroupAttributes), disposableSymbol) = pair;
                 if (typeDeclaration is null) {
                     return;
                 }
@@ -86,9 +86,16 @@
                 }
 
                 var typeName = typeDeclaration.Identifier.ToString();
-                
-                var attributes = typeSymbol.GetAttributes();
-                var inlineUpdateMethods = attributes.Any(x => x.AttributeClass?.Name == MorpehAttributes.INLINE_UPDATE_METHODS_NAME);
+
+                var inlineUpdateMethods = false;
+                for (int i = 0, length = systemsGroupAttributes.Length; i < length; i++) {
+                    var attribute = systemsGroupAttributes[i];
+                    
+                    var args = attribute.ConstructorArguments;
+                    if (args.Length >= 1 && args[0].Value is bool inlineUpdateMethodsValue) {
+                        inlineUpdateMethods = inlineUpdateMethodsValue;
+                    }
+                }
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

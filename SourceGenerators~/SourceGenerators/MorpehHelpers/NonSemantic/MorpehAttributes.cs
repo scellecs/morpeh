@@ -10,9 +10,6 @@
         public const string SYSTEMS_GROUP_NAME      = "SystemsGroupAttribute";
         public const string SYSTEMS_GROUP_FULL_NAME = "Scellecs.Morpeh.SystemsGroupAttribute";
 
-        public const string INLINE_UPDATE_METHODS_NAME      = "SystemsGroupInlineUpdateMethodsAttribute";
-        public const string INLINE_UPDATE_METHODS_FULL_NAME = "Scellecs.Morpeh.SystemsGroupInlineUpdateMethodsAttribute";
-
         public const string SYSTEMS_GROUP_RUNNER_NAME      = "SystemsGroupRunnerAttribute";
         public const string SYSTEMS_GROUP_RUNNER_FULL_NAME = "Scellecs.Morpeh.SystemsGroupRunnerAttribute";
 

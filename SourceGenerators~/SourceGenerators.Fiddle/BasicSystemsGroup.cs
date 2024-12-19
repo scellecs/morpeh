@@ -2,8 +2,7 @@
 
 using Scellecs.Morpeh;
 
-[SystemsGroup]
-[SystemsGroupInlineUpdateMethods]
+[SystemsGroup(inlineUpdateCalls: true)]
 public partial class BasicSystemsGroup {
     [Register]
     private BasicDisposableClass _basicDisposableClass1;
