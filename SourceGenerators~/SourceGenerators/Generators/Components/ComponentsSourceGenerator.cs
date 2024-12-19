@@ -12,7 +12,6 @@
     [Generator]
     public class ComponentsSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.ComponentAttribute";
-        private const string COMPONENT_INTERFACE_NAME = "Scellecs.Morpeh.IComponent";
         
         private const string STASH_INITIAL_CAPACITY_ATTRIBUTE_NAME = "StashInitialCapacity";
         private const int DEFAULT_STASH_CAPACITY = 16;
@@ -23,13 +22,10 @@
                 (s, _) => s is StructDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
 
-            var componentInterface = context.CompilationProvider
-                .Select(static (compilation, _) => compilation.GetTypeByMetadataName(COMPONENT_INTERFACE_NAME));
-
-            context.RegisterSourceOutput(structs.Combine(componentInterface), static (spc, pair) => {
-                var ((structDeclaration, typeSymbol, semanticModel), iComponent) = pair;
+            context.RegisterSourceOutput(structs, static (spc, pair) => {
+                var (structDeclaration, typeSymbol, semanticModel) = pair;
                 
-                if (structDeclaration is null || iComponent is null) {
+                if (structDeclaration is null) {
                     return;
                 }
                 
