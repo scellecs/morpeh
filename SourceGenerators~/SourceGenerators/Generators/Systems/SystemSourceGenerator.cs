@@ -33,7 +33,7 @@
                 var skipCommit    = attributes.Any(a => a.AttributeClass?.Name == SKIP_COMMIT_ATTRIBUTE_NAME);
                 
                 var typeName = typeDeclaration.Identifier.ToString();
-                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeDeclaration, semanticModel);
+                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(semanticModel, typeDeclaration);
                 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

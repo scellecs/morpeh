@@ -20,12 +20,12 @@
             var structs = context.SyntaxProvider.ForAttributeWithMetadataName(
                 ATTRIBUTE_FULL_NAME,
                 (s, _) => s is StructDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
+                (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol as ITypeSymbol, ctx.SemanticModel));
 
             context.RegisterSourceOutput(structs, static (spc, pair) => {
                 var (structDeclaration, typeSymbol, semanticModel) = pair;
                 
-                if (structDeclaration is null) {
+                if (structDeclaration is null || typeSymbol is null) {
                     return;
                 }
                 
@@ -34,9 +34,17 @@
                     return;
                 }
 
-                var typeName             = structDeclaration.Identifier.ToString();
-                var genericParams        = new StringBuilder().AppendGenericParams(structDeclaration).ToString();
-                var genericConstraints   = new StringBuilder().AppendGenericConstraints(structDeclaration).ToString();
+                var typeName = structDeclaration.Identifier.ToString();
+                
+                string genericParams;
+                using (var scoped = StringBuilderPool.GetScoped()) {
+                    genericParams = scoped.StringBuilder.AppendGenericParams(structDeclaration).ToString();
+                }
+                
+                string genericConstraints;
+                using (var scoped = StringBuilderPool.GetScoped()) {
+                    genericConstraints = scoped.StringBuilder.AppendGenericConstraints(structDeclaration).ToString();
+                }
                 
                 var stashInitialCapacity = DEFAULT_STASH_CAPACITY;
                 
@@ -65,8 +73,7 @@
                     }
                 }
                 
-
-                var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(semanticModel, structDeclaration);
+                var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(semanticModel, typeSymbol);
             
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

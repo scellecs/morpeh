@@ -29,5 +29,19 @@
             sb.Clear();
             pool.Push(sb);
         }
+        
+        public static ScopedStringBuilder GetScoped() => new(Get());
+
+        public readonly struct ScopedStringBuilder : IDisposable {
+            private readonly StringBuilder sb;
+            
+            public StringBuilder StringBuilder => this.sb;
+
+            public ScopedStringBuilder(StringBuilder sb) => this.sb = sb;
+
+            public void Dispose() {
+                Return(this.sb);
+            }
+        }
     }
 }

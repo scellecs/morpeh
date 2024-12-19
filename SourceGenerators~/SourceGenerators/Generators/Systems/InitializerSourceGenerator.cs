@@ -24,7 +24,7 @@
                 }
                 
                 var typeName = typeDeclaration.Identifier.ToString();
-                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeDeclaration, semanticModel);
+                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(semanticModel, typeDeclaration);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

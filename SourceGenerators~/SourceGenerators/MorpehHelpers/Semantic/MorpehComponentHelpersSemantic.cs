@@ -1,24 +1,34 @@
 ﻿namespace SourceGenerators.MorpehHelpers.Semantic {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using NonSemantic;
     using SourceGenerators.Utils.NonSemantic;
+    using SourceGenerators.Utils.Semantic;
+    using Utils.Pools;
 
     public static class MorpehComponentHelpersSemantic {
-        public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
-            if (semanticModel.GetDeclaredSymbol(structDeclaration) is not ITypeSymbol structSymbol) {
+        public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, ITypeSymbol? typeSymbol) {
+            if (typeSymbol is not INamedTypeSymbol structSymbol) {
                 return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
             }
-
-            var componentDecl = new StringBuilder()
-                .Append(structDeclaration.Identifier)
-                .AppendGenericParams(structDeclaration)
+            
+            using var scoped = StringBuilderPool.GetScoped();
+            
+            var componentDecl = scoped.StringBuilder
+                .Append(typeSymbol.Name)
+                .AppendGenericParams(structSymbol)
                 .ToString();
-
-            return GetStashSpecializationInternal(semanticModel, structSymbol, componentDecl);
+            
+            return GetStashSpecializationInternal(semanticModel, typeSymbol, componentDecl);
+        }
+        
+        public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
+            if (semanticModel.GetDeclaredSymbol(structDeclaration) is not INamedTypeSymbol structSymbol) {
+                return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
+            }
+            
+            return GetStashSpecialization(semanticModel, structSymbol);
         }
 
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, TypeOfExpressionSyntax typeOfExpression) {
@@ -34,7 +44,7 @@
                 return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
             }
             
-            var isTag        = typeSymbol.GetMembers()
+            var isTag = typeSymbol.GetMembers()
                 .Where(m => m.Kind is SymbolKind.Field or SymbolKind.Property)
                 .All(f => f.IsStatic);
             
@@ -53,7 +63,7 @@
             return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "IDataComponent");
         }
         
-        public static List<StashRequirement> GetStashRequirements(TypeDeclarationSyntax typeDeclaration, SemanticModel semanticModel) {
+        public static List<StashRequirement> GetStashRequirements(SemanticModel semanticModel, TypeDeclarationSyntax typeDeclaration) {
             var stashes = new List<StashRequirement>();
             
             for (int i = 0, length = typeDeclaration.AttributeLists.Count; i < length; i++) {
@@ -74,17 +84,20 @@
                     }
                 
                     var typeInfo = semanticModel.GetTypeInfo(typeOfExpression.Type);
+                    if (typeInfo.Type is not INamedTypeSymbol typeSymbol) {
+                        continue;
+                    }
                 
                     string fieldName;
-                    if (typeInfo.Type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol) {
-                        fieldName = $"_{namedTypeSymbol.Name.ToCamelCase()}_{string.Join("_", namedTypeSymbol.TypeArguments.Select(t => t.Name))}";
+                    if (typeSymbol is { IsGenericType: true }) {
+                        fieldName = $"_{typeSymbol.Name.ToCamelCase()}_{string.Join("_", typeSymbol.TypeArguments.Select(t => t.Name))}";
                     } else {
                         fieldName = $"_{typeOfExpression.Type.ToString().ToCamelCase()}";
                     }
                 
                     stashes.Add(new StashRequirement {
                         fieldName         = fieldName,
-                        fieldTypeName     = GetStashSpecialization(semanticModel, typeOfExpression).type,
+                        fieldTypeName     = GetStashSpecialization(semanticModel, typeSymbol).type,
                         metadataClassName = typeOfExpression.Type.ToString(),
                     });
                 }
