@@ -17,27 +17,27 @@
                 (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol as ITypeSymbol, ctx.Attributes));
 
             context.RegisterSourceOutput(structs, static (spc, pair) => {
-                var (structDeclaration, typeSymbol, componentAttributes) = pair;
+                var (typeDeclaration, typeSymbol, componentAttributes) = pair;
                 
-                if (structDeclaration is null || typeSymbol is null) {
+                if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
                 
-                if (structDeclaration.IsDeclaredInsideAnotherType()) {
-                    Errors.ReportNestedDeclaration(spc, structDeclaration);
+                if (typeDeclaration.IsDeclaredInsideAnotherType()) {
+                    Errors.ReportNestedDeclaration(spc, typeDeclaration);
                     return;
                 }
 
-                var typeName = structDeclaration.Identifier.ToString();
+                var typeName = typeDeclaration.Identifier.ToString();
                 
                 string genericParams;
                 using (var scoped = StringBuilderPool.GetScoped()) {
-                    genericParams = scoped.StringBuilder.AppendGenericParams(structDeclaration).ToString();
+                    genericParams = scoped.StringBuilder.AppendGenericParams(typeDeclaration).ToString();
                 }
                 
                 string genericConstraints;
                 using (var scoped = StringBuilderPool.GetScoped()) {
-                    genericConstraints = scoped.StringBuilder.AppendGenericConstraints(structDeclaration).ToString();
+                    genericConstraints = scoped.StringBuilder.AppendGenericConstraints(typeDeclaration).ToString();
                 }
                 
                 var initialCapacity = -1;
@@ -57,10 +57,10 @@
             
                 sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 
-                sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
+                sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
                 sb.AppendIl2CppAttributes(indent);
-                sb.AppendIndent(indent).AppendVisibility(structDeclaration)
+                sb.AppendIndent(indent).AppendVisibility(typeDeclaration)
                     .Append(" partial struct ")
                     .Append(typeName)
                     .Append(genericParams)
@@ -79,9 +79,9 @@
                 }
                 sb.AppendIndent(indent).AppendLine("}");
                 
-                sb.AppendEndNamespace(structDeclaration, indent).AppendLine();
+                sb.AppendEndNamespace(typeDeclaration, indent).AppendLine();
                 
-                spc.AddSource($"{structDeclaration.Identifier.Text}.component_{structDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                spc.AddSource($"{typeDeclaration.Identifier.Text}.component_{typeDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
                 
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);

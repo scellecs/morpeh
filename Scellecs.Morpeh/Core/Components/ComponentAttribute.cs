@@ -1,5 +1,8 @@
 ﻿namespace Scellecs.Morpeh {
-    public class ComponentAttribute : System.Attribute {
+    using System;
+
+    [AttributeUsage(AttributeTargets.Struct)]
+    public class ComponentAttribute : Attribute {
         public ComponentAttribute(int initialCapacity = StashConstants.DEFAULT_COMPONENTS_CAPACITY) {
             
         }
