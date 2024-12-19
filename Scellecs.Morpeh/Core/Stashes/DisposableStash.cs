@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class StashD<T> : IStash where T : struct, IComponent, IDisposable {
+    public sealed class DisposableStash<T> : IStash where T : struct, IComponent, IDisposable {
         internal World world;
         private TypeInfo typeInfo;
         
@@ -41,7 +41,7 @@ namespace Scellecs.Morpeh {
         }
         
         [UnityEngine.Scripting.Preserve]
-        internal StashD(World world, TypeInfo typeInfo, int capacity = -1) {
+        internal DisposableStash(World world, TypeInfo typeInfo, int capacity = -1) {
             this.world = world;
             this.typeInfo = typeInfo;
             

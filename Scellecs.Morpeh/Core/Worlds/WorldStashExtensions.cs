@@ -73,14 +73,14 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
-        public static StashD<T> GetStashD<T>(this World world, int capacity = -1) where T : struct, IComponent, IDisposable {
+        public static DisposableStash<T> GetDisposableStash<T>(this World world, int capacity = -1) where T : struct, IComponent, IDisposable {
             world.ThreadSafetyCheck();
             
             var info = ComponentId<T>.info;
 
             var candidate = world.GetExistingStash(info.id);
             if (candidate != null) {
-                if (candidate is StashD<T> typeStash) {
+                if (candidate is DisposableStash<T> typeStash) {
                     return typeStash;
                 } else {
                     throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
@@ -89,7 +89,7 @@
             
             world.EnsureStashCapacity(info.id);
             
-            var stash = new StashD<T>(world, info, capacity);
+            var stash = new DisposableStash<T>(world, info, capacity);
             world.stashes[info.id] = stash;
             return stash;
         }

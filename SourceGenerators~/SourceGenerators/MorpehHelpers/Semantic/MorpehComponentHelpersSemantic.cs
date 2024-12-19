@@ -60,7 +60,7 @@
             }
 
             if (isDisposable) {
-                return new StashSpecialization($"StashD<{componentDecl}>", $"GetStashD<{componentDecl}>", "IDisposableComponent");
+                return new StashSpecialization($"DisposableStash<{componentDecl}>", $"GetDisposableStash<{componentDecl}>", "IDisposableComponent");
             }
 
             return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "IDataComponent");
