@@ -5,6 +5,8 @@
         public const string MORPEH_DEBUG                = "MORPEH_DEBUG";
         public const string MORPEH_PROFILING            = "MORPEH_PROFILING";
         public const string MORPEH_ENABLE_IL2CPP_CHECKS = "MORPEH_ENABLE_IL2CPP_CHECKS";
+        public const string MORPEH_DISABLE_INLINING     = "MORPEH_DISABLE_INLINING";
+        
         public const string ENABLE_IL2CPP               = "ENABLE_IL2CPP";
         public const string ENABLE_MONO_OR_IL2CPP       = "ENABLE_MONO || ENABLE_IL2CPP";
         

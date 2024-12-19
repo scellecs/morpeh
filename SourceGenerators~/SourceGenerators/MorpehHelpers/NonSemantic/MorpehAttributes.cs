@@ -21,7 +21,9 @@
         }
         
         public static StringBuilder AppendInlining(this StringBuilder sb, MethodImplOptions options, IndentSource indent) {
+            sb.Append("#if !").Append(MorpehDefines.MORPEH_DISABLE_INLINING).AppendLine();
             sb.AppendIndent(indent).AppendLine($"[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.{options})]");
+            sb.AppendLine("#endif");
             
             return sb;
         }
