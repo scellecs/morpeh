@@ -20,7 +20,7 @@
                 .AppendGenericParams(structSymbol)
                 .ToString();
             
-            return GetStashSpecializationInternal(semanticModel, typeSymbol, componentDecl);
+            return GetStashSpecializationInternal(typeSymbol, componentDecl);
         }
         
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
@@ -36,10 +36,10 @@
             var typeSymbol    = typeInfo.Type;
             var componentDecl = typeOfExpression.Type.ToString();
 
-            return GetStashSpecializationInternal(semanticModel, typeSymbol, componentDecl);
+            return GetStashSpecializationInternal(typeSymbol, componentDecl);
         }
 
-        private static StashSpecialization GetStashSpecializationInternal(SemanticModel semanticModel, ITypeSymbol? typeSymbol, string componentDecl) {
+        private static StashSpecialization GetStashSpecializationInternal(ITypeSymbol? typeSymbol, string componentDecl) {
             if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
                 return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
             }
