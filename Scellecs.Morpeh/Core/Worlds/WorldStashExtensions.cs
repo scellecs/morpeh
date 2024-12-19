@@ -46,23 +46,76 @@
             return stash;
         }
         
+        // TODO: Change to IDataComponent. This will be a breaking change, proceed with caution.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
-        public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
+        public static Stash<T> GetStash<T>(this World world, int capacity = -1) where T : struct, IComponent {
             world.ThreadSafetyCheck();
             
             var info = ComponentId<T>.info;
 
             var candidate = world.GetExistingStash(info.id);
             if (candidate != null) {
-                return (Stash<T>)candidate;
+                if (candidate is Stash<T> typeStash) {
+                    return typeStash;
+                } else {
+                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
+                }
             }
             
             world.EnsureStashCapacity(info.id);
             
-            var capacity = ComponentId<T>.StashSize;
             var stash = new Stash<T>(world, info, capacity);
+            world.stashes[info.id] = stash;
+            return stash;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
+        [UnityEngine.Scripting.Preserve]
+        public static DisposableStash<T> GetDisposableStash<T>(this World world, int capacity = -1) where T : struct, IDisposableComponent {
+            world.ThreadSafetyCheck();
+            
+            var info = ComponentId<T>.info;
+
+            var candidate = world.GetExistingStash(info.id);
+            if (candidate != null) {
+                if (candidate is DisposableStash<T> typeStash) {
+                    return typeStash;
+                } else {
+                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
+                }
+            }
+            
+            world.EnsureStashCapacity(info.id);
+            
+            var stash = new DisposableStash<T>(world, info, capacity);
+            world.stashes[info.id] = stash;
+            return stash;
+        }
+        
+        // TODO: Pass type + info externally to avoid extra generic method which is absolutely useless
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
+        [UnityEngine.Scripting.Preserve]
+        public static TagStash GetTagStash<T>(this World world, int capacity = -1) where T : struct, ITagComponent {
+            world.ThreadSafetyCheck();
+            
+            var info = ComponentId<T>.info;
+
+            var candidate = world.GetExistingStash(info.id);
+            if (candidate != null) {
+                if (candidate is TagStash typeStash) {
+                    return typeStash;
+                } else {
+                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
+                }
+            }
+            
+            world.EnsureStashCapacity(info.id);
+            
+            var stash = new TagStash(world, typeof(T), info, capacity);
             world.stashes[info.id] = stash;
             return stash;
         }

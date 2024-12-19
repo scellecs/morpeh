@@ -19,17 +19,6 @@ public class StashTests {
     }
 
     [Fact]
-    public void StashSize_WorksCorrectly() {
-        ComponentId<StashSizeCheck>.StashSize = 512;
-
-        var w1Stash = world.GetStash<StashSizeCheck>();
-        var w2Stash = world2.GetStash<StashSizeCheck>();
-
-        Assert.True(w1Stash.map.capacity >= 512);
-        Assert.True(w2Stash.map.capacity >= 512);
-    }
-
-    [Fact]
     public void WorldGetStash_WorksCorretly() {
         var stash = this.world.GetStash<Test1>();
         Assert.NotNull(stash);
@@ -477,51 +466,6 @@ public class StashTests {
         }
 
         Assert.Equal(15, totalValue);
-    }
-
-    [Fact]
-    public void EntityDispose_DisposableComponent() {
-        var entity = this.world.CreateEntity();
-        var stash = this.world.GetStash<DisposableTest>().AsDisposable();
-        var handle = new DisposableTest.Handle();
-        stash.Set(entity, new DisposableTest {
-            value = handle,
-        });
-
-        Assert.True(handle.value);
-        Assert.True(stash.Get(entity).value.value);
-        Assert.Equal(handle, stash.Get(entity).value);
-
-        ref var data = ref stash.Get(entity);
-        this.world.RemoveEntity(entity);
-        this.world.Commit();
-
-        Assert.False(handle.value);
-        Assert.Equal(default, data.value);
-    }
-
-    [Fact]
-    public void WorldDispose_DisposableComponent() {
-        var world = World.Create();
-        world.Commit();
-
-        var entity = world.CreateEntity();
-        var stash = world.GetStash<DisposableTest>().AsDisposable();
-        var handle = new DisposableTest.Handle();
-        stash.Set(entity, new DisposableTest {
-            value = handle,
-        });
-
-        Assert.True(handle.value);
-        Assert.True(stash.Get(entity).value.value);
-        Assert.Equal(handle, stash.Get(entity).value);
-
-        ref var data = ref stash.Get(entity);
-        world.Commit();
-        world.Dispose();
-
-        Assert.False(handle.value);
-        Assert.Equal(default, data.value);
     }
 
     [Fact]

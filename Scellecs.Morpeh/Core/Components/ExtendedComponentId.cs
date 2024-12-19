@@ -56,7 +56,7 @@
                 },
                 entitySetComponentBoxed = (entity, component) => entity.GetWorld().GetStash<T>().Set(entity, (T)component),
                 entityRemoveComponent = (entity) => entity.GetWorld().GetStash<T>().Remove(entity),
-                isMarker = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length == 0,
+                isMarker = typeof(ITagComponent).IsAssignableFrom(typeof(T)),
             };
 
             typeAssociation.Add(typeof(T), typeDefinition);
