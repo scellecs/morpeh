@@ -69,7 +69,7 @@
                     }
                 }
                 
-                var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(semanticModel, typeSymbol);
+                var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(typeSymbol);
             
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

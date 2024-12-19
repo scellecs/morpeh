@@ -13,12 +13,12 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEM_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol));
             
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
-                var (typeDeclaration, typeSymbol, semanticModel) = pair;
-                if (typeDeclaration is null) {
+                var (typeDeclaration, typeSymbol) = pair;
+                if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
                 
@@ -27,7 +27,7 @@
                 var skipCommit    = attributes.Any(a => a.AttributeClass?.Name == MorpehAttributes.SKIP_COMMIT_NAME);
                 
                 var typeName = typeDeclaration.Identifier.ToString();
-                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(semanticModel, typeDeclaration);
+                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol);
                 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

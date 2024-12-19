@@ -3,12 +3,13 @@
     using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using NonSemantic;
     using SourceGenerators.Utils.NonSemantic;
     using SourceGenerators.Utils.Semantic;
     using Utils.Pools;
 
     public static class MorpehComponentHelpersSemantic {
-        public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, ITypeSymbol? typeSymbol) {
+        public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol) {
             if (typeSymbol is not INamedTypeSymbol structSymbol) {
                 return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
             }
@@ -28,7 +29,7 @@
                 return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
             }
             
-            return GetStashSpecialization(semanticModel, structSymbol);
+            return GetStashSpecialization(structSymbol);
         }
 
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, TypeOfExpressionSyntax typeOfExpression) {
@@ -65,44 +66,50 @@
             return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "IDataComponent");
         }
         
-        public static List<StashRequirement> GetStashRequirements(SemanticModel semanticModel, TypeDeclarationSyntax typeDeclaration) {
+        public static List<StashRequirement> GetStashRequirements(INamedTypeSymbol typeDeclaration) {
             var stashes = new List<StashRequirement>();
+
+            var attributes = typeDeclaration.GetAttributes();
             
-            for (int i = 0, length = typeDeclaration.AttributeLists.Count; i < length; i++) {
-                for (int j = 0, attributesLength = typeDeclaration.AttributeLists[i].Attributes.Count; j < attributesLength; j++) {
-                    var attribute = typeDeclaration.AttributeLists[i].Attributes[j];
+            for (int i = 0, length = attributes.Length; i < length; i++) {
+                var attribute = attributes[i];
                     
-                    if (attribute.Name.ToString() != "Require") {
-                        continue;
-                    }
-                    
-                    var args = attribute.ArgumentList?.Arguments;
-                    if (args is not { Count: 1 }) {
-                        continue;
-                    }
-                
-                    if (args.Value[0].Expression is not TypeOfExpressionSyntax typeOfExpression) {
-                        continue;
-                    }
-                
-                    var typeInfo = semanticModel.GetTypeInfo(typeOfExpression.Type);
-                    if (typeInfo.Type is not INamedTypeSymbol typeSymbol) {
-                        continue;
-                    }
-                
-                    string fieldName;
-                    if (typeSymbol is { IsGenericType: true }) {
-                        fieldName = $"_{typeSymbol.Name.ToCamelCase()}_{string.Join("_", typeSymbol.TypeArguments.Select(t => t.Name))}";
-                    } else {
-                        fieldName = $"_{typeOfExpression.Type.ToString().ToCamelCase()}";
-                    }
-                
-                    stashes.Add(new StashRequirement {
-                        fieldName         = fieldName,
-                        fieldTypeName     = GetStashSpecialization(semanticModel, typeSymbol).type,
-                        metadataClassName = typeOfExpression.Type.ToString(),
-                    });
+                if (attribute.AttributeClass?.Name != MorpehAttributes.REQUIRE_NAME) {
+                    continue;
                 }
+
+                var args = attribute.ConstructorArguments;
+                if (args is not { Length: 1 }) {
+                    continue;
+                }
+                
+                if (args[0].Kind != TypedConstantKind.Type) {
+                    continue;
+                }
+
+                if (args[0].Value is not INamedTypeSymbol componentTypeSymbol) {
+                    continue;
+                }
+                
+                string fieldName;
+                string metadataClassName;
+                
+                if (componentTypeSymbol is { IsGenericType: true }) {
+                    fieldName = $"_{componentTypeSymbol.Name.ToCamelCase()}_{string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name))}";
+                    
+                    using (var scoped = StringBuilderPool.GetScoped()) {
+                        metadataClassName = scoped.StringBuilder.Append(componentTypeSymbol.Name).AppendGenericParams(componentTypeSymbol).ToString();
+                    }
+                } else {
+                    fieldName = $"_{componentTypeSymbol.Name.ToCamelCase()}";
+                    metadataClassName = componentTypeSymbol.Name;
+                }
+                
+                stashes.Add(new StashRequirement {
+                    fieldName         = fieldName,
+                    fieldTypeName     = GetStashSpecialization(componentTypeSymbol).type,
+                    metadataClassName = metadataClassName,
+                });
             }
             
             return stashes;

@@ -37,6 +37,9 @@
         public const string REGISTER_NAME      = "RegisterAttribute";
         public const string REGISTER_FULL_NAME = "Scellecs.Morpeh.RegisterAttribute";
         
+        public const string REQUIRE_NAME      = "RequireAttribute";
+        public const string REQUIRE_FULL_NAME = "Scellecs.Morpeh.RequireAttribute";
+        
         public static StringBuilder AppendIl2CppAttributes(this StringBuilder sb, IndentSource indent) {
             sb.Append("#if !").Append(MorpehDefines.MORPEH_ENABLE_IL2CPP_CHECKS).Append(" && ").AppendLine(MorpehDefines.ENABLE_IL2CPP);
             sb.AppendIndent(indent).AppendLine("[Unity.IL2CPP.CompilerServices.Il2CppSetOption(Unity.IL2CPP.CompilerServices.Option.NullChecks, false)]");

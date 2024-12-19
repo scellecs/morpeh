@@ -12,17 +12,17 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.INITIALIZER_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.SemanticModel));
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol));
             
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
-                var (typeDeclaration, semanticModel) = pair;
-                if (typeDeclaration is null) {
+                var (typeDeclaration, typeSymbol) = pair;
+                if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
                 
                 var typeName = typeDeclaration.Identifier.ToString();
-                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(semanticModel, typeDeclaration);
+                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
