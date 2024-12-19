@@ -9,14 +9,9 @@
 
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.SystemAttribute";
-        
-        private const string ALWAYS_ENABLED_ATTRIBUTE_NAME = "AlwaysEnabledAttribute";
-        private const string SKIP_COMMIT_ATTRIBUTE_NAME = "SkipCommitAttribute";
-        
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_FULL_NAME,
+                MorpehAttributes.SYSTEM_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
             
@@ -28,8 +23,8 @@
                 }
                 
                 var attributes = typeSymbol.GetAttributes();
-                var alwaysEnabled = attributes.Any(a => a.AttributeClass?.Name == ALWAYS_ENABLED_ATTRIBUTE_NAME);
-                var skipCommit    = attributes.Any(a => a.AttributeClass?.Name == SKIP_COMMIT_ATTRIBUTE_NAME);
+                var alwaysEnabled = attributes.Any(a => a.AttributeClass?.Name == MorpehAttributes.ALWAYS_ENABLED_NAME);
+                var skipCommit    = attributes.Any(a => a.AttributeClass?.Name == MorpehAttributes.SKIP_COMMIT_NAME);
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(semanticModel, typeDeclaration);

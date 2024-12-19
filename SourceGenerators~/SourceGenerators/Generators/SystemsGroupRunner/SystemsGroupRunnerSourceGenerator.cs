@@ -9,11 +9,9 @@
 
     [Generator]
     public class SystemsGroupRunnerSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.SystemsGroupRunnerAttribute";
-        
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_FULL_NAME,
+                MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
                 (s, _) => s is ClassDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.SemanticModel));
             
@@ -77,7 +75,9 @@
                     .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
-                    .Append(" : System.IDisposable ")
+                    .Append(" : ")
+                    .Append(KnownTypes.DISPOSABLE_FULL_NAME)
+                    .Append(' ')
                     .AppendGenericConstraints(typeDeclaration)
                     .AppendLine(" {");
 

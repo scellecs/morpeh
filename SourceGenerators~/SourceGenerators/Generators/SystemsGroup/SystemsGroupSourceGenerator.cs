@@ -12,25 +12,14 @@
 
     [Generator]
     public class SystemsGroupSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.SystemsGroupAttribute";
-        
-        private const string INLINE_UPDATE_METHODS_ATTRIBUTE_NAME = "SystemsGroupInlineUpdateMethodsAttribute";
-        
-        private const string DISPOSABLE_INTERFACE_NAME = "System.IDisposable";
-        
-        private const string SYSTEM_ATTRIBUTE_NAME = "SystemAttribute";
-        private const string INITIALIZER_ATTRIBUTE_NAME = "InitializerAttribute";
-        private const string INJECTABLE_ATTRIBUTE_NAME = "InjectableAttribute";
-        private const string REGISTER_ATTRIBUTE_NAME = "RegisterAttribute";
-        
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_FULL_NAME,
+                MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
             
             var disposableInterface = context.CompilationProvider
-                .Select(static (compilation, _) => compilation.GetTypeByMetadataName(DISPOSABLE_INTERFACE_NAME));
+                .Select(static (compilation, _) => compilation.GetTypeByMetadataName(KnownTypes.DISPOSABLE_FULL_NAME));
             
             context.RegisterSourceOutput(classes.Combine(disposableInterface), static (spc, pair) =>
             {
@@ -65,15 +54,15 @@
                     fieldDefinition.fieldDeclaration = fieldDeclaration;
                     fieldDefinition.fieldSymbol      = fieldSymbol;
                     fieldDefinition.loopType         = LoopTypeHelpers.GetLoopMethodNameFromField(fieldSymbol);
-                    fieldDefinition.isSystem         = typeAttributes.Any(x => x.AttributeClass?.Name == SYSTEM_ATTRIBUTE_NAME);
-                    fieldDefinition.isInitializer    = typeAttributes.Any(x => x.AttributeClass?.Name == INITIALIZER_ATTRIBUTE_NAME);
+                    fieldDefinition.isSystem         = typeAttributes.Any(x => x.AttributeClass?.Name == MorpehAttributes.SYSTEM_NAME);
+                    fieldDefinition.isInitializer    = typeAttributes.Any(x => x.AttributeClass?.Name == MorpehAttributes.INITIALIZER_NAME);
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
-                    fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, INJECTABLE_ATTRIBUTE_NAME);
+                    fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, MorpehAttributes.INJECTABLE_NAME);
                     
                     for (int j = 0, jlength = fieldAttributes.Length; j < jlength; j++) {
                         var attribute = fieldAttributes[j];
                         
-                        if (attribute.AttributeClass?.Name != REGISTER_ATTRIBUTE_NAME) {
+                        if (attribute.AttributeClass?.Name != MorpehAttributes.REGISTER_NAME) {
                             continue;
                         }
 
@@ -99,7 +88,7 @@
                 var typeName = typeDeclaration.Identifier.ToString();
                 
                 var attributes = typeSymbol.GetAttributes();
-                var inlineUpdateMethods = attributes.Any(x => x.AttributeClass?.Name == INLINE_UPDATE_METHODS_ATTRIBUTE_NAME);
+                var inlineUpdateMethods = attributes.Any(x => x.AttributeClass?.Name == MorpehAttributes.INLINE_UPDATE_METHODS_NAME);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

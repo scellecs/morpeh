@@ -1,6 +1,5 @@
 ﻿namespace SourceGenerators.Generators.ComponentsMetadata {
     using System.Runtime.CompilerServices;
-    using System.Text;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Diagnostics;
@@ -11,14 +10,11 @@
 
     [Generator]
     public class ComponentsSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.ComponentAttribute";
-        
-        private const string STASH_INITIAL_CAPACITY_ATTRIBUTE_NAME = "StashInitialCapacity";
         private const int DEFAULT_STASH_CAPACITY = 16;
 
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var structs = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_FULL_NAME,
+                MorpehAttributes.COMPONENT_FULL_NAME,
                 (s, _) => s is StructDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol as ITypeSymbol, ctx.SemanticModel));
 
@@ -53,7 +49,7 @@
                         for (int j = 0, attributesCount = structDeclaration.AttributeLists[i].Attributes.Count; j < attributesCount; j++) {
                             var attribute = structDeclaration.AttributeLists[i].Attributes[j];
                             
-                            if (attribute.Name.ToString() != STASH_INITIAL_CAPACITY_ATTRIBUTE_NAME) {
+                            if (attribute.Name.ToString() != MorpehAttributes.STASH_INITIAL_CAPACITY_NAME) {
                                 continue;
                             }
 
