@@ -1,5 +1,7 @@
 ﻿namespace Scellecs.Morpeh {
-    public interface IDisposableComponent : IComponent {
+    using System;
+
+    public interface IDisposableComponent : IComponent, IDisposable {
         
     }
 }

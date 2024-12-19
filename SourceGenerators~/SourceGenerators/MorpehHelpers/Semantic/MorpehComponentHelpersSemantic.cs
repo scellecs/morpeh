@@ -43,14 +43,16 @@
             if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
                 return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
             }
+
+            var members = typeSymbol.GetMembers();
             
-            var isTag = typeSymbol.GetMembers()
+            var isTag = members
                 .Where(m => m.Kind is SymbolKind.Field or SymbolKind.Property)
                 .All(f => f.IsStatic);
             
-            var disposable = semanticModel.Compilation.GetTypeByMetadataName("System.IDisposable");
-            var isDisposable = disposable != null && typeSymbol.AllInterfaces
-                .Contains(disposable);
+            var isDisposable = members
+                .Where(m => m.Kind is SymbolKind.Method)
+                .Any(m => m.Name == "Dispose");
 
             if (isTag) {
                 return new StashSpecialization("TagStash", $"GetTagStash<{componentDecl}>", "ITagComponent");
