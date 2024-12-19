@@ -101,7 +101,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (OnAwake), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
-                            sb.AppendIndent(indent).Append("_systemHasFailed = true;");
+                            sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendElseDefine();
@@ -148,7 +148,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (OnUpdate), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
-                            sb.AppendIndent(indent).Append("_systemHasFailed = true;");
+                            sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendElseDefine();
@@ -181,7 +181,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (Dispose), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
-                            sb.AppendIndent(indent).Append("_systemHasFailed = true;");
+                            sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendElseDefine();
