@@ -16,10 +16,10 @@
             var structs = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.COMPONENT_FULL_NAME,
                 (s, _) => s is StructDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol as ITypeSymbol, ctx.SemanticModel));
+                (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol as ITypeSymbol, ctx.Attributes));
 
             context.RegisterSourceOutput(structs, static (spc, pair) => {
-                var (structDeclaration, typeSymbol, semanticModel) = pair;
+                var (structDeclaration, typeSymbol, componentAttributes) = pair;
                 
                 if (structDeclaration is null || typeSymbol is null) {
                     return;
@@ -42,30 +42,13 @@
                     genericConstraints = scoped.StringBuilder.AppendGenericConstraints(structDeclaration).ToString();
                 }
                 
-                var stashInitialCapacity = DEFAULT_STASH_CAPACITY;
+                var initialCapacity = -1;
                 
-                if (structDeclaration.AttributeLists.Count > 0) {
-                    for (int i = 0, length = structDeclaration.AttributeLists.Count; i < length; i++) {
-                        for (int j = 0, attributesCount = structDeclaration.AttributeLists[i].Attributes.Count; j < attributesCount; j++) {
-                            var attribute = structDeclaration.AttributeLists[i].Attributes[j];
-                            
-                            if (attribute.Name.ToString() != MorpehAttributes.STASH_INITIAL_CAPACITY_NAME) {
-                                continue;
-                            }
-
-                            if (attribute.ArgumentList?.Arguments.Count == 0) {
-                                continue;
-                            }
-
-                            var argument = attribute.ArgumentList?.Arguments[0];
-                            if (argument?.Expression is not LiteralExpressionSyntax literalExpressionSyntax) {
-                                continue;
-                            }
-
-                            if (int.TryParse(literalExpressionSyntax.Token.ValueText, out var value)) {
-                                stashInitialCapacity = value;
-                            }
-                        }
+                for (int i = 0, length = componentAttributes.Length; i < length; i++) {
+                    var attribute = componentAttributes[i];
+                    var args = attribute.ConstructorArguments;
+                    if (args.Length >= 1 && args[0].Value is int capacity) {
+                        initialCapacity = capacity;
                     }
                 }
                 
@@ -93,7 +76,7 @@
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).Append("public static ").Append(specialization.type).Append(" GetStash(World world) => world.").Append(specialization.getStashMethod)
                         .Append("(")
-                        .Append("capacity: ").Append(stashInitialCapacity)
+                        .Append("capacity: ").Append(initialCapacity)
                         .AppendLine(");");
                 }
                 sb.AppendIndent(indent).AppendLine("}");

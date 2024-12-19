@@ -7,9 +7,6 @@
         public const string COMPONENT_NAME      = "ComponentAttribute";
         public const string COMPONENT_FULL_NAME = "Scellecs.Morpeh.ComponentAttribute";
 
-        public const string STASH_INITIAL_CAPACITY_NAME      = "StashInitialCapacity";
-        public const string STASH_INITIAL_CAPACITY_FULL_NAME = "Scellecs.Morpeh.StashInitialCapacityAttribute";
-
         public const string SYSTEMS_GROUP_NAME      = "SystemsGroupAttribute";
         public const string SYSTEMS_GROUP_FULL_NAME = "Scellecs.Morpeh.SystemsGroupAttribute";
 
