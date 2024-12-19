@@ -10,7 +10,7 @@ namespace SourceGenerators.Tests;
 using Generators.ComponentsMetadata;
 
 [Collection("Sequential")]
-public class ComponentsSourceGeneratorTests(ITestOutputHelper output) {
+public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
     private readonly ITestOutputHelper output = output;
 
     private const string FILE_NAME = "TestComponent.component_extensions.g.cs";
@@ -151,10 +151,10 @@ public class ComponentsSourceGeneratorTests(ITestOutputHelper output) {
     }
     
     private static GeneratorDriverRunResult Generate(string source) {
-        var generator = new ComponentsSourceGenerator();
+        var generator = new ComponentSourceGenerator();
         var driver    = CSharpGeneratorDriver.Create(generator);
 
-        var compilation = CSharpCompilation.Create(nameof(ComponentsSourceGeneratorTests),
+        var compilation = CSharpCompilation.Create(nameof(ComponentSourceGeneratorTests),
             [
                 CSharpSyntaxTree.ParseText(source)
             ],

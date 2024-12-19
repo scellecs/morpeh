@@ -9,9 +9,7 @@
     using Utils.Pools;
 
     [Generator]
-    public class ComponentsSourceGenerator : IIncrementalGenerator {
-        private const int DEFAULT_STASH_CAPACITY = 16;
-
+    public class ComponentSourceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var structs = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.COMPONENT_FULL_NAME,
