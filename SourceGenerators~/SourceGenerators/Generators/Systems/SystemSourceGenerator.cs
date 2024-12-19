@@ -7,7 +7,6 @@
     using Utils.NonSemantic;
     using Utils.Pools;
 
-    // TODO: Systems disable mechanism for exceptions.
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.SystemAttribute";
@@ -57,6 +56,10 @@
                 
                 using (indent.Scope()) {
                     sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
+
+                    sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
+                    sb.AppendIndent(indent).AppendLine("private bool _systemHasFailed;");
+                    sb.AppendEndIfDefine();
                     
                     sb.AppendLine().AppendLine();
                     foreach (var stash in stashes) {
@@ -98,6 +101,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (OnAwake), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
+                            sb.AppendIndent(indent).Append("_systemHasFailed = true;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendElseDefine();
@@ -115,6 +119,14 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
                     using (indent.Scope()) {
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
+                        sb.AppendIndent(indent).AppendLine("if (_systemHasFailed) {");
+                        using (indent.Scope()) {
+                            sb.AppendIndent(indent).AppendLine("return;");
+                        }
+                        sb.AppendIndent(indent).AppendLine("}");
+                        sb.AppendEndIfDefine();
+                        
                         if (!alwaysEnabled) {
                             sb.AppendIndent(indent).AppendLine("if (!IsEnabled()) {");
                             using (indent.Scope()) {
@@ -136,6 +148,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (OnUpdate), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
+                            sb.AppendIndent(indent).Append("_systemHasFailed = true;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendElseDefine();
@@ -168,6 +181,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (Dispose), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
+                            sb.AppendIndent(indent).Append("_systemHasFailed = true;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendElseDefine();
