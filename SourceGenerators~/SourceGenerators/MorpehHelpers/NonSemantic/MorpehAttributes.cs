@@ -5,7 +5,7 @@
 
     public static class MorpehAttributes {
         public static StringBuilder AppendIl2CppAttributes(this StringBuilder sb, IndentSource indent) {
-            sb.Append("#if !").Append(MorpehDefines.MORPEH_ENABLE_IL2CPP_CHECKS).AppendLine();
+            sb.Append("#if !").Append(MorpehDefines.MORPEH_ENABLE_IL2CPP_CHECKS).Append(" && (").Append(MorpehDefines.ENABLE_MONO_OR_IL2CPP).AppendLine(")");
             sb.AppendIndent(indent).AppendLine("[Unity.IL2CPP.CompilerServices.Il2CppSetOption(Unity.IL2CPP.CompilerServices.Option.NullChecks, false)]");
             sb.AppendIndent(indent).AppendLine("[Unity.IL2CPP.CompilerServices.Il2CppSetOption(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false)]");
             sb.AppendIndent(indent).AppendLine("[Unity.IL2CPP.CompilerServices.Il2CppSetOption(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]");
