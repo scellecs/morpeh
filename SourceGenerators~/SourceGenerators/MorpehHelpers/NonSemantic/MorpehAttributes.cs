@@ -19,12 +19,6 @@
         public const string SYSTEM_NAME      = "SystemAttribute";
         public const string SYSTEM_FULL_NAME = "Scellecs.Morpeh.SystemAttribute";
 
-        public const string ALWAYS_ENABLED_NAME      = "AlwaysEnabledAttribute";
-        public const string ALWAYS_ENABLED_FULL_NAME = "Scellecs.Morpeh.AlwaysEnabledAttribute";
-
-        public const string SKIP_COMMIT_NAME      = "SkipCommitAttribute";
-        public const string SKIP_COMMIT_FULL_NAME = "Scellecs.Morpeh.SkipCommitAttribute";
-
         public const string INITIALIZER_NAME      = "InitializerAttribute";
         public const string INITIALIZER_FULL_NAME = "Scellecs.Morpeh.InitializerAttribute";
 

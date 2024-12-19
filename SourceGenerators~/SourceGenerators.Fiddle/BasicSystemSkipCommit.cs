@@ -2,9 +2,7 @@
 
 using Scellecs.Morpeh;
 
-[System]
-[SkipCommit]
-[AlwaysEnabled]
+[System(skipCommit: true, alwaysEnabled: true)]
 public partial class BasicSystemSkipCommit {
     public void OnAwake() {
         throw new NotImplementedException();

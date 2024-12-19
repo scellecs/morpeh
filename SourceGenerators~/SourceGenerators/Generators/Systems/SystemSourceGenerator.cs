@@ -13,18 +13,29 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEM_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol));
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.Attributes));
             
             context.RegisterSourceOutput(classes, static (spc, pair) =>
             {
-                var (typeDeclaration, typeSymbol) = pair;
+                var (typeDeclaration, typeSymbol, systemAttributes) = pair;
                 if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
+
+                var skipCommit    = false;
+                var alwaysEnabled = false;
                 
-                var attributes = typeSymbol.GetAttributes();
-                var alwaysEnabled = attributes.Any(a => a.AttributeClass?.Name == MorpehAttributes.ALWAYS_ENABLED_NAME);
-                var skipCommit    = attributes.Any(a => a.AttributeClass?.Name == MorpehAttributes.SKIP_COMMIT_NAME);
+                for (int i = 0, length = systemAttributes.Length; i < length; i++) {
+                    var attribute = systemAttributes[i];
+                    var args = attribute.ConstructorArguments;
+                    if (args.Length >= 1 && args[0].Value is bool skipCommitValue) {
+                        skipCommit = skipCommitValue;
+                    }
+                    
+                    if (args.Length >= 2 && args[1].Value is bool alwaysEnabledValue) {
+                        alwaysEnabled = alwaysEnabledValue;
+                    }
+                }
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol);
