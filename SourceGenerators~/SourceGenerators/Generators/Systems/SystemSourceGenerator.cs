@@ -11,8 +11,8 @@
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
         private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemAttribute";
-        private const string ALWAYS_ENABLED_ATTRIBUTE_NAME = "Scellecs.Morpeh.AlwaysEnabledAttribute";
-        private const string SKIP_COMMIT_ATTRIBUTE_NAME = "Scellecs.Morpeh.SkipCommitAttribute";
+        private const string ALWAYS_ENABLED_ATTRIBUTE_NAME = "AlwaysEnabledAttribute";
+        private const string SKIP_COMMIT_ATTRIBUTE_NAME = "SkipCommitAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
