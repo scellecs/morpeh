@@ -1,4 +1,4 @@
-﻿namespace SourceGenerators.Generators.ComponentsMetadata {
+﻿namespace SourceGenerators.Generators.Components {
     using System.Runtime.CompilerServices;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;

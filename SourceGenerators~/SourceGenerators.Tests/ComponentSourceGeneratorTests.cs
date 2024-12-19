@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace SourceGenerators.Tests;
 
-using Generators.ComponentsMetadata;
+using Generators.Components;
 
 [Collection("Sequential")]
 public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
