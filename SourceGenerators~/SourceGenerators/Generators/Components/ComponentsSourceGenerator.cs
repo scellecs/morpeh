@@ -83,10 +83,20 @@
                 sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
                 
                 sb.AppendIl2CppAttributes(indent);
-                sb.AppendIndent(indent).AppendVisibility(structDeclaration).AppendLine($" partial struct {typeName}{genericParams} : {specialization.constraintInterface} {genericConstraints} {{");
+                sb.AppendIndent(indent).AppendVisibility(structDeclaration)
+                    .Append(" partial struct ")
+                    .Append(typeName)
+                    .Append(genericParams)
+                    .Append(" : ")
+                    .Append(specialization.constraintInterface)
+                    .Append(' ')
+                    .Append(genericConstraints)
+                    .AppendLine(" {");
+                
                 using (indent.Scope()) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
-                    sb.AppendIndent(indent).Append($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}(")
+                    sb.AppendIndent(indent).Append("public static ").Append(specialization.type).Append(" GetStash(World world) => world.").Append(specialization.getStashMethod)
+                        .Append("(")
                         .Append("capacity: ").Append(stashInitialCapacity)
                         .AppendLine(");");
                 }
