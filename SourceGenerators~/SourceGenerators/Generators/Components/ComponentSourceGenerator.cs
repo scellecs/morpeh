@@ -30,16 +30,6 @@
 
                 var typeName = typeDeclaration.Identifier.ToString();
                 
-                string genericParams;
-                using (var scoped = StringBuilderPool.GetScoped()) {
-                    genericParams = scoped.StringBuilder.AppendGenericParams(typeDeclaration).ToString();
-                }
-                
-                string genericConstraints;
-                using (var scoped = StringBuilderPool.GetScoped()) {
-                    genericConstraints = scoped.StringBuilder.AppendGenericConstraints(typeDeclaration).ToString();
-                }
-                
                 var initialCapacity = -1;
                 
                 for (int i = 0, length = componentAttributes.Length; i < length; i++) {
@@ -63,11 +53,11 @@
                 sb.AppendIndent(indent).AppendVisibility(typeDeclaration)
                     .Append(" partial struct ")
                     .Append(typeName)
-                    .Append(genericParams)
+                    .AppendGenericParams(typeDeclaration)
                     .Append(" : ")
                     .Append(specialization.constraintInterface)
                     .Append(' ')
-                    .Append(genericConstraints)
+                    .AppendGenericConstraints(typeDeclaration)
                     .AppendLine(" {");
                 
                 using (indent.Scope()) {
