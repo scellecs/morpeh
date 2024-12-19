@@ -28,6 +28,8 @@
 
                 var fields = RunnerFieldDefinitionCache.GetList();
                 
+                var existingLoops = new HashSet<string>();
+                
                 for (int i = 0, length = typeDeclaration.Members.Count; i < length; i++) {
                     if (typeDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
                         continue;
@@ -37,8 +39,8 @@
                         continue;
                     }
 
-                    // TODO: Pool reference types
-                    var loops   = new HashSet<string>();
+                    var loops = new HashSet<string>();
+                    
                     var members = typeSymbol.GetMembers();
                     for (int j = 0, jlength = members.Length; j < jlength; j++) {
                         if (members[j] is not IFieldSymbol fieldSymbol) {
@@ -57,6 +59,8 @@
                         typeName: fieldDeclaration.Declaration.Type.ToString(), 
                         fieldName: fieldDeclaration.Declaration.Variables[0].Identifier.Text,
                         loops: loops));
+                    
+                    existingLoops.UnionWith(loops);
                 }
 
                 var sb     = StringBuilderPool.Get();
@@ -124,19 +128,10 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
-                    // TODO: Scan existing loops once, instead of checking all fields to find loops
-                    foreach (var methodName in LoopTypeHelpers.loopMethodNames) {
-                        var count = 0;
+                    for (int i = 0, length = LoopTypeHelpers.loopMethodNames.Length; i < length; i++) {
+                        var methodName = LoopTypeHelpers.loopMethodNames[i];
                         
-                        for (int i = 0, length = fields.Count; i < length; i++) {
-                            if (!fields[i].loops.Contains(methodName)) {
-                                continue;
-                            }
-
-                            count++;
-                        }
-                        
-                        if (count == 0) {
+                        if (!existingLoops.Contains(methodName)) {
                             continue;
                         }
 
@@ -146,12 +141,12 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("_world.Commit();");
                             
-                            for (int i = 0, length = fields.Count; i < length; i++) {
-                                if (!fields[i].loops.Contains(methodName)) {
+                            for (int j = 0, jlength = fields.Count; j < jlength; j++) {
+                                if (!fields[j].loops.Contains(methodName)) {
                                     continue;
                                 }
                                 
-                                sb.AppendIndent(indent).Append(fields[i].fieldName).Append('.').Append(methodName).AppendLine("(deltaTime);");
+                                sb.AppendIndent(indent).Append(fields[j].fieldName).Append('.').Append(methodName).AppendLine("(deltaTime);");
                             }
                         }
                     
