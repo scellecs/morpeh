@@ -10,7 +10,7 @@
     public static class MorpehComponentHelpersSemantic {
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
             if (semanticModel.GetDeclaredSymbol(structDeclaration) is not ITypeSymbol structSymbol) {
-                return new StashSpecialization("Stash<?>", "GetStash<?>");
+                return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
             }
 
             var componentDecl = new StringBuilder()
@@ -31,7 +31,7 @@
 
         private static StashSpecialization GetStashSpecializationInternal(SemanticModel semanticModel, ITypeSymbol? typeSymbol, string componentDecl) {
             if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
-                return new StashSpecialization("Stash<?>", "GetStash<?>");
+                return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
             }
             
             var isTag        = typeSymbol.GetMembers()
@@ -43,14 +43,14 @@
                 .Contains(disposable);
 
             if (isTag) {
-                return new StashSpecialization("TagStash", $"GetTagStash<{componentDecl}>");
+                return new StashSpecialization("TagStash", $"GetTagStash<{componentDecl}>", "ITagComponent");
             }
 
             if (isDisposable) {
-                return new StashSpecialization($"StashD<{componentDecl}>", $"GetStashD<{componentDecl}>");
+                return new StashSpecialization($"StashD<{componentDecl}>", $"GetStashD<{componentDecl}>", "IDisposableComponent");
             }
 
-            return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>");
+            return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "IDataComponent");
         }
         
         public static List<StashRequirement> GetStashRequirements(TypeDeclarationSyntax typeDeclaration, SemanticModel semanticModel) {
@@ -96,10 +96,12 @@
         public readonly struct StashSpecialization {
             public readonly string type;
             public readonly string getStashMethod;
+            public readonly string constraintInterface;
             
-            public StashSpecialization(string type, string getStashMethod) {
-                this.type           = type;
-                this.getStashMethod = getStashMethod;
+            public StashSpecialization(string type, string getStashMethod, string constraintInterface) {
+                this.type               = type;
+                this.getStashMethod     = getStashMethod;
+                this.constraintInterface = constraintInterface;
             }
         }
         
