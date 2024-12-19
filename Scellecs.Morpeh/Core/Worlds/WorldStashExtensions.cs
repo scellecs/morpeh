@@ -46,6 +46,7 @@
             return stash;
         }
         
+        // TODO: Change to IDataComponent. This will be a breaking change, proceed with caution.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
@@ -73,7 +74,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
-        public static DisposableStash<T> GetDisposableStash<T>(this World world, int capacity = -1) where T : struct, IComponent, IDisposable {
+        public static DisposableStash<T> GetDisposableStash<T>(this World world, int capacity = -1) where T : struct, IDisposableComponent {
             world.ThreadSafetyCheck();
             
             var info = ComponentId<T>.info;
@@ -98,7 +99,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
-        public static TagStash GetTagStash<T>(this World world, int capacity = -1) where T : struct, IComponent {
+        public static TagStash GetTagStash<T>(this World world, int capacity = -1) where T : struct, ITagComponent {
             world.ThreadSafetyCheck();
             
             var info = ComponentId<T>.info;

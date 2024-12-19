@@ -78,14 +78,14 @@
                 switch (current) {
                     case BaseNamespaceDeclarationSyntax baseNamespaceDeclaration: {
                         foreach (var usingDirective in baseNamespaceDeclaration.Usings) {
-                            sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+                            sb.AppendIndent(indent).AppendLine(usingDirective.ToString());
                         }
 
                         break;
                     }
                     case CompilationUnitSyntax compilationUnitSyntax: {
                         foreach (var usingDirective in compilationUnitSyntax.Usings) {
-                            sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+                            sb.AppendIndent(indent).AppendLine(usingDirective.ToString());
                         }
 
                         break;
@@ -105,14 +105,14 @@
                 switch (current) {
                     case BaseNamespaceDeclarationSyntax baseNamespaceDeclaration: {
                         foreach (var usingDirective in baseNamespaceDeclaration.Usings) {
-                            sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+                            sb.AppendIndent(indent).AppendLine(usingDirective.ToString());
                         }
 
                         break;
                     }
                     case CompilationUnitSyntax compilationUnitSyntax: {
                         foreach (var usingDirective in compilationUnitSyntax.Usings) {
-                            sb.AppendIndent(indent).Append(usingDirective).AppendLine();
+                            sb.AppendIndent(indent).AppendLine(usingDirective.ToString());
                         }
 
                         break;

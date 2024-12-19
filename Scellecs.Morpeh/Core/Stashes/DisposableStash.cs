@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class DisposableStash<T> : IStash where T : struct, IComponent, IDisposable {
+    public sealed class DisposableStash<T> : IStash where T : struct, IDisposableComponent {
         internal World world;
         private TypeInfo typeInfo;
         
