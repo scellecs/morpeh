@@ -94,6 +94,7 @@
             return stash;
         }
         
+        // TODO: Pass type + info externally to avoid extra generic method which is absolutely useless
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
