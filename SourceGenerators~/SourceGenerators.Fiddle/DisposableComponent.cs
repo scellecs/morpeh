@@ -4,7 +4,7 @@ using Scellecs.Morpeh;
 
 [Component]
 [StashInitialCapacity(32)]
-public partial struct DisposableComponent : System.IDisposable {
+internal partial struct DisposableComponent : System.IDisposable {
     public int value;
     
     public void Dispose() {

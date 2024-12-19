@@ -80,7 +80,7 @@
                 sb.AppendBeginNamespace(structDeclaration, indent).AppendLine();
                 
                 sb.AppendIl2CppAttributes(indent);
-                sb.AppendIndent(indent).AppendLine($"public partial struct {typeName}{genericParams} : {specialization.constraintInterface} {genericConstraints} {{");
+                sb.AppendIndent(indent).AppendVisibility(structDeclaration).AppendLine($" partial struct {typeName}{genericParams} : {specialization.constraintInterface} {genericConstraints} {{");
                 using (indent.Scope()) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).Append($"public static {specialization.type} GetStash(World world) => world.{specialization.getStashMethod}(")
