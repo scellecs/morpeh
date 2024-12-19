@@ -11,14 +11,14 @@
 
     [Generator]
     public class ComponentsSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.ComponentAttribute";
+        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.ComponentAttribute";
         
         private const string STASH_INITIAL_CAPACITY_ATTRIBUTE_NAME = "StashInitialCapacity";
         private const int DEFAULT_STASH_CAPACITY = 16;
 
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var structs = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_NAME,
+                ATTRIBUTE_FULL_NAME,
                 (s, _) => s is StructDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
 

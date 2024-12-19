@@ -10,13 +10,14 @@
     // TODO: Systems disable mechanism for exceptions.
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemAttribute";
+        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.SystemAttribute";
+        
         private const string ALWAYS_ENABLED_ATTRIBUTE_NAME = "AlwaysEnabledAttribute";
         private const string SKIP_COMMIT_ATTRIBUTE_NAME = "SkipCommitAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_NAME,
+                ATTRIBUTE_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
             

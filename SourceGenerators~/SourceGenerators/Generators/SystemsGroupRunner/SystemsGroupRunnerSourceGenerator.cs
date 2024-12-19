@@ -9,11 +9,11 @@
 
     [Generator]
     public class SystemsGroupRunnerSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemsGroupRunnerAttribute";
+        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.SystemsGroupRunnerAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_NAME,
+                ATTRIBUTE_FULL_NAME,
                 (s, _) => s is ClassDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.SemanticModel));
             

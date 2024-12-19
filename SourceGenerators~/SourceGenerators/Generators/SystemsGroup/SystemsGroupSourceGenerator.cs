@@ -12,8 +12,9 @@
 
     [Generator]
     public class SystemsGroupSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemsGroupAttribute";
-        private const string INLINE_UPDATE_METHODS_ATTRIBUTE_NAME = "Scellecs.Morpeh.SystemGroupInlineUpdateMethodsAttribute";
+        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.SystemsGroupAttribute";
+        
+        private const string INLINE_UPDATE_METHODS_ATTRIBUTE_NAME = "SystemsGroupInlineUpdateMethodsAttribute";
         
         private const string DISPOSABLE_INTERFACE_NAME = "System.IDisposable";
         
@@ -24,7 +25,7 @@
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_NAME,
+                ATTRIBUTE_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel));
             

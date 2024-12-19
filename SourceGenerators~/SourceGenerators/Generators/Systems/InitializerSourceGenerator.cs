@@ -8,11 +8,11 @@
 
     [Generator]
     public class InitializerSourceGenerator : IIncrementalGenerator {
-        private const string ATTRIBUTE_NAME = "Scellecs.Morpeh.InitializerAttribute";
+        private const string ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.InitializerAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
-                ATTRIBUTE_NAME,
+                ATTRIBUTE_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.SemanticModel));
             

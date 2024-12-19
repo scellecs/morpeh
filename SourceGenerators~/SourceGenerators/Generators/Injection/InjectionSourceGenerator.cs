@@ -11,7 +11,7 @@
     public class InjectionSourceGenerator : IIncrementalGenerator {
         private const string INJECTABLE_ATTRIBUTE_NAME = "InjectableAttribute";
         
-        private const string GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME = "Scellecs.Morpeh.GenericInjectionProviderAttribute";
+        private const string GENERIC_INJECTION_PROVIDER_ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.GenericInjectionProviderAttribute";
         
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -23,7 +23,7 @@
 
             var genericInjectionProviders = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
-                    GENERIC_INJECTION_PROVIDER_ATTRIBUTE_NAME,
+                    GENERIC_INJECTION_PROVIDER_ATTRIBUTE_FULL_NAME,
                     static (node, _) => node is ClassDeclarationSyntax,
                     static (ctx, _) => 
                     {
