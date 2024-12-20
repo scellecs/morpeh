@@ -30,10 +30,10 @@
                         continue;
                     }
                     
-                    if (attribute.ConstructorArguments.Length > 0 && attribute.ConstructorArguments[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol injectAsPositionalSymbol }) {
-                        monoProviderType = injectAsPositionalSymbol;
-                    } else if (attribute.NamedArguments.Length > 0 && attribute.NamedArguments[0].Value is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol injectAsNamedSymbol }) {
-                        monoProviderType = injectAsNamedSymbol;
+                    if (attribute.ConstructorArguments.Length > 0 && attribute.ConstructorArguments[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol positionalSymbol }) {
+                        monoProviderType = positionalSymbol;
+                    } else if (attribute.NamedArguments.Length > 0 && attribute.NamedArguments[0].Value is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol namedSymbol }) {
+                        monoProviderType = namedSymbol;
                     }
                     
                     break;
