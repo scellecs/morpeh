@@ -3,7 +3,7 @@
 using Scellecs.Morpeh;
 
 [Component(initialCapacity: 64)]
-internal partial struct DisposableComponent {
+public partial struct DisposableComponent {
     public int value;
     
     public void Dispose() {
