@@ -91,12 +91,6 @@
                     if (!isTag) {
                         sb.AppendLine().AppendLine();
                         sb.AppendIfDefine("UNITY_EDITOR");
-                        // TODO: Can be replaced with constant string
-                        sb.AppendIndent(indent).Append("private string typeName = typeof(").Append(providerTypeName).AppendLine(").Name;");
-                        sb.AppendLine();
-                        sb.AppendEndIfDefine();
-
-                        sb.AppendIfDefine("UNITY_EDITOR");
                         sb.AppendIndent(indent).AppendLine("[PropertySpace]");
                         sb.AppendIndent(indent).AppendLine("[ShowInInspector]");
                         sb.AppendIndent(indent).AppendLine("[PropertyOrder(1)]");
