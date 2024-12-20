@@ -54,6 +54,7 @@
                 var isValidatableWithGameObject = monoProviderType.AllInterfaces.Any(x => x.Name == "IValidatableWithGameObject");
                 
                 var providerStashSpecialization = MorpehComponentHelpersSemantic.GetStashSpecialization(monoProviderType);
+                var isTag = providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag;
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 
@@ -79,7 +80,7 @@
                     .AppendLine(" {");
 
                 using (indent.Scope()) {
-                    if (providerStashSpecialization.variation != MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                    if (!isTag) {
                         sb.AppendIndent(indent).AppendLine("[SerializeField]");
                         sb.AppendIndent(indent).AppendLine("[HideInInspector]");
                         sb.AppendIndent(indent).Append("private ").Append(providerTypeName).AppendLine(" serializedData;");
@@ -87,7 +88,7 @@
                     
                     sb.AppendIndent(indent).Append("private ").Append(providerStashSpecialization.type).AppendLine(" stash;");
                     
-                    if (providerStashSpecialization.variation != MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                    if (!isTag) {
                         sb.AppendLine().AppendLine();
                         sb.AppendIfDefine("UNITY_EDITOR");
                         // TODO: Can be replaced with constant string
@@ -154,7 +155,7 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
 
-                    if (providerStashSpecialization.variation != MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                    if (!isTag) {
                         sb.AppendLine().AppendLine();
                         sb.AppendIndent(indent).Append("public ref ").Append(providerTypeName).AppendLine(" GetSerializedData() => ref this.serializedData;");
                         
@@ -205,7 +206,7 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("protected sealed override void PreInitialize() {");
                     using (indent.Scope()) {
-                        if (providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                        if (isTag) {
                             sb.AppendIndent(indent).AppendLine("this.Stash.Set(this.cachedEntity);");
                         }
                         else {
