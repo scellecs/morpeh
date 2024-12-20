@@ -192,15 +192,11 @@
                         sb.AppendIndent(indent).AppendLine("protected virtual void OnValidate() {");
                         using (indent.Scope()) {
                             if (isValidatable) {
-                                sb.AppendIndent(indent).AppendLine("var validatable = this.serializedData as IValidatable;");
-                                sb.AppendIndent(indent).AppendLine("validatable.OnValidate();");
-                                sb.AppendIndent(indent).Append("this.serializedData = (").Append(providerTypeName).Append(")validatable;").AppendLine();
+                                sb.AppendIndent(indent).AppendLine("this.serializedData.OnValidate();");
                             }
                         
                             if (isValidatableWithGameObject) {
-                                sb.AppendIndent(indent).AppendLine("var validatableWithGameObject = this.serializedData as IValidatableWithGameObject;");
-                                sb.AppendIndent(indent).Append("validatableWithGameObject.OnValidate(this.gameObject);").AppendLine();
-                                sb.AppendIndent(indent).Append("this.serializedData = (").Append(providerTypeName).Append(")validatableWithGameObject;").AppendLine();
+                                sb.AppendIndent(indent).Append("this.serializedData.OnValidate(this.gameObject);").AppendLine();
                             }
                         }
                         sb.AppendIndent(indent).AppendLine("}");

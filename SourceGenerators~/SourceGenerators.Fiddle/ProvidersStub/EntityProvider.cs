@@ -1,7 +1,10 @@
 ﻿namespace Scellecs.Morpeh.Providers;
 
+using UnityEngine;
+
 public class EntityProvider {
-    protected Entity cachedEntity;
+    protected Entity     cachedEntity;
+    protected GameObject gameObject;
 
     protected Entity Entity => this.cachedEntity;
 

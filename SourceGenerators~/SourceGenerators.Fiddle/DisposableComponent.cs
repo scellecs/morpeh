@@ -1,10 +1,19 @@
 ﻿namespace Test.Namespace;
 
 using Scellecs.Morpeh;
+using UnityEngine;
 
 [Component(initialCapacity: 64)]
-public partial struct DisposableComponent {
+public partial struct DisposableComponent : IValidatable, IValidatableWithGameObject {
     public int value;
+
+    public void OnValidate() {
+        
+    }
+    
+    public void OnValidate(GameObject gameObject) {
+        
+    }
     
     public void Dispose() {
         throw new System.NotImplementedException();
