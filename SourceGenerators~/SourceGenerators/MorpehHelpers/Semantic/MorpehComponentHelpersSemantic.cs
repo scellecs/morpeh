@@ -11,7 +11,7 @@
     public static class MorpehComponentHelpersSemantic {
         public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol) {
             if (typeSymbol is not INamedTypeSymbol structSymbol) {
-                return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
+                return new StashSpecialization(StashVariation.Unknown, "Stash<?>", "GetStash<?>", "?");
             }
             
             using var scoped = StringBuilderPool.GetScoped();
@@ -26,7 +26,7 @@
         
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
             if (semanticModel.GetDeclaredSymbol(structDeclaration) is not INamedTypeSymbol structSymbol) {
-                return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
+                return new StashSpecialization(StashVariation.Unknown, "Stash<?>", "GetStash<?>", "?");
             }
             
             return GetStashSpecialization(structSymbol);
@@ -42,7 +42,7 @@
 
         private static StashSpecialization GetStashSpecializationInternal(ITypeSymbol? typeSymbol, string componentDecl) {
             if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
-                return new StashSpecialization("Stash<?>", "GetStash<?>", "?");
+                return new StashSpecialization(StashVariation.Unknown, "Stash<?>", "GetStash<?>", "?");
             }
 
             var members = typeSymbol.GetMembers();
@@ -56,14 +56,14 @@
                 .Any(m => m.Name == "Dispose");
 
             if (isTag) {
-                return new StashSpecialization("TagStash", $"GetTagStash<{componentDecl}>", "ITagComponent");
+                return new StashSpecialization(StashVariation.Tag, "TagStash", $"GetTagStash<{componentDecl}>", "ITagComponent");
             }
 
             if (isDisposable) {
-                return new StashSpecialization($"DisposableStash<{componentDecl}>", $"GetDisposableStash<{componentDecl}>", "IDisposableComponent");
+                return new StashSpecialization(StashVariation.Disposable, $"DisposableStash<{componentDecl}>", $"GetDisposableStash<{componentDecl}>", "IDisposableComponent");
             }
 
-            return new StashSpecialization($"Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "IDataComponent");
+            return new StashSpecialization(StashVariation.Data, $"Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "IDataComponent");
         }
         
         public static List<StashRequirement> GetStashRequirements(INamedTypeSymbol typeDeclaration) {
@@ -116,15 +116,24 @@
         }
         
         public readonly struct StashSpecialization {
-            public readonly string type;
-            public readonly string getStashMethod;
-            public readonly string constraintInterface;
+            public readonly StashVariation variation;
+            public readonly string    type;
+            public readonly string    getStashMethod;
+            public readonly string    constraintInterface;
             
-            public StashSpecialization(string type, string getStashMethod, string constraintInterface) {
-                this.type               = type;
-                this.getStashMethod     = getStashMethod;
+            public StashSpecialization(StashVariation variation, string type, string getStashMethod, string constraintInterface) {
+                this.variation           = variation;
+                this.type                = type;
+                this.getStashMethod      = getStashMethod;
                 this.constraintInterface = constraintInterface;
             }
+        }
+
+        public enum StashVariation {
+            Unknown,
+            Tag,
+            Disposable,
+            Data,
         }
         
         public struct StashRequirement {

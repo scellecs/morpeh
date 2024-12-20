@@ -79,9 +79,12 @@
                     .AppendLine(" {");
 
                 using (indent.Scope()) {
-                    sb.AppendIndent(indent).AppendLine("[SerializeField]");
-                    sb.AppendIndent(indent).AppendLine("[HideInInspector]");
-                    sb.AppendIndent(indent).Append("private ").Append(providerTypeName).AppendLine(" serializedData;");
+                    if (providerStashSpecialization.variation != MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                        sb.AppendIndent(indent).AppendLine("[SerializeField]");
+                        sb.AppendIndent(indent).AppendLine("[HideInInspector]");
+                        sb.AppendIndent(indent).Append("private ").Append(providerTypeName).AppendLine(" serializedData;");
+                    }
+                    
                     sb.AppendIndent(indent).Append("private ").Append(providerStashSpecialization.type).AppendLine(" stash;");
                     
                     sb.AppendLine().AppendLine();
@@ -89,50 +92,54 @@
                     // TODO: Can be replaced with constant string
                     sb.AppendIndent(indent).Append("private string typeName = typeof(").Append(providerTypeName).AppendLine(").Name;");
                     sb.AppendLine();
-                    sb.AppendIndent(indent).AppendLine("[PropertySpace]");
-                    sb.AppendIndent(indent).AppendLine("[ShowInInspector]");
-                    sb.AppendIndent(indent).AppendLine("[PropertyOrder(1)]");
-                    sb.AppendIndent(indent).AppendLine("[HideLabel]");
-                    sb.AppendIndent(indent).AppendLine("[InlineProperty]");
                     sb.AppendEndIfDefine();
-                    sb.AppendIndent(indent).Append("private ").Append(providerTypeName).AppendLine(" Data {");
-                    using (indent.Scope()) {
-                        sb.AppendIndent(indent).AppendLine("get {");
+
+                    if (providerStashSpecialization.variation != MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                        sb.AppendIfDefine("UNITY_EDITOR");
+                        sb.AppendIndent(indent).AppendLine("[PropertySpace]");
+                        sb.AppendIndent(indent).AppendLine("[ShowInInspector]");
+                        sb.AppendIndent(indent).AppendLine("[PropertyOrder(1)]");
+                        sb.AppendIndent(indent).AppendLine("[HideLabel]");
+                        sb.AppendIndent(indent).AppendLine("[InlineProperty]");
+                        sb.AppendEndIfDefine();
+                        sb.AppendIndent(indent).Append("private ").Append(providerTypeName).AppendLine(" Data {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).AppendLine("if (this.cachedEntity.IsNullOrDisposed() == false) {");
+                            sb.AppendIndent(indent).AppendLine("get {");
                             using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("var data = this.Stash.Get(this.cachedEntity, out var exist);").AppendLine();
-                                sb.AppendIndent(indent).Append("if (exist) {").AppendLine();
+                                sb.AppendIndent(indent).AppendLine("if (World.Default?.Has(this.cachedEntity) == true) {");
                                 using (indent.Scope()) {
-                                    sb.AppendIndent(indent).Append("return data;").AppendLine();
+                                    sb.AppendIndent(indent).Append("var data = this.Stash.Get(this.cachedEntity, out var exist);").AppendLine();
+                                    sb.AppendIndent(indent).Append("if (exist) {").AppendLine();
+                                    using (indent.Scope()) {
+                                        sb.AppendIndent(indent).Append("return data;").AppendLine();
+                                    }
+                                    sb.AppendIndent(indent).AppendLine("}");
                                 }
                                 sb.AppendIndent(indent).AppendLine("}");
+                                sb.AppendIndent(indent).AppendLine("return this.serializedData;");
                             }
                             sb.AppendIndent(indent).AppendLine("}");
-                            sb.AppendIndent(indent).AppendLine("return this.serializedData;");
-                        }
-                        sb.AppendIndent(indent).AppendLine("}");
-                        
-                        sb.AppendIndent(indent).AppendLine("set {");
-                        using (indent.Scope()) {
-                            sb.AppendIndent(indent).AppendLine("if (this.cachedEntity.IsNullOrDisposed() == false) {");
+                            
+                            sb.AppendIndent(indent).AppendLine("set {");
                             using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("this.Stash.Set(this.cachedEntity, value);").AppendLine();
-                            }
-                            sb.AppendIndent(indent).AppendLine("}");
-                            sb.AppendIndent(indent).AppendLine("else {");
-                            using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("this.serializedData = value;").AppendLine();
+                                sb.AppendIndent(indent).AppendLine("if (World.Default?.Has(this.cachedEntity) == true) {");
+                                using (indent.Scope()) {
+                                    sb.AppendIndent(indent).Append("this.Stash.Set(this.cachedEntity, value);").AppendLine();
+                                }
+                                sb.AppendIndent(indent).AppendLine("}");
+                                sb.AppendIndent(indent).AppendLine("else {");
+                                using (indent.Scope()) {
+                                    sb.AppendIndent(indent).Append("this.serializedData = value;").AppendLine();
+                                }
+                                sb.AppendIndent(indent).AppendLine("}");
                             }
                             sb.AppendIndent(indent).AppendLine("}");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                     }
-                    sb.AppendIndent(indent).AppendLine("}");
                     
                     sb.AppendLine().AppendLine();
-                    // TODO: If component is internal, stash accessor should be internal too?
-                    sb.AppendIndent(indent).Append("public ").Append(providerStashSpecialization.type).AppendLine(" Stash {");
+                    sb.AppendIndent(indent).AppendVisibility(monoProviderType).Append(" ").Append(providerStashSpecialization.type).AppendLine(" Stash {");
                     using (indent.Scope()) {
                         sb.AppendIndent(indent).AppendLine("get {");
                         using (indent.Scope()) {
@@ -146,66 +153,68 @@
                         sb.AppendIndent(indent).AppendLine("}");
                     }
                     sb.AppendIndent(indent).AppendLine("}");
-                    
-                    sb.AppendLine().AppendLine();
-                    // TODO: Won't work with tag components. Should it not be generated?
-                    sb.AppendIndent(indent).Append("public ref ").Append(providerTypeName).AppendLine(" GetSerializedData() => ref this.serializedData;");
-                    
-                    sb.AppendLine().AppendLine();
-                    // TODO: Same issue as with GetSerializedData
-                    sb.AppendIndent(indent).Append("public ref ").Append(providerTypeName).AppendLine(" GetData() {");
-                    using (indent.Scope()) {
-                        sb.AppendIndent(indent).Append("var ent = this.Entity;").AppendLine();
-                        sb.AppendIndent(indent).Append("if (ent.IsNullOrDisposed() == false) {").AppendLine();
+
+                    if (providerStashSpecialization.variation != MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                        sb.AppendLine().AppendLine();
+                        sb.AppendIndent(indent).Append("public ref ").Append(providerTypeName).AppendLine(" GetSerializedData() => ref this.serializedData;");
+                        
+                        sb.AppendLine().AppendLine();
+                        sb.AppendIndent(indent).Append("public ref ").Append(providerTypeName).AppendLine(" GetData() {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).Append("if (this.Stash.Has(ent)) {").AppendLine();
+                            sb.AppendIndent(indent).Append("var ent = this.Entity;").AppendLine();
+                            sb.AppendIndent(indent).Append("if (World.Default?.Has(this.cachedEntity) == true) {").AppendLine();
                             using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("return ref this.Stash.Get(ent);").AppendLine();
+                                sb.AppendIndent(indent).Append("if (this.Stash.Has(ent)) {").AppendLine();
+                                using (indent.Scope()) {
+                                    sb.AppendIndent(indent).Append("return ref this.Stash.Get(ent);").AppendLine();
+                                }
+                                sb.AppendIndent(indent).AppendLine("}");
                             }
                             sb.AppendIndent(indent).AppendLine("}");
+                            sb.AppendIndent(indent).AppendLine("return ref this.serializedData;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
-                        sb.AppendIndent(indent).AppendLine("return ref this.serializedData;");
-                    }
-                    sb.AppendIndent(indent).AppendLine("}");
-                    
-                    sb.AppendLine().AppendLine();
-                    // TODO: Same issue as with GetSerializedData
-                    sb.AppendIndent(indent).Append("public ref ").Append(providerTypeName).AppendLine(" GetData(out bool existOnEntity) {");
-                    using (indent.Scope()) {
-                        sb.AppendIndent(indent).Append("if (this.cachedEntity.IsNullOrDisposed() == false) {").AppendLine();
-                        using (indent.Scope()) {
-                            sb.AppendIndent(indent).Append("return ref this.Stash.Get(this.cachedEntity, out existOnEntity);").AppendLine();
-                        }
-                        sb.AppendIndent(indent).AppendLine("}");
-                        sb.AppendIndent(indent).AppendLine("existOnEntity = false;");
-                        sb.AppendIndent(indent).AppendLine("return ref this.serializedData;");
-                    }
-                    sb.AppendIndent(indent).AppendLine("}");
-                    
-                    sb.AppendLine().AppendLine();
-                    // TODO: Same issue as with GetSerializedData
-                    sb.AppendIndent(indent).AppendLine("protected virtual void OnValidate() {");
-                    using (indent.Scope()) {
-                        if (isValidatable) {
-                            sb.AppendIndent(indent).AppendLine("var validatable = this.serializedData as IValidatable;");
-                            sb.AppendIndent(indent).AppendLine("validatable.OnValidate();");
-                            sb.AppendIndent(indent).Append("this.serializedData = (").Append(providerTypeName).Append(")validatable;").AppendLine();
-                        }
                         
-                        if (isValidatableWithGameObject) {
-                            sb.AppendIndent(indent).AppendLine("var validatableWithGameObject = this.serializedData as IValidatableWithGameObject;");
-                            sb.AppendIndent(indent).Append("validatableWithGameObject.OnValidate(this.gameObject);").AppendLine();
-                            sb.AppendIndent(indent).Append("this.serializedData = (").Append(providerTypeName).Append(")validatableWithGameObject;").AppendLine();
+                        sb.AppendLine().AppendLine();
+                        sb.AppendIndent(indent).Append("public ref ").Append(providerTypeName).AppendLine(" GetData(out bool existOnEntity) {");
+                        using (indent.Scope()) {
+                            sb.AppendIndent(indent).Append("if (World.Default?.Has(this.cachedEntity) == true) {").AppendLine();
+                            using (indent.Scope()) {
+                                sb.AppendIndent(indent).Append("return ref this.Stash.Get(this.cachedEntity, out existOnEntity);").AppendLine();
+                            }
+                            sb.AppendIndent(indent).AppendLine("}");
+                            sb.AppendIndent(indent).AppendLine("existOnEntity = false;");
+                            sb.AppendIndent(indent).AppendLine("return ref this.serializedData;");
                         }
+                        sb.AppendIndent(indent).AppendLine("}");
+                        
+                        sb.AppendLine().AppendLine();
+                        sb.AppendIndent(indent).AppendLine("protected virtual void OnValidate() {");
+                        using (indent.Scope()) {
+                            if (isValidatable) {
+                                sb.AppendIndent(indent).AppendLine("var validatable = this.serializedData as IValidatable;");
+                                sb.AppendIndent(indent).AppendLine("validatable.OnValidate();");
+                                sb.AppendIndent(indent).Append("this.serializedData = (").Append(providerTypeName).Append(")validatable;").AppendLine();
+                            }
+                        
+                            if (isValidatableWithGameObject) {
+                                sb.AppendIndent(indent).AppendLine("var validatableWithGameObject = this.serializedData as IValidatableWithGameObject;");
+                                sb.AppendIndent(indent).Append("validatableWithGameObject.OnValidate(this.gameObject);").AppendLine();
+                                sb.AppendIndent(indent).Append("this.serializedData = (").Append(providerTypeName).Append(")validatableWithGameObject;").AppendLine();
+                            }
+                        }
+                        sb.AppendIndent(indent).AppendLine("}");
                     }
-                    sb.AppendIndent(indent).AppendLine("}");
                     
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("protected sealed override void PreInitialize() {");
                     using (indent.Scope()) {
-                        // TODO: For tag components, this should just set without any serialized data
-                        sb.AppendIndent(indent).Append("this.Stash.Set(this.cachedEntity, this.serializedData);").AppendLine();
+                        if (providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                            sb.AppendIndent(indent).AppendLine("this.Stash.Set(this.cachedEntity);");
+                        }
+                        else {
+                            sb.AppendIndent(indent).AppendLine("this.Stash.Set(this.cachedEntity, this.serializedData);");
+                        }
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
@@ -213,7 +222,7 @@
                     sb.AppendIndent(indent).AppendLine("protected sealed override void PreDeinitialize() {");
                     using (indent.Scope()) {
                         sb.AppendIndent(indent).AppendLine("var ent = this.Entity;");
-                        sb.AppendIndent(indent).AppendLine("if (ent.IsNullOrDisposed() == false) {");
+                        sb.AppendIndent(indent).AppendLine("if (World.Default?.Has(ent) == true) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("this.Stash.Remove(ent);").AppendLine();
                         }

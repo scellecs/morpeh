@@ -1,8 +1,23 @@
 ﻿namespace SourceGenerators.Utils.Semantic {
     using System.Collections.Generic;
+    using System.Text;
     using Microsoft.CodeAnalysis;
 
-    public class TypesSemantic {
+    public static class TypesSemantic {
+        public static StringBuilder AppendVisibility(this StringBuilder sb, INamedTypeSymbol typeSymbol) {
+            if (typeSymbol.DeclaredAccessibility == Accessibility.Public) {
+                sb.Append("public");
+            } else if (typeSymbol.DeclaredAccessibility == Accessibility.Internal) {
+                sb.Append("internal");
+            } else if (typeSymbol.DeclaredAccessibility == Accessibility.Protected) {
+                sb.Append("protected");
+            } else if (typeSymbol.DeclaredAccessibility == Accessibility.Private) {
+                sb.Append("private");
+            }
+            
+            return sb;
+        }
+        
         /// <summary>
         /// Check if the type contains fields with the specified attribute.
         /// For original type, checks all fields.
