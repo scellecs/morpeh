@@ -87,14 +87,14 @@
                     
                     sb.AppendIndent(indent).Append("private ").Append(providerStashSpecialization.type).AppendLine(" stash;");
                     
-                    sb.AppendLine().AppendLine();
-                    sb.AppendIfDefine("UNITY_EDITOR");
-                    // TODO: Can be replaced with constant string
-                    sb.AppendIndent(indent).Append("private string typeName = typeof(").Append(providerTypeName).AppendLine(").Name;");
-                    sb.AppendLine();
-                    sb.AppendEndIfDefine();
-
                     if (providerStashSpecialization.variation != MorpehComponentHelpersSemantic.StashVariation.Tag) {
+                        sb.AppendLine().AppendLine();
+                        sb.AppendIfDefine("UNITY_EDITOR");
+                        // TODO: Can be replaced with constant string
+                        sb.AppendIndent(indent).Append("private string typeName = typeof(").Append(providerTypeName).AppendLine(").Name;");
+                        sb.AppendLine();
+                        sb.AppendEndIfDefine();
+
                         sb.AppendIfDefine("UNITY_EDITOR");
                         sb.AppendIndent(indent).AppendLine("[PropertySpace]");
                         sb.AppendIndent(indent).AppendLine("[ShowInInspector]");
