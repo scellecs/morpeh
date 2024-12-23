@@ -47,5 +47,20 @@
         public static void ReportInvalidInjectionType(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration, string typeName, string injectionType) {
             ctx.ReportDiagnostic(Diagnostic.Create(INVALID_INJECTION_TYPE, fieldDeclaration.GetLocation(), typeName, injectionType));
         }
+        
+        // MORPEH_ERR_004
+        
+        private static readonly DiagnosticDescriptor LOOP_TYPE_NOT_SYSTEM_FIELD = new(
+            "MORPEH_ERR_004",
+            "The type is not a System so it cannot have a loop specified.",
+            "The type is not a System so it cannot have a loop specified.",
+            "Morpeh",
+            DiagnosticSeverity.Error,
+            true,
+            "The type is not a System so it cannot have a loop specified.");
+
+        public static void ReportLoopTypeOnNonSystemField(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration) {
+            ctx.ReportDiagnostic(Diagnostic.Create(LOOP_TYPE_NOT_SYSTEM_FIELD, fieldDeclaration.GetLocation()));
+        }
     }
 }

@@ -237,11 +237,13 @@
             for (int i = 0, length = scopedSystemsGroupFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                 var fieldDefinition = scopedSystemsGroupFieldDefinitionCollection.Collection.ordered[i];
 
-                if (fieldDefinition.isSystem && fieldDefinition.loopType is null) {
-                    if (fieldDefinition.fieldDeclaration != null) {
-                        Errors.ReportMissingLoopType(ctx, fieldDefinition.fieldDeclaration);
-                    }
+                if (fieldDefinition is { isSystem : true, loopType: null }) {
+                    Errors.ReportMissingLoopType(ctx, fieldDefinition.fieldDeclaration);
+                    success = false;
+                }
 
+                if (fieldDefinition is { isSystem: false, loopType: not null }) {
+                    Errors.ReportLoopTypeOnNonSystemField(ctx, fieldDefinition.fieldDeclaration);
                     success = false;
                 }
                 
