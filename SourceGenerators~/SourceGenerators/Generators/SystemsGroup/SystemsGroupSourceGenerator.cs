@@ -256,8 +256,6 @@
                     Errors.ReportInvalidInjectionType(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name, fieldDefinition.registerAs.Name);
                     success = false;
                 }
-                
-                // TODO: Check if we're trying to use a loop on a non-system field
             }
             
             return success;
