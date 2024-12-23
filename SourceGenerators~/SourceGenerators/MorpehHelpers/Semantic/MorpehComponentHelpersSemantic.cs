@@ -96,7 +96,19 @@
                 
                 if (componentTypeSymbol is { IsGenericType: true }) {
                     using (var scoped = StringBuilderPool.GetScoped()) {
-                        fieldName = scoped.StringBuilder.Append("_").Append(componentTypeSymbol.Name.ToCamelCase()).Append("_").Append(string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name))).ToString();
+                        var sb = scoped.StringBuilder
+                            .Append("_")
+                            .Append(componentTypeSymbol.Name.ToCamelCase())
+                            .Append("_");
+                        
+                        for (int j = 0, argumentsLength = componentTypeSymbol.TypeArguments.Length; j < argumentsLength; j++) {
+                            sb.Append(componentTypeSymbol.TypeArguments[i].Name);
+                            if (j < argumentsLength - 1) {
+                                sb.Append("_");
+                            }
+                        }
+                        
+                        fieldName = sb.ToString();
                     }
                     
                     using (var scoped = StringBuilderPool.GetScoped()) {
