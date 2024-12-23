@@ -95,7 +95,9 @@
                 string metadataClassName;
                 
                 if (componentTypeSymbol is { IsGenericType: true }) {
-                    fieldName = $"_{componentTypeSymbol.Name.ToCamelCase()}_{string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name))}";
+                    using (var scoped = StringBuilderPool.GetScoped()) {
+                        fieldName = scoped.StringBuilder.Append("_").Append(componentTypeSymbol.Name.ToCamelCase()).Append("_").Append(string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name))).ToString();
+                    }
                     
                     using (var scoped = StringBuilderPool.GetScoped()) {
                         metadataClassName = scoped.StringBuilder.Append(componentTypeSymbol.Name).AppendGenericParams(componentTypeSymbol).ToString();
