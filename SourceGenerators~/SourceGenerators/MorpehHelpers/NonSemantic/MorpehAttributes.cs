@@ -21,6 +21,9 @@
 
         public const string INJECTABLE_NAME      = "InjectableAttribute";
         public const string INJECTABLE_FULL_NAME = "Scellecs.Morpeh.InjectableAttribute";
+        
+        public const string GENERIC_INJECTION_RESOLVER_NAME                = "GenericInjectionResolverAttribute";
+        public const string GENERIC_INJECTION_RESOLVER_ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.GenericInjectionResolverAttribute";
 
         public const string REGISTER_NAME      = "RegisterAttribute";
         public const string REGISTER_FULL_NAME = "Scellecs.Morpeh.RegisterAttribute";

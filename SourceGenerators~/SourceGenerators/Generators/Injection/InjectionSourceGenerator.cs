@@ -1,18 +1,16 @@
 ﻿namespace SourceGenerators.Generators.Injection {
     using System.Linq;
+    using Diagnostics;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using MorpehHelpers.NonSemantic;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     [Generator]
     public class InjectionSourceGenerator : IIncrementalGenerator {
-        private const string INJECTABLE_ATTRIBUTE_NAME = "InjectableAttribute";
-        
-        private const string GENERIC_INJECTION_PROVIDER_ATTRIBUTE_FULL_NAME = "Scellecs.Morpeh.GenericInjectionProviderAttribute";
-        
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var classes = context.SyntaxProvider
@@ -21,9 +19,9 @@
                     static (ctx, _) => (declaration: (ClassDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
                 .Where(static pair => pair.declaration is not null);
 
-            var genericInjectionProviders = context.SyntaxProvider
+            var genericResolvers = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
-                    GENERIC_INJECTION_PROVIDER_ATTRIBUTE_FULL_NAME,
+                    MorpehAttributes.GENERIC_INJECTION_RESOLVER_ATTRIBUTE_FULL_NAME,
                     static (node, _) => node is ClassDeclarationSyntax,
                     static (ctx, _) => 
                     {
@@ -37,19 +35,41 @@
                         if (args.Length != 1 || args[0].Value is not INamedTypeSymbol baseType) {
                             return null;
                         }
+                        
+                        DiagnosticDescriptor? diagnosticDescriptor = null;
+                        
+                        var provideMethod = typeSymbol
+                            .GetMembers()
+                            .OfType<IMethodSymbol>()
+                            .Where(m => m.Name == "Resolve")
+                            .FirstOrDefault(m => m.IsGenericMethod && m.TypeArguments.Length == baseType.TypeArguments.Length);
+                        
+                        if (provideMethod is null) {
+                            diagnosticDescriptor = Errors.GENERIC_RESOLVER_HAS_NO_MATCHING_METHOD;
+                        }
 
                         return new GenericResolver
                         {
                             BaseType     = baseType,
-                            ResolverType = typeSymbol
+                            ResolverType = typeSymbol,
+                            //Declaration = (ClassDeclarationSyntax)ctx.TargetNode,
+                            //DiagnosticDescriptor = diagnosticDescriptor,
                         };
                     }
                 )
                 .Where(static resolver => resolver is not null)
                 .Select(static (resolver, _) => resolver!);
+
+            /*
+            context.RegisterSourceOutput(genericResolvers.Where(x => x.DiagnosticDescriptor != null).Collect(), static (spc, pair) => {
+                foreach (var resolver in pair) {
+                    Errors.ReportGenericResolverIssue(spc, resolver.Declaration!, resolver.DiagnosticDescriptor!);
+                }
+            });
+            */
             
             
-            context.RegisterSourceOutput(classes.Combine(genericInjectionProviders.Collect()), static (spc, pair) =>
+            context.RegisterSourceOutput(classes.Combine(genericResolvers/*.Where(x => x.DiagnosticDescriptor == null)*/.Collect()), static (spc, pair) =>
             {
                 var ((typeDeclaration, semanticModel), genericProviders) = pair;
                 
@@ -58,7 +78,7 @@
                     return;
                 }
 
-                var fields = TypesSemantic.GetFieldsWithAttribute(typeSymbol, INJECTABLE_ATTRIBUTE_NAME);
+                var fields = TypesSemantic.GetFieldsWithAttribute(typeSymbol, MorpehAttributes.INJECTABLE_NAME);
                 
                 if (fields.Count == 0) {
                     return;
@@ -130,6 +150,9 @@
         private class GenericResolver {
             public INamedTypeSymbol? BaseType;
             public INamedTypeSymbol? ResolverType;
+            
+            // public TypeDeclarationSyntax? Declaration;
+            // public DiagnosticDescriptor? DiagnosticDescriptor;
         }
     }
 }

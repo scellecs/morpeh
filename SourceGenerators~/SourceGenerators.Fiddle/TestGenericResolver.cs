@@ -6,9 +6,9 @@ public class SomeGenericClass<T> {
     
 }
 
-[GenericInjectionProvider(typeof(SomeGenericClass<>))]
+[GenericInjectionResolver(typeof(SomeGenericClass<>))]
 public class TestGenericResolver {
-    public SomeGenericClass<T> Provide<T>() {
+    public SomeGenericClass<T> Resolve<T>() {
         return new SomeGenericClass<T>();
     }
 }
@@ -17,9 +17,9 @@ public class SomeComplexGenericClass<T1, T2> {
     
 }
 
-[GenericInjectionProvider(typeof(SomeComplexGenericClass<,>))]
+[GenericInjectionResolver(typeof(SomeComplexGenericClass<,>))]
 public class TestComplexGenericResolver {
-    public SomeComplexGenericClass<T1, T2> Provide<T1, T2>() {
+    public SomeComplexGenericClass<T1, T2> Resolve<T1, T2>() {
         return new SomeComplexGenericClass<T1, T2>();
     }
 }

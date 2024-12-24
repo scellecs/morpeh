@@ -62,5 +62,20 @@
         public static void ReportLoopTypeOnNonSystemField(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration) {
             ctx.ReportDiagnostic(Diagnostic.Create(LOOP_TYPE_NOT_SYSTEM_FIELD, fieldDeclaration.GetLocation()));
         }
+        
+        // MORPEH_ERR_005
+        
+        public static readonly DiagnosticDescriptor GENERIC_RESOLVER_HAS_NO_MATCHING_METHOD = new(
+            "MORPEH_ERR_005",
+            "Generic resolver {0} does not have a matching Resolve method.",
+            "Generic resolver {0} does not have a matching Resolve method.",
+            "Morpeh",
+            DiagnosticSeverity.Error,
+            true,
+            "Generic resolver {0} does not have a matching Resolve method.");
+
+        public static void ReportGenericResolverIssue(SourceProductionContext ctx, TypeDeclarationSyntax typeDeclaration, DiagnosticDescriptor descriptor) {
+            ctx.ReportDiagnostic(Diagnostic.Create(GENERIC_RESOLVER_HAS_NO_MATCHING_METHOD, typeDeclaration.GetLocation(), typeDeclaration.Identifier.Text));
+        }
     }
 }
