@@ -38,11 +38,27 @@
                         
                         DiagnosticDescriptor? diagnosticDescriptor = null;
                         
-                        var provideMethod = typeSymbol
-                            .GetMembers()
-                            .OfType<IMethodSymbol>()
-                            .Where(m => m.Name == "Resolve")
-                            .FirstOrDefault(m => m.IsGenericMethod && m.TypeArguments.Length == baseType.TypeArguments.Length);
+                        ISymbol? provideMethod = null;
+                        foreach (var member in typeSymbol.GetMembers()) {
+                            if (member is not IMethodSymbol methodSymbol) {
+                                continue;
+                            }
+
+                            if (methodSymbol.Name != "Resolve") {
+                                continue;
+                            }
+
+                            if (!methodSymbol.IsGenericMethod) {
+                                continue;
+                            }
+
+                            if (methodSymbol.TypeArguments.Length != baseType.TypeArguments.Length) {
+                                continue;
+                            }
+
+                            provideMethod = methodSymbol;
+                            break;
+                        }
                         
                         if (provideMethod is null) {
                             diagnosticDescriptor = Errors.GENERIC_RESOLVER_HAS_NO_MATCHING_METHOD;
