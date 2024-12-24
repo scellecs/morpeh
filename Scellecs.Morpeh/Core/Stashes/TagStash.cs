@@ -170,7 +170,9 @@ namespace Scellecs.Morpeh {
         // TODO: Remove TRUE after migrating functionality to the new API
 #if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
         public IComponent GetBoxed(Entity entity) {
-            if (this.Has(entity)) {
+            this.world.ThreadSafetyCheck();
+            
+            if (this.set.Has(entity.Id)) {
                 return this.boxedValue;
             }
             
@@ -179,13 +181,17 @@ namespace Scellecs.Morpeh {
         }
 
         public IComponent GetBoxed(Entity entity, out bool exists) {
-            exists = this.Has(entity);
+            this.world.ThreadSafetyCheck();
+            
+            exists = this.set.Has(entity.Id);
             return exists ? this.boxedValue : null;
         }
 
         public void SetBoxed(Entity entity, IComponent value) {
-            if (value != null) {
-                this.Set(entity);
+            this.world.ThreadSafetyCheck();
+
+            if (this.set.Add(entity.Id)) {
+                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
         }
 #endif
