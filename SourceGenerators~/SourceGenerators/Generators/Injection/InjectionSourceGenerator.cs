@@ -38,7 +38,7 @@
                         
                         DiagnosticDescriptor? diagnosticDescriptor = null;
                         
-                        ISymbol? provideMethod = null;
+                        IMethodSymbol? provideMethod = null;
                         foreach (var member in typeSymbol.GetMembers()) {
                             if (member is not IMethodSymbol methodSymbol) {
                                 continue;
