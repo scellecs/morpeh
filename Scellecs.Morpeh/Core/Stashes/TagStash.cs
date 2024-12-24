@@ -23,6 +23,11 @@ namespace Scellecs.Morpeh {
         
         private IntHashSet set;
         
+        // TODO: Remove TRUE after migrating functionality to the new API
+#if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
+        private IComponent boxedValue;
+#endif
+        
         [PublicAPI]
         public bool IsDisposed;
 
@@ -45,6 +50,11 @@ namespace Scellecs.Morpeh {
             this.typeInfo = typeInfo;
             
             this.set = new IntHashSet(capacity < 0 ? StashConstants.DEFAULT_COMPONENTS_CAPACITY : capacity);
+            
+            // TODO: Remove TRUE after migrating functionality to the new API
+#if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
+            this.boxedValue = Activator.CreateInstance(type) as IComponent;
+#endif
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,6 +166,29 @@ namespace Scellecs.Morpeh {
             
             return this.set.length != 0;
         }
+        
+        // TODO: Remove TRUE after migrating functionality to the new API
+#if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
+        public IComponent GetBoxed(Entity entity) {
+            if (this.Has(entity)) {
+                return this.boxedValue;
+            }
+            
+            InvalidGetOperationException.ThrowMissing(entity, this.type);
+            return null;
+        }
+
+        public IComponent GetBoxed(Entity entity, out bool exists) {
+            exists = this.Has(entity);
+            return exists ? this.boxedValue : null;
+        }
+
+        public void SetBoxed(Entity entity, IComponent value) {
+            if (value != null) {
+                this.Set(entity);
+            }
+        }
+#endif
         
         public void Dispose() {
             if (this.IsDisposed) {

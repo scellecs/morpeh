@@ -319,6 +319,67 @@ namespace Scellecs.Morpeh {
             return this.map.length != 0;
         }
         
+        // TODO: Remove TRUE after migrating functionality to the new API
+#if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
+        public IComponent GetBoxed(Entity entity) {
+            this.world.ThreadSafetyCheck();
+            
+            if (this.world.IsDisposed(entity)) {
+                InvalidGetOperationException.ThrowDisposedEntity(entity, this.type);
+            }
+            
+            if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
+                return this.data[dataIndex];
+            }
+            
+            InvalidGetOperationException.ThrowMissing(entity, this.type);
+            return null;
+        }
+
+        public IComponent GetBoxed(Entity entity, out bool exists) {
+            this.world.ThreadSafetyCheck();
+            
+            if (this.world.IsDisposed(entity)) {
+                InvalidGetOperationException.ThrowDisposedEntity(entity, this.type);
+            }
+            
+            if (this.map.TryGetIndex(entity.Id, out var dataIndex)) {
+                exists = true;
+                return this.data[dataIndex];
+            }
+            
+            exists = false;
+            return null;
+        }
+
+        public void SetBoxed(Entity entity, IComponent value) {
+            this.world.ThreadSafetyCheck();
+            
+            if (this.world.IsDisposed(entity)) {
+                InvalidSetOperationException.ThrowDisposedEntity(entity, this.type);
+            }
+            
+            if (!(value is T)) {
+                InvalidSetOperationException.ThrowInvalidComponentType(entity, this.type, value.GetType());
+            }
+            
+            if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
+                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
+                
+                if (resized) {
+                    ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
+#if MORPEH_DEBUG
+                    this.world.newMetrics.stashResizes++;
+#endif
+                }
+                
+                this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
+            }
+            
+            this.data[slotIndex] = (T)value;
+        }
+#endif
+        
         public void Dispose() {
             if (this.IsDisposed) {
                 return;
