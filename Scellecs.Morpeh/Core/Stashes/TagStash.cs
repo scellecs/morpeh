@@ -172,6 +172,10 @@ namespace Scellecs.Morpeh {
         public IComponent GetBoxed(Entity entity) {
             this.world.ThreadSafetyCheck();
             
+            if (this.world.IsDisposed(entity)) {
+                InvalidGetOperationException.ThrowDisposedEntity(entity, this.type);
+            }
+            
             if (this.set.Has(entity.Id)) {
                 return this.boxedValue;
             }
@@ -183,12 +187,20 @@ namespace Scellecs.Morpeh {
         public IComponent GetBoxed(Entity entity, out bool exists) {
             this.world.ThreadSafetyCheck();
             
+            if (this.world.IsDisposed(entity)) {
+                InvalidGetOperationException.ThrowDisposedEntity(entity, this.type);
+            }
+            
             exists = this.set.Has(entity.Id);
             return exists ? this.boxedValue : null;
         }
 
         public void SetBoxed(Entity entity, IComponent value) {
             this.world.ThreadSafetyCheck();
+            
+            if (this.world.IsDisposed(entity)) {
+                InvalidSetOperationException.ThrowDisposedEntity(entity, this.type);
+            }
 
             if (this.set.Add(entity.Id)) {
                 this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
