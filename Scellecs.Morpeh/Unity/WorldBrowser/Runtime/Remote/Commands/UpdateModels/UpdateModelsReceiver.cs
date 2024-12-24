@@ -1,0 +1,30 @@
+﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD
+using UnityEngine;
+
+namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
+    internal unsafe sealed class UpdateModelsReceiver : ICommandHandler {
+        private readonly IModelsStorage modelsStorage;
+
+        public byte CommandType => CommandTypeId.Models;
+
+        internal UpdateModelsReceiver(IModelsStorage modelsStorage) {
+            this.modelsStorage = modelsStorage;
+        }
+
+        public void Handle(Command command, NetworkTransport transport) {
+            if (command.CommandId != ModelsCommand.UpdateRequest) {
+                Debug.LogError("Invalid command id");
+                return;
+            }
+
+            if (this.modelsStorage == null)
+            {
+                transport.Log("Models Storage is null");
+            }
+
+            this.modelsStorage.Update();
+            transport.PushSend(default(UpdateModelsResponse).Serialize(transport.SendAllocator, out var length), length);
+        }
+    }
+}
+#endif

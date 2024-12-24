@@ -1,0 +1,18 @@
+{
+    "name": "Scellecs.Morpeh.WorldBrowser.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3377deebfb0acde45876d12c6e3d27cc",
+        "GUID:76aaf6ae431c0d7458029595e33f13b2",
+        "GUID:763ddc7200ba35949a168ab07cb8fa30"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
