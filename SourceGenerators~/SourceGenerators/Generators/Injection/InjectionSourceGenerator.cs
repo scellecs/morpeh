@@ -52,24 +52,21 @@
                         {
                             BaseType     = baseType,
                             ResolverType = typeSymbol,
-                            //Declaration = (ClassDeclarationSyntax)ctx.TargetNode,
-                            //DiagnosticDescriptor = diagnosticDescriptor,
+                            Declaration = (ClassDeclarationSyntax)ctx.TargetNode,
+                            DiagnosticDescriptor = diagnosticDescriptor,
                         };
                     }
                 )
                 .Where(static resolver => resolver is not null)
                 .Select(static (resolver, _) => resolver!);
-
-            /*
+            
             context.RegisterSourceOutput(genericResolvers.Where(x => x.DiagnosticDescriptor != null).Collect(), static (spc, pair) => {
                 foreach (var resolver in pair) {
                     Errors.ReportGenericResolverIssue(spc, resolver.Declaration!, resolver.DiagnosticDescriptor!);
                 }
             });
-            */
             
-            
-            context.RegisterSourceOutput(classes.Combine(genericResolvers/*.Where(x => x.DiagnosticDescriptor == null)*/.Collect()), static (spc, pair) =>
+            context.RegisterSourceOutput(classes.Combine(genericResolvers.Where(x => x.DiagnosticDescriptor == null).Collect()), static (spc, pair) =>
             {
                 var ((typeDeclaration, semanticModel), genericProviders) = pair;
                 
@@ -151,8 +148,8 @@
             public INamedTypeSymbol? BaseType;
             public INamedTypeSymbol? ResolverType;
             
-            // public TypeDeclarationSyntax? Declaration;
-            // public DiagnosticDescriptor? DiagnosticDescriptor;
+            public TypeDeclarationSyntax? Declaration;
+            public DiagnosticDescriptor? DiagnosticDescriptor;
         }
     }
 }
