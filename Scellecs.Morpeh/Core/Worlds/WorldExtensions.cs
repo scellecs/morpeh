@@ -96,8 +96,9 @@ namespace Scellecs.Morpeh {
 
             World.worldsCount = 0;
             World.worlds.Clear();
-            var defaultWorld = World.Create();
-            defaultWorld.UpdateByUnity = true;
+            
+            World.Create();
+            
 #if MORPEH_UNITY
             var go = new GameObject {
                 name      = "MORPEH_UNITY_RUNTIME_HELPER",

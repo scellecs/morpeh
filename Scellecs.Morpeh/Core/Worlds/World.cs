@@ -49,12 +49,6 @@ namespace Scellecs.Morpeh {
         public FilterBuilder Filter => FilterBuilder.Create(this);
         
         [PublicAPI]
-        public bool UpdateByUnity;
-        
-        [PublicAPI]
-        public bool DoNotDisableSystemOnException;
-        
-        [PublicAPI]
         public bool IsDisposed;
 #if MORPEH_BURST
         [PublicAPI]
