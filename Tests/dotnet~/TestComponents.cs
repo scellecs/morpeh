@@ -63,6 +63,46 @@ public partial struct IntTest4 {
 }
 
 [Component]
+public partial struct DisposableTest1 {
+    public int    value;
+    public Action onDispose;
+    
+    public void Dispose() {
+        this.onDispose?.Invoke();
+    }
+}
+
+[Component]
+public partial struct DisposableTest2 {
+    public int    value;
+    public Action onDispose;
+    
+    public void Dispose() {
+        this.onDispose?.Invoke();
+    }
+}
+
+[Component]
+public partial struct DisposableTest3 {
+    public int    value;
+    public Action onDispose;
+    
+    public void Dispose() {
+        this.onDispose?.Invoke();
+    }
+}
+
+[Component]
+public partial struct DisposableTest4 {
+    public int value;
+    public Action onDispose;
+    
+    public void Dispose() {
+        this.onDispose?.Invoke();
+    }
+}
+
+[Component]
 public partial struct ManagedTest {
     public object value;
 }
