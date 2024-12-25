@@ -1,4 +1,5 @@
-﻿namespace Test.Namespace;
+﻿// ReSharper disable once CheckNamespace
+namespace Test.Namespace;
 
 using Scellecs.Morpeh;
 using UnityEngine;
@@ -16,6 +17,6 @@ public partial struct DisposableComponent : IValidatable, IValidatableWithGameOb
     }
     
     public void Dispose() {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }
