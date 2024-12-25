@@ -38,9 +38,8 @@
                     if (typeDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
                         continue;
                     }
-                    
-                    var fieldSymbol = semanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables.First()) as IFieldSymbol;
-                    if (fieldSymbol is null) {
+
+                    if (semanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables.First()) is not IFieldSymbol fieldSymbol) {
                         continue;
                     }
                     
@@ -261,14 +260,17 @@
                     success = false;
                 }
                 
-                if (fieldDefinition is { register: true }) {
-                    var conversionKind = semanticModel.Compilation.ClassifyConversion(fieldDefinition.fieldSymbol.Type, fieldDefinition.registerAs);
-                    if (conversionKind.IsImplicit || conversionKind.IsExplicit) {
-                        continue;
+                if (fieldDefinition.register) {
+                    if (fieldDefinition.fieldSymbol.Type.TypeKind is not TypeKind.Class) {
+                        Errors.ReportInvalidInjectionSourceType(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name);
+                        success = false;
+                    } else {
+                        var conversionKind = semanticModel.Compilation.ClassifyConversion(fieldDefinition.fieldSymbol.Type, fieldDefinition.registerAs);
+                        if (conversionKind is { IsImplicit: false, IsExplicit: false }) {
+                            Errors.ReportInvalidInjectionType(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name, fieldDefinition.registerAs.Name);
+                            success = false;
+                        }
                     }
-
-                    Errors.ReportInvalidInjectionType(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name, fieldDefinition.registerAs.Name);
-                    success = false;
                 }
             }
             
