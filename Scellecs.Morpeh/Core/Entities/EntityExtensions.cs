@@ -202,7 +202,7 @@ namespace Scellecs.Morpeh {
                 return null;
             }
 
-            var world = World.worlds[World.worldsIndices[worldId] - 1];
+            var world = World.worlds[index - 1];
 
             if (entity.WorldGeneration != World.worldsGens[worldId]) {
                 return null;
