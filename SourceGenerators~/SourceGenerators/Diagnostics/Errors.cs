@@ -82,12 +82,12 @@
         
         public static readonly DiagnosticDescriptor INVALID_INJECTION_SOURCE_TYPE = new(
             "MORPEH_ERR_006",
-            "Cannot inject {0} as it is not a class type.",
-            "Cannot inject {0} as it is not a class type.",
+            "Cannot register {0} as it is not a class type.",
+            "Cannot register {0} as it is not a class type.",
             "Morpeh",
             DiagnosticSeverity.Error,
             true,
-            "Cannot inject {0} as it is not a class type.");
+            "Cannot register {0} as it is not a class type.");
 
         public static void ReportInvalidInjectionSourceType(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration, string typeName) {
             ctx.ReportDiagnostic(Diagnostic.Create(INVALID_INJECTION_SOURCE_TYPE, fieldDeclaration.GetLocation(), typeName));
