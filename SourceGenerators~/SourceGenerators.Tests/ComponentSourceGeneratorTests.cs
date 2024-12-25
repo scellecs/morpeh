@@ -7,147 +7,126 @@ using Xunit.Abstractions;
 
 namespace SourceGenerators.Tests;
 
+using System;
 using Generators.Components;
 
 [Collection("Sequential")]
 public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
     private readonly ITestOutputHelper output = output;
 
-    private const string FILE_NAME = "TestComponent.component_extensions.g.cs";
+    private const string SHARED_CODE = @"namespace Scellecs.Morpeh {
+    using System;
+
+    [AttributeUsage(AttributeTargets.Struct)]
+    public class ComponentAttribute : Attribute {
+        public ComponentAttribute(int initialCapacity = StashConstants.DEFAULT_COMPONENTS_CAPACITY) {
+            
+        }
+    }
+}:";
     
     [Fact]
-    public void DataComponent_FileScopedNamespaceWorks() { 
+    public void DataComponent_FileScopedNs_NoSpecifiedCapacity() { 
         const string source = """
                               namespace Test.Namespace;
-
+                              
                               using Scellecs.Morpeh;
-
-                              public struct TestComponent : IComponent {
+                              
+                              [Component]
+                              public partial struct DataComponent {
                                   public int value;
-                              }
-                              """;
-        
-        const string target = """
-                              namespace Test.Namespace {
-                              using Scellecs.Morpeh;
-                              public static class TestComponent__Generated {
-                                  public static Stash<TestComponent> GetStash(World world) => world.GetStash<TestComponent>();
-                              }
-                              }
-
-                              """;
-        
-        var result     = Generate(source);
-        var syntaxTree = GetGeneratedTree(result, FILE_NAME);
-
-        Assert.Equal(target, syntaxTree.GetText().ToString(), ignoreLineEndingDifferences: true, ignoreWhiteSpaceDifferences: true);
-    }
-    
-    [Fact]
-    public void DataComponent_NamespaceWorks() { 
-        const string source = """
-                              using Scellecs.Morpeh;
-                              
-                              namespace Test.Namespace {
-                                  public struct TestComponent : IComponent {
-                                      public int value;
-                                  }
-                              }
-                              """;
-        
-        const string target = """
-                              namespace Test.Namespace {
-                              using Scellecs.Morpeh;
-                              public static class TestComponent__Generated {
-                                  public static Stash<TestComponent> GetStash(World world) => world.GetStash<TestComponent>();
-                              }
-                              }
-                              
-                              """;
-        
-        var result     = Generate(source);
-        var syntaxTree = GetGeneratedTree(result, FILE_NAME);
-
-        Assert.Equal(target, syntaxTree.GetText().ToString(), ignoreLineEndingDifferences: true, ignoreWhiteSpaceDifferences: true);
-    }
-    
-    [Fact]
-    public void DataComponent_GlobalNamespaceWorks() { 
-        const string source = """
-                              using Scellecs.Morpeh;
-
-                              public struct TestComponent : IComponent {
-                                  public int value;
-                              }
-                              """;
-        
-        const string target = """
-                              
-                              using Scellecs.Morpeh;
-                              public static class TestComponent__Generated {
-                                  public static Stash<TestComponent> GetStash(World world) => world.GetStash<TestComponent>();
-                              }
-                              
-                              
-                              """;
-        
-        var result     = Generate(source);
-        var syntaxTree = GetGeneratedTree(result, FILE_NAME);
-
-        Assert.Equal(target, syntaxTree.GetText().ToString(), ignoreLineEndingDifferences: true, ignoreWhiteSpaceDifferences: true);
-    }
-    
-    [Fact]
-    public void DataComponent_GenericWorks() { 
-        const string source = """
-                              namespace Test.Namespace;
-                              
-                              using Scellecs.Morpeh;
-                              
-                              public struct TestComponent<T> : IComponent where T : struct {
-                                  public T value;
-                              }
-                              """;
-        
-        const string target = """
-                              namespace Test.Namespace {
-                              using Scellecs.Morpeh;
-                              public static class TestComponent__Generated<T>  where T : struct  {
-                                  public static Stash<TestComponent<T>> GetStash(World world) => world.GetStash<TestComponent<T>>();
-                              }
-                              }
-                              
-                              """;
-        
-        var result     = Generate(source);
-        var syntaxTree = GetGeneratedTree(result, FILE_NAME);
-
-        Assert.Equal(target, syntaxTree.GetText().ToString(), ignoreLineEndingDifferences: true, ignoreWhiteSpaceDifferences: true);
-    }
-    
-    [Fact]
-    public void WrongInterface_DoesNotGenerate() { 
-        const string source = """
-                              namespace Test.Namespace;
-                              
-                              using System.ComponentModel; // Instead of Scellecs.Morpeh
-                              
-                              public class WrongInterface : IComponent {
-                                  private ISite? site;
-                              
-                                  public ISite? Site {
-                                      get => this.site;
-                                      set => this.site = value;
-                                  }
-                                  public event EventHandler? Disposed;
-                                  
-                                  public void Dispose() {
-                                  }
                               }
                               """;
         
         var result = Generate(source);
-        Assert.Empty(result.GeneratedTrees);
+        var text = GetGeneratedTree(result, "DataComponent").GetText().ToString();
+
+        if (!text.Contains("public static Stash<DataComponent> GetStash(World world) => world.GetStash<DataComponent>(capacity: 16);")) {
+            Assert.Fail(text);
+        }
+    }
+    
+    [Fact]
+    public void DataComponent_FileScopedNs_CustomCapacityPositional() { 
+        const string source = """
+                              namespace Test.Namespace;
+                              
+                              using Scellecs.Morpeh;
+
+                              [Component(32)]
+                              public partial struct DataComponent {
+                                  public int value;
+                              }
+                              """;
+        
+        var result = Generate(source);
+        var text   = GetGeneratedTree(result, "DataComponent").GetText().ToString();
+
+        if (!text.Contains("public static Stash<DataComponent> GetStash(World world) => world.GetStash<DataComponent>(capacity: 32);")) {
+            Assert.Fail(text);
+        }
+    }
+    
+    [Fact]
+    public void DataComponent_FileScopedNs_CustomCapacityNamed() { 
+        const string source = """
+                              namespace Test.Namespace;
+
+                              using Scellecs.Morpeh;
+
+                              [Component(initialCapacity: 32)]
+                              public partial struct DataComponent {
+                                  public int value;
+                              }
+                              """;
+        
+        var result = Generate(source);
+        var text   = GetGeneratedTree(result, "DataComponent").GetText().ToString();
+
+        if (!text.Contains("public static Stash<DataComponent> GetStash(World world) => world.GetStash<DataComponent>(capacity: 32);")) {
+            Assert.Fail(text);
+        }
+    }
+    
+    [Fact]
+    public void TagComponent() { 
+        const string source = """
+                              namespace Test.Namespace {
+                                using Scellecs.Morpeh;
+                              
+                                [Component]
+                                public partial struct TagComponent { }
+                              }
+                              """;
+        
+        var result = Generate(source);
+        var text   = GetGeneratedTree(result, "TagComponent").GetText().ToString();
+
+        if (!text.Contains("public static TagStash GetStash(World world) => world.GetTagStash<TagComponent>(capacity: 16);")) {
+            Assert.Fail(text);
+        }
+    }
+    
+    [Fact]
+    public void DisposableComponent() { 
+        const string source = """
+                              using Scellecs.Morpeh;
+                              
+                              namespace Test.Namespace {
+                                [Component]
+                                public partial struct DisposableComponent {
+                                  public int value;
+                                  public void Dispose() { }
+                                }
+                              }
+                              """;
+        
+        var result = Generate(source);
+        var text   = GetGeneratedTree(result, "DisposableComponent").GetText().ToString();
+
+        if (!text.Contains("public static DisposableStash<DisposableComponent> GetStash(World world) => world.GetDisposableStash<DisposableComponent>(capacity: 16);")) {
+            Assert.Fail(text);
+        }
     }
     
     private static GeneratorDriverRunResult Generate(string source) {
@@ -156,7 +135,8 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
 
         var compilation = CSharpCompilation.Create(nameof(ComponentSourceGeneratorTests),
             [
-                CSharpSyntaxTree.ParseText(source)
+                CSharpSyntaxTree.ParseText(source),
+                CSharpSyntaxTree.ParseText(SHARED_CODE), 
             ],
             [
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
@@ -167,6 +147,6 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
     }
     
     private static SyntaxTree GetGeneratedTree(GeneratorDriverRunResult result, string fileName) {
-        return result.GeneratedTrees.Single(t => t.FilePath.EndsWith(fileName));
+        return result.GeneratedTrees.Single(t => t.FilePath.Contains(fileName));
     }
 }

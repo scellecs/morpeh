@@ -30,7 +30,7 @@
 
                 var typeName = typeDeclaration.Identifier.ToString();
                 
-                var initialCapacity = -1;
+                var initialCapacity = 16;
                 
                 for (int i = 0, length = componentAttributes.Length; i < length; i++) {
                     var attribute = componentAttributes[i];
