@@ -22,23 +22,23 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed partial class World : IDisposable {
-        [CanBeNull]
-        [PublicAPI]
+        [CanBeNull, PublicAPI]
         public static World Default {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => defaultWorld;
         }
+
         [CanBeNull]
         internal static World defaultWorld;
-        [NotNull]
-        [PublicAPI]
-        internal static FastList<World> worlds = new FastList<World>();
-        [NotNull]
-        [PublicAPI]
-        internal static IntStack freeWorldIDs = new IntStack();
-        [NotNull]
-        [PublicAPI]
-        internal static byte[] worldsGens = new byte[4];
+
+        [NotNull, PublicAPI]
+        internal static World[] worlds = new World[WorldConstants.MAX_WORLDS_COUNT];
+
+        [NotNull, PublicAPI]
+        internal static int[] worldsIndices = new int[WorldConstants.MAX_WORLDS_COUNT];
+
+        [NotNull, PublicAPI]
+        internal static byte[] worldsGens = new byte[WorldConstants.MAX_WORLDS_COUNT];
 
         internal static int worldsCount = 0;
         
@@ -47,8 +47,7 @@ namespace Scellecs.Morpeh {
 
         internal int filterCount;
 
-        [PublicAPI]
-        [NotNull]
+        [NotNull, PublicAPI]
         public FilterBuilder Filter => FilterBuilder.Create(this);
         
         [PublicAPI]

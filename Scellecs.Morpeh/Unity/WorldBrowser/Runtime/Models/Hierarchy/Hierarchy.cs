@@ -92,7 +92,7 @@ namespace Scellecs.Morpeh.WorldBrowser {
             this.worlds.Clear();
             this.worldIdentifiers.Clear();
             for (int i = 0; i < globalWorldsCount; i++)  {
-                var world = globalWorlds.data[i];
+                var world = globalWorlds[i];
                 this.worldsMap[world.identifier] = world;
                 this.worldIdentifiers.Add(world.identifier);
             }

@@ -49,13 +49,14 @@ namespace Scellecs.Morpeh {
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
             //todo: check for fastmode
             if (state == PlayModeStateChange.EnteredEditMode) {
-                for (var i = World.worlds.length - 1; i >= 0; i--) {
-                    var world = World.worlds.data[i];
-                    world?.Dispose();
+                var worlds = World.worlds;
+                for (int i = World.worldsCount - 1; i >= 0; i--) {
+                    var world = worlds[i];
+                    if (!world.IsNullOrDisposed()) {
+                        world.Dispose();
+                    }
                 }
-
-                World.worldsCount = 0;
-                World.worlds.Clear();                
+              
                 World.plugins?.Clear();
 
                 if (this != null && this.gameObject != null) {
