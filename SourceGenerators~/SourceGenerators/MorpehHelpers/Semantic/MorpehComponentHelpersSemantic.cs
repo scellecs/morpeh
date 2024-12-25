@@ -86,11 +86,29 @@
                 if (args[0].Kind != TypedConstantKind.Type) {
                     continue;
                 }
-
-                if (args[0].Value is not INamedTypeSymbol componentTypeSymbol) {
+                
+                if (args[0].Value is not INamedTypeSymbol { TypeKind: TypeKind.Struct } componentTypeSymbol) {
                     continue;
                 }
+
+                var componentTypeAttributes = componentTypeSymbol.GetAttributes();
+                var isComponent = false;
                 
+                for (int j = 0, jlength = componentTypeAttributes.Length; j < jlength; j++) {
+                    var componentTypeAttribute = componentTypeAttributes[j];
+
+                    if (componentTypeAttribute.AttributeClass?.Name != MorpehAttributes.COMPONENT_NAME) {
+                        continue;
+                    }
+                    
+                    isComponent = true;
+                }
+                
+                // TODO: Possibly report a diagnostic here
+                if (!isComponent) {
+                    continue;
+                }
+
                 string fieldName;
                 string metadataClassName;
                 
