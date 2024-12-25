@@ -11,7 +11,6 @@ public class CreatureBatchesProfilerModule : ProfilerModule
             new("Entities", ProfilerCategory.Scripts), 
             new("Archetypes", ProfilerCategory.Scripts), 
             new("Filters", ProfilerCategory.Scripts), 
-            new("Systems", ProfilerCategory.Scripts), 
             new("Commits", ProfilerCategory.Scripts), 
             new("Migrations", ProfilerCategory.Scripts), 
             new("Stash Resizes", ProfilerCategory.Scripts), 
