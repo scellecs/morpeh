@@ -177,11 +177,11 @@ public class WorldTests : IDisposable {
     [Fact]
     public void Commit_UpdateFilters() {
         var world = World.Create();
-        var filter = world.Filter.With<Test1>().With<Test2>().Build();
-        var filter2 = world.Filter.With<Test1>().Without<Test2>().Build();
+        var filter = world.Filter.With<TagTest1>().With<TagTest2>().Build();
+        var filter2 = world.Filter.With<TagTest1>().Without<TagTest2>().Build();
         var entity = world.CreateEntity();
 
-        entity.AddComponent<Test1>();
+        entity.AddComponent<TagTest1>();
 
         Assert.True(filter.IsEmpty());
         Assert.True(filter2.IsEmpty());
@@ -191,7 +191,7 @@ public class WorldTests : IDisposable {
         Assert.True(filter.IsEmpty());
         Assert.True(filter2.IsNotEmpty());
 
-        entity.AddComponent<Test2>();
+        entity.AddComponent<TagTest2>();
 
         Assert.True(filter.IsEmpty());
         Assert.True(filter2.IsNotEmpty());

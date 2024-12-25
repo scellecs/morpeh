@@ -34,9 +34,8 @@
                 }
             }
 
-            var createMethod = typeof(WorldStashExtensions).GetMethod("GetStash", new[] { typeof(World), });
-            var genericMethod = createMethod?.MakeGenericMethod(type);
-            var stash = (IStash)genericMethod?.Invoke(null, new object[] { world, });
+            var createMethod = type.GetMethod("GetStash", new[] { typeof(World), });
+            var stash = (IStash)createMethod?.Invoke(null, new object[] { world, });
             
             definition = ComponentId.Get(type);
             
