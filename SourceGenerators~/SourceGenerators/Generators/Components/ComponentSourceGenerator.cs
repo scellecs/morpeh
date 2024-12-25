@@ -23,8 +23,7 @@
                     return;
                 }
                 
-                if (typeDeclaration.IsDeclaredInsideAnotherType()) {
-                    Errors.ReportNestedDeclaration(spc, typeDeclaration);
+                if (!RunDiagnostics(spc, typeDeclaration)) {
                     return;
                 }
 
@@ -76,6 +75,17 @@
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);
             });
+        }
+
+        private static bool RunDiagnostics(SourceProductionContext spc, StructDeclarationSyntax typeDeclaration) {
+            var success = true;
+
+            if (typeDeclaration.IsDeclaredInsideAnotherType()) {
+                Errors.ReportNestedDeclaration(spc, typeDeclaration);
+                success = false;
+            }
+
+            return success;
         }
     }
 }
