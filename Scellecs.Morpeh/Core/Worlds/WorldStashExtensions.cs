@@ -25,23 +25,27 @@
         [PublicAPI]
         public static IStash GetReflectionStash(this World world, Type type) {
             world.ThreadSafetyCheck();
-            
-            if (ComponentId.TryGet(type, out var definition)) {
-                var candidate = world.GetExistingStash(definition.id);
-                
-                if (candidate != null) {
-                    return candidate;
-                }
+
+            if (!ComponentId.TryGet(type, out var definition)) {
+                return world.CreateReflectionStash(type);
             }
 
-            var createMethod = type.GetMethod("GetStash", new[] { typeof(World), });
-            var stash = (IStash)createMethod?.Invoke(null, new object[] { world, });
+            var candidate = world.GetExistingStash(definition.id);
+            return candidate ?? world.CreateReflectionStash(type);
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static IStash CreateReflectionStash(this World world, Type type)
+        {
+            var createMethod  = typeof(WorldStashExtensions).GetMethod("GetStash", new[] { typeof(World), });
+            var genericMethod = createMethod?.MakeGenericMethod(type);
+            var stash         = (IStash)genericMethod?.Invoke(null, new object[] { world, });
             
-            definition = ComponentId.Get(type);
+            var definition = ComponentId.Get(type);
             
             world.EnsureStashCapacity(definition.id);
             world.stashes[definition.id] = stash;
-
+            
             return stash;
         }
         
