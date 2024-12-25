@@ -9,6 +9,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
         private NetworkTransport client;
         private CommandHandlerRegistry commandHandlers;
         private CommandDispatcher dispatcher;
+        private Action<bool> onStateChanged;
 
         private RemoteUpdateModelsSender modelsHandler;
         private RemoteComponentStorageCommandSender componentStorage;
@@ -23,10 +24,15 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
 
         private bool firstUpdate;
 
+        internal RemoteModelsStorage(Action<bool> onStateChanged) {
+            this.onStateChanged = onStateChanged;
+        }
+
         public bool Initialize() {
             try {
                 this.client = new NetworkTransport(new ServerLogger());
                 if (!this.client.Connect("127.0.0.1", 9999)) {
+                    this.onStateChanged(false);
                     return false;
                 }
 
@@ -41,6 +47,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
             }
             catch (Exception e) {
                 Debug.LogException(e);
+                this.onStateChanged(false);
                 return false;
             }
 
@@ -49,6 +56,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
 
         public void Update() {
             if (!client.IsConnected) {
+                this.onStateChanged(false);
                 return;
             }
 
@@ -70,6 +78,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
             catch (Exception e) {
                 Debug.LogError($"Error during update: {e}");
                 this.client.Stop();
+                this.onStateChanged(false);
             }
         }
 

@@ -53,8 +53,9 @@ namespace Scellecs.Morpeh.WorldBrowser.Filter {
         }
 
         public int IndexOf(Entity entity) {
-            if (EntityHandleUtils.IsValid(entity, entity.GetWorld())) {
-                var entityData = entity.GetWorld().entities[entity.Id];
+            var handle = new EntityHandle(entity);
+            if (handle.IsValid) {
+                var entityData = handle.EntityData;
                 var hash = entityData.currentArchetype.hash.GetValue();
                 var indexInArchetype = entityData.indexInCurrentArchetype;
                 if (this.rangesMap.TryGetValue(hash, out var rangeIndex)) {

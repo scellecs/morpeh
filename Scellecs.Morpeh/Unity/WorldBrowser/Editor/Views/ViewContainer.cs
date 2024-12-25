@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using UnityEditor;
 using UnityEngine.UIElements;
 namespace Scellecs.Morpeh.WorldBrowser.Editor {
     internal sealed class ViewContainer : VisualElement {

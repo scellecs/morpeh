@@ -22,10 +22,10 @@ namespace Scellecs.Morpeh.WorldBrowser {
             var handle = this.hierarchy.GetSelectedEntityHandle();
             if (!this.currentHandle.IsValid && !handle.IsValid) {
                 if (this.model.components.Count > 0) {
+                    this.currentHandle = default;
                     this.model.components.Clear();
                     this.model.selectedEntity = default;
                     this.model.IncrementVersion();
-                    this.currentHandle = EntityHandle.Invalid;
                 }
 
                 return;

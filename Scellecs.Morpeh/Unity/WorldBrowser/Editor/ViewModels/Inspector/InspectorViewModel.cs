@@ -41,6 +41,8 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
 
                 if (this.model.selectedEntity.Equals(default)) {
                     this.expandedStates.Clear();
+                    this.componentTypeIds.Clear();
+                    this.componentData.Clear();
                     this.selectedEntity = this.model.selectedEntity;
                     return;
                 }

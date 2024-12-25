@@ -27,18 +27,23 @@ namespace Scellecs.Morpeh.WorldBrowser {
         }
 
         internal IList<ComponentDataBoxed> FetchEntityComponents(Entity entity, IList<ComponentDataBoxed> buffer) {
-            var archetype = EntityHandleUtils.GetArchetype(entity);
-            var components = archetype.components;
             buffer.Clear();
+            var handle = new EntityHandle(entity);
+            if (handle.IsValid) {
+                var archetype = handle.Archetype;
+                var components = archetype.components;
 
-            foreach (var typeId in components) {
-                var def = ExtendedComponentId.Get(typeId);
-                var data = def.entityGetComponentBoxed.Invoke(entity);
-                buffer.Add(new ComponentDataBoxed() {
-                    data = data,
-                    typeId = typeId,
-                    isMarker = def.isMarker
-                });
+                foreach (var typeId in components)
+                {
+                    var def = ExtendedComponentId.Get(typeId);
+                    var data = def.entityGetComponentBoxed.Invoke(entity);
+                    buffer.Add(new ComponentDataBoxed() {
+                        data = data,
+                        typeId = typeId,
+                        isMarker = def.isMarker
+                    });
+                }
+
             }
 
             return buffer;

@@ -16,21 +16,39 @@ namespace Scellecs.Morpeh.WorldBrowser {
 
         private EntityHandle selectedHandle;
         private long hierarchySearchVersion;
+        private bool isDefaultWorldInitialized;
 
         internal Hierarchy(HierarchySearch hierarchySearch) {
             this.model = new HierarchyModel();
             this.hierarchySearch = hierarchySearch;
             this.filter = new SearchFilter();
             this.searchData = new SearchFilterData();
-            this.worlds = new List<World>() { World.Default };
-            this.worldIdentifiers = new List<int>() { World.Default.identifier };
-            this.selectedWorlds = new HashSet<int>() { World.Default.identifier };
+            this.worlds = new List<World>();
+            this.worldIdentifiers = new List<int>();
+            this.selectedWorlds = new HashSet<int>();
             this.worldsMap = new Dictionary<int, World>();
+            this.selectedHandle = default;
             this.hierarchySearchVersion = -1u;
+            this.isDefaultWorldInitialized = false;
+            this.InitDeafautWorld();
             this.UpdateModel();
         }
 
+        internal void InitDeafautWorld() {
+            if (!this.isDefaultWorldInitialized) {
+                var defaultWorld = World.Default;
+                if (!defaultWorld.IsNullOrDisposed()) {
+                    this.worlds.Add(defaultWorld);
+                    this.worldIdentifiers.Add(defaultWorld.identifier);
+                    this.selectedWorlds.Add(defaultWorld.identifier);
+                    this.isDefaultWorldInitialized = true;
+                }
+            }
+        }
+
         internal void Update() {
+            this.InitDeafautWorld();
+
             if (this.hierarchySearchVersion != this.hierarchySearch.GetVersion()) {
                 this.hierarchySearchVersion = this.hierarchySearch.GetVersion();
                 this.hierarchySearch.FillSearchFilterData(this.searchData);
@@ -38,6 +56,7 @@ namespace Scellecs.Morpeh.WorldBrowser {
 
             this.RemapWorlds();
             this.filter.Update(this.searchData, this.worlds);
+            this.SetSelectedEntity(this.selectedHandle.entity);
             this.UpdateModel();
         }
 
@@ -50,14 +69,8 @@ namespace Scellecs.Morpeh.WorldBrowser {
         }
 
         public void SetSelectedEntity(Entity entity) {
-            if (EntityHandleUtils.IsValid(entity, entity.GetWorld())) {
-                var archetype = EntityHandleUtils.GetArchetype(entity);
-                this.selectedHandle = new EntityHandle(entity, archetype.hash.GetValue());
-                this.UpdateModel();
-            }
-            else {
-                this.selectedHandle = EntityHandle.Invalid;
-            }
+            this.selectedHandle = new EntityHandle(entity);
+            this.UpdateModel();
         }
 
         public void SetSelectedWorldId(int id, bool state) {
@@ -77,13 +90,14 @@ namespace Scellecs.Morpeh.WorldBrowser {
 
             this.worldsMap.Clear();
             this.worlds.Clear();
+            this.worldIdentifiers.Clear();
             for (int i = 0; i < globalWorldsCount; i++)  {
                 var world = globalWorlds.data[i];
                 this.worldsMap[world.identifier] = world;
+                this.worldIdentifiers.Add(world.identifier);
             }
 
             this.selectedWorlds.RemoveWhere(identifier => !this.worldsMap.ContainsKey(identifier));
-
             foreach (var identifier in this.selectedWorlds) {
                 if (this.worldsMap.TryGetValue(identifier, out var world)) {
                     this.worlds.Add(world);

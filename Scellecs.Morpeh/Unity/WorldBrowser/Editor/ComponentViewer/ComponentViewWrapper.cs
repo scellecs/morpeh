@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Scellecs.Morpeh.WorldBrowser.Editor.ComponentViewer {
     [HideMonoScript]
-    internal sealed class ComponentViewWrapper : ScriptableObject{
+    internal sealed class ComponentViewWrapper : ScriptableObject {
         [HideLabel]
         [InlineProperty]
         [ShowInInspector]
