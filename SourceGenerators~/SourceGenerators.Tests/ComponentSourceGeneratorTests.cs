@@ -44,6 +44,10 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
         if (!text.Contains("public static Stash<DataComponent> GetStash(World world) => world.GetStash<DataComponent>(capacity: 16);")) {
             Assert.Fail(text);
         }
+        
+        if (!text.Contains(": IDataComponent")) {
+            Assert.Fail(text);
+        }
     }
     
     [Fact]
@@ -63,6 +67,10 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
         var text   = GetGeneratedTree(result, "DataComponent").GetText().ToString();
 
         if (!text.Contains("public static Stash<DataComponent> GetStash(World world) => world.GetStash<DataComponent>(capacity: 32);")) {
+            Assert.Fail(text);
+        }
+        
+        if (!text.Contains(": IDataComponent")) {
             Assert.Fail(text);
         }
     }
@@ -86,6 +94,10 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
         if (!text.Contains("public static Stash<DataComponent> GetStash(World world) => world.GetStash<DataComponent>(capacity: 32);")) {
             Assert.Fail(text);
         }
+        
+        if (!text.Contains(": IDataComponent")) {
+            Assert.Fail(text);
+        }
     }
     
     [Fact]
@@ -103,6 +115,10 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
         var text   = GetGeneratedTree(result, "TagComponent").GetText().ToString();
 
         if (!text.Contains("public static TagStash GetStash(World world) => world.GetTagStash<TagComponent>(capacity: 16);")) {
+            Assert.Fail(text);
+        }
+        
+        if (!text.Contains(": ITagComponent")) {
             Assert.Fail(text);
         }
     }
@@ -125,6 +141,10 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
         var text   = GetGeneratedTree(result, "DisposableComponent").GetText().ToString();
 
         if (!text.Contains("public static DisposableStash<DisposableComponent> GetStash(World world) => world.GetDisposableStash<DisposableComponent>(capacity: 16);")) {
+            Assert.Fail(text);
+        }
+        
+        if (!text.Contains(": IDisposableComponent")) {
             Assert.Fail(text);
         }
     }
