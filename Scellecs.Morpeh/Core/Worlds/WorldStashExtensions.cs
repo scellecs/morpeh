@@ -37,9 +37,8 @@
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static IStash CreateReflectionStash(this World world, Type type)
         {
-            var createMethod  = typeof(WorldStashExtensions).GetMethod("GetStash", new[] { typeof(World), });
-            var genericMethod = createMethod?.MakeGenericMethod(type);
-            var stash         = (IStash)genericMethod?.Invoke(null, new object[] { world, });
+            var createMethod = type.GetMethod("GetStash", new[] { typeof(World), });
+            var stash        = (IStash)createMethod?.Invoke(null, new object[] { world, });
             
             var definition = ComponentId.Get(type);
             

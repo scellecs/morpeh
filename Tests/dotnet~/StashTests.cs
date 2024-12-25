@@ -5,8 +5,6 @@ namespace Tests;
 
 [Collection("Sequential")]
 public class StashTests {
-    private struct StashSizeCheck : IComponent { }
-
     private readonly World world;
     private readonly World world2;
     private readonly ITestOutputHelper output;
@@ -365,7 +363,7 @@ public class StashTests {
     [Fact]
     public void Remove_ClearsDataManaged() {
         var entity = this.world.CreateEntity();
-        var stash = this.world.GetStash<ManagedTest>();
+        var stash = ManagedTest.GetStash(this.world);
         var valueManaged = new object();
         stash.Set(entity, new ManagedTest
         {
