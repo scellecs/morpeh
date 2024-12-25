@@ -10,12 +10,10 @@
         public static string GetStableFileCompliantHash(this TypeDeclarationSyntax type) {
             var sb = new StringBuilder();
             
-            sb.Append(type.Identifier.Text);
-
-            var parent = type.Parent;
+            SyntaxNode? current = type;
             
-            while (parent is not null) {
-                switch (parent) {
+            while (current is not null) {
+                switch (current) {
                     case TypeDeclarationSyntax parentType:
                         sb.Append(parentType.Identifier.Text);
                         break;
@@ -24,7 +22,7 @@
                         break;
                 }
                 
-                parent = parent.Parent;
+                current = current.Parent;
             }
             
             return sb.ToString().GetHashCode().ToString("X");
