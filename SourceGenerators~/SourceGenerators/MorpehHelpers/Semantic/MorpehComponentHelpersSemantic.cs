@@ -126,7 +126,9 @@
                         metadataClassName = scoped.StringBuilder.Append(componentTypeSymbol.Name).AppendGenericParams(componentTypeSymbol).ToString();
                     }
                 } else {
-                    fieldName = $"_{componentTypeSymbol.Name.ToCamelCase()}";
+                    using (var scoped = StringBuilderPool.GetScoped()) {
+                        fieldName = scoped.StringBuilder.Append("_").Append(componentTypeSymbol.Name.ToCamelCase()).ToString();
+                    }
                     metadataClassName = componentTypeSymbol.Name;
                 }
                 
