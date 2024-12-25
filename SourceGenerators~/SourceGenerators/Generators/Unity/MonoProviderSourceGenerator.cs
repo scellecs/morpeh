@@ -50,8 +50,8 @@
                     providerTypeName = scoped.StringBuilder.ToString();
                 }
 
-                var isValidatable = monoProviderType.AllInterfaces.Any(x => x.Name == "IValidatable");
-                var isValidatableWithGameObject = monoProviderType.AllInterfaces.Any(x => x.Name == "IValidatableWithGameObject");
+                var isValidatable = monoProviderType.AllInterfaces.Any(static x => x.Name == "IValidatable");
+                var isValidatableWithGameObject = monoProviderType.AllInterfaces.Any(static x => x.Name == "IValidatableWithGameObject");
                 
                 var providerStashSpecialization = MorpehComponentHelpersSemantic.GetStashSpecialization(monoProviderType);
                 var isTag = providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag;

@@ -50,8 +50,8 @@
                     fieldDefinition.fieldDeclaration = fieldDeclaration;
                     fieldDefinition.fieldSymbol      = fieldSymbol;
                     fieldDefinition.loopType         = LoopTypeHelpers.GetLoopMethodNameFromField(fieldSymbol);
-                    fieldDefinition.isSystem         = typeAttributes.Any(x => x.AttributeClass?.Name == MorpehAttributes.SYSTEM_NAME);
-                    fieldDefinition.isInitializer    = typeAttributes.Any(x => x.AttributeClass?.Name == MorpehAttributes.INITIALIZER_NAME);
+                    fieldDefinition.isSystem         = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.SYSTEM_NAME);
+                    fieldDefinition.isInitializer    = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.INITIALIZER_NAME);
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
                     fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, MorpehAttributes.INJECTABLE_NAME);
                     

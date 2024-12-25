@@ -131,7 +131,7 @@
                                         continue;
                                     }
 
-                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.ResolverType).Append(")injectionTable.Get(typeof(").Append(provider.ResolverType).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(t => t.ToString()))).AppendLine(">();");
+                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.ResolverType).Append(")injectionTable.Get(typeof(").Append(provider.ResolverType).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
                                     resolved = true;
                                     break;
                                 }

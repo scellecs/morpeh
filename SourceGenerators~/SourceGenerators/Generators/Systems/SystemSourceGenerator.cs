@@ -1,5 +1,4 @@
 ﻿namespace SourceGenerators.Generators.Systems {
-    using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
