@@ -83,26 +83,23 @@
 
                 using (indent.Scope()) {
                     sb.AppendIndent(indent).AppendLine("private readonly Scellecs.Morpeh.World _world;");
-                    sb.AppendIndent(indent).AppendLine("private readonly Scellecs.Morpeh.InjectionTable _injectionTable;");
                     
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable) {");
+                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                     using (indent.Scope()) {
                         sb.AppendIndent(indent).AppendLine("_world = world;");
-                        sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
                         
                         for (int i = 0, length = fields.Count; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].fieldName).Append(" = ").Append("new ").Append(fields[i].typeName).AppendLine("(world, injectionTable);");
                         }
-                    }
-                    sb.AppendIndent(indent).AppendLine("}");
-                    
-                    sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).AppendLine("public void Inject() {");
-                    using (indent.Scope()) {
-                        for (int i = 0, length = fields.Count; i < length; i++) {
-                            sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".Inject(_injectionTable);");
+                        
+                        sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
+                        using (indent.Scope()) {
+                            for (int i = 0, length = fields.Count; i < length; i++) {
+                                sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".Inject(injectionTable);");
+                            }
                         }
+                        sb.AppendIndent(indent).AppendLine("}");
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
