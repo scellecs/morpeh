@@ -32,14 +32,12 @@
                     return;
                 }
                 
-                var fields = typeDeclaration.Members
-                    .OfType<FieldDeclarationSyntax>()
-                    .ToArray();
-                
                 using var scopedFieldDefinitionCollection = SystemsGroupFieldDefinitionCache.GetScoped();
                 
-                for (int i = 0, length = fields.Length; i < length; i++) {
-                    var fieldDeclaration = fields[i];
+                for (int i = 0, length = typeDeclaration.Members.Count; i < length; i++) {
+                    if (typeDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
+                        continue;
+                    }
                     
                     var fieldSymbol = semanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables.First()) as IFieldSymbol;
                     if (fieldSymbol is null) {
