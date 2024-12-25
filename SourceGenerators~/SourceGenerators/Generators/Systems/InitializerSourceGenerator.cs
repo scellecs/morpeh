@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Systems {
+    using Diagnostics;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
@@ -23,6 +24,10 @@
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol);
+                
+                if (!RunDiagnostics(spc, typeDeclaration)) {
+                    return;
+                }
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
@@ -140,6 +145,40 @@
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);
             });
+        }
+
+        private static bool RunDiagnostics(SourceProductionContext spc, TypeDeclarationSyntax typeDeclaration) {
+            var success = true;
+            
+            var members = typeDeclaration.Members;
+            for (int i = 0, length = members.Count; i < length; i++) {
+                var member = members[i];
+                if (member is not MethodDeclarationSyntax methodDeclaration) {
+                    continue;
+                }
+
+                if (methodDeclaration.Identifier.Text != "OnUpdate") {
+                    continue;
+                }
+                    
+                var parameters = methodDeclaration.ParameterList.Parameters;
+                if (parameters.Count != 1) {
+                    continue;
+                }
+                    
+                var parameter = parameters[0];
+                if (parameter.Type is not PredefinedTypeSyntax predefinedType) {
+                    continue;
+                }
+                    
+                if (predefinedType.Keyword.Text != "float") {
+                    continue;
+                }
+                    
+                Warnings.ReportInitializerWithOnUpdate(spc, methodDeclaration);
+            }
+            
+            return success;
         }
     }
 }

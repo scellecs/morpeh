@@ -28,4 +28,8 @@ public partial class BasicInitializer1 {
     public void Dispose() {
         throw new NotImplementedException();
     }
+    
+    public void OnUpdate(float deltaTime) {
+        throw new NotImplementedException();
+    }
 }
