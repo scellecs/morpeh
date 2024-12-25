@@ -48,8 +48,10 @@ namespace Scellecs.Morpeh {
                     var components = new IComponent[counter];
                     for (int i = 0; i < counter; i++) {
                         var typeId = typeIds[i];
-                        var definition = ExtendedComponentId.Get(typeId);
-                        components[i] = (IComponent)definition.entityGetComponentBoxed.Invoke(this.entity);
+                        if (ComponentId.TryGet(typeId, out var type))
+                        {
+                            components[i] = world.GetBoxed(type, this.entity);
+                        }
                     }
 
                     return components;
