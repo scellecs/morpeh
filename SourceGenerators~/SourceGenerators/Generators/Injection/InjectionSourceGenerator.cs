@@ -11,8 +11,7 @@
 
     [Generator]
     public class InjectionSourceGenerator : IIncrementalGenerator {
-        public void Initialize(IncrementalGeneratorInitializationContext context)
-        {
+        public void Initialize(IncrementalGeneratorInitializationContext context) {
             var classes = context.SyntaxProvider
                 .CreateSyntaxProvider(
                     static (s, _) => s is ClassDeclarationSyntax cds && !cds.Modifiers.Any(SyntaxKind.AbstractKeyword),
@@ -23,8 +22,7 @@
                 .ForAttributeWithMetadataName(
                     MorpehAttributes.GENERIC_INJECTION_RESOLVER_ATTRIBUTE_FULL_NAME,
                     static (node, _) => node is ClassDeclarationSyntax,
-                    static (ctx, _) => 
-                    {
+                    static (ctx, _) => {
                         var typeSymbol = (INamedTypeSymbol)ctx.TargetSymbol;
                         var attribute  = ctx.Attributes.FirstOrDefault();
                         if (attribute is null) {
@@ -82,8 +80,7 @@
                 }
             });
             
-            context.RegisterSourceOutput(classes.Combine(genericResolvers.Where(x => x.DiagnosticDescriptor == null).Collect()), static (spc, pair) =>
-            {
+            context.RegisterSourceOutput(classes.Combine(genericResolvers.Where(x => x.DiagnosticDescriptor == null).Collect()), static (spc, pair) => {
                 var ((typeDeclaration, semanticModel), genericProviders) = pair;
                 
                 var typeSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration);

@@ -15,8 +15,7 @@
                 (s, _) => s is TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol));
             
-            context.RegisterSourceOutput(classes, static (spc, pair) =>
-            {
+            context.RegisterSourceOutput(classes, static (spc, pair) => {
                 var (typeDeclaration, typeSymbol) = pair;
                 if (typeDeclaration is null || typeSymbol is null) {
                     return;

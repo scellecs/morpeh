@@ -21,8 +21,7 @@
             var disposableInterface = context.CompilationProvider
                 .Select(static (compilation, _) => compilation.GetTypeByMetadataName(KnownTypes.DISPOSABLE_FULL_NAME));
             
-            context.RegisterSourceOutput(classes.Combine(disposableInterface), static (spc, pair) =>
-            {
+            context.RegisterSourceOutput(classes.Combine(disposableInterface), static (spc, pair) => {
                 var ((typeDeclaration, typeSymbol, semanticModel, systemsGroupAttributes), disposableSymbol) = pair;
                 if (typeDeclaration is null) {
                     return;

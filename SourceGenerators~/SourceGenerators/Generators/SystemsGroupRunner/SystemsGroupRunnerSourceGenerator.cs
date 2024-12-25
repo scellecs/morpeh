@@ -15,8 +15,7 @@
                 (s, _) => s is ClassDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.SemanticModel));
             
-            context.RegisterSourceOutput(classes, static (spc, pair) =>
-            {
+            context.RegisterSourceOutput(classes, static (spc, pair) => {
                 var (typeDeclaration, semanticModel) = pair;
                 if (typeDeclaration is null) {
                     return;
