@@ -13,6 +13,7 @@ namespace Scellecs.Morpeh {
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
+    // TODO: AsNative support
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
