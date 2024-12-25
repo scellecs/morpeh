@@ -116,7 +116,7 @@
                     sb.AppendIndent(indent).AppendLine("private readonly Scellecs.Morpeh.InjectionTable _injectionTable;");
                     
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable) {");
+                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                     using (indent.Scope()) {
                         sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
                         
@@ -128,15 +128,23 @@
                             } else {
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name} = new {fieldDefinition.fieldDeclaration?.Declaration.Type}();");
                             }
-
-                            if (fieldDefinition.register) {
-                                if (SymbolEqualityComparer.Default.Equals(fieldDefinition.fieldSymbol?.Type, fieldDefinition.registerAs)) {
-                                    sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).AppendLine(");");
-                                } else {
-                                    sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).Append(", typeof(").Append(fieldDefinition.registerAs).AppendLine("));");
+                        }
+                        
+                        sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
+                        using (indent.Scope()) {
+                            for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                                var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
+                            
+                                if (fieldDefinition.register) {
+                                    if (SymbolEqualityComparer.Default.Equals(fieldDefinition.fieldSymbol?.Type, fieldDefinition.registerAs)) {
+                                        sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).AppendLine(");");
+                                    } else {
+                                        sb.AppendIndent(indent).Append("injectionTable.Register(").Append(fieldDefinition.fieldSymbol?.Name).Append(", typeof(").Append(fieldDefinition.registerAs).AppendLine("));");
+                                    }
                                 }
                             }
                         }
+                        sb.AppendIndent(indent).AppendLine("}");
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
@@ -190,11 +198,19 @@
                                 sb.AppendIndent(indent).AppendLine("}");
                                 sb.AppendEndIfDefine();
                             }
-                            
-                            if (fieldDefinition.register) {
-                                sb.AppendIndent(indent).Append("_injectionTable.UnRegister(typeof(").Append(fieldDefinition.registerAs).AppendLine("));");
+                        }
+                        
+                        sb.AppendIndent(indent).AppendLine("if (_injectionTable != null) {");
+                        using (indent.Scope()) {
+                            for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                                var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
+
+                                if (fieldDefinition.register) {
+                                    sb.AppendIndent(indent).Append("_injectionTable.UnRegister(typeof(").Append(fieldDefinition.registerAs).AppendLine("));");
+                                }
                             }
                         }
+                        sb.AppendIndent(indent).AppendLine("}");
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
