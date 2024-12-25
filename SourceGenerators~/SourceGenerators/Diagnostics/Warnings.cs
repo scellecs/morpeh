@@ -14,8 +14,8 @@
             true,
             "The Initializer has an OnUpdate(float deltaTime) method. Did you mean to make a system instead?");
         
-        public static void ReportInitializerWithOnUpdate(SourceProductionContext ctx, SyntaxNode syntaxNode) {
-            ctx.ReportDiagnostic(Diagnostic.Create(INITIALIZER_WITH_ONUPDATE, syntaxNode.GetLocation()));
+        public static void ReportInitializerWithOnUpdate(SourceProductionContext ctx, MethodDeclarationSyntax methodDeclaration) {
+            ctx.ReportDiagnostic(Diagnostic.Create(INITIALIZER_WITH_ONUPDATE, methodDeclaration.GetLocation()));
         }
     }
 }
