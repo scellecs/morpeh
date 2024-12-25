@@ -149,6 +149,35 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
         }
     }
     
+    [Fact]
+    public void GenericComponent() { 
+        const string source = """
+                              using Scellecs.Morpeh;
+
+                              namespace Test.Namespace {
+                                [Component]
+                                public partial struct GenericComponent<T> where T : struct {
+                                  public T value;
+                                }
+                              }
+                              """;
+        
+        var result = Generate(source);
+        var text   = GetGeneratedTree(result, "GenericComponent").GetText().ToString();
+
+        if (!text.Contains("public static Stash<GenericComponent<T>> GetStash(World world) => world.GetStash<GenericComponent<T>>(capacity: 16);")) {
+            Assert.Fail(text);
+        }
+        
+        if (!text.Contains(": IDataComponent")) {
+            Assert.Fail(text);
+        }
+        
+        if (!text.Contains("where T : struct")) {
+            Assert.Fail(text);
+        }
+    }
+    
     private static GeneratorDriverRunResult Generate(string source) {
         var generator = new ComponentSourceGenerator();
         var driver    = CSharpGeneratorDriver.Create(generator);
