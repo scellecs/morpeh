@@ -6,7 +6,6 @@ namespace Scellecs.Morpeh.Utils.Editor {
     using System.Reflection;
     using Scellecs.Morpeh;
     using Scellecs.Morpeh.Providers;
-    using Scellecs.Morpeh.Systems;
     using UnityEditor;
     using UnityEngine;
     using Object = UnityEngine.Object;
@@ -85,7 +84,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
                             continue;
                         }
                         
-                        if (InheritsFrom(type, typeof(Initializer))) {
+                        if (InheritsFrom(type, typeof(IInitializer))) {
                             SelectAndSaveIcon(monoImporter, iconI);
                         }
                         else if (InheritsFrom(type, typeof(MonoProvider<>))) {
@@ -94,24 +93,9 @@ namespace Scellecs.Morpeh.Utils.Editor {
                         else if (InheritsFrom(type, typeof(IComponent))) {
                             SelectAndSaveIcon(monoImporter, iconC);
                         }
-                        else if (InheritsFrom(type, typeof(IFixedSystem))) {
-                            SelectAndSaveIcon(monoImporter, iconF);
-                        }
-                        else if (InheritsFrom(type, typeof(ILateSystem))) {
-                            SelectAndSaveIcon(monoImporter, iconL);
-                        }
-                        else if (InheritsFrom(type, typeof(ICleanupSystem))) {
-                            SelectAndSaveIcon(monoImporter, iconC);
-                        }
                         else if (InheritsFrom(type, typeof(ISystem))) {
                             SelectAndSaveIcon(monoImporter, iconU);
                         }
-                        // else if (InheritsFrom(type, typeof(BaseGlobalVariable<>))) {
-                        //     SelectAndSaveIcon(monoImporter, iconV);
-                        // }
-                        // else if (InheritsFrom(type, typeof(BaseGlobalEvent<>))) {
-                        //     SelectAndSaveIcon(monoImporter, iconE);
-                        // }
                     }
                 }
 

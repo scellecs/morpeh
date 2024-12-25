@@ -61,22 +61,6 @@ namespace Scellecs.Morpeh {
             world.componentsFiltersWith = new ComponentsToFiltersRelation(128);
             world.componentsFiltersWithout = new ComponentsToFiltersRelation(128);
 
-            if (World.plugins != null) {
-                foreach (var plugin in World.plugins) {
-#if MORPEH_DEBUG
-                    try {
-#endif
-                        plugin.Initialize(world);
-#if MORPEH_DEBUG
-                    }
-                    catch (Exception e) {
-                        MLogger.LogError($"Can not initialize world plugin {plugin.GetType()}");
-                        MLogger.LogException(e);
-                    }
-#endif
-                }
-            }
-
             world.ApplyAddWorld();
             return world;
         }
@@ -132,35 +116,6 @@ namespace Scellecs.Morpeh {
 #if MORPEH_BURST
             world.JobHandle.Complete();
 #endif
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SystemsGroup CreateSystemsGroup(this World world) {
-            world.ThreadSafetyCheck();
-            return new SystemsGroup(world);
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
-            world.ThreadSafetyCheck();
-            
-            world.newSystemsGroups.Add(order, systemsGroup);
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveSystemsGroup(this World world, SystemsGroup systemsGroup) {
-            world.ThreadSafetyCheck();
-            
-            systemsGroup.Dispose();
-            if (world.systemsGroups.ContainsValue(systemsGroup)) {
-                world.systemsGroups.RemoveAt(world.systemsGroups.IndexOfValue(systemsGroup));
-            }
-            else if (world.newSystemsGroups.ContainsValue(systemsGroup)) {
-                world.newSystemsGroups.RemoveAt(world.newSystemsGroups.IndexOfValue(systemsGroup));
-            }
         }
 
         [PublicAPI]
