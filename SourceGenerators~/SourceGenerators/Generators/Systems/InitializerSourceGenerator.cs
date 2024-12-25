@@ -22,12 +22,12 @@
                     return;
                 }
                 
-                var typeName = typeDeclaration.Identifier.ToString();
-                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol);
-                
                 if (!RunDiagnostics(spc, typeDeclaration)) {
                     return;
                 }
+                
+                var typeName = typeDeclaration.Identifier.ToString();
+                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
