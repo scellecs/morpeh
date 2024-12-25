@@ -5,7 +5,7 @@
     public static class Errors {
         // MORPEH_ERR_001
         
-        private static readonly DiagnosticDescriptor NESTED_DECLARATION = new(
+        public static readonly DiagnosticDescriptor NESTED_DECLARATION = new(
             "MORPEH_ERR_001",
             "Component {0} is declared inside another type.",
             "Component {0} is declared inside another type.",

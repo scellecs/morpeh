@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 namespace SourceGenerators.Tests;
 
 using System;
+using Diagnostics;
 using Generators.Components;
 
 [Collection("Sequential")]
@@ -176,6 +177,26 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
         if (!text.Contains("where T : struct")) {
             Assert.Fail(text);
         }
+    }
+    
+    [Fact]
+    public void DataComponent_InsideAnotherType() { 
+        const string source = """
+                              using Scellecs.Morpeh;
+
+                              namespace Test.Namespace {
+                                public class SomeClass {
+                                  [Component]
+                                  public partial struct GenericComponent<T> where T : struct {
+                                    public T value;
+                                  }
+                                }
+                              }
+                              """;
+        
+        var result = Generate(source);
+        Assert.Single(result.Diagnostics);
+        Assert.Equal(Errors.NESTED_DECLARATION.Id, result.Diagnostics[0].Id);
     }
     
     private static GeneratorDriverRunResult Generate(string source) {
