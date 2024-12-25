@@ -1,5 +1,4 @@
 ﻿namespace SourceGenerators.Utils.NonSemantic {
-    using System.Linq;
     using System.Text;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,14 +28,20 @@
         }
         
         public static StringBuilder AppendVisibility(this StringBuilder sb, TypeDeclarationSyntax type) {
-            if (type.Modifiers.Any(x => x.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword))) {
-                sb.Append("public");
-            } else if (type.Modifiers.Any(x => x.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.InternalKeyword))) {
-                sb.Append("internal");
-            } else if (type.Modifiers.Any(x => x.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.ProtectedKeyword))) {
-                sb.Append("protected");
-            } else if (type.Modifiers.Any(x => x.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PrivateKeyword))) {
-                sb.Append("private");
+            var modifiers = type.Modifiers;
+            
+            for (int i = 0, length = modifiers.Count; i < length; i++) {
+                var modifier = modifiers[i];
+                
+                if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword)) {
+                    sb.Append("public");
+                } else if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.InternalKeyword)) {
+                    sb.Append("internal");
+                } else if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.ProtectedKeyword)) {
+                    sb.Append("protected");
+                } else if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PrivateKeyword)) {
+                    sb.Append("private");
+                }
             }
             
             return sb;
