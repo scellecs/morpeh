@@ -272,6 +272,15 @@
                         }
                     }
                 }
+
+                if (!fieldDefinition.isSystem && !fieldDefinition.isInitializer) {
+                    if (fieldDefinition.fieldSymbol.Type is INamedTypeSymbol namedTypeSymbol) {
+                        if (!namedTypeSymbol.InstanceConstructors.Any(x => x.Parameters.Length == 0)) {
+                            Errors.ReportNoParameterlessConstructor(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name);
+                            success = false;
+                        }
+                    }
+                }
             }
             
             return success;

@@ -92,5 +92,20 @@
         public static void ReportInvalidInjectionSourceType(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration, string typeName) {
             ctx.ReportDiagnostic(Diagnostic.Create(INVALID_INJECTION_SOURCE_TYPE, fieldDeclaration.GetLocation(), typeName));
         }
+        
+        // MORPEH_ERR_007
+        
+        public static readonly DiagnosticDescriptor NO_PARAMETERLESS_CONSTRUCTOR_FOR_SERVICE = new(
+            "MORPEH_ERR_007",
+            "Cannot create an instance of {0} because it does not have a parameterless constructor.",
+            "Cannot create an instance of {0} because it does not have a parameterless constructor.",
+            "Morpeh",
+            DiagnosticSeverity.Error,
+            true,
+            "Cannot create an instance of {0} because it does not have a parameterless constructor.");
+
+        public static void ReportNoParameterlessConstructor(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration, string typeName) {
+            ctx.ReportDiagnostic(Diagnostic.Create(NO_PARAMETERLESS_CONSTRUCTOR_FOR_SERVICE, fieldDeclaration.GetLocation(), typeName));
+        }
     }
 }
