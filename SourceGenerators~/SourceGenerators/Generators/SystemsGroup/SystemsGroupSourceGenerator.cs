@@ -16,6 +16,7 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
+                // TODO: Possibly use type symbol instead of full semantic model. May not be enough information though.
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel, ctx.Attributes));
             
             var disposableInterface = context.CompilationProvider

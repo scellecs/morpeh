@@ -14,10 +14,10 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.MONO_PROVIDER_FULL_NAME,
                 (s, _) => s is ClassDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel, ctx.Attributes));
+                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.Attributes));
 
             context.RegisterSourceOutput(classes, static (spc, pair) => {
-                var (typeDeclaration, typeSymbol, semanticModel, monoProviderAttributes) = pair;
+                var (typeDeclaration, monoProviderAttributes) = pair;
                 if (typeDeclaration is null) {
                     return;
                 }

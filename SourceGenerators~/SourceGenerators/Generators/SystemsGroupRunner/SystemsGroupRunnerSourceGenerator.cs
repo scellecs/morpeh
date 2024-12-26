@@ -13,6 +13,7 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
                 (s, _) => s is ClassDeclarationSyntax,
+                // TODO: Use type symbol instead of full semantic model.
                 (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.SemanticModel));
             
             context.RegisterSourceOutput(classes, static (spc, pair) => {
