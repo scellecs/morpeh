@@ -99,7 +99,7 @@
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
                 
-                sb.AppendUsings(typeDeclaration, indent).AppendLine();
+                sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
 
                 sb.AppendIndent(indent)
@@ -131,7 +131,7 @@
                                         continue;
                                     }
 
-                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.ResolverType).Append(")injectionTable.Get(typeof(").Append(provider.ResolverType).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
+                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.ResolverType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append(")injectionTable.Get(typeof(").Append(provider.ResolverType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
                                     resolved = true;
                                     break;
                                 }
@@ -141,7 +141,7 @@
                                 continue;
                             }
                             
-                            sb.AppendIndent(indent).Append(field.Name).Append(" = (").Append(field.Type).Append(")injectionTable.Get(typeof(").Append(field.Type).AppendLine("));");
+                            sb.AppendIndent(indent).Append(field.Name).Append(" = (").Append(field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append(")injectionTable.Get(typeof(").Append(field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).AppendLine("));");
                         }
                     }
                     sb.AppendIndent(indent).AppendLine("}");

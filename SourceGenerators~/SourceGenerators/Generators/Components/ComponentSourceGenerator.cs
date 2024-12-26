@@ -43,8 +43,6 @@
             
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
-            
-                sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
@@ -61,8 +59,9 @@
                 
                 using (indent.Scope()) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
-                    sb.AppendIndent(indent).Append("public static ").Append(specialization.type).Append(" GetStash(World world) => world.").Append(specialization.getStashMethod)
+                    sb.AppendIndent(indent).Append("public static ").Append(specialization.type).Append(" GetStash(Scellecs.Morpeh.World world) => Scellecs.Morpeh.WorldStashExtensions.").Append(specialization.getStashMethod)
                         .Append("(")
+                        .Append("world, ")
                         .Append("capacity: ").Append(initialCapacity)
                         .AppendLine(");");
                 }

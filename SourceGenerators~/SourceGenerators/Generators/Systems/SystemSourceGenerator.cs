@@ -42,7 +42,7 @@
                 var indent = IndentSourcePool.Get();
 
                 sb.AppendMorpehDebugDefines();
-                sb.AppendUsings(typeDeclaration, indent).AppendLine();
+                sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
 
                 sb.AppendIl2CppAttributes(indent);
@@ -53,14 +53,14 @@
                     .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
-                    .Append(" : Scellecs.Morpeh.ISystem ")
                     .AppendGenericConstraints(typeDeclaration)
                     .AppendLine(" {");
                 
                 
                 using (indent.Scope()) {
-                    sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
-
+                    // TODO: Potentially auto-generate if it is not present?
+                    // sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
+                    
                     sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                     sb.AppendIndent(indent).AppendLine("private bool _systemHasFailed;");
                     sb.AppendEndIfDefine();
@@ -71,7 +71,7 @@
                     }
                     
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(World world) {");
+                    sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world) {");
                     using (indent.Scope()) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
                         sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_Constructor\");");
@@ -101,7 +101,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("OnAwake();");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (OnAwake), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
@@ -148,7 +148,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("OnUpdate(deltaTime);");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (OnUpdate), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
@@ -181,7 +181,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("Dispose();");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" system (Dispose), the system will be disabled\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");

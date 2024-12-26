@@ -70,59 +70,5 @@
             
             return sb;
         }
-
-        public static StringBuilder AppendUsings(this StringBuilder sb, TypeDeclarationSyntax typeDeclarationSyntax, int indent = 0) {
-            SyntaxNode? current = typeDeclarationSyntax;
-
-            while (current != null) {
-                switch (current) {
-                    case BaseNamespaceDeclarationSyntax baseNamespaceDeclaration: {
-                        foreach (var usingDirective in baseNamespaceDeclaration.Usings) {
-                            sb.AppendIndent(indent).AppendLine(usingDirective.ToString());
-                        }
-
-                        break;
-                    }
-                    case CompilationUnitSyntax compilationUnitSyntax: {
-                        foreach (var usingDirective in compilationUnitSyntax.Usings) {
-                            sb.AppendIndent(indent).AppendLine(usingDirective.ToString());
-                        }
-
-                        break;
-                    }
-                }
-
-                current = current.Parent;
-            }
-
-            return sb;
-        }
-        
-        public static StringBuilder AppendUsings(this StringBuilder sb, TypeDeclarationSyntax typeDeclarationSyntax, IndentSource indent) {
-            SyntaxNode? current = typeDeclarationSyntax;
-
-            while (current != null) {
-                switch (current) {
-                    case BaseNamespaceDeclarationSyntax baseNamespaceDeclaration: {
-                        foreach (var usingDirective in baseNamespaceDeclaration.Usings) {
-                            sb.AppendIndent(indent).AppendLine(usingDirective.ToString());
-                        }
-
-                        break;
-                    }
-                    case CompilationUnitSyntax compilationUnitSyntax: {
-                        foreach (var usingDirective in compilationUnitSyntax.Usings) {
-                            sb.AppendIndent(indent).AppendLine(usingDirective.ToString());
-                        }
-
-                        break;
-                    }
-                }
-
-                current = current.Parent;
-            }
-
-            return sb;
-        }
     }
 }

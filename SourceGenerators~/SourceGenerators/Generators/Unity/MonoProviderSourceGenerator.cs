@@ -14,10 +14,10 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.MONO_PROVIDER_FULL_NAME,
                 (s, _) => s is ClassDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.SemanticModel, ctx.Attributes));
+                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel, ctx.Attributes));
 
             context.RegisterSourceOutput(classes, static (spc, pair) => {
-                var (typeDeclaration, semanticModel, monoProviderAttributes) = pair;
+                var (typeDeclaration, typeSymbol, semanticModel, monoProviderAttributes) = pair;
                 if (typeDeclaration is null) {
                     return;
                 }
@@ -43,15 +43,10 @@
                     return;
                 }
 
-                string providerTypeName;
-                using (var scoped = StringBuilderPool.GetScoped()) {
-                    scoped.StringBuilder.Append(monoProviderType.Name);
-                    scoped.StringBuilder.AppendGenericParams(monoProviderType);
-                    providerTypeName = scoped.StringBuilder.ToString();
-                }
+                var providerTypeName = monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-                var isValidatable = monoProviderType.AllInterfaces.Any(static x => x.Name == "IValidatable");
-                var isValidatableWithGameObject = monoProviderType.AllInterfaces.Any(static x => x.Name == "IValidatableWithGameObject");
+                var isValidatable = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == "Scellecs.Morpeh.IValidatable");
+                var isValidatableWithGameObject = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == "Scellecs.Morpeh.IValidatableWithGameObject");
                 
                 var providerStashSpecialization = MorpehComponentHelpersSemantic.GetStashSpecialization(monoProviderType);
                 var isTag = providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag;
@@ -61,7 +56,6 @@
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
                 
-                sb.AppendUsings(typeDeclaration).AppendLine();
                 sb.AppendIndent(indent).AppendLine("using Sirenix.OdinInspector;");
                 sb.AppendIndent(indent).AppendLine("using UnityEngine;");
                 sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");

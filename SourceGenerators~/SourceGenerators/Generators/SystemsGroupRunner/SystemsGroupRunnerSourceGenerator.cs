@@ -53,7 +53,7 @@
                     }
 
                     fields.Add(new RunnerFieldDefinition(
-                        typeName: fieldDeclaration.Declaration.Type.ToString(), 
+                        typeName: typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                         fieldName: fieldDeclaration.Declaration.Variables[0].Identifier.Text,
                         loops: loops));
                     
@@ -63,7 +63,7 @@
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
                 
-                sb.AppendUsings(typeDeclaration).AppendLine();
+                sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
                 sb.AppendIl2CppAttributes(indent);

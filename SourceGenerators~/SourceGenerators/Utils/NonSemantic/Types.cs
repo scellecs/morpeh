@@ -15,6 +15,15 @@
                 switch (current) {
                     case TypeDeclarationSyntax parentType:
                         sb.Append(parentType.Identifier.Text);
+                        
+                        if (parentType.TypeParameterList is not null) {
+                            sb.Append(parentType.TypeParameterList.Parameters.Count);
+                            
+                            foreach (var typeParameter in parentType.TypeParameterList.Parameters) {
+                                sb.Append(typeParameter.Identifier.Text);
+                            }
+                        }
+                        
                         break;
                     case BaseNamespaceDeclarationSyntax ns:
                         sb.Append(ns.Name);

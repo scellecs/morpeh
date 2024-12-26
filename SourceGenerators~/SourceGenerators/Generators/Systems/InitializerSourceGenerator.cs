@@ -32,7 +32,7 @@
                 var indent = IndentSourcePool.Get();
                 
                 sb.AppendMorpehDebugDefines();
-                sb.AppendUsings(typeDeclaration, indent).AppendLine();
+                sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
 
                 sb.AppendIl2CppAttributes(indent);
@@ -43,13 +43,13 @@
                     .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
-                    .Append(" : Scellecs.Morpeh.IInitializer ")
                     .AppendGenericConstraints(typeDeclaration)
                     .AppendLine(" {");
                 
                 
                 using (indent.Scope()) {
-                    sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
+                    // TODO: Potentially auto-generate if it is not present?
+                    // sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
                     
                     sb.AppendLine().AppendLine();
                     foreach (var stash in stashes) {
@@ -87,7 +87,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("OnAwake();");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" initializer (OnAwake)\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
@@ -117,7 +117,7 @@
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("Dispose();");
                         }
-                        sb.AppendIndent(indent).AppendLine("} catch (System.Exception exception) {");
+                        sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" initializer (Dispose)\");");
                             sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");

@@ -9,6 +9,8 @@ using Test.Namespace;
 [Require(typeof(GlobalNamespaceComponent))]
 [Require(typeof(DisposableComponent))]
 public partial class BasicSystem1 {
+    public World World { get; set; }
+
     public bool IsEnabled() => throw new NotImplementedException();
 
     public void OnAwake() {

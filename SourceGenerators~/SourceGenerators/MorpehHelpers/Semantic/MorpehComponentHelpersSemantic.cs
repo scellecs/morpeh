@@ -5,28 +5,21 @@
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using NonSemantic;
     using SourceGenerators.Utils.NonSemantic;
-    using SourceGenerators.Utils.Semantic;
     using Utils.Pools;
 
     public static class MorpehComponentHelpersSemantic {
         public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol) {
             if (typeSymbol is not INamedTypeSymbol structSymbol) {
-                return new StashSpecialization(StashVariation.Unknown, "Stash<?>", "GetStash<?>", "?");
+                return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
             }
             
-            using var scoped = StringBuilderPool.GetScoped();
-            
-            var componentDecl = scoped.StringBuilder
-                .Append(typeSymbol.Name)
-                .AppendGenericParams(structSymbol)
-                .ToString();
-            
+            var componentDecl = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             return GetStashSpecializationInternal(typeSymbol, componentDecl);
         }
         
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
             if (semanticModel.GetDeclaredSymbol(structDeclaration) is not INamedTypeSymbol structSymbol) {
-                return new StashSpecialization(StashVariation.Unknown, "Stash<?>", "GetStash<?>", "?");
+                return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
             }
             
             return GetStashSpecialization(structSymbol);
@@ -35,14 +28,14 @@
         public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, TypeOfExpressionSyntax typeOfExpression) {
             var typeInfo      = semanticModel.GetTypeInfo(typeOfExpression.Type);
             var typeSymbol    = typeInfo.Type;
-            var componentDecl = typeOfExpression.Type.ToString();
+            var componentDecl = typeInfo.Type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
             return GetStashSpecializationInternal(typeSymbol, componentDecl);
         }
 
         private static StashSpecialization GetStashSpecializationInternal(ITypeSymbol? typeSymbol, string componentDecl) {
             if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
-                return new StashSpecialization(StashVariation.Unknown, "Stash<?>", "GetStash<?>", "?");
+                return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
             }
 
             var members = typeSymbol.GetMembers();
@@ -56,14 +49,14 @@
                 .Any(m => m.Name == "Dispose");
 
             if (isTag) {
-                return new StashSpecialization(StashVariation.Tag, "TagStash", $"GetTagStash<{componentDecl}>", "ITagComponent");
+                return new StashSpecialization(StashVariation.Tag, "Scellecs.Morpeh.TagStash", $"GetTagStash<{componentDecl}>", "Scellecs.Morpeh.ITagComponent");
             }
 
             if (isDisposable) {
-                return new StashSpecialization(StashVariation.Disposable, $"DisposableStash<{componentDecl}>", $"GetDisposableStash<{componentDecl}>", "IDisposableComponent");
+                return new StashSpecialization(StashVariation.Disposable, $"Scellecs.Morpeh.DisposableStash<{componentDecl}>", $"GetDisposableStash<{componentDecl}>", "Scellecs.Morpeh.IDisposableComponent");
             }
 
-            return new StashSpecialization(StashVariation.Data, $"Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "IDataComponent");
+            return new StashSpecialization(StashVariation.Data, $"Scellecs.Morpeh.Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "Scellecs.Morpeh.IDataComponent");
         }
         
         public static List<StashRequirement> GetStashRequirements(INamedTypeSymbol typeDeclaration) {
@@ -121,16 +114,13 @@
                             .Append(string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name)))
                             .ToString();
                     }
-                    
-                    using (var scoped = StringBuilderPool.GetScoped()) {
-                        metadataClassName = scoped.StringBuilder.Append(componentTypeSymbol.Name).AppendGenericParams(componentTypeSymbol).ToString();
-                    }
                 } else {
                     using (var scoped = StringBuilderPool.GetScoped()) {
                         fieldName = scoped.StringBuilder.Append("_").Append(componentTypeSymbol.Name.ToCamelCase()).ToString();
                     }
-                    metadataClassName = componentTypeSymbol.Name;
                 }
+
+                metadataClassName = componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 
                 stashes.Add(new StashRequirement {
                     fieldName         = fieldName,

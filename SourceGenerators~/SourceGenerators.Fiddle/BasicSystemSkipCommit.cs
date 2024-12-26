@@ -4,6 +4,8 @@ using Scellecs.Morpeh;
 
 [System(skipCommit: true, alwaysEnabled: true)]
 public partial class BasicSystemSkipCommit {
+    public World World { get; set; }
+    
     public void OnAwake() {
         throw new NotImplementedException();
     }
