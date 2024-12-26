@@ -36,9 +36,9 @@
         
         public static StringBuilder AppendIl2CppAttributes(this StringBuilder sb, IndentSource indent) {
             sb.Append("#if !").Append(MorpehDefines.MORPEH_ENABLE_IL2CPP_CHECKS).Append(" && ").AppendLine(MorpehDefines.ENABLE_IL2CPP);
-            sb.AppendIndent(indent).AppendLine("[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(Unity.IL2CPP.CompilerServices.Option.NullChecks, false)]");
-            sb.AppendIndent(indent).AppendLine("[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false)]");
-            sb.AppendIndent(indent).AppendLine("[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]");
+            sb.AppendIndent(indent).AppendLine("[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(global::Unity.IL2CPP.CompilerServices.Option.NullChecks, false)]");
+            sb.AppendIndent(indent).AppendLine("[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(global::Unity.IL2CPP.CompilerServices.Option.ArrayBoundsChecks, false)]");
+            sb.AppendIndent(indent).AppendLine("[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(global::Unity.IL2CPP.CompilerServices.Option.DivideByZeroChecks, false)]");
             sb.AppendLine("#endif");
             
             return sb;
