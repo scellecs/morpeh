@@ -45,6 +45,7 @@
 
                 var providerTypeName = monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
+                // TODO: Check that this actually works.
                 var isValidatable = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == "Scellecs.Morpeh.IValidatable");
                 var isValidatableWithGameObject = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == "Scellecs.Morpeh.IValidatableWithGameObject");
                 
