@@ -5,6 +5,7 @@
         private const string LOOP_ATTRIBUTE = "LoopAttribute";
         
         // Predefined names. Change them if you need to and keep your enum mapping updated.
+        // TODO: Read names from the attribute constructor arguments instead of hardcoding them.
         public static readonly string[] loopMethodNames = {
             "OnUpdate",        // 0
             "OnFixedUpdate",   // 1
