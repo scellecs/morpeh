@@ -217,7 +217,7 @@
 #endif
             }
         }
-
+#pragma warning disable 0618
         [Serializable]
         public class UpdateSystemPair : BasePair<UpdateSystem> {
         }
@@ -234,4 +234,5 @@
         public class CleanupSystemPair : BasePair<CleanupSystem> {
         }
     }
+#pragma warning restore 0618
 }

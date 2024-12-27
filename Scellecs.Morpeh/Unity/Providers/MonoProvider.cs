@@ -3,6 +3,7 @@
     using UnityEngine;
 
     public abstract class MonoProvider<T> : EntityProvider where T : struct, IComponent {
+#pragma warning disable 0618
         [SerializeField]
         [HideInInspector]
         private T serializedData;
@@ -89,5 +90,6 @@
                 this.Stash.Remove(ent);
             }
         }
+#pragma warning restore 0618
     }
 }
