@@ -17,7 +17,7 @@
                 MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
                 // TODO: Possibly use type symbol instead of full semantic model. May not be enough information though.
-                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol, ctx.SemanticModel, ctx.Attributes));
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.SemanticModel, ctx.Attributes));
             
             var disposableInterface = context.CompilationProvider
                 .Select(static (compilation, _) => compilation.GetTypeByMetadataName(KnownTypes.DISPOSABLE_FULL_NAME));
@@ -108,7 +108,7 @@
                     .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
-                    .AppendGenericConstraints(typeDeclaration)
+                    .AppendGenericConstraints(typeSymbol)
                     .AppendLine(" {");
 
                 using (indent.Scope()) {

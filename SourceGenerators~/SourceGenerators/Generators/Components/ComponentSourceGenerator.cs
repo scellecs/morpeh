@@ -6,6 +6,7 @@
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
     using Utils.NonSemantic;
+    using Utils.Semantic;
     using Utils.Pools;
 
     [Generator]
@@ -14,7 +15,7 @@
             var structs = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.COMPONENT_FULL_NAME,
                 (s, _) => s is StructDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol as ITypeSymbol, ctx.Attributes));
+                (ctx, _) => (ctx.TargetNode as StructDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.Attributes));
 
             context.RegisterSourceOutput(structs, static (spc, pair) => {
                 var (typeDeclaration, typeSymbol, componentAttributes) = pair;
@@ -54,7 +55,7 @@
                     .Append(" : ")
                     .Append(specialization.constraintInterface)
                     .Append(' ')
-                    .AppendGenericConstraints(typeDeclaration)
+                    .AppendGenericConstraints(typeSymbol)
                     .AppendLine(" {");
                 
                 using (indent.Scope()) {

@@ -83,8 +83,7 @@
             context.RegisterSourceOutput(classes.Combine(genericResolvers.Where(x => x.DiagnosticDescriptor == null).Collect()), static (spc, pair) => {
                 var ((typeDeclaration, semanticModel), genericProviders) = pair;
                 
-                var typeSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration);
-                if (typeSymbol is null) {
+                if (semanticModel.GetDeclaredSymbol(typeDeclaration) is not INamedTypeSymbol typeSymbol) {
                     return;
                 }
 
@@ -110,7 +109,7 @@
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
                     .Append(" : Scellecs.Morpeh.IInjectable ")
-                    .AppendGenericConstraints(typeDeclaration)
+                    .AppendGenericConstraints(typeSymbol)
                     .AppendLine(" {");
 
                 using (indent.Scope()) {

@@ -3,6 +3,6 @@
 using Scellecs.Morpeh;
 
 [Component]
-public partial struct GenericComponent<T> where T : struct {
+public partial struct GenericComponent<T> where T : unmanaged {
     public T value;
 }

@@ -5,6 +5,7 @@
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
     using Utils.NonSemantic;
+    using Utils.Semantic;
     using Utils.Pools;
 
     [Generator]
@@ -43,7 +44,7 @@
                     .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
-                    .AppendGenericConstraints(typeDeclaration)
+                    .AppendGenericConstraints(typeSymbol)
                     .AppendLine(" {");
                 
                 

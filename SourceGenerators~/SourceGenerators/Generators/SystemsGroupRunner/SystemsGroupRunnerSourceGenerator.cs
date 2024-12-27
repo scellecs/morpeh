@@ -5,6 +5,7 @@
     using MorpehHelpers.NonSemantic;
     using SystemsGroup;
     using Utils.NonSemantic;
+    using Utils.Semantic;
     using Utils.Pools;
 
     [Generator]
@@ -14,11 +15,11 @@
                 MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
                 (s, _) => s is ClassDeclarationSyntax,
                 // TODO: Use type symbol instead of full semantic model.
-                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.SemanticModel));
+                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.SemanticModel));
             
             context.RegisterSourceOutput(classes, static (spc, pair) => {
-                var (typeDeclaration, semanticModel) = pair;
-                if (typeDeclaration is null) {
+                var (typeDeclaration, typeSymbol, semanticModel) = pair;
+                if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
 
@@ -33,13 +34,13 @@
                         continue;
                     }
 
-                    if (semanticModel.GetSymbolInfo(fieldDeclaration.Declaration.Type).Symbol is not ITypeSymbol typeSymbol) {
+                    if (semanticModel.GetSymbolInfo(fieldDeclaration.Declaration.Type).Symbol is not ITypeSymbol fieldTypeSymbol) {
                         continue;
                     }
 
                     var loops = new HashSet<string>();
                     
-                    var members = typeSymbol.GetMembers();
+                    var members = fieldTypeSymbol.GetMembers();
                     for (int j = 0, jlength = members.Length; j < jlength; j++) {
                         if (members[j] is not IFieldSymbol fieldSymbol) {
                             continue;
@@ -54,7 +55,7 @@
                     }
 
                     fields.Add(new RunnerFieldDefinition(
-                        typeName: typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        typeName: fieldTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                         fieldName: fieldDeclaration.Declaration.Variables[0].Identifier.Text,
                         loops: loops));
                     
@@ -78,7 +79,7 @@
                     .Append(" : ")
                     .Append(KnownTypes.DISPOSABLE_FULL_NAME)
                     .Append(' ')
-                    .AppendGenericConstraints(typeDeclaration)
+                    .AppendGenericConstraints(typeSymbol)
                     .AppendLine(" {");
 
                 using (indent.Scope()) {
