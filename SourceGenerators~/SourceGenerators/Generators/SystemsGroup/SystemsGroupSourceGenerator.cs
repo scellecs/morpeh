@@ -192,8 +192,8 @@
                                 sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                                 sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                                 using (indent.Scope()) {
-                                    sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" (Dispose)\");");
-                                    sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
+                                    sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" (Dispose)\");");
+                                    sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                                 }
                                 sb.AppendIndent(indent).AppendLine("}");
                                 sb.AppendEndIfDefine();

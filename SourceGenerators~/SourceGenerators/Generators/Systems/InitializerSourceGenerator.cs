@@ -60,7 +60,7 @@
                     sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(World world) {");
                     using (indent.Scope()) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_Constructor\");");
+                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_Constructor\");");
                         sb.AppendEndIfDefine();
                         
                         sb.AppendIndent(indent).AppendLine("World = world;");
@@ -70,7 +70,7 @@
                         }
                         
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
                         sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
@@ -79,7 +79,7 @@
                     sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                     using (indent.Scope()) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_Awake\");");
+                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_Awake\");");
                         sb.AppendEndIfDefine();
                         
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
@@ -89,8 +89,8 @@
                         }
                         sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" initializer (OnAwake)\");");
-                            sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
+                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" initializer (OnAwake)\");");
+                            sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendElseDefine();
@@ -100,7 +100,7 @@
                         sb.AppendIndent(indent).AppendLine("World.Commit();");
                         
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
                         sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
@@ -109,7 +109,7 @@
                     sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                     using (indent.Scope()) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).Append("MLogger.BeginSample(\"").Append(typeName).AppendLine("_Dispose\");");
+                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_Dispose\");");
                         sb.AppendEndIfDefine();
                         
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
@@ -119,8 +119,8 @@
                         }
                         sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).Append("MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" initializer (Dispose)\");");
-                            sb.AppendIndent(indent).AppendLine("MLogger.LogException(exception);");
+                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" initializer (Dispose)\");");
+                            sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendElseDefine();
@@ -130,7 +130,7 @@
                         sb.AppendIndent(indent).AppendLine("World.Commit();");
                         
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).AppendLine("MLogger.EndSample();");
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
                         sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
