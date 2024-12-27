@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD
+﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
 namespace Scellecs.Morpeh.WorldBrowser {
     internal static class ComponentStorageModelExtensions {
         internal static SerializableComponentStorageModel ToSerializable(this ComponentStorageModel model) {

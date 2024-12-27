@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD
+﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
 using Scellecs.Morpeh.WorldBrowser.Filter;
 using System;
 using System.Collections.Generic;
@@ -33,8 +33,7 @@ namespace Scellecs.Morpeh.WorldBrowser {
                 var archetype = handle.Archetype;
                 var components = archetype.components;
 
-                foreach (var typeId in components)
-                {
+                foreach (var typeId in components) {
                     var def = ExtendedComponentId.Get(typeId);
                     var data = def.entityGetComponentBoxed.Invoke(entity);
                     buffer.Add(new ComponentDataBoxed() {

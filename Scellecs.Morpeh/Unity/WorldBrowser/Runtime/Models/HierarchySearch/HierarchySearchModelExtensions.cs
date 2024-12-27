@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD
+﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
 namespace Scellecs.Morpeh.WorldBrowser {
     internal static class HierarchySearchModelExtensions {
         internal static SerializableHierarchySearchModel ToSerializable(this HierarchySearchModel model) {

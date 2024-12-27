@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD
+﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
 namespace Scellecs.Morpeh.WorldBrowser {
     internal static class InspectorModelExtensions {
         internal static SerializableInspectorModel ToSerializable(this InspectorModel model) {

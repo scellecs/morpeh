@@ -84,10 +84,11 @@ namespace Scellecs.Morpeh.Utils.Editor {
                         if (iconProperty.objectReferenceValue != null) {
                             continue;
                         }
-                        
+#pragma warning disable 0618
                         if (InheritsFrom(type, typeof(Initializer))) {
                             SelectAndSaveIcon(monoImporter, iconI);
                         }
+#pragma warning restore 0618
                         else if (InheritsFrom(type, typeof(MonoProvider<>))) {
                             SelectAndSaveIcon(monoImporter, iconP);
                         }

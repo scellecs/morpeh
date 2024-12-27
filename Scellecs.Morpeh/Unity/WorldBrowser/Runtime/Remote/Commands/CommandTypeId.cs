@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD
+﻿#if UNITY_EDITOR && MORPEH_REMOTE_BROWSER || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
 namespace Scellecs.Morpeh.WorldBrowser.Remote {
     internal static class CommandTypeId {
         internal const byte Models = 1;

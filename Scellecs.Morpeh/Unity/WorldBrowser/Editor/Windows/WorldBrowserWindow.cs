@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using Scellecs.Morpeh.WorldBrowser.Editor.Utils;
-using Scellecs.Morpeh.WorldBrowser.Remote;
 using System;
 using UnityEditor;
 using UnityEngine;
@@ -67,9 +66,11 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private void CreateGUI() {
             if (!this.isApplicationPlaying && !this.isRemoteMode) {
                 this.rootVisualElement.Clear();
+#if MORPEH_REMOTE_BROWSER
                 this.rootVisualElement.styleSheets.Add(this.remoteToolbarStyleSheet);
                 this.remoteToolbarView = new RemoteToolbar(this.OnRemoteStateChanged);
                 this.rootVisualElement.Add(this.remoteToolbarView);
+#endif
                 return;
             }
 
@@ -77,7 +78,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
                 return;
             }
 
-            this.modelsStorage = isRemoteMode ? new RemoteModelsStorage(this.OnRemoteStateChanged) : new ModelsStorage();
+            this.modelsStorage = CreateModelsStorage();
             if (!this.modelsStorage.Initialize()) {
                 this.isRemoteMode = false;
                 return;
@@ -126,6 +127,14 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             this.hierarchySearchView.Update();
             this.hierarchyView.Update();
             this.inspectorView.Update();
+        }
+
+        private IModelsStorage CreateModelsStorage() {
+#if MORPEH_REMOTE_BROWSER
+            return isRemoteMode ? new Scellecs.Morpeh.WorldBrowser.Remote.RemoteModelsStorage(this.OnRemoteStateChanged) : new ModelsStorage();
+#else
+            return new ModelsStorage();
+#endif
         }
 
         private void EditorApplicationOnPlayModeStateChanged(PlayModeStateChange state) {
