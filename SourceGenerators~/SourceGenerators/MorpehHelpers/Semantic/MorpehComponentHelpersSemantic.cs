@@ -1,4 +1,6 @@
-﻿namespace SourceGenerators.MorpehHelpers.Semantic {
+﻿// #define MORPEH_SOURCEGEN_NO_STASH_SPECIALIZATION
+
+namespace SourceGenerators.MorpehHelpers.Semantic {
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
@@ -9,7 +11,7 @@
 
     public static class MorpehComponentHelpersSemantic {
         public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol) {
-            if (typeSymbol is not INamedTypeSymbol structSymbol) {
+            if (typeSymbol is null) {
                 return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
             }
             
@@ -38,6 +40,8 @@
                 return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
             }
 
+#if !MORPEH_SOURCEGEN_NO_STASH_SPECIALIZATION
+            
             var members = typeSymbol.GetMembers();
             
             var isTag = members
@@ -55,6 +59,8 @@
             if (isDisposable) {
                 return new StashSpecialization(StashVariation.Disposable, $"Scellecs.Morpeh.DisposableStash<{componentDecl}>", $"GetDisposableStash<{componentDecl}>", "Scellecs.Morpeh.IDisposableComponent");
             }
+            
+#endif
 
             return new StashSpecialization(StashVariation.Data, $"Scellecs.Morpeh.Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "Scellecs.Morpeh.IDataComponent");
         }
