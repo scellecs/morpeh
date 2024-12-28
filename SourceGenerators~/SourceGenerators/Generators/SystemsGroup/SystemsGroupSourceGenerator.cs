@@ -50,7 +50,7 @@
                     
                     fieldDefinition.fieldDeclaration = fieldDeclaration;
                     fieldDefinition.fieldSymbol      = fieldSymbol;
-                    fieldDefinition.loopType         = LoopTypeHelpers.GetLoopMethodNameFromField(fieldSymbol);
+                    fieldDefinition.loopType         = MorpehLoopTypeSemantic.GetLoopFromField(fieldSymbol);
                     fieldDefinition.isSystem         = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.SYSTEM_NAME);
                     fieldDefinition.isInitializer    = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.INITIALIZER_NAME);
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
@@ -215,12 +215,9 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
-                    for (int i = 0, length = LoopTypeHelpers.loopMethodNames.Length; i < length; i++) {
-                        var methodName  = LoopTypeHelpers.loopMethodNames[i];
-                        
-                        if (!scopedFieldDefinitionCollection.Collection.byLoopType.TryGetValue(methodName, out var loopMethods) || loopMethods.Count == 0) {
-                            continue;
-                        }
+                    foreach (var loopPair in scopedFieldDefinitionCollection.Collection.byLoopType) {
+                        var methodName = loopPair.Key;
+                        var loopMethods = loopPair.Value;
                         
                         sb.AppendLine().AppendLine();
                         if (inlineUpdateMethods) {

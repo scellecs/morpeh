@@ -34,6 +34,8 @@
         public const string MONO_PROVIDER_NAME      = "MonoProviderAttribute";
         public const string MONO_PROVIDER_FULL_NAME = "Scellecs.Morpeh.Providers.MonoProviderAttribute";
         
+        public const string LOOP_NAME      = "LoopAttribute"; // Can't have FULL_NAME because it's user-defined.
+        
         public static StringBuilder AppendIl2CppAttributes(this StringBuilder sb, IndentSource indent) {
             sb.Append("#if !").Append(MorpehDefines.MORPEH_ENABLE_IL2CPP_CHECKS).Append(" && ").AppendLine(MorpehDefines.ENABLE_IL2CPP);
             sb.AppendIndent(indent).AppendLine("[global::Unity.IL2CPP.CompilerServices.Il2CppSetOption(global::Unity.IL2CPP.CompilerServices.Option.NullChecks, false)]");

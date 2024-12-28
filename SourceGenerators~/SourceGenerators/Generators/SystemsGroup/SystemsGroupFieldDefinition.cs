@@ -1,11 +1,12 @@
 ﻿namespace SourceGenerators.Generators.SystemsGroup {
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using MorpehHelpers.NonSemantic;
 
     public class SystemsGroupFieldDefinition {
         public FieldDeclarationSyntax? fieldDeclaration;
         public IFieldSymbol?           fieldSymbol;
-        public int?                    loopType;
+        public MorpehLoopTypeSemantic.LoopDefinition? loopType;
         public bool                    isSystem;
         public bool                    isInitializer;
         public bool                    isDisposable;

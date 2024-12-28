@@ -1,5 +1,6 @@
 ﻿namespace SourceGenerators.Generators.SystemsGroup {
     using System.Collections.Generic;
+    using MorpehHelpers.NonSemantic;
 
     public class FieldDefinitionCollection {
         internal readonly List<SystemsGroupFieldDefinition>                     ordered;
@@ -8,17 +9,13 @@
         public FieldDefinitionCollection() {
             this.ordered    = new List<SystemsGroupFieldDefinition>();
             this.byLoopType = new Dictionary<string, List<SystemsGroupFieldDefinition>>();
-            
-            for (int i = 0, length = LoopTypeHelpers.loopMethodNames.Length; i < length; i++) {
-                this.byLoopType[LoopTypeHelpers.loopMethodNames[i]] = new List<SystemsGroupFieldDefinition>();
-            }
         }
 
         public void Clear() {
             this.ordered.Clear();
                 
-            for (int i = 0, length = LoopTypeHelpers.loopMethodNames.Length; i < length; i++) {
-                this.byLoopType[LoopTypeHelpers.loopMethodNames[i]].Clear();
+            foreach (var list in this.byLoopType.Values) {
+                list.Clear();
             }
         }
         
@@ -29,7 +26,11 @@
                 return;
             }
             
-            this.byLoopType[LoopTypeHelpers.loopMethodNames[systemsGroupFieldDefinition.loopType.Value]].Add(systemsGroupFieldDefinition);
+            if (!this.byLoopType.ContainsKey(systemsGroupFieldDefinition.loopType.Value.methodName)) {
+                this.byLoopType.Add(systemsGroupFieldDefinition.loopType.Value.methodName, new List<SystemsGroupFieldDefinition>());
+            }
+            
+            this.byLoopType[systemsGroupFieldDefinition.loopType.Value.methodName].Add(systemsGroupFieldDefinition);
         }
     }
 }

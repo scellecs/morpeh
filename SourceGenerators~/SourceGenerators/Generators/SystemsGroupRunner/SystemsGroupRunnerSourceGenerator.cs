@@ -27,7 +27,7 @@
 
                 var fields = RunnerFieldDefinitionCache.GetList();
                 
-                var existingLoops = new HashSet<string>();
+                var existingLoops = new HashSet<MorpehLoopTypeSemantic.LoopDefinition>();
                 
                 for (int i = 0, length = typeDeclaration.Members.Count; i < length; i++) {
                     if (typeDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
@@ -38,7 +38,7 @@
                         continue;
                     }
 
-                    var loops = new HashSet<string>();
+                    var loops = new HashSet<MorpehLoopTypeSemantic.LoopDefinition>();
                     
                     var members = fieldTypeSymbol.GetMembers();
                     for (int j = 0, jlength = members.Length; j < jlength; j++) {
@@ -46,12 +46,12 @@
                             continue;
                         }
 
-                        var loopType = LoopTypeHelpers.GetLoopMethodNameFromField(fieldSymbol);
-                        if (loopType == null) {
+                        var loopDefinitiom = MorpehLoopTypeSemantic.GetLoopFromField(fieldSymbol);
+                        if (loopDefinitiom == null) {
                             continue;
                         }
 
-                        loops.Add(LoopTypeHelpers.loopMethodNames[(int)loopType]);
+                        loops.Add(loopDefinitiom.Value);
                     }
 
                     fields.Add(new RunnerFieldDefinition(
@@ -126,12 +126,8 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
-                    for (int i = 0, length = LoopTypeHelpers.loopMethodNames.Length; i < length; i++) {
-                        var methodName = LoopTypeHelpers.loopMethodNames[i];
-                        
-                        if (!existingLoops.Contains(methodName)) {
-                            continue;
-                        }
+                    foreach (var existingLoop in existingLoops) {
+                        var methodName = existingLoop.methodName;
 
                         sb.AppendLine().AppendLine();
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
@@ -140,7 +136,7 @@
                             sb.AppendIndent(indent).AppendLine("_world.Commit();");
                             
                             for (int j = 0, jlength = fields.Count; j < jlength; j++) {
-                                if (!fields[j].loops.Contains(methodName)) {
+                                if (!fields[j].loops.Contains(existingLoop)) {
                                     continue;
                                 }
                                 
