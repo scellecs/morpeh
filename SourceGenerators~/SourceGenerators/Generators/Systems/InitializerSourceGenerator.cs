@@ -71,7 +71,7 @@
                     
                     sb.AppendLine().AppendLine();
                     foreach (var stash in stashes) {
-                        sb.AppendIndent(indent).Append("private ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
+                        sb.AppendIndent(indent).Append("private readonly ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
                     }
                     
                     sb.AppendLine().AppendLine();
