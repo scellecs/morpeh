@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
         private bool wasConnected;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void Initialize() {
+        public static void Initialize() {
             if (Application.isEditor) {
                 return;
             }
@@ -31,8 +31,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
         }
 
         private void Update() {
-            if (!this.isInitialized)
-            {
+            if (!this.isInitialized) {
                 return;
             }
 

@@ -1,4 +1,8 @@
-﻿namespace Scellecs.Morpeh {
+﻿#if UNITY_EDITOR || (DEBUG && !DEVELOPMENT_BUILD) || (MORPEH_REMOTE_BROWSER  && DEVELOPMENT_BUILD)
+#define MORPEH_GENERATE_ALL_EXTENDED_IDS
+#endif
+
+namespace Scellecs.Morpeh {
     using System;
     using System.Collections.Generic;
     using Unity.IL2CPP.CompilerServices;
@@ -65,7 +69,7 @@
             
             ComponentId.Add(typeof(T), info);
 
-#if UNITY_EDITOR || MORPEH_GENERATE_ALL_EXTENDED_IDS || (DEBUG && !DEVELOPMENT_BUILD)
+#if MORPEH_GENERATE_ALL_EXTENDED_IDS
             ExtendedComponentId.Generate<T>();
 #endif
         }
