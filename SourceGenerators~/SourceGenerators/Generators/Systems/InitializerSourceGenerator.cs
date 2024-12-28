@@ -26,6 +26,22 @@
                     return;
                 }
                 
+                var hasWorldProperty = false;
+                
+                var members = typeSymbol.GetMembers();
+                for (int i = 0, length = members.Length; i < length; i++) {
+                    if (members[i] is not IPropertySymbol propertySymbol) {
+                        continue;
+                    }
+
+                    if (propertySymbol.Name != "World") {
+                        continue;
+                    }
+
+                    hasWorldProperty = true;
+                    break;
+                }
+                
                 var typeName = typeDeclaration.Identifier.ToString();
                 var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol);
 
@@ -49,8 +65,9 @@
                 
                 
                 using (indent.Scope()) {
-                    // TODO: Potentially auto-generate if it is not present?
-                    // sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
+                    if (!hasWorldProperty) {
+                        sb.AppendIndent(indent).AppendLine("public Scellecs.Morpeh.World World { get; set; }");
+                    }
                     
                     sb.AppendLine().AppendLine();
                     foreach (var stash in stashes) {
