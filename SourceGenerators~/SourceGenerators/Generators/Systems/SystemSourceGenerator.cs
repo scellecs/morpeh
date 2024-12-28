@@ -76,7 +76,7 @@
                 
                 using (indent.Scope()) {
                     if (!hasWorldProperty) {
-                        sb.AppendIndent(indent).AppendLine("public World World { get; set; }");
+                        sb.AppendIndent(indent).AppendLine("public World World { get; }");
                     }
                     
                     sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);

@@ -66,7 +66,7 @@
                 
                 using (indent.Scope()) {
                     if (!hasWorldProperty) {
-                        sb.AppendIndent(indent).AppendLine("public Scellecs.Morpeh.World World { get; set; }");
+                        sb.AppendIndent(indent).AppendLine("public Scellecs.Morpeh.World World { get; }");
                     }
                     
                     sb.AppendLine().AppendLine();
