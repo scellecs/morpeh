@@ -29,7 +29,7 @@
                     }
 
                     if (field.HasConstantValue && (int)field.ConstantValue == enumNumericValue) {
-                        return new LoopDefinition(field.Name, enumNumericValue);
+                        return new LoopDefinition($"On{field.Name}", enumNumericValue);
                     }
                 }
             }
