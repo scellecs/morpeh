@@ -165,6 +165,10 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                     using (indent.Scope()) {
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_CallAwake\");");
+                        sb.AppendEndIfDefine();
+                        
                         for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                             var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
                             
@@ -172,12 +176,20 @@
                                 sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.CallAwake();");
                             }
                         }
+                        
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
+                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                     using (indent.Scope()) {
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_CallDispose\");");
+                        sb.AppendEndIfDefine();
+                        
                         for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                             var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
                             
@@ -213,6 +225,10 @@
                             }
                         }
                         sb.AppendIndent(indent).AppendLine("}");
+                        
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
+                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
@@ -226,9 +242,17 @@
                         }
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
                         using (indent.Scope()) {
+                            sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).Append("_").Append(methodName).AppendLine("\");");
+                            sb.AppendEndIfDefine();
+                            
                             foreach (var fieldDefinition in loopMethods) {
                                 sb.AppendIndent(indent).Append(fieldDefinition.fieldSymbol?.Name).AppendLine(".CallUpdate(deltaTime);");
                             }
+                            
+                            sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                            sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
+                            sb.AppendEndIfDefine();
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                     }
