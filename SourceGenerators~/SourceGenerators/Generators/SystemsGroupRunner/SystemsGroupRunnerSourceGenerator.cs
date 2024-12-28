@@ -65,6 +65,7 @@
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
                 
+                sb.AppendMorpehDebugDefines();
                 sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
                 
@@ -132,6 +133,7 @@
                         sb.AppendLine().AppendLine();
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
 
+                        // TODO: Profiling
                         using (indent.Scope()) {
                             sb.AppendIndent(indent).AppendLine("_world.Commit();");
                             
