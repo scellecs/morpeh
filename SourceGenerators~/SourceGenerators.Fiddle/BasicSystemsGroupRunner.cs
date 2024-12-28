@@ -2,7 +2,7 @@
 
 using Scellecs.Morpeh;
 
-[SystemsGroupRunner]
+[EcsSystemsGroupRunner]
 public partial class BasicSystemsGroupRunner {
     private readonly BasicSystemsGroup _basicSystemsGroup;
 }

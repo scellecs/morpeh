@@ -2,67 +2,67 @@
 
 using Scellecs.Morpeh;
 
-[Component]
+[EcsComponent]
 public partial struct TagTest1 {
     
 }
 
-[Component]
+[EcsComponent]
 public partial struct TagTest2 {
     
 }
 
-[Component]
+[EcsComponent]
 public partial struct TagTest3 {
     
 }
 
-[Component]
+[EcsComponent]
 public partial struct TagTest4 {
     
 }
 
-[Component]
+[EcsComponent]
 public partial struct TagTest5 {
     
 }
 
-[Component]
+[EcsComponent]
 public partial struct TagTest6 {
     
 }
 
-[Component]
+[EcsComponent]
 public partial struct TagTest7 {
     
 }
 
-[Component]
+[EcsComponent]
 public partial struct TagTest8 {
     
 }
 
-[Component]
+[EcsComponent]
 public partial struct IntTest1 {
     public int value;
 }
 
-[Component]
+[EcsComponent]
 public partial struct IntTest2 {
     public int value;
 }
 
-[Component]
+[EcsComponent]
 public partial struct IntTest3 {
     public int value;
 }
 
-[Component]
+[EcsComponent]
 public partial struct IntTest4 {
     public int value;
 }
 
-[Component]
+[EcsComponent]
 public partial struct DisposableTest1 {
     public int    value;
     public Action<int> onDispose;
@@ -72,7 +72,7 @@ public partial struct DisposableTest1 {
     }
 }
 
-[Component]
+[EcsComponent]
 public partial struct DisposableTest2 {
     public int         value;
     public Action<int> onDispose;
@@ -82,7 +82,7 @@ public partial struct DisposableTest2 {
     }
 }
 
-[Component]
+[EcsComponent]
 public partial struct DisposableTest3 {
     public int         value;
     public Action<int> onDispose;
@@ -92,7 +92,7 @@ public partial struct DisposableTest3 {
     }
 }
 
-[Component]
+[EcsComponent]
 public partial struct DisposableTest4 {
     public int         value;
     public Action<int> onDispose;
@@ -102,12 +102,12 @@ public partial struct DisposableTest4 {
     }
 }
 
-[Component]
+[EcsComponent]
 public partial struct ManagedTest {
     public object value;
 }
 
-[Component]
+[EcsComponent]
 public partial struct DisposableTest {
     public sealed class Handle {
         public bool value = true;

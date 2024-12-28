@@ -4,7 +4,7 @@ namespace Test.Namespace;
 using Scellecs.Morpeh;
 using UnityEngine;
 
-[Component(initialCapacity: 64)]
+[EcsComponent(initialCapacity: 64)]
 public partial struct DisposableComponent : IValidatable, IValidatableWithGameObject {
     public int value;
 

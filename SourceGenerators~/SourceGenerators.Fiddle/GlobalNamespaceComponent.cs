@@ -1,6 +1,6 @@
 ﻿using Scellecs.Morpeh;
 
-[Component]
+[EcsComponent]
 // ReSharper disable once CheckNamespace
 public partial struct GlobalNamespaceComponent {
     

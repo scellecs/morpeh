@@ -2,8 +2,8 @@
     using System;
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-    public class SystemAttribute : Attribute {
-        public SystemAttribute(bool skipCommit = false, bool alwaysEnabled = false) {
+    public class EcsSystemAttribute : Attribute {
+        public EcsSystemAttribute(bool skipCommit = false, bool alwaysEnabled = false) {
             
         }
     }

@@ -2,7 +2,7 @@
     using System;
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class SystemsGroupRunnerAttribute : Attribute {
+    public class EcsSystemsGroupRunnerAttribute : Attribute {
         
     }
 }

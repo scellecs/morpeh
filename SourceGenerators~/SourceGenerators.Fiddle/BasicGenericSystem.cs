@@ -2,7 +2,7 @@
 
 using Scellecs.Morpeh;
 
-[System]
+[EcsSystem]
 public partial class BasicGenericSystem<T> where T : struct {
     public World World { get; set; }
     

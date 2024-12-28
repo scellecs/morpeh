@@ -1,7 +1,7 @@
 ﻿namespace Scellecs.Morpeh {
     using System;
 
-    public class InitializerAttribute : Attribute {
+    public class EcsInitializerAttribute : Attribute {
         
     }
 }

@@ -2,7 +2,7 @@
 
 using Scellecs.Morpeh;
 
-[SystemsGroup(inlineUpdateCalls: true)]
+[EcsSystemsGroup(inlineUpdateCalls: true)]
 public partial class BasicSystemsGroup {
     [Register]
     private readonly BasicDisposableClass _basicDisposableClass1;
@@ -13,12 +13,12 @@ public partial class BasicSystemsGroup {
     
     private readonly BasicInitializer1 _basicInitializer1;
     
-    [Loop(LoopType.Update)]
+    [EcsLoop(LoopType.Update)]
     private readonly BasicSystem1 _basicSystem1;
     
-    [Loop(LoopType.Tick)]
+    [EcsLoop(LoopType.Tick)]
     private readonly BasicGenericSystem<int> _basicGenericSystem1;
     
-    [Loop(LoopType.TestAnother)]
+    [EcsLoop(LoopType.TestAnother)]
     private readonly BasicGenericSystem<int> _basicGenericSystem2;
 }

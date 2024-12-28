@@ -2,7 +2,7 @@
 
 using Scellecs.Morpeh;
 
-[Component]
+[EcsComponent]
 public partial struct GenericComponent<T> where T : unmanaged {
     public T value;
 }

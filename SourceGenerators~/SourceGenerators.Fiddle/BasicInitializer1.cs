@@ -3,11 +3,11 @@
 using Scellecs.Morpeh;
 using Test.Namespace;
 
-[Initializer]
-[Require(typeof(TagComponent))]
-[Require(typeof(GenericComponent<int>))]
-[Require(typeof(GlobalNamespaceComponent))]
-[Require(typeof(DisposableComponent))]
+[EcsInitializer]
+[IncludeStash(typeof(TagComponent))]
+[IncludeStash(typeof(GenericComponent<int>))]
+[IncludeStash(typeof(GlobalNamespaceComponent))]
+[IncludeStash(typeof(DisposableComponent))]
 public partial class BasicInitializer1 {
     [Injectable]
     private BasicDisposableClass _basicDisposableClass1;

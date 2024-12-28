@@ -4,20 +4,20 @@
     using SourceGenerators.Utils.NonSemantic;
 
     public static class MorpehAttributes {
-        public const string COMPONENT_NAME      = "ComponentAttribute";
-        public const string COMPONENT_FULL_NAME = "Scellecs.Morpeh.ComponentAttribute";
+        public const string COMPONENT_NAME      = "EcsComponentAttribute";
+        public const string COMPONENT_FULL_NAME = "Scellecs.Morpeh.EcsComponentAttribute";
 
-        public const string SYSTEMS_GROUP_NAME      = "SystemsGroupAttribute";
-        public const string SYSTEMS_GROUP_FULL_NAME = "Scellecs.Morpeh.SystemsGroupAttribute";
+        public const string SYSTEMS_GROUP_NAME      = "EcsSystemsGroupAttribute";
+        public const string SYSTEMS_GROUP_FULL_NAME = "Scellecs.Morpeh.EcsSystemsGroupAttribute";
 
-        public const string SYSTEMS_GROUP_RUNNER_NAME      = "SystemsGroupRunnerAttribute";
-        public const string SYSTEMS_GROUP_RUNNER_FULL_NAME = "Scellecs.Morpeh.SystemsGroupRunnerAttribute";
+        public const string SYSTEMS_GROUP_RUNNER_NAME      = "EcsSystemsGroupRunnerAttribute";
+        public const string SYSTEMS_GROUP_RUNNER_FULL_NAME = "Scellecs.Morpeh.EcsSystemsGroupRunnerAttribute";
 
-        public const string SYSTEM_NAME      = "SystemAttribute";
-        public const string SYSTEM_FULL_NAME = "Scellecs.Morpeh.SystemAttribute";
+        public const string SYSTEM_NAME      = "EcsSystemAttribute";
+        public const string SYSTEM_FULL_NAME = "Scellecs.Morpeh.EcsSystemAttribute";
 
-        public const string INITIALIZER_NAME      = "InitializerAttribute";
-        public const string INITIALIZER_FULL_NAME = "Scellecs.Morpeh.InitializerAttribute";
+        public const string INITIALIZER_NAME      = "EcsInitializerAttribute";
+        public const string INITIALIZER_FULL_NAME = "Scellecs.Morpeh.EcsInitializerAttribute";
 
         public const string INJECTABLE_NAME      = "InjectableAttribute";
         public const string INJECTABLE_FULL_NAME = "Scellecs.Morpeh.InjectableAttribute";
@@ -28,13 +28,13 @@
         public const string REGISTER_NAME      = "RegisterAttribute";
         public const string REGISTER_FULL_NAME = "Scellecs.Morpeh.RegisterAttribute";
         
-        public const string REQUIRE_NAME      = "RequireAttribute";
-        public const string REQUIRE_FULL_NAME = "Scellecs.Morpeh.RequireAttribute";
+        public const string REQUIRE_NAME      = "IncludeStashAttribute";
+        public const string REQUIRE_FULL_NAME = "Scellecs.Morpeh.IncludeStashAttribute";
         
         public const string MONO_PROVIDER_NAME      = "MonoProviderAttribute";
         public const string MONO_PROVIDER_FULL_NAME = "Scellecs.Morpeh.Providers.MonoProviderAttribute";
         
-        public const string LOOP_NAME      = "LoopAttribute"; // Can't have FULL_NAME because it's user-defined.
+        public const string LOOP_NAME      = "EcsLoopAttribute"; // Can't have FULL_NAME because it's user-defined.
         
         public static StringBuilder AppendIl2CppAttributes(this StringBuilder sb, IndentSource indent) {
             sb.Append("#if !").Append(MorpehDefines.MORPEH_ENABLE_IL2CPP_CHECKS).Append(" && ").AppendLine(MorpehDefines.ENABLE_IL2CPP);

@@ -3,11 +3,11 @@
 using Scellecs.Morpeh;
 using Test.Namespace;
 
-[System]
-[Require(typeof(TagComponent))]
-[Require(typeof(Test.Namespace.GenericComponent<Test.Namespace.TagComponent>))]
-[Require(typeof(GlobalNamespaceComponent))]
-[Require(typeof(DisposableComponent))]
+[EcsSystem]
+[IncludeStash(typeof(TagComponent))]
+[IncludeStash(typeof(Test.Namespace.GenericComponent<Test.Namespace.TagComponent>))]
+[IncludeStash(typeof(GlobalNamespaceComponent))]
+[IncludeStash(typeof(DisposableComponent))]
 public partial class BasicSystem1 {
     public World World { get; set; }
 
