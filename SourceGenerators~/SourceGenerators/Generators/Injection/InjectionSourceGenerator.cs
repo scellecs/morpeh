@@ -34,7 +34,7 @@
                             return null;
                         }
 
-                        return new GenericResolver(baseType, typeSymbol);
+                        return new GenericResolver(baseType, typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
                     }
                 )
                 .Where(static resolver => resolver is not null)
@@ -90,7 +90,7 @@
                                         continue;
                                     }
 
-                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.resolverType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append(")injectionTable.Get(typeof(").Append(provider.resolverType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
+                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.resolverTypeName).Append(")injectionTable.Get(typeof(").Append(provider.resolverTypeName).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
                                     resolved = true;
                                     break;
                                 }
@@ -99,8 +99,9 @@
                             if (resolved) {
                                 continue;
                             }
-                            
-                            sb.AppendIndent(indent).Append(field.Name).Append(" = (").Append(field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append(")injectionTable.Get(typeof(").Append(field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).AppendLine("));");
+
+                            var fieldTypeName = field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                            sb.AppendIndent(indent).Append(field.Name).Append(" = (").Append(fieldTypeName).Append(")injectionTable.Get(typeof(").Append(fieldTypeName).AppendLine("));");
                         }
                     }
                     sb.AppendIndent(indent).AppendLine("}");
@@ -118,11 +119,11 @@
 
         private class GenericResolver {
             public readonly INamedTypeSymbol baseType;
-            public readonly INamedTypeSymbol resolverType;
+            public readonly string           resolverTypeName;
 
-            public GenericResolver(INamedTypeSymbol baseType, INamedTypeSymbol resolverType) {
-                this.baseType     = baseType;
-                this.resolverType = resolverType;
+            public GenericResolver(INamedTypeSymbol baseType, string resolverTypeName) {
+                this.baseType         = baseType;
+                this.resolverTypeName = resolverTypeName;
             }
         }
     }
