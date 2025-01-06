@@ -34,6 +34,12 @@
         public const string MONO_PROVIDER_NAME      = "MonoProviderAttribute";
         public const string MONO_PROVIDER_FULL_NAME = "Scellecs.Morpeh.Providers.MonoProviderAttribute";
         
+        public const string VALIDATABLE_NAME      = "IValidatable";
+        public const string VALIDATABLE_FULL_NAME = "Scellecs.Morpeh.IValidatable";
+        
+        public const string VALIDATABLE_WITH_GAMEOBJECT_NAME      = "IValidatableWithGameObject";
+        public const string VALIDATABLE_WITH_GAMEOBJECT_FULL_NAME = "Scellecs.Morpeh.IValidatableWithGameObject";
+        
         public const string LOOP_NAME      = "EcsLoopAttribute"; // Can't have FULL_NAME because it's user-defined.
         
         public static StringBuilder AppendIl2CppAttributes(this StringBuilder sb, IndentSource indent) {
