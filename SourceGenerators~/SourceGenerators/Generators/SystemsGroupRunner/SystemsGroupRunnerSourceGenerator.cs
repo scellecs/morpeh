@@ -87,6 +87,10 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                     using (indent.Scope()) {
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_Constructor\");");
+                        sb.AppendEndIfDefine();
+                        
                         sb.AppendIndent(indent).AppendLine("_world = world;");
                         
                         for (int i = 0, length = fields.Count; i < length; i++) {
@@ -100,28 +104,48 @@
                             }
                         }
                         sb.AppendIndent(indent).AppendLine("}");
+                        
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
+                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void OnAwake() {");
                     using (indent.Scope()) {
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_OnAwake\");");
+                        sb.AppendEndIfDefine();
+                        
                         sb.AppendIndent(indent).AppendLine("_world.Commit();");
                         
                         for (int i = 0, length = fields.Count; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".CallAwake();");
                         }
+                        
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
+                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void Dispose() {");
                     using (indent.Scope()) {
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_Dispose\");");
+                        sb.AppendEndIfDefine();
+                        
                         sb.AppendIndent(indent).AppendLine("_world.Commit();");
                         
                         for (int i = 0, length = fields.Count; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".CallDispose();");
                         }
+                        
+                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
+                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
@@ -131,8 +155,11 @@
                         sb.AppendLine().AppendLine();
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
 
-                        // TODO: Profiling
                         using (indent.Scope()) {
+                            sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).Append('_').Append(methodName).AppendLine("\");");
+                            sb.AppendEndIfDefine();
+                            
                             sb.AppendIndent(indent).AppendLine("_world.Commit();");
                             
                             for (int j = 0, jlength = fields.Count; j < jlength; j++) {
@@ -142,6 +169,10 @@
                                 
                                 sb.AppendIndent(indent).Append(fields[j].fieldName).Append('.').Append(methodName).AppendLine("(deltaTime);");
                             }
+                            
+                            sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
+                            sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
+                            sb.AppendEndIfDefine();
                         }
                     
                         sb.AppendIndent(indent).AppendLine("}");
