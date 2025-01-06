@@ -73,6 +73,7 @@
                     .Append(' ')
                     .Append(typeName)
                     .AppendGenericParams(typeDeclaration)
+                    .Append(" : Scellecs.Morpeh.ISystem ")
                     .AppendGenericConstraints(typeSymbol)
                     .AppendLine(" {");
                 
