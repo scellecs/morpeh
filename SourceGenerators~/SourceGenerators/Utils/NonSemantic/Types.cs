@@ -1,6 +1,8 @@
 ﻿namespace SourceGenerators.Utils.NonSemantic {
+    using System;
     using System.Text;
     using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     public static class Types {
@@ -40,16 +42,19 @@
             var modifiers = type.Modifiers;
             
             for (int i = 0, length = modifiers.Count; i < length; i++) {
-                var modifier = modifiers[i];
-                
-                if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword)) {
-                    sb.Append("public");
-                } else if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.InternalKeyword)) {
-                    sb.Append("internal");
-                } else if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.ProtectedKeyword)) {
-                    sb.Append("protected");
-                } else if (modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PrivateKeyword)) {
-                    sb.Append("private");
+                switch (modifiers[i].Kind()) {
+                    case SyntaxKind.PublicKeyword:
+                        sb.Append("public");
+                        break;
+                    case SyntaxKind.InternalKeyword:
+                        sb.Append("internal");
+                        break;
+                    case SyntaxKind.ProtectedKeyword:
+                        sb.Append("protected");
+                        break;
+                    case SyntaxKind.PrivateKeyword:
+                        sb.Append("private");
+                        break;
                 }
             }
             
