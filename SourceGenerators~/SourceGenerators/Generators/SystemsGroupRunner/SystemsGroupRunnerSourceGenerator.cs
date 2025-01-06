@@ -3,7 +3,6 @@
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
-    using SystemsGroup;
     using Utils.NonSemantic;
     using Utils.Semantic;
     using Utils.Pools;
@@ -14,49 +13,48 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
                 (s, _) => s is ClassDeclarationSyntax,
-                // TODO: Use type symbol instead of full semantic model.
-                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.SemanticModel));
+                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol));
             
             context.RegisterSourceOutput(classes, static (spc, pair) => {
-                var (typeDeclaration, typeSymbol, semanticModel) = pair;
+                var (typeDeclaration, typeSymbol) = pair;
                 if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
 
-                var typeName = typeDeclaration.Identifier.ToString();
+                var typeName      = typeDeclaration.Identifier.ToString();
+                var existingLoops = new HashSet<MorpehLoopTypeSemantic.LoopDefinition>();
 
                 var fields = RunnerFieldDefinitionCache.GetList();
                 
-                var existingLoops = new HashSet<MorpehLoopTypeSemantic.LoopDefinition>();
-                
-                for (int i = 0, length = typeDeclaration.Members.Count; i < length; i++) {
-                    if (typeDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
+                var typeMembers = typeSymbol.GetMembers();
+                for (int i = 0, length = typeMembers.Length; i < length; i++) {
+                    if (typeMembers[i] is not IFieldSymbol fieldSymbol) {
                         continue;
                     }
 
-                    if (semanticModel.GetSymbolInfo(fieldDeclaration.Declaration.Type).Symbol is not ITypeSymbol fieldTypeSymbol) {
+                    if (fieldSymbol.Type is not INamedTypeSymbol fieldTypeSymbol) {
                         continue;
                     }
 
                     var loops = new HashSet<MorpehLoopTypeSemantic.LoopDefinition>();
+                    var fieldTypeMembers = fieldTypeSymbol.GetMembers();
                     
-                    var members = fieldTypeSymbol.GetMembers();
-                    for (int j = 0, jlength = members.Length; j < jlength; j++) {
-                        if (members[j] is not IFieldSymbol fieldSymbol) {
+                    for (int j = 0, jlength = fieldTypeMembers.Length; j < jlength; j++) {
+                        if (fieldTypeMembers[j] is not IFieldSymbol fieldTypeMemberSymbol) {
                             continue;
                         }
 
-                        var loopDefinitiom = MorpehLoopTypeSemantic.GetLoopFromField(fieldSymbol);
-                        if (loopDefinitiom == null) {
+                        var loopDefinition = MorpehLoopTypeSemantic.GetLoopFromField(fieldTypeMemberSymbol);
+                        if (loopDefinition == null) {
                             continue;
                         }
 
-                        loops.Add(loopDefinitiom.Value);
+                        loops.Add(loopDefinition.Value);
                     }
 
                     fields.Add(new RunnerFieldDefinition(
                         typeName: fieldTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                        fieldName: fieldDeclaration.Declaration.Variables[0].Identifier.Text,
+                        fieldName: fieldSymbol.Name,
                         loops: loops));
                     
                     existingLoops.UnionWith(loops);
