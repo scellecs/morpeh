@@ -1,6 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Injection {
     using System.Linq;
-    using Diagnostics;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,6 +23,7 @@
                     static (node, _) => node is ClassDeclarationSyntax,
                     static (ctx, _) => {
                         var typeSymbol = (INamedTypeSymbol)ctx.TargetSymbol;
+                        
                         var attribute  = ctx.Attributes.FirstOrDefault();
                         if (attribute is null) {
                             return null;
@@ -33,54 +33,14 @@
                         if (args.Length != 1 || args[0].Value is not INamedTypeSymbol baseType) {
                             return null;
                         }
-                        
-                        DiagnosticDescriptor? diagnosticDescriptor = null;
-                        
-                        IMethodSymbol? provideMethod = null;
-                        foreach (var member in typeSymbol.GetMembers()) {
-                            if (member is not IMethodSymbol methodSymbol) {
-                                continue;
-                            }
 
-                            if (methodSymbol.Name != "Resolve") {
-                                continue;
-                            }
-
-                            if (!methodSymbol.IsGenericMethod) {
-                                continue;
-                            }
-
-                            if (methodSymbol.TypeArguments.Length != baseType.TypeArguments.Length) {
-                                continue;
-                            }
-
-                            provideMethod = methodSymbol;
-                            break;
-                        }
-                        
-                        if (provideMethod is null) {
-                            diagnosticDescriptor = Errors.GENERIC_RESOLVER_HAS_NO_MATCHING_METHOD;
-                        }
-
-                        return new GenericResolver
-                        {
-                            BaseType     = baseType,
-                            ResolverType = typeSymbol,
-                            Declaration = (ClassDeclarationSyntax)ctx.TargetNode,
-                            DiagnosticDescriptor = diagnosticDescriptor,
-                        };
+                        return new GenericResolver(baseType, typeSymbol);
                     }
                 )
                 .Where(static resolver => resolver is not null)
                 .Select(static (resolver, _) => resolver!);
             
-            context.RegisterSourceOutput(genericResolvers.Where(x => x.DiagnosticDescriptor != null).Collect(), static (spc, pair) => {
-                foreach (var resolver in pair) {
-                    Errors.ReportGenericResolverIssue(spc, resolver.Declaration!, resolver.DiagnosticDescriptor!);
-                }
-            });
-            
-            context.RegisterSourceOutput(classes.Combine(genericResolvers.Where(x => x.DiagnosticDescriptor == null).Collect()), static (spc, pair) => {
+            context.RegisterSourceOutput(classes.Combine(genericResolvers.Collect()), static (spc, pair) => {
                 var ((typeDeclaration, semanticModel), genericProviders) = pair;
                 
                 if (semanticModel.GetDeclaredSymbol(typeDeclaration) is not INamedTypeSymbol typeSymbol) {
@@ -126,11 +86,11 @@
                                 for (int j = 0, jlength = genericProviders.Length; j < jlength; j++) {
                                     var provider = genericProviders[j];
                                     
-                                    if (!SymbolEqualityComparer.Default.Equals(unboundType, provider.BaseType)) {
+                                    if (!SymbolEqualityComparer.Default.Equals(unboundType, provider.baseType)) {
                                         continue;
                                     }
 
-                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.ResolverType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append(")injectionTable.Get(typeof(").Append(provider.ResolverType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
+                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.resolverType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append(")injectionTable.Get(typeof(").Append(provider.resolverType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
                                     resolved = true;
                                     break;
                                 }
@@ -157,11 +117,13 @@
         }
 
         private class GenericResolver {
-            public INamedTypeSymbol? BaseType;
-            public INamedTypeSymbol? ResolverType;
-            
-            public TypeDeclarationSyntax? Declaration;
-            public DiagnosticDescriptor? DiagnosticDescriptor;
+            public readonly INamedTypeSymbol baseType;
+            public readonly INamedTypeSymbol resolverType;
+
+            public GenericResolver(INamedTypeSymbol baseType, INamedTypeSymbol resolverType) {
+                this.baseType     = baseType;
+                this.resolverType = resolverType;
+            }
         }
     }
 }

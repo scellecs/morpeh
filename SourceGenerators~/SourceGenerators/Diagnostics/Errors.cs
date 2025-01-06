@@ -65,23 +65,8 @@
         
         // MORPEH_ERR_005
         
-        public static readonly DiagnosticDescriptor GENERIC_RESOLVER_HAS_NO_MATCHING_METHOD = new(
-            "MORPEH_ERR_005",
-            "Generic resolver {0} does not have a matching Resolve method.",
-            "Generic resolver {0} does not have a matching Resolve method.",
-            "Morpeh",
-            DiagnosticSeverity.Error,
-            true,
-            "Generic resolver {0} does not have a matching Resolve method.");
-
-        public static void ReportGenericResolverIssue(SourceProductionContext ctx, TypeDeclarationSyntax typeDeclaration, DiagnosticDescriptor descriptor) {
-            ctx.ReportDiagnostic(Diagnostic.Create(GENERIC_RESOLVER_HAS_NO_MATCHING_METHOD, typeDeclaration.GetLocation(), typeDeclaration.Identifier.Text));
-        }
-        
-        // MORPEH_ERR_006
-        
         public static readonly DiagnosticDescriptor INVALID_INJECTION_SOURCE_TYPE = new(
-            "MORPEH_ERR_006",
+            "MORPEH_ERR_005",
             "Cannot register {0} as it is not a class type.",
             "Cannot register {0} as it is not a class type.",
             "Morpeh",
@@ -93,10 +78,10 @@
             ctx.ReportDiagnostic(Diagnostic.Create(INVALID_INJECTION_SOURCE_TYPE, fieldDeclaration.GetLocation(), typeName));
         }
         
-        // MORPEH_ERR_007
+        // MORPEH_ERR_006
         
         public static readonly DiagnosticDescriptor NO_PARAMETERLESS_CONSTRUCTOR_FOR_SERVICE = new(
-            "MORPEH_ERR_007",
+            "MORPEH_ERR_006",
             "Cannot create an instance of {0} because it does not have a parameterless constructor.",
             "Cannot create an instance of {0} because it does not have a parameterless constructor.",
             "Morpeh",
