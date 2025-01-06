@@ -4,34 +4,16 @@ namespace SourceGenerators.MorpehHelpers.Semantic {
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using NonSemantic;
     using SourceGenerators.Utils.NonSemantic;
     using Utils.Pools;
 
     public static class MorpehComponentHelpersSemantic {
-        public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol) {
+        public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol, string componentDecl) {
             if (typeSymbol is null) {
                 return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
             }
             
-            var componentDecl = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            return GetStashSpecializationInternal(typeSymbol, componentDecl);
-        }
-        
-        public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, StructDeclarationSyntax structDeclaration) {
-            if (semanticModel.GetDeclaredSymbol(structDeclaration) is not INamedTypeSymbol structSymbol) {
-                return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
-            }
-            
-            return GetStashSpecialization(structSymbol);
-        }
-
-        public static StashSpecialization GetStashSpecialization(SemanticModel semanticModel, TypeOfExpressionSyntax typeOfExpression) {
-            var typeInfo      = semanticModel.GetTypeInfo(typeOfExpression.Type);
-            var typeSymbol    = typeInfo.Type;
-            var componentDecl = typeInfo.Type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
             return GetStashSpecializationInternal(typeSymbol, componentDecl);
         }
 
@@ -130,7 +112,7 @@ namespace SourceGenerators.MorpehHelpers.Semantic {
                 
                 stashes.Add(new StashRequirement {
                     fieldName         = fieldName,
-                    fieldTypeName     = GetStashSpecialization(componentTypeSymbol).type,
+                    fieldTypeName     = GetStashSpecialization(componentTypeSymbol, componentDecl: metadataClassName).type,
                     metadataClassName = metadataClassName,
                 });
             }

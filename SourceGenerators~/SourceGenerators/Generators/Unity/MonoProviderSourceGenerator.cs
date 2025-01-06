@@ -46,11 +46,11 @@
                 var providerTypeName = monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
                 // TODO: Check that this actually works.
-                var isValidatable = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == "Scellecs.Morpeh.IValidatable");
+                var isValidatable               = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == "Scellecs.Morpeh.IValidatable");
                 var isValidatableWithGameObject = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == "Scellecs.Morpeh.IValidatableWithGameObject");
                 
-                var providerStashSpecialization = MorpehComponentHelpersSemantic.GetStashSpecialization(monoProviderType);
-                var isTag = providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag;
+                var providerStashSpecialization = MorpehComponentHelpersSemantic.GetStashSpecialization(monoProviderType, providerTypeName);
+                var isTag                       = providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag;
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 

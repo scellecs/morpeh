@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Systems {
+    using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
@@ -20,20 +21,22 @@
                 if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
-
-                var skipCommit    = false;
-                var alwaysEnabled = false;
                 
-                for (int i = 0, length = systemAttributes.Length; i < length; i++) {
-                    var attribute = systemAttributes[i];
-                    var args = attribute.ConstructorArguments;
-                    if (args.Length >= 1 && args[0].Value is bool skipCommitValue) {
-                        skipCommit = skipCommitValue;
-                    }
-                    
-                    if (args.Length >= 2 && args[1].Value is bool alwaysEnabledValue) {
-                        alwaysEnabled = alwaysEnabledValue;
-                    }
+                var attribute = systemAttributes.FirstOrDefault();
+                if (attribute is null) {
+                    return;
+                }
+                
+                var args = attribute.ConstructorArguments;
+                
+                var skipCommit    = false;
+                if (args.Length >= 1 && args[0].Value is bool skipCommitValue) {
+                    skipCommit = skipCommitValue;
+                }
+                
+                var alwaysEnabled = false;
+                if (args.Length >= 2 && args[1].Value is bool alwaysEnabledValue) {
+                    alwaysEnabled = alwaysEnabledValue;
                 }
 
                 var hasWorldProperty = false;
