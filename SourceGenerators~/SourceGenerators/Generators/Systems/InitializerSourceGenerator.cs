@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Systems {
+    using System.Collections.Generic;
     using Diagnostics;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -43,7 +44,10 @@
                 }
                 
                 var typeName = typeDeclaration.Identifier.ToString();
-                var stashes  = MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol);
+
+                // TODO: Thread static list cache
+                var stashes = new List<MorpehComponentHelpersSemantic.StashRequirement>();
+                MorpehComponentHelpersSemantic.FillStashRequirements(stashes, typeSymbol);
 
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();

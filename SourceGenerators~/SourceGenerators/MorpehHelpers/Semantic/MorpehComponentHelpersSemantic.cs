@@ -32,7 +32,7 @@ namespace SourceGenerators.MorpehHelpers.Semantic {
             
             var isDisposable = members
                 .Where(m => m.Kind is SymbolKind.Method)
-                .Any(m => m.Name == "Dispose");
+                .Any(m => m.Name == "Dispose" && m is IMethodSymbol { Parameters: { Length: 0 } });
 
             if (isTag) {
                 return new StashSpecialization(StashVariation.Tag, "Scellecs.Morpeh.TagStash", $"GetTagStash<{componentDecl}>", "Scellecs.Morpeh.ITagComponent");
@@ -47,9 +47,7 @@ namespace SourceGenerators.MorpehHelpers.Semantic {
             return new StashSpecialization(StashVariation.Data, $"Scellecs.Morpeh.Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "Scellecs.Morpeh.IDataComponent");
         }
         
-        public static List<StashRequirement> GetStashRequirements(INamedTypeSymbol typeDeclaration) {
-            var stashes = new List<StashRequirement>();
-
+        public static void FillStashRequirements(List<StashRequirement> stashes, INamedTypeSymbol typeDeclaration) {
             var attributes = typeDeclaration.GetAttributes();
             
             for (int i = 0, length = attributes.Length; i < length; i++) {
@@ -72,43 +70,24 @@ namespace SourceGenerators.MorpehHelpers.Semantic {
                     continue;
                 }
 
-                var componentTypeAttributes = componentTypeSymbol.GetAttributes();
-                var isComponent = false;
-                
-                for (int j = 0, jlength = componentTypeAttributes.Length; j < jlength; j++) {
-                    var componentTypeAttribute = componentTypeAttributes[j];
-
-                    if (componentTypeAttribute.AttributeClass?.Name != MorpehAttributes.COMPONENT_NAME) {
-                        continue;
-                    }
-                    
-                    isComponent = true;
-                }
-                
-                // TODO: Possibly report a diagnostic here
-                if (!isComponent) {
-                    continue;
-                }
-
                 string fieldName;
-                string metadataClassName;
-                
+
                 if (componentTypeSymbol is { IsGenericType: true }) {
-                    using (var scoped = StringBuilderPool.GetScoped()) {
-                        fieldName = scoped.StringBuilder
-                            .Append("_")
-                            .Append(componentTypeSymbol.Name.ToCamelCase())
-                            .Append("_")
-                            .Append(string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name)))
-                            .ToString();
-                    }
+                    using var scoped = StringBuilderPool.GetScoped();
+                    
+                    fieldName = scoped.StringBuilder
+                        .Append('_')
+                        .Append(componentTypeSymbol.Name.ToCamelCase())
+                        .Append('_')
+                        .Append(string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name)))
+                        .ToString();
                 } else {
-                    using (var scoped = StringBuilderPool.GetScoped()) {
-                        fieldName = scoped.StringBuilder.Append("_").Append(componentTypeSymbol.Name.ToCamelCase()).ToString();
-                    }
+                    using var scoped = StringBuilderPool.GetScoped();
+                    
+                    fieldName = scoped.StringBuilder.Append('_').Append(componentTypeSymbol.Name.ToCamelCase()).ToString();
                 }
 
-                metadataClassName = componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var metadataClassName = componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 
                 stashes.Add(new StashRequirement {
                     fieldName         = fieldName,
@@ -116,8 +95,6 @@ namespace SourceGenerators.MorpehHelpers.Semantic {
                     metadataClassName = metadataClassName,
                 });
             }
-            
-            return stashes;
         }
         
         public readonly struct StashSpecialization {

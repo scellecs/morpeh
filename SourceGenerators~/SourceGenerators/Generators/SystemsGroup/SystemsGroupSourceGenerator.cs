@@ -243,7 +243,7 @@
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
                         using (indent.Scope()) {
                             sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).Append("_").Append(methodName).AppendLine("\");");
+                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).Append('_').Append(methodName).AppendLine("\");");
                             sb.AppendEndIfDefine();
                             
                             foreach (var fieldDefinition in loopMethods) {
