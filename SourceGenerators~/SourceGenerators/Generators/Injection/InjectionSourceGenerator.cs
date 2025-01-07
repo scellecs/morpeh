@@ -1,22 +1,37 @@
-﻿namespace SourceGenerators.Generators.Injection {
+﻿// #define MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
+
+namespace SourceGenerators.Generators.Injection {
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
+    
+#if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
+    using Microsoft.CodeAnalysis.CSharp;
+#endif
 
     [Generator]
     public class InjectionSourceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
+#if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
             var classes = context.SyntaxProvider
                 .CreateSyntaxProvider(
                     static (s, _) => s is ClassDeclarationSyntax cds && !cds.Modifiers.Any(SyntaxKind.AbstractKeyword),
                     static (ctx, _) => (declaration: (ClassDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
                 .Where(static pair => pair.declaration is not null);
+#else
+            var classes = context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                    MorpehAttributes.INJECTABLE_FULL_NAME,
+                    static (node, _) => node is ClassDeclarationSyntax,
+                    static (ctx, _) => (declaration: (ClassDeclarationSyntax)ctx.TargetNode, ctx.TargetSymbol as INamedTypeSymbol)
+                )
+                .Where(static pair => pair.declaration is not null);
+#endif
 
             var genericResolvers = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
@@ -43,11 +58,19 @@
                 .Collect();
             
             context.RegisterSourceOutput(classes.Combine(genericResolvers), static (spc, pair) => {
+#if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
                 var ((typeDeclaration, semanticModel), genericProviders) = pair;
                 
                 if (semanticModel.GetDeclaredSymbol(typeDeclaration) is not INamedTypeSymbol typeSymbol) {
                     return;
                 }
+#else
+                var ((typeDeclaration, typeSymbol), genericProviders) = pair;
+                
+                if (typeSymbol is null) {
+                    return;
+                }
+#endif
 
                 // TODO: Thread static cache
                 var fields = new List<IFieldSymbol>();

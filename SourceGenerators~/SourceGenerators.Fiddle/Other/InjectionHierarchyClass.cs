@@ -18,6 +18,7 @@ public partial class InjectionHierarchyClass : BaseInjectionHierarchyClass {
 }
 
 // TODO: Add support for multiple inheritance?
+[Injectable]
 public partial class InjectionUpperHierarchyClass : InjectionHierarchyClass {
     [Inject]
     private IDisposable _disposable_upper;
