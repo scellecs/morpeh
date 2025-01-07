@@ -38,9 +38,10 @@
                     }
                 )
                 .Where(static resolver => resolver is not null)
-                .Select(static (resolver, _) => resolver!);
+                .Select(static (resolver, _) => resolver!)
+                .Collect();
             
-            context.RegisterSourceOutput(classes.Combine(genericResolvers.Collect()), static (spc, pair) => {
+            context.RegisterSourceOutput(classes.Combine(genericResolvers), static (spc, pair) => {
                 var ((typeDeclaration, semanticModel), genericProviders) = pair;
                 
                 if (semanticModel.GetDeclaredSymbol(typeDeclaration) is not INamedTypeSymbol typeSymbol) {
