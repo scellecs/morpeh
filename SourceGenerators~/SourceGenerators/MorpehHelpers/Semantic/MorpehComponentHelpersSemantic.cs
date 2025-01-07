@@ -1,6 +1,4 @@
-﻿// #define MORPEH_SOURCEGEN_NO_STASH_SPECIALIZATION
-
-namespace SourceGenerators.MorpehHelpers.Semantic {
+﻿namespace SourceGenerators.MorpehHelpers.Semantic {
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;

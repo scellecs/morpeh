@@ -4,6 +4,7 @@ using Scellecs.Morpeh;
 using Test.Namespace;
 
 [EcsInitializer]
+[Injectable]
 [IncludeStash(typeof(TagComponent))]
 [IncludeStash(typeof(GenericComponent<int>))]
 [IncludeStash(typeof(GlobalNamespaceComponent))]

@@ -1,10 +1,9 @@
 ﻿namespace SourceGenerators.MorpehHelpers.NonSemantic {
+    using System.Collections.Immutable;
     using Microsoft.CodeAnalysis;
 
     public static class MorpehLoopTypeSemantic {
-        public static LoopDefinition? GetLoopFromField(IFieldSymbol fieldSymbol) {
-            var attributes = fieldSymbol.GetAttributes();
-
+        public static LoopDefinition? FindLoopType(ImmutableArray<AttributeData> attributes) {
             for (int i = 0, length = attributes.Length; i < length; i++) {
                 var attribute = attributes[i];
                 

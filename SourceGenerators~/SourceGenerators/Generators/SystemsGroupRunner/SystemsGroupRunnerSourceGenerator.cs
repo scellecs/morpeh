@@ -44,7 +44,7 @@
                             continue;
                         }
 
-                        var loopDefinition = MorpehLoopTypeSemantic.GetLoopFromField(fieldTypeMemberSymbol);
+                        var loopDefinition = MorpehLoopTypeSemantic.FindLoopType(fieldTypeMemberSymbol.GetAttributes());
                         if (loopDefinition == null) {
                             continue;
                         }

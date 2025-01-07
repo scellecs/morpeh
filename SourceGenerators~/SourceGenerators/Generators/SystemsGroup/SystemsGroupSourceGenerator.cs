@@ -50,11 +50,16 @@
                     
                     fieldDefinition.fieldDeclaration = fieldDeclaration;
                     fieldDefinition.fieldSymbol      = fieldSymbol;
-                    fieldDefinition.loopType         = MorpehLoopTypeSemantic.GetLoopFromField(fieldSymbol);
+                    fieldDefinition.loopType         = MorpehLoopTypeSemantic.FindLoopType(fieldSymbol.GetAttributes());
                     fieldDefinition.isSystem         = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.SYSTEM_NAME);
                     fieldDefinition.isInitializer    = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.INITIALIZER_NAME);
                     fieldDefinition.isDisposable     = fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
+                    
+#if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
                     fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, MorpehAttributes.INJECT_NAME);
+#else
+                    fieldDefinition.isInjectable     = fieldSymbol.Type.GetAttributes().Any(static x => x.AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME);
+#endif
                     
                     for (int j = 0, jlength = fieldAttributes.Length; j < jlength; j++) {
                         var attribute = fieldAttributes[j];

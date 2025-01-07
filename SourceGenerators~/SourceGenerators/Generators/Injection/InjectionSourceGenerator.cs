@@ -1,6 +1,4 @@
-﻿// #define MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
-
-namespace SourceGenerators.Generators.Injection {
+﻿namespace SourceGenerators.Generators.Injection {
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
