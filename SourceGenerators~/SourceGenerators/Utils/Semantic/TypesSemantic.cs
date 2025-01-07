@@ -59,9 +59,7 @@
             return false;
         }
         
-        public static List<IFieldSymbol> GetFieldsWithAttribute(ITypeSymbol typeSymbol, string attributeName) {
-            var symbols = new List<IFieldSymbol>();
-            
+        public static void FillFieldsWithAttribute(List<IFieldSymbol> symbols, ITypeSymbol typeSymbol, string attributeName) {
             var includePrivate = true;
             var currentSymbol  = typeSymbol;
 
@@ -93,8 +91,6 @@
                 currentSymbol  = currentSymbol.BaseType;
                 includePrivate = false;
             }
-
-            return symbols;
         }
     }
 }

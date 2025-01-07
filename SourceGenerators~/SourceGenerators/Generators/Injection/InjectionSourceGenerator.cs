@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Injection {
+    using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
@@ -48,7 +49,9 @@
                     return;
                 }
 
-                var fields = TypesSemantic.GetFieldsWithAttribute(typeSymbol, MorpehAttributes.INJECT_NAME);
+                // TODO: Thread static cache
+                var fields = new List<IFieldSymbol>();
+                TypesSemantic.FillFieldsWithAttribute(fields, typeSymbol, MorpehAttributes.INJECT_NAME);
                 
                 if (fields.Count == 0) {
                     return;
