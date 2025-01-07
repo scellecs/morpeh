@@ -48,7 +48,7 @@
                     return;
                 }
 
-                var fields = TypesSemantic.GetFieldsWithAttribute(typeSymbol, MorpehAttributes.INJECTABLE_NAME);
+                var fields = TypesSemantic.GetFieldsWithAttribute(typeSymbol, MorpehAttributes.INJECT_NAME);
                 
                 if (fields.Count == 0) {
                     return;

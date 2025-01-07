@@ -2,7 +2,7 @@
     using System;
 
     [AttributeUsage(AttributeTargets.Field)]
-    public class InjectableAttribute : Attribute {
+    public class InjectAttribute : Attribute {
         
     }
 }

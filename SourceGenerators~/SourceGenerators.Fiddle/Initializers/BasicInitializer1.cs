@@ -9,16 +9,16 @@ using Test.Namespace;
 [IncludeStash(typeof(GlobalNamespaceComponent))]
 [IncludeStash(typeof(DisposableComponent))]
 public partial class BasicInitializer1 {
-    [Injectable]
+    [Inject]
     private BasicDisposableClass _basicDisposableClass1;
     
-    [Injectable]
+    [Inject]
     private IDisposable _basicDisposableClass2;
     
-    [Injectable]
+    [Inject]
     private SomeGenericClass<int> _someGenericClass;
     
-    [Injectable]
+    [Inject]
     private SomeComplexGenericClass<int, string> _someComplexGenericClass;
     
     public void OnAwake() {
