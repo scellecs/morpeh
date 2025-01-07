@@ -73,7 +73,7 @@
                 var members = currentSymbol.GetMembers();
                 
                 for (int i = 0, length = members.Length; i < length; i++) {
-                    if (members[i] is not IFieldSymbol fieldSymbol) {
+                    if (members[i] is not IFieldSymbol fieldSymbol || fieldSymbol.IsStatic) {
                         continue;
                     }
                     
