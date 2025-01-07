@@ -59,7 +59,6 @@
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
                 
-                sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
 
                 sb.AppendIndent(indent)
