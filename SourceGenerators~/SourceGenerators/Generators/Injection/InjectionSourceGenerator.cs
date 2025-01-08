@@ -18,7 +18,7 @@
 #if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
             var classes = context.SyntaxProvider
                 .CreateSyntaxProvider(
-                    static (s, _) => s is ClassDeclarationSyntax cds && !cds.Modifiers.Any(SyntaxKind.AbstractKeyword),
+                    static (s, _) => s is ClassDeclarationSyntax cds,
                     static (ctx, _) => (declaration: (ClassDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
                 .Where(static pair => pair.declaration is not null);
 #else
@@ -72,11 +72,13 @@
 
                 // TODO: Thread static cache
                 var fields = new List<IFieldSymbol>();
-                TypesSemantic.FillFieldsWithAttribute(fields, typeSymbol, MorpehAttributes.INJECT_NAME);
+                FillInjectableFields(fields, typeSymbol);
                 
                 if (fields.Count == 0) {
                     return;
                 }
+                
+                var hasInjectionInParents = HasInjectionsInParents(typeSymbol);
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 
@@ -97,8 +99,15 @@
                     .AppendLine(" {");
 
                 using (indent.Scope()) {
-                    sb.AppendIndent(indent).AppendLine("public void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {");
+                    sb.AppendIndent(indent).AppendLine(hasInjectionInParents
+                        ? "public override void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {"
+                        : "public virtual void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {");
+
                     using (indent.Scope()) {
+                        if (hasInjectionInParents) {
+                            sb.AppendIndent(indent).AppendLine("base.Inject(injectionTable);");
+                        }
+                        
                         for (int i = 0, length = fields.Count; i < length; i++) {
                             var field = fields[i];
                             
@@ -139,6 +148,63 @@
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);
             });
+        }
+        
+        private static void FillInjectableFields(List<IFieldSymbol> symbols, ITypeSymbol typeSymbol) {
+            var members = typeSymbol.GetMembers();
+
+            for (int i = 0, length = members.Length; i < length; i++) {
+                if (members[i] is not IFieldSymbol fieldSymbol || fieldSymbol.IsStatic) {
+                    continue;
+                }
+
+                var attributes = fieldSymbol.GetAttributes();
+
+                for (int j = 0, attributesLength = attributes.Length; j < attributesLength; j++) {
+                    if (attributes[j].AttributeClass?.Name == MorpehAttributes.INJECT_NAME) {
+                        symbols.Add(fieldSymbol);
+                    }
+                }
+            }
+        }
+
+        private static bool HasInjectionsInParents(INamedTypeSymbol typeSymbol) {
+            var currentSymbol = typeSymbol.BaseType;
+            
+#if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
+            while (currentSymbol is { TypeKind : TypeKind.Class }) {
+                var members = currentSymbol.GetMembers();
+                
+                for (int i = 0, length = members.Length; i < length; i++) {
+                    var member = members[i];
+                    if (member is not IFieldSymbol fieldSymbol) {
+                        continue;
+                    }
+
+                    var attributes = fieldSymbol.GetAttributes();
+                    for (int j = 0, jlength = attributes.Length; j < jlength; j++) {
+                        if (attributes[j].AttributeClass?.Name == MorpehAttributes.INJECT_NAME) {
+                            return true;
+                        }
+                    }
+                }
+                
+                currentSymbol = currentSymbol.BaseType;
+            }
+#else
+            while (currentSymbol is { TypeKind : TypeKind.Class }) {
+                var attributes = currentSymbol.GetAttributes();
+                for (int i = 0, length = attributes.Length; i < length; i++) {
+                    if (attributes[i].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
+                        return true;
+                    }
+                }
+
+                currentSymbol = currentSymbol.BaseType;
+            }
+#endif
+
+            return false;
         }
 
         private class GenericResolver {

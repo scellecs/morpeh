@@ -56,7 +56,7 @@
                     fieldDefinition.isDisposable     = fieldDefinition is { isSystem: false, isInitializer: false } && fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
                     
 #if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
-                    fieldDefinition.isInjectable     = TypesSemantic.ContainsFieldsWithAttribute(fieldSymbol.Type, MorpehAttributes.INJECT_NAME);
+                    fieldDefinition.isInjectable     = IsInjectableSlowPath(fieldSymbol.Type);
 #else
                     fieldDefinition.isInjectable     = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME);
 #endif
@@ -314,5 +314,37 @@
             
             return success;
         }
+        
+#if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
+        private static bool IsInjectableSlowPath(ITypeSymbol typeSymbol) {
+            var currentSymbol  = typeSymbol;
+
+            while (currentSymbol != null) {
+                if (currentSymbol.TypeKind != TypeKind.Class && currentSymbol.TypeKind != TypeKind.Struct) {
+                    break;
+                }
+                
+                var members = currentSymbol.GetMembers();
+                
+                for (int i = 0, length = members.Length; i < length; i++) {
+                    if (members[i] is not IFieldSymbol fieldSymbol) {
+                        continue;
+                    }
+
+                    var attributes = fieldSymbol.GetAttributes();
+                    
+                    for (int j = 0, attributesLength = attributes.Length; j < attributesLength; j++) {
+                        if (attributes[j].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
+                            return true;
+                        }
+                    }
+                }
+
+                currentSymbol  = currentSymbol.BaseType;
+            }
+
+            return false;
+        }
+#endif
     }
 }
