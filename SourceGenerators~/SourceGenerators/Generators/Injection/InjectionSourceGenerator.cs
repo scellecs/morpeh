@@ -177,7 +177,7 @@
                 
                 for (int i = 0, length = members.Length; i < length; i++) {
                     var member = members[i];
-                    if (member is not IFieldSymbol fieldSymbol) {
+                    if (member is not IFieldSymbol fieldSymbol || fieldSymbol.IsStatic) {
                         continue;
                     }
 

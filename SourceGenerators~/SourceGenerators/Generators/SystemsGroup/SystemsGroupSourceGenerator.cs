@@ -319,15 +319,11 @@
         private static bool IsInjectableSlowPath(ITypeSymbol typeSymbol) {
             var currentSymbol  = typeSymbol;
 
-            while (currentSymbol != null) {
-                if (currentSymbol.TypeKind != TypeKind.Class && currentSymbol.TypeKind != TypeKind.Struct) {
-                    break;
-                }
-                
+            while (currentSymbol is { TypeKind: TypeKind.Class }) {
                 var members = currentSymbol.GetMembers();
                 
                 for (int i = 0, length = members.Length; i < length; i++) {
-                    if (members[i] is not IFieldSymbol fieldSymbol) {
+                    if (members[i] is not IFieldSymbol fieldSymbol || fieldSymbol.IsStatic) {
                         continue;
                     }
 
