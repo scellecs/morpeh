@@ -62,6 +62,9 @@ public class InjectionTests {
     public void ParentClass_InjectsIncludingChildrenFields() => this.injectionTable.New<ParentClass>().Validate();
 
     [Fact]
+    public void InjectableNonMiddlewareClass_InjectsIncludingChildrenFields() => this.injectionTable.New<NonInjectableMiddlewareClass>().Validate();
+
+    [Fact]
     public void InjectableMiddlewareClass_InjectsIncludingChildrenFields() => this.injectionTable.New<InjectableMiddlewareClass>().Validate();
 }
 
