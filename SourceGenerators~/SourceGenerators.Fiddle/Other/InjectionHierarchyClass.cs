@@ -4,19 +4,17 @@ using Scellecs.Morpeh;
 
 [Injectable]
 public abstract partial class BaseInjectionHierarchyClass {
-    // Will not be generated as it's private
     [Inject]
     private IDisposable _disposable_base1;
     
-    // Should be generated
     [Inject]
-    protected IDisposable _disposable_base2;
+    private IDisposable _disposable_base2;
 }
 
 [Injectable]
 public partial class InjectionHierarchyClass : BaseInjectionHierarchyClass {
     [Inject]
-    protected IDisposable _disposable;
+    private IDisposable _disposable;
 }
 
 [Injectable]
