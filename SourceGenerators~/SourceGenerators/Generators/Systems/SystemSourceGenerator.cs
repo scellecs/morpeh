@@ -1,10 +1,10 @@
 ﻿namespace SourceGenerators.Generators.Systems {
-    using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Utils.Caches;
     using Utils.NonSemantic;
     using Utils.Semantic;
     using Utils.Pools;
@@ -58,8 +58,7 @@
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 
-                // TODO: Thread static list cache
-                var stashes  = new List<MorpehComponentHelpersSemantic.StashRequirement>();
+                var stashes = ThreadStaticListCache<MorpehComponentHelpersSemantic.StashRequirement>.GetClear();
                 MorpehComponentHelpersSemantic.FillStashRequirements(stashes, typeSymbol);
                 
                 var sb     = StringBuilderPool.Get();

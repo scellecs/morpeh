@@ -4,6 +4,7 @@
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
+    using Utils.Caches;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
@@ -70,8 +71,7 @@
                 }
 #endif
 
-                // TODO: Thread static cache
-                var fields = new List<IFieldSymbol>();
+                var fields = ThreadStaticListCache<IFieldSymbol>.GetClear();
                 FillInjectableFields(fields, typeSymbol);
                 
                 if (fields.Count == 0) {
