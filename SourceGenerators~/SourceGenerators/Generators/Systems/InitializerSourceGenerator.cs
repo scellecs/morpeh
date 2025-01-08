@@ -162,7 +162,7 @@
                 sb.AppendIndent(indent).AppendLine("}");
                 sb.AppendEndNamespace(typeDeclaration, indent);
                 
-                spc.AddSource($"{typeDeclaration.Identifier.Text}.initializer_{typeDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                spc.AddSource($"{typeDeclaration.Identifier.Text}.initializer_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToString());
                 
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);

@@ -70,7 +70,7 @@
                 
                 sb.AppendEndNamespace(typeDeclaration, indent).AppendLine();
                 
-                spc.AddSource($"{typeDeclaration.Identifier.Text}.component_{typeDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                spc.AddSource($"{typeDeclaration.Identifier.Text}.component_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToString());
                 
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);

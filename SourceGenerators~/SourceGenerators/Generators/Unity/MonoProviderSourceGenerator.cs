@@ -14,11 +14,11 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.MONO_PROVIDER_FULL_NAME,
                 (s, _) => s is ClassDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.Attributes));
+                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.Attributes));
 
             context.RegisterSourceOutput(classes, static (spc, pair) => {
-                var (typeDeclaration, monoProviderAttributes) = pair;
-                if (typeDeclaration is null) {
+                var (typeDeclaration, typeSymbol, monoProviderAttributes) = pair;
+                if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
                 
@@ -225,7 +225,7 @@
                 sb.AppendIndent(indent).AppendLine("}");
                 sb.AppendEndNamespace(typeDeclaration, indent);
                 
-                spc.AddSource($"{typeDeclaration.Identifier.Text}.monoprovider_{typeDeclaration.GetStableFileCompliantHash()}.g.cs", sb.ToString());
+                spc.AddSource($"{typeDeclaration.Identifier.Text}.monoprovider_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToString());
                 
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);

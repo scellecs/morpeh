@@ -16,5 +16,9 @@
             
             return sb;
         }
+
+        public static string GetFullyQualifiedNameHash(this ITypeSymbol typeSymbol) => GetFullyQualifiedNameHash(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+        public static string GetFullyQualifiedNameHash(string fullyQualifiedName) => fullyQualifiedName.GetHashCode().ToString("X");
+
     }
 }
