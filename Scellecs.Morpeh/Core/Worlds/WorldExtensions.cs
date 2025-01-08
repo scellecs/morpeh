@@ -16,9 +16,6 @@ namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
-#if MORPEH_BURST
-    using Unity.Collections;
-#endif
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -29,7 +26,7 @@ namespace Scellecs.Morpeh {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
             var id = -1;
-            for (int i = 0; i < 256; i++) {
+            for (int i = 0; i < WorldConstants.MAX_WORLDS_COUNT; i++) {
                 if (World.worldsIndices[i] == 0) {
                     id = i;
                     break;
@@ -94,6 +91,7 @@ namespace Scellecs.Morpeh {
             unchecked {
                 World.worldsGens[world.identifier]++;
             }
+
             var currentIndex = World.worldsIndices[world.identifier] - 1;
             World.worldsCount--;
 
@@ -115,13 +113,7 @@ namespace Scellecs.Morpeh {
 #endif
         [PublicAPI]
         public static void InitializationDefaultWorld() {
-            var worlds = World.worlds;
-            for (int i = World.worldsCount - 1; i >= 0; i--) {
-                var world = worlds[i];
-                if (!world.IsNullOrDisposed()) {
-                    world.Dispose();
-                }
-            }
+            World.DisposeAllWorlds();
 
             var defaultWorld = World.Create();
             defaultWorld.UpdateByUnity = true;

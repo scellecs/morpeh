@@ -47,18 +47,7 @@ namespace Scellecs.Morpeh {
         
 #if UNITY_EDITOR
         private void OnEditorApplicationOnplayModeStateChanged(PlayModeStateChange state) {
-            //todo: check for fastmode
             if (state == PlayModeStateChange.EnteredEditMode) {
-                var worlds = World.worlds;
-                for (int i = World.worldsCount - 1; i >= 0; i--) {
-                    var world = worlds[i];
-                    if (!world.IsNullOrDisposed()) {
-                        world.Dispose();
-                    }
-                }
-              
-                World.plugins?.Clear();
-
                 if (this != null && this.gameObject != null) {
                     DestroyImmediate(this.gameObject);
                 }
@@ -68,9 +57,14 @@ namespace Scellecs.Morpeh {
         }
 #endif
 
-        private void Update() => WorldLoopExtensions.GlobalUpdate(Time.deltaTime);
+        private void Update() {
+            WorldLoopExtensions.GlobalUpdate(Time.deltaTime);
+        }
 
-        private void FixedUpdate() => WorldLoopExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
+        private void FixedUpdate() {
+            WorldLoopExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
+        }
+
         private void LateUpdate() {
             WorldLoopExtensions.GlobalLateUpdate(Time.deltaTime);
 #if MORPEH_METRICS

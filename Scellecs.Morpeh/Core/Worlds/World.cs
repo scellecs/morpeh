@@ -13,10 +13,6 @@ namespace Scellecs.Morpeh {
     using JetBrains.Annotations;
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
-#if MORPEH_BURST
-    using Unity.Jobs;
-    using Unity.Collections;
-#endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
@@ -60,7 +56,7 @@ namespace Scellecs.Morpeh {
         public bool IsDisposed;
 #if MORPEH_BURST
         [PublicAPI]
-        public JobHandle JobHandle;
+        public Unity.Jobs.JobHandle JobHandle;
 #endif
         internal LongHashMap<LongHashMap<Filter>> filtersLookup;
 
@@ -281,6 +277,23 @@ namespace Scellecs.Morpeh {
             this.IsDisposed = true;
 
             this.ApplyRemoveWorld();
+        }
+
+        internal static void DisposeAllWorlds() {
+            for (int i = worldsCount - 1; i >= 0; i--) {
+                var world = worlds[i];
+                if (!world.IsNullOrDisposed()) {
+                    world.Dispose();
+                }
+            }
+        }
+
+        internal static void CleanupStatic() {
+            DisposeAllWorlds();
+            plugins?.Clear();
+            worldsCount = 0;
+            defaultWorld = null;
+            Array.Clear(worldsGens, 0, WorldConstants.MAX_WORLDS_COUNT);
         }
 
         public struct Metrics {
