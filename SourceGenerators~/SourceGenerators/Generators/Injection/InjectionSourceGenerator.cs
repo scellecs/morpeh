@@ -170,11 +170,11 @@
 
         private static bool HasInjectionsInParents(INamedTypeSymbol typeSymbol) {
             var currentSymbol = typeSymbol.BaseType;
-            
-#if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
+
             while (currentSymbol is { TypeKind : TypeKind.Class }) {
+#if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
                 var members = currentSymbol.GetMembers();
-                
+
                 for (int i = 0, length = members.Length; i < length; i++) {
                     var member = members[i];
                     if (member is not IFieldSymbol fieldSymbol || fieldSymbol.IsStatic) {
@@ -188,21 +188,18 @@
                         }
                     }
                 }
-                
-                currentSymbol = currentSymbol.BaseType;
-            }
 #else
-            while (currentSymbol is { TypeKind : TypeKind.Class }) {
                 var attributes = currentSymbol.GetAttributes();
                 for (int i = 0, length = attributes.Length; i < length; i++) {
                     if (attributes[i].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
                         return true;
                     }
                 }
+#endif
 
                 currentSymbol = currentSymbol.BaseType;
             }
-#endif
+
 
             return false;
         }
