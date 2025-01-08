@@ -38,7 +38,12 @@ public class InjectionTests {
         var instance = this.injectionTable.Get(typeof(BasicDisposableClass));
         Assert.NotNull(instance);
     }
-    
+
+    [Fact]
+    public void Register_TwiceThrows() {
+        Assert.Throws<InvalidOperationException>(() => this.injectionTable.Register(new BasicDisposableClass(), typeof(IDisposable)));
+    }
+
     [Fact]
     public void UnRegister_ExistingUnregisters() {
         this.injectionTable.UnRegister(typeof(IDisposable));
