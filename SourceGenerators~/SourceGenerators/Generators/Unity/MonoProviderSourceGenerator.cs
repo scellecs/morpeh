@@ -21,34 +21,39 @@
                 if (typeDeclaration is null) {
                     return;
                 }
-
+                
+                var attribute = monoProviderAttributes.FirstOrDefault();
+                if (attribute is null) {
+                    return;
+                }
+                
                 INamedTypeSymbol? monoProviderType = null;
                 
-                for (int i = 0, length = monoProviderAttributes.Length; i < length; i++) {
-                    var attribute = monoProviderAttributes[i];
-                    if (attribute.AttributeClass is null) {
-                        continue;
-                    }
-                    
-                    if (attribute.ConstructorArguments.Length > 0 && attribute.ConstructorArguments[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol positionalSymbol }) {
-                        monoProviderType = positionalSymbol;
-                    } else if (attribute.NamedArguments.Length > 0 && attribute.NamedArguments[0].Value is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol namedSymbol }) {
-                        monoProviderType = namedSymbol;
-                    }
-                    
-                    break;
+                if (attribute.ConstructorArguments.Length > 0 && attribute.ConstructorArguments[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol positionalSymbol }) {
+                    monoProviderType = positionalSymbol;
                 }
                 
                 if (monoProviderType is null) {
                     return;
                 }
-
-                var providerTypeName = monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-                // TODO: Possibly reduce usage of ToDisplayString()
-                var isValidatable               = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == MorpehAttributes.VALIDATABLE_FULL_NAME);
-                var isValidatableWithGameObject = monoProviderType.AllInterfaces.Any(static x => x.ToDisplayString() == MorpehAttributes.VALIDATABLE_WITH_GAMEOBJECT_FULL_NAME);
                 
+                var isValidatable               = false;
+                var isValidatableWithGameObject = false;
+                
+                var interfaces = monoProviderType.AllInterfaces;
+                for (int i = 0, length = interfaces.Length; i < length; i++) {
+                    var interfaceName = interfaces[i].ToDisplayString();
+                    switch (interfaceName) {
+                        case MorpehAttributes.VALIDATABLE_FULL_NAME:
+                            isValidatable = true;
+                            break;
+                        case MorpehAttributes.VALIDATABLE_WITH_GAMEOBJECT_FULL_NAME:
+                            isValidatableWithGameObject = true;
+                            break;
+                    }
+                }
+                
+                var providerTypeName            = monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var providerStashSpecialization = MorpehComponentHelpersSemantic.GetStashSpecialization(monoProviderType, providerTypeName);
                 var isTag                       = providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag;
                 
