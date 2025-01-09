@@ -4,7 +4,6 @@
     using MorpehHelpers.NonSemantic;
 
     public class SystemsGroupFieldDefinition {
-        public FieldDeclarationSyntax? fieldDeclaration;
         public IFieldSymbol?           fieldSymbol;
         public MorpehLoopTypeSemantic.LoopDefinition? loopType;
         public bool                    isSystem;
@@ -15,7 +14,6 @@
         public INamedTypeSymbol?       registerAs;
         
         public void Reset() {
-            this.fieldDeclaration = null;
             this.fieldSymbol      = null;
             this.loopType         = null;
             this.isSystem         = false;

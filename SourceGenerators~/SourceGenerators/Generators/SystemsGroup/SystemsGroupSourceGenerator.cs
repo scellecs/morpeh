@@ -3,7 +3,6 @@
     using System.Runtime.CompilerServices;
     using Diagnostics;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using Utils.NonSemantic;
@@ -16,15 +15,14 @@
             var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,
-                // TODO: Possibly use type symbol instead of full semantic model. May not be enough information though.
-                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.SemanticModel, ctx.Attributes));
+                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.Attributes));
             
             var disposableInterface = context.CompilationProvider
                 .Select(static (compilation, _) => compilation.GetTypeByMetadataName(KnownTypes.DISPOSABLE_FULL_NAME));
             
             context.RegisterSourceOutput(classes.Combine(disposableInterface), static (spc, pair) => {
-                var ((typeDeclaration, typeSymbol, semanticModel, systemsGroupAttributes), disposableSymbol) = pair;
-                if (typeDeclaration is null) {
+                var ((typeDeclaration, typeSymbol, systemsGroupAttributes), disposableSymbol) = pair;
+                if (typeDeclaration is null || typeSymbol is null) {
                     return;
                 }
                 
@@ -33,13 +31,10 @@
                 }
                 
                 using var scopedFieldDefinitionCollection = SystemsGroupFieldDefinitionCache.GetScoped();
-                
-                for (int i = 0, length = typeDeclaration.Members.Count; i < length; i++) {
-                    if (typeDeclaration.Members[i] is not FieldDeclarationSyntax fieldDeclaration) {
-                        continue;
-                    }
 
-                    if (semanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables.First()) is not IFieldSymbol fieldSymbol) {
+                var members = typeSymbol.GetMembers();
+                for (int i = 0, length = members.Length; i < length; i++) {
+                    if (members[i] is not IFieldSymbol fieldSymbol) {
                         continue;
                     }
                     
@@ -48,7 +43,6 @@
                     
                     var fieldDefinition = scopedFieldDefinitionCollection.Create();
                     
-                    fieldDefinition.fieldDeclaration = fieldDeclaration;
                     fieldDefinition.fieldSymbol      = fieldSymbol;
                     fieldDefinition.loopType         = MorpehLoopTypeSemantic.FindLoopType(fieldAttributes);
                     fieldDefinition.isSystem         = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.SYSTEM_NAME);
@@ -83,7 +77,7 @@
                     scopedFieldDefinitionCollection.Add(fieldDefinition);
                 }
                 
-                if (!RunDiagnostics(spc, semanticModel, scopedFieldDefinitionCollection)) {
+                if (!RunDiagnostics(spc, scopedFieldDefinitionCollection)) {
                     return;
                 }
 
@@ -273,39 +267,33 @@
             });
         }
 
-        private static bool RunDiagnostics(SourceProductionContext ctx, SemanticModel semanticModel, ScopedSystemsGroupFieldDefinitionCollection scopedSystemsGroupFieldDefinitionCollection) {
+        private static bool RunDiagnostics(SourceProductionContext ctx, ScopedSystemsGroupFieldDefinitionCollection scopedSystemsGroupFieldDefinitionCollection) {
             var success = true;
             
             for (int i = 0, length = scopedSystemsGroupFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                 var fieldDefinition = scopedSystemsGroupFieldDefinitionCollection.Collection.ordered[i];
 
                 if (fieldDefinition is { isSystem : true, loopType: null }) {
-                    Errors.ReportMissingLoopType(ctx, fieldDefinition.fieldDeclaration);
+                    Errors.ReportMissingLoopType(ctx, fieldDefinition.fieldSymbol);
                     success = false;
                 }
 
                 if (fieldDefinition is { isSystem: false, loopType: not null }) {
-                    Errors.ReportLoopTypeOnNonSystemField(ctx, fieldDefinition.fieldDeclaration);
+                    Errors.ReportLoopTypeOnNonSystemField(ctx, fieldDefinition.fieldSymbol);
                     success = false;
                 }
                 
                 if (fieldDefinition.register) {
                     if (fieldDefinition.fieldSymbol.Type.TypeKind is not TypeKind.Class) {
-                        Errors.ReportInvalidInjectionSourceType(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name);
+                        Errors.ReportInvalidInjectionSourceType(ctx, fieldDefinition.fieldSymbol, fieldDefinition.fieldSymbol.Type.Name);
                         success = false;
-                    } else {
-                        var conversionKind = semanticModel.Compilation.ClassifyConversion(fieldDefinition.fieldSymbol.Type, fieldDefinition.registerAs);
-                        if (conversionKind is { IsImplicit: false, IsExplicit: false }) {
-                            Errors.ReportInvalidInjectionType(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name, fieldDefinition.registerAs.Name);
-                            success = false;
-                        }
                     }
                 }
 
                 if (!fieldDefinition.isSystem && !fieldDefinition.isInitializer) {
                     if (fieldDefinition.fieldSymbol.Type is INamedTypeSymbol namedTypeSymbol) {
                         if (!namedTypeSymbol.InstanceConstructors.Any(x => x.Parameters.Length == 0)) {
-                            Errors.ReportNoParameterlessConstructor(ctx, fieldDefinition.fieldDeclaration, fieldDefinition.fieldSymbol.Type.Name);
+                            Errors.ReportNoParameterlessConstructor(ctx, fieldDefinition.fieldSymbol, fieldDefinition.fieldSymbol.Type.Name);
                             success = false;
                         }
                     }

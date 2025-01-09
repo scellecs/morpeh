@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.Diagnostics {
+    using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -29,29 +30,14 @@
             true,
             "System does not have a [Loop] attribute.");
         
-        public static void ReportMissingLoopType(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration) {
-            ctx.ReportDiagnostic(Diagnostic.Create(MISSING_LOOP_TYPE, fieldDeclaration.GetLocation()));
+        public static void ReportMissingLoopType(SourceProductionContext ctx, ISymbol symbol) {
+            ctx.ReportDiagnostic(Diagnostic.Create(MISSING_LOOP_TYPE, symbol.Locations.First()));
         }
         
         // MORPEH_ERR_003
         
-        private static readonly DiagnosticDescriptor INVALID_INJECTION_TYPE = new(
-            "MORPEH_ERR_003",
-            "Cannot inject {0} as {1} because it cannot be casted to the type.",
-            "Cannot inject {0} as {1} because it cannot be casted to the type.",
-            "Morpeh",
-            DiagnosticSeverity.Error,
-            true,
-            "Cannot inject {0} as {1} because it cannot be casted to the type.");
-        
-        public static void ReportInvalidInjectionType(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration, string typeName, string injectionType) {
-            ctx.ReportDiagnostic(Diagnostic.Create(INVALID_INJECTION_TYPE, fieldDeclaration.GetLocation(), typeName, injectionType));
-        }
-        
-        // MORPEH_ERR_004
-        
         private static readonly DiagnosticDescriptor LOOP_TYPE_NOT_SYSTEM_FIELD = new(
-            "MORPEH_ERR_004",
+            "MORPEH_ERR_003",
             "The type is not a System so it cannot have a loop specified.",
             "The type is not a System so it cannot have a loop specified.",
             "Morpeh",
@@ -59,14 +45,14 @@
             true,
             "The type is not a System so it cannot have a loop specified.");
 
-        public static void ReportLoopTypeOnNonSystemField(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration) {
-            ctx.ReportDiagnostic(Diagnostic.Create(LOOP_TYPE_NOT_SYSTEM_FIELD, fieldDeclaration.GetLocation()));
+        public static void ReportLoopTypeOnNonSystemField(SourceProductionContext ctx, ISymbol symbol) {
+            ctx.ReportDiagnostic(Diagnostic.Create(LOOP_TYPE_NOT_SYSTEM_FIELD, symbol.Locations.First()));
         }
         
-        // MORPEH_ERR_005
+        // MORPEH_ERR_004
         
         public static readonly DiagnosticDescriptor INVALID_INJECTION_SOURCE_TYPE = new(
-            "MORPEH_ERR_005",
+            "MORPEH_ERR_004",
             "Cannot register {0} as it is not a class type.",
             "Cannot register {0} as it is not a class type.",
             "Morpeh",
@@ -74,14 +60,14 @@
             true,
             "Cannot register {0} as it is not a class type.");
 
-        public static void ReportInvalidInjectionSourceType(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration, string typeName) {
-            ctx.ReportDiagnostic(Diagnostic.Create(INVALID_INJECTION_SOURCE_TYPE, fieldDeclaration.GetLocation(), typeName));
+        public static void ReportInvalidInjectionSourceType(SourceProductionContext ctx, ISymbol symbol, string typeName) {
+            ctx.ReportDiagnostic(Diagnostic.Create(INVALID_INJECTION_SOURCE_TYPE, symbol.Locations.First(), typeName));
         }
         
-        // MORPEH_ERR_006
+        // MORPEH_ERR_005
         
         public static readonly DiagnosticDescriptor NO_PARAMETERLESS_CONSTRUCTOR_FOR_SERVICE = new(
-            "MORPEH_ERR_006",
+            "MORPEH_ERR_005",
             "Cannot create an instance of {0} because it does not have a parameterless constructor.",
             "Cannot create an instance of {0} because it does not have a parameterless constructor.",
             "Morpeh",
@@ -89,8 +75,8 @@
             true,
             "Cannot create an instance of {0} because it does not have a parameterless constructor.");
 
-        public static void ReportNoParameterlessConstructor(SourceProductionContext ctx, FieldDeclarationSyntax fieldDeclaration, string typeName) {
-            ctx.ReportDiagnostic(Diagnostic.Create(NO_PARAMETERLESS_CONSTRUCTOR_FOR_SERVICE, fieldDeclaration.GetLocation(), typeName));
+        public static void ReportNoParameterlessConstructor(SourceProductionContext ctx, ISymbol symbol, string typeName) {
+            ctx.ReportDiagnostic(Diagnostic.Create(NO_PARAMETERLESS_CONSTRUCTOR_FOR_SERVICE, symbol.Locations.First(), typeName));
         }
     }
 }
