@@ -112,13 +112,9 @@
                     .AppendLine(" {");
 
                 using (indent.Scope()) {
-                    sb.AppendIndent(indent).AppendLine("private readonly Scellecs.Morpeh.InjectionTable _injectionTable;");
-                    
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                     using (indent.Scope()) {
-                        sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
-                        
                         for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                             var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
 
@@ -177,7 +173,7 @@
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
+                    sb.AppendIndent(indent).AppendLine("public void CallDispose(Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                     using (indent.Scope()) {
                         using (MorpehSyntax.ScopedProfile(sb, typeName, "CallDispose", indent)) {
                             for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
@@ -206,15 +202,13 @@
                                 }
                             }
 
-                            // TODO: Count and generate null check for injectionTable if there are any registered fields
-                            sb.AppendIndent(indent).AppendLine("if (_injectionTable != null) {");
+                            sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
                             using (indent.Scope()) {
                                 for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                                     var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
 
                                     if (fieldDefinition.register) {
-                                        sb.AppendIndent(indent).Append("_injectionTable.UnRegister(typeof(")
-                                            .Append(fieldDefinition.registerAs.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).AppendLine("));");
+                                        sb.AppendIndent(indent).Append("injectionTable.UnRegister(typeof(").Append(fieldDefinition.registerAs.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).AppendLine("));");
                                     }
                                 }
                             }
