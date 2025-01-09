@@ -23,8 +23,7 @@
                     static (ctx, _) => (declaration: (ClassDeclarationSyntax)ctx.Node, model: ctx.SemanticModel))
                 .Where(static pair => pair.declaration is not null);
 #else
-            var classes = context.SyntaxProvider
-                .ForAttributeWithMetadataName(
+            var classes = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.INJECTABLE_FULL_NAME,
                     static (node, _) => node is ClassDeclarationSyntax,
                     static (ctx, _) => (declaration: (ClassDeclarationSyntax)ctx.TargetNode, ctx.TargetSymbol as INamedTypeSymbol)
