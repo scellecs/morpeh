@@ -48,20 +48,24 @@ namespace Scellecs.Morpeh.WorldBrowser {
             return buffer;
         }
 
+        public void AddComponentData(int typeId, Entity entity) {
+            if (this.TryGetDefinition(entity, typeId, out var def)) {
+                def.entityAddComponent?.Invoke(entity);
+            }
+        }
+
+        public void RemoveComponentData(int typeId, Entity entity) {
+            if (this.TryGetDefinition(entity, typeId, out var def)) {
+                def.entityRemoveComponent?.Invoke(entity);
+            }
+        }
+
         public void SetComponentData(object data, int typeId, Entity entity) {
-            var def = ExtendedComponentId.Get(typeId);
-
-            if (def.isMarker || Application.isPlaying == false) {
-                return;
+            if (this.TryGetDefinition(entity, typeId, out var def)) {
+                if (!def.isMarker) {
+                    def.entitySetComponentBoxed?.Invoke(entity, data);
+                }
             }
-
-            var isValid = !entity.GetWorld().IsNullOrDisposed() && !entity.GetWorld().IsDisposed(entity);
-
-            if (!isValid) {
-                return;
-            }
-
-            def.entitySetComponentBoxed?.Invoke(entity, data);
         }
 
         public ComponentStorageModel GetModel() {
@@ -96,6 +100,22 @@ namespace Scellecs.Morpeh.WorldBrowser {
                     }
                 }
             }
+        }
+
+        private bool TryGetDefinition(Entity entity, int typeId, out ExtendedComponentId.InternalTypeDefinition def) {
+            def = ExtendedComponentId.Get(typeId);
+
+            if (Application.isPlaying == false) {
+                return false;
+            }
+
+            var isValid = !entity.GetWorld().IsNullOrDisposed() && !entity.GetWorld().IsDisposed(entity);
+
+            if (!isValid) {
+                return false;
+            }
+
+            return true;
         }
 
         private void AddComponent(Type type, int typeId) {

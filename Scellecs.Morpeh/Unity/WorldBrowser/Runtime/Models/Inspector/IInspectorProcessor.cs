@@ -2,7 +2,10 @@
 namespace Scellecs.Morpeh.WorldBrowser {
     internal interface IInspectorProcessor {
         public InspectorModel GetModel();
+        public void AddComponentData(int id);
+        public void RemoveComponentData(int typeId);
         public void SetComponentData(int typeId, object data);
+        public void SetAddComponentSearchString(string value);
     }
 }
 #endif

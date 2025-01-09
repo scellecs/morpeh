@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using Scellecs.Morpeh.WorldBrowser.Editor.ComponentViewer;
+using Scellecs.Morpeh.WorldBrowser.Editor.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private readonly HashSet<int> expandedStates;
         private readonly List<int> componentTypeIds;
         private readonly Dictionary<int, ComponentDataBoxed> componentData;
+        private VirtualList<int> addComponentSuggestions;
 
         private readonly Func<int, object> Get;
         private readonly Action<int, object> Set;
@@ -27,6 +29,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             this.expandedStates = new HashSet<int>();
             this.componentTypeIds = new List<int>();
             this.componentData = new Dictionary<int, ComponentDataBoxed>();
+            this.addComponentSuggestions = new VirtualList<int>(this.model.addComponentSuggestions);
             this.Get = this.GetComponent;
             this.Set = this.SetComponent;
             this.version = 0u;
@@ -38,6 +41,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             if (this.modelVersion != this.model.version) {
                 this.IncrementVersion();
                 this.modelVersion = this.model.version;
+                this.addComponentSuggestions.SetList(this.model.addComponentSuggestions);
 
                 if (this.model.selectedEntity.Equals(default)) {
                     this.expandedStates.Clear();
@@ -94,7 +98,11 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             return this.expandedStates.Count < this.componentTypeIds.Count;
         }
 
-        public IList GetItemsSource() {
+        public IList GetAddComponentSuggestionsSource() {
+            return this.addComponentSuggestions;
+        }
+
+        public IList GetEntityComponentsSource() {
             return this.componentTypeIds;
         }
 
@@ -110,6 +118,22 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
                 Get = this.Get,
                 Set = this.Set,
             };
+        }
+
+        public string GetComponentNameById(int id) {
+            return this.storage.componentNames[id];    
+        }
+
+        public void AddComponentById(int id) { 
+            this.processor.AddComponentData(id);
+        }
+
+        public void RemoveComponentByTypeId(int typeId) { 
+            this.processor.RemoveComponentData(typeId);
+        }
+
+        public void SetAddComponentSearchString(string value) { 
+            this.processor.SetAddComponentSearchString(value);
         }
 
         private object GetComponent(int typeId) {

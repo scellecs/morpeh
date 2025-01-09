@@ -41,7 +41,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
                 this.visibleItems.Remove(item);
             };
 
-            this.itemsSource = this.model.GetItemsSource();
+            this.itemsSource = this.model.GetEntityComponentsSource();
         }
 
         internal void UpdateItems() {

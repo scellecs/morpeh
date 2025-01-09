@@ -7,15 +7,15 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private const string CHECKMARK = "hierarchy-search-components-list-item__checkmark";
         private const string LABEL = "hierarchy-search-components-list-item__label";
 
-        private readonly IHierarchySearchViewModel vm;
+        private readonly IHierarchySearchViewModel model;
         private readonly QueryParam queryParam;
         private readonly Label label;
         private readonly VisualElement checkmark;
 
         private int id;
 
-        internal HierarchySearchListViewItem(IHierarchySearchViewModel vm, QueryParam param) {
-            this.vm = vm;
+        internal HierarchySearchListViewItem(IHierarchySearchViewModel model, QueryParam param) {
+            this.model = model;
             this.queryParam = param;
             this.id = -1;
 
@@ -34,8 +34,8 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
 
         internal void Bind(int id) {
             this.id = id;
-            this.label.text = this.vm.GetComponentNameById(this.id);
-            this.UpdateVisualState(this.vm.GetComponentIncluded(this.id, this.queryParam));
+            this.label.text = this.model.GetComponentNameById(this.id);
+            this.UpdateVisualState(this.model.GetComponentIncluded(this.id, this.queryParam));
         }
 
         internal void Reset() {
@@ -49,8 +49,8 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
                 return;
             }
 
-            var newState = !this.vm.GetComponentIncluded(this.id, this.queryParam);
-            this.vm.SetComponentIncluded(this.id, newState, this.queryParam);
+            var newState = !this.model.GetComponentIncluded(this.id, this.queryParam);
+            this.model.SetComponentIncluded(this.id, newState, this.queryParam);
             this.UpdateVisualState(newState);
         }
 

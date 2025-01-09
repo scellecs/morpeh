@@ -1,5 +1,6 @@
 .inspector-list-view-item {
     flex-direction: column;
+    position: relative;
 }
 
 .inspector-list-view-item__label {
@@ -7,7 +8,23 @@
     border-width: 1px;
     border-color: rgb(77, 77, 77);
     padding: 4px;
-    display: none;
+}
+
+.inspector-list-view-item__remove-icon {
+    position: absolute;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    -unity-text-align: middle-center;
+    color: rgb(180, 180, 180);
+    cursor: link;
+    background-color: transparent;
+    padding: 0;
+    margin: 1px;
+}
+
+.inspector-list-view-item__remove-icon:hover {
+    color: rgb(220, 220, 220);
 }
 
 .inspector-list-view-item__foldout {
@@ -63,10 +80,74 @@
     -unity-text-align: middle-left;
 }
 
-.inspector-toolbar__refresh-toggle {
-    margin-left: 8px;
+.inspector-add-component-menu {
+    margin-left: auto;
 }
 
-.inspector-toolbar Toggle {
-    margin: 2px;
+.inspector-add-component-menu-dropdown {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.inspector-add-component-menu-dropdown-menu-content {
+    width: 300px;
+    height: 400px;
+    flex-direction: column;
+    background-color: rgb(56, 56, 56);
+}
+
+.inspector-add-component-menu-input {
+    margin: 4px;
+    border-radius: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.inspector-add-component-menu-button {
+    flex-direction: row;
+    align-items: center;
+    margin-left: auto;
+}
+
+.inspector-add-component-menu-button:hover {
+    background-color: rgb(56, 56, 56);
+}
+
+.inspector-add-component-menu-button__text {
+    color: rgb(200, 200, 200);
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.inspector-add-component-menu-button__icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    background-image: resource("d_Toolbar Plus");
+    -unity-background-image-tint-color: rgb(200, 200, 200);
+}
+
+.inspector-add-component-menu-list {
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 0;
+}
+
+.inspector-add-component-menu-list-item {
+    flex-direction: row;
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 100%;
+    height: 20px;
+    padding: 2px 4px;
+    align-items: center; 
+}
+
+.inspector-add-component-menu-list-item__label {
+    -unity-text-align: middle-left;
+}
+
+.inspector-add-component-menu-list-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }

@@ -50,6 +50,12 @@
             var typeDefinition = new InternalTypeDefinition {
                 typeInfo = ComponentId<T>.info,
                 type = typeof(T),
+                entityAddComponent = (entity) => {
+                    var stash = entity.GetWorld().GetStash<T>();
+                    if (!stash.Has(entity)) {
+                        stash.Add(entity);
+                    }
+                },
                 entityGetComponentBoxed = (entity) => {
                     var stash = entity.GetWorld().GetStash<T>();
                     return stash.Has(entity) ? stash.Get(entity) : default;
@@ -68,6 +74,7 @@
         internal struct InternalTypeDefinition {
             public TypeInfo typeInfo;
             public Type type;
+            public Action<Entity> entityAddComponent;
             public Func<Entity, object> entityGetComponentBoxed;
             public Action<Entity, object> entitySetComponentBoxed;
             public Action<Entity> entityRemoveComponent;

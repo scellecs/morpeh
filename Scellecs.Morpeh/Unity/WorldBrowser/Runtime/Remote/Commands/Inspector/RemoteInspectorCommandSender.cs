@@ -45,8 +45,20 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
             return this.model; 
         }
 
+        public void AddComponentData(int id) {
+            // temporarily discard for remote debug
+        }
+
+        public void RemoveComponentData(int id) {
+            // temporarily discard for remote debug
+        }
+
         public void SetComponentData(int typeId, object data) {
-            // discard for remote debug
+            // temporarily discard for remote debug
+        }
+
+        public void SetAddComponentSearchString(string value) {
+            // temporarily discard for remote debug
         }
 
         public void Dispose() {

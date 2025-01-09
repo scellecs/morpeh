@@ -9,8 +9,13 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         public void SetExpandedAll(bool value);
         public bool IsExpanded(int typeId);
         public bool IsNotExpandedAll();
-        public IList GetItemsSource();
+        public IList GetAddComponentSuggestionsSource();
+        public IList GetEntityComponentsSource();
         public ComponentData GetComponentData(int typeId);
+        public string GetComponentNameById(int id);
+        public void AddComponentById(int id);
+        public void RemoveComponentByTypeId(int typeId);
+        public void SetAddComponentSearchString(string value);
     }
 }
 #endif

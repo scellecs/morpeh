@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace Scellecs.Morpeh.WorldBrowser {
     internal sealed class InspectorModel : BaseModel {
         internal IList<ComponentDataBoxed> components;
+        internal IList<int> addComponentSuggestions;
         internal Entity selectedEntity;
     }
 }

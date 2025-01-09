@@ -9,25 +9,27 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private const string TAG_LABEL = "inspector-list-view-item__label";
         private const string DATA_FOLDOUT = "inspector-list-view-item__foldout";
         private const string DATA_CONTAINER = "inspector-list-view-item__data-container";
+        private const string REMOVE_ICON = "inspector-list-view-item__remove-icon";
 
         private const string TAG_COLOR = "#90EE90";
         private const string TAG_FORMAT = "[Tag]";
 
         private readonly Label tagLabel;
         private readonly Foldout dataFoldout;
+        private readonly Label labelRemoveIcon;
+        private readonly Label foldoutRemoveIcon;
         private readonly IMGUIContainer dataContainer;
         private readonly Action IMGUIHandler;
         private readonly EventCallback<ChangeEvent<bool>> FoldoutExpandedCallback;
-
         private readonly ComponentViewHandle handle;
         private readonly IInspectorViewModel model;
 
         private ComponentData data;
 
-        internal InspectorListViewItem(IInspectorViewModel model, ComponentViewHandle handle) {
+        internal InspectorListViewItem(IInspectorViewModel model, ComponentViewHandle handle)
+        {
             this.model = model;
             this.handle = handle;
-
             this.IMGUIHandler = () => this.handle.HandleOnGUI(this.data);
             this.FoldoutExpandedCallback = (evt) => this.model.SetExpanded(this.data.typeId, evt.newValue);
 
@@ -36,6 +38,18 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             this.tagLabel = new Label();
             this.tagLabel.AddToClassList(TAG_LABEL);
 
+            this.labelRemoveIcon = new Label("×");
+            this.labelRemoveIcon.AddToClassList(REMOVE_ICON);
+            this.labelRemoveIcon.AddManipulator(new Clickable(() => {
+                this.model.RemoveComponentByTypeId(this.data.typeId);
+            }));
+
+            this.foldoutRemoveIcon = new Label("×");
+            this.foldoutRemoveIcon.AddToClassList(REMOVE_ICON);
+            this.foldoutRemoveIcon.AddManipulator(new Clickable(() => {
+                this.model.RemoveComponentByTypeId(this.data.typeId);
+            }));
+
             this.dataFoldout = new Foldout();
             this.dataFoldout.AddToClassList(DATA_FOLDOUT);
             this.dataFoldout.SetValueWithoutNotify(false);
@@ -43,12 +57,13 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             this.dataContainer = new IMGUIContainer();
             this.dataContainer.cullingEnabled = true;
             this.dataContainer.AddToClassList(DATA_CONTAINER);
-
             this.dataFoldout.Add(this.dataContainer);
-            this.hierarchy.Add(this.tagLabel);
-            this.hierarchy.Add(this.dataFoldout);
-        }
 
+            this.Add(this.tagLabel);
+            this.Add(this.labelRemoveIcon);
+            this.Add(this.dataFoldout);
+            this.Add(this.foldoutRemoveIcon);
+        }
         internal void Bind(int typeId) {
             this.data = this.model.GetComponentData(typeId);
             var name = this.data.name;

@@ -95,9 +95,9 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             this.inspectorView = new InspectorView(this.inspectorViewModel);
 
             this.rootVisualElement.styleSheets.Add(this.viewContainerStyleSheet);
-            this.hierarchySearchView.styleSheets.Add(this.hierarchySearchStyleSheet);
-            this.hierarchyView.styleSheets.Add(this.hierarchyStyleSheet);
-            this.inspectorView.styleSheets.Add(this.inspectorStyleSheet);
+            this.rootVisualElement.styleSheets.Add(this.hierarchySearchStyleSheet);
+            this.rootVisualElement.styleSheets.Add(this.hierarchyStyleSheet);
+            this.rootVisualElement.styleSheets.Add(this.inspectorStyleSheet);
 
             this.splitterView.hierarchySearchRoot.Add(this.hierarchySearchView);
             this.splitterView.hierarchyRoot.Add(this.hierarchyView);

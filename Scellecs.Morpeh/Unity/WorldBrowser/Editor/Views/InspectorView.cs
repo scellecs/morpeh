@@ -5,6 +5,8 @@ using UnityEngine.UIElements;
 namespace Scellecs.Morpeh.WorldBrowser.Editor {
     internal sealed class InspectorView : VisualElement, IDisposable {
         private readonly InspectorToolbar toolbar;
+        private readonly ExpandFoldoutToggle expandAllToggle;
+        private readonly AddComponentMenu addComponentMenu;
         private readonly InspectorListView listView;
         private readonly ViewContainer viewContainer;
 
@@ -17,7 +19,14 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             this.model = model;
             this.handle = ComponentViewHandle.Create();
 
-            this.toolbar = new InspectorToolbar(this.model);
+            this.expandAllToggle = new ExpandFoldoutToggle("Expand All");
+            this.expandAllToggle.ValueChanged += (evt) => this.model.SetExpandedAll(evt.newValue);
+            this.addComponentMenu = new AddComponentMenu(this.model);
+
+            this.toolbar = new InspectorToolbar();
+            this.toolbar.Add(this.expandAllToggle);
+            this.toolbar.Add(this.addComponentMenu);
+
             this.listView = new InspectorListView(this.model, this.handle);
 
             this.viewContainer = new ViewContainer();
@@ -36,9 +45,10 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
 
         internal void SyncWithModel() {
             if (this.model.IsNotExpandedAll()) {
-                this.toolbar.SetExpandedStateWithoutNotify(false);
+                this.expandAllToggle.SetValueWithoutNotify(false);
             }
 
+            this.addComponentMenu.Refresh();
             this.listView.UpdateItems();
             this.modelVersion = this.model.GetVersion();
         }
