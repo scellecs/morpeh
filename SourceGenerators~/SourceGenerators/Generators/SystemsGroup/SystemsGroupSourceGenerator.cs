@@ -164,70 +164,62 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                     using (indent.Scope()) {
-                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_CallAwake\");");
-                        sb.AppendEndIfDefine();
-                        
-                        for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
-                            var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
-                            
-                            if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.CallAwake();");
+                        using (MorpehSyntax.ScopedProfile(sb, typeName, "CallAwake", indent)) {
+                            for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                                var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
+
+                                if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
+                                    sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.CallAwake();");
+                                }
                             }
                         }
-                        
-                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
-                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                     using (indent.Scope()) {
-                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).AppendLine("_CallDispose\");");
-                        sb.AppendEndIfDefine();
-                        
-                        for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
-                            var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
-                            
-                            if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
-                                sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.CallDispose();");
-                            } else if (fieldDefinition.isDisposable) {
-                                sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
-                                sb.AppendIndent(indent).AppendLine("try {");
-                                sb.AppendEndIfDefine();
-                                using (indent.Scope()) {
-                                    sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.Dispose();");
-                                }
-                                sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
-                                sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
-                                using (indent.Scope()) {
-                                    sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" (Dispose)\");");
-                                    sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
-                                }
-                                sb.AppendIndent(indent).AppendLine("}");
-                                sb.AppendEndIfDefine();
-                            }
-                        }
-                        
-                        // TODO: Count and generate null check for injectionTable if there are any registered fields
-                        sb.AppendIndent(indent).AppendLine("if (_injectionTable != null) {");
-                        using (indent.Scope()) {
+                        using (MorpehSyntax.ScopedProfile(sb, typeName, "CallDispose", indent)) {
                             for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
                                 var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
 
-                                if (fieldDefinition.register) {
-                                    sb.AppendIndent(indent).Append("_injectionTable.UnRegister(typeof(").Append(fieldDefinition.registerAs.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).AppendLine("));");
+                                if (fieldDefinition.isSystem || fieldDefinition.isInitializer) {
+                                    sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.CallDispose();");
+                                }
+                                else if (fieldDefinition.isDisposable) {
+                                    sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
+                                    sb.AppendIndent(indent).AppendLine("try {");
+                                    sb.AppendEndIfDefine();
+                                    using (indent.Scope()) {
+                                        sb.AppendIndent(indent).AppendLine($"{fieldDefinition.fieldSymbol?.Name}.Dispose();");
+                                    }
+
+                                    sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
+                                    sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
+                                    using (indent.Scope()) {
+                                        sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" (Dispose)\");");
+                                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
+                                    }
+
+                                    sb.AppendIndent(indent).AppendLine("}");
+                                    sb.AppendEndIfDefine();
                                 }
                             }
+
+                            // TODO: Count and generate null check for injectionTable if there are any registered fields
+                            sb.AppendIndent(indent).AppendLine("if (_injectionTable != null) {");
+                            using (indent.Scope()) {
+                                for (int i = 0, length = scopedFieldDefinitionCollection.Collection.ordered.Count; i < length; i++) {
+                                    var fieldDefinition = scopedFieldDefinitionCollection.Collection.ordered[i];
+
+                                    if (fieldDefinition.register) {
+                                        sb.AppendIndent(indent).Append("_injectionTable.UnRegister(typeof(")
+                                            .Append(fieldDefinition.registerAs.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).AppendLine("));");
+                                    }
+                                }
+                            }
+                            sb.AppendIndent(indent).AppendLine("}");
                         }
-                        sb.AppendIndent(indent).AppendLine("}");
-                        
-                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
-                        sb.AppendEndIfDefine();
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
@@ -241,17 +233,11 @@
                         }
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
                         using (indent.Scope()) {
-                            sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"").Append(typeName).Append('_').Append(methodName).AppendLine("\");");
-                            sb.AppendEndIfDefine();
-                            
-                            foreach (var fieldDefinition in loopMethods) {
-                                sb.AppendIndent(indent).Append(fieldDefinition.fieldSymbol?.Name).AppendLine(".CallUpdate(deltaTime);");
+                            using (MorpehSyntax.ScopedProfile(sb, typeName, methodName, indent)) {
+                                foreach (var fieldDefinition in loopMethods) {
+                                    sb.AppendIndent(indent).Append(fieldDefinition.fieldSymbol?.Name).AppendLine(".CallUpdate(deltaTime);");
+                                }
                             }
-                            
-                            sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                            sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
-                            sb.AppendEndIfDefine();
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                     }
