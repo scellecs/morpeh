@@ -81,6 +81,10 @@ namespace Scellecs.Morpeh.WorldBrowser.Filter {
                     var entitesData = state.world.entities;
                     if (id > 0 && id <= state.world.entitiesCount) { 
                         var data = entitesData[id];
+                        if (data.indexInCurrentArchetype == -1) {
+                            return;
+                        }
+
                         var archetype = data.currentArchetype;
                         var entity = archetype.entities.data[data.indexInCurrentArchetype];
                         this.searchResult.Add(entity);

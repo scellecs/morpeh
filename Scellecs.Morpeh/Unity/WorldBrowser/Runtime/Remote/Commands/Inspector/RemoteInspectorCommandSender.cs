@@ -7,7 +7,12 @@ using UnityEngine;
 namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
     internal unsafe sealed class RemoteInspectorCommandSender : IInspectorProcessor, ICommandHandler, IDisposable {
         private readonly InspectorModel model;
-        private readonly UnityObjectAdapter unityObjectAdapter;
+        private readonly UnityObjectEditorAdapter unityObjectAdapter;
+
+        private InspectorAddComponentCommand? addComponentCommand;
+        private InspectorRemoveComponentCommand? removeComponentCommand;
+        private InspectorSetComponentCommand? setComponentCommand;
+        private InspectorSetAddComponentSearchStringCommand? setComponentSearchStringCommand;
 
         public byte CommandType => CommandTypeId.Inspector;
 
@@ -15,8 +20,9 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
             this.model = new InspectorModel();
             this.model.version = -1u;
             this.model.components = new List<ComponentDataBoxed>();
+            this.model.addComponentSuggestions = new List<int>();
             this.model.selectedEntity = default;
-            this.unityObjectAdapter = SerializationUtility.GetAdapter<UnityObjectAdapter>();
+            this.unityObjectAdapter = SerializationUtility.GetAdapter<UnityObjectEditorAdapter>();
         }
 
         public void Handle(Command response, NetworkTransport transport) {
@@ -26,8 +32,29 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
 
         internal void SendCommands(NetworkTransport transport) {
             var allocator = transport.SendAllocator;
+
+            if (this.addComponentCommand != null) {
+                transport.PushSend(this.addComponentCommand.Value.Serialize(allocator, out var length), length);
+                this.addComponentCommand = null;
+            }
+
+            if (this.removeComponentCommand != null) {
+                transport.PushSend(this.removeComponentCommand.Value.Serialize(allocator, out var length), length);
+                this.removeComponentCommand = null;
+            }
+
+            if (this.setComponentCommand != null) {
+                transport.PushSend(this.setComponentCommand.Value.Serialize(allocator, out var length), length);
+                this.setComponentCommand = null;
+            }
+
+            if(this.setComponentSearchStringCommand != null) {
+                transport.PushSend(this.setComponentSearchStringCommand.Value.Serialize(allocator, out var length), length);
+                this.setComponentSearchStringCommand = null;
+            }
+
             var fetchCommand = new InspectorFetchCommand() { version = this.model.version };
-            transport.PushSend(fetchCommand.Serialize(allocator, out var length), length);
+            transport.PushSend(fetchCommand.Serialize(allocator, out var len), len);
         }
 
         private void HandleFetchResult(Command response) {
@@ -46,19 +73,19 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
         }
 
         public void AddComponentData(int id) {
-            // temporarily discard for remote debug
+            this.addComponentCommand = new InspectorAddComponentCommand() { id = id };
         }
 
-        public void RemoveComponentData(int id) {
-            // temporarily discard for remote debug
+        public void RemoveComponentData(int typeId) {
+            this.removeComponentCommand = new InspectorRemoveComponentCommand() { typeId = typeId };
         }
 
         public void SetComponentData(int typeId, object data) {
-            // temporarily discard for remote debug
+            this.setComponentCommand = new InspectorSetComponentCommand() { typeId = typeId, component = data };
         }
 
         public void SetAddComponentSearchString(string value) {
-            // temporarily discard for remote debug
+            this.setComponentSearchStringCommand = new InspectorSetAddComponentSearchStringCommand() { value = value };
         }
 
         public void Dispose() {

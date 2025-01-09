@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR && MORPEH_REMOTE_BROWSER || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
 using Scellecs.Morpeh.Utils.WorldBrowser.Remote;
 using Scellecs.Morpeh.WorldBrowser.Remote.Commands;
+using Scellecs.Morpeh.WorldBrowser.Serialization;
 using System;
 using UnityEngine;
 
@@ -90,6 +91,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
         }
 
         private void InitializeModels() {
+            SerializationUtility.AddAdapter(new UnityObjectBuildRuntimeAdapter());
             this.modelsStorage = new ModelsStorage();
             this.modelsStorage.Initialize();
             this.commandHandlers = new CommandHandlerRegistry();

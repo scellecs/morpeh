@@ -6,6 +6,7 @@ namespace Scellecs.Morpeh.WorldBrowser {
     internal struct SerializableInspectorModel {
         public long version;
         public ComponentDataBoxed[] components;
+        public int[] addComponentSuggestions;
         public Entity selectedEntity;
     }
 }

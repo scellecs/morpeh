@@ -9,10 +9,16 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
 
         static SerializationUtility() { 
             binaryAdapters.Add(new EntityAdapter());
-            binaryAdapters.Add(new UnityObjectAdapter());
         }
 
         public static void AddAdapter(IBinaryAdapter adapter) {
+            for (int i = 0; i < binaryAdapters.Count; i++) {
+                var binaryAdapter = binaryAdapters[i];
+                if (binaryAdapter.GetType() == adapter.GetType()) {
+                    return;
+                }
+            }
+
             binaryAdapters.Add(adapter);
         }
 
