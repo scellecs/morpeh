@@ -1,6 +1,7 @@
 ﻿namespace SourceGenerators.Generators.Injection {
     using System.Collections.Generic;
     using System.Linq;
+    using Diagnostics;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
@@ -69,6 +70,10 @@
                     return;
                 }
 #endif
+                
+                if (!RunDiagnostics(spc, typeDeclaration)) {
+                    return;
+                }
 
                 var fields = ThreadStaticListCache<IFieldSymbol>.GetClear();
                 FillInjectableFields(fields, typeSymbol);
@@ -201,6 +206,17 @@
 
 
             return false;
+        }
+        
+        private static bool RunDiagnostics(SourceProductionContext spc, TypeDeclarationSyntax typeDeclaration) {
+            var success = true;
+
+            if (typeDeclaration.IsDeclaredInsideAnotherType()) {
+                Errors.ReportNestedDeclaration(spc, typeDeclaration);
+                success = false;
+            }
+
+            return success;
         }
 
         private class GenericResolver {

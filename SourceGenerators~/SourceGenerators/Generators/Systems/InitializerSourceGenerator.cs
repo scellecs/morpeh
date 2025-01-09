@@ -158,6 +158,11 @@
         private static bool RunDiagnostics(SourceProductionContext spc, TypeDeclarationSyntax typeDeclaration) {
             var success = true;
             
+            if (typeDeclaration.IsDeclaredInsideAnotherType()) {
+                Errors.ReportNestedDeclaration(spc, typeDeclaration);
+                success = false;
+            }
+            
             var members = typeDeclaration.Members;
             for (int i = 0, length = members.Count; i < length; i++) {
                 var member = members[i];

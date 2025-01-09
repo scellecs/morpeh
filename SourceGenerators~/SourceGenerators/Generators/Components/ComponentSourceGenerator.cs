@@ -77,7 +77,7 @@
             });
         }
 
-        private static bool RunDiagnostics(SourceProductionContext spc, StructDeclarationSyntax typeDeclaration) {
+        private static bool RunDiagnostics(SourceProductionContext spc, TypeDeclarationSyntax typeDeclaration) {
             var success = true;
 
             if (typeDeclaration.IsDeclaredInsideAnotherType()) {

@@ -8,12 +8,12 @@
         
         public static readonly DiagnosticDescriptor NESTED_DECLARATION = new(
             "MORPEH_ERR_001",
-            "Component {0} is declared inside another type.",
-            "Component {0} is declared inside another type.",
+            "{0} cannot be declared inside another type.",
+            "{0} cannot be declared inside another type.",
             "Morpeh",
             DiagnosticSeverity.Error,
             true,
-            "Component {0} is declared inside another type.");
+            "{0} cannot be declared inside another type.");
         
         public static void ReportNestedDeclaration(SourceProductionContext ctx, TypeDeclarationSyntax typeDeclaration) {
             ctx.ReportDiagnostic(Diagnostic.Create(NESTED_DECLARATION, typeDeclaration.GetLocation(), typeDeclaration.Identifier.Text));

@@ -1,5 +1,6 @@
 ﻿namespace SourceGenerators.Generators.Unity {
     using System.Linq;
+    using Diagnostics;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
@@ -19,6 +20,10 @@
             context.RegisterSourceOutput(classes, static (spc, pair) => {
                 var (typeDeclaration, typeSymbol, monoProviderAttributes) = pair;
                 if (typeDeclaration is null || typeSymbol is null) {
+                    return;
+                }
+                
+                if (!RunDiagnostics(spc, typeDeclaration)) {
                     return;
                 }
                 
@@ -230,6 +235,17 @@
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);
             });
+        }
+        
+        private static bool RunDiagnostics(SourceProductionContext spc, TypeDeclarationSyntax typeDeclaration) {
+            var success = true;
+
+            if (typeDeclaration.IsDeclaredInsideAnotherType()) {
+                Errors.ReportNestedDeclaration(spc, typeDeclaration);
+                success = false;
+            }
+
+            return success;
         }
     }
 }

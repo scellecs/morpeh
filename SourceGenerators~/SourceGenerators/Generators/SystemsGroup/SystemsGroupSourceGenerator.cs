@@ -30,6 +30,10 @@
                     return;
                 }
                 
+                if (!RunDiagnostics(spc, typeDeclaration)) {
+                    return;
+                }
+                
                 using var scopedFieldDefinitionCollection = SystemsGroupFieldDefinitionCache.GetScoped();
 
                 var members = typeSymbol.GetMembers();
@@ -245,6 +249,17 @@
                 StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);
             });
+        }
+        
+        private static bool RunDiagnostics(SourceProductionContext spc, TypeDeclarationSyntax typeDeclaration) {
+            var success = true;
+
+            if (typeDeclaration.IsDeclaredInsideAnotherType()) {
+                Errors.ReportNestedDeclaration(spc, typeDeclaration);
+                success = false;
+            }
+
+            return success;
         }
 
         private static bool RunDiagnostics(SourceProductionContext ctx, ScopedSystemsGroupFieldDefinitionCollection scopedSystemsGroupFieldDefinitionCollection) {
