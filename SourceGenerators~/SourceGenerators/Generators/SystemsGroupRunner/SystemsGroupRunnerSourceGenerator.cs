@@ -169,9 +169,8 @@
                 sb.AppendIndent(indent).AppendLine("}");
                 sb.AppendEndNamespace(typeDeclaration, indent);
                 
-                spc.AddSource($"{typeDeclaration.Identifier.Text}.systemsgrouprunner_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToString());
+                spc.AddSource($"{typeName}.systemsgrouprunner_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToStringAndReturn());
                 
-                StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);
             });
         }

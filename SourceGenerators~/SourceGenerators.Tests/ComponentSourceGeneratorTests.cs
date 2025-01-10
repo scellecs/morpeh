@@ -10,6 +10,8 @@ namespace SourceGenerators.Tests;
 using System;
 using Diagnostics;
 using Generators.Components;
+using Microsoft.CodeAnalysis.Testing;
+using Utils.NonSemantic;
 
 [Collection("Sequential")]
 public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
@@ -19,8 +21,8 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
     using System;
 
     [AttributeUsage(AttributeTargets.Struct)]
-    public class ComponentAttribute : Attribute {
-        public ComponentAttribute(int initialCapacity = StashConstants.DEFAULT_COMPONENTS_CAPACITY) {
+    public class EcsComponentAttribute : Attribute {
+        public EcsComponentAttribute(int initialCapacity = StashConstants.DEFAULT_COMPONENTS_CAPACITY) {
             
         }
     }
@@ -33,7 +35,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
                               
                               using Scellecs.Morpeh;
                               
-                              [Component]
+                              [EcsComponent]
                               public partial struct DataComponent {
                                   public int value;
                               }
@@ -58,7 +60,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
                               
                               using Scellecs.Morpeh;
 
-                              [Component(32)]
+                              [EcsComponent(32)]
                               public partial struct DataComponent {
                                   public int value;
                               }
@@ -83,7 +85,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
 
                               using Scellecs.Morpeh;
 
-                              [Component(initialCapacity: 32)]
+                              [EcsComponent(initialCapacity: 32)]
                               public partial struct DataComponent {
                                   public int value;
                               }
@@ -107,7 +109,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
                               namespace Test.Namespace {
                                 using Scellecs.Morpeh;
                               
-                                [Component]
+                                [EcsComponent]
                                 public partial struct TagComponent { }
                               }
                               """;
@@ -130,7 +132,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
                               using Scellecs.Morpeh;
                               
                               namespace Test.Namespace {
-                                [Component]
+                                [EcsComponent]
                                 public partial struct DisposableComponent {
                                   public int value;
                                   public void Dispose() { }
@@ -156,7 +158,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
                               using Scellecs.Morpeh;
 
                               namespace Test.Namespace {
-                                [Component]
+                                [EcsComponent]
                                 public partial struct GenericComponent<T> where T : struct {
                                   public T value;
                                 }
@@ -186,7 +188,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
 
                               namespace Test.Namespace {
                                 public class SomeClass {
-                                  [Component]
+                                  [EcsComponent]
                                   public partial struct GenericComponent<T> where T : struct {
                                     public T value;
                                   }
@@ -198,22 +200,39 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
         Assert.Single(result.Diagnostics);
         Assert.Equal(Errors.NESTED_DECLARATION.Id, result.Diagnostics[0].Id);
     }
-    
-    private static GeneratorDriverRunResult Generate(string source) {
-        var generator = new ComponentSourceGenerator();
-        var driver    = CSharpGeneratorDriver.Create(generator);
 
-        var compilation = CSharpCompilation.Create(nameof(ComponentSourceGeneratorTests),
+    [Fact]
+    public void SourceGenerator_CachesOutput() {
+        const string source = """
+                              using Scellecs.Morpeh;
+
+                              namespace Test.Namespace {
+                                  [EcsComponent]
+                                  public partial struct GenericComponent<T> where T : struct {
+                                    public T value;
+                                  }
+                              }
+                              """;
+        
+        var trackingNames = new[] {TrackingNames.FIRST_PASS, TrackingNames.REMOVE_NULL_PASS };
+        SourceGeneratorTestUtilities.AssertRunCache<ComponentSourceGenerator>(CreateCompilation(source), trackingNames);
+    }
+
+    private static CSharpCompilation CreateCompilation(string source) =>
+        CSharpCompilation.Create(nameof(ComponentSourceGeneratorTests),
             [
                 CSharpSyntaxTree.ParseText(source),
-                CSharpSyntaxTree.ParseText(SHARED_CODE), 
+                CSharpSyntaxTree.ParseText(SHARED_CODE),
             ],
             [
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(IComponent).Assembly.Location),
             ]);
 
-        return driver.RunGenerators(compilation).GetRunResult();
+    private static GeneratorDriverRunResult Generate(string source) {
+        var generator = new ComponentSourceGenerator();
+        var driver    = CSharpGeneratorDriver.Create(generator);
+        return driver.RunGenerators(CreateCompilation(source)).GetRunResult();
     }
     
     private static SyntaxTree GetGeneratedTree(GeneratorDriverRunResult result, string fileName) {

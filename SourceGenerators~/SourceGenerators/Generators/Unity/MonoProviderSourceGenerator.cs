@@ -59,8 +59,9 @@
                 }
                 
                 var providerTypeName            = monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                var providerStashSpecialization = MorpehComponentHelpersSemantic.GetStashSpecialization(monoProviderType, providerTypeName);
-                var isTag                       = providerStashSpecialization.variation == MorpehComponentHelpersSemantic.StashVariation.Tag;
+                var providerStashVariation      = MorpehComponentHelpersSemantic.GetStashVariation(monoProviderType);
+                var providerStashSpecialization = MorpehComponentHelpersSemantic.GetStashSpecialization(providerStashVariation, providerTypeName);
+                var isTag                       = providerStashVariation == StashVariation.Tag;
                 
                 var typeName = typeDeclaration.Identifier.ToString();
                 
@@ -230,9 +231,8 @@
                 sb.AppendIndent(indent).AppendLine("}");
                 sb.AppendEndNamespace(typeDeclaration, indent);
                 
-                spc.AddSource($"{typeDeclaration.Identifier.Text}.monoprovider_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToString());
+                spc.AddSource($"{typeName}.monoprovider_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToStringAndReturn());
                 
-                StringBuilderPool.Return(sb);
                 IndentSourcePool.Return(indent);
             });
         }

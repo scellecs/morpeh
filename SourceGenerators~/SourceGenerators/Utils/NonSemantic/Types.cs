@@ -62,6 +62,25 @@
             return sb;
         }
         
+        public static string GetVisibility(TypeDeclarationSyntax type) {
+            var modifiers = type.Modifiers;
+            
+            for (int i = 0, length = modifiers.Count; i < length; i++) {
+                switch (modifiers[i].Kind()) {
+                    case SyntaxKind.PublicKeyword:
+                        return "public";
+                    case SyntaxKind.InternalKeyword:
+                        return "internal";
+                    case SyntaxKind.ProtectedKeyword:
+                        return "protected";
+                    case SyntaxKind.PrivateKeyword:
+                        return "private";
+                }
+            }
+            
+            return "public";
+        }
+        
         public static StringBuilder AppendTypeDeclarationType(this StringBuilder sb, TypeDeclarationSyntax type) {
             switch (type) {
                 case ClassDeclarationSyntax _:

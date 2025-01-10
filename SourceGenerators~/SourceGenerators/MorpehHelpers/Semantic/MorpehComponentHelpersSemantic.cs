@@ -8,20 +8,36 @@
 
     public static class MorpehComponentHelpersSemantic {
         public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol, string componentDecl) {
-            if (typeSymbol is null) {
-                return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
+            if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
+                return new StashSpecialization("Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
             }
             
-            return GetStashSpecializationInternal(typeSymbol, componentDecl);
+            return GetStashSpecialization(GetStashVariation(typeSymbol), componentDecl);
         }
-
-        private static StashSpecialization GetStashSpecializationInternal(ITypeSymbol? typeSymbol, string componentDecl) {
+        
+        public static StashSpecialization GetStashSpecialization(StashVariation variation, string componentDecl) {
+            return variation switch {
+                StashVariation.Tag => new StashSpecialization(
+                    type: "Scellecs.Morpeh.TagStash",
+                    getStashMethod: StringBuilderPool.Get().Append("GetTagStash<").Append(componentDecl).Append(">").ToStringAndReturn(),
+                    constraintInterface: "Scellecs.Morpeh.ITagComponent"),
+                StashVariation.Disposable => new StashSpecialization(
+                    type: StringBuilderPool.Get().Append("Scellecs.Morpeh.DisposableStash<").Append(componentDecl).Append(">").ToStringAndReturn(),
+                    getStashMethod: StringBuilderPool.Get().Append("GetDisposableStash<").Append(componentDecl).Append(">").ToStringAndReturn(),
+                    constraintInterface: "Scellecs.Morpeh.IDisposableComponent"),
+                _ => new StashSpecialization(
+                    type: StringBuilderPool.Get().Append("Scellecs.Morpeh.Stash<").Append(componentDecl).Append(">").ToStringAndReturn(),
+                    getStashMethod: StringBuilderPool.Get().Append("GetStash<").Append(componentDecl).Append(">").ToStringAndReturn(),
+                    constraintInterface: "Scellecs.Morpeh.IDataComponent")
+            };
+        }
+        
+        public static StashVariation GetStashVariation(ITypeSymbol? typeSymbol) {
             if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
-                return new StashSpecialization(StashVariation.Unknown, "Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
+                return StashVariation.Unknown;
             }
 
 #if !MORPEH_SOURCEGEN_NO_STASH_SPECIALIZATION
-            
             var members = typeSymbol.GetMembers();
             
             var isTag = members
@@ -33,16 +49,15 @@
                 .Any(m => m.Name == "Dispose" && m is IMethodSymbol { Parameters: { Length: 0 } });
 
             if (isTag) {
-                return new StashSpecialization(StashVariation.Tag, "Scellecs.Morpeh.TagStash", $"GetTagStash<{componentDecl}>", "Scellecs.Morpeh.ITagComponent");
+                return StashVariation.Tag;
             }
 
             if (isDisposable) {
-                return new StashSpecialization(StashVariation.Disposable, $"Scellecs.Morpeh.DisposableStash<{componentDecl}>", $"GetDisposableStash<{componentDecl}>", "Scellecs.Morpeh.IDisposableComponent");
+                return StashVariation.Disposable;
             }
-            
 #endif
 
-            return new StashSpecialization(StashVariation.Data, $"Scellecs.Morpeh.Stash<{componentDecl}>", $"GetStash<{componentDecl}>", "Scellecs.Morpeh.IDataComponent");
+            return StashVariation.Data;
         }
         
         public static void FillStashRequirements(List<StashRequirement> stashes, INamedTypeSymbol typeDeclaration) {
@@ -92,27 +107,6 @@
                     metadataClassName = metadataClassName,
                 });
             }
-        }
-        
-        public readonly struct StashSpecialization {
-            public readonly StashVariation variation;
-            public readonly string    type;
-            public readonly string    getStashMethod;
-            public readonly string    constraintInterface;
-            
-            public StashSpecialization(StashVariation variation, string type, string getStashMethod, string constraintInterface) {
-                this.variation           = variation;
-                this.type                = type;
-                this.getStashMethod      = getStashMethod;
-                this.constraintInterface = constraintInterface;
-            }
-        }
-
-        public enum StashVariation {
-            Unknown,
-            Tag,
-            Disposable,
-            Data,
         }
         
         public struct StashRequirement {
