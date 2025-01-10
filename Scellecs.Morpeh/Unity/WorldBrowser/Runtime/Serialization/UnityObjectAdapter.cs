@@ -31,7 +31,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
             var type = Type.GetType(typeName);
 
             if (type != null) {
-                var debugName = $"({type.Name}):({instanceId}) {name}";
+                var debugName = $"[{type.Name}:{instanceId}] {name}";
                 return CreateFakeUnityObject(type, debugName);
             }
 
