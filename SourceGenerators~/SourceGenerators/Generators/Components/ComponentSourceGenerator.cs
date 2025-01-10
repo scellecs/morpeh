@@ -37,7 +37,7 @@
                 
                 sb.AppendIl2CppAttributes(indent);
                 sb.AppendIndent(indent)
-                    .Append(component.visibility)
+                    .Append(Types.GetVisibilityModifierString(component.visibility))
                     .Append(" partial struct ")
                     .Append(component.typeName)
                     .Append(component.genericParams)
@@ -101,7 +101,7 @@
                 typeNamespace: typeNamespace,
                 genericParams: genericParams,
                 genericConstraints: genericConstraints,
-                visibility: Types.GetVisibility(syntaxNode),
+                visibility: Types.GetVisibilityModifier(syntaxNode),
                 initialCapacity: GetInitialCapacity(ctx.Attributes.First()),
                 stashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol));
         }

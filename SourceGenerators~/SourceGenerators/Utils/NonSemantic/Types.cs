@@ -62,6 +62,34 @@
             return sb;
         }
         
+        public static SyntaxKind GetVisibilityModifier(TypeDeclarationSyntax type) {
+            var modifiers = type.Modifiers;
+            
+            for (int i = 0, length = modifiers.Count; i < length; i++) {
+                var kind = modifiers[i].Kind();
+                if (kind is SyntaxKind.PublicKeyword or SyntaxKind.InternalKeyword or SyntaxKind.ProtectedKeyword or SyntaxKind.PrivateKeyword) {
+                    return kind;
+                }
+            }
+            
+            return SyntaxKind.PublicKeyword;
+        }
+        
+        public static string GetVisibilityModifierString(SyntaxKind syntaxKind) {
+            switch (syntaxKind) {
+                case SyntaxKind.PublicKeyword:
+                    return "public";
+                case SyntaxKind.InternalKeyword:
+                    return "internal";
+                case SyntaxKind.ProtectedKeyword:
+                    return "protected";
+                case SyntaxKind.PrivateKeyword:
+                    return "private";
+            }
+            
+            return "public";
+        }
+        
         public static string GetVisibility(TypeDeclarationSyntax type) {
             var modifiers = type.Modifiers;
             
