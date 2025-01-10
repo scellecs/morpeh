@@ -37,7 +37,7 @@ namespace Scellecs.Morpeh.WorldBrowser {
                     var def = ExtendedComponentId.Get(typeId);
                     var data = def.entityGetComponentBoxed.Invoke(entity);
                     buffer.Add(new ComponentDataBoxed() {
-                        data = data,
+                        data = (IComponent)data,
                         typeId = typeId,
                         isMarker = def.isMarker
                     });

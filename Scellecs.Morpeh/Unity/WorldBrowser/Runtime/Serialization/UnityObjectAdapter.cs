@@ -5,30 +5,9 @@ using System.Text;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Serialization.Binary;
 using UnityEngine;
-using static Scellecs.Morpeh.WorldBrowser.Serialization.UnityObjectAdapterUtility;
+using static Scellecs.Morpeh.WorldBrowser.Serialization.SerializationUtility;
 
 namespace Scellecs.Morpeh.WorldBrowser.Serialization {
-    internal unsafe static class UnityObjectAdapterUtility {
-        private const int MAX_STRING_LENGTH = 256;
-
-        internal static void WriteString(IBinarySerializationContext context, string str) {
-            var bytes = Encoding.UTF8.GetBytes(str);
-            context.Writer->Add(bytes.Length);
-            fixed (byte* ptr = bytes) {
-                context.Writer->Add(ptr, bytes.Length);
-            }
-        }
-
-        internal static string ReadString(IBinaryDeserializationContext context) {
-            var length = context.Reader->ReadNext<int>();
-            if (length <= 0 || length > MAX_STRING_LENGTH) {
-                return string.Empty;
-            }
-            byte* bytes = (byte*)context.Reader->ReadNext(length);
-            return Encoding.UTF8.GetString(bytes, length);
-        }
-    }
-
     internal unsafe sealed class UnityObjectEditorAdapter : IContravariantBinaryAdapter<UnityEngine.Object> {
         private readonly List<UnityEngine.Object> createdObjects;
 
@@ -45,11 +24,17 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
             if (instanceId == -1) {
                 return null;
             }
+
             var name = ReadString(context);
             var typeName = ReadString(context);
             var type = Type.GetType(typeName);
-            var debugName = $"({type.Name}):({instanceId}) {name}";
-            return CreateFakeUnityObject(type, debugName);
+
+            if (type != null) {
+                var debugName = $"({type.Name}):({instanceId}) {name}";
+                return CreateFakeUnityObject(type, debugName);
+            }
+
+            return null;
         }
 
         private UnityEngine.Object CreateFakeUnityObject(Type targetType, string name) {
@@ -74,13 +59,6 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
     }
 
     internal unsafe sealed class UnityObjectBuildRuntimeAdapter : IContravariantBinaryAdapter<UnityEngine.Object> {
-        private const int MAX_STRING_LENGTH = 512;
-        private readonly List<UnityEngine.Object> createdObjects;
-
-        internal UnityObjectBuildRuntimeAdapter() {
-            this.createdObjects = new List<UnityEngine.Object>();
-        }
-
         public void Serialize(IBinarySerializationContext context, UnityEngine.Object value) {
             if (value == null) {
                 context.Writer->Add(-1);

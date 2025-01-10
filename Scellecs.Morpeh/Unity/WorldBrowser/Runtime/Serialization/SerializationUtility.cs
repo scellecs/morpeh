@@ -1,13 +1,16 @@
 ﻿#if UNITY_EDITOR && MORPEH_REMOTE_BROWSER || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
-using System;
 using System.Collections.Generic;
+using System.Text;
 using Unity.Serialization.Binary;
 
 namespace Scellecs.Morpeh.WorldBrowser.Serialization {
-    internal static class SerializationUtility {
+    internal unsafe static class SerializationUtility {
+        private const int MAX_STRING_LENGTH = 256;
+
         internal static List<IBinaryAdapter> binaryAdapters = new List<IBinaryAdapter>();
 
-        static SerializationUtility() { 
+        static SerializationUtility() {
+            binaryAdapters.Add(new BoxedComponentAdapter());
             binaryAdapters.Add(new EntityAdapter());
         }
 
@@ -30,6 +33,27 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
             }
 
             return default;
+        }
+
+        internal static void WriteString(IBinarySerializationContext context, string str)
+        {
+            var bytes = Encoding.UTF8.GetBytes(str);
+            context.Writer->Add(bytes.Length);
+            fixed (byte* ptr = bytes)
+            {
+                context.Writer->Add(ptr, bytes.Length);
+            }
+        }
+
+        internal static string ReadString(IBinaryDeserializationContext context)
+        {
+            var length = context.Reader->ReadNext<int>();
+            if (length <= 0 || length > MAX_STRING_LENGTH)
+            {
+                return string.Empty;
+            }
+            byte* bytes = (byte*)context.Reader->ReadNext(length);
+            return Encoding.UTF8.GetString(bytes, length);
         }
     }
 }

@@ -4,7 +4,7 @@ using System;
 namespace Scellecs.Morpeh.WorldBrowser {
     [Serializable]
     internal struct ComponentDataBoxed {
-        public object data;
+        public IComponent data;
         public bool isMarker;
         public int typeId;
     }
