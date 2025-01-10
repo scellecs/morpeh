@@ -1,5 +1,6 @@
 ﻿namespace SourceGenerators.Tests;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -80,37 +81,35 @@ public static class SourceGeneratorTestUtilities {
         var visited = new HashSet<object>();
 
         foreach (var (obj, _) in runStep.Outputs) {
-            Visit(obj);
+            Visit(obj.GetType(), obj);
         }
 
         return;
 
-        void Visit(object? node) {
+        void Visit(Type type, object? node) {
+            Assert.False(typeof(Compilation).IsAssignableFrom(type), $"{stepName} must not contain Compilation");
+            Assert.False(typeof(ISymbol).IsAssignableFrom(type), $"{stepName} must not contain ISymbol");
+            Assert.False(typeof(SyntaxNode).IsAssignableFrom(type), $"{stepName} must not contain SyntaxNode");
+            Assert.False(typeof(SemanticModel).IsAssignableFrom(type), $"{stepName} must not contain SemanticModel");
+            
             if (node is null || !visited.Add(node)) {
                 return;
             }
-
-            Assert.False(node is Compilation, $"{stepName} must not contain Compilation");
-            Assert.False(node is ISymbol, $"{stepName} must not contain ISymbol");
-            Assert.False(node is SyntaxNode, $"{stepName} must not contain SyntaxNode");
-            Assert.False(node is SemanticModel, $"{stepName} must not contain SemanticModel");
-
-            var type = node.GetType();
+            
             if (type.IsPrimitive || type.IsEnum || type == typeof(string)) {
                 return;
             }
 
             if (node is IEnumerable collection and not string) {
                 foreach (var element in collection) {
-                    Visit(element);
+                    Visit(element.GetType(), element);
                 }
 
                 return;
             }
 
             foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) {
-                var fieldValue = field.GetValue(node);
-                Visit(fieldValue);
+                Visit(field.FieldType, field.GetValue(node));
             }
         }
     }
