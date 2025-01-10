@@ -53,9 +53,8 @@
                         .Append(specialization.type)
                         .Append(" GetStash(Scellecs.Morpeh.World world) => Scellecs.Morpeh.WorldStashExtensions.")
                         .Append(specialization.getStashMethod)
-                        .Append("(")
-                        .Append("world, ")
-                        .Append("capacity: ").Append(component.initialCapacity)
+                        .Append("(world, capacity: ")
+                        .Append(component.initialCapacity)
                         .AppendLine(");");
                 }
                 sb.AppendIndent(indent).AppendLine("}");
