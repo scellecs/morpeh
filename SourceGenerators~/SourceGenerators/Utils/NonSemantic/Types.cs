@@ -4,12 +4,13 @@
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Pools;
 
     public static class Types {
         public static bool IsDeclaredInsideAnotherType(this TypeDeclarationSyntax type) => type.Parent is TypeDeclarationSyntax;
         
         public static string GetStableFileCompliantHash(this TypeDeclarationSyntax type) {
-            var sb = new StringBuilder();
+            var sb = StringBuilderPool.Get();
             
             SyntaxNode? current = type;
             
@@ -35,7 +36,7 @@
                 current = current.Parent;
             }
             
-            return sb.ToString().GetHashCode().ToString("X");
+            return sb.ToStringAndReturn().GetHashCode().ToString("X");
         }
         
         public static StringBuilder AppendVisibility(this StringBuilder sb, TypeDeclarationSyntax type) {

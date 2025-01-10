@@ -1,27 +1,15 @@
 ﻿namespace SourceGenerators.Utils.Pools {
-    using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using NonSemantic;
 
     public static class IndentSourcePool {
-        private const int MAX_POOL_SIZE = 4;
+        private const int MAX_POOL_SIZE = 32;
         
-        [ThreadStatic]
-        private static Stack<IndentSource>? pool;
+        private static readonly ConcurrentStack<IndentSource> pool = new();
         
-        public static IndentSource Get() {
-            pool ??= new Stack<IndentSource>();
-            
-            if (pool.Count == 0) {
-                return new IndentSource();
-            }
-
-            return pool.Pop();
-        }
+        public static IndentSource Get() => pool.TryPop(out var indent) ? indent : new IndentSource();
 
         public static void Return(IndentSource indent) {
-            pool ??= new Stack<IndentSource>();
-            
             if (pool.Count > MAX_POOL_SIZE) {
                 return;
             }

@@ -1,47 +1,27 @@
 ﻿namespace SourceGenerators.Utils.Pools {
-    using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.Text;
 
     public static class StringBuilderPool {
-        private const int MAX_POOL_SIZE = 16;
-        
-        [ThreadStatic]
-        private static Stack<StringBuilder>? pool;
-        
-        public static StringBuilder Get() {
-            pool ??= new Stack<StringBuilder>();
-            
-            if (pool.Count == 0) {
-                return new StringBuilder();
-            }
+        private const int MAX_POOL_SIZE = 32;
 
-            return pool.Pop();
-        }
+        private static readonly ConcurrentStack<StringBuilder> pool = new();
+
+        public static StringBuilder Get() => pool.TryPop(out var sb) ? sb : new StringBuilder();
 
         public static void Return(StringBuilder sb) {
-            pool ??= new Stack<StringBuilder>();
-            
-            if (pool.Count > MAX_POOL_SIZE) {
+            if (pool.Count >= MAX_POOL_SIZE) {
                 return;
             }
-            
+
             sb.Clear();
             pool.Push(sb);
         }
-        
-        public static ScopedStringBuilder GetScoped() => new(Get());
 
-        public readonly struct ScopedStringBuilder : IDisposable {
-            private readonly StringBuilder sb;
-            
-            public StringBuilder StringBuilder => this.sb;
-
-            public ScopedStringBuilder(StringBuilder sb) => this.sb = sb;
-
-            public void Dispose() {
-                Return(this.sb);
-            }
+        public static string ToStringAndReturn(this StringBuilder sb) {
+            var result = sb.ToString();
+            Return(sb);
+            return result;
         }
     }
 }

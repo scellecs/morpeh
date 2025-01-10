@@ -71,18 +71,17 @@
                 string fieldName;
 
                 if (componentTypeSymbol is { IsGenericType: true }) {
-                    using var scoped = StringBuilderPool.GetScoped();
-                    
-                    fieldName = scoped.StringBuilder
+                    fieldName = StringBuilderPool.Get()
                         .Append('_')
                         .Append(componentTypeSymbol.Name.ToCamelCase())
                         .Append('_')
                         .Append(string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name)))
-                        .ToString();
+                        .ToStringAndReturn();
                 } else {
-                    using var scoped = StringBuilderPool.GetScoped();
-                    
-                    fieldName = scoped.StringBuilder.Append('_').Append(componentTypeSymbol.Name.ToCamelCase()).ToString();
+                    fieldName = StringBuilderPool.Get()
+                        .Append('_')
+                        .Append(componentTypeSymbol.Name.ToCamelCase())
+                        .ToStringAndReturn();
                 }
 
                 var metadataClassName = componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
