@@ -101,9 +101,9 @@
                 typeNamespace: typeNamespace,
                 genericParams: genericParams,
                 genericConstraints: genericConstraints,
-                visibility: Types.GetVisibilityModifier(syntaxNode),
                 initialCapacity: GetInitialCapacity(ctx.Attributes.First()),
-                stashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol));
+                stashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol),
+                visibility: Types.GetVisibilityModifier(syntaxNode));
         }
         
         private static int GetInitialCapacity(AttributeData attribute) {
