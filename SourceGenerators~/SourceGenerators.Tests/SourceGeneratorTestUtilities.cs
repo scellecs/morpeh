@@ -93,6 +93,7 @@ public static class SourceGeneratorTestUtilities {
             Assert.False(node is Compilation, $"{stepName} must not contain Compilation");
             Assert.False(node is ISymbol, $"{stepName} must not contain ISymbol");
             Assert.False(node is SyntaxNode, $"{stepName} must not contain SyntaxNode");
+            Assert.False(node is SemanticModel, $"{stepName} must not contain SemanticModel");
 
             var type = node.GetType();
             if (type.IsPrimitive || type.IsEnum || type == typeof(string)) {
