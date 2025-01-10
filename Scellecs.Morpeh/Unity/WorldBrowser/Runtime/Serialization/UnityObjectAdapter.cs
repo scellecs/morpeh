@@ -1,8 +1,8 @@
 ﻿#if UNITY_EDITOR && MORPEH_REMOTE_BROWSER || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Unity.Collections.LowLevel.Unsafe;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Unity.Serialization.Binary;
 using UnityEngine;
 using static Scellecs.Morpeh.WorldBrowser.Serialization.SerializationUtility;
@@ -10,6 +10,7 @@ using static Scellecs.Morpeh.WorldBrowser.Serialization.SerializationUtility;
 namespace Scellecs.Morpeh.WorldBrowser.Serialization {
     internal unsafe sealed class UnityObjectEditorAdapter : IContravariantBinaryAdapter<UnityEngine.Object> {
         private readonly List<UnityEngine.Object> createdObjects;
+        private static FieldInfo unityObjectNativePtr = typeof(UnityEngine.Object).GetField("m_CachedPtr", BindingFlags.Instance | BindingFlags.NonPublic);
 
         internal UnityObjectEditorAdapter() {
             this.createdObjects = new List<UnityEngine.Object>();
@@ -38,13 +39,13 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
         }
 
         private UnityEngine.Object CreateFakeUnityObject(Type targetType, string name) {
+            var obj = (UnityEngine.Object)RuntimeHelpers.GetUninitializedObject(targetType);
             var scriptable = ScriptableObject.CreateInstance<ScriptableObject>();
             scriptable.name = name;
-            var ptr = UnsafeUtility.As<ScriptableObject, IntPtr>(ref scriptable);
-            var targetVTable = targetType.TypeHandle.Value;
-            *(IntPtr*)ptr = targetVTable;
+            var ptrValue = unityObjectNativePtr.GetValue(scriptable);
+            unityObjectNativePtr.SetValue(obj, ptrValue);
             this.createdObjects.Add(scriptable);
-            return scriptable;
+            return obj;
         }
 
         internal void Cleanup() {

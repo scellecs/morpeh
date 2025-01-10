@@ -35,21 +35,17 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
             return default;
         }
 
-        internal static void WriteString(IBinarySerializationContext context, string str)
-        {
+        internal static void WriteString(IBinarySerializationContext context, string str) {
             var bytes = Encoding.UTF8.GetBytes(str);
             context.Writer->Add(bytes.Length);
-            fixed (byte* ptr = bytes)
-            {
+            fixed (byte* ptr = bytes) {
                 context.Writer->Add(ptr, bytes.Length);
             }
         }
 
-        internal static string ReadString(IBinaryDeserializationContext context)
-        {
+        internal static string ReadString(IBinaryDeserializationContext context) {
             var length = context.Reader->ReadNext<int>();
-            if (length <= 0 || length > MAX_STRING_LENGTH)
-            {
+            if (length <= 0 || length > MAX_STRING_LENGTH) {
                 return string.Empty;
             }
             byte* bytes = (byte*)context.Reader->ReadNext(length);
