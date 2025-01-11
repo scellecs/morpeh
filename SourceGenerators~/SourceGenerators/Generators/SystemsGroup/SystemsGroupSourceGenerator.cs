@@ -9,6 +9,8 @@
     using Utils.Pools;
     using Utils.Semantic;
 
+    // TODO: Move to a separate pipeline
+    // TODO: Combine with runner generator to extract loop definitions at once
     [Generator]
     public class SystemsGroupSourceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {

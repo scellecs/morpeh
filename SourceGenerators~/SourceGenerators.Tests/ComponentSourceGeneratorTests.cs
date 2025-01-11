@@ -10,6 +10,7 @@ namespace SourceGenerators.Tests;
 using System;
 using Diagnostics;
 using Generators.Components;
+using Generators.Pipelines;
 using Microsoft.CodeAnalysis.Testing;
 using Utils.NonSemantic;
 
@@ -215,7 +216,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
                               """;
         
         var trackingNames = new[] {TrackingNames.FIRST_PASS, TrackingNames.REMOVE_NULL_PASS };
-        SourceGeneratorTestUtilities.AssertRunCache<ComponentSourceGenerator>(CreateCompilation(source), trackingNames);
+        SourceGeneratorTestUtilities.AssertRunCache<ComponentsPipeline>(CreateCompilation(source), trackingNames);
     }
 
     private static CSharpCompilation CreateCompilation(string source) =>
@@ -230,7 +231,7 @@ public class ComponentSourceGeneratorTests(ITestOutputHelper output) {
             ]);
 
     private static GeneratorDriverRunResult Generate(string source) {
-        var generator = new ComponentSourceGenerator();
+        var generator = new ComponentsPipeline();
         var driver    = CSharpGeneratorDriver.Create(generator);
         return driver.RunGenerators(CreateCompilation(source)).GetRunResult();
     }

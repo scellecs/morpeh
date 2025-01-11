@@ -12,6 +12,7 @@
     using Utils.Semantic;
     using Utils.Pools;
 
+    // TODO: Move to a separate pipeline
     [Generator]
     public class SystemSourceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {

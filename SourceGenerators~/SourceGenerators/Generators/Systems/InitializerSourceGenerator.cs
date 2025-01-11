@@ -11,6 +11,7 @@
     using Utils.Semantic;
     using Utils.Pools;
 
+    // TODO: Move to a separate pipeline
     [Generator]
     public class InitializerSourceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {

@@ -10,6 +10,8 @@
     using Utils.Pools;
     using Utils.Semantic;
 
+    // TODO: Move to a separate pipeline
+    // TODO: Possibly combine with components source generator as this one reuses symbol information which is 100% available there
     [Generator]
     public class MonoProviderSourceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
