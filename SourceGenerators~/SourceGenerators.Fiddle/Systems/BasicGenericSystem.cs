@@ -9,7 +9,7 @@ using Test.Namespace;
 [IncludeStash(typeof(GlobalNamespaceComponent))]
 [IncludeStash(typeof(DisposableComponent))]
 public partial class BasicGenericSystem<T> where T : struct {
-    public World World { get; set; }
+    public World World { get; }
     
     public bool IsEnabled() => throw new NotImplementedException();
 

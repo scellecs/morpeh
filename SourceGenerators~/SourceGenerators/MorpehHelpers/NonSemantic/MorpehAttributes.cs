@@ -31,8 +31,8 @@
         public const string REGISTER_NAME      = "RegisterAttribute";
         public const string REGISTER_FULL_NAME = "Scellecs.Morpeh.RegisterAttribute";
         
-        public const string REQUIRE_NAME      = "IncludeStashAttribute";
-        public const string REQUIRE_FULL_NAME = "Scellecs.Morpeh.IncludeStashAttribute";
+        public const string INCLUDE_STASH_NAME      = "IncludeStashAttribute";
+        public const string INCLUDE_STASH_FULL_NAME = "Scellecs.Morpeh.IncludeStashAttribute";
         
         public const string MONO_PROVIDER_NAME      = "MonoProviderAttribute";
         public const string MONO_PROVIDER_FULL_NAME = "Scellecs.Morpeh.Providers.MonoProviderAttribute";

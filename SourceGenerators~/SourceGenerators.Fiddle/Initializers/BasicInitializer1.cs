@@ -21,7 +21,9 @@ public partial class BasicInitializer1 {
     
     [Inject]
     private SomeComplexGenericClass<int, string> _someComplexGenericClass;
-    
+
+    public World World { get; }
+
     public void OnAwake() {
         throw new NotImplementedException();
     }

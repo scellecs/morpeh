@@ -124,5 +124,21 @@
             
             return sb;
         }
+        
+        public static TypeDeclType TypeDeclTypeFromSyntaxNode(SyntaxNode syntaxNode) {
+            return syntaxNode switch {
+                StructDeclarationSyntax _ => TypeDeclType.Struct,
+                ClassDeclarationSyntax _ => TypeDeclType.Class,
+                _ => throw new ArgumentOutOfRangeException(nameof(syntaxNode))
+            };
+        }
+        
+        public static string AsString(TypeDeclType typeDeclType) {
+            return typeDeclType switch {
+                TypeDeclType.Struct => "struct",
+                TypeDeclType.Class  => "class",
+                _ => ""
+            };
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.MorpehHelpers.Semantic {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.CodeAnalysis;
@@ -8,27 +9,44 @@
 
     public static class MorpehComponentHelpersSemantic {
         public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol, string componentDecl) {
-            if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
-                return new StashSpecialization("Scellecs.Morpeh.Stash<?>", "Scellecs.Morpeh.GetStash<?>", "?");
-            }
-            
             return GetStashSpecialization(GetStashVariation(typeSymbol), componentDecl);
         }
         
         public static StashSpecialization GetStashSpecialization(StashVariation variation, string componentDecl) {
+            return new StashSpecialization(
+                type: GetStashSpecializationType(variation, componentDecl),
+                getStashMethod: GetStashSpecializationGetStashMethod(variation, componentDecl),
+                constraintInterface: GetStashSpecializationConstraintInterface(variation)
+            );
+        }
+        
+        public static string GetStashSpecializationType(StashVariation variation, string componentDecl) {
+            switch (variation) {
+                case StashVariation.Tag:
+                    return "Scellecs.Morpeh.TagStash";
+                case StashVariation.Disposable:
+                    return StringBuilderPool.Get().Append("Scellecs.Morpeh.DisposableStash<").Append(componentDecl).Append(">").ToStringAndReturn();
+                default:
+                    return StringBuilderPool.Get().Append("Scellecs.Morpeh.Stash<").Append(componentDecl).Append(">").ToStringAndReturn();
+            }
+        }
+        
+        public static string GetStashSpecializationGetStashMethod(StashVariation variation, string componentDecl) {
+            switch (variation) {
+                case StashVariation.Tag:
+                    return StringBuilderPool.Get().Append("GetTagStash<").Append(componentDecl).Append(">").ToStringAndReturn();
+                case StashVariation.Disposable:
+                    return StringBuilderPool.Get().Append("GetDisposableStash<").Append(componentDecl).Append(">").ToStringAndReturn();
+                default:
+                    return StringBuilderPool.Get().Append("GetStash<").Append(componentDecl).Append(">").ToStringAndReturn();
+            }
+        }
+        
+        public static string GetStashSpecializationConstraintInterface(StashVariation variation) {
             return variation switch {
-                StashVariation.Tag => new StashSpecialization(
-                    type: "Scellecs.Morpeh.TagStash",
-                    getStashMethod: StringBuilderPool.Get().Append("GetTagStash<").Append(componentDecl).Append(">").ToStringAndReturn(),
-                    constraintInterface: "Scellecs.Morpeh.ITagComponent"),
-                StashVariation.Disposable => new StashSpecialization(
-                    type: StringBuilderPool.Get().Append("Scellecs.Morpeh.DisposableStash<").Append(componentDecl).Append(">").ToStringAndReturn(),
-                    getStashMethod: StringBuilderPool.Get().Append("GetDisposableStash<").Append(componentDecl).Append(">").ToStringAndReturn(),
-                    constraintInterface: "Scellecs.Morpeh.IDisposableComponent"),
-                _ => new StashSpecialization(
-                    type: StringBuilderPool.Get().Append("Scellecs.Morpeh.Stash<").Append(componentDecl).Append(">").ToStringAndReturn(),
-                    getStashMethod: StringBuilderPool.Get().Append("GetStash<").Append(componentDecl).Append(">").ToStringAndReturn(),
-                    constraintInterface: "Scellecs.Morpeh.IDataComponent")
+                StashVariation.Tag => "Scellecs.Morpeh.ITagComponent",
+                StashVariation.Disposable => "Scellecs.Morpeh.IDisposableComponent",
+                _ => "Scellecs.Morpeh.IDataComponent"
             };
         }
         
@@ -66,7 +84,7 @@
             for (int i = 0, length = attributes.Length; i < length; i++) {
                 var attribute = attributes[i];
                     
-                if (attribute.AttributeClass?.Name != MorpehAttributes.REQUIRE_NAME) {
+                if (attribute.AttributeClass?.Name != MorpehAttributes.INCLUDE_STASH_NAME) {
                     continue;
                 }
 
@@ -83,36 +101,33 @@
                     continue;
                 }
 
-                string fieldName;
+                var symbolChars = componentTypeSymbol.Name.AsSpan();
+                
+                var sb = StringBuilderPool.Get()
+                    .Append('_')
+                    .Append(char.ToLower(symbolChars[0]));
+
+                for (int j = 1, jlength = symbolChars.Length; j < jlength; j++) {
+                    sb.Append(symbolChars[j]);
+                }
 
                 if (componentTypeSymbol is { IsGenericType: true }) {
-                    fieldName = StringBuilderPool.Get()
-                        .Append('_')
-                        .Append(componentTypeSymbol.Name.ToCamelCase())
-                        .Append('_')
-                        .Append(string.Join("_", componentTypeSymbol.TypeArguments.Select(t => t.Name)))
-                        .ToStringAndReturn();
-                } else {
-                    fieldName = StringBuilderPool.Get()
-                        .Append('_')
-                        .Append(componentTypeSymbol.Name.ToCamelCase())
-                        .ToStringAndReturn();
+                    var typeArguments = componentTypeSymbol.TypeArguments;
+                    
+                    for (int j = 0, jlength = typeArguments.Length; j < jlength; j++) {
+                        sb.Append('_');
+                        sb.Append(typeArguments[j].Name);
+                    }
                 }
 
                 var metadataClassName = componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 
                 stashes.Add(new StashRequirement {
-                    fieldName         = fieldName,
-                    fieldTypeName     = GetStashSpecialization(componentTypeSymbol, componentDecl: metadataClassName).type,
+                    fieldName         = sb.ToStringAndReturn(),
+                    fieldTypeName     = GetStashSpecializationType(GetStashVariation(componentTypeSymbol), componentDecl: metadataClassName),
                     metadataClassName = metadataClassName,
                 });
             }
-        }
-        
-        public struct StashRequirement {
-            public string  fieldName;
-            public string  fieldTypeName;
-            public string? metadataClassName;
         }
     }
 }
