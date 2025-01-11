@@ -40,7 +40,7 @@
                     predicate: static (node, _) => node is ClassDeclarationSyntax,
                     transform: static (ctx, ct) => ExtractGenericResolver(ctx, ct))
                 .Where(static resolver => resolver is not null)
-                .Select(static (resolver, _) => (GenericResolver)resolver!)
+                .Select(static (resolver, _) => resolver!.Value)
                 .Collect()
                 .Select(static (resolvers, _) => resolvers.ToImmutableDictionary(static resolver => resolver.BaseTypeName, static resolver => resolver));
             
