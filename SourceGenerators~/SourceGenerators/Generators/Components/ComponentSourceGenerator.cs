@@ -15,6 +15,8 @@
     [Generator]
     public class ComponentSourceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
+            // TODO: Implement monoprovider generator as a separate stage in the pipeline.
+            // TODO: This will allow to reuse the same information, as providers are always a subset of components.
             var components = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.COMPONENT_FULL_NAME,
                 predicate: static (s, _) => s is StructDeclarationSyntax,
