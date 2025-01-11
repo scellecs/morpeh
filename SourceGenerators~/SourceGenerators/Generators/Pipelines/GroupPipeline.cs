@@ -13,12 +13,12 @@
             // TODO: DTOs
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
-                (s, _) => s is TypeDeclarationSyntax,
+                (s, _) => s is TypeDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.Attributes));
         
             var runners = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
-                (s, _) => s is ClassDeclarationSyntax,
+                (s, _) => s is ClassDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol));
 
             context.RegisterSourceOutput(groups, static (spc, pair) => SystemsGroupSourceGenerator.Generate(spc, pair));
