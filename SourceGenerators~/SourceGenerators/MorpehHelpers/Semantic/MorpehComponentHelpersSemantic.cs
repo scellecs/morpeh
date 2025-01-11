@@ -16,9 +16,9 @@
         
         public static StashSpecialization GetStashSpecialization(StashVariation variation, string componentDecl) {
             return new StashSpecialization(
-                type: GetStashSpecializationType(variation, componentDecl),
-                getStashMethod: GetStashSpecializationGetStashMethod(variation, componentDecl),
-                constraintInterface: GetStashSpecializationConstraintInterface(variation)
+                Type: GetStashSpecializationType(variation, componentDecl),
+                GetStashMethod: GetStashSpecializationGetStashMethod(variation, componentDecl),
+                ConstraintInterface: GetStashSpecializationConstraintInterface(variation)
             );
         }
         
@@ -127,9 +127,9 @@
                 var metadataClassName = componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 
                 stashes.Add(new StashRequirement {
-                    fieldName         = sb.ToStringAndReturn(),
-                    fieldTypeName     = GetStashSpecializationType(GetStashVariation(componentTypeSymbol), componentDecl: metadataClassName),
-                    metadataClassName = metadataClassName,
+                    FieldName         = sb.ToStringAndReturn(),
+                    FieldTypeName     = GetStashSpecializationType(GetStashVariation(componentTypeSymbol), componentDecl: metadataClassName),
+                    MetadataClassName = metadataClassName,
                 });
             }
             

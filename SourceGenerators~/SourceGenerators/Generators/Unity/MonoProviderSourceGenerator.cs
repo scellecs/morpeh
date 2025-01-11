@@ -92,7 +92,7 @@
                         sb.AppendIndent(indent).Append("private ").Append(providerTypeName).AppendLine(" serializedData;");
                     }
                     
-                    sb.AppendIndent(indent).Append("private ").Append(providerStashSpecialization.type).AppendLine(" stash;");
+                    sb.AppendIndent(indent).Append("private ").Append(providerStashSpecialization.Type).AppendLine(" stash;");
                     
                     if (!isTag) {
                         sb.AppendLine().AppendLine();
@@ -140,7 +140,7 @@
                     }
                     
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).AppendVisibility(monoProviderType).Append(" ").Append(providerStashSpecialization.type).AppendLine(" Stash {");
+                    sb.AppendIndent(indent).AppendVisibility(monoProviderType).Append(" ").Append(providerStashSpecialization.Type).AppendLine(" Stash {");
                     using (indent.Scope()) {
                         sb.AppendIndent(indent).AppendLine("get {");
                         using (indent.Scope()) {

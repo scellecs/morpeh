@@ -6,6 +6,7 @@
     public readonly struct RunnerFieldDefinition {
         public readonly string?                                        typeName;
         public readonly string?                                        fieldName;
+        // TODO: EquatableHashSet
         public readonly HashSet<MorpehLoopTypeSemantic.LoopDefinition> loops;
         
         public RunnerFieldDefinition(string? typeName, string? fieldName, HashSet<MorpehLoopTypeSemantic.LoopDefinition> loops) {

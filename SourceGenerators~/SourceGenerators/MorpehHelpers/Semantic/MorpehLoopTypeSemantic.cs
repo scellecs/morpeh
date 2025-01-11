@@ -36,17 +36,6 @@
             return null;
         }
 
-        public readonly struct LoopDefinition {
-            public readonly string methodName;
-            public readonly int index;
-            
-            public LoopDefinition(string methodName, int index) {
-                this.methodName = methodName;
-                this.index      = index;
-            }
-            
-            public override string ToString()    => $"{this.methodName} ({this.index})";
-            public override int    GetHashCode() => this.index.GetHashCode();
-        }
+        public record struct LoopDefinition(string MethodName, int Index);
     }
 }

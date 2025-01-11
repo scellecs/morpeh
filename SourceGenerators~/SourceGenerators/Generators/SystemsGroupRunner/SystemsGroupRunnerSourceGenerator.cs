@@ -143,7 +143,7 @@
                     sb.AppendIndent(indent).AppendLine("}");
                     
                     foreach (var existingLoop in existingLoops) {
-                        var methodName = existingLoop.methodName;
+                        var methodName = existingLoop.MethodName;
 
                         sb.AppendLine().AppendLine();
                         sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");

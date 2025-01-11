@@ -56,7 +56,7 @@
                     if (system.StashRequirements.Length > 0) {
                         sb.AppendLine().AppendLine();
                         foreach (var stash in system.StashRequirements) {
-                            sb.AppendIndent(indent).Append("private readonly ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
+                            sb.AppendIndent(indent).Append("private readonly ").Append(stash.FieldTypeName).Append(' ').Append(stash.FieldName).AppendLine(";");
                         }
                     }
 
@@ -67,7 +67,7 @@
                             sb.AppendIndent(indent).AppendLine("World = world;");
 
                             foreach (var stash in system.StashRequirements) {
-                                sb.AppendIndent(indent).Append(stash.fieldName).Append(" = ").Append(stash.metadataClassName).AppendLine(".GetStash(world);");
+                                sb.AppendIndent(indent).Append(stash.FieldName).Append(" = ").Append(stash.MetadataClassName).AppendLine(".GetStash(world);");
                             }
                         }
                     }

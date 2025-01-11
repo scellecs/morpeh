@@ -26,11 +26,11 @@
                 return;
             }
             
-            if (!this.byLoopType.ContainsKey(systemsGroupFieldDefinition.loopType.Value.methodName)) {
-                this.byLoopType.Add(systemsGroupFieldDefinition.loopType.Value.methodName, new List<SystemsGroupFieldDefinition>());
+            if (!this.byLoopType.ContainsKey(systemsGroupFieldDefinition.loopType.Value.MethodName)) {
+                this.byLoopType.Add(systemsGroupFieldDefinition.loopType.Value.MethodName, new List<SystemsGroupFieldDefinition>());
             }
             
-            this.byLoopType[systemsGroupFieldDefinition.loopType.Value.methodName].Add(systemsGroupFieldDefinition);
+            this.byLoopType[systemsGroupFieldDefinition.loopType.Value.MethodName].Add(systemsGroupFieldDefinition);
         }
     }
 }

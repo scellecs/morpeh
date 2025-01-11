@@ -43,7 +43,7 @@
                     .Append(component.TypeName)
                     .Append(component.GenericParams)
                     .Append(" : ")
-                    .Append(specialization.constraintInterface)
+                    .Append(specialization.ConstraintInterface)
                     .Append(' ')
                     .Append(component.GenericConstraints)
                     .AppendLine(" {");
@@ -51,9 +51,9 @@
                 using (indent.Scope()) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).Append("public static ")
-                        .Append(specialization.type)
+                        .Append(specialization.Type)
                         .Append(" GetStash(Scellecs.Morpeh.World world) => Scellecs.Morpeh.WorldStashExtensions.")
-                        .Append(specialization.getStashMethod)
+                        .Append(specialization.GetStashMethod)
                         .Append("(world, capacity: ")
                         .Append(component.InitialCapacity)
                         .AppendLine(");");
