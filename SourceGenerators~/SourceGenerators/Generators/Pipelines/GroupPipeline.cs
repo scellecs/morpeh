@@ -9,6 +9,7 @@
     public class GroupPipeline : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             // TODO: Combine with loop information extraction.
+            // TODO: Extract groups first and then extract runners, so that we can use group info in runners.
         
             // TODO: DTOs
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
