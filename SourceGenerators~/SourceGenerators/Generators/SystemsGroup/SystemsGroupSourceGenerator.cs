@@ -17,16 +17,9 @@
                 (s, _) => s is TypeDeclarationSyntax,
                 (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.Attributes));
             
-            var disposableInterface = context.CompilationProvider
-                .Select(static (compilation, _) => compilation.GetTypeByMetadataName(KnownTypes.DISPOSABLE_FULL_NAME));
-            
-            context.RegisterSourceOutput(classes.Combine(disposableInterface), static (spc, pair) => {
-                var ((typeDeclaration, typeSymbol, systemsGroupAttributes), disposableSymbol) = pair;
+            context.RegisterSourceOutput(classes, static (spc, pair) => {
+                var (typeDeclaration, typeSymbol, systemsGroupAttributes) = pair;
                 if (typeDeclaration is null || typeSymbol is null) {
-                    return;
-                }
-                
-                if (disposableSymbol is null) {
                     return;
                 }
                 
@@ -51,7 +44,7 @@
                     fieldDefinition.loopType         = MorpehLoopTypeSemantic.FindLoopType(fieldAttributes);
                     fieldDefinition.isSystem         = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.SYSTEM_NAME);
                     fieldDefinition.isInitializer    = typeAttributes.Any(static x => x.AttributeClass?.Name == MorpehAttributes.INITIALIZER_NAME);
-                    fieldDefinition.isDisposable     = fieldDefinition is { isSystem: false, isInitializer: false } && fieldSymbol.Type.AllInterfaces.Contains(disposableSymbol);
+                    fieldDefinition.isDisposable = fieldDefinition is { isSystem: false, isInitializer: false } && fieldSymbol.Type.AllInterfaces.Any(x => x.Name == KnownTypes.DISPOSABLE_NAME && x.ToDisplayString() == KnownTypes.DISPOSABLE_FULL_NAME);
                     
 #if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
                     fieldDefinition.isInjectable     = IsInjectableSlowPath(fieldSymbol.Type);
