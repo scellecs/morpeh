@@ -2,9 +2,11 @@
     using System;
     using System.Threading;
     using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Utils.Collections;
     using Utils.NonSemantic;
     using Utils.Semantic;
     using Utils.Pools;
@@ -27,39 +29,39 @@
                 
                 sb.AppendMorpehDebugDefines();
 
-                if (initializer.typeNamespace != null) {
-                    sb.AppendIndent(indent).Append("namespace ").Append(initializer.typeNamespace).AppendLine(" {");
+                if (initializer.TypeNamespace != null) {
+                    sb.AppendIndent(indent).Append("namespace ").Append(initializer.TypeNamespace).AppendLine(" {");
                     indent.Right();
                 }
 
                 sb.AppendIl2CppAttributes(indent);
                 sb.AppendIndent(indent)
-                    .Append(Types.GetVisibilityModifierString(initializer.visibility))
+                    .Append(Types.GetVisibilityModifierString(initializer.Visibility))
                     .Append(" partial ")
-                    .Append(Types.AsString(initializer.typeDeclType))
+                    .Append(Types.AsString(initializer.TypeDeclType))
                     .Append(' ')
-                    .Append(initializer.typeName)
-                    .Append(initializer.genericParams)
+                    .Append(initializer.TypeName)
+                    .Append(initializer.GenericParams)
                     .Append(" : Scellecs.Morpeh.IInitializer ")
-                    .Append(initializer.genericConstraints)
+                    .Append(initializer.GenericConstraints)
                     .AppendLine(" {");
                 
                 
                 using (indent.Scope()) {
-                    if (initializer.stashRequirements.Length > 0) {
+                    if (initializer.StashRequirements.Length > 0) {
                         sb.AppendLine().AppendLine();
-                        foreach (var stash in initializer.stashRequirements) {
+                        foreach (var stash in initializer.StashRequirements) {
                             sb.AppendIndent(indent).Append("private readonly ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
                         }
                     }
                     
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).Append("public ").Append(initializer.typeName).AppendLine("(Scellecs.Morpeh.World world) {");
+                    sb.AppendIndent(indent).Append("public ").Append(initializer.TypeName).AppendLine("(Scellecs.Morpeh.World world) {");
                     using (indent.Scope()) {
-                        using (MorpehSyntax.ScopedProfile(sb, initializer.typeName, "Constructor", indent)) {
+                        using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Constructor", indent)) {
                             sb.AppendIndent(indent).AppendLine("World = world;");
                         
-                            foreach (var stash in initializer.stashRequirements) {
+                            foreach (var stash in initializer.StashRequirements) {
                                 sb.AppendIndent(indent).Append(stash.fieldName).Append(" = ").Append(stash.metadataClassName).AppendLine(".GetStash(world);");
                             }
                         }
@@ -69,7 +71,7 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                     using (indent.Scope()) {
-                        using (MorpehSyntax.ScopedProfile(sb, initializer.typeName, "Awake", indent)) {
+                        using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Awake", indent)) {
                             sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                             sb.AppendIndent(indent).AppendLine("try {");
                             using (indent.Scope()) {
@@ -78,7 +80,7 @@
 
                             sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                             using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(initializer.typeName).AppendLine(" initializer (OnAwake)\");");
+                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(initializer.TypeName).AppendLine(" initializer (OnAwake)\");");
                                 sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                             }
 
@@ -95,7 +97,7 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                     using (indent.Scope()) {
-                        using (MorpehSyntax.ScopedProfile(sb, initializer.typeName, "Dispose", indent)) {
+                        using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Dispose", indent)) {
                             sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                             sb.AppendIndent(indent).AppendLine("try {");
                             using (indent.Scope()) {
@@ -104,7 +106,7 @@
 
                             sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                             using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(initializer.typeName).AppendLine(" initializer (Dispose)\");");
+                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(initializer.TypeName).AppendLine(" initializer (Dispose)\");");
                                 sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                             }
 
@@ -120,13 +122,13 @@
                 }
                 
                 sb.AppendIndent(indent).AppendLine("}");
-                if (initializer.typeNamespace != null) {
+                if (initializer.TypeNamespace != null) {
                     indent.Left();
                     sb.AppendIndent(indent).AppendLine("}");
                 }
                 
                 // TODO: Think of a better way to handle collisions between names.
-                spc.AddSource($"{initializer.typeName}.initializer_{Guid.NewGuid():N}.g.cs", sb.ToStringAndReturn());
+                spc.AddSource($"{initializer.TypeName}.initializer_{Guid.NewGuid():N}.g.cs", sb.ToStringAndReturn());
                 
                 IndentSourcePool.Return(indent);
             });
@@ -156,13 +158,22 @@
             }
             
             return new InitializerToGenerate(
-                typeName: syntaxNode.Identifier.ToString(),
-                typeNamespace: typeNamespace,
-                genericParams: genericParams,
-                genericConstraints: genericConstraints,
-                stashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
-                typeDeclType: Types.TypeDeclTypeFromSyntaxNode(syntaxNode),
-                visibility: Types.GetVisibilityModifier(syntaxNode));
+                TypeName: syntaxNode.Identifier.ToString(),
+                TypeNamespace: typeNamespace,
+                GenericParams: genericParams,
+                GenericConstraints: genericConstraints,
+                StashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
+                TypeDeclType: Types.TypeDeclTypeFromSyntaxNode(syntaxNode),
+                Visibility: Types.GetVisibilityModifier(syntaxNode));
         }
+
+        private record struct InitializerToGenerate(
+            string TypeName,
+            string? TypeNamespace,
+            string GenericParams,
+            string GenericConstraints,
+            EquatableArray<StashRequirement> StashRequirements,
+            TypeDeclType TypeDeclType,
+            SyntaxKind Visibility);
     }
 }

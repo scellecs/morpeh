@@ -3,9 +3,11 @@
     using System.Linq;
     using System.Threading;
     using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Utils.Collections;
     using Utils.NonSemantic;
     using Utils.Semantic;
     using Utils.Pools;
@@ -28,21 +30,21 @@
 
                 sb.AppendMorpehDebugDefines();
                 
-                if (system.typeNamespace != null) {
-                    sb.AppendIndent(indent).Append("namespace ").Append(system.typeNamespace).AppendLine(" {");
+                if (system.TypeNamespace != null) {
+                    sb.AppendIndent(indent).Append("namespace ").Append(system.TypeNamespace).AppendLine(" {");
                     indent.Right();
                 }
 
                 sb.AppendIl2CppAttributes(indent);
                 sb.AppendIndent(indent)
-                    .Append(Types.GetVisibilityModifierString(system.visibility))
+                    .Append(Types.GetVisibilityModifierString(system.Visibility))
                     .Append(" partial ")
-                    .Append(Types.AsString(system.typeDeclType))
+                    .Append(Types.AsString(system.TypeDeclType))
                     .Append(' ')
-                    .Append(system.typeName)
-                    .Append(system.genericParams)
+                    .Append(system.TypeName)
+                    .Append(system.GenericParams)
                     .Append(" : Scellecs.Morpeh.IInitializer ")
-                    .Append(system.genericConstraints)
+                    .Append(system.GenericConstraints)
                     .AppendLine(" {");
                 
                 
@@ -51,20 +53,20 @@
                     sb.AppendIndent(indent).AppendLine("private bool _systemHasFailed;");
                     sb.AppendEndIfDefine();
 
-                    if (system.stashRequirements.Length > 0) {
+                    if (system.StashRequirements.Length > 0) {
                         sb.AppendLine().AppendLine();
-                        foreach (var stash in system.stashRequirements) {
+                        foreach (var stash in system.StashRequirements) {
                             sb.AppendIndent(indent).Append("private readonly ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
                         }
                     }
 
                     sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).Append("public ").Append(system.typeName).AppendLine("(Scellecs.Morpeh.World world) {");
+                    sb.AppendIndent(indent).Append("public ").Append(system.TypeName).AppendLine("(Scellecs.Morpeh.World world) {");
                     using (indent.Scope()) {
-                        using (MorpehSyntax.ScopedProfile(sb, system.typeName, "Constructor", indent)) {
+                        using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Constructor", indent)) {
                             sb.AppendIndent(indent).AppendLine("World = world;");
 
-                            foreach (var stash in system.stashRequirements) {
+                            foreach (var stash in system.StashRequirements) {
                                 sb.AppendIndent(indent).Append(stash.fieldName).Append(" = ").Append(stash.metadataClassName).AppendLine(".GetStash(world);");
                             }
                         }
@@ -74,7 +76,7 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                     using (indent.Scope()) {
-                        using (MorpehSyntax.ScopedProfile(sb, system.typeName, "Awake", indent)) {
+                        using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Awake", indent)) {
                             sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                             sb.AppendIndent(indent).AppendLine("try {");
                             using (indent.Scope()) {
@@ -83,7 +85,7 @@
 
                             sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                             using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.typeName).AppendLine(" system (OnAwake), the system will be disabled\");");
+                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (OnAwake), the system will be disabled\");");
                                 sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                                 sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                             }
@@ -109,7 +111,7 @@
                         sb.AppendIndent(indent).AppendLine("}");
                         sb.AppendEndIfDefine();
                         
-                        if (!system.alwaysEnabled) {
+                        if (!system.AlwaysEnabled) {
                             sb.AppendIndent(indent).AppendLine("if (!IsEnabled()) {");
                             using (indent.Scope()) {
                                 sb.AppendIndent(indent).AppendLine("return;");
@@ -117,7 +119,7 @@
                             sb.AppendIndent(indent).AppendLine("}");
                         }
 
-                        using (MorpehSyntax.ScopedProfile(sb, system.typeName, "OnUpdate", indent)) {
+                        using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "OnUpdate", indent)) {
                             sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                             sb.AppendIndent(indent).AppendLine("try {");
                             using (indent.Scope()) {
@@ -126,7 +128,7 @@
 
                             sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                             using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.typeName).AppendLine(" system (OnUpdate), the system will be disabled\");");
+                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (OnUpdate), the system will be disabled\");");
                                 sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                                 sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                             }
@@ -136,7 +138,7 @@
                             sb.AppendIndent(indent).AppendLine("OnUpdate(deltaTime);");
                             sb.AppendEndIfDefine();
 
-                            if (!system.skipCommit) {
+                            if (!system.SkipCommit) {
                                 sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(World);");
                             }
                         }
@@ -146,7 +148,7 @@
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                     using (indent.Scope()) {
-                        using (MorpehSyntax.ScopedProfile(sb, system.typeName, "Dispose", indent)) {
+                        using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Dispose", indent)) {
                             sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                             sb.AppendIndent(indent).AppendLine("try {");
                             using (indent.Scope()) {
@@ -155,7 +157,7 @@
 
                             sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                             using (indent.Scope()) {
-                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.typeName).AppendLine(" system (Dispose), the system will be disabled\");");
+                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (Dispose), the system will be disabled\");");
                                 sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                                 sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                             }
@@ -173,12 +175,12 @@
                 
                 sb.AppendIndent(indent).AppendLine("}");
                 
-                if (system.typeNamespace != null) {
+                if (system.TypeNamespace != null) {
                     indent.Left();
                     sb.AppendIndent(indent).AppendLine("}");
                 }
                 
-                spc.AddSource($"{system.typeName}.system_{Guid.NewGuid():N}.g.cs", sb.ToStringAndReturn());
+                spc.AddSource($"{system.TypeName}.system_{Guid.NewGuid():N}.g.cs", sb.ToStringAndReturn());
                 
                 IndentSourcePool.Return(indent);
             });
@@ -220,15 +222,26 @@
             }
 
             return new SystemToGenerate(
-                typeName: syntaxNode.Identifier.ToString(),
-                typeNamespace: typeNamespace,
-                genericParams: genericParams,
-                genericConstraints: genericConstraints,
-                stashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
-                typeDeclType: Types.TypeDeclTypeFromSyntaxNode(syntaxNode),
-                visibility: Types.GetVisibilityModifier(syntaxNode),
-                skipCommit: skipCommit,
-                alwaysEnabled: alwaysEnabled);
+                TypeName: syntaxNode.Identifier.ToString(),
+                TypeNamespace: typeNamespace,
+                GenericParams: genericParams,
+                GenericConstraints: genericConstraints,
+                StashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
+                TypeDeclType: Types.TypeDeclTypeFromSyntaxNode(syntaxNode),
+                Visibility: Types.GetVisibilityModifier(syntaxNode),
+                SkipCommit: skipCommit,
+                AlwaysEnabled: alwaysEnabled);
         }
+        
+        private record struct SystemToGenerate(
+            string TypeName,
+            string? TypeNamespace,
+            string GenericParams,
+            string GenericConstraints,
+            EquatableArray<StashRequirement> StashRequirements,
+            TypeDeclType TypeDeclType,
+            SyntaxKind Visibility,
+            bool SkipCommit,
+            bool AlwaysEnabled);
     }
 }

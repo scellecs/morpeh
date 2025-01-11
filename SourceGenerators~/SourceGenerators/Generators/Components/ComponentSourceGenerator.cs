@@ -4,6 +4,7 @@
     using System.Runtime.CompilerServices;
     using System.Threading;
     using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
@@ -24,27 +25,27 @@
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS);
 
             context.RegisterSourceOutput(components, static (spc, component) => {
-                var fullTypeName = StringBuilderPool.Get().Append(component.typeName).Append(component.genericParams).ToStringAndReturn();
-                var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(component.stashVariation, fullTypeName);
+                var fullTypeName = StringBuilderPool.Get().Append(component.TypeName).Append(component.GenericParams).ToStringAndReturn();
+                var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(component.StashVariation, fullTypeName);
             
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
                 
-                if (component.typeNamespace != null) {
-                    sb.AppendIndent(indent).Append("namespace ").Append(component.typeNamespace).AppendLine(" {");
+                if (component.TypeNamespace != null) {
+                    sb.AppendIndent(indent).Append("namespace ").Append(component.TypeNamespace).AppendLine(" {");
                     indent.Right();
                 }
                 
                 sb.AppendIl2CppAttributes(indent);
                 sb.AppendIndent(indent)
-                    .Append(Types.GetVisibilityModifierString(component.visibility))
+                    .Append(Types.GetVisibilityModifierString(component.Visibility))
                     .Append(" partial struct ")
-                    .Append(component.typeName)
-                    .Append(component.genericParams)
+                    .Append(component.TypeName)
+                    .Append(component.GenericParams)
                     .Append(" : ")
                     .Append(specialization.constraintInterface)
                     .Append(' ')
-                    .Append(component.genericConstraints)
+                    .Append(component.GenericConstraints)
                     .AppendLine(" {");
                 
                 using (indent.Scope()) {
@@ -54,18 +55,18 @@
                         .Append(" GetStash(Scellecs.Morpeh.World world) => Scellecs.Morpeh.WorldStashExtensions.")
                         .Append(specialization.getStashMethod)
                         .Append("(world, capacity: ")
-                        .Append(component.initialCapacity)
+                        .Append(component.InitialCapacity)
                         .AppendLine(");");
                 }
                 sb.AppendIndent(indent).AppendLine("}");
 
-                if (component.typeNamespace != null) {
+                if (component.TypeNamespace != null) {
                     indent.Left();
                     sb.AppendIndent(indent).AppendLine("}");
                 }
                 
                 // TODO: Think of a better way to handle collisions between names.
-                spc.AddSource($"{component.typeName}.component_{Guid.NewGuid():N}.g.cs", sb.ToStringAndReturn());
+                spc.AddSource($"{component.TypeName}.component_{Guid.NewGuid():N}.g.cs", sb.ToStringAndReturn());
                 
                 IndentSourcePool.Return(indent);
             });
@@ -97,13 +98,13 @@
             }
             
             return new ComponentToGenerate(
-                typeName: syntaxNode.Identifier.ToString(),
-                typeNamespace: typeNamespace,
-                genericParams: genericParams,
-                genericConstraints: genericConstraints,
-                initialCapacity: GetInitialCapacity(ctx.Attributes.First()),
-                stashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol),
-                visibility: Types.GetVisibilityModifier(syntaxNode));
+                TypeName: syntaxNode.Identifier.ToString(),
+                TypeNamespace: typeNamespace,
+                GenericParams: genericParams,
+                GenericConstraints: genericConstraints,
+                InitialCapacity: GetInitialCapacity(ctx.Attributes.First()),
+                StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol),
+                Visibility: Types.GetVisibilityModifier(syntaxNode));
         }
         
         private static int GetInitialCapacity(AttributeData attribute) {
@@ -116,5 +117,14 @@
             
             return initialCapacity;
         }
+        
+        private record struct ComponentToGenerate(
+            string TypeName,
+            string? TypeNamespace,
+            string GenericParams,
+            string GenericConstraints,
+            int InitialCapacity,
+            StashVariation StashVariation,
+            SyntaxKind Visibility);
     }
 }
