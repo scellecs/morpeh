@@ -16,16 +16,8 @@
         
         public int Length => this.array.Length;
         
-        public T this[int index] {
-            get {
-                if (this.array == null) {
-                    throw new IndexOutOfRangeException();
-                }
-                
-                return this.array[index];
-            }
-        }
-        
+        public T this[int index] => this.array[index];
+
         public ReadOnlySpan<T>              AsSpan()        => this.array.AsSpan();
         public ImmutableArray<T>.Enumerator GetEnumerator() => this.array.GetEnumerator();
         
