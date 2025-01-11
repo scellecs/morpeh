@@ -10,14 +10,12 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private readonly InspectorListView listView;
         private readonly ViewContainer viewContainer;
 
-        private readonly ComponentViewHandle handle;
         private readonly IInspectorViewModel model;
 
         private long modelVersion;
 
         internal InspectorView(IInspectorViewModel model) {
             this.model = model;
-            this.handle = ComponentViewHandle.Create();
 
             this.expandAllToggle = new ExpandFoldoutToggle("Expand All");
             this.expandAllToggle.ValueChanged += (evt) => this.model.SetExpandedAll(evt.newValue);
@@ -27,7 +25,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             this.toolbar.Add(this.expandAllToggle);
             this.toolbar.Add(this.addComponentMenu);
 
-            this.listView = new InspectorListView(this.model, this.handle);
+            this.listView = new InspectorListView(this.model);
 
             this.viewContainer = new ViewContainer();
             this.viewContainer.SetToolbar(this.toolbar);
@@ -54,7 +52,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         }
 
         public void Dispose() {
-            this.handle?.Dispose();
+            this.listView.Dispose();
         }
     }
 }

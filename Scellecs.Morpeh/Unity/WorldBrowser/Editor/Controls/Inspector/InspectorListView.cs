@@ -5,17 +5,17 @@ using System.Collections.Generic;
 using UnityEngine.UIElements;
 
 namespace Scellecs.Morpeh.WorldBrowser.Editor {
-    internal sealed class InspectorListView : ListView {
+    internal sealed class InspectorListView : ListView, IDisposable {
         private readonly IInspectorViewModel model;
-        private readonly ComponentViewHandle handle;
 
         private readonly List<InspectorListViewItem> visibleItems;
+        private readonly List<ComponentViewHandle> handles;
         private readonly Stack<InspectorListViewItem> pool;
 
-        internal InspectorListView(IInspectorViewModel model, ComponentViewHandle handle) {
+        internal InspectorListView(IInspectorViewModel model) {
             this.model = model;
-            this.handle = handle;
             this.visibleItems = new List<InspectorListViewItem>();
+            this.handles = new List<ComponentViewHandle>();
             this.pool = new Stack<InspectorListViewItem>();
 
             this.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
@@ -57,11 +57,23 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         }
 
         private InspectorListViewItem Rent() {
-            return this.pool.Count > 0 ? this.pool.Pop() : new InspectorListViewItem(this.model, this.handle);
+            if (pool.Count > 0) {
+                return this.pool.Pop();
+            }
+
+            var handle = ComponentViewHandle.Create();
+            this.handles.Add(handle);
+            return new InspectorListViewItem(this.model, handle);
         }
 
         private void Return(InspectorListViewItem item) {
             this.pool.Push(item);
+        }
+
+        public void Dispose() {
+            foreach (var handle in this.handles) {
+                handle.Dispose();
+            }
         }
     }
 }
