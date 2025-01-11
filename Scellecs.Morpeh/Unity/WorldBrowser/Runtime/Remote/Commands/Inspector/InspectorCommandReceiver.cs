@@ -53,7 +53,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
 
         private void HandleSetComponent(Command command) { 
             var commandData = command.Deserialize<InspectorSetComponentCommand>();
-            this.processor.SetComponentData(commandData.typeId, commandData.component);
+            this.processor.SetComponentData(commandData.componentData);
         }
 
         private void HandleSetAddComponentSearchString(Command command) {

@@ -5,8 +5,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands
 {
     [Serializable]
     internal struct InspectorSetComponentCommand : ICommand {
-        public object component;
-        public int typeId;
+        public ComponentDataBoxed componentData;
 
         public byte CommandType() => CommandTypeId.Inspector;
         public byte CommandId() => InspectorCommand.SetComponent;

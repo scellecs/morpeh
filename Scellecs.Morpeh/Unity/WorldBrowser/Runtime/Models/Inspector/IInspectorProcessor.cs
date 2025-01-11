@@ -4,7 +4,7 @@ namespace Scellecs.Morpeh.WorldBrowser {
         public InspectorModel GetModel();
         public void AddComponentData(int id);
         public void RemoveComponentData(int typeId);
-        public void SetComponentData(int typeId, object data);
+        public void SetComponentData(ComponentDataBoxed componentData);
         public void SetAddComponentSearchString(string value);
     }
 }

@@ -110,7 +110,6 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             var component = this.componentData[typeId];
             var internalId = this.storage.typeIdToInternalId[typeId];
             var name = this.storage.componentNames[internalId];
-
             return new ComponentData(){
                 typeId = component.typeId,
                 name = name,
@@ -141,7 +140,10 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         }
 
         private void SetComponent(int typeId, object value) {
-            this.processor.SetComponentData(typeId, value);
+            this.processor.SetComponentData(new ComponentDataBoxed() {
+                data = (IComponent)value,
+                typeId = typeId,
+            });
         }
     }
 }

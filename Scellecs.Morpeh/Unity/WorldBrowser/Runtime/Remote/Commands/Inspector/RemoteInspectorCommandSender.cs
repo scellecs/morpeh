@@ -80,8 +80,8 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
             this.removeComponentCommand = new InspectorRemoveComponentCommand() { typeId = typeId };
         }
 
-        public void SetComponentData(int typeId, object data) {
-            this.setComponentCommand = new InspectorSetComponentCommand() { typeId = typeId, component = data };
+        public void SetComponentData(ComponentDataBoxed componentData) {
+            this.setComponentCommand = new InspectorSetComponentCommand() { componentData = componentData };
         }
 
         public void SetAddComponentSearchString(string value) {
