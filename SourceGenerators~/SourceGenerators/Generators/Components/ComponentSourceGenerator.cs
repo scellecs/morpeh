@@ -26,7 +26,6 @@
 
             context.RegisterSourceOutput(components, static (spc, component) => {
                 var fullTypeName = StringBuilderPool.Get().Append(component.TypeName).Append(component.GenericParams).ToStringAndReturn();
-                var specialization = MorpehComponentHelpersSemantic.GetStashSpecialization(component.StashVariation, fullTypeName);
             
                 var sb     = StringBuilderPool.Get();
                 var indent = IndentSourcePool.Get();
@@ -43,7 +42,7 @@
                     .Append(component.TypeName)
                     .Append(component.GenericParams)
                     .Append(" : ")
-                    .Append(specialization.ConstraintInterface)
+                    .Append(MorpehComponentHelpersSemantic.GetStashSpecializationConstraintInterface(component.StashVariation))
                     .Append(' ')
                     .Append(component.GenericConstraints)
                     .AppendLine(" {");
@@ -51,9 +50,9 @@
                 using (indent.Scope()) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).Append("public static ")
-                        .Append(specialization.Type)
+                        .Append(MorpehComponentHelpersSemantic.GetStashSpecializationType(component.StashVariation, fullTypeName))
                         .Append(" GetStash(Scellecs.Morpeh.World world) => Scellecs.Morpeh.WorldStashExtensions.")
-                        .Append(specialization.GetStashMethod)
+                        .Append(MorpehComponentHelpersSemantic.GetStashSpecializationGetStashMethod(component.StashVariation, fullTypeName))
                         .Append("(world, capacity: ")
                         .Append(component.InitialCapacity)
                         .AppendLine(");");
