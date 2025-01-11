@@ -10,6 +10,7 @@
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             // TODO: Combine with loop information extraction.
         
+            // TODO: DTOs
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                 (s, _) => s is TypeDeclarationSyntax,

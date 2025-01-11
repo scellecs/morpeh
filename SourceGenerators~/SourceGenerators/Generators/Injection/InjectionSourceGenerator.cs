@@ -16,6 +16,7 @@
     using Microsoft.CodeAnalysis.CSharp;
 #endif
 
+    // TODO: Separate pipeline for both modes
     [Generator]
     public class InjectionSourceGenerator : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
