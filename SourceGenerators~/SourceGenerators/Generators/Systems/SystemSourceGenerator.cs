@@ -50,12 +50,14 @@
                     sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                     sb.AppendIndent(indent).AppendLine("private bool _systemHasFailed;");
                     sb.AppendEndIfDefine();
-                    
-                    sb.AppendLine().AppendLine();
-                    foreach (var stash in system.stashRequirements) {
-                        sb.AppendIndent(indent).Append("private readonly ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
+
+                    if (system.stashRequirements.Length > 0) {
+                        sb.AppendLine().AppendLine();
+                        foreach (var stash in system.stashRequirements) {
+                            sb.AppendIndent(indent).Append("private readonly ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
+                        }
                     }
-                    
+
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).Append("public ").Append(system.typeName).AppendLine("(Scellecs.Morpeh.World world) {");
                     using (indent.Scope()) {

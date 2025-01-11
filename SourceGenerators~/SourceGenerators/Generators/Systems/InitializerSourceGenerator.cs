@@ -46,9 +46,11 @@
                 
                 
                 using (indent.Scope()) {
-                    sb.AppendLine().AppendLine();
-                    foreach (var stash in initializer.stashRequirements) {
-                        sb.AppendIndent(indent).Append("private readonly ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
+                    if (initializer.stashRequirements.Length > 0) {
+                        sb.AppendLine().AppendLine();
+                        foreach (var stash in initializer.stashRequirements) {
+                            sb.AppendIndent(indent).Append("private readonly ").Append(stash.fieldTypeName).Append(' ').Append(stash.fieldName).AppendLine(";");
+                        }
                     }
                     
                     sb.AppendLine().AppendLine();

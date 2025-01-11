@@ -3,7 +3,7 @@
     using System.Collections;
     using System.Collections.Generic;
 
-    public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T> where T : IEquatable<T> {
+    public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>> where T : IEquatable<T> {
         private readonly T[]? array;
         
         public EquatableArray(T[] array) {
@@ -59,11 +59,23 @@
                 return hash;
             }
         }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => ((IEnumerable<T>)(this.array ?? Array.Empty<T>())).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)(this.array ?? Array.Empty<T>())).GetEnumerator();
         
         public static bool operator ==(EquatableArray<T> left, EquatableArray<T> right) => left.Equals(right);
         public static bool operator !=(EquatableArray<T> left, EquatableArray<T> right) => !left.Equals(right);
+        
+        public Enumerator GetEnumerator() => new(this.array ?? Array.Empty<T>());
+        
+        public struct Enumerator {
+            private readonly T[] array;
+            private          int index;
+            
+            public Enumerator(T[] array) {
+                this.array = array;
+                this.index = -1;
+            }
+            
+            public bool MoveNext() => ++this.index < this.array.Length;
+            public T Current => this.array[this.index];
+        }
     }
 }
