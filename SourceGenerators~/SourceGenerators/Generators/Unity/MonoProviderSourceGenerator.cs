@@ -17,8 +17,10 @@
                 MorpehAttributes.MONO_PROVIDER_FULL_NAME,
                 predicate: static (s, _) => s is ClassDeclarationSyntax cds && cds.Parent is not TypeDeclarationSyntax,
                 transform: static (ctx, ct) => ExtractTypesToGenerate(ctx, ct))
+                .WithTrackingName(TrackingNames.FIRST_PASS)
                 .Where(candidate => candidate is not null)
-                .Select(static (candidate, _) => candidate!.Value);
+                .Select(static (candidate, _) => candidate!.Value)
+                .WithTrackingName(TrackingNames.REMOVE_NULL_PASS);
 
             context.RegisterSourceOutput(classes, static (spc, provider) => {
                 var specializationType = MorpehComponentHelpersSemantic.GetStashSpecializationType(provider.StashVariation, provider.ProviderTypeFullName);
