@@ -63,7 +63,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
                 return;
             }
 
-            this.unityObjectAdapter.Cleanup();
+            this.unityObjectAdapter.Refresh();
             var fetchResult = response.Deserialize<InspectorFetchResponse>();
             this.model.FromSerializable(ref fetchResult.inspector);
         }
