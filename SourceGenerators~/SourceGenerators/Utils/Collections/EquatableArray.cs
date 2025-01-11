@@ -1,25 +1,20 @@
 ﻿namespace SourceGenerators.Utils.Collections {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.Immutable;
 
-    public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T> where T : IEquatable<T> {
-        private readonly T[]? array;
-        
-        public EquatableArray(T[] array) {
-            this.array = array;
-        }
+    public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>> where T : IEquatable<T> {
+        private readonly ImmutableArray<T> array;
         
         public EquatableArray(List<T>? list) {
             if (list == null || list.Count == 0) {
-                this.array = null;
                 return;
             }
             
-            this.array = list.ToArray();
+            this.array = list.ToImmutableArray();
         }
         
-        public int Length => this.array?.Length ?? 0;
+        public int Length => this.array.Length;
         
         public T this[int index] {
             get {
@@ -29,17 +24,10 @@
                 
                 return this.array[index];
             }
-            
-            set {
-                if (this.array == null) {
-                    throw new IndexOutOfRangeException();
-                }
-                
-                this.array[index] = value;
-            }
         }
         
-        public ReadOnlySpan<T> AsSpan() => this.array.AsSpan();
+        public ReadOnlySpan<T>              AsSpan()        => this.array.AsSpan();
+        public ImmutableArray<T>.Enumerator GetEnumerator() => this.array.GetEnumerator();
         
         public bool Equals(EquatableArray<T> otherArray) => this.AsSpan().SequenceEqual(otherArray.AsSpan());
         public override bool Equals(object? obj) => obj is EquatableArray<T> otherArray && this.Equals(otherArray);
@@ -59,9 +47,6 @@
                 return hash;
             }
         }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => ((IEnumerable<T>)(this.array ?? Array.Empty<T>())).GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)(this.array ?? Array.Empty<T>())).GetEnumerator();
         
         public static bool operator ==(EquatableArray<T> left, EquatableArray<T> right) => left.Equals(right);
         public static bool operator !=(EquatableArray<T> left, EquatableArray<T> right) => !left.Equals(right);
