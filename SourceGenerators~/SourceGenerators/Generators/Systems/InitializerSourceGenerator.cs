@@ -154,16 +154,13 @@
                 genericParams      = string.Empty;
                 genericConstraints = string.Empty;
             }
-
-            var stashRequirements = ThreadStaticListCache<StashRequirement>.GetClear();
-            MorpehComponentHelpersSemantic.FillStashRequirements(stashRequirements, typeSymbol);
-
+            
             return new InitializerToGenerate(
                 typeName: syntaxNode.Identifier.ToString(),
                 typeNamespace: typeNamespace,
                 genericParams: genericParams,
                 genericConstraints: genericConstraints,
-                stashRequirements: new EquatableArray<StashRequirement>(stashRequirements),
+                stashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
                 typeDeclType: Types.TypeDeclTypeFromSyntaxNode(syntaxNode),
                 visibility: Types.GetVisibilityModifier(syntaxNode));
         }

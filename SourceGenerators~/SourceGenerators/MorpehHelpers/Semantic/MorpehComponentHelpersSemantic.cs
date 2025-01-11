@@ -5,6 +5,8 @@
     using Microsoft.CodeAnalysis;
     using NonSemantic;
     using SourceGenerators.Utils.NonSemantic;
+    using Utils.Caches;
+    using Utils.Collections;
     using Utils.Pools;
 
     public static class MorpehComponentHelpersSemantic {
@@ -78,7 +80,9 @@
             return StashVariation.Data;
         }
         
-        public static void FillStashRequirements(List<StashRequirement> stashes, INamedTypeSymbol typeDeclaration) {
+        public static EquatableArray<StashRequirement> GetStashRequirements(INamedTypeSymbol typeDeclaration) {
+            var stashes = ThreadStaticListCache<StashRequirement>.GetClear();
+            
             var attributes = typeDeclaration.GetAttributes();
             
             for (int i = 0, length = attributes.Length; i < length; i++) {
@@ -128,6 +132,8 @@
                     metadataClassName = metadataClassName,
                 });
             }
+            
+            return new EquatableArray<StashRequirement>(stashes);
         }
     }
 }
