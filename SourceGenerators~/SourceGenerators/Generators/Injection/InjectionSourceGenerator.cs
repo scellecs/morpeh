@@ -46,7 +46,7 @@
             
             context.RegisterSourceOutput(classes.Combine(genericResolvers), static (spc, pair) => {
 #if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
-                var ((typeDeclaration, semanticModel), genericProviders) = pair;
+                var ((typeDeclaration, semanticModel), genericResolvers) = pair;
                 
                 if (semanticModel.GetDeclaredSymbol(typeDeclaration) is not INamedTypeSymbol typeSymbol) {
                     return;
