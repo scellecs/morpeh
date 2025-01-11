@@ -90,6 +90,16 @@
             return "public";
         }
         
+        public static string GetVisibilityModifierString(Accessibility accessibility) {
+            return accessibility switch {
+                Accessibility.Public => "public",
+                Accessibility.Internal => "internal",
+                Accessibility.Protected => "protected",
+                Accessibility.Private => "private",
+                _ => "public"
+            };
+        }
+        
         public static string GetVisibility(TypeDeclarationSyntax type) {
             var modifiers = type.Modifiers;
             
