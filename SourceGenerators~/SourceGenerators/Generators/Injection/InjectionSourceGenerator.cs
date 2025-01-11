@@ -1,6 +1,8 @@
 ﻿namespace SourceGenerators.Generators.Injection {
     using System.Collections.Generic;
+    using System.Collections.Immutable;
     using System.Linq;
+    using System.Threading;
     using Diagnostics;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -35,26 +37,12 @@
             var genericResolvers = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                     MorpehAttributes.GENERIC_INJECTION_RESOLVER_ATTRIBUTE_FULL_NAME,
-                    static (node, _) => node is ClassDeclarationSyntax,
-                    static (ctx, _) => {
-                        var typeSymbol = (INamedTypeSymbol)ctx.TargetSymbol;
-                        
-                        var attribute  = ctx.Attributes.FirstOrDefault();
-                        if (attribute is null) {
-                            return null;
-                        }
-                        
-                        var args = attribute.ConstructorArguments;
-                        if (args.Length != 1 || args[0].Value is not INamedTypeSymbol baseType) {
-                            return null;
-                        }
-
-                        return new GenericResolver(baseType, typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
-                    }
-                )
+                    predicate: static (node, _) => node is ClassDeclarationSyntax,
+                    transform: static (ctx, ct) => ExtractGenericResolver(ctx, ct))
                 .Where(static resolver => resolver is not null)
-                .Select(static (resolver, _) => resolver!)
-                .Collect();
+                .Select(static (resolver, _) => (GenericResolver)resolver!)
+                .Collect()
+                .Select(static (resolvers, _) => resolvers.ToImmutableDictionary(static resolver => resolver.BaseTypeName, static resolver => resolver));
             
             context.RegisterSourceOutput(classes.Combine(genericResolvers), static (spc, pair) => {
 #if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
@@ -118,18 +106,11 @@
                             var resolved = false;
                             
                             if (field.Type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol) {
-                                var unboundType = namedTypeSymbol.ConstructUnboundGenericType();
+                                var unboundType = namedTypeSymbol.ConstructUnboundGenericType().ToString();
                                 
-                                for (int j = 0, jlength = genericProviders.Length; j < jlength; j++) {
-                                    var provider = genericProviders[j];
-                                    
-                                    if (!SymbolEqualityComparer.Default.Equals(unboundType, provider.baseType)) {
-                                        continue;
-                                    }
-
-                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(provider.resolverTypeName).Append(")injectionTable.Get(typeof(").Append(provider.resolverTypeName).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
+                                if (genericProviders.TryGetValue(unboundType, out var genericProvider)) {
+                                    sb.AppendIndent(indent).Append(field.Name).Append(" = ((").Append(genericProvider.ResolverTypeName).Append(")injectionTable.Get(typeof(").Append(genericProvider.ResolverTypeName).Append("))).Resolve<").Append(string.Join(", ", namedTypeSymbol.TypeArguments.Select(static t => t.ToString()))).AppendLine(">();");
                                     resolved = true;
-                                    break;
                                 }
                             }
                             
@@ -217,15 +198,25 @@
 
             return success;
         }
-
-        private class GenericResolver {
-            public readonly INamedTypeSymbol baseType;
-            public readonly string           resolverTypeName;
-
-            public GenericResolver(INamedTypeSymbol baseType, string resolverTypeName) {
-                this.baseType         = baseType;
-                this.resolverTypeName = resolverTypeName;
+        
+        private static GenericResolver? ExtractGenericResolver(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
+            ct.ThrowIfCancellationRequested();
+            
+            var typeSymbol = (INamedTypeSymbol)ctx.TargetSymbol;
+                        
+            var attribute  = ctx.Attributes.FirstOrDefault();
+            if (attribute is null) {
+                return null;
             }
+                        
+            var args = attribute.ConstructorArguments;
+            if (args.Length != 1 || args[0].Value is not INamedTypeSymbol baseType) {
+                return null;
+            }
+
+            return new GenericResolver(baseType.ToString(), typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
         }
+
+        private record struct GenericResolver(string BaseTypeName, string ResolverTypeName);
     }
 }
