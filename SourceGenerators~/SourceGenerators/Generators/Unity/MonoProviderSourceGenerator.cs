@@ -218,7 +218,7 @@
                 ProviderTypeFullName: monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 ProviderTypeVisibility: monoProviderType.DeclaredAccessibility,
                 StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(monoProviderType),
-                Visibility: monoProviderType.DeclaredAccessibility);
+                Visibility: typeSymbol.DeclaredAccessibility);
         }
 
         private record struct ProviderToGenerate(
