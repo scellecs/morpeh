@@ -8,110 +8,136 @@
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
     using Unity;
+    using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     [Generator]
     public class ComponentsPipeline : IIncrementalGenerator {
+        private const string PIPELINE_NAME = nameof(ComponentsPipeline);
+        
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var components = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.COMPONENT_FULL_NAME,
-                    static (s, _) => s is StructDeclarationSyntax && s.Parent is not TypeDeclarationSyntax,
-                    static (s, ct) => ExtractComponentsToGenerate(s, ct))
+                    predicate: static (s, _) => s is StructDeclarationSyntax && s.Parent is not TypeDeclarationSyntax,
+                    transform: static (s, ct) => ExtractComponentsToGenerate(s, ct))
                 .WithTrackingName(TrackingNames.FIRST_PASS)
+                .WithLogging(PIPELINE_NAME, "components_ExtractComponentsToGenerate")
                 .Where(static candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
-                .WithTrackingName(TrackingNames.REMOVE_NULL_PASS);
+                .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
+                .WithLogging(PIPELINE_NAME, "components_RemoveNullPass");
             
             var providers = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.MONO_PROVIDER_FULL_NAME,
                     predicate: static (s, _) => s is ClassDeclarationSyntax cds && cds.Parent is not TypeDeclarationSyntax,
                     transform: static (ctx, ct) => ExtractProvidersToGenerate(ctx, ct))
                 .WithTrackingName(TrackingNames.FIRST_PASS)
+                .WithLogging(PIPELINE_NAME, "providers_ExtractProvidersToGenerate")
                 .Where(candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
-                .WithTrackingName(TrackingNames.REMOVE_NULL_PASS);
+                .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
+                .WithLogging(PIPELINE_NAME, "providers_RemoveNullPass");
 
             context.RegisterSourceOutput(components, static (spc, component) => ComponentSourceGenerator.Generate(spc, component));
             context.RegisterSourceOutput(providers, static (spc, provider) => MonoProviderSourceGenerator.Generate(spc, provider));
         }
 
         private static ComponentToGenerate? ExtractComponentsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
-            ct.ThrowIfCancellationRequested();
+            const string generatorStepName = nameof(ExtractComponentsToGenerate);
             
-            if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
+            ct.ThrowIfCancellationRequested();
+
+            try {
+                if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
+                    return null;
+                }
+            
+                Logger.Log(PIPELINE_NAME, generatorStepName, $"Transform: {typeSymbol.Name}");
+            
+                string genericParams;
+                string genericConstraints;
+
+                if (typeSymbol.TypeParameters.Length > 0) {
+                    genericParams      = StringBuilderPool.Get().AppendGenericParams(typeSymbol).ToStringAndReturn();
+                    genericConstraints = StringBuilderPool.Get().AppendGenericConstraints(typeSymbol).ToStringAndReturn();
+                }
+                else {
+                    genericParams      = string.Empty;
+                    genericConstraints = string.Empty;
+                }
+            
+                var initialCapacity = 16;
+                
+                var args = ctx.Attributes.First().ConstructorArguments;
+                if (args.Length >= 1 && args[0].Value is int capacity) {
+                    initialCapacity = capacity;
+                }
+            
+                return new ComponentToGenerate(
+                    TypeName: typeSymbol.Name,
+                    TypeNamespace: typeSymbol.GetNamespaceString(),
+                    GenericParams: genericParams,
+                    GenericConstraints: genericConstraints,
+                    InitialCapacity: initialCapacity,
+                    StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol),
+                    Visibility: typeSymbol.DeclaredAccessibility);
+            } catch (Exception e) {
+                Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;
             }
-            
-            string genericParams;
-            string genericConstraints;
-
-            if (typeSymbol.TypeParameters.Length > 0) {
-                genericParams      = StringBuilderPool.Get().AppendGenericParams(typeSymbol).ToStringAndReturn();
-                genericConstraints = StringBuilderPool.Get().AppendGenericConstraints(typeSymbol).ToStringAndReturn();
-            }
-            else {
-                genericParams      = string.Empty;
-                genericConstraints = string.Empty;
-            }
-            
-            var initialCapacity = 16;
-            var args = ctx.Attributes.First().ConstructorArguments;
-            if (args.Length >= 1 && args[0].Value is int capacity) {
-                initialCapacity = capacity;
-            }
-            
-            return new ComponentToGenerate(
-                TypeName: typeSymbol.Name,
-                TypeNamespace: typeSymbol.GetNamespaceString(),
-                GenericParams: genericParams,
-                GenericConstraints: genericConstraints,
-                InitialCapacity: initialCapacity,
-                StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol),
-                Visibility: typeSymbol.DeclaredAccessibility);
         }
         
         private static ProviderToGenerate? ExtractProvidersToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
+            const string generatorStepName = nameof(ExtractProvidersToGenerate);
+            
             ct.ThrowIfCancellationRequested();
-            
-            if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
-                return null;
-            }
-            
-            INamedTypeSymbol? monoProviderType = null;
-            
-            var attribute = ctx.Attributes.First();
-            var args = attribute.ConstructorArguments;
-            if (args.Length > 0 && args[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol symbol }) {
-                monoProviderType = symbol;
-            }
-                
-            if (monoProviderType is null) {
-                return null;
-            }
-            
-            string genericParams;
-            string genericConstraints;
 
-            if (typeSymbol.TypeParameters.Length > 0) {
-                genericParams      = StringBuilderPool.Get().AppendGenericParams(typeSymbol).ToStringAndReturn();
-                genericConstraints = StringBuilderPool.Get().AppendGenericConstraints(typeSymbol).ToStringAndReturn();
-            }
-            else {
-                genericParams      = string.Empty;
-                genericConstraints = string.Empty;
-            }
+            try {
+                if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
+                    return null;
+                }
             
-            return new ProviderToGenerate(
-                TypeName: typeSymbol.Name,
-                TypeNamespace: typeSymbol.GetNamespaceString(),
-                GenericParams: genericParams,
-                GenericConstraints: genericConstraints,
-                ProviderTypeFullName: monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                ProviderTypeVisibility: monoProviderType.DeclaredAccessibility,
-                StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(monoProviderType),
-                Visibility: typeSymbol.DeclaredAccessibility);
+                Logger.Log(PIPELINE_NAME, generatorStepName, $"Transform: {typeSymbol.Name}");
+            
+                INamedTypeSymbol? monoProviderType = null;
+            
+                var args = ctx.Attributes.First().ConstructorArguments;
+            
+                if (args.Length > 0 && args[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol symbol }) {
+                    monoProviderType = symbol;
+                }
+                
+                if (monoProviderType is null) {
+                    return null;
+                }
+            
+                string genericParams;
+                string genericConstraints;
+
+                if (typeSymbol.TypeParameters.Length > 0) {
+                    genericParams      = StringBuilderPool.Get().AppendGenericParams(typeSymbol).ToStringAndReturn();
+                    genericConstraints = StringBuilderPool.Get().AppendGenericConstraints(typeSymbol).ToStringAndReturn();
+                }
+                else {
+                    genericParams      = string.Empty;
+                    genericConstraints = string.Empty;
+                }
+            
+                return new ProviderToGenerate(
+                    TypeName: typeSymbol.Name,
+                    TypeNamespace: typeSymbol.GetNamespaceString(),
+                    GenericParams: genericParams,
+                    GenericConstraints: genericConstraints,
+                    ProviderTypeFullName: monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    ProviderTypeVisibility: monoProviderType.DeclaredAccessibility,
+                    StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(monoProviderType),
+                    Visibility: typeSymbol.DeclaredAccessibility);
+            } catch (Exception e) {
+                Logger.LogException(PIPELINE_NAME, generatorStepName, e);
+                return null;
+            }
         }
     }
 }

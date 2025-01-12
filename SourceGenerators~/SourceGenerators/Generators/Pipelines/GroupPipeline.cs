@@ -4,6 +4,8 @@
     using MorpehHelpers.NonSemantic;
     using SystemsGroup;
     using SystemsGroupRunner;
+    using Utils.Logging;
+    using Utils.NonSemantic;
 
     [Generator]
     public class GroupPipeline : IIncrementalGenerator {
@@ -14,13 +16,17 @@
             // TODO: DTOs
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
-                (s, _) => s is TypeDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.Attributes));
+                predicate: (s, _) => s is TypeDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
+                transform: (ctx, _) => (ctx.TargetNode as TypeDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol, ctx.Attributes))
+                .WithTrackingName(TrackingNames.FIRST_PASS)
+                .WithLogging(nameof(GroupPipeline), "groups_ExtractGroupsToGenerate");
         
             var runners = context.SyntaxProvider.ForAttributeWithMetadataName(
                 MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
-                (s, _) => s is ClassDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
-                (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol));
+                predicate: (s, _) => s is ClassDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
+                transform: (ctx, _) => (ctx.TargetNode as ClassDeclarationSyntax, ctx.TargetSymbol as INamedTypeSymbol))
+                .WithTrackingName(TrackingNames.FIRST_PASS)
+                .WithLogging(nameof(GroupPipeline), "runners_ExtractRunnersToGenerate");
 
             context.RegisterSourceOutput(groups, static (spc, pair) => SystemsGroupSourceGenerator.Generate(spc, pair));
             context.RegisterSourceOutput(runners, static (spc, pair) => SystemsGroupRunnerSourceGenerator.Generate(spc, pair));

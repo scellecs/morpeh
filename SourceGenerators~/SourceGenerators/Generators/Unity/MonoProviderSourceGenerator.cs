@@ -3,13 +3,20 @@
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
 
     public static class MonoProviderSourceGenerator {
-        public static void Generate(SourceProductionContext spc, ProviderToGenerate provider) {
-            var source = Generate(provider);
-            spc.AddSource($"{provider.TypeName}._provider_{Guid.NewGuid():N}.g.cs", source);
+        public static void Generate(SourceProductionContext spc, in ProviderToGenerate provider) {
+            try {
+                var source = Generate(provider);
+                spc.AddSource($"{provider.TypeName}._provider_{Guid.NewGuid():N}.g.cs", source);
+                
+                Logger.Log(nameof(MonoProviderSourceGenerator), nameof(Generate), $"Generated: {provider.TypeName}");
+            } catch (Exception e) {
+                Logger.LogException(nameof(MonoProviderSourceGenerator), nameof(Generate), e);
+            }
         }
         
         public static string Generate(ProviderToGenerate provider) {

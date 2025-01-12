@@ -1,16 +1,24 @@
 ﻿namespace SourceGenerators.Generators.Components {
     using System;
+    using System.Diagnostics;
     using System.Runtime.CompilerServices;
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
 
     public static class ComponentSourceGenerator {
-        public static void Generate(SourceProductionContext spc, ComponentToGenerate component) {
-            var source = Generate(component);
-            spc.AddSource($"{component.TypeName}.component_{Guid.NewGuid():N}.g.cs", source);
+        public static void Generate(SourceProductionContext spc, in ComponentToGenerate component) {
+            try {
+                var source = Generate(component);
+                spc.AddSource($"{component.TypeName}.component_{Guid.NewGuid():N}.g.cs", source);
+                
+                Logger.Log(nameof(ComponentSourceGenerator), nameof(Generate), $"Generated component: {component.TypeName}");
+            } catch (Exception e) {
+                Logger.LogException(nameof(ComponentSourceGenerator), nameof(Generate), e);
+            }
         }
         
         public static string Generate(ComponentToGenerate component) {
