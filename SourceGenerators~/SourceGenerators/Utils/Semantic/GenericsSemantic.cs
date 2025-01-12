@@ -2,6 +2,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using Caches;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -26,14 +27,16 @@
         }
 
         public static StringBuilder AppendGenericConstraints(this StringBuilder sb, INamedTypeSymbol originSymbol) {
-            if (originSymbol.TypeParameters.Length == 0) {
+            var typeParameters = originSymbol.TypeParameters;
+            
+            if (typeParameters.Length == 0) {
                 return sb;
             }
 
-            var sections = new List<string>();
+            var sections = ThreadStaticListCache<string>.GetClear();
 
-            for (int i = 0, length = originSymbol.TypeParameters.Length; i < length; i++) {
-                var typeParam = originSymbol.TypeParameters[i];
+            for (int i = 0, length = typeParameters.Length; i < length; i++) {
+                var typeParam = typeParameters[i];
                 
                 var hasConstraints =
                     typeParam.HasConstructorConstraint ||
@@ -65,15 +68,21 @@
                     sections.Add("notnull");
                 }
 
-                for (int j = 0, jlength = typeParam.ConstraintTypes.Length; j < jlength; j++) {
-                    sections.Add(typeParam.ConstraintTypes[j].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+                var constraintTypes = typeParam.ConstraintTypes;
+                for (int j = 0, jlength = constraintTypes.Length; j < jlength; j++) {
+                    sections.Add(constraintTypes[j].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
                 }
 
                 if (typeParam.HasConstructorConstraint) {
                     sections.Add("new()");
                 }
 
-                sb.Append(string.Join(", ", sections));
+                for (int j = 0, jlength = sections.Count; j < jlength; j++) {
+                    sb.Append(sections[j]);
+                    if (j < jlength - 1) {
+                        sb.Append(", ");
+                    }
+                }
             }
 
             return sb;

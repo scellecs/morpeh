@@ -1,5 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Components {
-    using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis;
     using MorpehHelpers.Semantic;
 
     public record struct ComponentToGenerate(
@@ -9,5 +9,5 @@
         string GenericConstraints,
         int InitialCapacity,
         StashVariation StashVariation,
-        SyntaxKind Visibility);
+        Accessibility Visibility);
 }
