@@ -11,7 +11,6 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
             context.Writer->Add(0);
             var contentStart = context.Writer->Length;
 
-            WriteString(context, value.data.GetType().AssemblyQualifiedName);
             context.Writer->Add(value.isMarker);
             context.Writer->Add(value.typeId);
             context.SerializeValue(value.data);
@@ -24,7 +23,6 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
             var blockSize = context.Reader->ReadNext<int>();
             var startOffset = context.Reader->Offset;
 
-            var typeName = ReadString(context);
             var isMarker = context.Reader->ReadNext<bool>();
             var typeId = context.Reader->ReadNext<int>();
             var componentData = default(IComponent);
@@ -36,8 +34,6 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
             catch (Exception) {
                 context.Reader->Offset = startOffset + blockSize;
                 isNotSerialized = true;
-                var type = Type.GetType(typeName);
-                componentData = (IComponent)Activator.CreateInstance(type);
             }
 
             return new ComponentDataBoxed() {

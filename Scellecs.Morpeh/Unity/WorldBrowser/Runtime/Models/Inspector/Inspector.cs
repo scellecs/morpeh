@@ -78,7 +78,9 @@ namespace Scellecs.Morpeh.WorldBrowser {
         }
 
         public void SetComponentData(ComponentDataBoxed componentData) {
-            this.storage.SetComponentData(componentData.data, componentData.typeId, this.currentHandle.entity);
+            if (!componentData.isNotSerialized) {
+                this.storage.SetComponentData(componentData.data, componentData.typeId, this.currentHandle.entity);
+            }
         }
 
         public void SetAddComponentSearchString(string value) {

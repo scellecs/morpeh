@@ -100,7 +100,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
 
         public object Deserialize(IBinaryDeserializationContext context) {
             context.Reader->ReadNext<int>();
-            return null;
+            throw new NotImplementedException(); //BoxedComponentAdapter handle this
         }
     }
 }

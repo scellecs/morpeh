@@ -77,8 +77,14 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
                 this.dataFoldout.style.display = DisplayStyle.None;
                 this.dataContainer.onGUIHandler = null;
             }
+            else if(this.data.isNotSerialized) {
+                this.tagLabel.text = $"<color={NOT_SERIALIZED_COLOR}>{NOT_SERIALIZED_FORMAT}</color> {name}";
+                this.tagLabel.style.display = DisplayStyle.Flex;
+                this.dataFoldout.style.display = DisplayStyle.None;
+                this.dataContainer.onGUIHandler = null;
+            }
             else {
-                this.dataFoldout.text = this.data.isNotSerialized ? $"<color={NOT_SERIALIZED_COLOR}>{NOT_SERIALIZED_FORMAT}</color> {name}" :  name;
+                this.dataFoldout.text = name;
                 this.dataFoldout.SetValueWithoutNotify(this.model.IsExpanded(typeId));
                 this.dataFoldout.RegisterValueChangedCallback(this.FoldoutExpandedCallback);
                 this.dataFoldout.style.display = DisplayStyle.Flex;
