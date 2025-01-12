@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Pipelines {
+    using System;
     using System.Linq;
     using System.Threading;
     using Components;
@@ -14,7 +15,6 @@
     [Generator]
     public class ComponentsPipeline : IIncrementalGenerator {
         public void Initialize(IncrementalGeneratorInitializationContext context) {
-            // TODO: Combine with mono providers as a second stage
             var components = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.COMPONENT_FULL_NAME,
                     static (s, _) => s is StructDeclarationSyntax && s.Parent is not TypeDeclarationSyntax,
@@ -43,10 +43,7 @@
             if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
                 return null;
             }
-
-            var containingNamespace = typeSymbol.ContainingNamespace;
-            var typeNamespace       = containingNamespace.IsGlobalNamespace ? null : containingNamespace.ToDisplayString();
-
+            
             string genericParams;
             string genericConstraints;
 
@@ -66,13 +63,13 @@
             }
             
             return new ComponentToGenerate(
-                typeSymbol.Name,
-                typeNamespace,
-                genericParams,
-                genericConstraints,
-                initialCapacity,
-                MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol),
-                typeSymbol.DeclaredAccessibility);
+                TypeName: typeSymbol.Name,
+                TypeNamespace: typeSymbol.GetNamespaceString(),
+                GenericParams: genericParams,
+                GenericConstraints: genericConstraints,
+                InitialCapacity: initialCapacity,
+                StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol),
+                Visibility: typeSymbol.DeclaredAccessibility);
         }
         
         private static ProviderToGenerate? ExtractProvidersToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
@@ -85,7 +82,8 @@
             INamedTypeSymbol? monoProviderType = null;
             
             var attribute = ctx.Attributes.First();
-            if (attribute.ConstructorArguments.Length > 0 && attribute.ConstructorArguments[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol symbol }) {
+            var args = attribute.ConstructorArguments;
+            if (args.Length > 0 && args[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol symbol }) {
                 monoProviderType = symbol;
             }
                 
@@ -107,7 +105,7 @@
             
             return new ProviderToGenerate(
                 TypeName: typeSymbol.Name,
-                TypeNamespace: typeSymbol.ContainingNamespace.IsGlobalNamespace ? null : typeSymbol.ContainingNamespace.ToDisplayString(),
+                TypeNamespace: typeSymbol.GetNamespaceString(),
                 GenericParams: genericParams,
                 GenericConstraints: genericConstraints,
                 ProviderTypeFullName: monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
