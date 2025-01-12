@@ -7,6 +7,7 @@ namespace Scellecs.Morpeh.WorldBrowser {
         public IComponent data;
         public bool isMarker;
         public int typeId;
+        public bool isNotSerialized;
     }
 }
 #endif

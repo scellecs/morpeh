@@ -110,12 +110,14 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             var component = this.componentData[typeId];
             var internalId = this.storage.typeIdToInternalId[typeId];
             var name = this.storage.componentNames[internalId];
+
             return new ComponentData(){
                 typeId = component.typeId,
                 name = name,
                 isMarker = component.isMarker,
+                isNotSerialized = component.isNotSerialized,
                 Get = this.Get,
-                Set = this.Set,
+                Set = component.isNotSerialized ? null : this.Set,
             };
         }
 

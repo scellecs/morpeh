@@ -14,6 +14,9 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private const string TAG_COLOR = "#90EE90";
         private const string TAG_FORMAT = "[Tag]";
 
+        private const string NOT_SERIALIZED_COLOR = "#FFB6B6";
+        private const string NOT_SERIALIZED_FORMAT = "[NotSerialized]";
+
         private readonly Label tagLabel;
         private readonly Foldout dataFoldout;
         private readonly Label labelRemoveIcon;
@@ -75,7 +78,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
                 this.dataContainer.onGUIHandler = null;
             }
             else {
-                this.dataFoldout.text = name;
+                this.dataFoldout.text = this.data.isNotSerialized ? $"<color={NOT_SERIALIZED_COLOR}>{NOT_SERIALIZED_FORMAT}</color> {name}" :  name;
                 this.dataFoldout.SetValueWithoutNotify(this.model.IsExpanded(typeId));
                 this.dataFoldout.RegisterValueChangedCallback(this.FoldoutExpandedCallback);
                 this.dataFoldout.style.display = DisplayStyle.Flex;

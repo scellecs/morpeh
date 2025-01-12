@@ -28,12 +28,14 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
             var isMarker = context.Reader->ReadNext<bool>();
             var typeId = context.Reader->ReadNext<int>();
             var componentData = default(IComponent);
+            var isNotSerialized = false;
 
             try {
                 componentData = context.DeserializeValue<IComponent>();
             }
             catch (Exception) {
                 context.Reader->Offset = startOffset + blockSize;
+                isNotSerialized = true;
                 var type = Type.GetType(typeName);
                 componentData = (IComponent)Activator.CreateInstance(type);
             }
@@ -42,6 +44,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Serialization {
                 data = componentData,
                 isMarker = isMarker,
                 typeId = typeId,
+                isNotSerialized = isNotSerialized,
             };
         }
     }

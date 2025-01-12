@@ -8,6 +8,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor.ComponentViewer {
         internal int typeId;
         internal string name;
         internal bool isMarker;
+        internal bool isNotSerialized;
 
         internal Func<int, object> Get;
         internal Action<int, object> Set;
