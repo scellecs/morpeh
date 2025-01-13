@@ -95,7 +95,7 @@
             
                 var args = ctx.Attributes[0].ConstructorArguments;
             
-                if (args.Length > 0 && args[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol symbol }) {
+                if (args.Length > 0 && args[0].Value is INamedTypeSymbol symbol) {
                     monoProviderType = symbol;
                 }
                 

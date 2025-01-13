@@ -1,4 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Pipelines {
+    using System;
     using System.Threading;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -39,55 +40,69 @@
         }
         
         private static SystemToGenerate? ExtractSystemsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
-            ct.ThrowIfCancellationRequested();
+            const string generatorStepName = nameof(ExtractSystemsToGenerate);
             
-            if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
+            ct.ThrowIfCancellationRequested();
+
+            try {
+                if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
+                    return null;
+                }
+
+                var args = ctx.Attributes[0].ConstructorArguments;
+
+                var skipCommit = false;
+                if (args.Length >= 1 && args[0].Value is bool skipCommitValue) {
+                    skipCommit = skipCommitValue;
+                }
+
+                var alwaysEnabled = false;
+                if (args.Length >= 2 && args[1].Value is bool alwaysEnabledValue) {
+                    alwaysEnabled = alwaysEnabledValue;
+                }
+
+                var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
+
+                return new SystemToGenerate(
+                    TypeName: typeSymbol.Name,
+                    TypeNamespace: typeSymbol.GetNamespaceString(),
+                    GenericParams: genericParams,
+                    GenericConstraints: genericConstraints,
+                    StashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
+                    TypeKind: typeSymbol.TypeKind,
+                    Visibility: typeSymbol.DeclaredAccessibility,
+                    SkipCommit: skipCommit,
+                    AlwaysEnabled: alwaysEnabled);
+            } catch (Exception e) {
+                Logger.LogException(nameof(SystemsPipeline), generatorStepName, e);
                 return null;
             }
-            
-            var args = ctx.Attributes[0].ConstructorArguments;
-                
-            var skipCommit    = false;
-            if (args.Length >= 1 && args[0].Value is bool skipCommitValue) {
-                skipCommit = skipCommitValue;
-            }
-                
-            var alwaysEnabled = false;
-            if (args.Length >= 2 && args[1].Value is bool alwaysEnabledValue) {
-                alwaysEnabled = alwaysEnabledValue;
-            }
-            
-            var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
-
-            return new SystemToGenerate(
-                TypeName: typeSymbol.Name,
-                TypeNamespace: typeSymbol.GetNamespaceString(),
-                GenericParams: genericParams,
-                GenericConstraints: genericConstraints,
-                StashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
-                TypeKind: typeSymbol.TypeKind,
-                Visibility: typeSymbol.DeclaredAccessibility,
-                SkipCommit: skipCommit,
-                AlwaysEnabled: alwaysEnabled);
         }
         
         private static InitializerToGenerate? ExtractInitializersToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
-            ct.ThrowIfCancellationRequested();
+            const string generatorStepName = nameof(ExtractInitializersToGenerate);
             
-            if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
+            ct.ThrowIfCancellationRequested();
+
+            try {
+                if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
+                    return null;
+                }
+
+                var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
+
+                return new InitializerToGenerate(
+                    TypeName: typeSymbol.Name,
+                    TypeNamespace: typeSymbol.GetNamespaceString(),
+                    GenericParams: genericParams,
+                    GenericConstraints: genericConstraints,
+                    StashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
+                    TypeKind: typeSymbol.TypeKind,
+                    Visibility: typeSymbol.DeclaredAccessibility);
+            } catch (Exception e) {
+                Logger.LogException(nameof(SystemsPipeline), generatorStepName, e);
                 return null;
             }
-            
-            var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
-            
-            return new InitializerToGenerate(
-                TypeName: typeSymbol.Name,
-                TypeNamespace: typeSymbol.GetNamespaceString(),
-                GenericParams: genericParams,
-                GenericConstraints: genericConstraints,
-                StashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
-                TypeKind: typeSymbol.TypeKind,
-                Visibility: typeSymbol.DeclaredAccessibility);
         }
     }
 }
