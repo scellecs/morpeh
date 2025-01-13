@@ -2,6 +2,7 @@
     using System;
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
+    using MorpehHelpers.Semantic;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
@@ -46,7 +47,7 @@
                 if (initializer.StashRequirements.Length > 0) {
                     sb.AppendLine().AppendLine();
                     foreach (var stash in initializer.StashRequirements) {
-                        sb.AppendIndent(indent).Append("private readonly ").Append(stash.FieldTypeName).Append(' ').Append(stash.FieldName).AppendLine(";");
+                        sb.AppendIndent(indent).Append("private readonly ").Append(MorpehComponentHelpersSemantic.GetStashSpecializationType(stash.StashVariation, stash.MetadataClassName)).Append(' ').Append(stash.FieldName).AppendLine(";");
                     }
                 }
 

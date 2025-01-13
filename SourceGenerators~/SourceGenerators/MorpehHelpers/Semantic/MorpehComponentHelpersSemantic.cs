@@ -93,7 +93,7 @@
                 }
 
                 var args = attribute.ConstructorArguments;
-                if (args is not { Length: 1 }) {
+                if (args.Length == 0) {
                     continue;
                 }
                 
@@ -123,14 +123,11 @@
                         sb.Append(typeArguments[j].Name);
                     }
                 }
-
-                var metadataClassName = componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 
-                stashes.Add(new StashRequirement {
-                    FieldName         = sb.ToStringAndReturn(),
-                    FieldTypeName     = GetStashSpecializationType(GetStashVariation(componentTypeSymbol), componentDecl: metadataClassName),
-                    MetadataClassName = metadataClassName,
-                });
+                stashes.Add(new StashRequirement(
+                    FieldName: sb.ToStringAndReturn(),
+                    MetadataClassName: componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    StashVariation: GetStashVariation(componentTypeSymbol)));
             }
             
             return new EquatableArray<StashRequirement>(stashes);
