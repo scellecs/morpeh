@@ -335,7 +335,7 @@ The provider is called `RemoveEntityOnDestroy`.
 
 #### 🌐 World Browser
 
-The WorldBrowser tool enables real-time tracking and searching of entities and their components.
+The WorldBrowser tool enables real-time tracking and searching of entities and their components. Also provides functionality to add and remove components. Works in both Unity Editor playmode and can connect remotely to builds runtime.
 Supports the same filtering logic as the core ``Filter``, allowing complex queries using ``With`` and ``Without`` conditions.
 
 Access it via Tools -> Morpeh -> WorldBrowser.
@@ -359,6 +359,44 @@ Access it via Tools -> Morpeh -> WorldBrowser.
 **World Selection:**
 - Use the top toolbar (with the **W** icon) to choose worlds to search.
 - By default, ``World.Default`` is pre-selected.
+
+**Remote Connection:**
+
+The feature is currently in experimental stage and works only in development builds. It has several limitations compared to Unity Editor playmode:
+- Components containing `Unity.Object` are displayed in read-only mode.
+- Cannot inspect `Unity.Object fields` in components, but provides `Type`, `Name`, and `InstanceID` information.
+- Some components may fail serialization, will be marked with [NotSerialized] tag and won't be rendered. You'll need to modify the component structure manually if serialization is required.
+
+Setup:
+- Install [Unity.Serialization package](https://docs.unity3d.com/Packages/com.unity.serialization@3.1/manual/index.html) via Package Manager.
+- Add `MORPEH_REMOTE_BROWSER` directive to *ProjectSettings -> Player -> Scripting Define Symbols*.
+- Restart Unity Editor.
+- After restart, the `WorldBrowser` will display a "Connect To Remote" button.
+
+> [!IMPORTANT]  
+> You must build your application after enabling remote mode. Previous builds will not support remote debugging.
+
+Starting Remote Debug:
+- Connect your device to computer via USB in File Transfer mode.
+- Make sure USB Debugging is enabled in Developer Options.
+- Set up port forwarding using platform-specific method below.
+- Launch the application on your device.
+- Open WorldBrowser in Unity Editor.
+- Click "Connect To Remote" button.
+
+Android:
+- Install Android Studio.
+- Navigate to Android SDK platform-tools in terminal: `\Android\Sdk\platform-tools`.
+- Set up port forwarding: `adb forward tcp:9999 tcp:9999`.
+- Optional: View logs with `adb logcat -s Unity`.
+
+iOS:
+- Build and deploy your app via Xcode.
+- Enable port forwarding: `ideviceproxy 9999 9999`.
+- Optional: View logs with `idevicesyslog | grep Unity`.
+
+Windows & macOS & Linux:
+- Direct connection available on local network.
 
 ---
 
