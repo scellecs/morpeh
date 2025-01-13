@@ -21,7 +21,7 @@
             }
         }
         
-        public static string Generate(ComponentToGenerate component) {
+        public static string Generate(in ComponentToGenerate component) {
             var fullTypeName = StringBuilderPool.Get().Append(component.TypeName).Append(component.GenericParams).ToStringAndReturn();
 
             var sb     = StringBuilderPool.Get();

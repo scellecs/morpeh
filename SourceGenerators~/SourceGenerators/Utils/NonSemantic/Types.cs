@@ -150,5 +150,15 @@
                 _ => ""
             };
         }
+
+        public static string AsString(TypeKind typeKind) {
+            return typeKind switch {
+                TypeKind.Class => "class",
+                TypeKind.Enum => "enum",
+                TypeKind.Interface => "interface",
+                TypeKind.Struct => "struct",
+                _ => ""
+            };
+        }
     }
 }
