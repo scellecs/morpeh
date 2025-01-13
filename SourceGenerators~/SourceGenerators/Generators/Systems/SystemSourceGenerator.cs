@@ -50,7 +50,8 @@
 
                 if (system.StashRequirements.Length > 0) {
                     sb.AppendLine().AppendLine();
-                    foreach (var stash in system.StashRequirements) {
+                    for (int i = 0, length = system.StashRequirements.Length; i < length; i++) {
+                        var stash = system.StashRequirements[i];
                         sb.AppendIndent(indent).Append("private readonly ").Append(MorpehComponentHelpersSemantic.GetStashSpecializationType(stash.StashVariation, stash.MetadataClassName)).Append(' ').Append(stash.FieldName).AppendLine(";");
                     }
                 }
@@ -61,7 +62,8 @@
                     using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Constructor", indent)) {
                         sb.AppendIndent(indent).AppendLine("World = world;");
 
-                        foreach (var stash in system.StashRequirements) {
+                        for (int i = 0, length = system.StashRequirements.Length; i < length; i++) {
+                            var stash = system.StashRequirements[i];
                             sb.AppendIndent(indent).Append(stash.FieldName).Append(" = ").Append(stash.MetadataClassName).AppendLine(".GetStash(world);");
                         }
                     }
