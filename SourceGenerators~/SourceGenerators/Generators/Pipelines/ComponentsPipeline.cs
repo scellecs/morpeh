@@ -56,24 +56,14 @@
             
                 Logger.Log(PIPELINE_NAME, generatorStepName, $"Transform: {typeSymbol.Name}");
             
-                string genericParams;
-                string genericConstraints;
-
-                if (typeSymbol.TypeParameters.Length > 0) {
-                    genericParams      = StringBuilderPool.Get().AppendGenericParams(typeSymbol).ToStringAndReturn();
-                    genericConstraints = StringBuilderPool.Get().AppendGenericConstraints(typeSymbol).ToStringAndReturn();
-                }
-                else {
-                    genericParams      = string.Empty;
-                    genericConstraints = string.Empty;
-                }
-            
                 var initialCapacity = 16;
                 
                 var args = ctx.Attributes[0].ConstructorArguments;
                 if (args.Length >= 1 && args[0].Value is int capacity) {
                     initialCapacity = capacity;
                 }
+                
+                var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
             
                 return new ComponentToGenerate(
                     TypeName: typeSymbol.Name,
@@ -113,17 +103,7 @@
                     return null;
                 }
             
-                string genericParams;
-                string genericConstraints;
-
-                if (typeSymbol.TypeParameters.Length > 0) {
-                    genericParams      = StringBuilderPool.Get().AppendGenericParams(typeSymbol).ToStringAndReturn();
-                    genericConstraints = StringBuilderPool.Get().AppendGenericConstraints(typeSymbol).ToStringAndReturn();
-                }
-                else {
-                    genericParams      = string.Empty;
-                    genericConstraints = string.Empty;
-                }
+                var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
             
                 return new ProviderToGenerate(
                     TypeName: typeSymbol.Name,

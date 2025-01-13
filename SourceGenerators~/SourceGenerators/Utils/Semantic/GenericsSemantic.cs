@@ -5,6 +5,7 @@
     using Caches;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Pools;
 
     public static class GenericsSemantic {
         public static StringBuilder AppendGenericParams(this StringBuilder sb, INamedTypeSymbol typeSymbol) {
@@ -86,6 +87,30 @@
             }
 
             return sb;
+        }
+
+        public static (string, string) GetGenericParamsAndConstraints(INamedTypeSymbol symbol) {
+            string genericParams;
+            string genericConstraints;
+            
+            if (symbol.TypeParameters.Length > 0) {
+                var sb = StringBuilderPool.Get();
+                
+                genericParams = sb
+                    .AppendGenericParams(symbol)
+                    .ToString();
+                
+                genericConstraints = sb
+                    .Clear()
+                    .AppendGenericConstraints(symbol)
+                    .ToStringAndReturn();
+                
+            } else {
+                genericParams      = string.Empty;
+                genericConstraints = string.Empty;
+            }
+            
+            return (genericParams, genericConstraints);
         }
         
         // TODO: Might be useful for later but it requires full semantic model.

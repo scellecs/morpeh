@@ -7,7 +7,6 @@
     using Systems;
     using Utils.Logging;
     using Utils.NonSemantic;
-    using Utils.Pools;
     using Utils.Semantic;
 
     [Generator]
@@ -46,17 +45,6 @@
                 return null;
             }
             
-            string genericParams;
-            string genericConstraints;
-            
-            if (typeSymbol.TypeParameters.Length > 0) {
-                genericParams      = StringBuilderPool.Get().AppendGenericParams(typeSymbol).ToStringAndReturn();
-                genericConstraints = StringBuilderPool.Get().AppendGenericConstraints(typeSymbol).ToStringAndReturn();
-            } else {
-                genericParams      = string.Empty;
-                genericConstraints = string.Empty;
-            }
-            
             var args = ctx.Attributes[0].ConstructorArguments;
                 
             var skipCommit    = false;
@@ -68,6 +56,8 @@
             if (args.Length >= 2 && args[1].Value is bool alwaysEnabledValue) {
                 alwaysEnabled = alwaysEnabledValue;
             }
+            
+            var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
 
             return new SystemToGenerate(
                 TypeName: typeSymbol.Name,
@@ -88,16 +78,7 @@
                 return null;
             }
             
-            string genericParams;
-            string genericConstraints;
-            
-            if (typeSymbol.TypeParameters.Length > 0) {
-                genericParams      = StringBuilderPool.Get().AppendGenericParams(typeSymbol).ToStringAndReturn();
-                genericConstraints = StringBuilderPool.Get().AppendGenericConstraints(typeSymbol).ToStringAndReturn();
-            } else {
-                genericParams      = string.Empty;
-                genericConstraints = string.Empty;
-            }
+            var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
             
             return new InitializerToGenerate(
                 TypeName: typeSymbol.Name,
