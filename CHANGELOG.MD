@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2024.1.1] - WIP
+### Fixed
+- Fixed incorrect behavior of `Entity.GetWorld` when using multiworld setup.
+- Fixed several minor bugs in `WorldBrowser`.
+
+### Added
+- Added automatic static data cleanup for `World` and `EntityProvider` when exiting playmode in Unity Editor.
+- Added ability to add and remove components in `WorldBrowser`.
+- Added remote debug functionality for `WorldBrowser`.
+- Added `MORPEH_REMOTE_BROWSER` directive.
+
+### Removed
+- Removed `MORPEH_NON_SERIALIZED` directive.
+
 ## [2024.1.0] - 11.12.2024
 ### Fixed
 - Fixed archetype recreation when an archetype becomes empty in the same Commit call when the archetype has to become active again.
