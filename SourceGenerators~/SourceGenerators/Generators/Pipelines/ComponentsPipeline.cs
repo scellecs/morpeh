@@ -70,7 +70,7 @@
             
                 var initialCapacity = 16;
                 
-                var args = ctx.Attributes.First().ConstructorArguments;
+                var args = ctx.Attributes[0].ConstructorArguments;
                 if (args.Length >= 1 && args[0].Value is int capacity) {
                     initialCapacity = capacity;
                 }
@@ -103,7 +103,7 @@
             
                 INamedTypeSymbol? monoProviderType = null;
             
-                var args = ctx.Attributes.First().ConstructorArguments;
+                var args = ctx.Attributes[0].ConstructorArguments;
             
                 if (args.Length > 0 && args[0] is { Kind: TypedConstantKind.Type, Value: INamedTypeSymbol symbol }) {
                     monoProviderType = symbol;

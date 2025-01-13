@@ -210,7 +210,7 @@
                 genericConstraints = string.Empty;
             }
             
-            var args = ctx.Attributes.First().ConstructorArguments;
+            var args = ctx.Attributes[0].ConstructorArguments;
                 
             var skipCommit    = false;
             if (args.Length >= 1 && args[0].Value is bool skipCommitValue) {
