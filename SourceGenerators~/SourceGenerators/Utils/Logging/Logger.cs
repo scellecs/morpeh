@@ -6,6 +6,7 @@ namespace SourceGenerators.Utils.Logging {
     using System.IO;
     using Microsoft.CodeAnalysis;
 
+    // TODO: Has issues with accessing files, due to being blocked by the OS or other processes.
     public static class Logger {
         private static readonly object @lock = new object();
         private static readonly string rootDir;
