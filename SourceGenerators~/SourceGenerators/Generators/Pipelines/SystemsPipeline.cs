@@ -12,28 +12,30 @@
 
     [Generator]
     public class SystemsPipeline : IIncrementalGenerator {
+        private const string PIPELINE_NAME = nameof(SystemsPipeline);
+        
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var systems = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEM_FULL_NAME,
                     predicate: static (s, _) => s is TypeDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
                     transform: static (s, ct) => ExtractSystemsToGenerate(s, ct))
                 .WithTrackingName(TrackingNames.FIRST_PASS)
-                .WithLogging(nameof(SystemsPipeline), "systems_ExtractSystemsToGenerate")
+                .WithLogging(PIPELINE_NAME, "systems_ExtractSystemsToGenerate")
                 .Where(static candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
-                .WithLogging(nameof(SystemsPipeline), "systems_RemoveNullPass");
+                .WithLogging(PIPELINE_NAME, "systems_RemoveNullPass");
             
             var initializers = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.INITIALIZER_FULL_NAME,
                     predicate: static (s, _) => s is TypeDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
                     transform: static (s, ct) => ExtractInitializersToGenerate(s, ct))
                 .WithTrackingName(TrackingNames.FIRST_PASS)
-                .WithLogging(nameof(SystemsPipeline), "initializers_ExtractInitializersToGenerate")
+                .WithLogging(PIPELINE_NAME, "initializers_ExtractInitializersToGenerate")
                 .Where(static candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
-                .WithLogging(nameof(SystemsPipeline), "initializers_RemoveNullPass");
+                .WithLogging(PIPELINE_NAME, "initializers_RemoveNullPass");
             
             context.RegisterSourceOutput(systems, static (spc, system) => SystemSourceGenerator.Generate(spc, system));
             context.RegisterSourceOutput(initializers, static (spc, initializer) => InitializerSourceGenerator.Generate(spc, initializer));
@@ -48,6 +50,8 @@
                 if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
                     return null;
                 }
+                
+                Logger.Log(PIPELINE_NAME, generatorStepName, $"Transform: {typeSymbol.Name}");
 
                 var args = ctx.Attributes[0].ConstructorArguments;
 
@@ -74,7 +78,7 @@
                     SkipCommit: skipCommit,
                     AlwaysEnabled: alwaysEnabled);
             } catch (Exception e) {
-                Logger.LogException(nameof(SystemsPipeline), generatorStepName, e);
+                Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;
             }
         }
@@ -88,6 +92,8 @@
                 if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
                     return null;
                 }
+                
+                Logger.Log(PIPELINE_NAME, generatorStepName, $"Transform: {typeSymbol.Name}");
 
                 var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
 
@@ -100,7 +106,7 @@
                     TypeKind: typeSymbol.TypeKind,
                     Visibility: typeSymbol.DeclaredAccessibility);
             } catch (Exception e) {
-                Logger.LogException(nameof(SystemsPipeline), generatorStepName, e);
+                Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;
             }
         }
