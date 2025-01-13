@@ -39,9 +39,20 @@
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
                 .WithLogging(PIPELINE_NAME, "providers_RemoveNullPass");
+            
+            var isUnity = context.CompilationProvider
+                .Select(static (compilation, _) => compilation.GetTypeByMetadataName("UnityEngine.MonoBehaviour") is not null);
+
+            var providersOnlyInUnity = providers.Combine(isUnity)
+                .Where(static pair => pair.Item2)
+                .Select(static (pair, ct) => {
+                    ct.ThrowIfCancellationRequested();
+
+                    return pair.Item1;
+                });
 
             context.RegisterSourceOutput(components, static (spc, component) => ComponentSourceGenerator.Generate(spc, component));
-            context.RegisterSourceOutput(providers, static (spc, provider) => MonoProviderSourceGenerator.Generate(spc, provider));
+            context.RegisterSourceOutput(providersOnlyInUnity, static (spc, provider) => MonoProviderSourceGenerator.Generate(spc, provider));
         }
 
         private static ComponentToGenerate? ExtractComponentsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
