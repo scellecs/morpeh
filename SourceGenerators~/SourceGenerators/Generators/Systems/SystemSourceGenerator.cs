@@ -38,10 +38,9 @@
                 .Append(' ')
                 .Append(system.TypeName)
                 .Append(system.GenericParams)
-                .Append(" : Scellecs.Morpeh.IInitializer ")
+                .Append(system.AlwaysEnabled ? " : Scellecs.Morpeh.ISystem " : " : Scellecs.Morpeh.IEnableableSystem ")
                 .Append(system.GenericConstraints)
                 .AppendLine(" {");
-
 
             using (indent.Scope()) {
                 sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
