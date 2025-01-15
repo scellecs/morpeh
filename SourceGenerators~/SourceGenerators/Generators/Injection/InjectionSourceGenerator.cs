@@ -146,7 +146,7 @@
                 var attributes = fieldSymbol.GetAttributes();
 
                 for (int j = 0, attributesLength = attributes.Length; j < attributesLength; j++) {
-                    if (attributes[j].AttributeClass?.Name == MorpehAttributes.INJECT_NAME) {
+                    if (attributes[j].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
                         symbols.Add(fieldSymbol);
                     }
                 }
@@ -168,7 +168,7 @@
 
                     var attributes = fieldSymbol.GetAttributes();
                     for (int j = 0, jlength = attributes.Length; j < jlength; j++) {
-                        if (attributes[j].AttributeClass?.Name == MorpehAttributes.INJECT_NAME) {
+                        if (attributes[j].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
                             return true;
                         }
                     }

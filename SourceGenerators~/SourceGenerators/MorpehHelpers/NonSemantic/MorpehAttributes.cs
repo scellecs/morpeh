@@ -18,9 +18,6 @@
 
         public const string INITIALIZER_NAME      = "EcsInitializerAttribute";
         public const string INITIALIZER_FULL_NAME = "Scellecs.Morpeh.EcsInitializerAttribute";
-
-        public const string INJECT_NAME      = "InjectAttribute";
-        public const string INJECT_FULL_NAME = "Scellecs.Morpeh.InjectAttribute";
         
         public const string INJECTABLE_NAME      = "InjectableAttribute";
         public const string INJECTABLE_FULL_NAME = "Scellecs.Morpeh.InjectableAttribute";
