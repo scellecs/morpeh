@@ -75,7 +75,7 @@
             return SyntaxKind.PublicKeyword;
         }
         
-        public static string GetVisibilityModifierString(SyntaxKind syntaxKind) {
+        public static string AsString(SyntaxKind syntaxKind) {
             switch (syntaxKind) {
                 case SyntaxKind.PublicKeyword:
                     return "public";
@@ -90,7 +90,7 @@
             return "public";
         }
         
-        public static string GetVisibilityModifierString(Accessibility accessibility) {
+        public static string AsString(Accessibility accessibility) {
             return accessibility switch {
                 Accessibility.Public => "public",
                 Accessibility.Internal => "internal",

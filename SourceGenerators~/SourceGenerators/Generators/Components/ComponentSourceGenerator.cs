@@ -34,7 +34,7 @@
 
             sb.AppendIl2CppAttributes(indent);
             sb.AppendIndent(indent)
-                .Append(Types.GetVisibilityModifierString(component.Visibility))
+                .Append(Types.AsString(component.Visibility))
                 .Append(" partial struct ")
                 .Append(component.TypeName)
                 .Append(component.GenericParams)

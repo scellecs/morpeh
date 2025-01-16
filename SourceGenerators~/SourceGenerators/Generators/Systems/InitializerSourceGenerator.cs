@@ -32,7 +32,7 @@
 
             sb.AppendIl2CppAttributes(indent);
             sb.AppendIndent(indent)
-                .Append(Types.GetVisibilityModifierString(initializer.Visibility))
+                .Append(Types.AsString(initializer.Visibility))
                 .Append(" partial ")
                 .Append(Types.AsString(initializer.TypeKind))
                 .Append(' ')

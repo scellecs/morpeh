@@ -37,7 +37,7 @@
 
             sb.AppendIl2CppAttributes(indent);
             sb.AppendIndent(indent)
-                .Append(Types.GetVisibilityModifierString(provider.Visibility))
+                .Append(Types.AsString(provider.Visibility))
                 .Append(" partial class ")
                 .Append(typeName)
                 .Append(provider.GenericParams)
@@ -107,7 +107,7 @@
                 }
 
                 sb.AppendLine().AppendLine();
-                sb.AppendIndent(indent).Append(Types.GetVisibilityModifierString(provider.ProviderTypeVisibility)).Append(" ").Append(specializationType).AppendLine(" Stash {");
+                sb.AppendIndent(indent).Append(Types.AsString(provider.ProviderTypeVisibility)).Append(" ").Append(specializationType).AppendLine(" Stash {");
                 using (indent.Scope()) {
                     sb.AppendIndent(indent).AppendLine("get {");
                     using (indent.Scope()) {
