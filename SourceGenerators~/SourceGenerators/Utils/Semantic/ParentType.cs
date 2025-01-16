@@ -60,10 +60,12 @@
 
             var currentSymbol = typeSymbol.ContainingType;
             
+            var sb = StringBuilderPool.Get();
+            
             while (currentSymbol != null && IsAllowedSymbol(currentSymbol.TypeKind)) {
                 parentType = new ParentType(
                     Child: parentType,
-                    TypeNameWithGenerics: StringBuilderPool.Get().Append(currentSymbol.Name).AppendGenericParams(currentSymbol).AppendGenericConstraints(currentSymbol).ToStringAndReturn(),
+                    TypeNameWithGenerics: sb.Clear().Append(currentSymbol.Name).AppendGenericParams(currentSymbol).AppendGenericConstraints(currentSymbol).ToString(),
                     TypeKind: currentSymbol.TypeKind,
                     Visibility: currentSymbol.DeclaredAccessibility,
                     IsStatic: currentSymbol.IsStatic,
@@ -73,6 +75,8 @@
 
                 currentSymbol = currentSymbol.ContainingType;
             }
+            
+            StringBuilderPool.Return(sb);
             
             return parentType;
         }
