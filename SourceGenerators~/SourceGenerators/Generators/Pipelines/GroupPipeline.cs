@@ -130,14 +130,10 @@
                 if (args.Length >= 1 && args[0].Value is bool inlineUpdateMethodsValue) {
                     inlineUpdateMethods = inlineUpdateMethodsValue;
                 }
-
-                var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
-
+                
                 return new SystemsGroupToGenerate(
                     TypeName: typeSymbol.Name,
                     TypeNamespace: typeSymbol.GetNamespaceString(),
-                    GenericParams: genericParams,
-                    GenericConstraints: genericConstraints,
                     Fields: new EquatableArray<SystemsGroupField>(systemsGroupFields),
                     TypeKind: typeSymbol.TypeKind,
                     Visibility: typeSymbol.DeclaredAccessibility,
@@ -206,13 +202,9 @@
                         TypeName: fieldTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
                 }
                 
-                var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
-                
                 return new RunnerToGenerate(
                     TypeName: typeSymbol.Name,
                     TypeNamespace: typeSymbol.GetNamespaceString(),
-                    GenericParams: genericParams,
-                    GenericConstraints: genericConstraints,
                     Fields: new EquatableArray<RunnerField>(fields),
                     TypeKind: typeSymbol.TypeKind,
                     Visibility: typeSymbol.DeclaredAccessibility);

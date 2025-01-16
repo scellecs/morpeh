@@ -38,11 +38,8 @@
                 .Append(Types.AsString(runner.TypeKind))
                 .Append(' ')
                 .Append(runner.TypeName)
-                .Append(runner.GenericParams)
                 .Append(" : ")
                 .Append(KnownTypes.DISPOSABLE_FULL_NAME)
-                .Append(' ')
-                .Append(runner.GenericConstraints)
                 .AppendLine(" {");
 
             using (indent.Scope()) {

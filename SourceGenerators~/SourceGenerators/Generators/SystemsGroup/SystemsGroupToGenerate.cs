@@ -5,8 +5,6 @@
     public record struct SystemsGroupToGenerate(
         string TypeName,
         string? TypeNamespace,
-        string GenericParams,
-        string GenericConstraints,
         EquatableArray<SystemsGroupField> Fields,
         TypeKind TypeKind,
         Accessibility Visibility,

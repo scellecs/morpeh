@@ -39,8 +39,6 @@
                 .Append(Types.AsString(systemsGroup.TypeKind))
                 .Append(' ')
                 .Append(systemsGroup.TypeName)
-                .Append(systemsGroup.GenericParams)
-                .Append(systemsGroup.GenericConstraints)
                 .AppendLine(" {");
 
             using (indent.Scope()) {
