@@ -20,10 +20,8 @@
         }
         
         public static string Generate(in SystemsGroupToGenerate systemsGroup) {
-            var typeName = systemsGroup.TypeName;
-
-            var inlineUpdateMethods = systemsGroup.InlineUpdateMethods;
-
+            var fields = systemsGroup.Fields;
+            
             var sb     = StringBuilderPool.Get();
             var indent = IndentSourcePool.Get();
 
@@ -40,16 +38,14 @@
                 .Append(" partial ")
                 .Append(Types.AsString(systemsGroup.TypeKind))
                 .Append(' ')
-                .Append(typeName)
+                .Append(systemsGroup.TypeName)
                 .Append(systemsGroup.GenericParams)
                 .Append(systemsGroup.GenericConstraints)
                 .AppendLine(" {");
-            
-            var fields = systemsGroup.Fields;
 
             using (indent.Scope()) {
                 sb.AppendLine().AppendLine();
-                sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
+                sb.AppendIndent(indent).Append("public ").Append(systemsGroup.TypeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                 using (indent.Scope()) {
                     for (int i = 0, length = fields.Length; i < length; i++) {
                         var field = fields[i];
@@ -98,7 +94,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, typeName, "CallAwake", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallAwake", indent)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
                             
@@ -111,12 +107,12 @@
                 sb.AppendIndent(indent).AppendLine("}");
                 
                 sb.AppendLine().AppendLine();
-                if (inlineUpdateMethods) {
+                if (systemsGroup.InlineUpdateMethods) {
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                 }
                 sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, typeName, "CallUpdate", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallUpdate", indent)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
                             
@@ -131,7 +127,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallDispose(Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, typeName, "CallDispose", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallDispose", indent)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
                             
@@ -148,7 +144,7 @@
                                 sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                                 sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                                 using (indent.Scope()) {
-                                    sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(typeName).AppendLine(" (Dispose)\");");
+                                    sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(systemsGroup.TypeName).AppendLine(" (Dispose)\");");
                                     sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
                                 }
 

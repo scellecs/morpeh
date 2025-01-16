@@ -19,7 +19,6 @@
         }
         
         public static string Generate(in RunnerToGenerate runner) {
-            var typeName      = runner.TypeName;
             var fields = runner.Fields;
 
             var sb     = StringBuilderPool.Get();
@@ -38,7 +37,7 @@
                 .Append(" partial ")
                 .Append(Types.AsString(runner.TypeKind))
                 .Append(' ')
-                .Append(typeName)
+                .Append(runner.TypeName)
                 .Append(runner.GenericParams)
                 .Append(" : ")
                 .Append(KnownTypes.DISPOSABLE_FULL_NAME)
@@ -51,9 +50,9 @@
                 sb.AppendIndent(indent).AppendLine("private readonly Scellecs.Morpeh.InjectionTable _injectionTable;");
 
                 sb.AppendLine().AppendLine();
-                sb.AppendIndent(indent).Append("public ").Append(typeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
+                sb.AppendIndent(indent).Append("public ").Append(runner.TypeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, typeName, "Constructor", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "Constructor", indent)) {
                         sb.AppendIndent(indent).AppendLine("_world = world;");
                         sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
 
@@ -76,7 +75,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void OnAwake() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, typeName, "OnAwake", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "OnAwake", indent)) {
                         sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
 
                         for (int i = 0, length = fields.Length; i < length; i++) {
@@ -94,7 +93,7 @@
                 sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
 
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, typeName, "CallUpdate", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "CallUpdate", indent)) {
                         sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
 
                         for (int i = 0, length = fields.Length; i < length; i++) {
@@ -107,7 +106,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void Dispose() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, typeName, "Dispose", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "Dispose", indent)) {
                         sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
 
                         for (int i = 0, length = fields.Length; i < length; i++) {
