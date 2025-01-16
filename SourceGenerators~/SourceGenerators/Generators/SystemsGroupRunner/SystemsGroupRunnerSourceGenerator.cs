@@ -1,83 +1,49 @@
 ﻿namespace SourceGenerators.Generators.SystemsGroupRunner {
-    using System.Collections.Generic;
-    using Diagnostics;
+    using System;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
+    using Utils.Logging;
     using Utils.NonSemantic;
-    using Utils.Semantic;
     using Utils.Pools;
     
-    // TODO: Add string-output Generate method after making inputs DTOs
     public static class SystemsGroupRunnerSourceGenerator {
-        public static void Generate(SourceProductionContext spc, (TypeDeclarationSyntax? typeDeclaration, INamedTypeSymbol? typeSymbol) pair) {
-            var (typeDeclaration, typeSymbol) = pair;
-            if (typeDeclaration is null || typeSymbol is null) {
-                return;
+        public static void Generate(SourceProductionContext spc, in RunnerToGenerate runner) {
+            try {
+                var source = Generate(runner);
+                spc.AddSource($"{runner.TypeName}.runner_{Guid.NewGuid():N}.g.cs", source);
+                
+                Logger.Log(nameof(SystemsGroupRunnerSourceGenerator), nameof(Generate), $"Generated systems group: {runner.TypeName}");
+            } catch (Exception e) {
+                Logger.LogException(nameof(SystemsGroupRunnerSourceGenerator), nameof(Generate), e);
             }
-
-            if (!RunDiagnostics(spc, typeDeclaration)) {
-                return;
-            }
-
-            var typeName      = typeDeclaration.Identifier.ToString();
-            var existingLoops = new HashSet<MorpehLoopTypeSemantic.LoopDefinition>();
-
-            var fields = RunnerFieldDefinitionCache.GetList();
-
-            var typeMembers = typeSymbol.GetMembers();
-            for (int i = 0, length = typeMembers.Length; i < length; i++) {
-                if (typeMembers[i] is not IFieldSymbol fieldSymbol) {
-                    continue;
-                }
-
-                if (fieldSymbol.Type is not INamedTypeSymbol fieldTypeSymbol) {
-                    continue;
-                }
-
-                var loops            = new HashSet<MorpehLoopTypeSemantic.LoopDefinition>();
-                var fieldTypeMembers = fieldTypeSymbol.GetMembers();
-
-                for (int j = 0, jlength = fieldTypeMembers.Length; j < jlength; j++) {
-                    if (fieldTypeMembers[j] is not IFieldSymbol fieldTypeMemberSymbol) {
-                        continue;
-                    }
-
-                    var loopDefinition = MorpehLoopTypeSemantic.FindLoopType(fieldTypeMemberSymbol.GetAttributes());
-                    if (loopDefinition == null) {
-                        continue;
-                    }
-
-                    loops.Add(loopDefinition.Value);
-                }
-
-                fields.Add(new RunnerFieldDefinition(
-                    fieldTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                    fieldSymbol.Name,
-                    loops));
-
-                existingLoops.UnionWith(loops);
-            }
+        }
+        
+        public static string Generate(in RunnerToGenerate runner) {
+            var typeName      = runner.TypeName;
+            var fields = runner.Fields;
 
             var sb     = StringBuilderPool.Get();
             var indent = IndentSourcePool.Get();
 
             sb.AppendMorpehDebugDefines();
-            sb.AppendIndent(indent).AppendLine("using Scellecs.Morpeh;");
-            sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
+
+            if (runner.TypeNamespace != null) {
+                sb.AppendIndent(indent).Append("namespace ").Append(runner.TypeNamespace).AppendLine(" {");
+                indent.Right();
+            }
 
             sb.AppendIl2CppAttributes(indent);
             sb.AppendIndent(indent)
-                .AppendVisibility(typeDeclaration)
+                .Append(Types.GetVisibilityModifierString(runner.Visibility))
                 .Append(" partial ")
-                .AppendTypeDeclarationType(typeDeclaration)
+                .Append(Types.AsString(runner.TypeKind))
                 .Append(' ')
                 .Append(typeName)
-                .AppendGenericParams(typeDeclaration)
+                .Append(runner.GenericParams)
                 .Append(" : ")
                 .Append(KnownTypes.DISPOSABLE_FULL_NAME)
                 .Append(' ')
-                .AppendGenericConstraints(typeSymbol)
+                .Append(runner.GenericConstraints)
                 .AppendLine(" {");
 
             using (indent.Scope()) {
@@ -91,31 +57,30 @@
                         sb.AppendIndent(indent).AppendLine("_world = world;");
                         sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
 
-                        for (int i = 0, length = fields.Count; i < length; i++) {
-                            sb.AppendIndent(indent).Append(fields[i].fieldName).Append(" = ").Append("new ").Append(fields[i].typeName).AppendLine("(world, injectionTable);");
+                        for (int i = 0, length = fields.Length; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].Name).Append(" = ").Append("new ").Append(fields[i].TypeName).AppendLine("(world, injectionTable);");
                         }
 
                         sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
                         using (indent.Scope()) {
-                            for (int i = 0, length = fields.Count; i < length; i++) {
-                                sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".Inject(injectionTable);");
+                            for (int i = 0, length = fields.Length; i < length; i++) {
+                                sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".Inject(injectionTable);");
                             }
                         }
 
                         sb.AppendIndent(indent).AppendLine("}");
                     }
                 }
-
                 sb.AppendIndent(indent).AppendLine("}");
 
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void OnAwake() {");
                 using (indent.Scope()) {
                     using (MorpehSyntax.ScopedProfile(sb, typeName, "OnAwake", indent)) {
-                        sb.AppendIndent(indent).AppendLine("_world.Commit();");
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
 
-                        for (int i = 0, length = fields.Count; i < length; i++) {
-                            sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".CallAwake();");
+                        for (int i = 0, length = fields.Length; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".CallAwake();");
                         }
 
                         sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
@@ -123,64 +88,45 @@
                         sb.AppendEndIfDefine();
                     }
                 }
+                sb.AppendIndent(indent).AppendLine("}");
+                
+                sb.AppendLine().AppendLine();
+                sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
 
+                using (indent.Scope()) {
+                    using (MorpehSyntax.ScopedProfile(sb, typeName, "CallUpdate", indent)) {
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
+
+                        for (int i = 0, length = fields.Length; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".CallUpdate(deltaTime);");
+                        }
+                    }
+                }
                 sb.AppendIndent(indent).AppendLine("}");
 
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void Dispose() {");
                 using (indent.Scope()) {
                     using (MorpehSyntax.ScopedProfile(sb, typeName, "Dispose", indent)) {
-                        sb.AppendIndent(indent).AppendLine("_world.Commit();");
+                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
 
-                        for (int i = 0, length = fields.Count; i < length; i++) {
-                            sb.AppendIndent(indent).Append(fields[i].fieldName).AppendLine(".CallDispose(_injectionTable);");
+                        for (int i = 0, length = fields.Length; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".CallDispose(_injectionTable);");
                         }
                     }
                 }
-
                 sb.AppendIndent(indent).AppendLine("}");
-
-                foreach (var existingLoop in existingLoops) {
-                    var methodName = existingLoop.MethodName;
-
-                    sb.AppendLine().AppendLine();
-                    sb.AppendIndent(indent).Append("public void ").Append(methodName).AppendLine("(float deltaTime) {");
-
-                    using (indent.Scope()) {
-                        using (MorpehSyntax.ScopedProfile(sb, typeName, methodName, indent)) {
-                            sb.AppendIndent(indent).AppendLine("_world.Commit();");
-
-                            for (int j = 0, jlength = fields.Count; j < jlength; j++) {
-                                if (!fields[j].loops.Contains(existingLoop)) {
-                                    continue;
-                                }
-
-                                sb.AppendIndent(indent).Append(fields[j].fieldName).Append('.').Append(methodName).AppendLine("(deltaTime);");
-                            }
-                        }
-                    }
-
-                    sb.AppendIndent(indent).AppendLine("}");
-                }
             }
-
             sb.AppendIndent(indent).AppendLine("}");
-            sb.AppendEndNamespace(typeDeclaration, indent);
-
-            spc.AddSource($"{typeName}.systemsgrouprunner_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToStringAndReturn());
+            
+            if (runner.TypeNamespace != null) {
+                indent.Left();
+                sb.AppendIndent(indent).AppendLine("}");
+            }
 
             IndentSourcePool.Return(indent);
-        }
-        
-        private static bool RunDiagnostics(SourceProductionContext spc, TypeDeclarationSyntax typeDeclaration) {
-            var success = true;
 
-            if (typeDeclaration.IsDeclaredInsideAnotherType()) {
-                Errors.ReportNestedDeclaration(spc, typeDeclaration);
-                success = false;
-            }
-
-            return success;
+            return sb.ToStringAndReturn();
         }
     }
 }

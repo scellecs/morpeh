@@ -78,10 +78,8 @@
                             }
                         }
                     }
-
                     sb.AppendIndent(indent).AppendLine("}");
                 }
-
                 sb.AppendIndent(indent).AppendLine("}");
 
                 sb.AppendLine().AppendLine();
@@ -95,7 +93,6 @@
                         }
                     }
                 }
-
                 sb.AppendIndent(indent).AppendLine("}");
 
                 sb.AppendLine().AppendLine();
@@ -111,7 +108,6 @@
                         }
                     }
                 }
-
                 sb.AppendIndent(indent).AppendLine("}");
                 
                 sb.AppendLine().AppendLine();
@@ -177,14 +173,11 @@
                                 }
                             }
                         }
-
                         sb.AppendIndent(indent).AppendLine("}");
                     }
                 }
-
                 sb.AppendIndent(indent).AppendLine("}");
             }
-
             sb.AppendIndent(indent).AppendLine("}");
             
             if (systemsGroup.TypeNamespace != null) {
