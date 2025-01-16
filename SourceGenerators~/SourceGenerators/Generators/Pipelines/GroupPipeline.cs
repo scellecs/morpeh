@@ -20,7 +20,7 @@
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
-                    predicate: static (s, _) => s is TypeDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
+                    predicate: static (s, _) => s is TypeDeclarationSyntax,
                     transform: static (ctx, ct) => ExtractSystemsGroupsToGenerate(ctx, ct))
                 .WithTrackingName(TrackingNames.FIRST_PASS)
                 .WithLogging(PIPELINE_NAME, "systemsgroup_ExtractSystemsGroupsToGenerate")
@@ -31,7 +31,7 @@
             
             var runners = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
-                    predicate: static (s, _) => s is ClassDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
+                    predicate: static (s, _) => s is ClassDeclarationSyntax,
                     transform: static (ctx, ct) => ExtractRunnersToGenerate(ctx, ct))
                 .WithTrackingName(TrackingNames.FIRST_PASS)
                 .WithLogging(PIPELINE_NAME, "runner_ExtractSystemsGroupsToGenerate")
@@ -132,6 +132,7 @@
                 }
                 
                 return new SystemsGroupToGenerate(
+                    Hierarchy: ParentType.FromTypeSymbol(typeSymbol), 
                     TypeName: typeSymbol.Name,
                     TypeNamespace: typeSymbol.GetNamespaceString(),
                     Fields: new EquatableArray<SystemsGroupField>(systemsGroupFields),
@@ -203,6 +204,7 @@
                 }
                 
                 return new RunnerToGenerate(
+                    Hierarchy: ParentType.FromTypeSymbol(typeSymbol),
                     TypeName: typeSymbol.Name,
                     TypeNamespace: typeSymbol.GetNamespaceString(),
                     Fields: new EquatableArray<RunnerField>(fields),

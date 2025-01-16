@@ -6,6 +6,7 @@
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
+    using Utils.Semantic;
 
     public static class SystemSourceGenerator {
         public static void Generate(SourceProductionContext spc, in SystemToGenerate system) {
@@ -29,6 +30,8 @@
                 sb.AppendIndent(indent).Append("namespace ").Append(system.TypeNamespace).AppendLine(" {");
                 indent.Right();
             }
+            
+            var hierarchyDepth = ParentType.WriteOpen(sb, indent, system.Hierarchy);
 
             sb.AppendIl2CppAttributes(indent);
             sb.AppendIndent(indent)
@@ -177,6 +180,8 @@
             }
 
             sb.AppendIndent(indent).AppendLine("}");
+            
+            ParentType.WriteClose(sb, indent, hierarchyDepth);
 
             if (system.TypeNamespace != null) {
                 indent.Left();

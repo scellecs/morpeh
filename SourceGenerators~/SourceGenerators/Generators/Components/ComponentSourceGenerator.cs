@@ -8,6 +8,7 @@
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
+    using Utils.Semantic;
 
     public static class ComponentSourceGenerator {
         public static void Generate(SourceProductionContext spc, in ComponentToGenerate component) {
@@ -31,6 +32,8 @@
                 sb.AppendIndent(indent).Append("namespace ").Append(component.TypeNamespace).AppendLine(" {");
                 indent.Right();
             }
+            
+            var hierarchyDepth = ParentType.WriteOpen(sb, indent, component.Hierarchy);
 
             sb.AppendIl2CppAttributes(indent);
             sb.AppendIndent(indent)
@@ -56,6 +59,8 @@
             }
 
             sb.AppendIndent(indent).AppendLine("}");
+            
+            ParentType.WriteClose(sb, indent, hierarchyDepth);
 
             if (component.TypeNamespace != null) {
                 indent.Left();

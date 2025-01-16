@@ -17,7 +17,7 @@
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var systems = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEM_FULL_NAME,
-                    predicate: static (s, _) => s is TypeDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
+                    predicate: static (s, _) => s is TypeDeclarationSyntax,
                     transform: static (s, ct) => ExtractSystemsToGenerate(s, ct))
                 .WithTrackingName(TrackingNames.FIRST_PASS)
                 .WithLogging(PIPELINE_NAME, "systems_ExtractSystemsToGenerate")
@@ -28,7 +28,7 @@
             
             var initializers = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.INITIALIZER_FULL_NAME,
-                    predicate: static (s, _) => s is TypeDeclarationSyntax syntaxNode && syntaxNode.Parent is not TypeDeclarationSyntax,
+                    predicate: static (s, _) => s is TypeDeclarationSyntax,
                     transform: static (s, ct) => ExtractInitializersToGenerate(s, ct))
                 .WithTrackingName(TrackingNames.FIRST_PASS)
                 .WithLogging(PIPELINE_NAME, "initializers_ExtractInitializersToGenerate")
@@ -68,6 +68,7 @@
                 var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
 
                 return new SystemToGenerate(
+                    Hierarchy: ParentType.FromTypeSymbol(typeSymbol), 
                     TypeName: typeSymbol.Name,
                     TypeNamespace: typeSymbol.GetNamespaceString(),
                     GenericParams: genericParams,
@@ -98,6 +99,7 @@
                 var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
 
                 return new InitializerToGenerate(
+                    Hierarchy: ParentType.FromTypeSymbol(typeSymbol), 
                     TypeName: typeSymbol.Name,
                     TypeNamespace: typeSymbol.GetNamespaceString(),
                     GenericParams: genericParams,

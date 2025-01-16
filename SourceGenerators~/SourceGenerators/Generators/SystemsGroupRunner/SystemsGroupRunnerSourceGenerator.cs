@@ -5,7 +5,8 @@
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
-    
+    using Utils.Semantic;
+
     public static class SystemsGroupRunnerSourceGenerator {
         public static void Generate(SourceProductionContext spc, in RunnerToGenerate runner) {
             try {
@@ -30,6 +31,8 @@
                 sb.AppendIndent(indent).Append("namespace ").Append(runner.TypeNamespace).AppendLine(" {");
                 indent.Right();
             }
+            
+            var hierarchyDepth = ParentType.WriteOpen(sb, indent, runner.Hierarchy);
 
             sb.AppendIl2CppAttributes(indent);
             sb.AppendIndent(indent)
@@ -114,6 +117,8 @@
                 sb.AppendIndent(indent).AppendLine("}");
             }
             sb.AppendIndent(indent).AppendLine("}");
+            
+            ParentType.WriteClose(sb, indent, hierarchyDepth);
             
             if (runner.TypeNamespace != null) {
                 indent.Left();

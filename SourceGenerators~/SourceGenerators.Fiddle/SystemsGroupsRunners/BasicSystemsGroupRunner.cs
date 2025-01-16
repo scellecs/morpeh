@@ -4,5 +4,5 @@ using Scellecs.Morpeh;
 
 [EcsSystemsGroupRunner]
 public partial class BasicSystemsGroupRunner {
-    private readonly BasicSystemsGroup _basicSystemsGroup;
+    private readonly BasicFeature.Update _basicFeature;
 }

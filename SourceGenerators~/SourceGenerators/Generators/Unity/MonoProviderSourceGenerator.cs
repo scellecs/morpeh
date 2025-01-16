@@ -6,6 +6,7 @@
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
+    using Utils.Semantic;
 
     public static class MonoProviderSourceGenerator {
         public static void Generate(SourceProductionContext spc, in ProviderToGenerate provider) {
@@ -34,6 +35,8 @@
                 sb.AppendIndent(indent).Append("namespace ").Append(provider.TypeNamespace).AppendLine(" {");
                 indent.Right();
             }
+            
+            var hierarchyDepth = ParentType.WriteOpen(sb, indent, provider.Hierarchy);
 
             sb.AppendIl2CppAttributes(indent);
             sb.AppendIndent(indent)
@@ -191,6 +194,8 @@
             }
 
             sb.AppendIndent(indent).AppendLine("}");
+            
+            ParentType.WriteClose(sb, indent, hierarchyDepth);
 
             if (provider.TypeNamespace != null) {
                 indent.Left();
