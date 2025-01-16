@@ -7,9 +7,11 @@
     public record ParentType(
         ParentType? Child,
         string TypeNameWithGenerics,
-        string GenericConstraints,
         TypeKind TypeKind,
-        Accessibility Visibility) {
+        Accessibility Visibility,
+        bool IsStatic,
+        bool IsAbstract,
+        bool IsSealed) {
         
         public static int WriteOpen(StringBuilder sb, IndentSource indent, ParentType? parentType) {
             var hierarchyDepth   = 0;
@@ -18,11 +20,23 @@
             while (currentHierarchy != null) {
                 sb.AppendIndent(indent)
                     .Append(Types.AsString(currentHierarchy.Visibility))
-                    .Append(" partial ")
-                    .Append(Types.AsString(currentHierarchy.TypeKind))
+                    .Append(" partial ");
+
+                if (currentHierarchy.IsStatic) {
+                    sb.Append("static ");
+                }
+                
+                if (currentHierarchy.IsAbstract) {
+                    sb.Append("abstract ");
+                }
+                
+                if (currentHierarchy.IsSealed) {
+                    sb.Append("sealed ");
+                }
+                    
+                sb.Append(Types.AsString(currentHierarchy.TypeKind))
                     .Append(' ')
                     .Append(currentHierarchy.TypeNameWithGenerics)
-                    .Append(currentHierarchy.GenericConstraints)
                     .AppendLine(" {");
                 
                 indent.Right();
@@ -49,10 +63,12 @@
             while (currentSymbol != null && IsAllowedSymbol(currentSymbol.TypeKind)) {
                 parentType = new ParentType(
                     Child: parentType,
-                    TypeNameWithGenerics: StringBuilderPool.Get().Append(currentSymbol.Name).AppendGenericParams(currentSymbol).ToStringAndReturn(),
-                    GenericConstraints: StringBuilderPool.Get().AppendGenericConstraints(currentSymbol).ToStringAndReturn(),
+                    TypeNameWithGenerics: StringBuilderPool.Get().Append(currentSymbol.Name).AppendGenericParams(currentSymbol).AppendGenericConstraints(currentSymbol).ToStringAndReturn(),
                     TypeKind: currentSymbol.TypeKind,
-                    Visibility: currentSymbol.DeclaredAccessibility
+                    Visibility: currentSymbol.DeclaredAccessibility,
+                    IsStatic: currentSymbol.IsStatic,
+                    IsAbstract: currentSymbol.IsAbstract,
+                    IsSealed: currentSymbol.IsSealed
                 );
 
                 currentSymbol = currentSymbol.ContainingType;

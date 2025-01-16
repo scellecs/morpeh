@@ -17,13 +17,15 @@ public partial class InjectionHierarchyClass : BaseInjectionHierarchyClass {
     private IDisposable _disposable;
 }
 
-[Injectable]
-public partial class InjectionUpperHierarchyClass : InjectionHierarchyClass {
+public partial class OuterScopeForParentInjection {
     [Injectable]
-    private IDisposable _disposable_upper;
+    public partial class InjectionUpperHierarchyClass : InjectionHierarchyClass {
+        [Injectable]
+        private IDisposable _disposable_upper;
+    }
 }
 
-public class InjectionMiddlewareClass : InjectionUpperHierarchyClass {
+public class InjectionMiddlewareClass : OuterScopeForParentInjection.InjectionUpperHierarchyClass {
     
 }
 
