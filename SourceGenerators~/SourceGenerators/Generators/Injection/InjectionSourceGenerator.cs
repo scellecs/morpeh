@@ -59,10 +59,6 @@
                     return;
                 }
 #endif
-                
-                if (!RunDiagnostics(spc, typeDeclaration)) {
-                    return;
-                }
 
                 var fields = ThreadStaticListCache<IFieldSymbol>.GetClear();
                 FillInjectableFields(fields, typeSymbol);
@@ -71,6 +67,7 @@
                     return;
                 }
                 
+                var hierarchy = ParentType.FromTypeSymbol(typeSymbol);
                 var hasInjectionInParents = HasInjectionsInParents(typeSymbol);
                 
                 var typeName = typeDeclaration.Identifier.ToString();
@@ -79,6 +76,8 @@
                 var indent = IndentSourcePool.Get();
                 
                 sb.AppendBeginNamespace(typeDeclaration, indent).AppendLine();
+                
+                var hierarchyDepth = ParentType.WriteOpen(sb, indent, hierarchy);
 
                 sb.AppendIndent(indent)
                     .AppendVisibility(typeDeclaration)
@@ -127,6 +126,9 @@
                 }
                 
                 sb.AppendIndent(indent).AppendLine("}");
+                
+                ParentType.WriteClose(sb, indent, hierarchyDepth);
+                
                 sb.AppendEndNamespace(typeDeclaration, indent);
                 
                 spc.AddSource($"{typeName}.injection_{typeSymbol.GetFullyQualifiedNameHash()}.g.cs", sb.ToStringAndReturn());
@@ -187,17 +189,6 @@
 
 
             return false;
-        }
-        
-        private static bool RunDiagnostics(SourceProductionContext spc, TypeDeclarationSyntax typeDeclaration) {
-            var success = true;
-
-            if (typeDeclaration.IsDeclaredInsideAnotherType()) {
-                Errors.ReportNestedDeclaration(spc, typeDeclaration);
-                success = false;
-            }
-
-            return success;
         }
         
         private static GenericResolver? ExtractGenericResolver(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {

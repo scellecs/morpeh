@@ -27,8 +27,10 @@ public class InjectionMiddlewareClass : InjectionUpperHierarchyClass {
     
 }
 
-[Injectable]
-public partial class InjectionAfterMiddlewareClass : InjectionMiddlewareClass {
+public partial class OuterScopeForInjection {
     [Injectable]
-    private IDisposable _disposable_after_middleware;
+    public partial class InjectionAfterMiddlewareClass : InjectionMiddlewareClass {
+        [Injectable]
+        private IDisposable _disposable_after_middleware;
+    }
 }
