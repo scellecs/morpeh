@@ -4,22 +4,22 @@ using Scellecs.Morpeh;
 
 [Injectable]
 public abstract partial class BaseInjectionHierarchyClass {
-    [Inject]
+    [Injectable]
     private IDisposable _disposable_base1;
     
-    [Inject]
+    [Injectable]
     private IDisposable _disposable_base2;
 }
 
 [Injectable]
 public partial class InjectionHierarchyClass : BaseInjectionHierarchyClass {
-    [Inject]
+    [Injectable]
     private IDisposable _disposable;
 }
 
 [Injectable]
 public partial class InjectionUpperHierarchyClass : InjectionHierarchyClass {
-    [Inject]
+    [Injectable]
     private IDisposable _disposable_upper;
 }
 
@@ -29,6 +29,6 @@ public class InjectionMiddlewareClass : InjectionUpperHierarchyClass {
 
 [Injectable]
 public partial class InjectionAfterMiddlewareClass : InjectionMiddlewareClass {
-    [Inject]
+    [Injectable]
     private IDisposable _disposable_after_middleware;
 }
