@@ -11,14 +11,8 @@ public partial struct StructSystemsGroup {
     // [Register(typeof(IntPtr))]
     private readonly BasicDisposableClass _basicDisposableClass2;
     
-    private readonly BasicInitializer1 _basicInitializer1;
-    
-    [EcsLoop(LoopType.Update)]
-    private readonly BasicSystem1 _basicSystem1;
-    
-    [EcsLoop(LoopType.Tick)]
+    private readonly BasicInitializer1       _basicInitializer1;
+    private readonly BasicSystem1            _basicSystem1;
     private readonly BasicGenericSystem<int> _basicGenericSystem1;
-    
-    [EcsLoop(LoopType.TestAnother)]
     private readonly BasicGenericSystem<int> _basicGenericSystem2;
 }

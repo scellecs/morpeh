@@ -75,10 +75,10 @@ public class BasicDisposableClass : IDisposable {
 
 [Injectable]
 public partial class MultipleFieldsBaseClass {
-    [Inject]
+    [Injectable]
     private IDisposable disposable1;
     
-    [Inject]
+    [Injectable]
     private IDisposable disposable2;
     
     public virtual void Validate() {
@@ -89,10 +89,10 @@ public partial class MultipleFieldsBaseClass {
 
 [Injectable]
 public partial class ParentClass : MultipleFieldsBaseClass {
-    [Inject]
+    [Injectable]
     private IDisposable disposable3;
     
-    [Inject]
+    [Injectable]
     private IDisposable disposable4;
     
     public override void Validate() {
@@ -109,10 +109,10 @@ public class NonInjectableMiddlewareClass : ParentClass {
 
 [Injectable]
 public partial class InjectableMiddlewareClass : NonInjectableMiddlewareClass {
-    [Inject]
+    [Injectable]
     private IDisposable disposable5;
     
-    [Inject]
+    [Injectable]
     private IDisposable disposable6;
     
     public override void Validate() {
