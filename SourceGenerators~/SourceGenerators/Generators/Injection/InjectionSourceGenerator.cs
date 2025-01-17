@@ -1,6 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Injection {
     using System;
-    using System.Collections.Immutable;
     using Microsoft.CodeAnalysis;
     using Utils.Collections;
     using Utils.Logging;

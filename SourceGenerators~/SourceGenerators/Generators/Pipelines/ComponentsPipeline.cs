@@ -1,6 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Pipelines {
     using System;
-    using System.Linq;
     using System.Threading;
     using Components;
     using Microsoft.CodeAnalysis;
@@ -10,7 +9,6 @@
     using Unity;
     using Utils.Logging;
     using Utils.NonSemantic;
-    using Utils.Pools;
     using Utils.Semantic;
 
     [Generator]
