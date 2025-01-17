@@ -1,7 +1,9 @@
 ﻿namespace SourceGenerators.MorpehHelpers.Semantic {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Immutable;
     using System.Linq;
+    using System.Text;
     using Microsoft.CodeAnalysis;
     using NonSemantic;
     using SourceGenerators.Utils.NonSemantic;
@@ -114,15 +116,10 @@
                 for (int j = 1, jlength = symbolChars.Length; j < jlength; j++) {
                     sb.Append(symbolChars[j]);
                 }
-
-                if (componentTypeSymbol is { IsGenericType: true }) {
-                    var typeArguments = componentTypeSymbol.TypeArguments;
-                    
-                    for (int j = 0, jlength = typeArguments.Length; j < jlength; j++) {
-                        sb.Append('_');
-                        sb.Append(typeArguments[j].Name);
-                    }
-                }
+                
+                RecursiveGenericWalker
+                    .Create(sb, '_')
+                    .Walk(componentTypeSymbol);
                 
                 stashes.Add(new StashRequirement(
                     FieldName: sb.ToStringAndReturn(),
@@ -131,6 +128,37 @@
             }
             
             return new EquatableArray<StashRequirement>(stashes);
+        }
+
+        private readonly struct RecursiveGenericWalker {
+            private readonly StringBuilder sb;
+            private readonly char separator;
+            
+            private RecursiveGenericWalker(StringBuilder sb, char separator) {
+                this.sb = sb;
+                this.separator = separator;
+            }
+            
+            public static RecursiveGenericWalker Create(StringBuilder sb, char separator) => new(sb, separator);
+
+            public void Walk(INamedTypeSymbol typeSymbol) {
+                if (typeSymbol is not { IsGenericType: true }) {
+                    return;
+                }
+
+                var typeArguments = typeSymbol.TypeArguments;
+                    
+                for (int j = 0, jlength = typeArguments.Length; j < jlength; j++) {
+                    var typeArgument = typeArguments[j];
+                        
+                    this.sb.Append(this.separator);
+                    this.sb.Append(typeArgument.Name);
+                    
+                    if (typeArgument is INamedTypeSymbol namedTypeSymbol) {
+                        this.Walk(namedTypeSymbol);
+                    }
+                }
+            }
         }
     }
 }
