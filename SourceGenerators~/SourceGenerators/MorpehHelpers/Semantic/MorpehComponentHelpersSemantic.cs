@@ -66,14 +66,14 @@
                 .Where(m => m.Kind is SymbolKind.Field or SymbolKind.Property)
                 .All(f => f.IsStatic);
             
-            var isDisposable = members
-                .Where(m => m.Kind is SymbolKind.Method)
-                .Any(m => m.Name == "Dispose" && m is IMethodSymbol { Parameters: { Length: 0 } });
-
             if (isTag) {
                 return StashVariation.Tag;
             }
-
+            
+            var isDisposable = members
+                .Where(m => m.Kind is SymbolKind.Method)
+                .Any(m => m.Name == "Dispose" && m is IMethodSymbol { Parameters: { Length: 0 } });
+            
             if (isDisposable) {
                 return StashVariation.Disposable;
             }
