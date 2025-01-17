@@ -47,7 +47,8 @@
                     transform: static (ctx, ct) => ExtractGenericResolver(ctx, ct))
                 .Where(static resolver => resolver is not null)
                 .Select(static (resolver, _) => resolver!.Value)
-                .Collect();
+                .Collect()
+                .Select(static (resolvers, _) => new EquatableArray<GenericResolver>(resolvers));
             
             context.RegisterSourceOutput(injections.Combine(genericResolvers), static (spc, pair) => InjectionSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }

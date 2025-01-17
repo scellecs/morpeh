@@ -2,13 +2,14 @@
     using System;
     using System.Collections.Immutable;
     using Microsoft.CodeAnalysis;
+    using Utils.Collections;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     public static class InjectionSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in InjectionToGenerate injection, ImmutableArray<GenericResolver> genericResolvers) {
+        public static void Generate(SourceProductionContext spc, in InjectionToGenerate injection, EquatableArray<GenericResolver> genericResolvers) {
             try {
                 var source = Generate(injection, genericResolvers);
                 spc.AddSource($"{injection.TypeName}.injection_{Guid.NewGuid():N}.g.cs", source);
@@ -19,7 +20,7 @@
             }
         }
         
-        public static string Generate(in InjectionToGenerate injection, ImmutableArray<GenericResolver> genericResolvers) {
+        public static string Generate(in InjectionToGenerate injection, EquatableArray<GenericResolver> genericResolvers) {
             var sb     = StringBuilderPool.Get();
             var indent = IndentSourcePool.Get();
 

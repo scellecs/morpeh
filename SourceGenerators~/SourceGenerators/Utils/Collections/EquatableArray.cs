@@ -1,13 +1,18 @@
 ﻿namespace SourceGenerators.Utils.Collections {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Linq;
 
     public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>> where T : IEquatable<T> {
         private readonly T[]? array;
         
         public EquatableArray(T[] array) {
             this.array = array;
+        }
+        
+        public EquatableArray(ImmutableArray<T> array) {
+            this.array = array.ToArray();
         }
         
         public EquatableArray(List<T>? list) {
