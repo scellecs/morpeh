@@ -6,7 +6,6 @@ namespace SourceGenerators.Utils.Logging {
     using System.IO;
     using Microsoft.CodeAnalysis;
 
-    // TODO: Has issues with accessing files, due to being blocked by the OS or other processes.
     public static class Logger {
         private static readonly object @lock = new object();
         private static readonly string rootDir;
@@ -24,7 +23,11 @@ namespace SourceGenerators.Utils.Logging {
                 var threadId    = Environment.CurrentManagedThreadId;
                 var logLine     = $"[{timeStamp}][{step}] [{threadId}] {message}";
 
-                File.AppendAllText(logFilePath, logLine + Environment.NewLine);
+                try {
+                    File.AppendAllText(logFilePath, logLine + Environment.NewLine);
+                } catch (Exception) {
+                    // skip
+                }
             }
         }
 
@@ -36,7 +39,11 @@ namespace SourceGenerators.Utils.Logging {
                 var threadId = Environment.CurrentManagedThreadId;
                 var logLine     = $"[{timeStamp}][{step}] [{threadId}] {exception.Message}{Environment.NewLine}{exception.StackTrace}";
 
-                File.AppendAllText(logFilePath, logLine + Environment.NewLine);
+                try {
+                    File.AppendAllText(logFilePath, logLine + Environment.NewLine);
+                } catch (Exception) {
+                    // skip
+                }
             }
         }
         
