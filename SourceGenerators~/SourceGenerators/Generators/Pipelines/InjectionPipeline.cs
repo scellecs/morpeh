@@ -40,6 +40,7 @@
                 .WithLogging(PIPELINE_NAME, "injections_RemoveNullPass");
 #endif
 
+            // TODO: Possibly convert to an equatable dictionary to avoid scans if there's a lot of them
             var genericResolvers = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                     MorpehAttributes.GENERIC_INJECTION_RESOLVER_ATTRIBUTE_FULL_NAME,
