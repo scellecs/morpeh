@@ -22,16 +22,18 @@
                     .Append(Types.AsString(currentHierarchy.Visibility))
                     .Append(" partial ");
 
-                if (currentHierarchy.IsStatic) {
-                    sb.Append("static ");
-                }
+                if (currentHierarchy.TypeKind == TypeKind.Class) {
+                    if (currentHierarchy.IsStatic) {
+                        sb.Append("static ");
+                    }
                 
-                if (currentHierarchy.IsAbstract) {
-                    sb.Append("abstract ");
-                }
+                    if (currentHierarchy.IsAbstract) {
+                        sb.Append("abstract ");
+                    }
                 
-                if (currentHierarchy.IsSealed) {
-                    sb.Append("sealed ");
+                    if (currentHierarchy.IsSealed) {
+                        sb.Append("sealed ");
+                    }
                 }
                     
                 sb.Append(Types.AsString(currentHierarchy.TypeKind))
