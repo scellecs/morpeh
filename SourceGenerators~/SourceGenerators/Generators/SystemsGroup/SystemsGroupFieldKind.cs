@@ -1,5 +1,5 @@
 ﻿namespace SourceGenerators.Generators.SystemsGroup {
-    public enum SystemsGroupFieldKind {
+    public enum SystemsGroupFieldKind : byte {
         System,
         Initializer,
         Disposable,

@@ -11,5 +11,6 @@
         string GenericConstraints,
         int InitialCapacity,
         StashVariation StashVariation,
-        Accessibility Visibility);
+        Accessibility Visibility
+    );
 }

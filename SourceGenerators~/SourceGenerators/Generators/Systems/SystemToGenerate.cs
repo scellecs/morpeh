@@ -14,5 +14,6 @@
         TypeKind TypeKind,
         Accessibility Visibility,
         bool SkipCommit,
-        bool AlwaysEnabled);
+        bool AlwaysEnabled
+    );
 }
