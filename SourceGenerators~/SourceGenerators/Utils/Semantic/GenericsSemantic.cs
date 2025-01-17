@@ -16,7 +16,7 @@
             sb.Append("<");
             
             for (int i = 0, length = typeSymbol.TypeArguments.Length; i < length; i++) {
-                sb.Append(typeSymbol.TypeArguments[i].Name);
+                sb.Append(typeSymbol.TypeArguments[i].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
                 if (i < length - 1) {
                     sb.Append(", ");
                 }
