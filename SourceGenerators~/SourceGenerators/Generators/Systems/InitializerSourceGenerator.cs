@@ -124,10 +124,10 @@
 
                 sb.AppendIndent(indent).AppendLine("}");
             }
+            sb.AppendIndent(indent).AppendLine("}");
             
             ParentType.WriteClose(sb, indent, hierarchyDepth);
-
-            sb.AppendIndent(indent).AppendLine("}");
+            
             if (initializer.TypeNamespace != null) {
                 indent.Left();
                 sb.AppendIndent(indent).AppendLine("}");
