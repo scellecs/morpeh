@@ -116,10 +116,10 @@
                 for (int j = 1, jlength = symbolChars.Length; j < jlength; j++) {
                     sb.Append(symbolChars[j]);
                 }
-                
-                RecursiveGenericWalker
-                    .Create(sb, '_')
-                    .Walk(componentTypeSymbol);
+
+                if (componentTypeSymbol.IsGenericType) {
+                    RecursiveGenericWalker.Create(sb, '_').Walk(componentTypeSymbol);
+                }
                 
                 stashes.Add(new StashRequirement(
                     FieldName: sb.ToStringAndReturn(),
@@ -142,10 +142,6 @@
             public static RecursiveGenericWalker Create(StringBuilder sb, char separator) => new(sb, separator);
 
             public void Walk(INamedTypeSymbol typeSymbol) {
-                if (typeSymbol is not { IsGenericType: true }) {
-                    return;
-                }
-
                 var typeArguments = typeSymbol.TypeArguments;
                     
                 for (int j = 0, jlength = typeArguments.Length; j < jlength; j++) {
@@ -154,7 +150,7 @@
                     this.sb.Append(this.separator);
                     this.sb.Append(typeArgument.Name);
                     
-                    if (typeArgument is INamedTypeSymbol namedTypeSymbol) {
+                    if (typeArgument is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol) {
                         this.Walk(namedTypeSymbol);
                     }
                 }
