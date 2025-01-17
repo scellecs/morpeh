@@ -12,18 +12,6 @@
     using Utils.Pools;
 
     public static class MorpehComponentHelpersSemantic {
-        public static StashSpecialization GetStashSpecialization(ITypeSymbol? typeSymbol, string componentDecl) {
-            return GetStashSpecialization(GetStashVariation(typeSymbol), componentDecl);
-        }
-        
-        public static StashSpecialization GetStashSpecialization(StashVariation variation, string componentDecl) {
-            return new StashSpecialization(
-                Type: GetStashSpecializationType(variation, componentDecl),
-                GetStashMethod: GetStashSpecializationGetStashMethod(variation, componentDecl),
-                ConstraintInterface: GetStashSpecializationConstraintInterface(variation)
-            );
-        }
-        
         public static string GetStashSpecializationType(StashVariation variation, string componentDecl) {
             switch (variation) {
                 case StashVariation.Tag:
