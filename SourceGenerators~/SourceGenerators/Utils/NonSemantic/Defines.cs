@@ -12,11 +12,6 @@
             return sb;
         }
         
-        public static StringBuilder AppendElseIfDefine(this StringBuilder sb, string define) {
-            sb.Append("#elif ").AppendLine(define);
-            return sb;
-        }
-        
         public static StringBuilder AppendElseDefine(this StringBuilder sb) {
             sb.AppendLine("#else");
             return sb;

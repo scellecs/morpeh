@@ -112,34 +112,5 @@
             
             return (genericParams, genericConstraints);
         }
-        
-        // TODO: Might be useful for later but it requires full semantic model.
-        /*
-        public static StringBuilder AppendGenericConstraints(this StringBuilder sb, TypeDeclarationSyntax typeDeclaration, SemanticModel semanticModel)
-        {
-            for (int i = 0, length = typeDeclaration.ConstraintClauses.Count; i < length; i++) {
-                var constraintClause = typeDeclaration.ConstraintClauses[i];
-                
-                sb.Append(" where ").Append(constraintClause.Name.Identifier.Text).Append(" : ");
-
-                for (int j = 0, jlength = constraintClause.Constraints.Count; j < jlength; j++) {
-                    var constraint = constraintClause.Constraints[j];
-
-                    if (constraint is not TypeConstraintSyntax typeConstraint) {
-                        return sb.Append(constraint);
-                    }
-
-                    var symbolInfo = semanticModel.GetSymbolInfo(typeConstraint.Type);
-                    if (symbolInfo.Symbol is ITypeSymbol typeSymbol) {
-                        sb.Append(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
-                    }
-
-                    sb.Append(typeConstraint.Type);
-                }
-            }
-
-            return sb;
-        }
-        */
     }
 }
