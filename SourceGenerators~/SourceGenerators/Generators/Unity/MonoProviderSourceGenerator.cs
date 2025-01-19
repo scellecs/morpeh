@@ -3,15 +3,16 @@
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Options;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     public static class MonoProviderSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in ProviderToGenerate provider) {
+        public static void Generate(SourceProductionContext spc, in ProviderToGenerate provider, in PreprocessorOptionsData options) {
             try {
-                var source = Generate(provider);
+                var source = Generate(provider, options);
                 spc.AddSource($"{provider.TypeName}._provider_{Guid.NewGuid():N}.g.cs", source);
                 
                 Logger.Log(nameof(MonoProviderSourceGenerator), nameof(Generate), $"Generated: {provider.TypeName}");
@@ -20,8 +21,9 @@
             }
         }
         
-        public static string Generate(ProviderToGenerate provider) {
-            var specializationType = MorpehComponentHelpersSemantic.GetStashSpecializationType(provider.StashVariation, provider.ProviderTypeFullName);
+        public static string Generate(ProviderToGenerate provider, PreprocessorOptionsData options) {
+            var stashVariation     = options.EnableStashSpecialization ? provider.StashVariation : StashVariation.Data;
+            var specializationType = MorpehComponentHelpersSemantic.GetStashSpecializationType(stashVariation, provider.ProviderTypeFullName);
             var typeName           = provider.TypeName;
 
             var sb     = StringBuilderPool.Get();
@@ -49,7 +51,7 @@
                 .AppendLine(" {");
 
             using (indent.Scope()) {
-                if (provider.StashVariation != StashVariation.Tag) {
+                if (stashVariation != StashVariation.Tag) {
                     sb.AppendIndent(indent).AppendLine("[SerializeField]");
                     sb.AppendIndent(indent).AppendLine("[HideInInspector]");
                     sb.AppendIndent(indent).Append("private ").Append(provider.ProviderTypeFullName).AppendLine(" serializedData;");
@@ -57,7 +59,7 @@
 
                 sb.AppendIndent(indent).Append("private ").Append(specializationType).AppendLine(" stash;");
 
-                if (provider.StashVariation != StashVariation.Tag) {
+                if (stashVariation != StashVariation.Tag) {
                     sb.AppendLine().AppendLine();
                     sb.AppendIfDefine("UNITY_EDITOR");
                     sb.AppendIndent(indent).AppendLine("[PropertySpace]");
@@ -128,7 +130,7 @@
 
                 sb.AppendIndent(indent).AppendLine("}");
 
-                if (provider.StashVariation != StashVariation.Tag) {
+                if (stashVariation != StashVariation.Tag) {
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).Append("public ref ").Append(provider.ProviderTypeFullName).AppendLine(" GetSerializedData() => ref this.serializedData;");
 
@@ -171,7 +173,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("protected sealed override void PreInitialize() {");
                 using (indent.Scope()) {
-                    sb.AppendIndent(indent).AppendLine(provider.StashVariation == StashVariation.Tag
+                    sb.AppendIndent(indent).AppendLine(stashVariation == StashVariation.Tag
                         ? "this.Stash.Set(this.cachedEntity);"
                         : "this.Stash.Set(this.cachedEntity, this.serializedData);");
                 }

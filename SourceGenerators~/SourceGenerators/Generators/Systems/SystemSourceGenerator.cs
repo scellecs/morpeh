@@ -3,15 +3,16 @@
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Options;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     public static class SystemSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in SystemToGenerate system) {
+        public static void Generate(SourceProductionContext spc, in SystemToGenerate system, in PreprocessorOptionsData options) {
             try {
-                var source = Generate(system);
+                var source = Generate(system, options);
                 spc.AddSource($"{system.TypeName}.system_{Guid.NewGuid():N}.g.cs", source);
                 
                 Logger.Log(nameof(SystemSourceGenerator), nameof(Generate), $"Generated system: {system.TypeName}");
@@ -20,7 +21,7 @@
             }
         }
         
-        public static string Generate(in SystemToGenerate system) {
+        public static string Generate(in SystemToGenerate system, in PreprocessorOptionsData options) {
             var sb     = StringBuilderPool.Get();
             var indent = IndentSourcePool.Get();
 
@@ -54,7 +55,8 @@
                     sb.AppendLine().AppendLine();
                     for (int i = 0, length = system.StashRequirements.Length; i < length; i++) {
                         var stash = system.StashRequirements[i];
-                        sb.AppendIndent(indent).Append("private readonly ").Append(MorpehComponentHelpersSemantic.GetStashSpecializationType(stash.StashVariation, stash.MetadataClassName)).Append(' ').Append(stash.FieldName).AppendLine(";");
+                        var stashVariation = options.EnableStashSpecialization ? stash.StashVariation : StashVariation.Data;
+                        sb.AppendIndent(indent).Append("private readonly ").Append(MorpehComponentHelpersSemantic.GetStashSpecializationType(stashVariation, stash.MetadataClassName)).Append(' ').Append(stash.FieldName).AppendLine(";");
                     }
                 }
 

@@ -44,7 +44,6 @@
                 return StashVariation.Unknown;
             }
 
-#if !MORPEH_SOURCEGEN_NO_STASH_SPECIALIZATION
             var members = typeSymbol.GetMembers();
             
             var isTag = members
@@ -62,7 +61,6 @@
             if (isDisposable) {
                 return StashVariation.Disposable;
             }
-#endif
 
             return StashVariation.Data;
         }

@@ -1,11 +1,13 @@
 ﻿namespace SourceGenerators.Generators.Pipelines {
     using System;
+    using System.Linq;
     using System.Threading;
     using Components;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Options;
     using Unity;
     using Utils.Logging;
     using Utils.NonSemantic;
@@ -16,6 +18,9 @@
         private const string PIPELINE_NAME = nameof(ComponentsPipeline);
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
+            var options = context.ParseOptionsProvider
+                .Select(static (parseOptions, _) => PreprocessorOptionsData.FromParseOptions(parseOptions));
+            
             var components = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.COMPONENT_FULL_NAME,
                     predicate: static (s, _) => s is StructDeclarationSyntax,
@@ -37,20 +42,12 @@
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
                 .WithLogging(PIPELINE_NAME, "providers_RemoveNullPass");
-            
-            var isUnity = context.CompilationProvider
-                .Select(static (compilation, _) => compilation.GetTypeByMetadataName("UnityEngine.MonoBehaviour") is not null);
 
-            var providersOnlyInUnity = providers.Combine(isUnity)
-                .Where(static pair => pair.Item2)
-                .Select(static (pair, ct) => {
-                    ct.ThrowIfCancellationRequested();
+            var providersOnlyInUnity = providers.Combine(options)
+                .Where(static pair => pair.Right.IsUnity);
 
-                    return pair.Item1;
-                });
-
-            context.RegisterSourceOutput(components, static (spc, component) => ComponentSourceGenerator.Generate(spc, component));
-            context.RegisterSourceOutput(providersOnlyInUnity, static (spc, provider) => MonoProviderSourceGenerator.Generate(spc, provider));
+            context.RegisterSourceOutput(components.Combine(options), static (spc, pair) => ComponentSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(providersOnlyInUnity, static (spc, pair) => MonoProviderSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }
 
         private static ComponentToGenerate? ExtractComponentsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {

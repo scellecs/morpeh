@@ -3,15 +3,16 @@
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Options;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     public static class InitializerSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in InitializerToGenerate initializer) {
+        public static void Generate(SourceProductionContext spc, in InitializerToGenerate initializer, in PreprocessorOptionsData options) {
             try {
-                var source = Generate(initializer);
+                var source = Generate(initializer, options);
                 spc.AddSource($"{initializer.TypeName}.initializer_{Guid.NewGuid():N}.g.cs", source);
 
                 Logger.Log(nameof(InitializerSourceGenerator), nameof(Generate), $"Generated initializer: {initializer.TypeName}");
@@ -20,7 +21,7 @@
             }
         }
 
-        public static string Generate(in InitializerToGenerate initializer) {
+        public static string Generate(in InitializerToGenerate initializer, in PreprocessorOptionsData options) {
             var sb     = StringBuilderPool.Get();
             var indent = IndentSourcePool.Get();
 
@@ -51,7 +52,8 @@
                     sb.AppendLine().AppendLine();
                     for (int i = 0, length = initializer.StashRequirements.Length; i < length; i++) {
                         var stash = initializer.StashRequirements[i];
-                        sb.AppendIndent(indent).Append("private readonly ").Append(MorpehComponentHelpersSemantic.GetStashSpecializationType(stash.StashVariation, stash.MetadataClassName)).Append(' ').Append(stash.FieldName).AppendLine(";");
+                        var stashVariation = options.EnableStashSpecialization ? stash.StashVariation : StashVariation.Data;
+                        sb.AppendIndent(indent).Append("private readonly ").Append(MorpehComponentHelpersSemantic.GetStashSpecializationType(stashVariation, stash.MetadataClassName)).Append(' ').Append(stash.FieldName).AppendLine(";");
                     }
                 }
 

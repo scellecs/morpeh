@@ -5,6 +5,7 @@
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
+    using Options;
     using Systems;
     using Utils.Logging;
     using Utils.NonSemantic;
@@ -15,6 +16,9 @@
         private const string PIPELINE_NAME = nameof(SystemsPipeline);
         
         public void Initialize(IncrementalGeneratorInitializationContext context) {
+            var options = context.ParseOptionsProvider
+                .Select(static (parseOptions, _) => PreprocessorOptionsData.FromParseOptions(parseOptions));
+            
             var systems = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEM_FULL_NAME,
                     predicate: static (s, _) => s is TypeDeclarationSyntax,
@@ -37,8 +41,8 @@
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
                 .WithLogging(PIPELINE_NAME, "initializers_RemoveNullPass");
             
-            context.RegisterSourceOutput(systems, static (spc, system) => SystemSourceGenerator.Generate(spc, system));
-            context.RegisterSourceOutput(initializers, static (spc, initializer) => InitializerSourceGenerator.Generate(spc, initializer));
+            context.RegisterSourceOutput(systems.Combine(options), static (spc, pair) => SystemSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(initializers.Combine(options), static (spc, pair) => InitializerSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }
         
         private static SystemToGenerate? ExtractSystemsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
