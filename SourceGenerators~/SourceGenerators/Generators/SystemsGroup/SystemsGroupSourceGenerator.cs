@@ -3,15 +3,16 @@
     using System.Runtime.CompilerServices;
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
+    using Options;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     public static class SystemsGroupSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in SystemsGroupToGenerate systemsGroup) {
+        public static void Generate(SourceProductionContext spc, in SystemsGroupToGenerate systemsGroup, in PreprocessorOptionsData options) {
             try {
-                var source = Generate(systemsGroup);
+                var source = Generate(systemsGroup, options);
                 spc.AddSource($"{systemsGroup.TypeName}.systemsgroup_{Guid.NewGuid():N}.g.cs", source);
                 
                 Logger.Log(nameof(SystemsGroupSourceGenerator), nameof(Generate), $"Generated systems group: {systemsGroup.TypeName}");
@@ -20,7 +21,7 @@
             }
         }
         
-        public static string Generate(in SystemsGroupToGenerate systemsGroup) {
+        public static string Generate(in SystemsGroupToGenerate systemsGroup, in PreprocessorOptionsData options) {
             var fields = systemsGroup.Fields;
             
             var sb     = StringBuilderPool.Get();
@@ -95,7 +96,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallAwake", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallAwake", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
                             
@@ -113,7 +114,7 @@
                 }
                 sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallUpdate", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
                             
@@ -128,7 +129,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallDispose(Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallDispose", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallDispose", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
                             

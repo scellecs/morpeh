@@ -12,12 +12,16 @@
     using Utils.NonSemantic;
     using Utils.Semantic;
     using System.Linq;
+    using Options;
 
     [Generator]
     public class GroupPipeline : IIncrementalGenerator {
         private const string PIPELINE_NAME = nameof(GroupPipeline);
 
         public void Initialize(IncrementalGeneratorInitializationContext context) {
+            var options = context.ParseOptionsProvider
+                .Select(static (parseOptions, _) => PreprocessorOptionsData.FromParseOptions(parseOptions));
+            
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                     predicate: static (s, _) => s is TypeDeclarationSyntax,
@@ -40,8 +44,8 @@
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
                 .WithLogging(PIPELINE_NAME, "runner_RemoveNullPass");
 
-            context.RegisterSourceOutput(groups, static (spc, pair) => SystemsGroupSourceGenerator.Generate(spc, pair));
-            context.RegisterSourceOutput(runners, static (spc, pair) => SystemsGroupRunnerSourceGenerator.Generate(spc, pair));
+            context.RegisterSourceOutput(groups.Combine(options), static (spc, pair) => SystemsGroupSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(runners.Combine(options), static (spc, pair) => SystemsGroupRunnerSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }
 
         private static SystemsGroupToGenerate? ExtractSystemsGroupsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {

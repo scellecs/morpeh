@@ -63,7 +63,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).Append("public ").Append(system.TypeName).AppendLine("(Scellecs.Morpeh.World world) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Constructor", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Constructor", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIndent(indent).AppendLine("World = world;");
 
                         for (int i = 0, length = system.StashRequirements.Length; i < length; i++) {
@@ -78,7 +78,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Awake", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Awake", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
@@ -124,7 +124,7 @@
                         sb.AppendIndent(indent).AppendLine("}");
                     }
 
-                    using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "OnUpdate", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "OnUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
@@ -155,7 +155,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Dispose", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, system.TypeName, "Dispose", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {

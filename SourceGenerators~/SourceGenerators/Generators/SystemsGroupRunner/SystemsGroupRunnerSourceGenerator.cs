@@ -2,15 +2,16 @@
     using System;
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
+    using Options;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     public static class SystemsGroupRunnerSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in RunnerToGenerate runner) {
+        public static void Generate(SourceProductionContext spc, in RunnerToGenerate runner, in PreprocessorOptionsData options) {
             try {
-                var source = Generate(runner);
+                var source = Generate(runner, options);
                 spc.AddSource($"{runner.TypeName}.runner_{Guid.NewGuid():N}.g.cs", source);
                 
                 Logger.Log(nameof(SystemsGroupRunnerSourceGenerator), nameof(Generate), $"Generated systems group: {runner.TypeName}");
@@ -19,7 +20,7 @@
             }
         }
         
-        public static string Generate(in RunnerToGenerate runner) {
+        public static string Generate(in RunnerToGenerate runner, in PreprocessorOptionsData options) {
             var fields = runner.Fields;
 
             var sb     = StringBuilderPool.Get();
@@ -52,7 +53,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).Append("public ").Append(runner.TypeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "Constructor", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "Constructor", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIndent(indent).AppendLine("_world = world;");
                         sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
 
@@ -75,7 +76,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void OnAwake() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "OnAwake", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "OnAwake", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
 
                         for (int i = 0, length = fields.Length; i < length; i++) {
@@ -93,7 +94,7 @@
                 sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
 
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "CallUpdate", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
 
                         for (int i = 0, length = fields.Length; i < length; i++) {
@@ -106,7 +107,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void Dispose() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "Dispose", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "Dispose", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
 
                         for (int i = 0, length = fields.Length; i < length; i++) {

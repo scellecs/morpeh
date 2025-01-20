@@ -4,50 +4,29 @@
     using Utils.NonSemantic;
 
     public static class MorpehSyntax {
-        public static ProfileScopeInstance ScopedProfile(StringBuilder sb, string typeName, IndentSource indent) {
+        public static ProfileScopeInstance ScopedProfile(StringBuilder sb, string typeName, string suffix, IndentSource indent, bool isUnityProfiler) {
             sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-#if MORPEH_SOURCEGEN_UNITY_PROFILER
-            sb.AppendIndent(indent).Append("UnityEngine.Profiler.BeginSample(\"");
-#else
-            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"");
-#endif
-            sb.Append(typeName).AppendLine("\");");
-            
-            sb.AppendEndIfDefine();
-            
-            return new ProfileScopeInstance(sb, indent);
-        }
-        
-        public static ProfileScopeInstance ScopedProfile(StringBuilder sb, string typeName, string suffix, IndentSource indent) {
-            sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-#if MORPEH_SOURCEGEN_UNITY_PROFILER
-            sb.AppendIndent(indent).Append("UnityEngine.Profiler.BeginSample(\"");
-#else
-            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.BeginSample(\"");
-#endif
+            sb.AppendIndent(indent).Append(isUnityProfiler ? "UnityEngine.Profiler.BeginSample(\"" : "Scellecs.Morpeh.MLogger.BeginSample(\"");
             sb.Append(typeName).Append('_').Append(suffix).AppendLine("\");");
-            
             sb.AppendEndIfDefine();
             
-            return new ProfileScopeInstance(sb, indent);
+            return new ProfileScopeInstance(sb, indent, isUnityProfiler);
         }
         
         public struct ProfileScopeInstance : IDisposable {
             private StringBuilder sb;
             private IndentSource indent;
+            private bool isUnityProfiler;
             
-            public ProfileScopeInstance(StringBuilder sb, IndentSource indent) {
+            public ProfileScopeInstance(StringBuilder sb, IndentSource indent, bool isUnityProfiler) {
                 this.sb     = sb;
                 this.indent = indent;
+                this.isUnityProfiler = isUnityProfiler;
             }
             
             public void Dispose() {
                 this.sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-#if MORPEH_SOURCEGEN_UNITY_PROFILER
-                this.sb.AppendIndent(indent).AppendLine("UnityEngine.Profiler.EndSample();");
-#else
-                this.sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
-#endif
+                this.sb.AppendIndent(this.indent).AppendLine(this.isUnityProfiler ? "UnityEngine.Profiler.EndSample();" : "Scellecs.Morpeh.MLogger.EndSample();");
                 this.sb.AppendEndIfDefine();
             }
         }

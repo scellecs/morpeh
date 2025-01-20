@@ -60,7 +60,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).Append("public ").Append(initializer.TypeName).AppendLine("(Scellecs.Morpeh.World world) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Constructor", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Constructor", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIndent(indent).AppendLine("World = world;");
 
                         for (int i = 0, length = initializer.StashRequirements.Length; i < length; i++) {
@@ -75,7 +75,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Awake", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Awake", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
@@ -102,7 +102,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Dispose", indent)) {
+                    using (MorpehSyntax.ScopedProfile(sb, initializer.TypeName, "Dispose", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
