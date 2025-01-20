@@ -2,9 +2,9 @@
 
 using Scellecs.Morpeh;
 
-public partial struct BasicFeature {
+public static partial class BasicFeature {
     [EcsSystemsGroup(inlineUpdateCalls: true)]
-    public partial class Update {
+    public partial struct Update {
         [Register]
         private readonly BasicDisposableClass _basicDisposableClass1;
     

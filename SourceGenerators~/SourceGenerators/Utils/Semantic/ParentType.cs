@@ -20,21 +20,22 @@
             while (currentHierarchy != null) {
                 sb.AppendIndent(indent)
                     .Append(Types.AsString(currentHierarchy.Visibility))
-                    .Append(" partial ");
+                    .Append(' ');
 
                 if (currentHierarchy.TypeKind == TypeKind.Class) {
                     if (currentHierarchy.IsStatic) {
                         sb.Append("static ");
                     }
-                
-                    if (currentHierarchy.IsAbstract) {
-                        sb.Append("abstract ");
-                    }
-                
-                    if (currentHierarchy.IsSealed) {
-                        sb.Append("sealed ");
+                    else {
+                        if (currentHierarchy.IsAbstract) {
+                            sb.Append("abstract ");
+                        } else if (currentHierarchy.IsSealed) {
+                            sb.Append("sealed ");
+                        }
                     }
                 }
+
+                sb.Append("partial ");
                     
                 sb.Append(Types.AsString(currentHierarchy.TypeKind))
                     .Append(' ')
