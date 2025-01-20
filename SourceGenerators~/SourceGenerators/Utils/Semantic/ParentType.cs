@@ -57,6 +57,20 @@
                 sb.AppendIndent(indent).AppendLine("}");
             }
         }
+
+        public static string ToProfilerMarkerName(ParentType? parentType, string typeName) {
+            var profilerMarkerBuilder = StringBuilderPool.Get();
+            
+            var currentHierarchy = parentType;
+            while (currentHierarchy != null) {
+                profilerMarkerBuilder.Append(currentHierarchy.TypeNameWithGenerics).Append('.');
+                currentHierarchy = currentHierarchy.Child;
+            }
+            
+            profilerMarkerBuilder.Append(typeName);
+            
+            return profilerMarkerBuilder.ToStringAndReturn();
+        }
         
         public static ParentType? FromTypeSymbol(INamedTypeSymbol typeSymbol) {
             ParentType? parentType = null;

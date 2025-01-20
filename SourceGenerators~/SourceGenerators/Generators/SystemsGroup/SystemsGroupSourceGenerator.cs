@@ -22,6 +22,8 @@
         }
         
         public static string Generate(in SystemsGroupToGenerate systemsGroup, in PreprocessorOptionsData options) {
+            var profilerMarker = ParentType.ToProfilerMarkerName(systemsGroup.Hierarchy, systemsGroup.TypeName);
+            
             var fields = systemsGroup.Fields;
             
             var sb     = StringBuilderPool.Get();
@@ -97,8 +99,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                 using (indent.Scope()) {
-                    // TODO: Needs full hierarchy name for profiler
-                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallAwake", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                    using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "CallAwake", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
                             
@@ -117,7 +118,7 @@
                     }
                     sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
                     using (indent.Scope()) {
-                        using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                        using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
                             for (int i = 0, length = fields.Length; i < length; i++) {
                                 var field = fields[i];
                             
@@ -133,7 +134,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallDispose(Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallDispose", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                    using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "CallDispose", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
                             
