@@ -22,6 +22,8 @@
             var options = context.ParseOptionsProvider
                 .Select(static (parseOptions, _) => PreprocessorOptionsData.FromParseOptions(parseOptions));
             
+            // TODO: Support groups & runners without update methods (attribute argument)
+            
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                     predicate: static (s, _) => s is TypeDeclarationSyntax,
