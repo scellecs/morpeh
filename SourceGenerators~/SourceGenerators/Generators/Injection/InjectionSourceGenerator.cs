@@ -1,5 +1,6 @@
 ﻿namespace SourceGenerators.Generators.Injection {
     using System;
+    using System.Collections.Immutable;
     using Microsoft.CodeAnalysis;
     using Utils.Collections;
     using Utils.Logging;
@@ -8,7 +9,7 @@
     using Utils.Semantic;
 
     public static class InjectionSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in InjectionToGenerate injection, EquatableArray<GenericResolver> genericResolvers) {
+        public static void Generate(SourceProductionContext spc, in InjectionToGenerate injection, ImmutableDictionary<string, string> genericResolvers) {
             try {
                 var source = Generate(injection, genericResolvers);
                 spc.AddSource($"{injection.TypeName}.injection_{Guid.NewGuid():N}.g.cs", source);
@@ -19,7 +20,7 @@
             }
         }
         
-        public static string Generate(in InjectionToGenerate injection, EquatableArray<GenericResolver> genericResolvers) {
+        public static string Generate(in InjectionToGenerate injection, ImmutableDictionary<string, string> genericResolvers) {
             var sb     = StringBuilderPool.Get();
             var indent = IndentSourcePool.Get();
 
@@ -53,36 +54,26 @@
 
                     for (int i = 0, length = injection.Fields.Length; i < length; i++) {
                         var field = injection.Fields[i];
-
-                        var resolved = false;
-
-                        if (field.GenericParams != null) {
-                            for (int j = 0, genericResolversLength = genericResolvers.Length; j < genericResolversLength; j++) {
-                                var genericResolver = genericResolvers[j];
-                                if (field.TypeName != genericResolver.BaseTypeName) {
-                                    continue;
-                                }
-
-                                sb.AppendIndent(indent)
-                                    .Append(field.Name)
-                                    .Append(" = ((")
-                                    .Append(genericResolver.ResolverTypeName)
-                                    .Append(")injectionTable.Get(typeof(")
-                                    .Append(genericResolver.ResolverTypeName)
-                                    .Append("))).Resolve")
-                                    .Append(field.GenericParams)
-                                    .AppendLine("();");
-                                
-                                resolved = true;
-                                break;
-                            }
+                        
+                        if (field.GenericParams != null && genericResolvers.TryGetValue(field.TypeName, out var resolverTypeName)) {
+                            sb.AppendIndent(indent)
+                                .Append(field.Name)
+                                .Append(" = ((")
+                                .Append(resolverTypeName)
+                                .Append(")injectionTable.Get(typeof(")
+                                .Append(resolverTypeName)
+                                .Append("))).Resolve")
+                                .Append(field.GenericParams)
+                                .AppendLine("();");
+                        } else {
+                            sb.AppendIndent(indent)
+                                .Append(field.Name)
+                                .Append(" = (")
+                                .Append(field.TypeName)
+                                .Append(")injectionTable.Get(typeof(")
+                                .Append(field.TypeName)
+                                .AppendLine("));");
                         }
-
-                        if (resolved) {
-                            continue;
-                        }
-
-                        sb.AppendIndent(indent).Append(field.Name).Append(" = (").Append(field.TypeName).Append(")injectionTable.Get(typeof(").Append(field.TypeName).AppendLine("));");
                     }
                 }
 

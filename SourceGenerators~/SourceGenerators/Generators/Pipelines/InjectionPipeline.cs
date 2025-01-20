@@ -1,5 +1,6 @@
 ﻿namespace SourceGenerators.Generators.Pipelines {
     using System;
+    using System.Collections.Immutable;
     using System.Threading;
     using Injection;
     using Microsoft.CodeAnalysis;
@@ -40,7 +41,6 @@
                 .WithLogging(PIPELINE_NAME, "injections_RemoveNullPass");
 #endif
 
-            // TODO: Possibly convert to an equatable dictionary to avoid scans if there's a lot of them
             var genericResolvers = context.SyntaxProvider
                 .ForAttributeWithMetadataName(
                     MorpehAttributes.GENERIC_INJECTION_RESOLVER_ATTRIBUTE_FULL_NAME,
@@ -49,7 +49,7 @@
                 .Where(static resolver => resolver is not null)
                 .Select(static (resolver, _) => resolver!.Value)
                 .Collect()
-                .Select(static (resolvers, _) => new EquatableArray<GenericResolver>(resolvers));
+                .Select(static (resolvers, _) => resolvers.ToImmutableDictionary(static resolver => resolver.BaseTypeName, static resolver => resolver.ResolverTypeName));
             
             context.RegisterSourceOutput(injections.Combine(genericResolvers), static (spc, pair) => InjectionSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }
