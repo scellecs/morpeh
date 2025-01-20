@@ -59,24 +59,25 @@
                         }
                     }
 
-                    // TODO: Count and generate null check for injectionTable if there are any registered fields
-                    sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
-                    using (indent.Scope()) {
-                        for (int i = 0, length = fields.Length; i < length; i++) {
-                            var field = fields[i];
+                    if (systemsGroup.HasRegistrations) {
+                        sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
+                        using (indent.Scope()) {
+                            for (int i = 0, length = fields.Length; i < length; i++) {
+                                var field = fields[i];
 
-                            if (field.RegisterAs == null) {
-                                continue;
-                            }
+                                if (field.RegisterAs == null) {
+                                    continue;
+                                }
 
-                            if (field.RegisterAs == field.TypeName) {
-                                sb.AppendIndent(indent).Append("injectionTable.Register(").Append(field.Name).AppendLine(");");
-                            } else {
-                                sb.AppendIndent(indent).Append("injectionTable.Register(").Append(field.Name).Append(", typeof(").Append(field.RegisterAs).AppendLine("));");
+                                if (field.RegisterAs == field.TypeName) {
+                                    sb.AppendIndent(indent).Append("injectionTable.Register(").Append(field.Name).AppendLine(");");
+                                } else {
+                                    sb.AppendIndent(indent).Append("injectionTable.Register(").Append(field.Name).Append(", typeof(").Append(field.RegisterAs).AppendLine("));");
+                                }
                             }
                         }
+                        sb.AppendIndent(indent).AppendLine("}");
                     }
-                    sb.AppendIndent(indent).AppendLine("}");
                 }
                 sb.AppendIndent(indent).AppendLine("}");
 
@@ -155,23 +156,25 @@
                             }
                         }
 
-                        sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
-                        using (indent.Scope()) {
-                            for (int i = 0, length = fields.Length; i < length; i++) {
-                                var field = fields[i];
+                        if (systemsGroup.HasRegistrations) {
+                            sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
+                            using (indent.Scope()) {
+                                for (int i = 0, length = fields.Length; i < length; i++) {
+                                    var field = fields[i];
 
-                                if (field.RegisterAs == null) {
-                                    continue;
-                                }
+                                    if (field.RegisterAs == null) {
+                                        continue;
+                                    }
 
-                                if (field.RegisterAs == field.TypeName) {
-                                    sb.AppendIndent(indent).Append("injectionTable.UnRegister(").Append(field.Name).AppendLine(");");
-                                } else {
-                                    sb.AppendIndent(indent).Append("injectionTable.UnRegister(typeof(").Append(field.RegisterAs).AppendLine("));");
+                                    if (field.RegisterAs == field.TypeName) {
+                                        sb.AppendIndent(indent).Append("injectionTable.UnRegister(").Append(field.Name).AppendLine(");");
+                                    } else {
+                                        sb.AppendIndent(indent).Append("injectionTable.UnRegister(typeof(").Append(field.RegisterAs).AppendLine("));");
+                                    }
                                 }
                             }
+                            sb.AppendIndent(indent).AppendLine("}");
                         }
-                        sb.AppendIndent(indent).AppendLine("}");
                     }
                 }
                 sb.AppendIndent(indent).AppendLine("}");

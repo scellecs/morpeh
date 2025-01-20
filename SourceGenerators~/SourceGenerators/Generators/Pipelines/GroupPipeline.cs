@@ -59,8 +59,9 @@
                 }
 
                 Logger.Log(PIPELINE_NAME, generatorStepName, $"Transform: {typeSymbol.Name}");
-
+                
                 var systemsGroupFields = ThreadStaticListCache<SystemsGroupField>.GetClear();
+                var hasRegistrations   = false;
 
                 var members = typeSymbol.GetMembers();
                 for (int i = 0, length = members.Length; i < length; i++) {
@@ -103,6 +104,8 @@
                                 }
 
                                 registerAs = registerSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                                hasRegistrations = true;
+                                
                                 break;
                             }
 #if !MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
@@ -142,6 +145,7 @@
                     Fields: new EquatableArray<SystemsGroupField>(systemsGroupFields),
                     TypeKind: typeSymbol.TypeKind,
                     Visibility: typeSymbol.DeclaredAccessibility,
+                    HasRegistrations: hasRegistrations,
                     InlineUpdateMethods: inlineUpdateMethods);
             }
             catch (Exception e) {

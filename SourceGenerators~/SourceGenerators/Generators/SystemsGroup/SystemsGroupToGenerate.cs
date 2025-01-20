@@ -10,6 +10,7 @@
         EquatableArray<SystemsGroupField> Fields,
         TypeKind TypeKind,
         Accessibility Visibility,
+        bool HasRegistrations,
         bool InlineUpdateMethods
     );
 }
