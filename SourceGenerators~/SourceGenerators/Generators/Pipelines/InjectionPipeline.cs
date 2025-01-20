@@ -213,6 +213,10 @@
                     return null;
                 }
 
+                if (!baseType.IsUnboundGenericType) {
+                    return null;
+                }
+                
                 return new GenericResolver(baseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
             } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, nameof(ExtractGenericResolver), e);
