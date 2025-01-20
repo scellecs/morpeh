@@ -97,6 +97,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                 using (indent.Scope()) {
+                    // TODO: Needs full hierarchy name for profiler
                     using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallAwake", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             var field = fields[i];
