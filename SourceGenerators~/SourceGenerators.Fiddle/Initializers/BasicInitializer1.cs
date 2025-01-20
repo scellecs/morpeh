@@ -25,7 +25,10 @@ public partial class BasicInitializer1 {
     public World World { get; }
 
     public void OnAwake() {
-        throw new NotImplementedException();
+        this._tagComponent.Has(default);
+        this._genericComponent_Int32.Has(default);
+        this._globalTest.Has(default);
+        this._disposableComponent.Has(default);
     }
     
     public void Dispose() {
