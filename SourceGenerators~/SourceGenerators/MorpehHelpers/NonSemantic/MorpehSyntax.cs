@@ -6,7 +6,7 @@
     public static class MorpehSyntax {
         public static ProfileScopeInstance ScopedProfile(StringBuilder sb, string typeName, string suffix, IndentSource indent, bool isUnityProfiler) {
             sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-            sb.AppendIndent(indent).Append(isUnityProfiler ? "UnityEngine.Profiler.BeginSample(\"" : "Scellecs.Morpeh.MLogger.BeginSample(\"");
+            sb.AppendIndent(indent).Append(isUnityProfiler ? "UnityEngine.Profiling.Profiler.BeginSample(\"" : "Scellecs.Morpeh.MLogger.BeginSample(\"");
             sb.Append(typeName).Append('_').Append(suffix).AppendLine("\");");
             sb.AppendEndIfDefine();
             
@@ -26,7 +26,7 @@
             
             public void Dispose() {
                 this.sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                this.sb.AppendIndent(this.indent).AppendLine(this.isUnityProfiler ? "UnityEngine.Profiler.EndSample();" : "Scellecs.Morpeh.MLogger.EndSample();");
+                this.sb.AppendIndent(this.indent).AppendLine(this.isUnityProfiler ? "UnityEngine.Profiling.Profiler.EndSample();" : "Scellecs.Morpeh.MLogger.EndSample();");
                 this.sb.AppendEndIfDefine();
             }
         }
