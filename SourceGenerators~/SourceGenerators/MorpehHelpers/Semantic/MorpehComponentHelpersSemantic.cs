@@ -90,22 +90,30 @@
                     continue;
                 }
 
-                var symbolChars = componentTypeSymbol.Name.AsSpan();
+                string fieldName;
                 
-                var sb = StringBuilderPool.Get()
-                    .Append('_')
-                    .Append(char.ToLower(symbolChars[0]));
+                if (args.Length > 1 && args[1].Value is string fieldNameValue && !string.IsNullOrEmpty(fieldNameValue)) {
+                    fieldName = fieldNameValue;
+                } else {
+                    var symbolChars = componentTypeSymbol.Name.AsSpan();
+                
+                    var sb = StringBuilderPool.Get()
+                        .Append('_')
+                        .Append(char.ToLower(symbolChars[0]));
 
-                for (int j = 1, jlength = symbolChars.Length; j < jlength; j++) {
-                    sb.Append(symbolChars[j]);
-                }
+                    for (int j = 1, jlength = symbolChars.Length; j < jlength; j++) {
+                        sb.Append(symbolChars[j]);
+                    }
 
-                if (componentTypeSymbol.IsGenericType) {
-                    RecursiveGenericWalker.Create(sb, '_').Walk(componentTypeSymbol);
+                    if (componentTypeSymbol.IsGenericType) {
+                        RecursiveGenericWalker.Create(sb, '_').Walk(componentTypeSymbol);
+                    }
+                
+                    fieldName = sb.ToStringAndReturn();
                 }
                 
                 stashes.Add(new StashRequirement(
-                    FieldName: sb.ToStringAndReturn(),
+                    FieldName: fieldName,
                     MetadataClassName: componentTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                     StashVariation: GetStashVariation(componentTypeSymbol)));
             }
