@@ -9,10 +9,12 @@
     ) {
         public static PreprocessorOptionsData FromParseOptions(ParseOptions parseOptions) {
             var symbols = parseOptions.PreprocessorSymbolNames.ToImmutableHashSet();
+
+            var isUnity = symbols.Contains("UNITY_2019_1_OR_NEWER");
             
             return new PreprocessorOptionsData(
-                IsUnity: symbols.Contains("UNITY_2019_1_OR_NEWER"),
-                IsUnityProfiler: symbols.Contains("UNITY_2019_3_OR_NEWER") && !symbols.Contains("MORPEH_SOURCEGEN_NO_UNITY_PROFILER"),
+                IsUnity: isUnity,
+                IsUnityProfiler: isUnity && !symbols.Contains("MORPEH_SOURCEGEN_NO_UNITY_PROFILER"),
                 EnableStashSpecialization: !symbols.Contains("MORPEH_SOURCEGEN_NO_STASH_SPECIALIZATION")
             );
         }
