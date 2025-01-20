@@ -89,20 +89,22 @@
                     }
                 }
                 sb.AppendIndent(indent).AppendLine("}");
-                
-                sb.AppendLine().AppendLine();
-                sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
 
-                using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
-                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
+                if (runner.GenerateUpdateMethod) {
+                    sb.AppendLine().AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
 
-                        for (int i = 0, length = fields.Length; i < length; i++) {
-                            sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".CallUpdate(deltaTime);");
+                    using (indent.Scope()) {
+                        using (MorpehSyntax.ScopedProfile(sb, runner.TypeName, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                            sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(_world);");
+
+                            for (int i = 0, length = fields.Length; i < length; i++) {
+                                sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".CallUpdate(deltaTime);");
+                            }
                         }
                     }
+                    sb.AppendIndent(indent).AppendLine("}");
                 }
-                sb.AppendIndent(indent).AppendLine("}");
 
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void Dispose() {");

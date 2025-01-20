@@ -3,7 +3,7 @@
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class EcsSystemsGroupAttribute : Attribute {
-        public EcsSystemsGroupAttribute(bool inlineUpdateCalls = false) {
+        public EcsSystemsGroupAttribute(bool generateUpdateMethod = true, bool inlineUpdateCalls = false) {
             
         }
     }

@@ -133,11 +133,16 @@
                         IsInjectable: isInjectable));
                 }
 
-                var inlineUpdateMethods = false;
+                var generateUpdateMethod = false;
+                var inlineUpdateCalls    = false;
 
                 var args = ctx.Attributes[0].ConstructorArguments;
-                if (args.Length >= 1 && args[0].Value is bool inlineUpdateMethodsValue) {
-                    inlineUpdateMethods = inlineUpdateMethodsValue;
+                if (args.Length >= 1 && args[0].Value is bool generateUpdateMethodValue) {
+                    generateUpdateMethod = generateUpdateMethodValue;
+                }
+                
+                if (args.Length >= 2 && args[1].Value is bool inlineUpdateMethodsValue) {
+                    inlineUpdateCalls = inlineUpdateMethodsValue;
                 }
                 
                 return new SystemsGroupToGenerate(
@@ -148,7 +153,8 @@
                     TypeKind: typeSymbol.TypeKind,
                     Visibility: typeSymbol.DeclaredAccessibility,
                     HasRegistrations: hasRegistrations,
-                    InlineUpdateMethods: inlineUpdateMethods);
+                    GenerateUpdateMethod: generateUpdateMethod,
+                    InlineUpdateCalls: inlineUpdateCalls);
             }
             catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
@@ -213,13 +219,21 @@
                         TypeName: fieldTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
                 }
                 
+                var generateUpdateMethod = true;
+                
+                var args = ctx.Attributes[0].ConstructorArguments;
+                if (args.Length >= 1 && args[0].Value is bool generateUpdateMethodValue) {
+                    generateUpdateMethod = generateUpdateMethodValue;
+                }
+                
                 return new RunnerToGenerate(
                     Hierarchy: ParentType.FromTypeSymbol(typeSymbol),
                     TypeName: typeSymbol.Name,
                     TypeNamespace: typeSymbol.GetNamespaceString(),
                     Fields: new EquatableArray<RunnerField>(fields),
                     TypeKind: typeSymbol.TypeKind,
-                    Visibility: typeSymbol.DeclaredAccessibility);
+                    Visibility: typeSymbol.DeclaredAccessibility,
+                    GenerateUpdateMethod: generateUpdateMethod);
             } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;

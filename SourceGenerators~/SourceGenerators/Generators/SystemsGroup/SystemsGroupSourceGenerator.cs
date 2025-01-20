@@ -108,24 +108,26 @@
                     }
                 }
                 sb.AppendIndent(indent).AppendLine("}");
-                
-                sb.AppendLine().AppendLine();
-                if (systemsGroup.InlineUpdateMethods) {
-                    sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
-                }
-                sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
-                using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
-                        for (int i = 0, length = fields.Length; i < length; i++) {
-                            var field = fields[i];
+
+                if (systemsGroup.GenerateUpdateMethod) {
+                    sb.AppendLine().AppendLine();
+                    if (systemsGroup.InlineUpdateCalls) {
+                        sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                    }
+                    sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
+                    using (indent.Scope()) {
+                        using (MorpehSyntax.ScopedProfile(sb, systemsGroup.TypeName, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                            for (int i = 0, length = fields.Length; i < length; i++) {
+                                var field = fields[i];
                             
-                            if (field.FieldKind is SystemsGroupFieldKind.System) {
-                                sb.AppendIndent(indent).Append(field.Name).AppendLine(".CallUpdate(deltaTime);");
+                                if (field.FieldKind is SystemsGroupFieldKind.System) {
+                                    sb.AppendIndent(indent).Append(field.Name).AppendLine(".CallUpdate(deltaTime);");
+                                }
                             }
                         }
                     }
+                    sb.AppendIndent(indent).AppendLine("}");
                 }
-                sb.AppendIndent(indent).AppendLine("}");
 
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallDispose(Scellecs.Morpeh.InjectionTable injectionTable = null) {");

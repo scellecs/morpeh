@@ -3,6 +3,8 @@
 
     [AttributeUsage(AttributeTargets.Class)]
     public class EcsSystemsGroupRunnerAttribute : Attribute {
-        
+        public EcsSystemsGroupRunnerAttribute(bool generateUpdateMethod = true) {
+            
+        }
     }
 }

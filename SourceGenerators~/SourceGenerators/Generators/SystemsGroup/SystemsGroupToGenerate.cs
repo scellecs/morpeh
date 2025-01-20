@@ -11,6 +11,7 @@
         TypeKind TypeKind,
         Accessibility Visibility,
         bool HasRegistrations,
-        bool InlineUpdateMethods
+        bool GenerateUpdateMethod,
+        bool InlineUpdateCalls
     );
 }

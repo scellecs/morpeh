@@ -9,6 +9,7 @@
         string? TypeNamespace,
         EquatableArray<RunnerField> Fields,
         TypeKind TypeKind,
-        Accessibility Visibility
+        Accessibility Visibility,
+        bool GenerateUpdateMethod
     );
 }
