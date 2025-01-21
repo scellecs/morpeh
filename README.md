@@ -377,26 +377,20 @@ Setup:
 > You must build your application after enabling remote mode. Previous builds will not support remote debugging.
 
 Starting Remote Debug:
-- Connect your device to computer via USB in File Transfer mode.
-- Make sure USB Debugging is enabled in Developer Options.
-- Set up port forwarding using platform-specific method below.
-- Launch the application on your device.
+- Launch the application on your target device.
 - Open WorldBrowser in Unity Editor.
+- Enter the device's IP address (and optional port) as specified below.
 - Click "Connect To Remote" button.
 
-Android:
-- Install Android Studio.
-- Navigate to Android SDK platform-tools in terminal: `\Android\Sdk\platform-tools`.
-- Set up port forwarding: `adb forward tcp:9999 tcp:9999`.
-- Optional: View logs with `adb logcat -s Unity`.
-
-iOS:
-- Build and deploy your app via Xcode.
-- Enable port forwarding: `ideviceproxy 9999 9999`.
-- Optional: View logs with `idevicesyslog | grep Unity`.
+Android & iOS:
+- Connect to the same WiFi network as your device.
+- Get the device's IP address from Settings -> WiFi -> Network details.
+- Enter the IP address in the connection dialog (e.g., `192.168.1.100`).
+- Optionally specify a custom port (e.g., `192.168.1.100:22005`).
 
 Windows & macOS & Linux:
-- Direct connection available on local network.
+- Use localhost (e.g., `127.0.0.1`).
+- Optionally specify a custom port (e.g., `127.0.0.1:22005`).
 
 ---
 
