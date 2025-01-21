@@ -57,7 +57,7 @@
                 using (indent.Scope()) {
                     using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "Constructor", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIndent(indent).AppendLine("_world = world;");
-                        sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
+                        sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable ?? new Scellecs.Morpeh.InjectionTable();");
 
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].Name).Append(" = ").Append("new ").Append(fields[i].TypeName).AppendLine("(world, injectionTable);");
