@@ -77,10 +77,10 @@ public class BasicDisposableClass : IDisposable {
 public partial class MultipleFieldsBaseClass {
     [Injectable]
     private IDisposable disposable1;
-    
+
     [Injectable]
-    private IDisposable disposable2;
-    
+    private IDisposable disposable2 { get; set; }
+
     public virtual void Validate() {
         Assert.NotNull(this.disposable1);
         Assert.NotNull(this.disposable2);
@@ -93,7 +93,7 @@ public partial class ParentClass : MultipleFieldsBaseClass {
     private IDisposable disposable3;
     
     [Injectable]
-    private IDisposable disposable4;
+    private IDisposable disposable4 { get; set; }
     
     public override void Validate() {
         base.Validate();
@@ -113,7 +113,7 @@ public partial class InjectableMiddlewareClass : NonInjectableMiddlewareClass {
     private IDisposable disposable5;
     
     [Injectable]
-    private IDisposable disposable6;
+    private IDisposable disposable6 { get; set; }
     
     public override void Validate() {
         base.Validate();
