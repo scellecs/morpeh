@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR && MORPEH_REMOTE_BROWSER || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
+﻿#if UNITY_EDITOR && MORPEH_REMOTE_BROWSER
 using Scellecs.Morpeh.Utils.WorldBrowser.Remote;
 using Scellecs.Morpeh.WorldBrowser.Remote.Commands;
 using Scellecs.Morpeh.WorldBrowser.Serialization;

@@ -3,7 +3,7 @@ using System;
 
 namespace Scellecs.Morpeh.WorldBrowser.Remote {
     internal static class RemoteWorldBrowserUtils {
-        internal const int SERVER_PORT = 9999;
+        internal const int SERVER_PORT = 22005;
         internal const string EDITOR_PREFS_IP_KEY = "__WORLD_BROWSER_REMOTE_IP";
 
         internal static bool ParseIP(string input, out string ip, out int port) {
@@ -22,12 +22,9 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
 
             var ipSpan = input.AsSpan(0, separatorIndex);
             var portSpan = input.AsSpan()[(separatorIndex + 1)..];
-
-            if (portSpan.IsEmpty || !int.TryParse(portSpan, out port)) {
-                return false;
-            }
-
+            int.TryParse(portSpan, out port);
             ip = ipSpan.ToString();
+
             return !string.IsNullOrEmpty(ip);
         }
     }
