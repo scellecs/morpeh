@@ -72,8 +72,6 @@
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".Inject(injectionTable);");
                         }
-
-                        sb.AppendIndent(indent).AppendLine("}");
                     }
                 }
                 sb.AppendIndent(indent).AppendLine("}");
