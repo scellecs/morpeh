@@ -56,8 +56,14 @@
                 sb.AppendIndent(indent).Append("public ").Append(runner.TypeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                 using (indent.Scope()) {
                     using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "Constructor", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                        sb.AppendIndent(indent).AppendLine("if (injectionTable == null) {");
+                        using (indent.Scope()) {
+                            sb.AppendIndent(indent).AppendLine("injectionTable = new Scellecs.Morpeh.InjectionTable();");
+                        }
+                        sb.AppendIndent(indent).AppendLine("}");
+                        
                         sb.AppendIndent(indent).AppendLine("_world = world;");
-                        sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable ?? new Scellecs.Morpeh.InjectionTable();");
+                        sb.AppendIndent(indent).AppendLine("_injectionTable = injectionTable;");
 
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].Name).Append(" = ").Append("new ").Append(fields[i].TypeName).AppendLine("(world, injectionTable);");
