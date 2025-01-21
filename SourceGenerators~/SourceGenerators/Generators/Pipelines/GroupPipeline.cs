@@ -73,9 +73,9 @@
 
                     string? registerAs = null;
                     
-                    var     attributes = fieldSymbol.GetAttributes();
+                    var  attributes = fieldSymbol.GetAttributes();
                     for (int j = 0, jlength = attributes.Length; j < jlength; j++) {
-                        var attribute     = attributes[j];
+                        var attribute = attributes[j];
 
                         if (attribute.AttributeClass?.Name != MorpehAttributes.REGISTER_NAME) {
                             continue;
