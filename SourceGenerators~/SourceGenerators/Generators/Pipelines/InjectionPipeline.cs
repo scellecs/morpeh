@@ -202,17 +202,19 @@
             
             var attributes = fieldSymbol.GetAttributes();
             for (int i = 0, length = attributes.Length; i < length; i++) {
-                if (attributes[i].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
-                    return true;
+                if (attributes[i].AttributeClass?.Name != MorpehAttributes.INJECTABLE_NAME) {
+                    continue;
                 }
-            }
-
-            if (fieldSymbol.Type is not INamedTypeSymbol fieldType) {
-                return false;
+                
+                if (fieldSymbol.Type is not INamedTypeSymbol fieldType) {
+                    return false;
+                }
+                
+                typeSymbol = fieldType;
+                return true;
             }
             
-            typeSymbol = fieldType;
-            return true;
+            return false;
         }
         
         private static bool IsInjectablePropertySymbol(IPropertySymbol propertySymbol, out INamedTypeSymbol typeSymbol) {
@@ -220,17 +222,19 @@
             
             var attributes = propertySymbol.GetAttributes();
             for (int i = 0, length = attributes.Length; i < length; i++) {
-                if (attributes[i].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
-                    return true;
+                if (attributes[i].AttributeClass?.Name != MorpehAttributes.INJECTABLE_NAME) {
+                    continue;
                 }
+
+                if (propertySymbol.Type is not INamedTypeSymbol propertyType) {
+                    return false;
+                }
+                
+                typeSymbol = propertyType;
+                return true;
             }
 
-            if (propertySymbol.Type is not INamedTypeSymbol propertyType) {
-                return false;
-            }
-
-            typeSymbol = propertyType;
-            return true;
+            return false;
         }
         
         private static GenericResolver? ExtractGenericResolver(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
