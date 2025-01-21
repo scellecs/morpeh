@@ -18,9 +18,9 @@ public partial class BasicInitializer1 {
     
     [Injectable]
     private SomeGenericClass<int> _someGenericClass;
-    
+
     [Injectable]
-    private SomeComplexGenericClass<int, string> _someComplexGenericClass;
+    private SomeComplexGenericClass<int, string> _someComplexGenericClass { get; set; }
 
     public World World { get; }
 
