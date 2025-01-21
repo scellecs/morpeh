@@ -68,12 +68,9 @@
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].Name).Append(" = ").Append("new ").Append(fields[i].TypeName).AppendLine("(world, injectionTable);");
                         }
-
-                        sb.AppendIndent(indent).AppendLine("if (injectionTable != null) {");
-                        using (indent.Scope()) {
-                            for (int i = 0, length = fields.Length; i < length; i++) {
-                                sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".Inject(injectionTable);");
-                            }
+                        
+                        for (int i = 0, length = fields.Length; i < length; i++) {
+                            sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".Inject(injectionTable);");
                         }
 
                         sb.AppendIndent(indent).AppendLine("}");
