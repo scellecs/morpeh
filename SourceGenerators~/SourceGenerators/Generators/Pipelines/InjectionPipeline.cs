@@ -127,35 +127,25 @@
             var members = typeSymbol.GetMembers();
 
             for (int i = 0, length = members.Length; i < length; i++) {
-                if (members[i] is not IFieldSymbol fieldSymbol || fieldSymbol.IsStatic) {
+                var symbol = members[i];
+                
+                if (!IsInjectableFieldOrPropertySymbol(symbol, out var symbolType)) {
                     continue;
                 }
-
-                var attributes = fieldSymbol.GetAttributes();
-
-                for (int j = 0, attributesLength = attributes.Length; j < attributesLength; j++) {
-                    if (attributes[j].AttributeClass?.Name != MorpehAttributes.INJECTABLE_NAME) {
-                        continue;
-                    }
-
-                    if (fieldSymbol.Type is not INamedTypeSymbol namedTypeSymbol) {
-                        continue;
-                    }
-
-                    if (namedTypeSymbol.IsGenericType) {
-                        fields.Add(new InjectionField(
-                            Name: fieldSymbol.Name,
-                            TypeName: namedTypeSymbol.ConstructUnboundGenericType().ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                            GenericParams: StringBuilderPool.Get().AppendGenericParams(namedTypeSymbol).ToStringAndReturn()
-                        ));
-                    }
-                    else {
-                        fields.Add(new InjectionField(
-                            Name: fieldSymbol.Name,
-                            TypeName: fieldSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                            GenericParams: null
-                        ));
-                    }
+                
+                if (symbolType.IsGenericType) {
+                    fields.Add(new InjectionField(
+                        Name: symbol.Name,
+                        TypeName: symbolType.ConstructUnboundGenericType().ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        GenericParams: StringBuilderPool.Get().AppendGenericParams(symbolType).ToStringAndReturn()
+                    ));
+                }
+                else {
+                    fields.Add(new InjectionField(
+                        Name: symbol.Name,
+                        TypeName: symbolType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        GenericParams: null
+                    ));
                 }
             }
             
@@ -170,16 +160,8 @@
                 var members = currentSymbol.GetMembers();
 
                 for (int i = 0, length = members.Length; i < length; i++) {
-                    var member = members[i];
-                    if (member is not IFieldSymbol fieldSymbol || fieldSymbol.IsStatic) {
-                        continue;
-                    }
-
-                    var attributes = fieldSymbol.GetAttributes();
-                    for (int j = 0, jlength = attributes.Length; j < jlength; j++) {
-                        if (attributes[j].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
-                            return true;
-                        }
+                    if (IsInjectableFieldOrPropertySymbol(members[i], out _)) {
+                        return true;
                     }
                 }
 #else
@@ -196,6 +178,59 @@
 
 
             return false;
+        }
+        
+        private static bool IsInjectableFieldOrPropertySymbol(ISymbol symbol, out INamedTypeSymbol typeSymbol) {
+            if (symbol.IsStatic) {
+                typeSymbol = null!;
+                return false;
+            }
+            
+            switch (symbol) {
+                case IFieldSymbol fieldSymbol:
+                    return IsInjectableFieldSymbol(fieldSymbol, out typeSymbol);
+                case IPropertySymbol propertySymbol:
+                    return IsInjectablePropertySymbol(propertySymbol, out typeSymbol);
+                default:
+                    typeSymbol = null!;
+                    return false;
+            }
+        }
+        
+        private static bool IsInjectableFieldSymbol(IFieldSymbol fieldSymbol, out INamedTypeSymbol typeSymbol) {
+            typeSymbol = null!;
+            
+            var attributes = fieldSymbol.GetAttributes();
+            for (int i = 0, length = attributes.Length; i < length; i++) {
+                if (attributes[i].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
+                    return true;
+                }
+            }
+
+            if (fieldSymbol.Type is not INamedTypeSymbol fieldType) {
+                return false;
+            }
+            
+            typeSymbol = fieldType;
+            return true;
+        }
+        
+        private static bool IsInjectablePropertySymbol(IPropertySymbol propertySymbol, out INamedTypeSymbol typeSymbol) {
+            typeSymbol = null!;
+            
+            var attributes = propertySymbol.GetAttributes();
+            for (int i = 0, length = attributes.Length; i < length; i++) {
+                if (attributes[i].AttributeClass?.Name == MorpehAttributes.INJECTABLE_NAME) {
+                    return true;
+                }
+            }
+
+            if (propertySymbol.Type is not INamedTypeSymbol propertyType) {
+                return false;
+            }
+
+            typeSymbol = propertyType;
+            return true;
         }
         
         private static GenericResolver? ExtractGenericResolver(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {

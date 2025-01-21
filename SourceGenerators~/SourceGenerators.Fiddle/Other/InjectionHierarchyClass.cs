@@ -34,5 +34,8 @@ public partial class OuterScopeForInjection {
     public partial class InjectionAfterMiddlewareClass : InjectionMiddlewareClass {
         [Injectable]
         private IDisposable _disposable_after_middleware;
+
+        [Injectable]
+        private IDisposable _disposable_property { get; set; }
     }
 }
