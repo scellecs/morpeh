@@ -22,8 +22,6 @@
             var options = context.ParseOptionsProvider
                 .Select(static (parseOptions, _) => PreprocessorOptionsData.FromParseOptions(parseOptions));
             
-            // TODO: Support groups & runners without update methods (attribute argument)
-            
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                     predicate: static (s, _) => s is TypeDeclarationSyntax,
@@ -33,7 +31,8 @@
                 .Where(static candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
-                .WithLogging(PIPELINE_NAME, "systemsgroup_RemoveNullPass");
+                .WithLogging(PIPELINE_NAME, "systemsgroup_RemoveNullPass")
+                .Combine(options);
             
             var runners = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
@@ -44,10 +43,11 @@
                 .Where(static candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
-                .WithLogging(PIPELINE_NAME, "runner_RemoveNullPass");
+                .WithLogging(PIPELINE_NAME, "runner_RemoveNullPass")
+                .Combine(options);
 
-            context.RegisterSourceOutput(groups.Combine(options), static (spc, pair) => SystemsGroupSourceGenerator.Generate(spc, pair.Left, pair.Right));
-            context.RegisterSourceOutput(runners.Combine(options), static (spc, pair) => SystemsGroupRunnerSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(groups, static (spc, pair) => SystemsGroupSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(runners, static (spc, pair) => SystemsGroupRunnerSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }
 
         private static SystemsGroupToGenerate? ExtractSystemsGroupsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {

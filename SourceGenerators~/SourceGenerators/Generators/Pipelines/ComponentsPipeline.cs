@@ -30,8 +30,9 @@
                 .Where(static candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
-                .WithLogging(PIPELINE_NAME, "components_RemoveNullPass");
-            
+                .WithLogging(PIPELINE_NAME, "components_RemoveNullPass")
+                .Combine(options);
+
             var providers = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.MONO_PROVIDER_FULL_NAME,
                     predicate: static (s, _) => s is ClassDeclarationSyntax,
@@ -41,13 +42,12 @@
                 .Where(candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
-                .WithLogging(PIPELINE_NAME, "providers_RemoveNullPass");
-
-            var providersOnlyInUnity = providers.Combine(options)
+                .WithLogging(PIPELINE_NAME, "providers_RemoveNullPass")
+                .Combine(options)
                 .Where(static pair => pair.Right.IsUnity);
 
-            context.RegisterSourceOutput(components.Combine(options), static (spc, pair) => ComponentSourceGenerator.Generate(spc, pair.Left, pair.Right));
-            context.RegisterSourceOutput(providersOnlyInUnity, static (spc, pair) => MonoProviderSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(components, static (spc, pair) => ComponentSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(providers, static (spc, pair) => MonoProviderSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }
 
         private static ComponentToGenerate? ExtractComponentsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {

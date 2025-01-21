@@ -28,7 +28,8 @@
                 .Where(static candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
-                .WithLogging(PIPELINE_NAME, "systems_RemoveNullPass");
+                .WithLogging(PIPELINE_NAME, "systems_RemoveNullPass")
+                .Combine(options);
             
             var initializers = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.INITIALIZER_FULL_NAME,
@@ -39,10 +40,11 @@
                 .Where(static candidate => candidate is not null)
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
-                .WithLogging(PIPELINE_NAME, "initializers_RemoveNullPass");
+                .WithLogging(PIPELINE_NAME, "initializers_RemoveNullPass")
+                .Combine(options);
             
-            context.RegisterSourceOutput(systems.Combine(options), static (spc, pair) => SystemSourceGenerator.Generate(spc, pair.Left, pair.Right));
-            context.RegisterSourceOutput(initializers.Combine(options), static (spc, pair) => InitializerSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(systems, static (spc, pair) => SystemSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(initializers, static (spc, pair) => InitializerSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }
         
         private static SystemToGenerate? ExtractSystemsToGenerate(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
