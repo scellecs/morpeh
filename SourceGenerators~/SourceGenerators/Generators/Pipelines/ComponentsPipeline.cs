@@ -1,6 +1,5 @@
 ﻿namespace SourceGenerators.Generators.Pipelines {
     using System;
-    using System.Linq;
     using System.Threading;
     using Components;
     using Microsoft.CodeAnalysis;

@@ -2,7 +2,6 @@
     using System;
     using System.Collections.Immutable;
     using Microsoft.CodeAnalysis;
-    using Utils.Collections;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
