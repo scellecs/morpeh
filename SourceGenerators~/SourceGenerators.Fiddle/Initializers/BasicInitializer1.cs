@@ -7,7 +7,7 @@ using Test.Namespace;
 [Injectable]
 [IncludeStash(typeof(TagComponent))]
 [IncludeStash(typeof(GenericComponent<int>))]
-[IncludeStash(typeof(GlobalNamespaceComponent), customFieldName: "_globalTest")]
+[IncludeStash(typeof(GlobalNamespaceComponent), fieldName: "_globalTest")]
 [IncludeStash(typeof(DisposableComponent))]
 public partial class BasicInitializer1 {
     [Injectable]
