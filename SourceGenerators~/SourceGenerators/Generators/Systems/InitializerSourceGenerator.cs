@@ -77,7 +77,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallAwake() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "Awake", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                    using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "CallAwake", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
@@ -104,7 +104,7 @@
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).AppendLine("public void CallDispose() {");
                 using (indent.Scope()) {
-                    using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "Dispose", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                    using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "CallDispose", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
