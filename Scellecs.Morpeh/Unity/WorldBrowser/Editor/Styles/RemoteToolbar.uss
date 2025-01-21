@@ -19,3 +19,17 @@
 .remote-toolbar-button:hover {
     background-color: rgb(56, 56, 56);
 }
+
+.remote-toolbar-ip {
+    width: 150px;
+    margin-right: 8px;
+}
+
+.remote-toolbar-ip > Label {
+    min-width: 20px;
+    margin-right: 4px;
+}
+
+.remote-toolbar-ip > TextField {
+    flex-grow: 1;
+}

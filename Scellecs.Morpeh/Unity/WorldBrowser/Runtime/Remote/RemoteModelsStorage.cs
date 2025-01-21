@@ -10,7 +10,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
         private NetworkTransport client;
         private CommandHandlerRegistry commandHandlers;
         private CommandDispatcher dispatcher;
-        private Action<bool> onStateChanged;
+        private Action<bool> OnStateChanged;
 
         private RemoteUpdateModelsSender modelsHandler;
         private RemoteComponentStorageCommandSender componentStorage;
@@ -25,15 +25,22 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
 
         private bool firstUpdate;
 
-        internal RemoteModelsStorage(Action<bool> onStateChanged) {
-            this.onStateChanged = onStateChanged;
+        internal RemoteModelsStorage(Action<bool> OnStateChanged) {
+            this.OnStateChanged = OnStateChanged;
         }
 
         public bool Initialize() {
             try {
+                var ipString = UnityEditor.EditorPrefs.GetString(RemoteWorldBrowserUtils.EDITOR_PREFS_IP_KEY);
+                if (!RemoteWorldBrowserUtils.ParseIP(ipString, out var ip, out var port)) {
+                    Debug.LogError("Failed to parse ip address");
+                    return false;
+                }
+
                 this.client = new NetworkTransport(new ServerLogger());
-                if (!this.client.Connect("127.0.0.1", 9999)) {
-                    this.onStateChanged(false);
+
+                if (!this.client.Connect(ip, port)) {
+                    this.OnStateChanged(false);
                     return false;
                 }
 
@@ -44,12 +51,12 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
                 this.commandHandlers.RegisterHandler(this.hierarchySearch = new RemoteHierarchySearchCommandSender());
                 this.commandHandlers.RegisterHandler(this.hierarchy = new RemoteHierarchyCommandSender());
                 this.commandHandlers.RegisterHandler(this.inspector = new RemoteInspectorCommandSender());
-                this.dispatcher = new CommandDispatcher(client, commandHandlers);
+                this.dispatcher = new CommandDispatcher(this.client, this.commandHandlers);
                 this.firstUpdate = true;
             }
             catch (Exception e) {
                 Debug.LogException(e);
-                this.onStateChanged(false);
+                this.OnStateChanged(false);
                 return false;
             }
 
@@ -57,8 +64,8 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
         }
 
         public void Update() {
-            if (!client.IsConnected) {
-                this.onStateChanged(false);
+            if (!this.client.IsConnected) {
+                this.OnStateChanged(false);
                 return;
             }
 
@@ -75,12 +82,12 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
             }
 
             try {
-                dispatcher.CollectCommands();
+                this.dispatcher.CollectCommands();
             }
             catch (Exception e) {
                 Debug.LogError($"Error during update: {e}");
                 this.client.Stop();
-                this.onStateChanged(false);
+                this.OnStateChanged(false);
             }
         }
 

@@ -17,11 +17,6 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote.Commands {
                 return;
             }
 
-            if (this.modelsStorage == null)
-            {
-                transport.Log("Models Storage is null");
-            }
-
             this.modelsStorage.Update();
             transport.PushSend(default(UpdateModelsResponse).Serialize(transport.SendAllocator, out var length), length);
         }

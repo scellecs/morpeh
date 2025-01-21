@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace Scellecs.Morpeh.WorldBrowser.Remote {
     internal sealed class RemoteDebugServer : MonoBehaviour {
-        private const int PORT = 9999;
         private INetworkLogger logger;
         private IModelsStorage modelsStorage;
         private NetworkTransport server;
@@ -67,7 +66,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
             try {
                 this.logger = new ServerLogger();
                 this.server = new NetworkTransport(this.logger);
-                if (!this.server.StartServer(PORT)) {
+                if (!this.server.StartServer(RemoteWorldBrowserUtils.SERVER_PORT)) {
                     Log("Failed to start server");
                     return;
                 }
