@@ -71,10 +71,35 @@
                         continue;
                     }
 
+                    string? registerAs = null;
+                    
+                    var     attributes = fieldSymbol.GetAttributes();
+                    for (int j = 0, jlength = attributes.Length; j < jlength; j++) {
+                        var attribute     = attributes[j];
+
+                        if (attribute.AttributeClass?.Name != MorpehAttributes.REGISTER_NAME) {
+                            continue;
+                        }
+
+                        INamedTypeSymbol? registerSymbol;
+
+                        var attributeArgs = attribute.ConstructorArguments;
+                        if (attributeArgs.Length > 0 && attributeArgs[0].Value is INamedTypeSymbol registerSymbolArg) {
+                            registerSymbol = registerSymbolArg;
+                        }
+                        else {
+                            registerSymbol = fieldSymbol.Type as INamedTypeSymbol;
+                        }
+                        
+                        registerAs       = registerSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        hasRegistrations = true;
+
+                        break;
+                    }
+                    
                     var typeAttributes = fieldSymbol.Type.GetAttributes();
 
-                    var     fieldKind  = SystemsGroupFieldKind.Constructible;
-                    string? registerAs = null;
+                    var fieldKind  = SystemsGroupFieldKind.Constructible;
 
                     var isInjectable = false;
 #if MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
@@ -84,7 +109,7 @@
                     for (int j = 0, jlength = typeAttributes.Length; j < jlength; j++) {
                         var attribute     = typeAttributes[j];
                         var attributeName = attribute.AttributeClass?.Name;
-
+                        
                         switch (attributeName) {
                             case MorpehAttributes.SYSTEM_NAME: {
                                 fieldKind = SystemsGroupFieldKind.System;
@@ -92,22 +117,6 @@
                             }
                             case MorpehAttributes.INITIALIZER_NAME: {
                                 fieldKind = SystemsGroupFieldKind.Initializer;
-                                break;
-                            }
-                            case MorpehAttributes.REGISTER_NAME: {
-                                INamedTypeSymbol? registerSymbol;
-
-                                var attributeArgs = attribute.ConstructorArguments;
-                                if (attributeArgs.Length > 0 && attributeArgs[0].Value is INamedTypeSymbol registerSymbolArg) {
-                                    registerSymbol = registerSymbolArg;
-                                }
-                                else {
-                                    registerSymbol = fieldSymbol.Type as INamedTypeSymbol;
-                                }
-
-                                registerAs = registerSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                                hasRegistrations = true;
-                                
                                 break;
                             }
 #if !MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
