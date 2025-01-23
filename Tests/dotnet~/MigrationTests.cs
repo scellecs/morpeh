@@ -6,10 +6,21 @@ namespace Tests;
 [Collection("Sequential")]
 public class MigrationTests {
     private readonly World world;
+
+    private readonly TagStash tagTest1;
+    private readonly TagStash tagTest2;
+    private readonly TagStash tagTest3;
+    private readonly TagStash tagTest4;
     
     public MigrationTests(ITestOutputHelper output) {
-        world = World.Create();
         MLogger.SetInstance(new XUnitLogger(output));
+        
+        this.world = World.Create();
+
+        this.tagTest1 = TagTest1.GetStash(this.world);
+        this.tagTest2 = TagTest2.GetStash(this.world);
+        this.tagTest3 = TagTest3.GetStash(this.world);
+        this.tagTest4 = TagTest4.GetStash(this.world);
     }
     
     [Fact]
@@ -17,7 +28,7 @@ public class MigrationTests {
         var entity = this.world.CreateEntity();
         var previousArchetype = default(ArchetypeHash);
         
-        entity.AddComponent<TagTest1>();
+        this.tagTest1.Set(entity);
         
         // We haven't committed the changes yet, so the archetype should be the same
         Assert.Equal(previousArchetype, world.ArchetypeOf(entity));
@@ -29,7 +40,7 @@ public class MigrationTests {
         var archetype = this.world.GetArchetype(default(ArchetypeHash).With<TagTest1>());
         Assert.Equal(1, archetype.length);
         
-        entity.RemoveComponent<TagTest1>();
+        this.tagTest1.Remove(entity);
         this.world.Commit();
         
         Assert.Equal(0, archetype.length);
@@ -45,14 +56,14 @@ public class MigrationTests {
         
         Assert.Equal(baseArchetype, world.ArchetypeOf(entity));
         
-        entity.AddComponent<TagTest1>();
+        this.tagTest1.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>(), world.ArchetypeOf(entity));
         
         var archetypeT1 = this.world.GetArchetype(baseArchetype.With<TagTest1>());
         Assert.Equal(1, archetypeT1.length);
         
-        entity.AddComponent<TagTest2>();
+        this.tagTest2.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         Assert.Equal(0, archetypeT1.length);
@@ -60,7 +71,7 @@ public class MigrationTests {
         var archetypeT1T2 = this.world.GetArchetype(baseArchetype.With<TagTest1>().With<TagTest2>());
         Assert.Equal(1, archetypeT1T2.length);
         
-        entity.AddComponent<TagTest3>();
+        this.tagTest3.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>().With<TagTest3>(), world.ArchetypeOf(entity));
         
@@ -68,7 +79,7 @@ public class MigrationTests {
         Assert.Equal(1, archetypeT1T2T3.length);
         Assert.Equal(0, archetypeT1T2.length);
         
-        entity.AddComponent<TagTest4>();
+        this.tagTest4.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>().With<TagTest3>().With<TagTest4>(), world.ArchetypeOf(entity));
         
@@ -76,7 +87,7 @@ public class MigrationTests {
         Assert.Equal(1, archetypeT1T2T3T4.length);
         Assert.Equal(0, archetypeT1T2T3.length);
         
-        entity.RemoveComponent<TagTest4>();
+        this.tagTest4.Remove(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>().With<TagTest3>(), world.ArchetypeOf(entity));
         
@@ -84,7 +95,7 @@ public class MigrationTests {
         Assert.Equal(1, archetypeT1T2T3.length);
         Assert.Equal(0, archetypeT1T2T3T4.length);
         
-        entity.RemoveComponent<TagTest3>();
+        this.tagTest3.Remove(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         
@@ -92,7 +103,7 @@ public class MigrationTests {
         Assert.Equal(1, archetypeT1T2.length);
         Assert.Equal(0, archetypeT1T2T3.length);
         
-        entity.RemoveComponent<TagTest2>();
+        this.tagTest2.Remove(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>(), world.ArchetypeOf(entity));
         
@@ -100,7 +111,7 @@ public class MigrationTests {
         Assert.Equal(1, archetypeT1.length);
         Assert.Equal(0, archetypeT1T2.length);
         
-        entity.RemoveComponent<TagTest1>();
+        this.tagTest1.Remove(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype, world.ArchetypeOf(entity));
         
@@ -112,16 +123,16 @@ public class MigrationTests {
         var entity = this.world.CreateEntity();
         var baseArchetype = world.ArchetypeOf(entity);
         
-        entity.AddComponent<TagTest1>();
-        entity.AddComponent<TagTest2>();
+        this.tagTest1.Set(entity);
+        this.tagTest2.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         
         var archetypeT1T2 = this.world.GetArchetype(baseArchetype.With<TagTest1>().With<TagTest2>());
         Assert.Equal(1, archetypeT1T2.length);
         
-        entity.AddComponent<TagTest3>();
-        entity.AddComponent<TagTest4>();
+        this.tagTest3.Set(entity);
+        this.tagTest4.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>().With<TagTest3>().With<TagTest4>(), world.ArchetypeOf(entity));
         
@@ -129,8 +140,8 @@ public class MigrationTests {
         Assert.Equal(1, archetypeT1T2T3T4.length);
         Assert.Equal(0, archetypeT1T2.length);
         
-        entity.RemoveComponent<TagTest4>();
-        entity.RemoveComponent<TagTest3>();
+        this.tagTest4.Remove(entity);
+        this.tagTest3.Remove(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         
@@ -138,8 +149,8 @@ public class MigrationTests {
         Assert.Equal(1, archetypeT1T2.length);
         Assert.Equal(0, archetypeT1T2T3T4.length);
         
-        entity.RemoveComponent<TagTest2>();
-        entity.RemoveComponent<TagTest1>();
+        this.tagTest2.Remove(entity);
+        this.tagTest1.Remove(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype, world.ArchetypeOf(entity));
         
@@ -151,16 +162,16 @@ public class MigrationTests {
         var entity = this.world.CreateEntity();
         var baseArchetype = world.ArchetypeOf(entity);
         
-        entity.AddComponent<TagTest1>();
-        entity.AddComponent<TagTest2>();
+        this.tagTest1.Set(entity);
+        this.tagTest2.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         
         var archetypeT1T2 = this.world.GetArchetype(baseArchetype.With<TagTest1>().With<TagTest2>());
         Assert.Equal(1, archetypeT1T2.length);
         
-        entity.AddComponent<TagTest3>();
-        entity.RemoveComponent<TagTest3>();
+        this.tagTest3.Set(entity);
+        this.tagTest3.Remove(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         
@@ -172,15 +183,15 @@ public class MigrationTests {
         var entity = this.world.CreateEntity();
         var baseArchetype = world.ArchetypeOf(entity);
         
-        entity.AddComponent<TagTest1>();
-        entity.AddComponent<TagTest2>();
+        this.tagTest1.Set(entity);
+        this.tagTest2.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         
         var archetypeT1T2 = this.world.GetArchetype(baseArchetype.With<TagTest1>().With<TagTest2>());
         Assert.Equal(1, archetypeT1T2.length);
         
-        entity.RemoveComponent<TagTest3>();
+        this.tagTest3.Remove(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         
@@ -192,8 +203,8 @@ public class MigrationTests {
         var entity = world.CreateEntity();
         var baseArchetype = default(ArchetypeHash);
         
-        entity.AddComponent<TagTest1>();
-        entity.AddComponent<TagTest2>();
+        this.tagTest1.Set(entity);
+        this.tagTest2.Set(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype.With<TagTest1>().With<TagTest2>(), world.ArchetypeOf(entity));
         
