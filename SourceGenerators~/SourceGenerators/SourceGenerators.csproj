@@ -16,9 +16,11 @@
     - MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
     - MORPEH_SOURCEGEN_LOGGING
     -->
+    <!--
     <PropertyGroup>
         <DefineConstants>MORPEH_SOURCEGEN_LOGGING</DefineConstants>
     </PropertyGroup>
+    -->
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
