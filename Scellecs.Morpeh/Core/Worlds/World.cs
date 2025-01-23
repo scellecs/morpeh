@@ -203,7 +203,6 @@ namespace Scellecs.Morpeh {
 
         internal static void CleanupStatic() {
             DisposeAllWorlds();
-            plugins?.Clear();
             worldsCount = 0;
             defaultWorld = null;
             Array.Clear(worldsGens, 0, WorldConstants.MAX_WORLDS_COUNT);
