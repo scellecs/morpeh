@@ -401,7 +401,10 @@ public class WorldTests : IDisposable {
         var filter2 = world.Filter.With<IntTest1>().Without<IntTest2>().Build();
         var entity  = world.CreateEntity();
 
-        entity.AddComponent<IntTest1>();
+        var intTest1 = IntTest1.GetStash(world);
+        var intTest2 = IntTest2.GetStash(world);
+
+        intTest1.Add(entity);
 
         Assert.True(filter.IsEmpty());
         Assert.True(filter2.IsEmpty());
@@ -411,7 +414,7 @@ public class WorldTests : IDisposable {
         Assert.True(filter.IsEmpty());
         Assert.True(filter2.IsNotEmpty());
 
-        entity.AddComponent<IntTest2>();
+        intTest2.Add(entity);
 
         Assert.True(filter.IsEmpty());
         Assert.True(filter2.IsNotEmpty());
