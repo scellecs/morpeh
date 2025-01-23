@@ -1,6 +1,7 @@
 ﻿namespace SourceGenerators.Generators.Components {
     using System;
     using System.Runtime.CompilerServices;
+    using System.Text;
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
@@ -50,13 +51,53 @@
 
             using (indent.Scope()) {
                 sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
-                sb.AppendIndent(indent).Append("public static ")
+                sb.AppendIndent(indent)
+                    .Append("public static ")
                     .Append(MorpehComponentHelpersSemantic.GetStashSpecializationType(stashVariation, fullTypeName))
                     .Append(" GetStash(Scellecs.Morpeh.World world) => Scellecs.Morpeh.WorldStashExtensions.")
                     .Append(MorpehComponentHelpersSemantic.GetStashSpecializationGetStashMethod(stashVariation, fullTypeName))
                     .Append("(world, capacity: ")
                     .Append(component.InitialCapacity)
                     .AppendLine(");");
+
+                if (options.EnableSlowComponentApi) {
+                    sb.AppendLine();
+                    sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                    sb.AppendIndent(indent).AppendLine("public static bool Has(Scellecs.Morpeh.Entity entity) => GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Has(entity);");
+                    
+                    sb.AppendLine();
+                    sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                    sb.AppendIndent(indent).AppendLine("public static void Set(Scellecs.Morpeh.Entity entity) => GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Set(entity);");
+                    
+                    sb.AppendLine();
+                    sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                    sb.AppendIndent(indent).AppendLine("public static void Remove(Scellecs.Morpeh.Entity entity) => GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Remove(entity);");
+
+                    if (stashVariation != StashVariation.Tag) {
+                        // Set
+                        sb.AppendLine();
+                        sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                        sb.AppendIndent(indent).Append("public static void Set(Scellecs.Morpeh.Entity entity, in ").Append(fullTypeName).AppendLine(" value) => GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Set(entity, in value);");
+                        
+                        // Add
+                        sb.AppendLine();
+                        sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                        sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Add(Scellecs.Morpeh.Entity entity) => ref GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Add(entity);");
+                        
+                        sb.AppendLine();
+                        sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                        sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Add(Scellecs.Morpeh.Entity entity, out bool exist) => ref GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Add(entity, out exist);");
+                        
+                        // Get
+                        sb.AppendLine();
+                        sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                        sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Get(Scellecs.Morpeh.Entity entity) => ref GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Get(entity);");
+
+                        sb.AppendLine();
+                        sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
+                        sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Get(Scellecs.Morpeh.Entity entity, out bool success) => ref GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Get(entity, out success);");
+                    }
+                }
             }
 
             sb.AppendIndent(indent).AppendLine("}");
