@@ -327,7 +327,7 @@ public class FilterMatchTests {
         }
         Assert.Equal(1, filter.archetypesLength);
         
-        entity.Dispose();
+        this.world.RemoveEntity(entity);
         this.world.Commit();
         
         foreach (var _ in filter) {
@@ -369,7 +369,7 @@ public class FilterMatchTests {
         Assert.Equal(1, filter.archetypesLength);
         
         for (var i = 0; i < entitiesCount; i++) {
-            entities[i].Dispose();
+            this.world.RemoveEntity(entities[i]);
             this.world.Commit();
         }
         
@@ -393,7 +393,7 @@ public class FilterMatchTests {
         
         Assert.Equal(8, filter.GetLengthSlow());
         foreach (var entity in filter) {
-            entity.Dispose();
+            this.world.RemoveEntity(entity);
             Assert.True(this.world.IsDisposed(entity));
         }
         this.world.Commit();

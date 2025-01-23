@@ -211,7 +211,7 @@ public class MigrationTests {
         var archetypeT1T2 = world.GetArchetype(baseArchetype.With<TagTest1>().With<TagTest2>());
         Assert.Equal(1, archetypeT1T2.length);
         
-        entity.Dispose();
+        this.world.RemoveEntity(entity);
         this.world.Commit();
         Assert.Equal(baseArchetype, world.ArchetypeOf(entity));
         
