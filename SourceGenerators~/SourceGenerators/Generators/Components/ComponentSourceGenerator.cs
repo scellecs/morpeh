@@ -61,6 +61,7 @@
                     .AppendLine(");");
 
                 if (options.EnableSlowComponentApi) {
+                    // TODO: Disposed entity error handling
                     sb.AppendLine();
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).AppendLine("public static bool Has(Scellecs.Morpeh.Entity entity) => GetStash(Scellecs.Morpeh.EntityExtensions.GetWorld(entity)).Has(entity);");
