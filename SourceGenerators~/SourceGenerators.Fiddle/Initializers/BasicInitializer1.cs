@@ -29,6 +29,13 @@ public partial class BasicInitializer1 {
         this._genericComponent_Int32.Has(default);
         this._globalTest.Has(default);
         this._disposableComponent.Has(default);
+
+#if MORPEH_SOURCEGEN_ENABLE_SLOW_COMPONENT_API
+        TagComponent.Has(default);
+        GenericComponent<int>.Has(default);
+        GlobalNamespaceComponent.Has(default);
+        DisposableComponent.Has(default);
+#endif
     }
     
     public void Dispose() {
