@@ -109,6 +109,7 @@
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         
+                        // TODO: passing "out" this way causes compile time errors on newer versions of dotnet
                         sb.AppendLine();
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Add(Scellecs.Morpeh.Entity entity, out bool exist) {");
@@ -128,6 +129,7 @@
                         }
                         sb.AppendIndent(indent).AppendLine("}");
 
+                        // TODO: passing "out" this way causes compile time errors on newer versions of dotnet
                         sb.AppendLine();
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Get(Scellecs.Morpeh.Entity entity, out bool success) {");
