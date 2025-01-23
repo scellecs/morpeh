@@ -335,7 +335,7 @@ The provider is called `RemoveEntityOnDestroy`.
 
 #### 🌐 World Browser
 
-The WorldBrowser tool enables real-time tracking and searching of entities and their components.
+The WorldBrowser tool enables real-time tracking and searching of entities and their components. Also provides functionality to add and remove components. Works in both Unity Editor playmode and can connect remotely to builds runtime.
 Supports the same filtering logic as the core ``Filter``, allowing complex queries using ``With`` and ``Without`` conditions.
 
 Access it via Tools -> Morpeh -> WorldBrowser.
@@ -359,6 +359,38 @@ Access it via Tools -> Morpeh -> WorldBrowser.
 **World Selection:**
 - Use the top toolbar (with the **W** icon) to choose worlds to search.
 - By default, ``World.Default`` is pre-selected.
+
+**Remote Connection:**
+
+The feature is currently in experimental stage and works only in development builds. It has several limitations compared to Unity Editor playmode:
+- Components containing `Unity.Object` are displayed in read-only mode.
+- Cannot inspect `Unity.Object fields` in components, but provides `Type`, `Name`, and `InstanceID` information.
+- Some components may fail serialization, will be marked with [NotSerialized] tag and won't be rendered. You'll need to modify the component structure manually if serialization is required.
+
+Setup:
+- Install [Unity.Serialization package](https://docs.unity3d.com/Packages/com.unity.serialization@3.1/manual/index.html) via Package Manager.
+- Add `MORPEH_REMOTE_BROWSER` directive to *ProjectSettings -> Player -> Scripting Define Symbols*.
+- Restart Unity Editor.
+- After restart, the `WorldBrowser` will display a "Connect To Remote" button.
+
+> [!IMPORTANT]  
+> You must build your application after enabling remote mode. Previous builds will not support remote debugging.
+
+Starting Remote Debug:
+- Launch the application on your target device.
+- Open WorldBrowser in Unity Editor.
+- Enter the device's IP address (and optional port) as specified below.
+- Click "Connect To Remote" button.
+
+Android & iOS:
+- Connect to the same WiFi network as your device.
+- Get the device's IP address from Settings -> WiFi -> Network details.
+- Enter the IP address in the connection dialog (e.g., `192.168.1.100`).
+- Optionally specify a custom port (e.g., `192.168.1.100:22005`).
+
+Windows & macOS & Linux:
+- Use localhost (e.g., `127.0.0.1`).
+- Optionally specify a custom port (e.g., `127.0.0.1:22005`).
 
 ---
 

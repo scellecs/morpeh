@@ -1,0 +1,35 @@
+.remote-toolbar {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(0, 0, 0);
+    padding: 4px;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.remote-toolbar-button {
+    flex-direction: row;
+    align-items: center;
+    margin-right: 8px;
+    border-radius: 0;
+    background-color: rgb(0, 0, 0);
+    -unity-text-align: middle-left;
+}
+
+.remote-toolbar-button:hover {
+    background-color: rgb(56, 56, 56);
+}
+
+.remote-toolbar-ip {
+    width: 150px;
+    margin-right: 8px;
+}
+
+.remote-toolbar-ip > Label {
+    min-width: 20px;
+    margin-right: 4px;
+}
+
+.remote-toolbar-ip > TextField {
+    flex-grow: 1;
+}
