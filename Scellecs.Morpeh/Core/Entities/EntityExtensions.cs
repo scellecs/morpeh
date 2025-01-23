@@ -15,7 +15,6 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [Obsolete("Entity extensions are obsolete and will be removed in future versions of Morpeh.")]
     public static class EntityExtensions {
 #if !MORPEH_STRICT_MODE
         [Obsolete("[MORPEH] Use Stash.Add() instead.")]
