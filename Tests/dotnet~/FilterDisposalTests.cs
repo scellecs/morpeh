@@ -7,19 +7,29 @@ namespace Tests;
 [Collection("Sequential")]
 public class FilterDisposalTests {
     private readonly ITestOutputHelper output;
-    private readonly World world;
+    private readonly World             world;
+    
+    private readonly TagStash tagTest1;
+    private readonly TagStash tagTest2;
+    private readonly TagStash tagTest3;
+    private readonly TagStash tagTest4;
 
     public FilterDisposalTests(ITestOutputHelper output) {
         this.output = output;
         MLogger.SetInstance(new XUnitLogger(this.output));
 
         this.world = World.Create();
+        
+        this.tagTest1 = TagTest1.GetStash(this.world);
+        this.tagTest2 = TagTest2.GetStash(this.world);
+        this.tagTest3 = TagTest3.GetStash(this.world);
+        this.tagTest4 = TagTest4.GetStash(this.world);
     }
 
     [Fact]
     public void DisposeInvalidatesFilter() {
         var ent = this.world.CreateEntity(); 
-        ent.AddComponent<TagTest1>();
+        this.tagTest1.Set(ent);
         this.world.Commit();
 
         var filter = this.world.Filter.With<TagTest1>().Build();
@@ -46,7 +56,7 @@ public class FilterDisposalTests {
     [Fact]
     public void DisposeInvalidatesAllFilterReferences() {
         var ent = this.world.CreateEntity();
-        ent.AddComponent<TagTest1>();
+        this.tagTest1.Set(ent);
         this.world.Commit();
 
         var filter0 = this.world.Filter.With<TagTest1>().Build();
@@ -77,7 +87,7 @@ public class FilterDisposalTests {
     [Fact]
     public void DisposeRemovesFilterFromWorld() {
         var ent = this.world.CreateEntity();
-        ent.AddComponent<TagTest1>();
+        this.tagTest1.Set(ent);
         this.world.Commit();
 
         var filterBuilder = this.world.Filter.With<TagTest1>();
@@ -137,8 +147,8 @@ public class FilterDisposalTests {
     [Fact]
     public void DisposeFreesIdAndAssignsItToNewFilter() {
         var ent = this.world.CreateEntity();
-        ent.AddComponent<TagTest1>();
-        ent.AddComponent<TagTest2>();
+        this.tagTest1.Set(ent);
+        this.tagTest2.Set(ent);
         this.world.Commit();
 
         var filterBuilder0 = this.world.Filter.With<TagTest1>();
@@ -192,7 +202,7 @@ public class FilterDisposalTests {
     [Fact]
     public void DisposeRemovesMatchingFilterAndKeepsOtherValid() {
         var ent = this.world.CreateEntity();
-        ent.AddComponent<TagTest1>();
+        this.tagTest1.Set(ent);
         this.world.Commit();
 
         var filterBuilder0 = this.world.Filter.With<TagTest1>();
@@ -285,8 +295,8 @@ public class FilterDisposalTests {
     public void DisposeRemovesMatchingFilterAndKeepsOtherValid2()
     {
         var ent = this.world.CreateEntity();
-        ent.AddComponent<TagTest1>();
-        ent.AddComponent<TagTest2>();
+        this.tagTest1.Set(ent);
+        this.tagTest2.Set(ent);
         this.world.Commit();
 
         var filterBuilder0 = this.world.Filter.With<TagTest1>();
@@ -374,8 +384,8 @@ public class FilterDisposalTests {
     [Fact]
     public void StructuralChangesFilter() {
         var ent = this.world.CreateEntity();
-        ent.AddComponent<TagTest1>();
-        ent.AddComponent<TagTest2>();
+        this.tagTest1.Set(ent);
+        this.tagTest2.Set(ent);
 
         this.world.Commit();
 
@@ -388,7 +398,7 @@ public class FilterDisposalTests {
 
         this.world.Commit();
 
-        ent.AddComponent<TagTest3>();
+        this.tagTest3.Set(ent);
 
         foreach (var _ in filter) {
             Assert.Fail("Filter should be empty");
@@ -409,8 +419,8 @@ public class FilterDisposalTests {
     [Fact]
     public void StructuralChangesDoNotThrow() {
         var ent = this.world.CreateEntity();
-        ent.AddComponent<TagTest1>();
-        ent.AddComponent<TagTest2>();
+        this.tagTest1.Set(ent);
+        this.tagTest2.Set(ent);
 
         this.world.Commit();
 
@@ -423,7 +433,7 @@ public class FilterDisposalTests {
 
         this.world.Commit();
 
-        ent.AddComponent<TagTest3>();
+        this.tagTest3.Set(ent);
 
         foreach (var _ in filter) {
             Assert.Fail("Filter should be empty");
@@ -441,9 +451,9 @@ public class FilterDisposalTests {
     [Fact]
     public void StructuralChangesWithMultipleMatchesFilters() {
         var ent = this.world.CreateEntity();
-        ent.AddComponent<TagTest1>();
-        ent.AddComponent<TagTest2>();
-        ent.AddComponent<TagTest3>();
+        this.tagTest1.Set(ent);
+        this.tagTest2.Set(ent);
+        this.tagTest3.Set(ent);
         this.world.Commit();
 
         var filterBuilder0 = this.world.Filter.With<TagTest1>().With<TagTest2>();
@@ -470,7 +480,7 @@ public class FilterDisposalTests {
             Assert.Equal(ent, filterEnt);
         }
 
-        ent.AddComponent<TagTest4>();
+        this.tagTest4.Set(ent);
 
         this.world.Commit();
 
@@ -489,7 +499,7 @@ public class FilterDisposalTests {
             Assert.Equal(ent, filterEnt);
         }
 
-        ent.RemoveComponent<TagTest2>();
+        this.tagTest4.Remove(ent);
         this.world.Commit();
 
         foreach (var _ in filter0) {
@@ -505,7 +515,7 @@ public class FilterDisposalTests {
             Assert.Fail("Filter2 should be empty");
         }
 
-        ent.AddComponent<TagTest2>();
+        this.tagTest2.Set(ent);
         filter1.Dispose();
 
         foreach (var _ in filter0) {
