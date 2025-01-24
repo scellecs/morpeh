@@ -61,6 +61,7 @@
                     .AppendLine(");");
 
                 if (options.EnableSlowComponentApi) {
+                    // Has
                     sb.AppendLine();
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).AppendLine("public static bool Has(Scellecs.Morpeh.Entity entity) {");
@@ -70,6 +71,7 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
+                    // Set
                     sb.AppendLine();
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).AppendLine("public static void Set(Scellecs.Morpeh.Entity entity) {");
@@ -79,6 +81,7 @@
                     }
                     sb.AppendIndent(indent).AppendLine("}");
                     
+                    // Remove
                     sb.AppendLine();
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).AppendLine("public static void Remove(Scellecs.Morpeh.Entity entity) {");
@@ -89,7 +92,7 @@
                     sb.AppendIndent(indent).AppendLine("}");
 
                     if (stashVariation != StashVariation.Tag) {
-                        // Set
+                        // Set + in
                         sb.AppendLine();
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static void Set(Scellecs.Morpeh.Entity entity, in ").Append(fullTypeName).AppendLine(" value) {");
@@ -109,7 +112,7 @@
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         
-                        // TODO: passing "out" this way causes compile time errors on newer versions of dotnet
+                        // Add + out
                         sb.AppendLine();
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Add(Scellecs.Morpeh.Entity entity, out bool exist) {");
@@ -136,7 +139,7 @@
                         }
                         sb.AppendIndent(indent).AppendLine("}");
 
-                        // TODO: passing "out" this way causes compile time errors on newer versions of dotnet
+                        // Get + out
                         sb.AppendLine();
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Get(Scellecs.Morpeh.Entity entity, out bool success) {");
