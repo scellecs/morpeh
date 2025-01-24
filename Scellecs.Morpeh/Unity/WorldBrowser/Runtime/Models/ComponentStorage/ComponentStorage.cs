@@ -29,43 +29,70 @@ namespace Scellecs.Morpeh.WorldBrowser {
         internal IList<ComponentDataBoxed> FetchEntityComponents(Entity entity, IList<ComponentDataBoxed> buffer) {
             buffer.Clear();
             var handle = new EntityHandle(entity);
-            if (handle.IsValid) {
-                var archetype = handle.Archetype;
-                var components = archetype.components;
+            if (!handle.IsValid) {
+                return buffer;
+            }
+            
+            var world = handle.World;
+            var archetype = handle.Archetype;
+            var components = archetype.components;
 
-                foreach (var typeId in components) {
-                    var def = ExtendedComponentId.Get(typeId);
-                    var data = def.entityGetComponentBoxed.Invoke(entity);
-                    buffer.Add(new ComponentDataBoxed() {
-                        data = (IComponent)data,
-                        typeId = typeId,
-                        isMarker = def.isMarker
-                    });
+            foreach (var typeId in components) {
+                if (!ComponentId.TryGet(typeId, out var type)) {
+                    continue;
                 }
 
+                var stash = world.GetReflectionStash(type);
+                    
+                buffer.Add(new ComponentDataBoxed {
+                    data = stash.GetBoxed(entity),
+                    typeId = typeId,
+                    isMarker = stash is TagStash,
+                });
             }
 
             return buffer;
         }
 
         public void AddComponentData(int typeId, Entity entity) {
-            if (this.TryGetDefinition(entity, typeId, out var def)) {
-                def.entityAddComponent?.Invoke(entity);
+            if (!this.TryGetDefinition(entity, typeId, out var type)) {
+                return;
             }
+            
+            var world = entity.GetWorld();
+            var stash = world.GetReflectionStash(type);
+
+            if (stash.Has(entity)) {
+                return;
+            }
+            
+            stash.Set(entity);
         }
 
         public void RemoveComponentData(int typeId, Entity entity) {
-            if (this.TryGetDefinition(entity, typeId, out var def)) {
-                def.entityRemoveComponent?.Invoke(entity);
+            if (!this.TryGetDefinition(entity, typeId, out var type)) {
+                return;
             }
+            
+            var world = entity.GetWorld();
+            var stash = world.GetReflectionStash(type);
+            
+            stash.Remove(entity);
         }
 
-        public void SetComponentData(object data, int typeId, Entity entity) {
-            if (this.TryGetDefinition(entity, typeId, out var def)) {
-                if (!def.isMarker) {
-                    def.entitySetComponentBoxed?.Invoke(entity, data);
-                }
+        public void SetComponentData(IComponent data, int typeId, Entity entity) {
+            if (!this.TryGetDefinition(entity, typeId, out var def)) {
+                return;
             }
+            
+            var world = entity.GetWorld();
+            var stash = world.GetReflectionStash(def);
+            
+            if (stash is TagStash) {
+                return;
+            }
+            
+            stash.SetBoxed(entity, data);
         }
 
         public ComponentStorageModel GetModel() {
@@ -102,9 +129,9 @@ namespace Scellecs.Morpeh.WorldBrowser {
             }
         }
 
-        private bool TryGetDefinition(Entity entity, int typeId, out ExtendedComponentId.InternalTypeDefinition def) {
-            def = ExtendedComponentId.Get(typeId);
-
+        private bool TryGetDefinition(Entity entity, int typeId, out Type type) {
+            type = null;
+            
             if (Application.isPlaying == false) {
                 return false;
             }
@@ -114,8 +141,8 @@ namespace Scellecs.Morpeh.WorldBrowser {
             if (!isValid) {
                 return false;
             }
-
-            return true;
+            
+            return ComponentId.TryGet(typeId, out type);
         }
 
         private void AddComponent(Type type, int typeId) {

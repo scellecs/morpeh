@@ -64,10 +64,6 @@ namespace Scellecs.Morpeh {
             info = new TypeInfo(new TypeHash(typeHash), typeId);
             
             ComponentId.Add(typeof(T), info);
-
-#if MORPEH_GENERATE_ALL_EXTENDED_IDS
-            ExtendedComponentId.Generate<T>();
-#endif
         }
     }
 }
