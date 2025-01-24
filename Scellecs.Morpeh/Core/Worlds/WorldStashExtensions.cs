@@ -52,7 +52,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
-        public static Stash<T> GetStash<T>(this World world, int capacity = -1) where T : struct, IComponent {
+        public static Stash<T> GetStash<T>(this World world, int capacity = -1) where T : struct, IDataComponent {
             world.ThreadSafetyCheck();
             
             var info = ComponentId<T>.info;
