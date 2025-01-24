@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+﻿#if UNITY_EDITOR && MORPEH_REMOTE_BROWSER
 using Scellecs.Morpeh.WorldBrowser.Remote;
 using System;
 using UnityEditor;
