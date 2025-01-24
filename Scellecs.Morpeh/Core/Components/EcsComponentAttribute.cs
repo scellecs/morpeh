@@ -3,7 +3,7 @@
 
     [AttributeUsage(AttributeTargets.Struct)]
     public class EcsComponentAttribute : Attribute {
-        public EcsComponentAttribute(int initialCapacity = StashConstants.DEFAULT_COMPONENTS_CAPACITY) {
+        public EcsComponentAttribute(int initialCapacity = StashConstants.DEFAULT_COMPONENTS_CAPACITY, bool forceGenerateSlowApi = false) {
             
         }
     }

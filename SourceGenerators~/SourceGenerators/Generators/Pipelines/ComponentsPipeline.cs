@@ -61,11 +61,16 @@
             
                 Logger.Log(PIPELINE_NAME, generatorStepName, $"Transform: {typeSymbol.Name}");
             
-                var initialCapacity = 16;
+                var initialCapacity      = 16;
+                var forceGenerateSlowApi = false;
                 
                 var args = ctx.Attributes[0].ConstructorArguments;
                 if (args.Length >= 1 && args[0].Value is int capacity) {
                     initialCapacity = capacity;
+                }
+                
+                if (args.Length >= 2 && args[1].Value is bool slowApi) {
+                    forceGenerateSlowApi = slowApi;
                 }
                 
                 var (genericParams, genericConstraints) = GenericsSemantic.GetGenericParamsAndConstraints(typeSymbol);
@@ -78,7 +83,8 @@
                     GenericConstraints: genericConstraints,
                     InitialCapacity: initialCapacity,
                     StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(typeSymbol),
-                    Visibility: typeSymbol.DeclaredAccessibility);
+                    Visibility: typeSymbol.DeclaredAccessibility,
+                    ForceGenerateSlowApi: forceGenerateSlowApi);
             } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;

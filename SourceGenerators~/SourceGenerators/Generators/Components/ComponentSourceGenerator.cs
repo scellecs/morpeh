@@ -60,7 +60,7 @@
                     .Append(component.InitialCapacity)
                     .AppendLine(");");
 
-                if (options.EnableSlowComponentApi) {
+                if (options.EnableSlowComponentApi || component.ForceGenerateSlowApi) {
                     // Has
                     sb.AppendLine();
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
