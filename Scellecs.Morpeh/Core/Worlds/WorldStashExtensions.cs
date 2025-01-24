@@ -60,9 +60,9 @@
             if (candidate != null) {
                 if (candidate is Stash<T> typeStash) {
                     return typeStash;
-                } else {
-                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
                 }
+
+                throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
             }
             
             world.EnsureStashCapacity(info.id);
@@ -84,9 +84,9 @@
             if (candidate != null) {
                 if (candidate is DisposableStash<T> typeStash) {
                     return typeStash;
-                } else {
-                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
                 }
+
+                throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
             }
             
             world.EnsureStashCapacity(info.id);
@@ -109,9 +109,9 @@
             if (candidate != null) {
                 if (candidate is TagStash typeStash) {
                     return typeStash;
-                } else {
-                    throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
                 }
+
+                throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
             }
             
             world.EnsureStashCapacity(info.id);
