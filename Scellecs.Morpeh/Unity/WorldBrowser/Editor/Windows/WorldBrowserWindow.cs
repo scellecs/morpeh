@@ -17,7 +17,6 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private IHierarchyViewModel hierarchyViewModel;
         private IInspectorViewModel inspectorViewModel;
 
-        private RemoteToolbar remoteToolbarView;
         private HierarchySearchView hierarchySearchView;
         private HierarchyView hierarchyView;
         private InspectorView inspectorView;
@@ -67,9 +66,9 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
             if (!this.isApplicationPlaying && !this.isRemoteMode) {
                 this.rootVisualElement.Clear();
 #if MORPEH_REMOTE_BROWSER
+                var remoteToolbarView = new RemoteToolbar(this.OnRemoteStateChanged);
                 this.rootVisualElement.styleSheets.Add(this.remoteToolbarStyleSheet);
-                this.remoteToolbarView = new RemoteToolbar(this.OnRemoteStateChanged);
-                this.rootVisualElement.Add(this.remoteToolbarView);
+                this.rootVisualElement.Add(remoteToolbarView);
 #endif
                 return;
             }
