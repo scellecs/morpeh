@@ -115,7 +115,14 @@
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Add(Scellecs.Morpeh.Entity entity, out bool exist) {");
                         using (indent.Scope()) {
                             AppendEntityLivelinessCheck();
-                            sb.AppendIndent(indent).AppendLine("return ref GetStash(world).Add(entity, out exist);");
+                            sb.AppendIndent(indent).AppendLine("var stash = GetStash(world);");
+                            sb.AppendIndent(indent).AppendLine("exist = stash.Has(entity);");
+                            sb.AppendIndent(indent).AppendLine("if (!exist) {");
+                            using (indent.Scope()) {
+                                sb.AppendIndent(indent).AppendLine("return ref stash.Add(entity);");
+                            }
+                            sb.AppendIndent(indent).AppendLine("}");
+                            sb.AppendIndent(indent).AppendLine("return ref stash.Empty;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                         
@@ -135,7 +142,14 @@
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Get(Scellecs.Morpeh.Entity entity, out bool success) {");
                         using (indent.Scope()) {
                             AppendEntityLivelinessCheck();
-                            sb.AppendIndent(indent).AppendLine("return ref GetStash(world).Get(entity, out success);");
+                            sb.AppendIndent(indent).AppendLine("var stash = GetStash(world);");
+                            sb.AppendIndent(indent).AppendLine("success = stash.Has(entity);");
+                            sb.AppendIndent(indent).AppendLine("if (success) {");
+                            using (indent.Scope()) {
+                                sb.AppendIndent(indent).AppendLine("return ref stash.Get(entity);");
+                            }
+                            sb.AppendIndent(indent).AppendLine("}");
+                            sb.AppendIndent(indent).AppendLine("return ref stash.Empty;");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                     }

@@ -40,6 +40,11 @@ namespace Scellecs.Morpeh {
             get => this.map.length;
         }
         
+        public ref T Empty {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref this.empty;
+        }
+        
         [UnityEngine.Scripting.Preserve]
         internal Stash(World world, TypeInfo typeInfo, int capacity = -1) {
             this.world = world;
