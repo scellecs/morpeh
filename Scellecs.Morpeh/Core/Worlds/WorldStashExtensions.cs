@@ -48,7 +48,6 @@
             return stash;
         }
         
-        // TODO: Change to IDataComponent. This will be a breaking change, proceed with caution.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
