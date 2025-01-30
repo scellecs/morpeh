@@ -66,7 +66,7 @@
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).AppendLine("public static bool Has(Scellecs.Morpeh.Entity entity) {");
                     using (indent.Scope()) {
-                        AppendEntityLivelinessCheck();
+                        AppendEntityLivelinessCheck("InvalidHasOperationException");
                         sb.AppendIndent(indent).AppendLine("return GetStash(world).Has(entity);");
                     }
                     sb.AppendIndent(indent).AppendLine("}");
@@ -76,7 +76,7 @@
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).AppendLine("public static void Set(Scellecs.Morpeh.Entity entity) {");
                     using (indent.Scope()) {
-                        AppendEntityLivelinessCheck();
+                        AppendEntityLivelinessCheck("InvalidSetOperationException");
                         sb.AppendIndent(indent).AppendLine("GetStash(world).Set(entity);");
                     }
                     sb.AppendIndent(indent).AppendLine("}");
@@ -86,7 +86,7 @@
                     sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                     sb.AppendIndent(indent).AppendLine("public static void Remove(Scellecs.Morpeh.Entity entity) {");
                     using (indent.Scope()) {
-                        AppendEntityLivelinessCheck();
+                        AppendEntityLivelinessCheck("InvalidRemoveOperationException");
                         sb.AppendIndent(indent).AppendLine("GetStash(world).Remove(entity);");
                     }
                     sb.AppendIndent(indent).AppendLine("}");
@@ -97,7 +97,7 @@
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static void Set(Scellecs.Morpeh.Entity entity, in ").Append(fullTypeName).AppendLine(" value) {");
                         using (indent.Scope()) {
-                            AppendEntityLivelinessCheck();
+                            AppendEntityLivelinessCheck("InvalidSetOperationException");
                             sb.AppendIndent(indent).AppendLine("GetStash(world).Set(entity, value);");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
@@ -107,7 +107,7 @@
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Add(Scellecs.Morpeh.Entity entity) {");
                         using (indent.Scope()) {
-                            AppendEntityLivelinessCheck();
+                            AppendEntityLivelinessCheck("InvalidAddOperationException");
                             sb.AppendIndent(indent).AppendLine("return ref GetStash(world).Add(entity);");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
@@ -117,7 +117,7 @@
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Add(Scellecs.Morpeh.Entity entity, out bool exist) {");
                         using (indent.Scope()) {
-                            AppendEntityLivelinessCheck();
+                            AppendEntityLivelinessCheck("InvalidAddOperationException");
                             sb.AppendIndent(indent).AppendLine("var stash = GetStash(world);");
                             sb.AppendIndent(indent).AppendLine("exist = stash.Has(entity);");
                             sb.AppendIndent(indent).AppendLine("if (!exist) {");
@@ -134,7 +134,7 @@
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Get(Scellecs.Morpeh.Entity entity) {");
                         using (indent.Scope()) {
-                            AppendEntityLivelinessCheck();
+                            AppendEntityLivelinessCheck("InvalidGetOperationException");
                             sb.AppendIndent(indent).AppendLine("return ref GetStash(world).Get(entity);");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
@@ -144,7 +144,7 @@
                         sb.AppendInlining(MethodImplOptions.AggressiveInlining, indent);
                         sb.AppendIndent(indent).Append("public static ref ").Append(fullTypeName).AppendLine(" Get(Scellecs.Morpeh.Entity entity, out bool success) {");
                         using (indent.Scope()) {
-                            AppendEntityLivelinessCheck();
+                            AppendEntityLivelinessCheck("InvalidGetOperationException");
                             sb.AppendIndent(indent).AppendLine("var stash = GetStash(world);");
                             sb.AppendIndent(indent).AppendLine("success = stash.Has(entity);");
                             sb.AppendIndent(indent).AppendLine("if (success) {");
@@ -157,11 +157,11 @@
                         sb.AppendIndent(indent).AppendLine("}");
                     }
                     
-                    void AppendEntityLivelinessCheck() {
+                    void AppendEntityLivelinessCheck(string exceptionClass) {
                         sb.AppendIndent(indent).AppendLine("var world = Scellecs.Morpeh.EntityExtensions.GetWorld(entity);");
                         sb.AppendIndent(indent).AppendLine("if (world == null || Scellecs.Morpeh.WorldEntityExtensions.IsDisposed(world, entity)) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(").Append(fullTypeName).AppendLine("));");
+                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.").Append(exceptionClass).Append(".ThrowDisposedEntity(entity, typeof(").Append(fullTypeName).AppendLine("));");
                         }
                         sb.AppendIndent(indent).AppendLine("}");
                     }
