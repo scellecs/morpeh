@@ -89,9 +89,13 @@
 
                         sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (OnAwake), the system will be disabled\");");
+                            sb.AppendIndent(indent).AppendLine("if (World.doNotDisableSystemOnException == false) {");
+                            using (indent.Scope()) {
+                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (OnAwake), the system will be disabled\");");
+                                sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
+                            }
+                            sb.AppendIndent(indent).AppendLine("}");
                             sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
-                            sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                         }
 
                         sb.AppendIndent(indent).AppendLine("}");
@@ -135,10 +139,13 @@
 
                         sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName)
-                                .AppendLine(" system (OnUpdate), the system will be disabled\");");
+                            sb.AppendIndent(indent).AppendLine("if (World.doNotDisableSystemOnException == false) {");
+                            using (indent.Scope()) {
+                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (OnUpdate), the system will be disabled\");");
+                                sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
+                            }
+                            sb.AppendIndent(indent).AppendLine("}");
                             sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
-                            sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                         }
 
                         sb.AppendIndent(indent).AppendLine("}");
@@ -166,9 +173,13 @@
 
                         sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (Dispose), the system will be disabled\");");
+                            sb.AppendIndent(indent).AppendLine("if (World.doNotDisableSystemOnException == false) {");
+                            using (indent.Scope()) {
+                                sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (Dispose), the system will be disabled\");");
+                                sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
+                            }
+                            sb.AppendIndent(indent).AppendLine("}");
                             sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.LogException(exception);");
-                            sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
                         }
 
                         sb.AppendIndent(indent).AppendLine("}");

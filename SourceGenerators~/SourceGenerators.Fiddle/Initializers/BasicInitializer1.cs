@@ -1,10 +1,12 @@
 ﻿namespace SourceGenerators.Fiddle;
 
+using Components;
 using Scellecs.Morpeh;
 using Test.Namespace;
 
 [EcsInitializer]
 [Injectable]
+[IncludeStash(typeof(DataComponent))]
 [IncludeStash(typeof(TagComponent))]
 [IncludeStash(typeof(GenericComponent<int>))]
 [IncludeStash(typeof(GlobalNamespaceComponent), fieldName: "_globalTest")]
@@ -25,6 +27,7 @@ public partial class BasicInitializer1 {
     public World World { get; }
 
     public void OnAwake() {
+        this._dataComponent.Has(default);
         this._tagComponent.Has(default);
         this._genericComponent_Int32.Has(default);
         this._globalTest.Has(default);
