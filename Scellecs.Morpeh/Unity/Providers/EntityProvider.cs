@@ -11,6 +11,7 @@ namespace Scellecs.Morpeh.Providers {
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [AddComponentMenu("ECS/" + nameof(EntityProvider))]
     public class EntityProvider : MonoBehaviour {
+#pragma warning disable 0618
         public static IntHashMap<MapItem> map = new IntHashMap<MapItem>();
         public struct MapItem {
             public Entity entity;
@@ -145,5 +146,6 @@ namespace Scellecs.Morpeh.Providers {
         [Title("","Debug Info", HorizontalLine = true)]
         private Editor.EntityViewer entityViewer = new Editor.EntityViewer();
 #endif
+#pragma warning restore 0618
     }
 }

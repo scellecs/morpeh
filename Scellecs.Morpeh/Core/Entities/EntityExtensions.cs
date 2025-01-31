@@ -15,89 +15,8 @@ namespace Scellecs.Morpeh {
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    [Obsolete("Entity extensions are obsolete and will be removed in future versions of Morpeh.")]
     public static class EntityExtensions {
 #if !MORPEH_STRICT_MODE
-        [Obsolete("[MORPEH] Use Stash.Add() instead.")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T AddComponent<T>(this Entity entity) where T : struct, IComponent {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
-            }
-#endif
-            return ref entity.GetWorld().GetStash<T>().Add(entity);
-        }
-
-        [Obsolete("[MORPEH] Use Stash.Add() instead.")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                InvalidAddOperationException.ThrowDisposedEntity(entity, typeof(T));
-            }
-#endif
-            return ref entity.GetWorld().GetStash<T>().Add(entity, out exist);
-        }
-
-        [Obsolete("[MORPEH] Use Stash.Get() instead.")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T GetComponent<T>(this Entity entity) where T : struct, IComponent {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
-            }
-#endif
-            return ref entity.GetWorld().GetStash<T>().Get(entity);
-        }
-
-        [Obsolete("[MORPEH] Use Stash.Get() instead.")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IComponent {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                InvalidGetOperationException.ThrowDisposedEntity(entity, typeof(T));
-            }
-#endif
-            return ref entity.GetWorld().GetStash<T>().Get(entity, out exist);
-        }
-
-        [Obsolete("[MORPEH] Use Stash.Set() instead.")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IComponent {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                InvalidSetOperationException.ThrowDisposedEntity(entity, typeof(T));
-            }
-#endif
-            entity.GetWorld().GetStash<T>().Set(entity, value);
-        }
-
-        [Obsolete("[MORPEH] Use Stash.Remove() instead.")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool RemoveComponent<T>(this Entity entity) where T : struct, IComponent {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                InvalidRemoveOperationException.ThrowDisposedEntity(entity, typeof(T));
-            }
-#endif
-            return entity.GetWorld().GetStash<T>().Remove(entity);
-        }
-
-        [Obsolete("[MORPEH] Use Stash.Migrate() instead.")]
-        public static void Migrate<T>(this Entity from, Entity to, bool overwrite = true) where T : struct, IComponent {
-#if MORPEH_DEBUG
-            if (from.IsNullOrDisposed()) {
-                InvalidMigrateOperationException.ThrowDisposedEntityFrom(from, typeof(T));
-            }
-            
-            if (to.IsNullOrDisposed()) {
-                InvalidMigrateOperationException.ThrowDisposedEntityTo(to, typeof(T));
-            }
-#endif
-            from.GetWorld().GetStash<T>().Migrate(from, to, overwrite);
-        }
-        
         [Obsolete("This method is slow and doesn't have a Stash-based alternative. Consider doing manual migration of required components.")]
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
@@ -152,17 +71,7 @@ namespace Scellecs.Morpeh {
                 world.GetExistingStash(typeId)?.Migrate(from, to, overwrite);
             }
         }
-
-        [Obsolete("[MORPEH] Use Stash.Has() instead.")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Has<T>(this Entity entity) where T : struct, IComponent {
-#if MORPEH_DEBUG
-            if (entity.IsNullOrDisposed()) {
-                InvalidHasOperationException.ThrowDisposedEntity(entity, typeof(T));
-            }
-#endif
-            return entity.GetWorld().GetStash<T>().Has(entity);
-        }
+        
 #endif
 
         [Obsolete("[MORPEH] Use World.RemoveEntity() instead.")]
@@ -192,15 +101,23 @@ namespace Scellecs.Morpeh {
         public static World GetWorld(this Entity entity) {
             var worldId = entity.WorldId;
 
-            if (worldId < 0 || worldId >= World.worlds.length) {
+            if (worldId < 0 || worldId >= WorldConstants.MAX_WORLDS_COUNT) {
                 return null;
             }
+
+            var index = World.worldsIndices[worldId];
+
+            if (index == 0) {
+                return null;
+            }
+
+            var world = World.worlds[index - 1];
 
             if (entity.WorldGeneration != World.worldsGens[worldId]) {
                 return null;
             }
-            
-            return World.worlds.data[worldId];
+
+            return world;
         }
     }
 }

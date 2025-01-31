@@ -2,18 +2,37 @@
 
 namespace Benchmarks;
 
-public struct Test1 : IComponent {
+[EcsComponent]
+public partial struct IntTest1 {
     public int value;
 }
 
-public struct Test2 : IComponent {
+[EcsComponent]
+public partial struct IntTest2 {
     public int value;
 }
 
-public struct Test3 : IComponent {
+[EcsComponent]
+public partial struct IntTest3 {
     public int value;
 }
 
-public struct Test4 : IComponent {
+[EcsComponent]
+public partial struct IntTest4 {
     public int value;
+}
+
+[EcsComponent]
+public partial struct TagTest1 {
+    
+}
+
+[EcsComponent]
+public partial struct TagTest2 {
+    
+}
+
+[EcsComponent]
+public partial struct TagTest3 {
+    
 }

@@ -1,23 +1,114 @@
-﻿using Scellecs.Morpeh;
+﻿namespace Tests;
 
-namespace Tests;
+using Scellecs.Morpeh;
 
-public struct Test1 : IComponent { }
-public struct Test2 : IComponent { }
-public struct Test3 : IComponent { }
-public struct Test4 : IComponent { }
-public struct Test5 : IComponent { }
-public struct Test6 : IComponent { }
-public struct Test7 : IComponent { }
-public struct Test8 : IComponent { }
+[EcsComponent]
+public partial struct TagTest1 {
+    
+}
 
-public struct IntTest1 : IComponent { public int value; }
+[EcsComponent]
+public partial struct TagTest2 {
+    
+}
 
-public struct ManagedTest : IComponent {
+[EcsComponent]
+public partial struct TagTest3 {
+    
+}
+
+[EcsComponent]
+public partial struct TagTest4 {
+    
+}
+
+[EcsComponent]
+public partial struct TagTest5 {
+    
+}
+
+[EcsComponent]
+public partial struct TagTest6 {
+    
+}
+
+[EcsComponent]
+public partial struct TagTest7 {
+    
+}
+
+[EcsComponent]
+public partial struct TagTest8 {
+    
+}
+
+[EcsComponent]
+public partial struct IntTest1 {
+    public int value;
+}
+
+[EcsComponent]
+public partial struct IntTest2 {
+    public int value;
+}
+
+[EcsComponent]
+public partial struct IntTest3 {
+    public int value;
+}
+
+[EcsComponent]
+public partial struct IntTest4 {
+    public int value;
+}
+
+[EcsComponent]
+public partial struct DisposableTest1 {
+    public int    value;
+    public Action<int> onDispose;
+    
+    public void Dispose() {
+        this.onDispose?.Invoke(value);
+    }
+}
+
+[EcsComponent]
+public partial struct DisposableTest2 {
+    public int         value;
+    public Action<int> onDispose;
+    
+    public void Dispose() {
+        this.onDispose?.Invoke(value);
+    }
+}
+
+[EcsComponent]
+public partial struct DisposableTest3 {
+    public int         value;
+    public Action<int> onDispose;
+    
+    public void Dispose() {
+        this.onDispose?.Invoke(value);
+    }
+}
+
+[EcsComponent]
+public partial struct DisposableTest4 {
+    public int         value;
+    public Action<int> onDispose;
+    
+    public void Dispose() {
+        this.onDispose?.Invoke(value);
+    }
+}
+
+[EcsComponent]
+public partial struct ManagedTest {
     public object value;
 }
 
-public struct DisposableTest : IComponent, IDisposable {
+[EcsComponent]
+public partial struct DisposableTest {
     public sealed class Handle {
         public bool value = true;
     }

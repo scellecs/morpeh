@@ -33,7 +33,7 @@ namespace Scellecs.Morpeh.Editor {
                 
                 foreach (var typeId in archetype.components) {
                     var view = new ComponentView {
-                        internalTypeDefinition = ExtendedComponentId.Get(this.world.stashes[typeId].Type),
+                        stash = this.world.stashes[typeId],
                         entity = this.entity,
                     };
                     this.componentViews.Add(view);
@@ -49,38 +49,37 @@ namespace Scellecs.Morpeh.Editor {
         //[PropertyTooltip("$" + nameof(FullName))]
         [Serializable]
         private struct ComponentView {
-            internal ExtendedComponentId.InternalTypeDefinition internalTypeDefinition;
+            internal IStash stash;
+            internal Entity entity;
 
-            internal bool   IsMarker => this.internalTypeDefinition.isMarker;
-            internal string FullName => this.internalTypeDefinition.type.FullName;
+            internal bool   IsMarker => this.stash is TagStash;
+            internal string FullName => this.stash.Type.FullName;
 
             [ShowIf("$" + nameof(IsMarker))]
             [HideLabel]
             [DisplayAsString(false)]
             [ShowInInspector]
-            internal string TypeName => this.internalTypeDefinition.type.Name;
-
-            internal Entity entity;
+            internal string TypeName => this.stash.Type.Name;
 
             [DisableContextMenu]
             [HideIf("$" + nameof(IsMarker))]
             [LabelText("$" + nameof(TypeName))]
             [ShowInInspector]
             [HideReferenceObjectPicker]
-            public object Data {
+            public IComponent Data {
                 get {
-                    if (this.internalTypeDefinition.isMarker || Application.isPlaying == false) {
+                    if (this.IsMarker || Application.isPlaying == false) {
                         return null;
                     }
-
-                    return this.internalTypeDefinition.entityGetComponentBoxed(this.entity);
+                    
+                    return this.stash.GetBoxed(this.entity);
                 }
                 set {
-                    if (this.internalTypeDefinition.isMarker || Application.isPlaying == false) {
+                    if (this.IsMarker || Application.isPlaying == false) {
                         return;
                     }
 
-                    this.internalTypeDefinition.entitySetComponentBoxed(this.entity, value);
+                    this.stash.SetBoxed(this.entity, value);
                 }
             }
         }

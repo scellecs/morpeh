@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Scellecs.Morpeh\Scellecs.Morpeh.csproj" />
+      <ProjectReference Include="..\..\SourceGenerators~\SourceGenerators\SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
 </Project>

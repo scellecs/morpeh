@@ -16,9 +16,6 @@ namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
-#if MORPEH_BURST
-    using Unity.Collections;
-#endif
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -28,10 +25,12 @@ namespace Scellecs.Morpeh {
     public static class WorldExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
-            var id = World.freeWorldIDs.TryPop(out var freeID) ? freeID : World.worlds.length;
-            if (id >= World.worldsGens.Length) {
-                var newCapacity = HashHelpers.GetCapacity(id) + 1;
-                ArrayHelpers.Grow(ref World.worldsGens, newCapacity);
+            var id = -1;
+            for (int i = 0; i < WorldConstants.MAX_WORLDS_COUNT; i++) {
+                if (World.worldsIndices[i] == 0) {
+                    id = i;
+                    break;
+                }
             }
 
             world.identifier        = id;
@@ -61,40 +60,36 @@ namespace Scellecs.Morpeh {
             world.componentsFiltersWith = new ComponentsToFiltersRelation(128);
             world.componentsFiltersWithout = new ComponentsToFiltersRelation(128);
 
-            if (World.plugins != null) {
-                foreach (var plugin in World.plugins) {
-#if MORPEH_DEBUG
-                    try {
-#endif
-                        plugin.Initialize(world);
-#if MORPEH_DEBUG
-                    }
-                    catch (Exception e) {
-                        MLogger.LogError($"Can not initialize world plugin {plugin.GetType()}");
-                        MLogger.LogException(e);
-                    }
-#endif
-                }
-            }
-
             world.ApplyAddWorld();
             return world;
         }
 
         internal static void ApplyAddWorld(this World world) {
-            World.worlds.Add(world);
+            World.worlds[World.worldsCount] = world;
+            World.worldsIndices[world.identifier] = World.worldsCount + 1;
+            World.defaultWorld = World.worlds[0];
             World.worldsCount++;
-            World.defaultWorld = World.worlds.data[0];
         }
 
         internal static void ApplyRemoveWorld(this World world) {
             unchecked {
                 World.worldsGens[world.identifier]++;
             }
-            World.freeWorldIDs.Push(world.identifier);
-            World.worlds.Remove(world);
+
+            var currentIndex = World.worldsIndices[world.identifier] - 1;
             World.worldsCount--;
-            World.defaultWorld = World.worldsCount > 0 ? World.worlds.data[0] : null;
+
+            if (currentIndex < World.worldsCount) {
+                var swapWorld = World.worlds[World.worldsCount];
+                World.worlds[currentIndex] = swapWorld;
+                World.worldsIndices[swapWorld.identifier] = currentIndex + 1;
+            }
+
+            World.worlds[World.worldsCount] = null;
+            World.worldsIndices[world.identifier] = 0;
+            World.defaultWorld = World.worldsCount > 0 ? World.worlds[0] : null;
+            world.identifier = -1;
+            world.generation = -1;
         }
 
 #if MORPEH_UNITY && !MORPEH_DISABLE_AUTOINITIALIZATION
@@ -102,18 +97,9 @@ namespace Scellecs.Morpeh {
 #endif
         [PublicAPI]
         public static void InitializationDefaultWorld() {
-            var worlds = World.worlds.data;
-            for (int i = World.worlds.length - 1; i >= 0; i--) {
-                var world = worlds[i];
-                if (!world.IsNullOrDisposed()) {
-                    world.Dispose();
-                }
-            }
+            World.DisposeAllWorlds();
 
-            World.worldsCount = 0;
-            World.worlds.Clear();
             var defaultWorld = World.Create();
-            defaultWorld.UpdateByUnity = true;
 #if MORPEH_UNITY
             var go = new GameObject {
                 name      = "MORPEH_UNITY_RUNTIME_HELPER",
@@ -132,35 +118,6 @@ namespace Scellecs.Morpeh {
 #if MORPEH_BURST
             world.JobHandle.Complete();
 #endif
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SystemsGroup CreateSystemsGroup(this World world) {
-            world.ThreadSafetyCheck();
-            return new SystemsGroup(world);
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
-            world.ThreadSafetyCheck();
-            
-            world.newSystemsGroups.Add(order, systemsGroup);
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveSystemsGroup(this World world, SystemsGroup systemsGroup) {
-            world.ThreadSafetyCheck();
-            
-            systemsGroup.Dispose();
-            if (world.systemsGroups.ContainsValue(systemsGroup)) {
-                world.systemsGroups.RemoveAt(world.systemsGroups.IndexOfValue(systemsGroup));
-            }
-            else if (world.newSystemsGroups.ContainsValue(systemsGroup)) {
-                world.newSystemsGroups.RemoveAt(world.newSystemsGroups.IndexOfValue(systemsGroup));
-            }
         }
 
         [PublicAPI]

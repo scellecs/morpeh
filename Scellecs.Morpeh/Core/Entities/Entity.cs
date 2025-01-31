@@ -5,12 +5,10 @@ namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using System.Diagnostics;
 
-#if !MORPEH_NON_SERIALIZED
-    [Serializable]
-#endif
 #if DEBUG && !DEVELOPMENT_BUILD
     [DebuggerTypeProxy(typeof(EntityDebuggerProxy))]
 #endif
+    [Serializable]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]

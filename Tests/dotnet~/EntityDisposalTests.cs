@@ -7,14 +7,14 @@ namespace Tests;
 public class EntityDisposalTests {
     private readonly ITestOutputHelper output;
     private readonly World world;
-    private readonly Stash<Test1> test1;
+    private readonly TagStash tagTest1;
     
     public EntityDisposalTests(ITestOutputHelper output) {
         this.output = output;
         MLogger.SetInstance(new XUnitLogger(this.output));
         
         this.world = World.Create();
-        this.test1 = this.world.GetStash<Test1>();
+        this.tagTest1 = TagTest1.GetStash(this.world);
     }
     
     [Fact]
@@ -35,7 +35,7 @@ public class EntityDisposalTests {
     public void DisposeNonEmptyEntity() {
         var entity = this.world.CreateEntity();
         
-        this.test1.Set(entity, new Test1());
+        this.tagTest1.Set(entity);
         Assert.Equal(1, world.entitiesCount);
         
         this.world.RemoveEntity(entity);
@@ -67,7 +67,7 @@ public class EntityDisposalTests {
         var entity = this.world.CreateEntity();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Set(entity, new Test1());
+        this.tagTest1.Set(entity);
         this.world.RemoveEntity(entity);
         this.world.Commit();
         Assert.True(this.world.IsDisposed(entity));
@@ -84,7 +84,7 @@ public class EntityDisposalTests {
         var entity = this.world.CreateEntity();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Set(entity, new Test1());
+        this.tagTest1.Set(entity);
         this.world.Commit();
         Assert.False(this.world.IsDisposed(entity));
         Assert.Equal(1, world.entitiesCount);
@@ -107,8 +107,8 @@ public class EntityDisposalTests {
         var entity = this.world.CreateEntity();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Set(entity, new Test1());
-        this.test1.Remove(entity);
+        this.tagTest1.Set(entity);
+        this.tagTest1.Remove(entity);
         Assert.False(this.world.IsDisposed(entity));
         Assert.Equal(1, world.entitiesCount);
         
@@ -127,11 +127,11 @@ public class EntityDisposalTests {
         var entity = this.world.CreateEntity();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Set(entity, new Test1());
+        this.tagTest1.Set(entity);
         this.world.Commit();
         Assert.Equal(1, world.entitiesCount);
         
-        this.test1.Remove(entity);
+        this.tagTest1.Remove(entity);
         this.world.Commit();
         
         Assert.True(this.world.IsDisposed(entity));
