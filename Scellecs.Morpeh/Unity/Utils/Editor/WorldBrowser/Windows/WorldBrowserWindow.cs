@@ -82,6 +82,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 return;
             }
 
+            if (this.componentsStorage == null) 
+            {
+                this.initialized = false;
+                return;
+            }
+
             this.componentsStorage.ValidateUpdateCache();
             this.hierarchySearch.Update();
             this.hierarchy.Update();
