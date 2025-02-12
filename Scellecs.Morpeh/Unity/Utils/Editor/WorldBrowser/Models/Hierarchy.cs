@@ -91,9 +91,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             this.worldsMap.Clear();
             this.worlds.Clear();
+            this.worldIdentifiers.Clear();
+
             for (int i = 0; i < globalWorldsCount; i++)  {
                 var world = globalWorlds.data[i];
                 this.worldsMap[world.identifier] = world;
+                this.worldIdentifiers.Add(world.identifier);
             }
 
             this.selectedWorlds.RemoveWhere(identifier => !this.worldsMap.ContainsKey(identifier));
