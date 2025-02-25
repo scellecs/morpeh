@@ -14,7 +14,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private readonly HashSet<int> expandedStates;
         private readonly List<int> componentTypeIds;
         private readonly Dictionary<int, ComponentDataBoxed> componentData;
-        private VirtualList<int> addComponentSuggestions;
+        private readonly VirtualList<int> addComponentSuggestions;
 
         private readonly Func<int, object> Get;
         private readonly Action<int, object> Set;
