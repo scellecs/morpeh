@@ -138,7 +138,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         }
 
         private object GetComponent(int typeId) {
-            return this.componentData[typeId].data;
+            return this.componentData.TryGetValue(typeId, out var component) ? component.data : default;
         }
 
         private void SetComponent(int typeId, object value) {
