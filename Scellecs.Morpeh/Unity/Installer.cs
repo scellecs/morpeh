@@ -10,9 +10,8 @@
 #if UNITY_EDITOR
     using UnityEditor;
     using Sirenix.OdinInspector;
+    using Sirenix.Serialization;
 #endif
-
-    [Obsolete("Use SystemGroup instead.")]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
