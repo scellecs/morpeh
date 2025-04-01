@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2024.1.1] - WIP
+## [2024.1.1] - 01.04.2025
 ### Fixed
 - Fixed incorrect behavior of `Entity.GetWorld` when using multiworld setup.
 - Fixed several minor bugs in `WorldBrowser`.
+- Fixed NullReferenceException in `WorldBrowser` after domain reload by @Burrik.
+- Fixed broken `Installer` inspector.
+- Fixed `ScriptTemplates.package` with presets for systems. Now regular systems are created instead of deprecated `ScriptableObject` based.
 
 ### Added
 - Added automatic static data cleanup for `World` and `EntityProvider` when exiting playmode in Unity Editor.
