@@ -30,13 +30,14 @@
         
         private bool IsPrefab() => this.gameObject.scene.name == null;
 #endif
-        
+#pragma warning disable 0618
         [Space]
 #if UNITY_EDITOR
         [PropertyOrder(-6)]
         [Required]
 #endif
         public Initializer[] initializers;
+#pragma warning restore 0618
 #if UNITY_EDITOR
         [PropertyOrder(-5)]
         [OnValueChanged(nameof(OnValueChangedUpdate))]
