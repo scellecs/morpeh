@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added remote debug functionality for `WorldBrowser`.
 - Added `MORPEH_REMOTE_BROWSER` directive.
 
+### Changed
+- Aspect API is marked as Obsolete, and will be removed in future versions.
+
 ### Removed
 - Removed `MORPEH_NON_SERIALIZED` directive.
 
