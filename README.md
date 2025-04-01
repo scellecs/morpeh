@@ -79,7 +79,7 @@ Requires [Tri Inspector](https://github.com/codewriter-packages/Tri-Inspector) f
 
 &nbsp;&nbsp;&nbsp;&nbsp;⭐ Master: https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh  
 &nbsp;&nbsp;&nbsp;&nbsp;🚧 Stage:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#stage-2024.1  
-&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#2024.1.0  
+&nbsp;&nbsp;&nbsp;&nbsp;🏷️ Tag:  https://github.com/scellecs/morpeh.git?path=Scellecs.Morpeh#2024.1.1  
 
 ### .Net Platform
 
