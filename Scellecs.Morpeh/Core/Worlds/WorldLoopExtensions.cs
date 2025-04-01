@@ -10,8 +10,10 @@
     public static class WorldLoopExtensions {
         [PublicAPI]
         public static void GlobalUpdate(float deltaTime) {
-            foreach (var world in World.worlds) {
-                if (world.UpdateByUnity) {
+            var count = World.worldsCount;
+            for (int i = 0; i < count; i++) {
+                var world = World.worlds[i];
+                if (!world.IsNullOrDisposed() && world.UpdateByUnity) {
                     world.Update(deltaTime);
                 }
             }
@@ -19,8 +21,10 @@
 
         [PublicAPI]
         public static void GlobalFixedUpdate(float deltaTime) {
-            foreach (var world in World.worlds) {
-                if (world.UpdateByUnity) {
+            var count = World.worldsCount;
+            for (int i = 0; i < count; i++) {
+                var world = World.worlds[i];
+                if (!world.IsNullOrDisposed() && world.UpdateByUnity) {
                     world.FixedUpdate(deltaTime);
                 }
             }
@@ -28,8 +32,10 @@
 
         [PublicAPI]
         public static void GlobalLateUpdate(float deltaTime) {
-            foreach (var world in World.worlds) {
-                if (world.UpdateByUnity) {
+            var count = World.worldsCount;
+            for (int i = 0; i < count; i++) {
+                var world = World.worlds[i];
+                if (!world.IsNullOrDisposed() && world.UpdateByUnity) {
                     world.LateUpdate(deltaTime);
                     world.CleanupUpdate(deltaTime);
                 }

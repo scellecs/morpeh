@@ -11,8 +11,6 @@
     using UnityEditor;
     using Sirenix.OdinInspector;
 #endif
-
-    [Obsolete("Use SystemGroup instead.")]
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
@@ -32,13 +30,14 @@
         
         private bool IsPrefab() => this.gameObject.scene.name == null;
 #endif
-        
+#pragma warning disable 0618
         [Space]
 #if UNITY_EDITOR
         [PropertyOrder(-6)]
         [Required]
 #endif
         public Initializer[] initializers;
+#pragma warning restore 0618
 #if UNITY_EDITOR
         [PropertyOrder(-5)]
         [OnValueChanged(nameof(OnValueChangedUpdate))]
@@ -217,7 +216,7 @@
 #endif
             }
         }
-
+#pragma warning disable 0618
         [Serializable]
         public class UpdateSystemPair : BasePair<UpdateSystem> {
         }
@@ -234,4 +233,5 @@
         public class CleanupSystemPair : BasePair<CleanupSystem> {
         }
     }
+#pragma warning restore 0618
 }

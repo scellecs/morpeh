@@ -4,11 +4,11 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>2024.1.0</Version>
+        <Version>2024.1.1</Version>
         <Title>Scellecs.Morpeh</Title>
         <Authors>Oleg Morozov, Igor Boyko</Authors>
         <Description>ECS Framework for Unity Game Engine and .Net Platform</Description>
-        <Copyright>Copyright (c) 2024 Oleg Morozov, Igor Boyko, Matvey Reschikov</Copyright>
+        <Copyright>Copyright (c) 2025 Oleg Morozov, Igor Boyko, Matvey Reschikov</Copyright>
         <PackageLicenseUrl>https://github.com/scellecs/morpeh/blob/master/LICENSE.md</PackageLicenseUrl>
         <PackageIcon>logo.png</PackageIcon>
         <PackageReadmeFile>README_NUGET.md</PackageReadmeFile>
@@ -24,30 +24,7 @@
 
     <ItemGroup>
         <Compile Remove="Packages\**" />
-        <Compile Remove="Unity\BaseInstaller.cs" />
-        <Compile Remove="Unity\Installer.cs" />
-        <Compile Remove="Unity\UnityRuntimeHelper.cs" />
-        <Compile Remove="Unity\Editor\**" />
-        <Compile Remove="Unity\Providers\**" />
-        <Compile Remove="Unity\Systems\**" />
-        <Compile Remove="Unity\Utils\ComponentViewer\**" />
-        <Compile Remove="Unity\Utils\Editor\Resources\MaterialIcons\**" />
-        <Compile Remove="Unity\Utils\Editor\Resources\MorpehIcons\**" />
-        <Compile Remove="Unity\Utils\Editor\CompilationTime.cs" />
-        <Compile Remove="Unity\Utils\Editor\DefineAsset.cs" />
-        <Compile Remove="Unity\Utils\Editor\DependencyResolver.cs" />
-        <Compile Remove="Unity\Utils\Editor\EditorSceneSetup.cs" />
-        <Compile Remove="Unity\Utils\Editor\IconsSetter.cs" />
-        <Compile Remove="Unity\Utils\Editor\OpenAssetProcessor.cs" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Controls\**" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Models\**" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Search\SearchFilter\**" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Search\SearchHandler\**" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Styles\**" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Utils\**" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Views\**" />
-        <Compile Remove="Unity\Utils\Editor\WorldBrowser\Windows\**" />
-        <Compile Remove="Unity\Utils\SceneReference.cs" />
+        <Compile Remove="Unity\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -56,6 +33,7 @@
         <None Remove="**\*.asset" />
         <None Remove="**\*.uss" />
         <None Remove="**\*.asmdef" />
+        <None Remove="**\*.asmref" />
         <None Remove="**\*.unitypackage" />
         <None Include="Unity\Utils\Editor\Resources\logo.png" Pack="true" PackagePath="" />
         <None Include="..\README_NUGET.md" Pack="true" PackagePath="" />

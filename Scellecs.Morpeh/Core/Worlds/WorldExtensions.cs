@@ -16,9 +16,6 @@ namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
-#if MORPEH_BURST
-    using Unity.Collections;
-#endif
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -28,10 +25,12 @@ namespace Scellecs.Morpeh {
     public static class WorldExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static World Initialize(this World world) {
-            var id = World.freeWorldIDs.TryPop(out var freeID) ? freeID : World.worlds.length;
-            if (id >= World.worldsGens.Length) {
-                var newCapacity = HashHelpers.GetCapacity(id) + 1;
-                ArrayHelpers.Grow(ref World.worldsGens, newCapacity);
+            var id = -1;
+            for (int i = 0; i < WorldConstants.MAX_WORLDS_COUNT; i++) {
+                if (World.worldsIndices[i] == 0) {
+                    id = i;
+                    break;
+                }
             }
 
             world.identifier        = id;
@@ -82,19 +81,31 @@ namespace Scellecs.Morpeh {
         }
 
         internal static void ApplyAddWorld(this World world) {
-            World.worlds.Add(world);
+            World.worlds[World.worldsCount] = world;
+            World.worldsIndices[world.identifier] = World.worldsCount + 1;
+            World.defaultWorld = World.worlds[0];
             World.worldsCount++;
-            World.defaultWorld = World.worlds.data[0];
         }
 
         internal static void ApplyRemoveWorld(this World world) {
             unchecked {
                 World.worldsGens[world.identifier]++;
             }
-            World.freeWorldIDs.Push(world.identifier);
-            World.worlds.Remove(world);
+
+            var currentIndex = World.worldsIndices[world.identifier] - 1;
             World.worldsCount--;
-            World.defaultWorld = World.worldsCount > 0 ? World.worlds.data[0] : null;
+
+            if (currentIndex < World.worldsCount) {
+                var swapWorld = World.worlds[World.worldsCount];
+                World.worlds[currentIndex] = swapWorld;
+                World.worldsIndices[swapWorld.identifier] = currentIndex + 1;
+            }
+
+            World.worlds[World.worldsCount] = null;
+            World.worldsIndices[world.identifier] = 0;
+            World.defaultWorld = World.worldsCount > 0 ? World.worlds[0] : null;
+            world.identifier = -1;
+            world.generation = -1;
         }
 
 #if MORPEH_UNITY && !MORPEH_DISABLE_AUTOINITIALIZATION
@@ -102,16 +113,8 @@ namespace Scellecs.Morpeh {
 #endif
         [PublicAPI]
         public static void InitializationDefaultWorld() {
-            var worlds = World.worlds.data;
-            for (int i = World.worlds.length - 1; i >= 0; i--) {
-                var world = worlds[i];
-                if (!world.IsNullOrDisposed()) {
-                    world.Dispose();
-                }
-            }
+            World.DisposeAllWorlds();
 
-            World.worldsCount = 0;
-            World.worlds.Clear();
             var defaultWorld = World.Create();
             defaultWorld.UpdateByUnity = true;
 #if MORPEH_UNITY
@@ -537,6 +540,7 @@ namespace Scellecs.Morpeh {
         }
         
         [PublicAPI]
+        [Obsolete("Will be removed in future versions")]
         public static AspectFactory<T> GetAspectFactory<T>(this World world) where T : struct, IAspect {
             world.ThreadSafetyCheck();
             var aspectFactory = default(AspectFactory<T>);

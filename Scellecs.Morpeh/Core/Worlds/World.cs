@@ -13,32 +13,28 @@ namespace Scellecs.Morpeh {
     using JetBrains.Annotations;
     using Sirenix.OdinInspector;
     using Unity.IL2CPP.CompilerServices;
-#if MORPEH_BURST
-    using Unity.Jobs;
-    using Unity.Collections;
-#endif
 
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public sealed partial class World : IDisposable {
-        [CanBeNull]
-        [PublicAPI]
+        [CanBeNull, PublicAPI]
         public static World Default {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => defaultWorld;
         }
+
         [CanBeNull]
         internal static World defaultWorld;
-        [NotNull]
-        [PublicAPI]
-        internal static FastList<World> worlds = new FastList<World>();
-        [NotNull]
-        [PublicAPI]
-        internal static IntStack freeWorldIDs = new IntStack();
-        [NotNull]
-        [PublicAPI]
-        internal static byte[] worldsGens = new byte[4];
+
+        [NotNull, PublicAPI]
+        internal static World[] worlds = new World[WorldConstants.MAX_WORLDS_COUNT];
+
+        [NotNull, PublicAPI]
+        internal static int[] worldsIndices = new int[WorldConstants.MAX_WORLDS_COUNT];
+
+        [NotNull, PublicAPI]
+        internal static byte[] worldsGens = new byte[WorldConstants.MAX_WORLDS_COUNT];
 
         internal static int worldsCount = 0;
         
@@ -47,8 +43,7 @@ namespace Scellecs.Morpeh {
 
         internal int filterCount;
 
-        [PublicAPI]
-        [NotNull]
+        [NotNull, PublicAPI]
         public FilterBuilder Filter => FilterBuilder.Create(this);
         
         [PublicAPI]
@@ -61,7 +56,7 @@ namespace Scellecs.Morpeh {
         public bool IsDisposed;
 #if MORPEH_BURST
         [PublicAPI]
-        public JobHandle JobHandle;
+        public Unity.Jobs.JobHandle JobHandle;
 #endif
         internal LongHashMap<LongHashMap<Filter>> filtersLookup;
 
@@ -282,6 +277,23 @@ namespace Scellecs.Morpeh {
             this.IsDisposed = true;
 
             this.ApplyRemoveWorld();
+        }
+
+        internal static void DisposeAllWorlds() {
+            for (int i = worldsCount - 1; i >= 0; i--) {
+                var world = worlds[i];
+                if (!world.IsNullOrDisposed()) {
+                    world.Dispose();
+                }
+            }
+        }
+
+        internal static void CleanupStatic() {
+            DisposeAllWorlds();
+            plugins?.Clear();
+            worldsCount = 0;
+            defaultWorld = null;
+            Array.Clear(worldsGens, 0, WorldConstants.MAX_WORLDS_COUNT);
         }
 
         public struct Metrics {

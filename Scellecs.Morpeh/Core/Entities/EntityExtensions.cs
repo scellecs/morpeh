@@ -192,15 +192,23 @@ namespace Scellecs.Morpeh {
         public static World GetWorld(this Entity entity) {
             var worldId = entity.WorldId;
 
-            if (worldId < 0 || worldId >= World.worlds.length) {
+            if (worldId < 0 || worldId >= WorldConstants.MAX_WORLDS_COUNT) {
                 return null;
             }
+
+            var index = World.worldsIndices[worldId];
+
+            if (index == 0) {
+                return null;
+            }
+
+            var world = World.worlds[index - 1];
 
             if (entity.WorldGeneration != World.worldsGens[worldId]) {
                 return null;
             }
-            
-            return World.worlds.data[worldId];
+
+            return world;
         }
     }
 }
