@@ -1035,8 +1035,9 @@ Optimized lightweight implementation of a bit array, resizes significantly faste
 * **One State RP - Life Simulator** by *Chillbase*  
   [Android](https://play.google.com/store/apps/details?id=com.Chillgaming.oneState) [iOS](https://apps.apple.com/us/app/one-state-rp-online/id1597760047)
 
-* **FatalZone** by *Midhard Games*  
-  [Steam](https://store.steampowered.com/app/2488510/FatalZone/)
+
+* **Survival Arena** by *OAZIS GAMES*  
+  [Android](https://play.google.com/store/apps/details?id=tower.defense.survival.arena) [iOS](https://apps.apple.com/by/app/survival-arena-tower-defense/id6720725666)
 
 
 * **Zombie City** by *GreenButtonGames*  
@@ -1055,8 +1056,8 @@ Optimized lightweight implementation of a bit array, resizes significantly faste
   [Android](https://play.google.com/store/apps/details?id=com.multicastgames.venomSurvive) [iOS](https://apps.apple.com/tr/app/alien-invasion-rpg-idle-space/id6443697602)
 
 
-* **Cowravaneer** by *FESUNENKO GAMES*  
-  [Android](https://play.google.com/store/apps/details?id=com.FesunenkoGames.Cowravaneer)
+* **FatalZone** by *Midhard Games*  
+  [Steam](https://store.steampowered.com/app/2488510/FatalZone/)
 
 ---
 
