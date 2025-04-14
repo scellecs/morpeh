@@ -1,13 +1,15 @@
-namespace Scellecs.Morpeh {
+namespace Scellecs.Morpeh
+{
     using System;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
     using Scellecs.Morpeh.Collections;
-    
+    using Scellecs.Morpeh.Experimental;
+
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public sealed class Archetype : IDisposable {
+    public unsafe sealed class Archetype : IDisposable {
         internal ArchetypeHash hash;
         
         internal EntityPinnedArray entities;
@@ -18,6 +20,8 @@ namespace Scellecs.Morpeh {
 
         internal IntSlotMap filtersMap;
         internal Filter[]   filters;
+
+        internal NativeArchetype* native;
        
         internal Archetype(ArchetypeHash hash) {
             this.hash = hash;
@@ -30,6 +34,8 @@ namespace Scellecs.Morpeh {
             
             this.filtersMap = new IntSlotMap(3);
             this.filters    = new Filter[this.filtersMap.capacity];
+
+            this.native = null;
         }
         
         public void Dispose() {

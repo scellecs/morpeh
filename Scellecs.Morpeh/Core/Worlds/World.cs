@@ -12,6 +12,7 @@ namespace Scellecs.Morpeh {
     using Collections;
     using JetBrains.Annotations;
     using Sirenix.OdinInspector;
+    using Unity.Entities;
     using Unity.IL2CPP.CompilerServices;
 
     [Il2CppSetOption(Option.NullChecks, false)]
@@ -115,6 +116,8 @@ namespace Scellecs.Morpeh {
         
         [ShowInInspector]
         internal int emptyArchetypesCount;
+
+        internal unsafe EntityComponentStore* nativeArchetypes;
         
         [ShowInInspector]
         internal int identifier;

@@ -16,6 +16,7 @@ namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using Collections;
     using JetBrains.Annotations;
+    using Scellecs.Morpeh.Experimental;
     using Unity.IL2CPP.CompilerServices;
     using UnityEngine;
 
@@ -56,7 +57,14 @@ namespace Scellecs.Morpeh {
             world.archetypePool        = new ArchetypePool(32);
             world.emptyArchetypes      = new Archetype[32];
             world.emptyArchetypesCount = 0;
-
+#if MORPEH_UNITY
+            unsafe {
+                world.nativeArchetypes = (Unity.Entities.EntityComponentStore*)Unity.Collections.UnityCollectionsBridge.Allocate(
+                    Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<Unity.Entities.EntityComponentStore>(),
+                    Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<Unity.Entities.EntityComponentStore>(),
+                    Unity.Collections.Allocator.Persistent);
+            }
+#endif
             world.componentsFiltersWith = new ComponentsToFiltersRelation(128);
             world.componentsFiltersWithout = new ComponentsToFiltersRelation(128);
 
@@ -235,9 +243,10 @@ namespace Scellecs.Morpeh {
                     world.IncrementGeneration(entityId);
                     --world.entitiesCount;
                 } else if (entityData.addedComponentsCount + entityData.removedComponentsCount > 0) {
-                    world.ApplyTransientChanges(entityId, ref entityData);
+                    world.ApplyTransientChanges(entityId, ref entityData, (entityData.dirtyFlags & EntityDirtyFlags.Native) != 0);
                 }
                 
+                entityData.dirtyFlags = EntityDirtyFlags.None;
                 sparseSet.sparse[entityId] = 0;
             }
 
@@ -302,7 +311,33 @@ namespace Scellecs.Morpeh {
             
             MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void TransientChangeAddNativeChunkComponent(this World world, int entityId, ref TypeInfo typeInfo) {
+            ref var entityData = ref world.entities[entityId];
+            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
+            entityData.nextNativeArchetypeHash = entityData.nextNativeArchetypeHash.Combine(typeInfo.hash);
+
+            for (var i = entityData.removedComponentsCount - 1; i >= 0; i--) {
+                if (entityData.removedComponents[i] != typeInfo.id) {
+                    continue;
+                }
+
+                entityData.removedComponents[i] = entityData.removedComponents[--entityData.removedComponentsCount];
+                return;
+            }
+
+            if (entityData.addedComponentsCount == entityData.addedComponents.Length) {
+                ExpandAddedComponents(ref entityData);
+            }
+
+            entityData.addedComponents[entityData.addedComponentsCount++] = typeInfo.id;
+            entityData.dirtyFlags |= EntityDirtyFlags.Native;
+            world.dirtyEntities.Add(entityId);
+
+            MLogger.LogTrace($"[AddNativeComponent] To: {entityData.nextArchetypeHash}");
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ExpandAddedComponents(ref EntityData entityData) {
             ArrayHelpers.Grow(ref entityData.addedComponents, entityData.addedComponentsCount << 1);
@@ -331,19 +366,60 @@ namespace Scellecs.Morpeh {
             
             MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void TransientChangeRemoveNativeChunkComponent(this World world, int entityId, ref TypeInfo typeInfo) {
+            ref var entityData = ref world.entities[entityId];
+            entityData.nextArchetypeHash = entityData.nextArchetypeHash.Combine(typeInfo.hash);
+            entityData.nextNativeArchetypeHash = entityData.nextNativeArchetypeHash.Combine(typeInfo.hash);
+
+            for (var i = entityData.addedComponentsCount - 1; i >= 0; i--) {
+                if (entityData.addedComponents[i] != typeInfo.id) {
+                    continue;
+                }
+
+                entityData.addedComponents[i] = entityData.addedComponents[--entityData.addedComponentsCount];
+                return;
+            }
+
+            if (entityData.removedComponentsCount == entityData.removedComponents.Length) {
+                ExpandRemovedComponents(ref entityData);
+            }
+
+            entityData.removedComponents[entityData.removedComponentsCount++] = typeInfo.id;
+            entityData.dirtyFlags |= EntityDirtyFlags.Native;
+            world.dirtyEntities.Add(entityId);
+
+            MLogger.LogTrace($"[RemoveNativeComponent] To: {entityData.nextArchetypeHash}");
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ExpandRemovedComponents(ref EntityData entityData) {
             ArrayHelpers.Grow(ref entityData.removedComponents, entityData.removedComponentsCount << 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ApplyTransientChanges(this World world, int entityId, ref EntityData entityData) {
+        internal static unsafe void ApplyTransientChanges(this World world, int entityId, ref EntityData entityData, bool nativeMigration = false) {
             // Add to new archetype
             if (!world.archetypes.TryGet(entityData.nextArchetypeHash, out var nextArchetype)) {
                 nextArchetype = world.CreateMigratedArchetype(ref entityData);
             }
-            
+
+            // Native archetype migration if native dirty flag applied, otherwise just copy native pointer
+            // Move native archetype pointer from Archetype to EntityData?
+            if (nativeMigration) {
+                var nextNative = world.nativeArchetypes->GetExistingArchetype(entityData.nextNativeArchetypeHash);
+                if (nextNative == null) {
+                    nextNative = CreateMigratedNativeArchetype(world, nextArchetype, ref entityData);
+                }
+
+                nextArchetype.native = nextNative;
+                ChunkDataUtility.Move(entityId, nextNative);
+            }
+            else { 
+                nextArchetype.native = nextArchetype != null ? nextArchetype.native : null;
+            }
+
             var indexInNextArchetype = nextArchetype.AddEntity(world.GetEntityAtIndex(entityId));
             
             // Remove from previous archetype
@@ -385,7 +461,38 @@ namespace Scellecs.Morpeh {
         internal static void GrowEmptyArchetypes(this World world) {
             ArrayHelpers.Grow(ref world.emptyArchetypes, world.emptyArchetypesCount << 1);
         }
-        
+
+        internal static unsafe NativeArchetype* CreateMigratedNativeArchetype(this World world, Archetype nextArchetype, ref EntityData entityData) {
+            var currentNative = entityData.currentArchetype != null ? entityData.currentArchetype.native : null;
+            var nextNativeCountConservative = nextArchetype.components.length;
+            var nextNativeIterator = 0;
+            var nextNativeTypeIds = stackalloc int[nextNativeCountConservative];
+
+            if (currentNative != null) {
+                var nativeTypeIds = currentNative->typeIds;
+                var nativeCount = currentNative->typesCount;
+
+                for (int i = 0; i < nativeCount; i++) {
+                    var typeId = nativeTypeIds[i];
+
+                    if (!nextArchetype.components.Has(typeId)) {
+                        continue;
+                    }
+
+                    nextNativeTypeIds[nextNativeIterator++] = typeId;
+                }
+            }
+
+            for (int i = 0; i < entityData.addedComponentsCount; i++) {
+                var typeId = entityData.addedComponents[i];
+                if (ComponentId.TryGetNative(typeId, out _)) { // temp govno
+                    nextNativeTypeIds[nextNativeIterator++] = typeId;
+                }
+            }
+
+            return world.nativeArchetypes->CreateArchetype(nextNativeTypeIds, nextNativeIterator);
+        }
+
         internal static Archetype CreateMigratedArchetype(this World world, ref EntityData entityData) {
             var nextArchetype = world.archetypePool.Rent(entityData.nextArchetypeHash);
             
@@ -461,7 +568,7 @@ namespace Scellecs.Morpeh {
             
             world.archetypes.Add(nextArchetype);
             world.archetypesCount++;
-            
+
             return nextArchetype;
         }
 

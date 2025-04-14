@@ -1,4 +1,5 @@
 ﻿namespace Scellecs.Morpeh {
+    using System;
     using System.Runtime.CompilerServices;
     using Unity.IL2CPP.CompilerServices;
     
@@ -8,6 +9,9 @@
     public struct EntityData {
         internal Archetype     currentArchetype;
         internal ArchetypeHash nextArchetypeHash;
+        internal ArchetypeHash nextNativeArchetypeHash;
+
+        internal EntityDirtyFlags dirtyFlags;
         
         internal int indexInCurrentArchetype;
         internal int addedComponentsCount;
@@ -15,7 +19,7 @@
         
         internal int[] addedComponents;
         internal int[] removedComponents;
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Initialize() {
             this.currentArchetype  = null;
@@ -28,5 +32,11 @@
             this.addedComponents = new int[8];
             this.removedComponents = new int[8];
         }
+    }
+
+    [Flags]
+    internal enum EntityDirtyFlags { 
+        None,
+        Native
     }
 }
