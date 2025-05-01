@@ -48,6 +48,7 @@ Key points for people familiar with other ECS frameworks:
     * [Unity Jobs And Burst](#-unity-jobs-and-burst)
     * [Defines](#%EF%B8%8F-defines)
     * [World Plugins](#%EF%B8%8F-world-plugins)
+    * [World Browser](#-world-browser)
     * [Metrics](#-metrics)
     * [Stash size](#-stash-size)
     * [Collections](#%EF%B8%8F-collections)
@@ -332,65 +333,6 @@ var stash = monoProvider.Stash;
 We also have one additional provider that allows you to destroy an entity when a GameObject is removed from the scene.  
 You can simply hang it on a GameObject and no matter how many components are left on the entity, it will be deleted.  
 The provider is called `RemoveEntityOnDestroy`.  
-
-#### 🌐 World Browser
-
-The WorldBrowser tool enables real-time tracking and searching of entities and their components. Also provides functionality to add and remove components. Works in both Unity Editor playmode and can connect remotely to builds runtime.
-Supports the same filtering logic as the core ``Filter``, allowing complex queries using ``With`` and ``Without`` conditions.
-
-Access it via Tools -> Morpeh -> WorldBrowser.
-
-**To declare a query:**
-- Enter the full component name in the search bar for ``With`` conditions.
-- Use ``!`` before the component name for ``Without`` conditions (e.g. ``!ComponentName``).
-- You can paste a complete regular expression directly into the search bar, and it will automatically synchronize with the list of available components.
-
-**Alternatively:**
-- Choose from a synchronized list of available components instead of typing them manually.
-- Suggestions appear as you type in the search bar. When you start typing a component name, a list of available components is displayed. You can click on a suggestion to automatically complete the name.
-
-**ID search:**
-- Search by one or multiple entity IDs by entering ``id:`` (e.g. ``id:25 id:145``).
-- ID-based search overrides any component-based query.
-
-> [!NOTE]
-> ``Entity`` with ID 0 cannot exist, as it's reserved as an invalid entity in the framework.
-
-**World Selection:**
-- Use the top toolbar (with the **W** icon) to choose worlds to search.
-- By default, ``World.Default`` is pre-selected.
-
-**Remote Connection:**
-
-The feature is currently in experimental stage and works only in development builds. It has several limitations compared to Unity Editor playmode:
-- Components containing `Unity.Object` are displayed in read-only mode.
-- Cannot inspect `Unity.Object fields` in components, but provides `Type`, `Name`, and `InstanceID` information.
-- Some components may fail serialization, will be marked with [NotSerialized] tag and won't be rendered. You'll need to modify the component structure manually if serialization is required.
-
-Setup:
-- Install [Unity.Serialization package](https://docs.unity3d.com/Packages/com.unity.serialization@3.1/manual/index.html) via Package Manager.
-- Add `MORPEH_REMOTE_BROWSER` directive to *ProjectSettings -> Player -> Scripting Define Symbols*.
-- Restart Unity Editor.
-- After restart, the `WorldBrowser` will display a "Connect To Remote" button.
-
-> [!IMPORTANT]  
-> You must build your application after enabling remote mode. Previous builds will not support remote debugging.
-
-Starting Remote Debug:
-- Launch the application on your target device.
-- Open WorldBrowser in Unity Editor.
-- Enter the device's IP address (and optional port) as specified below.
-- Click "Connect To Remote" button.
-
-Android & iOS:
-- Connect to the same WiFi network as your device.
-- Get the device's IP address from Settings -> WiFi -> Network details.
-- Enter the IP address in the connection dialog (e.g., `192.168.1.100`).
-- Optionally specify a custom port (e.g., `192.168.1.100:22005`).
-
-Windows & macOS & Linux:
-- Use localhost (e.g., `127.0.0.1`).
-- Optionally specify a custom port (e.g., `127.0.0.1:22005`).
 
 ---
 
@@ -944,6 +886,64 @@ class GlobalsWorldPlugin : IWorldPlugin {
     }
 }
 ```
+#### 🌐 World Browser
+
+The WorldBrowser tool enables real-time tracking and searching of entities and their components. Also provides functionality to add and remove components. Works in both Unity Editor playmode and can connect remotely to builds runtime.
+Supports the same filtering logic as the core ``Filter``, allowing complex queries using ``With`` and ``Without`` conditions.
+
+Access it via Tools -> Morpeh -> WorldBrowser.
+
+**To declare a query:**
+- Enter the full component name in the search bar for ``With`` conditions.
+- Use ``!`` before the component name for ``Without`` conditions (e.g. ``!ComponentName``).
+- You can paste a complete regular expression directly into the search bar, and it will automatically synchronize with the list of available components.
+
+**Alternatively:**
+- Choose from a synchronized list of available components instead of typing them manually.
+- Suggestions appear as you type in the search bar. When you start typing a component name, a list of available components is displayed. You can click on a suggestion to automatically complete the name.
+
+**ID search:**
+- Search by one or multiple entity IDs by entering ``id:`` (e.g. ``id:25 id:145``).
+- ID-based search overrides any component-based query.
+
+> [!NOTE]
+> ``Entity`` with ID 0 cannot exist, as it's reserved as an invalid entity in the framework.
+
+**World Selection:**
+- Use the top toolbar (with the **W** icon) to choose worlds to search.
+- By default, ``World.Default`` is pre-selected.
+
+**Remote Connection:**
+
+The feature is currently in experimental stage and works only in development builds. It has several limitations compared to Unity Editor playmode:
+- Components containing `Unity.Object` are displayed in read-only mode.
+- Cannot inspect `Unity.Object fields` in components, but provides `Type`, `Name`, and `InstanceID` information.
+- Some components may fail serialization, will be marked with [NotSerialized] tag and won't be rendered. You'll need to modify the component structure manually if serialization is required.
+
+Setup:
+- Install [Unity.Serialization package](https://docs.unity3d.com/Packages/com.unity.serialization@3.1/manual/index.html) via Package Manager.
+- Add `MORPEH_REMOTE_BROWSER` directive to *ProjectSettings -> Player -> Scripting Define Symbols*.
+- Restart Unity Editor.
+- After restart, the `WorldBrowser` will display a "Connect To Remote" button.
+
+> [!IMPORTANT]  
+> You must build your application after enabling remote mode. Previous builds will not support remote debugging.
+
+Starting Remote Debug:
+- Launch the application on your target device.
+- Open WorldBrowser in Unity Editor.
+- Enter the device's IP address (and optional port) as specified below.
+- Click "Connect To Remote" button.
+
+Android & iOS:
+- Connect to the same WiFi network as your device.
+- Get the device's IP address from Settings -> WiFi -> Network details.
+- Enter the IP address in the connection dialog (e.g., `192.168.1.100`).
+- Optionally specify a custom port (e.g., `192.168.1.100:22005`).
+
+Windows & macOS & Linux:
+- Use localhost (e.g., `127.0.0.1`).
+- Optionally specify a custom port (e.g., `127.0.0.1:22005`).
 
 ####  📊 Metrics
 To debug the game, you may need statistics on basic data in the ECS framework, such as:
