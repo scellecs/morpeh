@@ -19,9 +19,9 @@ public class EntityDisposalTests {
     
     [Fact]
     public void DisposeEmptyEntity() {
-        Entity entity = this.world.CreateEntity();
-        Assert.Equal(1, this.world.entitiesCount);
-
+        var entity = this.world.CreateEntity();
+        Assert.Equal(1, world.entitiesCount);
+        
         this.world.RemoveEntity(entity);
         Assert.True(this.world.IsDisposed(entity));
         Assert.Equal(0, world.entitiesCount);
