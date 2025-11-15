@@ -28,3 +28,24 @@ public struct DisposableTest : IComponent, IDisposable {
         this.value.value = false;
     }
 }
+
+public class ActivableGameObject {
+    public Action onActivate;
+    public Action onDeactivate;
+
+    public void Activate() {
+        this.onActivate.Invoke();
+    }
+
+    public void Deactivate() {
+        this.onDeactivate.Invoke();
+    }
+}
+
+public struct PooledObjectView : IComponent, IDisposable {
+    public ActivableGameObject go;
+
+    public void Dispose() {
+        this.go?.Deactivate();
+    }
+}
