@@ -29,13 +29,8 @@ namespace Scellecs.Morpeh.Providers {
 
         [CanBeNull]
         public Entity Entity {
-            get {
-                if (this.IsEditmodeOrPrefab()) {
-                    return default;
-                }
-
-                return this.cachedEntity;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => this.cachedEntity;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
