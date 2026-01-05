@@ -9,8 +9,6 @@
         private T serializedData;
         private Stash<T> stash;
 #if UNITY_EDITOR
-        private string typeName = typeof(T).Name;
-
         [PropertySpace]
         [ShowInInspector]
         [PropertyOrder(1)]
