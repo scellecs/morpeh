@@ -149,10 +149,10 @@ namespace Scellecs.Morpeh.Providers {
             get {
                 if (this.entityViewer == null) {
                     this.entityViewer = new Editor.EntityViewer();
+
+                    this.entityViewer.world  = World.Default;
+                    this.entityViewer.entity = this.Entity;
                 }
-                
-                this.entityViewer.world  = World.Default;
-                this.entityViewer.entity = this.Entity;
                 
                 return this.entityViewer;
             }
