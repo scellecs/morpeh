@@ -144,7 +144,7 @@ public class EntityDisposalTests {
 
     [Fact]
     public void DisposeWithMonoProviderDoesNotDoubleRemoveFromStash() {
-        var stashDisposable = this.world.GetStash<PooledObjectView>().AsDisposable();
+        var stashDisposable = this.world.GetDisposableStash<PooledObjectView>();
 
         var entity = this.world.CreateEntity();
 
@@ -152,11 +152,11 @@ public class EntityDisposalTests {
 
         // Simulate a provider that adds/removes a component on activation/deactivation
         go.onActivate = () => {
-            this.test1.Set(entity, new Test1());
+            this.tagTest1.Set(entity);
         };
         go.onDeactivate = () => {
             if (this.world.Has(entity)) {
-                this.test1.Remove(entity);
+                this.tagTest1.Remove(entity);
             }
         };
 
@@ -166,7 +166,7 @@ public class EntityDisposalTests {
         pooledObjectView.go = go;
         this.world.Commit();
 
-        Assert.True(this.test1.Has(entity));
+        Assert.True(this.tagTest1.Has(entity));
         Assert.True(stashDisposable.Has(entity));
         
         // Remove entity, which triggers Dispose() and the OnDeactivate callback
@@ -177,7 +177,7 @@ public class EntityDisposalTests {
         this.world.Commit();
 
         var newEntity1 = this.world.CreateEntity();
-        this.test1.Add(newEntity1);
+        this.tagTest1.Add(newEntity1);
         Assert.NotEqual(newEntity1, entity);
         // A double removal would corrupt the generation, making below asserts fail
         Assert.Equal(entity.Generation + 1, newEntity1.Generation);
@@ -186,7 +186,7 @@ public class EntityDisposalTests {
         var newEntity2 = this.world.CreateEntity();
         Assert.NotEqual(newEntity2, newEntity1);
         Assert.NotEqual(newEntity2, entity);
-        this.test1.Add(newEntity2);
+        this.tagTest1.Add(newEntity2);
         this.world.Commit();
     }
 }

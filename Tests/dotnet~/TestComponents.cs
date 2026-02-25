@@ -133,7 +133,7 @@ public class ActivableGameObject {
     }
 }
 
-public struct PooledObjectView : IComponent, IDisposable {
+public struct PooledObjectView : IDisposableComponent {
     public ActivableGameObject go;
 
     public void Dispose() {
