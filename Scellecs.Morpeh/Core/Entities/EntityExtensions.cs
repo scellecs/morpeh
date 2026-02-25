@@ -18,6 +18,7 @@ namespace Scellecs.Morpeh {
     public static class EntityExtensions {
 #if !MORPEH_STRICT_MODE
         [Obsolete("This method is slow and doesn't have a Stash-based alternative. Consider doing manual migration of required components.")]
+#endif
         public static void MigrateTo(this Entity from, Entity to, bool overwrite = true) {
 #if MORPEH_DEBUG
             if (from.IsNullOrDisposed()) {
@@ -28,7 +29,6 @@ namespace Scellecs.Morpeh {
                 InvalidMigrateOperationException.ThrowDisposedEntityTo(to);
             }
 #endif
-
             var world = from.GetWorld();
             ref var fromEntityData = ref world.entities[from.Id];
             
@@ -71,16 +71,17 @@ namespace Scellecs.Morpeh {
                 world.GetExistingStash(typeId)?.Migrate(from, to, overwrite);
             }
         }
-        
-#endif
 
+#if !MORPEH_SUPPRESS_OBSOLETE
         [Obsolete("[MORPEH] Use World.RemoveEntity() instead.")]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Dispose(this Entity entity) {
             entity.GetWorld()?.RemoveEntity(entity);
         }
-        
+#if !MORPEH_SUPPRESS_OBSOLETE
         [Obsolete("[MORPEH] Use World.IsDisposed() instead.")]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsDisposed(this Entity entity) {
             if (entity == default) {
@@ -90,8 +91,9 @@ namespace Scellecs.Morpeh {
             var world = entity.GetWorld();
             return world == null || world.IsDisposed(entity);
         }
-
+#if !MORPEH_SUPPRESS_OBSOLETE
         [Obsolete("[MORPEH] Use World.IsDisposed() instead. This is the same as IsDisposed() but with a different name for compatibility.")]
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed(this Entity entity) {
             return entity.IsDisposed();

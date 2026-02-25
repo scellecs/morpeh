@@ -25,8 +25,8 @@ namespace Scellecs.Morpeh.WorldBrowser.Remote {
 
         private bool firstUpdate;
 
-        internal RemoteModelsStorage(Action<bool> OnStateChanged) {
-            this.OnStateChanged = OnStateChanged;
+        internal RemoteModelsStorage(Action<bool> onStateChanged) {
+            this.OnStateChanged = onStateChanged;
         }
 
         public bool Initialize() {

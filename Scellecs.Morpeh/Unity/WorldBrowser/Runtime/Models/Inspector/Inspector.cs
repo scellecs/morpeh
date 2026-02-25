@@ -8,9 +8,8 @@ namespace Scellecs.Morpeh.WorldBrowser {
         private readonly Hierarchy hierarchy;
         private readonly ComponentStorage storage;
 
-        private string addComponentSearchString;
         private List<int> addComponentSuggestions;
-        private bool requireUpdateSuggestions;
+        private string addComponentSearchString;
 
         private EntityHandle currentHandle;
         private long storageVersion;
@@ -22,13 +21,13 @@ namespace Scellecs.Morpeh.WorldBrowser {
             this.model.components = new List<ComponentDataBoxed>();
             this.model.addComponentSuggestions = this.addComponentSuggestions = new List<int>();
             this.addComponentSearchString = string.Empty;
-            this.requireUpdateSuggestions = true;
             this.currentHandle = default;
             this.storageVersion = -1u;
         }
 
         internal void Update() {
             var handle = this.hierarchy.GetSelectedEntityHandle();
+            var requireUpdateSuggestions = false;
 
             if (!this.currentHandle.IsValid && !handle.IsValid) {
                 if (this.model.components.Count > 0) {
@@ -46,21 +45,20 @@ namespace Scellecs.Morpeh.WorldBrowser {
             if (!this.currentHandle.Equals(handle)) {
                 this.currentHandle = handle;
                 this.model.selectedEntity = this.currentHandle.entity;
-                this.requireUpdateSuggestions = true;
                 this.model.IncrementVersion();
+                requireUpdateSuggestions = true;
             }
 
             this.storage.FetchEntityComponents(this.currentHandle.entity, this.model.components);
 
             if (this.storageVersion != this.storage.GetVersion()) {
                 this.storageVersion = this.storage.GetVersion();
-                this.requireUpdateSuggestions = true;
                 this.model.IncrementVersion();
+                requireUpdateSuggestions = true;
             }
 
-            if (this.requireUpdateSuggestions) {
+            if (requireUpdateSuggestions) {
                 this.UpdateAddComponentSuggestions();
-                this.requireUpdateSuggestions = false;
             }
         }
 

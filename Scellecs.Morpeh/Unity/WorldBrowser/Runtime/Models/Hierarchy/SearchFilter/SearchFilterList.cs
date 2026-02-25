@@ -34,7 +34,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Filter {
         }
 
         internal int this[Entity entity] {
-            get => this.mode == SearchFilterListMode.Archetypes ? IndexOf(entity) : this.ids.IndexOf(entity);
+            get => IndexOf(entity);
         }
 
         public int Count => this.count;
@@ -53,6 +53,10 @@ namespace Scellecs.Morpeh.WorldBrowser.Filter {
         }
 
         public int IndexOf(Entity entity) {
+            if (this.mode == SearchFilterListMode.EntityIds) {
+                return this.ids.IndexOf(entity);
+            }
+
             var handle = new EntityHandle(entity);
             if (handle.IsValid) {
                 var entityData = handle.EntityData;
@@ -110,9 +114,11 @@ namespace Scellecs.Morpeh.WorldBrowser.Filter {
             if (index >= this.count || index < 0) {
                 throw new IndexOutOfRangeException(nameof(index));
             }
+
             var left = 0;
             var right = this.archetypesRanges.Count - 1;
             var foundRangeIndex = -1;
+
             while (left <= right) {
                 var mid = left + (right - left) / 2;
                 var rangeStart = this.archetypesRanges[mid];
@@ -128,6 +134,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Filter {
                     left = mid + 1;
                 }
             }
+
             var archetype = this.archetypes[foundRangeIndex];
             var indexInArchetype = index - this.archetypesRanges[foundRangeIndex];
             return archetype.entities[indexInArchetype];

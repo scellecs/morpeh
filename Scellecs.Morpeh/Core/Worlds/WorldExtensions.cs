@@ -494,6 +494,9 @@ namespace Scellecs.Morpeh {
         }
         
         [PublicAPI]
+#if !MORPEH_SUPPRESS_OBSOLETE
+        [Obsolete("Will be removed in future versions")]
+#endif
         public static AspectFactory<T> GetAspectFactory<T>(this World world) where T : struct, IAspect {
             world.ThreadSafetyCheck();
             var aspectFactory = default(AspectFactory<T>);

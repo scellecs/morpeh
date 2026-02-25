@@ -113,6 +113,12 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
                 return;
             }
 
+            if (this.modelsStorage == null && this.initialized) {
+                this.Cleanup();
+                this.CreateGUI();
+                return;
+            }
+
             if (!this.initialized) {
                 return;
             }

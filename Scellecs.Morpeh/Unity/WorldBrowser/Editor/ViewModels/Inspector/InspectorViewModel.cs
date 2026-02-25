@@ -14,7 +14,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private readonly HashSet<int> expandedStates;
         private readonly List<int> componentTypeIds;
         private readonly Dictionary<int, ComponentDataBoxed> componentData;
-        private VirtualList<int> addComponentSuggestions;
+        private readonly VirtualList<int> addComponentSuggestions;
 
         private readonly Func<int, object> Get;
         private readonly Action<int, object> Set;
@@ -138,7 +138,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         }
 
         private object GetComponent(int typeId) {
-            return this.componentData[typeId].data;
+            return this.componentData.TryGetValue(typeId, out var component) ? component.data : default;
         }
 
         private void SetComponent(int typeId, object value) {

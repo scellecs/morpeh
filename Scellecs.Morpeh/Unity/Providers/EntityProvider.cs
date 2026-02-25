@@ -29,13 +29,8 @@ namespace Scellecs.Morpeh.Providers {
 
         [CanBeNull]
         public Entity Entity {
-            get {
-                if (this.IsEditmodeOrPrefab()) {
-                    return default;
-                }
-
-                return this.cachedEntity;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => this.cachedEntity;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,8 +80,10 @@ namespace Scellecs.Morpeh.Providers {
             this.Initialize();
             
 #if UNITY_EDITOR
-            this.entityViewer.world = World.Default;
-            this.entityViewer.entity = this.Entity;
+            if (this.entityViewer != null) {
+                this.entityViewer.world = World.Default;
+                this.entityViewer.entity = this.Entity;
+            }
 #endif
         }
 
@@ -110,8 +107,10 @@ namespace Scellecs.Morpeh.Providers {
             }
             
 #if UNITY_EDITOR
-            this.entityViewer.world = default;
-            this.entityViewer.entity = default;
+            if (this.entityViewer != null) {
+                this.entityViewer.world = default;
+                this.entityViewer.entity = default;
+            }
 #endif
         }
 
@@ -136,15 +135,28 @@ namespace Scellecs.Morpeh.Providers {
                 return type != typeof(EntityProvider);
             }
         }
-
-        [HideIf("$" + nameof(IsNotEntityProvider))]
+        
+        private Editor.EntityViewer entityViewer;
+        
+        [HideIf("$IsNotEntityProvider")]
         [PropertyOrder(100)]
         [ShowInInspector]
         [InlineProperty]
         [HideReferenceObjectPicker]
         [HideLabel]
         [Title("","Debug Info", HorizontalLine = true)]
-        private Editor.EntityViewer entityViewer = new Editor.EntityViewer();
+        private Editor.EntityViewer EntityViewer {
+            get {
+                if (this.entityViewer == null) {
+                    this.entityViewer = new Editor.EntityViewer();
+
+                    this.entityViewer.world  = World.Default;
+                    this.entityViewer.entity = this.Entity;
+                }
+                
+                return this.entityViewer;
+            }
+        }
 #endif
 #pragma warning restore 0618
     }

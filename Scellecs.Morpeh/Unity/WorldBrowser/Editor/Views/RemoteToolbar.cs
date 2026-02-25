@@ -11,9 +11,9 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
 
         private readonly Action<bool> OnStateChanged;
 
-        internal RemoteToolbar(Action<bool> OnRemoteStateChanged) {
+        internal RemoteToolbar(Action<bool> onRemoteStateChanged) {
             this.AddToClassList(TOOLBAR);
-            this.OnStateChanged = OnRemoteStateChanged;
+            this.OnStateChanged = onRemoteStateChanged;
 
             var connectButton = new Button(() => this.OnStateChanged?.Invoke(true));
             connectButton.text = "Connect to Remote";
