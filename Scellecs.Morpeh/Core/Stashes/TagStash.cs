@@ -24,8 +24,7 @@ namespace Scellecs.Morpeh {
         
         private IntHashSet set;
         
-        // TODO: Remove TRUE after migrating functionality to the new API
-#if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
+#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
         private IComponent boxedValue;
 #endif
         
@@ -52,8 +51,7 @@ namespace Scellecs.Morpeh {
             
             this.set = new IntHashSet(capacity < 0 ? StashConstants.DEFAULT_COMPONENTS_CAPACITY : capacity);
             
-            // TODO: Remove TRUE after migrating functionality to the new API
-#if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
+#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
             this.boxedValue = Activator.CreateInstance(type) as IComponent;
 #endif
         }
@@ -168,8 +166,7 @@ namespace Scellecs.Morpeh {
             return this.set.length != 0;
         }
         
-        // TODO: Remove TRUE after migrating functionality to the new API
-#if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
+#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
         public IComponent GetBoxed(Entity entity) {
             this.world.ThreadSafetyCheck();
             

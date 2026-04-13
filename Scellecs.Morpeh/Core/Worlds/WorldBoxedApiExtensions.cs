@@ -1,5 +1,4 @@
-﻿// TODO: Remove TRUE after migrating functionality to the new API
-#if UNITY_EDITOR || MORPEH_ENABLE_RUNTIME_BOXING_API || TRUE
+﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
 
 namespace Scellecs.Morpeh {
     using System;
