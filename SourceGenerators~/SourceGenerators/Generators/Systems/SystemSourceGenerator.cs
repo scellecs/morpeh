@@ -219,6 +219,16 @@
                         sb.AppendEndIfDefine();
 
                         sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(World);");
+                        
+                        for (var i = middlewares.Length - 1; i >= 0; i--) {
+                            var middleware = middlewares[i];
+                            
+                            if (!middleware.IsDisposable) {
+                                continue;
+                            }
+                            
+                            sb.AppendIndent(indent).Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(".Dispose();");
+                        }
                     }
                 }
 

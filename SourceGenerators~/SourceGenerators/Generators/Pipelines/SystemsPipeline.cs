@@ -1,6 +1,7 @@
 ﻿namespace SourceGenerators.Generators.Pipelines {
     using System;
     using System.Collections.Immutable;
+    using System.Linq;
     using System.Threading;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -140,7 +141,12 @@
                     priority = priorityValue;
                 }
                 
-                return new SystemUpdateMiddleware(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), priority);
+                var isDisposable = typeSymbol.AllInterfaces.Any(x => x.Name == KnownTypes.DISPOSABLE_NAME && x.ToDisplayString() == KnownTypes.DISPOSABLE_FULL_NAME);
+                
+                return new SystemUpdateMiddleware(
+                    FullTypeName: typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    Priority: priority,
+                    IsDisposable: isDisposable);
             } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;
