@@ -499,7 +499,7 @@ public class FilterDisposalTests {
             Assert.Equal(ent, filterEnt);
         }
 
-        this.tagTest4.Remove(ent);
+        this.tagTest2.Remove(ent);
         this.world.Commit();
 
         foreach (var _ in filter0) {
