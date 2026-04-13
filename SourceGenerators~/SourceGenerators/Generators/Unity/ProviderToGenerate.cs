@@ -1,6 +1,7 @@
 ﻿namespace SourceGenerators.Generators.Unity {
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.Semantic;
+    using Utils.Collections;
     using Utils.Semantic;
 
     public record struct ProviderToGenerate(
@@ -10,6 +11,7 @@
         string GenericParams,
         string GenericConstraints,
         string ProviderTypeFullName,
+        EquatableArray<StashRequirement> StashRequirements,
         Accessibility ProviderTypeVisibility,
         StashVariation StashVariation,
         Accessibility Visibility);

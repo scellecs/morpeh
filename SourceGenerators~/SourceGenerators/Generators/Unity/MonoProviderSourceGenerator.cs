@@ -10,6 +10,8 @@
     using Utils.Semantic;
 
     public static class MonoProviderSourceGenerator {
+        private const string INCLUDE_STASH_BACKING_FIELD_PREFIX = "__backingField";
+        
         public static void Generate(SourceProductionContext spc, in ProviderToGenerate provider, in PreprocessorOptionsData options) {
             try {
                 var source = Generate(provider, options);
@@ -129,6 +131,15 @@
                 }
 
                 sb.AppendIndent(indent).AppendLine("}");
+                
+                sb.AppendLine().AppendLine();
+                for (int i = 0, length = provider.StashRequirements.Length; i < length; i++) {
+                    var stashRequirement = provider.StashRequirements[i];
+                    
+                    sb.AppendIndent(indent).Append(INCLUDE_STASH_BACKING_FIELD_PREFIX).Append(stashRequirement.FieldName).AppendLine(";");
+                    sb.AppendIndent(indent).Append("private ").Append(stashRequirement.MetadataClassName).Append(" ").Append(stashRequirement.FieldName).AppendLine(" => this.").Append(INCLUDE_STASH_BACKING_FIELD_PREFIX).Append(stashRequirement.FieldName).AppendLine(" ??= ").Append(stashRequirement.MetadataClassName).AppendLine(".GetStash(World.Default);");
+                }
+                sb.AppendLine().AppendLine();
 
                 if (stashVariation != StashVariation.Tag) {
                     sb.AppendLine().AppendLine();

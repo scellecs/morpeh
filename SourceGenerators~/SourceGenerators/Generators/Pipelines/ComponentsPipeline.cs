@@ -124,6 +124,7 @@
                     GenericParams: genericParams,
                     GenericConstraints: genericConstraints,
                     ProviderTypeFullName: monoProviderType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    StashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
                     ProviderTypeVisibility: monoProviderType.DeclaredAccessibility,
                     StashVariation: MorpehComponentHelpersSemantic.GetStashVariation(monoProviderType),
                     Visibility: typeSymbol.DeclaredAccessibility);
