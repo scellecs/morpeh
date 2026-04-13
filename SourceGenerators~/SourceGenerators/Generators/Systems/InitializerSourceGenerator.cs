@@ -51,7 +51,7 @@
 
             using (indent.Scope()) {
                 if (initializer.StashRequirements.Length > 0) {
-                    sb.AppendLine().AppendLine();
+                    sb.AppendLine();
                     for (int i = 0, length = initializer.StashRequirements.Length; i < length; i++) {
                         var stash = initializer.StashRequirements[i];
                         var stashVariation = options.EnableStashSpecialization ? stash.StashVariation : StashVariation.Data;
@@ -59,7 +59,7 @@
                     }
                 }
 
-                sb.AppendLine().AppendLine();
+                sb.AppendLine();
                 sb.AppendIndent(indent).Append("public ").Append(initializer.TypeName).AppendLine("(Scellecs.Morpeh.World world) {");
                 using (indent.Scope()) {
                     using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "Constructor", indent, isUnityProfiler: options.IsUnityProfiler)) {

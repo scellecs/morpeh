@@ -24,6 +24,14 @@
             this.array = list.ToArray();
         }
         
+        public void Sort(Comparison<T> comparison) {
+            if (this.array == null) {
+                return;
+            }
+            
+            Array.Sort(this.array, comparison);
+        }
+        
         public int Length => this.array?.Length ?? 0;
         
         public T this[int index] {

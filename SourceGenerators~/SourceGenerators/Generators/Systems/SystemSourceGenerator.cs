@@ -4,15 +4,18 @@
     using MorpehHelpers.NonSemantic;
     using MorpehHelpers.Semantic;
     using Options;
+    using Utils.Collections;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     public static class SystemSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in SystemToGenerate system, in PreprocessorOptionsData options) {
+        private const string UPDATE_MIDDLEWARE_PREFIX = "__updateMiddleware";
+        
+        public static void Generate(SourceProductionContext spc, in SystemToGenerate system, in EquatableArray<SystemUpdateMiddleware> middlewares, in PreprocessorOptionsData options) {
             try {
-                var source = Generate(system, options);
+                var source = Generate(system, middlewares, options);
                 spc.AddSource($"{system.TypeName}.system_{Guid.NewGuid():N}.g.cs", source);
                 
                 Logger.Log(nameof(SystemSourceGenerator), nameof(Generate), $"Generated system: {system.TypeName}");
@@ -21,7 +24,7 @@
             }
         }
         
-        public static string Generate(in SystemToGenerate system, in PreprocessorOptionsData options) {
+        public static string Generate(in SystemToGenerate system, in EquatableArray<SystemUpdateMiddleware> middlewares, in PreprocessorOptionsData options) {
             var profilerMarker = ParentType.ToProfilerMarkerName(system.Hierarchy, system.TypeName);
             
             var sb     = StringBuilderPool.Get();
@@ -49,12 +52,8 @@
                 .AppendLine(" {");
 
             using (indent.Scope()) {
-                sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
-                sb.AppendIndent(indent).AppendLine("private bool _systemHasFailed;");
-                sb.AppendEndIfDefine();
-
                 if (system.StashRequirements.Length > 0) {
-                    sb.AppendLine().AppendLine();
+                    sb.AppendLine();
                     for (int i = 0, length = system.StashRequirements.Length; i < length; i++) {
                         var stash = system.StashRequirements[i];
                         var stashVariation = options.EnableStashSpecialization ? stash.StashVariation : StashVariation.Data;
@@ -62,7 +61,20 @@
                     }
                 }
 
-                sb.AppendLine().AppendLine();
+                if (middlewares.Length > 0) {
+                    sb.AppendLine();
+                    for (int i = 0, length = middlewares.Length; i < length; i++) {
+                        var middleware = middlewares[i];
+                        sb.AppendIndent(indent).Append("private readonly ").Append(middleware.FullTypeName).Append(" ").Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(";");
+                    }
+                }
+                
+                sb.AppendLine();
+                sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
+                sb.AppendIndent(indent).AppendLine("private bool _systemHasFailed;");
+                sb.AppendEndIfDefine();
+
+                sb.AppendLine();
                 sb.AppendIndent(indent).Append("public ").Append(system.TypeName).AppendLine("(Scellecs.Morpeh.World world) {");
                 using (indent.Scope()) {
                     using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "Constructor", indent, isUnityProfiler: options.IsUnityProfiler)) {
@@ -71,6 +83,13 @@
                         for (int i = 0, length = system.StashRequirements.Length; i < length; i++) {
                             var stash = system.StashRequirements[i];
                             sb.AppendIndent(indent).Append(stash.FieldName).Append(" = ").Append(stash.MetadataClassName).AppendLine(".GetStash(world);");
+                        }
+                        
+                        sb.AppendLine();
+                        
+                        for (int i = 0, length = middlewares.Length; i < length; i++) {
+                            var middleware = middlewares[i];
+                            sb.AppendIndent(indent).Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).Append(" = new ").Append(middleware.FullTypeName).Append("(\"").Append(system.TypeName).AppendLine("\");");
                         }
                     }
                 }
@@ -131,6 +150,12 @@
                     }
 
                     using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                        for (int i = 0, length = middlewares.Length; i < length; i++) {
+                            sb.AppendIndent(indent).Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(".Begin();");
+                        }
+                        
+                        sb.AppendLine();
+                        
                         sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                         sb.AppendIndent(indent).AppendLine("try {");
                         using (indent.Scope()) {
@@ -152,6 +177,12 @@
                         sb.AppendElseDefine();
                         sb.AppendIndent(indent).AppendLine("OnUpdate(deltaTime);");
                         sb.AppendEndIfDefine();
+                        
+                        for (var i = middlewares.Length - 1; i >= 0; i--) {
+                            sb.AppendIndent(indent).Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(".End();");
+                        }
+
+                        sb.AppendLine();
 
                         if (!system.SkipCommit) {
                             sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.WorldExtensions.Commit(World);");

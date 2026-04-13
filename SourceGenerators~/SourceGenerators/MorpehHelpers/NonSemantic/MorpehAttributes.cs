@@ -15,6 +15,9 @@
 
         public const string SYSTEM_NAME      = "EcsSystemAttribute";
         public const string SYSTEM_FULL_NAME = "Scellecs.Morpeh.EcsSystemAttribute";
+        
+        public const string SYSTEM_UPDATE_MIDDLEWARE_NAME = "EcsSystemUpdateMiddlewareAttribute";
+        public const string SYSTEM_UPDATE_MIDDLEWARE_FULL_NAME = "Scellecs.Morpeh.EcsSystemUpdateMiddlewareAttribute";
 
         public const string INITIALIZER_NAME      = "EcsInitializerAttribute";
         public const string INITIALIZER_FULL_NAME = "Scellecs.Morpeh.EcsInitializerAttribute";
