@@ -6,6 +6,7 @@ using Test.Namespace;
 using Scellecs.Morpeh.Providers;
 
 [MonoProvider(typeof(DisposableComponent))]
+[IncludeStash(typeof(TagComponent))]
 public partial class DisposableComponentProvider {
 
 }

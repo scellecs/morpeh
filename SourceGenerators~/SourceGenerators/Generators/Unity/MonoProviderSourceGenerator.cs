@@ -131,16 +131,20 @@
                 }
 
                 sb.AppendIndent(indent).AppendLine("}");
-                
-                sb.AppendLine().AppendLine();
-                for (int i = 0, length = provider.StashRequirements.Length; i < length; i++) {
-                    var stashRequirement = provider.StashRequirements[i];
-                    
-                    sb.AppendIndent(indent).Append(INCLUDE_STASH_BACKING_FIELD_PREFIX).Append(stashRequirement.FieldName).AppendLine(";");
-                    sb.AppendIndent(indent).Append("private ").Append(stashRequirement.MetadataClassName).Append(" ").Append(stashRequirement.FieldName).AppendLine(" => this.").Append(INCLUDE_STASH_BACKING_FIELD_PREFIX).Append(stashRequirement.FieldName).AppendLine(" ??= ").Append(stashRequirement.MetadataClassName).AppendLine(".GetStash(World.Default);");
-                }
-                sb.AppendLine().AppendLine();
 
+                if (provider.StashRequirements.Length > 0) {
+                    sb.AppendLine().AppendLine();
+                    for (int i = 0, length = provider.StashRequirements.Length; i < length; i++) {
+                        var stash = provider.StashRequirements[i];
+                        
+                        var variation = options.EnableStashSpecialization ? stash.StashVariation : StashVariation.Data; 
+                        var stashSpecializationType = MorpehComponentHelpersSemantic.GetStashSpecializationType(variation, stash.MetadataClassName);
+                    
+                        sb.AppendIndent(indent).Append("private ").Append(stashSpecializationType).Append(" ").Append(INCLUDE_STASH_BACKING_FIELD_PREFIX).Append(stash.FieldName).AppendLine(";");
+                        sb.AppendIndent(indent).Append("private ").Append(stashSpecializationType).Append(" ").Append(stash.FieldName).Append(" => this.").Append(INCLUDE_STASH_BACKING_FIELD_PREFIX).Append(stash.FieldName).Append(" ??= ").Append(stash.MetadataClassName).AppendLine(".GetStash(World.Default);");
+                    }
+                }
+                
                 if (stashVariation != StashVariation.Tag) {
                     sb.AppendLine().AppendLine();
                     sb.AppendIndent(indent).Append("public ref ").Append(provider.ProviderTypeFullName).AppendLine(" GetSerializedData() => ref this.serializedData;");
