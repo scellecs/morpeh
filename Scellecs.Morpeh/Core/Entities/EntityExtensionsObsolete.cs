@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 namespace Scellecs.Morpeh
 {
     public static class EntityExtensionsObsolete {
-#if !MORPEH_STRICT_MODE
-        [Obsolete("[MORPEH] Use Stash.Add() instead.")]
+#if MORPEH_ENABLE_OBSOLETE_ENTITY_DATA_COMPONENT_API
+        [Obsolete("[MORPEH] Will be removed in future versions, use Stash.Add() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity) where T : struct, IDataComponent {
 #if MORPEH_DEBUG
@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh
             return ref entity.GetWorld().GetStash<T>().Add(entity);
         }
 
-        [Obsolete("[MORPEH] Use Stash.Add() instead.")]
+        [Obsolete("[MORPEH] Will be removed in future versions, use Stash.Has() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AddComponent<T>(this Entity entity, out bool exist) where T : struct, IDataComponent {
 #if MORPEH_DEBUG
@@ -27,7 +27,7 @@ namespace Scellecs.Morpeh
             return ref entity.GetWorld().GetStash<T>().Add(entity, out exist);
         }
 
-        [Obsolete("[MORPEH] Use Stash.Get() instead.")]
+        [Obsolete("[MORPEH] Will be removed in future versions, use Stash.Get() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity) where T : struct, IDataComponent {
 #if MORPEH_DEBUG
@@ -38,7 +38,7 @@ namespace Scellecs.Morpeh
             return ref entity.GetWorld().GetStash<T>().Get(entity);
         }
 
-        [Obsolete("[MORPEH] Use Stash.Get() instead.")]
+        [Obsolete("[MORPEH] Will be removed in future versions, use Stash.Has() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetComponent<T>(this Entity entity, out bool exist) where T : struct, IDataComponent {
 #if MORPEH_DEBUG
@@ -49,7 +49,7 @@ namespace Scellecs.Morpeh
             return ref entity.GetWorld().GetStash<T>().Get(entity, out exist);
         }
 
-        [Obsolete("[MORPEH] Use Stash.Set() instead.")]
+        [Obsolete("[MORPEH] Will be removed in future versions, use Stash.Has() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetComponent<T>(this Entity entity, in T value) where T : struct, IDataComponent {
 #if MORPEH_DEBUG
@@ -60,7 +60,7 @@ namespace Scellecs.Morpeh
             entity.GetWorld().GetStash<T>().Set(entity, value);
         }
 
-        [Obsolete("[MORPEH] Use Stash.Remove() instead.")]
+        [Obsolete("[MORPEH] Will be removed in future versions, use Stash.Has() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool RemoveComponent<T>(this Entity entity) where T : struct, IDataComponent {
 #if MORPEH_DEBUG
@@ -71,7 +71,7 @@ namespace Scellecs.Morpeh
             return entity.GetWorld().GetStash<T>().Remove(entity);
         }
         
-        [Obsolete("[MORPEH] Use Stash.Has() instead.")]
+        [Obsolete("[MORPEH] Will be removed in future versions, use Stash.Has() instead.")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Has<T>(this Entity entity) where T : struct, IDataComponent {
 #if MORPEH_DEBUG
@@ -81,6 +81,6 @@ namespace Scellecs.Morpeh
 #endif
             return entity.GetWorld().GetStash<T>().Has(entity);
         }
-    }
 #endif
+    }
 }
