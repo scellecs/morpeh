@@ -4,6 +4,9 @@
     public interface IStash : IDisposable { 
         public Type Type { get; }
         public int Length { get; }
+
+        public bool IsEmpty();
+        public bool IsNotEmpty();
         
         public void Set(Entity entity);
         public bool Remove(Entity entity);

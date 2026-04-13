@@ -43,7 +43,18 @@
             if (typeSymbol is not { TypeKind: TypeKind.Struct }) {
                 return StashVariation.Unknown;
             }
-
+            
+            var ecsComponentAttribute = typeSymbol
+                .GetAttributes()
+                .FirstOrDefault(attribute => attribute.AttributeClass?.Name == MorpehAttributes.COMPONENT_NAME);
+            
+            if (ecsComponentAttribute != null) {
+                var args = ecsComponentAttribute.ConstructorArguments;
+                if (args.Length >= 3 && args[2].Value is int variation && (StashVariation)variation != StashVariation.Unknown) {
+                    return (StashVariation)variation;
+                }
+            }
+            
             var members = typeSymbol.GetMembers();
             
             var isTag = members

@@ -37,7 +37,7 @@ namespace Scellecs.Morpeh {
         internal static byte[] worldsGens = new byte[WorldConstants.MAX_WORLDS_COUNT];
 
         [PublicAPI]
-        public bool doNotDisableSystemOnException;
+        public bool DoNotDisableSystemOnException;
 
         internal static int worldsCount = 0;
 
