@@ -83,7 +83,8 @@
                     Fields: fields,
                     TypeKind: typeSymbol.TypeKind,
                     Visibility: typeSymbol.DeclaredAccessibility,
-                    HasInjectionsInParents: HasInjectionsInParents(typeSymbol));
+                    HasInjectionsInParents: HasInjectionsInParents(typeSymbol),
+                    IsSealed: typeSymbol.IsSealed);
             } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;
@@ -113,7 +114,8 @@
                     Fields: GetInjectionFields(typeSymbol),
                     TypeKind: typeSymbol.TypeKind,
                     Visibility: typeSymbol.DeclaredAccessibility,
-                    HasInjectionsInParents: HasInjectionsInParents(typeSymbol));
+                    HasInjectionsInParents: HasInjectionsInParents(typeSymbol),
+                    IsSealed: typeSymbol.IsSealed);
             } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;

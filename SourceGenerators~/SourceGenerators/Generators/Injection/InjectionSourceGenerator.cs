@@ -47,7 +47,10 @@
             using (indent.Scope()) {
                 sb.AppendIndent(indent).AppendLine(injection.HasInjectionsInParents
                     ? "public override void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {"
-                    : "public virtual void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {");
+                    : injection.IsSealed
+                        ? "public void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {"
+                        : "public virtual void Inject(Scellecs.Morpeh.InjectionTable injectionTable) {"
+                );
 
                 using (indent.Scope()) {
                     if (injection.HasInjectionsInParents) {

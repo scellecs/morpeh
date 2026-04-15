@@ -12,6 +12,7 @@
         EquatableArray<InjectionField> Fields,
         TypeKind TypeKind,
         Accessibility Visibility,
-        bool HasInjectionsInParents
+        bool HasInjectionsInParents,
+        bool IsSealed
     );
 }
