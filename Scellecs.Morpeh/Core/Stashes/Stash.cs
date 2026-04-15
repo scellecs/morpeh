@@ -321,7 +321,6 @@ namespace Scellecs.Morpeh {
             return this.map.length != 0;
         }
         
-#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
         public IComponent GetBoxed(Entity entity) {
             this.world.ThreadSafetyCheck();
             
@@ -379,7 +378,6 @@ namespace Scellecs.Morpeh {
             
             this.data[slotIndex] = (T)value;
         }
-#endif
         
         public void Dispose() {
             if (this.IsDisposed) {

@@ -24,9 +24,7 @@ namespace Scellecs.Morpeh {
         
         private IntHashSet set;
         
-#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
-        private IComponent boxedValue;
-#endif
+        private IComponent lazyBoxedValue;
         
         [PublicAPI]
         public bool IsDisposed;
@@ -50,10 +48,6 @@ namespace Scellecs.Morpeh {
             this.typeInfo = typeInfo;
             
             this.set = new IntHashSet(capacity < 0 ? StashConstants.DEFAULT_COMPONENTS_CAPACITY : capacity);
-            
-#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
-            this.boxedValue = Activator.CreateInstance(type) as IComponent;
-#endif
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -166,7 +160,6 @@ namespace Scellecs.Morpeh {
             return this.set.length != 0;
         }
         
-#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
         public IComponent GetBoxed(Entity entity) {
             this.world.ThreadSafetyCheck();
             
@@ -175,7 +168,7 @@ namespace Scellecs.Morpeh {
             }
             
             if (this.set.Has(entity.Id)) {
-                return this.boxedValue;
+                return this.lazyBoxedValue ??= (IComponent)Activator.CreateInstance(this.type);
             }
             
             InvalidGetOperationException.ThrowMissing(entity, this.type);
@@ -190,7 +183,12 @@ namespace Scellecs.Morpeh {
             }
             
             exists = this.set.Has(entity.Id);
-            return exists ? this.boxedValue : null;
+            
+            if (!exists) {
+                return null;
+            }
+
+            return this.lazyBoxedValue ??= (IComponent)Activator.CreateInstance(this.type);
         }
 
         public void SetBoxed(Entity entity, IComponent value) {
@@ -204,7 +202,6 @@ namespace Scellecs.Morpeh {
                 this.world.TransientChangeAddComponent(entity.Id, ref this.typeInfo);
             }
         }
-#endif
         
         public void Dispose() {
             if (this.IsDisposed) {

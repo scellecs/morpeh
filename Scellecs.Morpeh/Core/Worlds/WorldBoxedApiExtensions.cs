@@ -1,6 +1,4 @@
-﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
-
-namespace Scellecs.Morpeh {
+﻿namespace Scellecs.Morpeh {
     using System;
     
     public static class WorldBoxedApiExtensions {
@@ -13,5 +11,3 @@ namespace Scellecs.Morpeh {
         public static void MigrateBoxed(this World world, Type type, Entity from, Entity to) => world.GetReflectionStash(type).Migrate(from, to);
     }
 }
-
-#endif

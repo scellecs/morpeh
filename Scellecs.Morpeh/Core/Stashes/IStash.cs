@@ -15,10 +15,8 @@
         public bool Has(Entity entity);
         internal void Clean(Entity entity);
         
-#if UNITY_EDITOR || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER || MORPEH_ENABLE_RUNTIME_BOXING_API
         public IComponent GetBoxed(Entity entity);
         public IComponent GetBoxed(Entity entity, out bool exists);
         public void       SetBoxed(Entity entity, IComponent value);
-#endif
     }
 }
