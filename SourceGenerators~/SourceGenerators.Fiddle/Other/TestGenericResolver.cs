@@ -23,3 +23,12 @@ public class TestComplexGenericResolver {
         return new SomeComplexGenericClass<T1, T2>();
     }
 }
+
+[Injectable]
+public partial class TestGenericResolverClass {
+    [Injectable]
+    private SomeGenericClass<string> _generic1;
+    
+    [Injectable]
+    private SomeComplexGenericClass<string, int> _generic2;
+}

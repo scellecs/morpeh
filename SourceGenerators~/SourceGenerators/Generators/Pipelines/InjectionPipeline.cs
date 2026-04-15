@@ -138,7 +138,8 @@
                 if (symbolType.IsGenericType) {
                     fields.Add(new InjectionField(
                         Name: symbol.Name,
-                        TypeName: symbolType.ConstructUnboundGenericType().ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        TypeName: symbolType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        UnboundTypeName: symbolType.ConstructUnboundGenericType().ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                         GenericParams: StringBuilderPool.Get().AppendGenericParams(symbolType).ToStringAndReturn()
                     ));
                 }
@@ -146,6 +147,7 @@
                     fields.Add(new InjectionField(
                         Name: symbol.Name,
                         TypeName: symbolType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                        UnboundTypeName: null,
                         GenericParams: null
                     ));
                 }

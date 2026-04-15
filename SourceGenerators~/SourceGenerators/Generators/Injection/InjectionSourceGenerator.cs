@@ -60,7 +60,7 @@
                     for (int i = 0, length = injection.Fields.Length; i < length; i++) {
                         var field = injection.Fields[i];
                         
-                        if (field.GenericParams != null && genericResolvers.TryGetValue(field.TypeName, out var resolverTypeName)) {
+                        if (field.UnboundTypeName != null && genericResolvers.TryGetValue(field.UnboundTypeName, out var resolverTypeName)) {
                             sb.AppendIndent(indent)
                                 .Append(field.Name)
                                 .Append(" = ((")
