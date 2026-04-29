@@ -71,9 +71,16 @@
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].Name).Append(" = ").Append("new ").Append(fields[i].TypeName).AppendLine("(world, injectionTable);");
                         }
-                        
+                    }
+                }
+                sb.AppendIndent(indent).AppendLine("}");
+                
+                sb.AppendLine().AppendLine();
+                sb.AppendIndent(indent).AppendLine("public void Inject() {");
+                using (indent.Scope()) {
+                    using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "Inject", indent, isUnityProfiler: options.IsUnityProfiler)) {
                         for (int i = 0, length = fields.Length; i < length; i++) {
-                            sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".Inject(injectionTable);");
+                            sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".Inject(_injectionTable);");
                         }
                     }
                 }
