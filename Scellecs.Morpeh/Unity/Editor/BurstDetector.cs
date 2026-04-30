@@ -1,4 +1,6 @@
-﻿#if UNITY_EDITOR && UNITY_2019_1_OR_NEWER
+﻿using UnityEditor.Build;
+
+#if UNITY_EDITOR && UNITY_2019_1_OR_NEWER
 namespace Scellecs.Morpeh.Editor {
     using System.Threading.Tasks;
     using UnityEditor;
@@ -28,11 +30,22 @@ namespace Scellecs.Morpeh.Editor {
             RemoveDefine(DEFINITION_NAME);
         }
 
-        private static string GetDefinesString() => PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+        private static string GetDefinesString() {
+#if UNITY_6000_0_OR_NEWER
+            return PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
+#else
+            return PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+#endif
+        }
 
         private static void SetDefine(string newDefine) {
             if (!IsDefined(newDefine)) {
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, GetDefinesString() + ";" + newDefine);
+                var replacement = GetDefinesString() + ";" + newDefine;
+#if UNITY_6000_0_OR_NEWER
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup), replacement);
+#else
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, replacement);
+#endif
             }
         }
 
@@ -45,7 +58,11 @@ namespace Scellecs.Morpeh.Editor {
                     if (t != def) newDefs += t + ";";
                 }
 
+#if UNITY_6000_0_OR_NEWER
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup), newDefs);
+#else
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, newDefs);
+#endif
             }
         }
 
