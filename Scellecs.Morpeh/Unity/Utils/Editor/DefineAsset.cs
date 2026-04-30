@@ -1,4 +1,6 @@
-﻿#if UNITY_EDITOR
+﻿using UnityEditor.Build;
+
+#if UNITY_EDITOR
 namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
@@ -44,7 +46,12 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             var addedDefines  = new List<string>();
             var existsDefines = new List<string>();
+            
+#if UNITY_6000_0_OR_NEWER
+            var savedDefines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildGroup));
+#else
             var savedDefines  = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildGroup);
+#endif
             if (!savedDefines.EndsWith(";")) {
                 savedDefines += ";";
             }
@@ -93,7 +100,11 @@ namespace Scellecs.Morpeh.Utils.Editor {
             }
 
             if (savedDefinesChanged) {
+#if UNITY_6000_0_OR_NEWER
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildGroup), savedDefines);
+#else
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, savedDefines);
+#endif
             }
 
             EditorPrefs.SetString(PREFS_KEY, string.Join(",", summaryDefines));

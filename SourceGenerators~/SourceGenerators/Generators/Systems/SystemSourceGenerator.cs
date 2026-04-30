@@ -111,7 +111,7 @@
 
                         sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).AppendLine("if (World.doNotDisableSystemOnException == false) {");
+                            sb.AppendIndent(indent).AppendLine("if (World.DoNotDisableSystemOnException == false) {");
                             using (indent.Scope()) {
                                 sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (OnAwake), the system will be disabled\");");
                                 sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
@@ -167,7 +167,7 @@
 
                         sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).AppendLine("if (World.doNotDisableSystemOnException == false) {");
+                            sb.AppendIndent(indent).AppendLine("if (World.DoNotDisableSystemOnException == false) {");
                             using (indent.Scope()) {
                                 sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (OnUpdate), the system will be disabled\");");
                                 sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
@@ -207,7 +207,7 @@
 
                         sb.AppendIndent(indent).AppendLine("} catch (global::System.Exception exception) {");
                         using (indent.Scope()) {
-                            sb.AppendIndent(indent).AppendLine("if (World.doNotDisableSystemOnException == false) {");
+                            sb.AppendIndent(indent).AppendLine("if (World.DoNotDisableSystemOnException == false) {");
                             using (indent.Scope()) {
                                 sb.AppendIndent(indent).Append("Scellecs.Morpeh.MLogger.LogError(\"Exception in ").Append(system.TypeName).AppendLine(" system (Dispose), the system will be disabled\");");
                                 sb.AppendIndent(indent).AppendLine("_systemHasFailed = true;");
