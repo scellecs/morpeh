@@ -1,11 +1,10 @@
-﻿using UnityEditor.Build;
-
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 namespace Scellecs.Morpeh.Utils.Editor {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using UnityEditor;
+	using UnityEditor.Build;
     using UnityEngine;
     using Sirenix.OdinInspector;
 
