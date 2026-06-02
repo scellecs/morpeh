@@ -45,7 +45,6 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity = 4;
             this.data     = new T[this.capacity];
             this.length   = 0;
-            this.comparer = EqualityComparer<T>.Default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -53,8 +52,6 @@ namespace Scellecs.Morpeh.Collections {
             this.capacity = HashHelpers.GetCapacitySmall(capacity) + 1;
             this.data = new T[this.capacity];
             this.length = 0;
-
-            this.comparer = EqualityComparer<T>.Default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
