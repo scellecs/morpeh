@@ -29,21 +29,27 @@ namespace Scellecs.Morpeh.Editor {
             RemoveDefine(DEFINITION_NAME);
         }
 
+        private static BuildTargetGroup GetActiveBuildTargetGroup() {
+            return BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
+        }
+
         private static string GetDefinesString() {
+            var buildTargetGroup = GetActiveBuildTargetGroup();
 #if UNITY_6000_0_OR_NEWER
-            return PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
+            return PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup));
 #else
-            return PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            return PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
 #endif
         }
 
         private static void SetDefine(string newDefine) {
             if (!IsDefined(newDefine)) {
-                var replacement = GetDefinesString() + ";" + newDefine;
+                var replacement      = GetDefinesString() + ";" + newDefine;
+                var buildTargetGroup = GetActiveBuildTargetGroup();
 #if UNITY_6000_0_OR_NEWER
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup), replacement);
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup), replacement);
 #else
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, replacement);
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, replacement);
 #endif
             }
         }
@@ -57,10 +63,11 @@ namespace Scellecs.Morpeh.Editor {
                     if (t != def) newDefs += t + ";";
                 }
 
+                var buildTargetGroup = GetActiveBuildTargetGroup();
 #if UNITY_6000_0_OR_NEWER
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup), newDefs);
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup), newDefs);
 #else
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, newDefs);
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, newDefs);
 #endif
             }
         }
