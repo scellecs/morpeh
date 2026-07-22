@@ -10,6 +10,9 @@
         public const string SYSTEMS_GROUP_NAME      = "EcsSystemsGroupAttribute";
         public const string SYSTEMS_GROUP_FULL_NAME = "Scellecs.Morpeh.EcsSystemsGroupAttribute";
 
+        public const string SYSTEMS_GROUP_UPDATE_MIDDLEWARE_NAME      = "EcsSystemsGroupUpdateMiddlewareAttribute";
+        public const string SYSTEMS_GROUP_UPDATE_MIDDLEWARE_FULL_NAME = "Scellecs.Morpeh.EcsSystemsGroupUpdateMiddlewareAttribute";
+
         public const string SYSTEMS_GROUP_RUNNER_NAME      = "EcsSystemsGroupRunnerAttribute";
         public const string SYSTEMS_GROUP_RUNNER_FULL_NAME = "Scellecs.Morpeh.EcsSystemsGroupRunnerAttribute";
 

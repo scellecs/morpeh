@@ -4,24 +4,27 @@
     using Microsoft.CodeAnalysis;
     using MorpehHelpers.NonSemantic;
     using Options;
+    using Utils.Collections;
     using Utils.Logging;
     using Utils.NonSemantic;
     using Utils.Pools;
     using Utils.Semantic;
 
     public static class SystemsGroupSourceGenerator {
-        public static void Generate(SourceProductionContext spc, in SystemsGroupToGenerate systemsGroup, in PreprocessorOptionsData options) {
+        private const string UPDATE_MIDDLEWARE_PREFIX = "__updateMiddleware";
+
+        public static void Generate(SourceProductionContext spc, in SystemsGroupToGenerate systemsGroup, in EquatableArray<SystemsGroupUpdateMiddleware> middlewares, in PreprocessorOptionsData options) {
             try {
-                var source = Generate(systemsGroup, options);
+                var source = Generate(systemsGroup, middlewares, options);
                 spc.AddSource($"{systemsGroup.TypeName}.systemsgroup_{Guid.NewGuid():N}.g.cs", source);
-                
+
                 Logger.Log(nameof(SystemsGroupSourceGenerator), nameof(Generate), $"Generated systems group: {systemsGroup.TypeName}");
             } catch (Exception e) {
                 Logger.LogException(nameof(SystemsGroupSourceGenerator), nameof(Generate), e);
             }
         }
-        
-        public static string Generate(in SystemsGroupToGenerate systemsGroup, in PreprocessorOptionsData options) {
+
+        public static string Generate(in SystemsGroupToGenerate systemsGroup, in EquatableArray<SystemsGroupUpdateMiddleware> middlewares, in PreprocessorOptionsData options) {
             var profilerMarker = ParentType.ToProfilerMarkerName(systemsGroup.Hierarchy, systemsGroup.TypeName);
             
             var fields = systemsGroup.Fields;
@@ -51,6 +54,14 @@
                 .AppendLine(" {");
 
             using (indent.Scope()) {
+                if (middlewares.Length > 0) {
+                    sb.AppendLine();
+                    for (int i = 0, length = middlewares.Length; i < length; i++) {
+                        var middleware = middlewares[i];
+                        sb.AppendIndent(indent).Append("private readonly ").Append(middleware.FullTypeName).Append(" ").Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(";");
+                    }
+                }
+
                 sb.AppendLine().AppendLine();
                 sb.AppendIndent(indent).Append("public ").Append(systemsGroup.TypeName).AppendLine("(Scellecs.Morpeh.World world, Scellecs.Morpeh.InjectionTable injectionTable = null) {");
                 using (indent.Scope()) {
@@ -61,6 +72,14 @@
                             sb.AppendIndent(indent).Append(field.Name).Append(" = new ").Append(field.TypeName).AppendLine("(world);");
                         } else {
                             sb.AppendIndent(indent).Append(field.Name).Append(" = new ").Append(field.TypeName).AppendLine("();");
+                        }
+                    }
+
+                    if (middlewares.Length > 0) {
+                        sb.AppendLine();
+                        for (int i = 0, length = middlewares.Length; i < length; i++) {
+                            var middleware = middlewares[i];
+                            sb.AppendIndent(indent).Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).Append(" = new ").Append(middleware.FullTypeName).Append("(\"").Append(systemsGroup.TypeName).AppendLine("\");");
                         }
                     }
 
@@ -122,12 +141,28 @@
                     sb.AppendIndent(indent).AppendLine("public void CallUpdate(float deltaTime) {");
                     using (indent.Scope()) {
                         using (MorpehSyntax.ScopedProfile(sb, profilerMarker, "CallUpdate", indent, isUnityProfiler: options.IsUnityProfiler)) {
+                            for (int i = 0, length = middlewares.Length; i < length; i++) {
+                                sb.AppendIndent(indent).Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(".Begin();");
+                            }
+
+                            if (middlewares.Length > 0) {
+                                sb.AppendLine();
+                            }
+
                             for (int i = 0, length = fields.Length; i < length; i++) {
                                 var field = fields[i];
                             
                                 if (field.FieldKind is SystemsGroupFieldKind.System) {
                                     sb.AppendIndent(indent).Append(field.Name).AppendLine(".CallUpdate(deltaTime);");
                                 }
+                            }
+
+                            if (middlewares.Length > 0) {
+                                sb.AppendLine();
+                            }
+
+                            for (var i = middlewares.Length - 1; i >= 0; i--) {
+                                sb.AppendIndent(indent).Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(".End();");
                             }
                         }
                     }
@@ -181,6 +216,16 @@
                                 }
                             }
                             sb.AppendIndent(indent).AppendLine("}");
+                        }
+
+                        for (var i = middlewares.Length - 1; i >= 0; i--) {
+                            var middleware = middlewares[i];
+
+                            if (!middleware.IsDisposable) {
+                                continue;
+                            }
+
+                            sb.AppendIndent(indent).Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(".Dispose();");
                         }
                     }
                 }

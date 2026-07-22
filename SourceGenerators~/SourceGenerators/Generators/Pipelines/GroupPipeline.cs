@@ -1,5 +1,6 @@
 ﻿namespace SourceGenerators.Generators.Pipelines {
     using System;
+    using System.Collections.Immutable;
     using System.Threading;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -21,7 +22,20 @@
         public void Initialize(IncrementalGeneratorInitializationContext context) {
             var options = context.ParseOptionsProvider
                 .Select(static (parseOptions, _) => PreprocessorOptionsData.FromParseOptions(parseOptions));
-            
+
+            var updateMiddlewares = context.SyntaxProvider.ForAttributeWithMetadataName(
+                    MorpehAttributes.SYSTEMS_GROUP_UPDATE_MIDDLEWARE_FULL_NAME,
+                    predicate: static (s, _) => s is TypeDeclarationSyntax,
+                    transform: static (s, ct) => ExtractSystemsGroupUpdateMiddlewares(s, ct))
+                .WithTrackingName(TrackingNames.FIRST_PASS)
+                .WithLogging(PIPELINE_NAME, "systemsGroupUpdateMiddlewares_ExtractSystemsGroupUpdateMiddlewares")
+                .Where(static candidate => candidate is not null)
+                .Select(static (candidate, _) => candidate!.Value)
+                .WithTrackingName(TrackingNames.FIRST_PASS)
+                .WithLogging(PIPELINE_NAME, "systemsGroupUpdateMiddlewares_RemoveNullPass")
+                .Collect()
+                .Select(static (middlewares, ct) => SortSystemsGroupUpdateMiddlewares(middlewares, ct));
+
             var groups = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEMS_GROUP_FULL_NAME,
                     predicate: static (s, _) => s is TypeDeclarationSyntax,
@@ -32,7 +46,8 @@
                 .Select(static (candidate, _) => candidate!.Value)
                 .WithTrackingName(TrackingNames.REMOVE_NULL_PASS)
                 .WithLogging(PIPELINE_NAME, "systemsgroup_RemoveNullPass")
-                .Combine(options);
+                .Combine(options)
+                .Combine(updateMiddlewares);
             
             var runners = context.SyntaxProvider.ForAttributeWithMetadataName(
                     MorpehAttributes.SYSTEMS_GROUP_RUNNER_FULL_NAME,
@@ -46,7 +61,7 @@
                 .WithLogging(PIPELINE_NAME, "runner_RemoveNullPass")
                 .Combine(options);
 
-            context.RegisterSourceOutput(groups, static (spc, pair) => SystemsGroupSourceGenerator.Generate(spc, pair.Left, pair.Right));
+            context.RegisterSourceOutput(groups, static (spc, pair) => SystemsGroupSourceGenerator.Generate(spc, pair.Left.Left, pair.Right, pair.Left.Right));
             context.RegisterSourceOutput(runners, static (spc, pair) => SystemsGroupRunnerSourceGenerator.Generate(spc, pair.Left, pair.Right));
         }
 
@@ -166,6 +181,52 @@
                     InlineUpdateCalls: inlineUpdateCalls);
             }
             catch (Exception e) {
+                Logger.LogException(PIPELINE_NAME, generatorStepName, e);
+                return null;
+            }
+        }
+
+        private static EquatableArray<SystemsGroupUpdateMiddleware> SortSystemsGroupUpdateMiddlewares(ImmutableArray<SystemsGroupUpdateMiddleware> middlewares, CancellationToken ct) {
+            const string generatorStepName = nameof(SortSystemsGroupUpdateMiddlewares);
+
+            ct.ThrowIfCancellationRequested();
+
+            try {
+                var array = new EquatableArray<SystemsGroupUpdateMiddleware>(middlewares);
+                array.Sort(static (a, b) => a.Priority.CompareTo(b.Priority));
+                return array;
+            } catch (Exception e) {
+                Logger.LogException(PIPELINE_NAME, generatorStepName, e);
+                return new EquatableArray<SystemsGroupUpdateMiddleware>(Array.Empty<SystemsGroupUpdateMiddleware>());
+            }
+        }
+
+        private static SystemsGroupUpdateMiddleware? ExtractSystemsGroupUpdateMiddlewares(GeneratorAttributeSyntaxContext ctx, CancellationToken ct) {
+            const string generatorStepName = nameof(ExtractSystemsGroupUpdateMiddlewares);
+
+            ct.ThrowIfCancellationRequested();
+
+            try {
+                if (ctx.TargetSymbol is not INamedTypeSymbol typeSymbol) {
+                    return null;
+                }
+
+                Logger.Log(PIPELINE_NAME, generatorStepName, $"Transform: {typeSymbol.Name}");
+
+                var priority = 0;
+
+                var args = ctx.Attributes[0].ConstructorArguments;
+                if (args.Length >= 1 && args[0].Value is int priorityValue) {
+                    priority = priorityValue;
+                }
+
+                var isDisposable = typeSymbol.AllInterfaces.Any(x => x.Name == KnownTypes.DISPOSABLE_NAME && x.ToDisplayString() == KnownTypes.DISPOSABLE_FULL_NAME);
+
+                return new SystemsGroupUpdateMiddleware(
+                    FullTypeName: typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    Priority: priority,
+                    IsDisposable: isDisposable);
+            } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;
             }
