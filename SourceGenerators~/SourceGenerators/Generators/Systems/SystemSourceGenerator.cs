@@ -71,7 +71,22 @@
                         sb.AppendIndent(indent).Append("private readonly ").Append(middleware.FullTypeName).Append(" ").Append(UPDATE_MIDDLEWARE_PREFIX).Append(i).AppendLine(";");
                     }
                 }
-                
+
+                if (!system.HasWorldProperty) {
+                    sb.AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public Scellecs.Morpeh.World World { get; }");
+                }
+
+                if (!system.HasOnAwake) {
+                    sb.AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void OnAwake() { }");
+                }
+
+                if (!system.HasDispose) {
+                    sb.AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void Dispose() { }");
+                }
+
                 sb.AppendLine();
                 sb.AppendIfDefine(MorpehDefines.MORPEH_DEBUG);
                 sb.AppendIndent(indent).AppendLine("private bool _systemHasFailed;");

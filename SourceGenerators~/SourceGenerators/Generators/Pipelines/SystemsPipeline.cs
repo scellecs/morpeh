@@ -100,7 +100,10 @@
                     TypeKind: typeSymbol.TypeKind,
                     Visibility: typeSymbol.DeclaredAccessibility,
                     SkipCommit: skipCommit,
-                    AlwaysEnabled: alwaysEnabled);
+                    AlwaysEnabled: alwaysEnabled,
+                    HasWorldProperty: HasWorldProperty(typeSymbol),
+                    HasOnAwake: HasParameterlessMethod(typeSymbol, "OnAwake"),
+                    HasDispose: HasParameterlessMethod(typeSymbol, "Dispose"));
             } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;
@@ -175,11 +178,38 @@
                     GenericConstraints: genericConstraints,
                     StashRequirements: MorpehComponentHelpersSemantic.GetStashRequirements(typeSymbol),
                     TypeKind: typeSymbol.TypeKind,
-                    Visibility: typeSymbol.DeclaredAccessibility);
+                    Visibility: typeSymbol.DeclaredAccessibility,
+                    HasWorldProperty: HasWorldProperty(typeSymbol),
+                    HasOnAwake: HasParameterlessMethod(typeSymbol, "OnAwake"),
+                    HasDispose: HasParameterlessMethod(typeSymbol, "Dispose"));
             } catch (Exception e) {
                 Logger.LogException(PIPELINE_NAME, generatorStepName, e);
                 return null;
             }
+        }
+
+        private static bool HasWorldProperty(INamedTypeSymbol typeSymbol) {
+            for (var current = typeSymbol; current != null && current.SpecialType != SpecialType.System_Object; current = current.BaseType) {
+                foreach (var member in current.GetMembers("World")) {
+                    if (member is IPropertySymbol) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasParameterlessMethod(INamedTypeSymbol typeSymbol, string name) {
+            for (var current = typeSymbol; current != null && current.SpecialType != SpecialType.System_Object; current = current.BaseType) {
+                foreach (var member in current.GetMembers(name)) {
+                    if (member is IMethodSymbol { Parameters.Length: 0 }) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

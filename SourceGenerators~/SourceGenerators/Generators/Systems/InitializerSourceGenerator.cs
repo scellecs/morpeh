@@ -62,6 +62,21 @@
                     }
                 }
 
+                if (!initializer.HasWorldProperty) {
+                    sb.AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public Scellecs.Morpeh.World World { get; }");
+                }
+
+                if (!initializer.HasOnAwake) {
+                    sb.AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void OnAwake() { }");
+                }
+
+                if (!initializer.HasDispose) {
+                    sb.AppendLine();
+                    sb.AppendIndent(indent).AppendLine("public void Dispose() { }");
+                }
+
                 sb.AppendLine();
                 sb.AppendIndent(indent).Append("public ").Append(initializer.TypeName).AppendLine("(Scellecs.Morpeh.World world) {");
                 using (indent.Scope()) {

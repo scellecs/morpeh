@@ -12,6 +12,9 @@
         string GenericConstraints,
         EquatableArray<StashRequirement> StashRequirements,
         TypeKind TypeKind,
-        Accessibility Visibility
+        Accessibility Visibility,
+        bool HasWorldProperty,
+        bool HasOnAwake,
+        bool HasDispose
     );
 }
