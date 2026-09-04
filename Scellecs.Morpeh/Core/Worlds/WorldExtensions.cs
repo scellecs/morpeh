@@ -230,7 +230,10 @@ namespace Scellecs.Morpeh {
                 var entityId = sparseSet.dense[i];
                 ref var entityData = ref world.entities[entityId];
                 
-                if (entityData.nextArchetypeHash == default) {
+                var currentComponentsCount = entityData.currentArchetype?.components?.length ?? 0;
+                var nextComponentsCount = currentComponentsCount + entityData.addedComponentsCount - entityData.removedComponentsCount;
+                
+                if (nextComponentsCount == 0) {
                     world.CompleteEntityDisposal(entityId, ref entityData);
                     world.IncrementGeneration(entityId);
                     --world.entitiesCount;
