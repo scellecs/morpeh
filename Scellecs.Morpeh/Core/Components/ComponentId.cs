@@ -46,8 +46,6 @@ namespace Scellecs.Morpeh {
     public static class ComponentId<T> where T : struct, IComponent {
         internal static TypeInfo info;
         internal static bool initialized;
-
-        public static int StashSize;
         
         static ComponentId() {
             Warmup();
@@ -59,19 +57,13 @@ namespace Scellecs.Morpeh {
             }
             
             initialized = true;
-
-            StashSize = StashConstants.DEFAULT_COMPONENTS_CAPACITY;
-
+            
             var typeId = ComponentsCounter.Increment();
             var typeHash = Math.Abs(7_777_777_777_777_777_773L * typeId);
             
             info = new TypeInfo(new TypeHash(typeHash), typeId);
             
             ComponentId.Add(typeof(T), info);
-
-#if MORPEH_GENERATE_ALL_EXTENDED_IDS
-            ExtendedComponentId.Generate<T>();
-#endif
         }
     }
 }

@@ -22,7 +22,11 @@ namespace Scellecs.Morpeh.Utils.Editor {
         
         [OnOpenAsset]
         private static bool OnOpenAsset(int instanceID, int line) {
+#if UNITY_6000_2_OR_NEWER
+            var obj = EditorUtility.EntityIdToObject(instanceID);
+#else
             var obj = EditorUtility.InstanceIDToObject(instanceID);
+#endif
             if (obj is EditorSceneSetup) {
                 var setup = (EditorSceneSetup)obj;
                 var active = setup.ActiveScene;

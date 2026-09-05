@@ -25,44 +25,98 @@
         [PublicAPI]
         public static IStash GetReflectionStash(this World world, Type type) {
             world.ThreadSafetyCheck();
-            
-            if (ComponentId.TryGet(type, out var definition)) {
-                var candidate = world.GetExistingStash(definition.id);
-                
-                if (candidate != null) {
-                    return candidate;
-                }
+
+            if (!ComponentId.TryGet(type, out var definition)) {
+                return world.CreateReflectionStash(type);
             }
 
-            var createMethod = typeof(WorldStashExtensions).GetMethod("GetStash", new[] { typeof(World), });
-            var genericMethod = createMethod?.MakeGenericMethod(type);
-            var stash = (IStash)genericMethod?.Invoke(null, new object[] { world, });
+            var candidate = world.GetExistingStash(definition.id);
+            return candidate ?? world.CreateReflectionStash(type);
+        }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static IStash CreateReflectionStash(this World world, Type type)
+        {
+            var createMethod = type.GetMethod("GetStash", new[] { typeof(World), });
+            var stash        = (IStash)createMethod?.Invoke(null, new object[] { world, });
             
-            definition = ComponentId.Get(type);
+            var definition = ComponentId.Get(type);
             
             world.EnsureStashCapacity(definition.id);
             world.stashes[definition.id] = stash;
-
+            
             return stash;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [PublicAPI]
         [UnityEngine.Scripting.Preserve]
-        public static Stash<T> GetStash<T>(this World world) where T : struct, IComponent {
+        public static Stash<T> GetStash<T>(this World world, int capacity = -1) where T : struct, IDataComponent {
             world.ThreadSafetyCheck();
             
             var info = ComponentId<T>.info;
 
             var candidate = world.GetExistingStash(info.id);
             if (candidate != null) {
-                return (Stash<T>)candidate;
+                if (candidate is Stash<T> typeStash) {
+                    return typeStash;
+                }
+
+                throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
             }
             
             world.EnsureStashCapacity(info.id);
             
-            var capacity = ComponentId<T>.StashSize;
             var stash = new Stash<T>(world, info, capacity);
+            world.stashes[info.id] = stash;
+            return stash;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
+        [UnityEngine.Scripting.Preserve]
+        public static DisposableStash<T> GetDisposableStash<T>(this World world, int capacity = -1) where T : struct, IDisposableComponent {
+            world.ThreadSafetyCheck();
+            
+            var info = ComponentId<T>.info;
+
+            var candidate = world.GetExistingStash(info.id);
+            if (candidate != null) {
+                if (candidate is DisposableStash<T> typeStash) {
+                    return typeStash;
+                }
+
+                throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
+            }
+            
+            world.EnsureStashCapacity(info.id);
+            
+            var stash = new DisposableStash<T>(world, info, capacity);
+            world.stashes[info.id] = stash;
+            return stash;
+        }
+        
+        // TODO: Pass type + info externally to avoid extra generic method which is absolutely useless
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [PublicAPI]
+        [UnityEngine.Scripting.Preserve]
+        public static TagStash GetTagStash<T>(this World world, int capacity = -1) where T : struct, ITagComponent {
+            world.ThreadSafetyCheck();
+            
+            var info = ComponentId<T>.info;
+
+            var candidate = world.GetExistingStash(info.id);
+            if (candidate != null) {
+                if (candidate is TagStash typeStash) {
+                    return typeStash;
+                }
+
+                throw new InvalidOperationException($"Stash {candidate.Type} already exists, but with different Stash type.");
+            }
+            
+            world.EnsureStashCapacity(info.id);
+            
+            var stash = new TagStash(world, typeof(T), info, capacity);
             world.stashes[info.id] = stash;
             return stash;
         }
