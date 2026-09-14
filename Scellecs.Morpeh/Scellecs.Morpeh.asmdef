@@ -22,6 +22,11 @@
             "define": "MORPEH_METRICS"
         },
         {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "MORPEH_BURST"
+        },
+        {
             "name": "com.codewriter.triinspector",
             "expression": "1.10.0",
             "define": "TRI_INSPECTOR"
