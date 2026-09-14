@@ -1,4 +1,4 @@
-﻿#if DEBUG && !DEVELOPMENT_BUILD
+﻿#if UNITY_EDITOR || DEBUG && !ENABLE_MONO && !ENABLE_IL2CPP
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
