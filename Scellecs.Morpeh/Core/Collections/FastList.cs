@@ -13,6 +13,7 @@ namespace Scellecs.Morpeh.Collections {
         public int length;
         public int capacity;
 
+        [NonSerialized]
         public EqualityComparer<T> comparer;
 
         /// <summary>
