@@ -22,6 +22,7 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
         private readonly Label labelRemoveIcon;
         private readonly Label foldoutRemoveIcon;
         private readonly IMGUIContainer dataContainer;
+        private readonly VisualElement dataInspector;
         private readonly Action IMGUIHandler;
         private readonly EventCallback<ChangeEvent<bool>> FoldoutExpandedCallback;
         private readonly ComponentViewHandle handle;
@@ -59,8 +60,11 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
 
             this.dataContainer = new IMGUIContainer();
             this.dataContainer.cullingEnabled = true;
-            this.dataContainer.AddToClassList(DATA_CONTAINER);
-            this.dataFoldout.Add(this.dataContainer);
+
+            this.dataInspector = this.handle.CreateInspector() ?? this.dataContainer;
+            this.dataInspector.AddToClassList(DATA_CONTAINER);
+
+            this.dataFoldout.Add(this.dataInspector);
 
             this.Add(this.tagLabel);
             this.Add(this.labelRemoveIcon);
@@ -91,6 +95,8 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor {
                 this.tagLabel.style.display = DisplayStyle.None;
                 this.dataContainer.onGUIHandler = this.IMGUIHandler;
             }
+
+            this.handle.SetComponent(this.data);
         }
 
         internal void Refresh() {
