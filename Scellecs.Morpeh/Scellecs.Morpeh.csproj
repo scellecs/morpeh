@@ -18,6 +18,10 @@
         <Product>Morpeh</Product>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(MorpehThreadSafety)' == 'true' ">
+        <DefineConstants>$(DefineConstants);MORPEH_THREAD_SAFETY</DefineConstants>
+    </PropertyGroup>
+
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <DefineConstants>TRACE;MORPEH_DEBUG;MORPEH_TRACE</DefineConstants>
     </PropertyGroup>
