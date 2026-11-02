@@ -22,6 +22,17 @@
         public T Get<T>() where T : class {
             return (T)this.Get(typeof(T));
         }
+        
+        public bool TryGet<T>(out T value) where T : class {
+            value = null;
+            
+            if (this.mapping.TryGetValue(typeof(T), out var instance)) {
+                value = (T)instance;
+                return true;
+            }
+
+            return false;
+        }
 
         public void Register<T>(T obj) where T : class {
             var type = typeof(T);
