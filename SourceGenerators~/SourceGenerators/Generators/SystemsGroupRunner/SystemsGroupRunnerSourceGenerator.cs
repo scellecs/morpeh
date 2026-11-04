@@ -95,10 +95,6 @@
                         for (int i = 0, length = fields.Length; i < length; i++) {
                             sb.AppendIndent(indent).Append(fields[i].Name).AppendLine(".CallAwake();");
                         }
-
-                        sb.AppendIfDefine(MorpehDefines.MORPEH_PROFILING);
-                        sb.AppendIndent(indent).AppendLine("Scellecs.Morpeh.MLogger.EndSample();");
-                        sb.AppendEndIfDefine();
                     }
                 }
                 sb.AppendIndent(indent).AppendLine("}");
