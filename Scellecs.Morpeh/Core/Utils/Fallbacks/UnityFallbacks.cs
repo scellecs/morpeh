@@ -35,7 +35,7 @@ namespace Unity.IL2CPP.CompilerServices {
 #if !MORPEH_EXTERNAL_IL2CPP_ATTRS
     public class Il2CppEagerStaticClassConstructionAttribute : Attribute
 #else
-    internal class Il2CppEagerStaticClassConstructionAttribute : Attribute {
+    internal class Il2CppEagerStaticClassConstructionAttribute : Attribute
 #endif
     {
     }

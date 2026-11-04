@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR && MORPEH_REMOTE_BROWSER || DEVELOPMENT_BUILD && MORPEH_REMOTE_BROWSER
+﻿#if MORPEH_REMOTE_BROWSER && (UNITY_EDITOR || UNITY_ASSERTIONS || UNITY_INCLUDE_INSTRUMENTATION)
 using Unity.Serialization.Binary;
 
 namespace Scellecs.Morpeh.WorldBrowser.Serialization {

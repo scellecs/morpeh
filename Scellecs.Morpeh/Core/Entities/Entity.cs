@@ -5,7 +5,7 @@ namespace Scellecs.Morpeh {
     using System.Runtime.CompilerServices;
     using System.Diagnostics;
 
-#if DEBUG && !DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEBUG && !ENABLE_MONO && !ENABLE_IL2CPP
     [DebuggerTypeProxy(typeof(EntityDebuggerProxy))]
 #endif
     [Serializable]

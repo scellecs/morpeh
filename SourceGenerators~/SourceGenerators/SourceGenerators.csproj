@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>10</LangVersion>
+        
+        <IsPackable>false</IsPackable>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsRoslynComponent>true</IsRoslynComponent>
+    </PropertyGroup>
+    
+    <!--
+    Supported constants:
+    - MORPEH_SOURCEGEN_INJECTABLE_SCAN_SLOW
+    - MORPEH_SOURCEGEN_LOGGING
+    -->
+    <!--
+    <PropertyGroup>
+        <DefineConstants>MORPEH_SOURCEGEN_LOGGING</DefineConstants>
+    </PropertyGroup>
+    -->
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.1"/>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
+        <Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="..\..\Scellecs.Morpeh\Unity\Plugins" />
+    </Target>
+</Project>

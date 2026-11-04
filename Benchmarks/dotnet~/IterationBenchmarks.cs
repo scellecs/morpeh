@@ -11,9 +11,7 @@ public class IterationBenchmarks {
 
     private World world;
     
-    private Stash<Test1> test1;
-    private Stash<Test2> test2;
-    private Stash<Test3> test3;
+    private Stash<IntTest1> intTest1;
     
     private Filter filter;
     
@@ -22,17 +20,15 @@ public class IterationBenchmarks {
     [GlobalSetup]
     public void SetUp() {
         this.world = World.Create();
+
+        this.intTest1 = IntTest1.GetStash(this.world);
         
-        this.test1 = this.world.GetStash<Test1>();
-        this.test2 = this.world.GetStash<Test2>();
-        this.test3 = this.world.GetStash<Test3>();
-        
-        this.filter = this.world.Filter.With<Test1>().Build();
+        this.filter = this.world.Filter.With<IntTest1>().Build();
         
         this.buffer = new Entity[Count];
         for (var i = 0; i < Count; i++) {
             this.buffer[i] = this.world.CreateEntity();
-            this.test1.Set(this.buffer[i], new Test1());
+            this.intTest1.Set(this.buffer[i], new IntTest1());
         }
         
         this.world.Commit();
@@ -41,7 +37,7 @@ public class IterationBenchmarks {
     // [Benchmark]
     public void ForeachFilterSingle() {
         foreach (var entity in this.filter) {
-            this.test1.Get(entity).value++;
+            this.intTest1.Get(entity).value++;
         }
     }
     
@@ -52,7 +48,7 @@ public class IterationBenchmarks {
             var entities = arch.entities;
             
             for (var i = arch.length - 1; i >= 0; i--) {
-                this.test1.Get(entities[i]).value++;
+                this.intTest1.Get(entities[i]).value++;
             }
         }
     }

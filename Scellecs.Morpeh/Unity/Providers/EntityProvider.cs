@@ -12,7 +12,11 @@ namespace Scellecs.Morpeh.Providers {
     [AddComponentMenu("ECS/" + nameof(EntityProvider))]
     public class EntityProvider : MonoBehaviour {
 #pragma warning disable 0618
+#if UNITY_6000_5_OR_NEWER
+        public static LongHashMap<MapItem> map = new LongHashMap<MapItem>();
+#else
         public static IntHashMap<MapItem> map = new IntHashMap<MapItem>();
+#endif
         public struct MapItem {
             public Entity entity;
             public int    refCounter;
@@ -29,13 +33,8 @@ namespace Scellecs.Morpeh.Providers {
 
         [CanBeNull]
         public Entity Entity {
-            get {
-                if (this.IsEditmodeOrPrefab()) {
-                    return default;
-                }
-
-                return this.cachedEntity;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => this.cachedEntity;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -55,8 +54,9 @@ namespace Scellecs.Morpeh.Providers {
 
         protected void CheckEntityInitialization() {
             if (this.cachedEntity.IsNullOrDisposed()) {
-                var instanceId = this.gameObject.GetInstanceID();
-                if (map.TryGetValue(instanceId, out var item)) {
+                var id = GetGameObjectIdentifier(this.gameObject);
+                
+                if (map.TryGetValue(id, out var item)) {
                     if (item.entity.IsNullOrDisposed()) {
                         this.cachedEntity = item.entity = World.Default.CreateEntity();
                     }
@@ -64,12 +64,12 @@ namespace Scellecs.Morpeh.Providers {
                         this.cachedEntity = item.entity;
                     }
                     item.refCounter++;
-                    map.Set(instanceId, item, out _);
+                    map.Set(id, item, out _);
                 }
                 else {
                     this.cachedEntity = item.entity = World.Default.CreateEntity();
                     item.refCounter   = 1;
-                    map.Add(instanceId, item, out _);
+                    map.Add(id, item, out _);
                 }
             }
         }
@@ -85,8 +85,10 @@ namespace Scellecs.Morpeh.Providers {
             this.Initialize();
             
 #if UNITY_EDITOR
-            this.entityViewer.world = World.Default;
-            this.entityViewer.entity = this.Entity;
+            if (this.entityViewer != null) {
+                this.entityViewer.world = World.Default;
+                this.entityViewer.entity = this.Entity;
+            }
 #endif
         }
 
@@ -97,21 +99,24 @@ namespace Scellecs.Morpeh.Providers {
             
             this.PreDeinitialize();
             this.Deinitialize();
+
+            var id = GetGameObjectIdentifier(this.gameObject);
             
-            var instanceId = this.gameObject.GetInstanceID();
-            if (map.TryGetValue(instanceId, out var item)) {
+            if (map.TryGetValue(id, out var item)) {
                 item.refCounter--;
                 if (item.refCounter <= 0) {
-                    map.Remove(instanceId, out _);
+                    map.Remove(id, out _);
                 } 
                 else {
-                    map.Set(instanceId, item, out _);
+                    map.Set(id, item, out _);
                 }
             }
             
 #if UNITY_EDITOR
-            this.entityViewer.world = default;
-            this.entityViewer.entity = default;
+            if (this.entityViewer != null) {
+                this.entityViewer.world = default;
+                this.entityViewer.entity = default;
+            }
 #endif
         }
 
@@ -128,6 +133,21 @@ namespace Scellecs.Morpeh.Providers {
 
         protected virtual void Deinitialize() {
         }
+        
+#if UNITY_6005_OR_NEWER
+        private static long GetGameObjectIdentifier(GameObject obj) {
+            return (long)obj.GetEntityId().ToULong();
+        }
+#else
+        private static int GetGameObjectIdentifier(GameObject obj)
+        {
+#if UNITY_6000_3_OR_NEWER
+            return obj.GetEntityId().GetHashCode();
+#else
+            return obj.GetInstanceID();
+#endif
+        }
+#endif
 
 #if UNITY_EDITOR
         private bool IsNotEntityProvider {
@@ -136,15 +156,28 @@ namespace Scellecs.Morpeh.Providers {
                 return type != typeof(EntityProvider);
             }
         }
-
-        [HideIf("$" + nameof(IsNotEntityProvider))]
+        
+        private Editor.EntityViewer entityViewer;
+        
+        [HideIf("$IsNotEntityProvider")]
         [PropertyOrder(100)]
         [ShowInInspector]
         [InlineProperty]
         [HideReferenceObjectPicker]
         [HideLabel]
         [Title("","Debug Info", HorizontalLine = true)]
-        private Editor.EntityViewer entityViewer = new Editor.EntityViewer();
+        private Editor.EntityViewer EntityViewer {
+            get {
+                if (this.entityViewer == null) {
+                    this.entityViewer = new Editor.EntityViewer();
+
+                    this.entityViewer.world  = World.Default;
+                    this.entityViewer.entity = this.Entity;
+                }
+                
+                return this.entityViewer;
+            }
+        }
 #endif
 #pragma warning restore 0618
     }

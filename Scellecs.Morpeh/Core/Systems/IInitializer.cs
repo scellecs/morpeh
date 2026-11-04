@@ -2,7 +2,7 @@
     using System;
     
     public interface IInitializer : IDisposable {
-        World World { get; set; }
+        World World { get; }
 
         void OnAwake();
     }
