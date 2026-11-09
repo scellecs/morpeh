@@ -15,33 +15,33 @@ namespace Scellecs.Morpeh {
     public readonly struct Entity : IEquatable<Entity> {
         internal readonly long value;
 
-        // [ Id: 32 bits | Generation: 16 bits | WorldId: 8 bits | WorldGeneration: 8 bits ]
+        // [ Generation: 16 bits | WorldId: 8 bits | WorldGeneration: 8 bits | Id: 32 bits ]
         internal Entity(int worldId, int worldGeneration, int id, ushort generation) {
-            value = ((id & 0xFFFFFFFFL) << 32) | ((generation & 0xFFFFL) << 16) | ((worldId & 0xFFL) << 8) | (worldGeneration & 0xFFL);
+            value = ((generation & 0xFFFFL) << 48) | ((worldId & 0xFFL) << 40) | ((worldGeneration & 0xFFL) << 32) | (id & 0xFFFFFFFFL);
         }
 
         [ShowInInspector]
         public int Id {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (int)((this.value >> 32) & 0xFFFFFFFF);
+            get => (int)this.value;
         }
 
         [ShowInInspector]
         public ushort Generation {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (ushort)((this.value >> 16) & 0xFFFF);
+            get => (ushort)(this.value >> 48);
         }
 
         [ShowInInspector]
         public int WorldId {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (int)((this.value >> 8) & 0xFF);
+            get => (int)((this.value >> 40) & 0xFF);
         }
 
         [ShowInInspector]
         public int WorldGeneration {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => (int)(this.value & 0xFF);
+            get => (int)((this.value >> 32) & 0xFF);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
