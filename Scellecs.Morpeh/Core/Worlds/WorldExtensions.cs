@@ -254,8 +254,11 @@ namespace Scellecs.Morpeh {
                 ExpandAddedComponents(ref entityData);
             }
 
+            if (entityData.addedComponentsCount + entityData.removedComponentsCount == 0) {
+                world.dirtyEntities.Add(entityId);
+            }
+            
             entityData.addedComponents[entityData.addedComponentsCount++] = typeInfo.id;
-            world.dirtyEntities.Add(entityId);
             
             MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
         }
@@ -283,8 +286,11 @@ namespace Scellecs.Morpeh {
                 ExpandRemovedComponents(ref entityData);
             }
             
+            if (entityData.addedComponentsCount + entityData.removedComponentsCount == 0) {
+                world.dirtyEntities.Add(entityId);
+            }
+            
             entityData.removedComponents[entityData.removedComponentsCount++] = typeInfo.id;
-            world.dirtyEntities.Add(entityId);
             
             MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
         }
