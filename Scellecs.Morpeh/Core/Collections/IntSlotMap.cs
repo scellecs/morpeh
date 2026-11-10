@@ -219,7 +219,9 @@
 
         private static int* AllocPage() {
             var page = (int*)Marshal.AllocHGlobal(PAGE_SIZE * sizeof(int));
-            new Span<int>(page, PAGE_SIZE).Clear();
+            for (var i = 0; i < PAGE_SIZE; i++) {
+                page[i] = 0;
+            }
             return page;
         }
         
