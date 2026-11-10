@@ -21,8 +21,16 @@ namespace Scellecs.Morpeh.Utils.Editor {
         public static event EditorSceneSetupLoadedDelegate onSetupLoaded;
         
         [OnOpenAsset]
+#if UNITY_6000_4_OR_NEWER
+        private static bool OnOpenAsset(EntityId instanceID, int line) {
+            var obj = EditorUtility.EntityIdToObject(instanceID);
+#elif UNITY_6000_2_OR_NEWER
+        private static bool OnOpenAsset(int instanceID, int line) {
+            var obj = EditorUtility.EntityIdToObject(instanceID);
+#else
         private static bool OnOpenAsset(int instanceID, int line) {
             var obj = EditorUtility.InstanceIDToObject(instanceID);
+#endif
             if (obj is EditorSceneSetup) {
                 var setup = (EditorSceneSetup)obj;
                 var active = setup.ActiveScene;
@@ -52,7 +60,11 @@ namespace Scellecs.Morpeh.Utils.Editor {
 
             var namingInstance = new DoCreateGenericAsset();
             namingInstance.type = typeof(T);
+#if UNITY_6000_4_OR_NEWER
+            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(EntityId.None, namingInstance, fileName, icon, null);
+#else
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, namingInstance, fileName, icon, null);
+#endif
         }
         
         private static ScriptableObject CreateAssetAtPath(string path, Type type) {
@@ -62,6 +74,16 @@ namespace Scellecs.Morpeh.Utils.Editor {
             return asset;
         }
         
+#if UNITY_6000_4_OR_NEWER
+        private class DoCreateGenericAsset : UnityEditor.ProjectWindowCallback.AssetCreationEndAction {
+            public Type type;
+
+            public override void Action(EntityId instanceId, string pathName, string resourceFile) {
+                ScriptableObject asset = CreateAssetAtPath(pathName, this.type);
+                ProjectWindowUtil.ShowCreatedAsset(asset);
+            }
+        }
+#else
         private class DoCreateGenericAsset : UnityEditor.ProjectWindowCallback.EndNameEditAction {
             public Type type;
 
@@ -70,6 +92,7 @@ namespace Scellecs.Morpeh.Utils.Editor {
                 ProjectWindowUtil.ShowCreatedAsset(asset);
             }
         }
+#endif
 
         public int ActiveScene;
         public EditorScene[] LoadedScenes;

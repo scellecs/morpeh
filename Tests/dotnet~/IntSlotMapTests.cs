@@ -93,6 +93,94 @@ public class IntSlotMapTests(ITestOutputHelper output) {
     }
 
     [Fact]
+    public void GetOrTakeSlot_AddsNewKey() {
+        var slotMap = new IntSlotMap(10);
+        var slotIndex = slotMap.GetOrTakeSlot(42, out var exists, out var resized);
+
+        Assert.False(exists);
+        Assert.False(resized);
+        Assert.Equal(1, slotMap.length);
+        Assert.True(slotMap.TryGetIndex(42, out var foundIndex));
+        Assert.Equal(slotIndex, foundIndex);
+    }
+
+    [Fact]
+    public void GetOrTakeSlot_ReturnsExistingSlot() {
+        var slotMap = new IntSlotMap(10);
+        var slotIndex = slotMap.TakeSlot(42, out _);
+        var existingIndex = slotMap.GetOrTakeSlot(42, out var exists, out var resized);
+
+        Assert.True(exists);
+        Assert.False(resized);
+        Assert.Equal(slotIndex, existingIndex);
+        Assert.Equal(1, slotMap.length);
+    }
+
+    [Fact]
+    public void GetOrTakeSlot_ReusesFreedSlot() {
+        var slotMap = new IntSlotMap(10);
+        slotMap.TakeSlot(1, out _);
+        var freedIndex = slotMap.TakeSlot(2, out _);
+        slotMap.Remove(2, out _);
+
+        var slotIndex = slotMap.GetOrTakeSlot(100_000, out var exists, out _);
+
+        Assert.False(exists);
+        Assert.Equal(freedIndex, slotIndex);
+        Assert.Equal(100_000, slotMap.GetKeyBySlotIndex(slotIndex));
+        Assert.True(slotMap.Has(1));
+        Assert.False(slotMap.Has(2));
+    }
+
+    [Fact]
+    public void TakeSlot_ReusesFreedSlotsInReverseOrder() {
+        var slotMap = new IntSlotMap(10);
+        var slots = new int[5];
+        for (int i = 0; i < slots.Length; i++) {
+            slots[i] = slotMap.TakeSlot(i, out _);
+        }
+
+        slotMap.Remove(1, out _);
+        slotMap.Remove(3, out _);
+        slotMap.Remove(4, out _);
+
+        var enumerated = new List<int>();
+        foreach (var slotIndex in slotMap) {
+            enumerated.Add(slotMap.GetKeyBySlotIndex(slotIndex));
+        }
+        Assert.Equal(new[] { 0, 2 }, enumerated);
+
+        Assert.Equal(slots[4], slotMap.TakeSlot(10, out _));
+        Assert.Equal(slots[3], slotMap.TakeSlot(11, out _));
+        Assert.Equal(slots[1], slotMap.TakeSlot(12, out _));
+        Assert.Equal(5, slotMap.TakeSlot(13, out _));
+
+        Assert.Equal(6, slotMap.length);
+        foreach (var key in new[] { 0, 2, 10, 11, 12, 13 }) {
+            Assert.True(slotMap.Has(key));
+        }
+        Assert.False(slotMap.Has(1));
+        Assert.False(slotMap.Has(3));
+        Assert.False(slotMap.Has(4));
+    }
+
+    [Fact]
+    public void GetOrTakeSlot_ResizesWhenCapacityIsFull() {
+        var slotMap = new IntSlotMap(1);
+        var resized = false;
+        for (int i = 0; i < 10000; i++) {
+            slotMap.GetOrTakeSlot(i, out _, out var r);
+            resized |= r;
+        }
+
+        Assert.True(resized);
+        Assert.Equal(10000, slotMap.length);
+        for (int i = 0; i < 10000; i++) {
+            Assert.True(slotMap.Has(i));
+        }
+    }
+
+    [Fact]
     public void TakeSlot_ResizesWhenCapacityIsFull() {
         var slotMap = new IntSlotMap(1);
         var resized = false;

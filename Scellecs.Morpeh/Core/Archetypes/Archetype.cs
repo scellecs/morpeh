@@ -42,6 +42,7 @@ namespace Scellecs.Morpeh {
             
             this.components = null;
             
+            this.filtersMap?.Dispose();
             this.filtersMap = null;
             this.filters = null;
         }

@@ -60,22 +60,6 @@ namespace Scellecs.Morpeh {
             world.componentsFiltersWith = new ComponentsToFiltersRelation(128);
             world.componentsFiltersWithout = new ComponentsToFiltersRelation(128);
 
-            if (World.plugins != null) {
-                foreach (var plugin in World.plugins) {
-#if MORPEH_DEBUG
-                    try {
-#endif
-                        plugin.Initialize(world);
-#if MORPEH_DEBUG
-                    }
-                    catch (Exception e) {
-                        MLogger.LogError($"Can not initialize world plugin {plugin.GetType()}");
-                        MLogger.LogException(e);
-                    }
-#endif
-                }
-            }
-
             world.ApplyAddWorld();
             return world;
         }
@@ -116,7 +100,6 @@ namespace Scellecs.Morpeh {
             World.DisposeAllWorlds();
 
             var defaultWorld = World.Create();
-            defaultWorld.UpdateByUnity = true;
 #if MORPEH_UNITY
             var go = new GameObject {
                 name      = "MORPEH_UNITY_RUNTIME_HELPER",
@@ -135,35 +118,6 @@ namespace Scellecs.Morpeh {
 #if MORPEH_BURST
             world.JobHandle.Complete();
 #endif
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SystemsGroup CreateSystemsGroup(this World world) {
-            world.ThreadSafetyCheck();
-            return new SystemsGroup(world);
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddSystemsGroup(this World world, int order, SystemsGroup systemsGroup) {
-            world.ThreadSafetyCheck();
-            
-            world.newSystemsGroups.Add(order, systemsGroup);
-        }
-
-        [PublicAPI]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void RemoveSystemsGroup(this World world, SystemsGroup systemsGroup) {
-            world.ThreadSafetyCheck();
-            
-            systemsGroup.Dispose();
-            if (world.systemsGroups.ContainsValue(systemsGroup)) {
-                world.systemsGroups.RemoveAt(world.systemsGroups.IndexOfValue(systemsGroup));
-            }
-            else if (world.newSystemsGroups.ContainsValue(systemsGroup)) {
-                world.newSystemsGroups.RemoveAt(world.newSystemsGroups.IndexOfValue(systemsGroup));
-            }
         }
 
         [PublicAPI]
@@ -230,7 +184,10 @@ namespace Scellecs.Morpeh {
                 var entityId = sparseSet.dense[i];
                 ref var entityData = ref world.entities[entityId];
                 
-                if (entityData.nextArchetypeHash == default) {
+                var currentComponentsCount = entityData.currentArchetype?.components?.length ?? 0;
+                var nextComponentsCount = currentComponentsCount + entityData.addedComponentsCount - entityData.removedComponentsCount;
+                
+                if (nextComponentsCount == 0) {
                     world.CompleteEntityDisposal(entityId, ref entityData);
                     world.IncrementGeneration(entityId);
                     --world.entitiesCount;
@@ -259,7 +216,7 @@ namespace Scellecs.Morpeh {
                 MLogger.LogTrace($"[WorldExtensions] Remove archetype {archetype.hash}");
                 
                 for (int slotIndex = 0, lastIndex = archetype.filtersMap.lastIndex; slotIndex < lastIndex; slotIndex++) {
-                    if (archetype.filtersMap.slots[slotIndex].key - 1 < 0) {
+                    if (archetype.filtersMap.slots[slotIndex] - 1 < 0) {
                         continue;
                     }
                     
@@ -297,8 +254,11 @@ namespace Scellecs.Morpeh {
                 ExpandAddedComponents(ref entityData);
             }
 
+            if (entityData.addedComponentsCount + entityData.removedComponentsCount == 0) {
+                world.dirtyEntities.Add(entityId);
+            }
+            
             entityData.addedComponents[entityData.addedComponentsCount++] = typeInfo.id;
-            world.dirtyEntities.Add(entityId);
             
             MLogger.LogTrace($"[AddComponent] To: {entityData.nextArchetypeHash}");
         }
@@ -326,8 +286,11 @@ namespace Scellecs.Morpeh {
                 ExpandRemovedComponents(ref entityData);
             }
             
+            if (entityData.addedComponentsCount + entityData.removedComponentsCount == 0) {
+                world.dirtyEntities.Add(entityId);
+            }
+            
             entityData.removedComponents[entityData.removedComponentsCount++] = typeInfo.id;
-            world.dirtyEntities.Add(entityId);
             
             MLogger.LogTrace($"[RemoveComponent] To: {entityData.nextArchetypeHash}");
         }
@@ -397,7 +360,7 @@ namespace Scellecs.Morpeh {
                 var filters= entityData.currentArchetype.filters;
             
                 for (int slotIndex = 0, lastIndex = filtersMap.lastIndex; slotIndex < lastIndex; slotIndex++) {
-                    if (filtersMap.slots[slotIndex].key - 1 < 0) {
+                    if (filtersMap.slots[slotIndex] - 1 < 0) {
                         continue;
                     }
 
@@ -540,7 +503,9 @@ namespace Scellecs.Morpeh {
         }
         
         [PublicAPI]
+#if !MORPEH_SUPPRESS_OBSOLETE
         [Obsolete("Will be removed in future versions")]
+#endif
         public static AspectFactory<T> GetAspectFactory<T>(this World world) where T : struct, IAspect {
             world.ThreadSafetyCheck();
             var aspectFactory = default(AspectFactory<T>);

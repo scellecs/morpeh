@@ -20,7 +20,6 @@ namespace Scellecs.Morpeh {
         private static readonly ProfilerCounterValue<int> entitiesCounter = new(ProfilerCategory.Scripts, "Entities", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> archetypesCounter = new(ProfilerCategory.Scripts, "Archetypes", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> filtersCounter = new(ProfilerCategory.Scripts, "Filters", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
-        private static readonly ProfilerCounterValue<int> systemsCounter = new(ProfilerCategory.Scripts, "Systems", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> commitsCounter = new(ProfilerCategory.Scripts, "Commits", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> migrationsCounter = new(ProfilerCategory.Scripts, "Migrations", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
         private static readonly ProfilerCounterValue<int> stashResizeCounter = new(ProfilerCategory.Scripts, "Stash Resizes", ProfilerMarkerDataUnit.Count, ProfilerCounterOptions.FlushOnEndOfFrame);
@@ -56,31 +55,6 @@ namespace Scellecs.Morpeh {
             }
         }
 #endif
-
-        private void Update() {
-            WorldLoopExtensions.GlobalUpdate(Time.deltaTime);
-        }
-
-        private void FixedUpdate() {
-            WorldLoopExtensions.GlobalFixedUpdate(Time.fixedDeltaTime);
-        }
-
-        private void LateUpdate() {
-            WorldLoopExtensions.GlobalLateUpdate(Time.deltaTime);
-#if MORPEH_METRICS
-            var w = World.Default;
-            if (w != null) {
-                var m = w.metrics;
-                entitiesCounter.Value = w.metrics.entities;
-                archetypesCounter.Value = w.metrics.archetypes;
-                filtersCounter.Value = w.metrics.filters;
-                systemsCounter.Value = w.metrics.systems;
-                commitsCounter.Value = w.metrics.commits;
-                migrationsCounter.Value = w.metrics.migrations;
-                stashResizeCounter.Value = w.metrics.stashResizes;
-            }
-#endif
-        }
 
         internal void OnApplicationPause(bool pauseStatus) {
             if (pauseStatus) {

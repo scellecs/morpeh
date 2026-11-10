@@ -58,6 +58,8 @@ namespace Scellecs.Morpeh.Collections {
         /// <returns>The zero-based index of the first occurrence of the element; or -1 if not found.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf<T>(this FastList<T> list, T value) {
+            list.comparer ??= EqualityComparer<T>.Default;
+            
             for (int i = 0, length = list.length; i < length; i++) {
                 if (list.comparer.Equals(value, list.data[i])) {
                     return i;

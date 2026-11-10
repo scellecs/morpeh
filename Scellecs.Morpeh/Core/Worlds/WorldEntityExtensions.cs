@@ -56,8 +56,12 @@
             
             ref var entityData = ref world.entities[entity.Id];
             
-            // Clear new components if entity is transient
+            world.disposedEntities.Add(entity.Id);
             
+            world.IncrementGeneration(entity.Id);
+            --world.entitiesCount;
+            
+            // Clear new components if entity is transient
             if (world.dirtyEntities.Remove(entity.Id)) {
                 var addedComponentsCount = entityData.addedComponentsCount;
                 
@@ -74,11 +78,6 @@
                     world.GetExistingStash(typeId)?.Clean(entity);
                 }
             }
-            
-            world.disposedEntities.Add(entity.Id);
-            
-            world.IncrementGeneration(entity.Id);
-            --world.entitiesCount;
         }
 
         [PublicAPI]

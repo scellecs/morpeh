@@ -13,7 +13,7 @@ public class ArchetypeStoreTests(ITestOutputHelper output) {
     public void AddArchetype_AddsArchetypeToStore() {
         var archetypeStore = new ArchetypeStore();
 
-        var archetype = new Archetype(default(ArchetypeHash).With<Test1>());
+        var archetype = new Archetype(default(ArchetypeHash).With<TagTest1>());
         archetypeStore.Add(archetype);
 
         Assert.True(archetypeStore.TryGet(archetype.hash, out var storedArchetype));
@@ -24,7 +24,7 @@ public class ArchetypeStoreTests(ITestOutputHelper output) {
     public void RemoveArchetype_RemovesArchetypeFromStore() {
         var archetypeStore = new ArchetypeStore();
 
-        var archetype = new Archetype(default(ArchetypeHash).With<Test1>());
+        var archetype = new Archetype(default(ArchetypeHash).With<TagTest1>());
         archetypeStore.Add(archetype);
 
         Assert.True(archetypeStore.TryGet(archetype.hash, out _));
@@ -38,9 +38,9 @@ public class ArchetypeStoreTests(ITestOutputHelper output) {
     public void Clear_WorksCorrectly() {
         var archetypeStore = new ArchetypeStore();
 
-        var archetype1 = new Archetype(default(ArchetypeHash).With<Test1>());
-        var archetype2 = new Archetype(default(ArchetypeHash).With<Test2>());
-        var archetype3 = new Archetype(default(ArchetypeHash).With<Test3>());
+        var archetype1 = new Archetype(default(ArchetypeHash).With<TagTest1>());
+        var archetype2 = new Archetype(default(ArchetypeHash).With<TagTest2>());
+        var archetype3 = new Archetype(default(ArchetypeHash).With<TagTest3>());
         
         archetypeStore.Add(archetype1);
         archetypeStore.Add(archetype2);
@@ -73,9 +73,9 @@ public class ArchetypeStoreTests(ITestOutputHelper output) {
     public void Enumerator_Works() {
         var archetypeStore = new ArchetypeStore();
 
-        var archetype1 = new Archetype(default(ArchetypeHash).With<Test1>());
-        var archetype2 = new Archetype(default(ArchetypeHash).With<Test2>());
-        var archetype3 = new Archetype(default(ArchetypeHash).With<Test3>());
+        var archetype1 = new Archetype(default(ArchetypeHash).With<TagTest1>());
+        var archetype2 = new Archetype(default(ArchetypeHash).With<TagTest2>());
+        var archetype3 = new Archetype(default(ArchetypeHash).With<TagTest3>());
         
         archetypeStore.Add(archetype1);
         archetypeStore.Add(archetype2);

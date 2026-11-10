@@ -19,7 +19,7 @@ public abstract class FastListTests<T>(ITestOutputHelper output) {
         Assert.Equal(0, list.length);
         Assert.True(list.capacity > 0);
         Assert.NotNull(list.data);
-        Assert.Equal(EqualityComparer<T>.Default, list.comparer);
+        Assert.Null(list.comparer);
     }
 
     [Theory]
@@ -34,7 +34,7 @@ public abstract class FastListTests<T>(ITestOutputHelper output) {
         Assert.True(list.capacity >= initialCapacity);
         Assert.NotNull(list.data);
         Assert.Equal(list.data.Length, list.capacity);
-        Assert.Equal(EqualityComparer<T>.Default, list.comparer);
+        Assert.Null(list.comparer);
     }
 
     [Fact]
@@ -173,6 +173,17 @@ public abstract class FastListTests<T>(ITestOutputHelper output) {
 
         Assert.Equal(1, list.IndexOf(value2));
         Assert.Equal(-1, list.IndexOf(CreateValue()));
+    }
+
+    [Fact]
+    public void IndexOf_UsesDefaultComparerWhenNoneIsSet() {
+        var list = new FastList<T>();
+        var value = CreateValue();
+
+        list.Add(value);
+
+        Assert.Equal(0, list.IndexOf(value));
+        Assert.Equal(EqualityComparer<T>.Default, list.comparer);
     }
 
     [Fact]
