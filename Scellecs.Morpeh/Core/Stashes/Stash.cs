@@ -66,11 +66,10 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
-            if (this.map.IsKeySet(entity.Id, out var slotIndex)) {
+            var slotIndex = this.map.GetOrTakeSlot(entity.Id, out var exists, out var resized);
+            if (exists) {
                 InvalidAddOperationException.ThrowAlreadyExists(entity, this.type);
             } else {
-                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
-                
                 if (resized) {
                     ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
@@ -93,9 +92,8 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
-            if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
-                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
-                
+            var slotIndex = this.map.GetOrTakeSlot(entity.Id, out var exists, out var resized);
+            if (!exists) {
                 if (resized) {
                     ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
@@ -122,11 +120,10 @@ namespace Scellecs.Morpeh {
                 InvalidAddOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
-            if (this.map.IsKeySet(entity.Id, out var slotIndex)) {
+            var slotIndex = this.map.GetOrTakeSlot(entity.Id, out var exists, out var resized);
+            if (exists) {
                 InvalidAddOperationException.ThrowAlreadyExists(entity, this.type);
             } else {
-                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
-                
                 if (resized) {
                     ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
@@ -180,9 +177,8 @@ namespace Scellecs.Morpeh {
                 InvalidSetOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
-            if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
-                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
-                
+            var slotIndex = this.map.GetOrTakeSlot(entity.Id, out var exists, out var resized);
+            if (!exists) {
                 if (resized) {
                     ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
@@ -204,9 +200,8 @@ namespace Scellecs.Morpeh {
                 InvalidSetOperationException.ThrowDisposedEntity(entity, this.type);
             }
             
-            if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
-                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
-                
+            var slotIndex = this.map.GetOrTakeSlot(entity.Id, out var exists, out var resized);
+            if (!exists) {
                 if (resized) {
                     ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
@@ -273,9 +268,8 @@ namespace Scellecs.Morpeh {
             if (this.map.TryGetIndex(from.Id, out var fromSlotIndex)) {
                 ref var component = ref this.data[fromSlotIndex];
                 
-                if (!this.map.IsKeySet(to.Id, out var toSlotIndex)) {
-                    toSlotIndex = this.map.TakeSlot(to.Id, out var resized);
-                    
+                var toSlotIndex = this.map.GetOrTakeSlot(to.Id, out var exists, out var resized);
+                if (!exists) {
                     if (resized) {
                         ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG
@@ -363,9 +357,8 @@ namespace Scellecs.Morpeh {
                 InvalidSetOperationException.ThrowInvalidComponentType(entity, this.type, value.GetType());
             }
             
-            if (!this.map.IsKeySet(entity.Id, out var slotIndex)) {
-                slotIndex = this.map.TakeSlot(entity.Id, out var resized);
-                
+            var slotIndex = this.map.GetOrTakeSlot(entity.Id, out var exists, out var resized);
+            if (!exists) {
                 if (resized) {
                     ArrayHelpers.GrowNonInlined(ref this.data, this.map.capacity);
 #if MORPEH_DEBUG

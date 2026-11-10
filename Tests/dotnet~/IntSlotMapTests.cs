@@ -93,6 +93,62 @@ public class IntSlotMapTests(ITestOutputHelper output) {
     }
 
     [Fact]
+    public void GetOrTakeSlot_AddsNewKey() {
+        var slotMap = new IntSlotMap(10);
+        var slotIndex = slotMap.GetOrTakeSlot(42, out var exists, out var resized);
+
+        Assert.False(exists);
+        Assert.False(resized);
+        Assert.Equal(1, slotMap.length);
+        Assert.True(slotMap.TryGetIndex(42, out var foundIndex));
+        Assert.Equal(slotIndex, foundIndex);
+    }
+
+    [Fact]
+    public void GetOrTakeSlot_ReturnsExistingSlot() {
+        var slotMap = new IntSlotMap(10);
+        var slotIndex = slotMap.TakeSlot(42, out _);
+        var existingIndex = slotMap.GetOrTakeSlot(42, out var exists, out var resized);
+
+        Assert.True(exists);
+        Assert.False(resized);
+        Assert.Equal(slotIndex, existingIndex);
+        Assert.Equal(1, slotMap.length);
+    }
+
+    [Fact]
+    public void GetOrTakeSlot_ReusesFreedSlot() {
+        var slotMap = new IntSlotMap(10);
+        slotMap.TakeSlot(1, out _);
+        var freedIndex = slotMap.TakeSlot(2, out _);
+        slotMap.Remove(2, out _);
+
+        var slotIndex = slotMap.GetOrTakeSlot(100_000, out var exists, out _);
+
+        Assert.False(exists);
+        Assert.Equal(freedIndex, slotIndex);
+        Assert.Equal(100_000, slotMap.GetKeyBySlotIndex(slotIndex));
+        Assert.True(slotMap.Has(1));
+        Assert.False(slotMap.Has(2));
+    }
+
+    [Fact]
+    public void GetOrTakeSlot_ResizesWhenCapacityIsFull() {
+        var slotMap = new IntSlotMap(1);
+        var resized = false;
+        for (int i = 0; i < 10000; i++) {
+            slotMap.GetOrTakeSlot(i, out _, out var r);
+            resized |= r;
+        }
+
+        Assert.True(resized);
+        Assert.Equal(10000, slotMap.length);
+        for (int i = 0; i < 10000; i++) {
+            Assert.True(slotMap.Has(i));
+        }
+    }
+
+    [Fact]
     public void TakeSlot_ResizesWhenCapacityIsFull() {
         var slotMap = new IntSlotMap(1);
         var resized = false;

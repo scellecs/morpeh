@@ -185,6 +185,60 @@
             return slotIndex;
         }
         
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetOrTakeSlot(int key, out bool exists, out bool resized) {
+            resized = false;
+
+            var pageIndex = (uint)key >> PAGE_SHIFT;
+            int* page = null;
+            if (pageIndex < (uint)this.pagesLength) {
+                page = this.pages[pageIndex];
+                if (page != null) {
+                    var existing = page[key & PAGE_MASK] - 1;
+                    if (existing >= 0) {
+                        exists = true;
+                        return existing;
+                    }
+                }
+            }
+
+            exists = false;
+
+            int slotIndex;
+            if (this.freeIndex >= 0) {
+                slotIndex = this.freeIndex;
+                this.freeIndex = this.slots.ptr[slotIndex].next;
+            }
+            else {
+                if (this.IsCapacityFull()) {
+                    this.Expand();
+                    resized = true;
+                }
+
+                slotIndex = this.lastIndex;
+                ++this.lastIndex;
+            }
+
+            if (page == null) {
+                if (pageIndex >= (uint)this.pagesLength) {
+                    this.GrowPages(pageIndex);
+                }
+
+                page = this.pages[pageIndex] = AllocPage();
+            }
+
+            page[key & PAGE_MASK] = slotIndex + 1;
+
+            ref var newSlot = ref this.slots.ptr[slotIndex];
+            newSlot.key = key + 1;
+            newSlot.next = -1;
+
+            ++this.length;
+
+            return slotIndex;
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private int Expand() {
             var newCapacity = HashHelpers.GetCapacity(this.length) + 1;
