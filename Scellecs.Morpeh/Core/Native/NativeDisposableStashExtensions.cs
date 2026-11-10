@@ -14,11 +14,10 @@ namespace Scellecs.Morpeh.Native {
             var nativeIntSlotMap = new NativeIntSlotMap();
             var nativeStash = default(NativeDisposableStash<TNative>);
 
-            fixed (int* capacityMinusOnePtr = &slotMap.capacityMinusOne)
             fixed (TNative* dataPtr = &stash.data[0]) 
             fixed (TNative* emptyPtr = &stash.empty) {
-                nativeIntSlotMap.capacityMinusOnePtr = capacityMinusOnePtr;
-                nativeIntSlotMap.buckets = slotMap.buckets.ptr;
+                nativeIntSlotMap.pages = slotMap.pages;
+                nativeIntSlotMap.pagesLength = slotMap.pagesLength;
                 nativeIntSlotMap.slots = slotMap.slots.ptr;
                 nativeStash.data = dataPtr;
                 nativeStash.empty = emptyPtr;

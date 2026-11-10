@@ -9,10 +9,9 @@ namespace Scellecs.Morpeh.Native {
     /// </summary>
     public struct NativeIntSlotMap {
         [NativeDisableUnsafePtrRestriction]
-        public unsafe int* capacityMinusOnePtr;
+        public unsafe int** pages;
 
-        [NativeDisableUnsafePtrRestriction]
-        public unsafe int* buckets;
+        public int pagesLength;
 
         [NativeDisableUnsafePtrRestriction]
         public unsafe IntHashMapSlot* slots;

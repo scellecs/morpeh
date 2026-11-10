@@ -9,15 +9,12 @@ namespace Scellecs.Morpeh.Native {
     public static unsafe class NativeIntSlotMapExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexOf(this ref NativeIntSlotMap slotMap, in int key) {
-            var rem = key & *slotMap.capacityMinusOnePtr;
-            int next;
-            for (var i = slotMap.buckets[rem] - 1; i >= 0; i = next) {
-                ref var slot = ref slotMap.slots[i];
-                if (slot.key - 1 == key) {
-                    return i;
+            var pageIndex = (uint)key >> IntSlotMap.PAGE_SHIFT;
+            if (pageIndex < (uint)slotMap.pagesLength) {
+                var page = slotMap.pages[pageIndex];
+                if (page != null) {
+                    return page[key & IntSlotMap.PAGE_MASK] - 1;
                 }
-
-                next = slot.next;
             }
 
             return -1;
