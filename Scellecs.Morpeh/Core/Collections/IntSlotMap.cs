@@ -14,13 +14,13 @@
         internal const int PAGE_SIZE  = 1 << PAGE_SHIFT;
         internal const int PAGE_MASK  = PAGE_SIZE - 1;
 
-        internal int                       length;
-        internal int                       capacity;
-        internal int                       lastIndex;
-        internal int                       freeIndex;
-        internal int**                     pages;
-        internal int                       pagesLength;
-        internal IntHashMapSlotPinnedArray slots;
+        internal int            length;
+        internal int            capacity;
+        internal int            lastIndex;
+        internal int            freeIndex;
+        internal int**          pages;
+        internal int            pagesLength;
+        internal IntPinnedArray slots;
 
         public IntSlotMap(int capacity) {
             this.lastIndex = 0;
@@ -33,7 +33,7 @@
             this.pages = (int**)Marshal.AllocHGlobal(sizeof(int*));
             this.pages[0] = null;
 
-            this.slots = new IntHashMapSlotPinnedArray(this.capacity);
+            this.slots = new IntPinnedArray(this.capacity);
         }
         
         public void Dispose() {
@@ -59,7 +59,7 @@
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetKeyBySlotIndex(int slotIndex) {
-            return this.slots.ptr[slotIndex].key - 1;
+            return this.slots.ptr[slotIndex] - 1;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -82,9 +82,7 @@
                     slotIndex = entry - 1;
                     entry = 0;
 
-                    ref var slot = ref this.slots.ptr[slotIndex];
-                    slot.key = -1;
-                    slot.next = this.freeIndex;
+                    this.slots.ptr[slotIndex] = -(this.freeIndex + 2);
 
                     --this.length;
                     if (this.length == 0) {
@@ -152,7 +150,7 @@
             int slotIndex;
             if (this.freeIndex >= 0) {
                 slotIndex = this.freeIndex;
-                this.freeIndex = this.slots.ptr[slotIndex].next;
+                this.freeIndex = -this.slots.ptr[slotIndex] - 2;
             }
             else {
                 if (this.IsCapacityFull()) {
@@ -176,9 +174,7 @@
 
             page[key & PAGE_MASK] = slotIndex + 1;
 
-            ref var newSlot = ref this.slots.ptr[slotIndex];
-            newSlot.key = key + 1;
-            newSlot.next = -1;
+            this.slots.ptr[slotIndex] = key + 1;
 
             ++this.length;
             
@@ -208,7 +204,7 @@
             int slotIndex;
             if (this.freeIndex >= 0) {
                 slotIndex = this.freeIndex;
-                this.freeIndex = this.slots.ptr[slotIndex].next;
+                this.freeIndex = -this.slots.ptr[slotIndex] - 2;
             }
             else {
                 if (this.IsCapacityFull()) {
@@ -230,9 +226,7 @@
 
             page[key & PAGE_MASK] = slotIndex + 1;
 
-            ref var newSlot = ref this.slots.ptr[slotIndex];
-            newSlot.key = key + 1;
-            newSlot.next = -1;
+            this.slots.ptr[slotIndex] = key + 1;
 
             ++this.length;
 
@@ -282,7 +276,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear() {
             for (var i = 0; i < this.lastIndex; i++) {
-                var key = this.slots.ptr[i].key - 1;
+                var key = this.slots.ptr[i] - 1;
                 if (key >= 0) {
                     this.pages[(uint)key >> PAGE_SHIFT][key & PAGE_MASK] = 0;
                 }
@@ -314,8 +308,7 @@
 
             public bool MoveNext() {
                 for (; this.index < this.map.lastIndex; ++this.index) {
-                    var slot = this.map.slots.ptr[this.index];
-                    if (slot.key - 1 < 0) {
+                    if (this.map.slots.ptr[this.index] - 1 < 0) {
                         continue;
                     }
 

@@ -133,6 +133,38 @@ public class IntSlotMapTests(ITestOutputHelper output) {
     }
 
     [Fact]
+    public void TakeSlot_ReusesFreedSlotsInReverseOrder() {
+        var slotMap = new IntSlotMap(10);
+        var slots = new int[5];
+        for (int i = 0; i < slots.Length; i++) {
+            slots[i] = slotMap.TakeSlot(i, out _);
+        }
+
+        slotMap.Remove(1, out _);
+        slotMap.Remove(3, out _);
+        slotMap.Remove(4, out _);
+
+        var enumerated = new List<int>();
+        foreach (var slotIndex in slotMap) {
+            enumerated.Add(slotMap.GetKeyBySlotIndex(slotIndex));
+        }
+        Assert.Equal(new[] { 0, 2 }, enumerated);
+
+        Assert.Equal(slots[4], slotMap.TakeSlot(10, out _));
+        Assert.Equal(slots[3], slotMap.TakeSlot(11, out _));
+        Assert.Equal(slots[1], slotMap.TakeSlot(12, out _));
+        Assert.Equal(5, slotMap.TakeSlot(13, out _));
+
+        Assert.Equal(6, slotMap.length);
+        foreach (var key in new[] { 0, 2, 10, 11, 12, 13 }) {
+            Assert.True(slotMap.Has(key));
+        }
+        Assert.False(slotMap.Has(1));
+        Assert.False(slotMap.Has(3));
+        Assert.False(slotMap.Has(4));
+    }
+
+    [Fact]
     public void GetOrTakeSlot_ResizesWhenCapacityIsFull() {
         var slotMap = new IntSlotMap(1);
         var resized = false;

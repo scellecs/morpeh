@@ -14,7 +14,7 @@ namespace Scellecs.Morpeh.Native {
         public int pagesLength;
 
         [NativeDisableUnsafePtrRestriction]
-        public unsafe IntHashMapSlot* slots;
+        public unsafe int* slots;
     }
 }
 #endif
