@@ -1,6 +1,8 @@
 ﻿#if UNITY_EDITOR
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
+
 namespace Scellecs.Morpeh.WorldBrowser.Editor.ComponentViewer {
     internal sealed class ComponentViewHandle : IDisposable {
         private ComponentViewWrapper wrapper;
@@ -18,9 +20,17 @@ namespace Scellecs.Morpeh.WorldBrowser.Editor.ComponentViewer {
             return new ComponentViewHandle(wrapper, wrapperEditor);
         }
 
+        internal VisualElement CreateInspector() {
+            return this.wrapperEditor.CreateInspectorGUI();
+        }
+
         internal void HandleOnGUI(ComponentData componentData) {
             this.wrapper.component = componentData;
             this.wrapperEditor.OnInspectorGUI();
+        }
+
+        internal void SetComponent(ComponentData componentData) {
+            this.wrapper.component = componentData;
         }
 
         public void Dispose() {
