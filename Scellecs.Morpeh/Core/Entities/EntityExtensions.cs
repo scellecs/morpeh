@@ -204,6 +204,10 @@ namespace Scellecs.Morpeh {
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static World GetWorld(this Entity entity) {
+            if (entity.Id <= 0) {
+                return null;
+            }
+
             var worldId = entity.WorldId;
 
             if (worldId < 0 || worldId >= WorldConstants.MAX_WORLDS_COUNT) {

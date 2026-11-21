@@ -141,6 +141,16 @@ public class WorldTests : IDisposable {
     }
 
     [Fact]
+    public void GetWorld_DefaultEntityReturnsNull() {
+        var world = World.Create();
+
+        Assert.Null(default(Entity).GetWorld());
+        Assert.True(default(Entity).IsDisposed());
+
+        world.Dispose();
+    }
+
+    [Fact]
     public void GetWorld_GenerationCheck() {
         var world = World.Create();
         var entity = world.CreateEntity();
